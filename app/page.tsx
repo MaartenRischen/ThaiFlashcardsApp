@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { exportLocalStorage, importLocalStorage } from './backup';
 import SettingsMenu from './components/SettingsMenu';
 import { loadUserData, saveMnemonic, savePhoneticNote, updateProgress } from './utils/storage';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 interface Phrase {
   meaning: string;
@@ -116,7 +117,7 @@ const DEFAULT_PHRASES: Phrase[] = [
   }
 ];
 
-export default function ThaiFlashcards() {
+function ThaiFlashcardsInner() {
   const [phrases, setPhrases] = useState<Phrase[]>(DEFAULT_PHRASES);
   const [index, setIndex] = useState<number>(0);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -224,12 +225,39 @@ export default function ThaiFlashcards() {
   useEffect(() => {
     const loadAdditionalPhrases = async () => {
       try {
+        // Start with default phrases
+        setPhrases(DEFAULT_PHRASES);
+        setIndex(0);
+
+        // Try to load additional phrases
         const response = await fetch('/phrases.json');
-        if (!response.ok) return; // Just use default phrases if fetch fails
+        if (!response.ok) return;
         
         const data = await response.json();
-        if (Array.isArray(data) && data.length > 0) {
+        if (!Array.isArray(data)) {
+          console.error('Loaded data is not an array:', data);
+          return;
+        }
+
+        // Validate the data structure
+        const isValidData = data.every(phrase => 
+          phrase &&
+          typeof phrase === 'object' &&
+          typeof phrase.meaning === 'string' &&
+          typeof phrase.thai === 'string' &&
+          typeof phrase.pronunciation === 'string' &&
+          typeof phrase.mnemonic === 'string'
+        );
+
+        if (!isValidData) {
+          console.error('Invalid phrase data structure:', data);
+          return;
+        }
+
+        // Only update if we have valid data
+        if (data.length > 0) {
           setPhrases(data);
+          setIndex(0);
         }
       } catch (error) {
         console.error('Error loading additional phrases:', error);
@@ -822,25 +850,58 @@ export default function ThaiFlashcards() {
   }, [showAnswer, autoplay]);
 
   // Ensure we have valid data before rendering
-  const currentPhrase = phrases[index];
-  if (!currentPhrase) {
-    setIndex(0);
+  if (!Array.isArray(phrases) || phrases.length === 0) {
+    console.error('Invalid phrases data:', { phrases });
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-lg mb-4">Resetting...</p>
+          <h1 className="text-2xl font-bold mb-4">Something went wrong!</h1>
+          <p className="text-gray-300 mb-6">Unable to load phrases. Please try refreshing the page.</p>
+          <button
+            onClick={() => {
+              setPhrases(DEFAULT_PHRASES);
+              setIndex(0);
+              window.location.reload();
+            }}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded transition-colors duration-200"
+          >
+            Refresh Page
+          </button>
         </div>
       </div>
     );
   }
 
-  // Create a safe version of the current phrase
+  // Get the current phrase safely
+  const currentPhrase = phrases[index];
+  if (!currentPhrase || typeof currentPhrase !== 'object') {
+    console.error('Invalid current phrase:', { index, currentPhrase, phrasesLength: phrases.length });
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <h1 className="text-2xl font-bold mb-4">Something went wrong!</h1>
+          <p className="text-gray-300 mb-6">Unable to load the current phrase. Please try refreshing the page.</p>
+          <button
+            onClick={() => {
+              setPhrases(DEFAULT_PHRASES);
+              setIndex(0);
+              window.location.reload();
+            }}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded transition-colors duration-200"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Create a safe version of the current phrase with explicit type checking
   const safePhrase = {
-    meaning: currentPhrase.meaning || '',
-    thai: currentPhrase.thai || '',
-    pronunciation: currentPhrase.pronunciation || '',
-    mnemonic: currentPhrase.mnemonic || ''
+    meaning: typeof currentPhrase.meaning === 'string' ? currentPhrase.meaning : '',
+    thai: typeof currentPhrase.thai === 'string' ? currentPhrase.thai : '',
+    pronunciation: typeof currentPhrase.pronunciation === 'string' ? currentPhrase.pronunciation : '',
+    mnemonic: typeof currentPhrase.mnemonic === 'string' ? currentPhrase.mnemonic : ''
   };
 
   const nextReview = getNextReviewDate(index);
@@ -1299,5 +1360,14 @@ export default function ThaiFlashcards() {
 
       <SettingsMenu />
     </main>
+  );
+}
+
+// Export the wrapped component
+export default function ThaiFlashcards() {
+  return (
+    <ErrorBoundary>
+      <ThaiFlashcardsInner />
+    </ErrorBoundary>
   );
 } 

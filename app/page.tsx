@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { exportLocalStorage, importLocalStorage } from './backup';
+import SettingsMenu from './components/SettingsMenu';
+import { loadUserData, saveMnemonic, savePhoneticNote, updateProgress } from './utils/storage';
 
 interface Phrase {
   meaning: string;
@@ -146,6 +148,8 @@ export default function ThaiFlashcards() {
 
   // Add vocabulary state
   const [showVocabulary, setShowVocabulary] = useState(false);
+
+  const userData = loadUserData();
 
   // Save progress to localStorage whenever it changes
   useEffect(() => {
@@ -1321,6 +1325,8 @@ export default function ThaiFlashcards() {
           </div>
         </div>
       )}
+
+      <SettingsMenu />
     </main>
   );
 } 

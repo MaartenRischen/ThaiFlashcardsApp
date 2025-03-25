@@ -904,7 +904,7 @@ export default function ThaiFlashcards() {
               onClick={() => setShowVocabulary(!showVocabulary)}
               className="neumorphic-button"
             >
-              Vocabulary
+              Learned Phrases
             </button>
           </div>
         </div>

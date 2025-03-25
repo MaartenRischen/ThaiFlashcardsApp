@@ -1,7 +1,75 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+  --card-bg: #1a1a1a;
+  --button-bg: #1a1a1a;
+  --button-hover: #222222;
+  --text: #ffffff;
+  --text-secondary: #999999;
+  --border: #333333;
+  --blue-500: #3b82f6;
+  --purple-500: #8b5cf6;
+  --red-500: #ef4444;
+  --yellow-500: #eab308;
+  --green-500: #22c55e;
+}
+
+@layer components {
+  .nav-bar {
+    @apply fixed top-0 left-0 right-0 bg-black z-50;
+  }
+
+  .nav-content {
+    @apply max-w-lg mx-auto px-4 py-4 flex justify-between items-center;
+  }
+
+  .button {
+    @apply px-4 py-2 bg-[#1a1a1a] text-white rounded-full hover:bg-[#222] transition-colors;
+  }
+
+  .card {
+    @apply bg-[#1a1a1a] rounded-3xl p-6;
+  }
+
+  .status-new {
+    @apply px-3 py-1 bg-blue-500 text-white text-sm rounded-full;
+  }
+
+  .status-mastered {
+    @apply px-3 py-1 bg-purple-500 text-white text-sm rounded-full;
+  }
+
+  .input {
+    @apply w-full px-4 py-3 bg-[#1a1a1a] text-white rounded-2xl border border-[#333] focus:outline-none focus:border-blue-500 transition-colors;
+  }
+
+  .settings-button {
+    @apply w-14 h-14 flex items-center justify-center bg-blue-500 text-white rounded-full shadow-lg;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-[#111];
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-[#333] rounded-full;
+}
+
+/* Checkbox styles */
+.form-checkbox {
+  @apply rounded border-gray-600 bg-[#1a1a1a] text-blue-500 focus:ring-blue-500;
+}
+
 @layer base {
   :root {
     --background: #1a1a1a;

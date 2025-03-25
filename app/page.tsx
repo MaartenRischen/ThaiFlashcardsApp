@@ -119,7 +119,7 @@ const DEFAULT_PHRASES: Phrase[] = [
 
 function ThaiFlashcardsInner() {
   const [phrases, setPhrases] = useState<Phrase[]>(DEFAULT_PHRASES);
-  const [index, setIndex] = useState<number>(0);
+  const [index, setIndex] = useState<number | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [localMnemonics, setLocalMnemonics] = useState<MnemonicEdits>(() => {
     try {
@@ -492,162 +492,42 @@ function ThaiFlashcardsInner() {
   };
 
   // Modify getDueCards to strictly enforce current batch
-  const getDueCards = () => {
-    const now = new Date();
-    const dueCards: { index: number; dueDate: Date; type: 'learning' | 'new' | 'review' }[] = [];
-    
-    // Ensure currentBatch exists and is valid
-    if (!levelProgress?.currentBatch || !Array.isArray(levelProgress.currentBatch)) {
-      // Initialize first batch if needed
-      const initialBatch = [0, 1, 2, 3, 4];
-      setLevelProgress(prev => ({
-        currentLevel: 1,
-        currentBatch: initialBatch,
-        masteredCards: prev?.masteredCards || []
-      }));
-      return initialBatch.map(i => ({ 
-        index: i, 
-        dueDate: new Date(0), 
-        type: 'new' as const
-      }));
-    }
-
-    // Only work with current batch indices
-    const currentBatchIndices = levelProgress.currentBatch;
-
-    // Get all cards from current batch, sorted by their state
-    currentBatchIndices.forEach(i => {
-      if (i >= phrases.length) return; // Skip if index is out of bounds
-      
-      const progress = cardProgress[i];
-      
-      if (!progress || !progress.reviews.length) {
-        // New card
-        dueCards.push({ 
-          index: i, 
-          dueDate: new Date(0), 
-          type: 'new' 
-        });
-      } else {
-        const lastReview = progress.reviews[progress.reviews.length - 1];
-        const dueDate = new Date(progress.nextReviewDate);
-        
-        if (lastReview.interval < GRADUATING_INTERVAL && dueDate <= now) {
-          // Learning card
-          dueCards.push({ 
-            index: i, 
-            dueDate, 
-            type: 'learning' 
-          });
-        } else if (dueDate <= now) {
-          // Review card
-          dueCards.push({ 
-            index: i, 
-            dueDate, 
-            type: 'review' 
-          });
-        }
-      }
-    });
-
-    // Sort cards: learning first, then new, then reviews
-    return dueCards.sort((a, b) => {
-      const typeOrder = { learning: 0, new: 1, review: 2 };
-      if (typeOrder[a.type] !== typeOrder[b.type]) {
-        return typeOrder[a.type] - typeOrder[b.type];
-      }
-      return a.dueDate.getTime() - b.dueDate.getTime();
-    });
+  const getDueCards = (): number[] => {
+    return Object.entries(cardProgress)
+      .filter(([_, progress]) => new Date(progress.nextReviewDate) <= new Date())
+      .map(([index]) => parseInt(index, 10));
   };
 
   // Modify getNextCard to only show current batch cards
-  const getNextCard = () => {
+  const getNextCard = (): number => {
     const dueCards = getDueCards();
-    
-    if (dueCards.length > 0) {
-      return dueCards[0].index;
-    }
-
-    // If no cards are due, return the first card from current batch
-    // that has the earliest next review date
-    const currentBatchCards = levelProgress.currentBatch
-      .filter(i => i < phrases.length)
-      .map(i => {
-        const progress = cardProgress[i];
-        const dueDate = progress?.nextReviewDate ? new Date(progress.nextReviewDate) : new Date(0);
-        return { index: i, dueDate };
-      })
-      .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
-
-    return currentBatchCards.length > 0 ? currentBatchCards[0].index : levelProgress.currentBatch[0];
+    if (dueCards.length === 0) return 0;
+    return dueCards[0];
   };
 
   // Modify handleCardAction to ensure levelProgress is valid
   const handleCardAction = (difficulty: Review['difficulty']) => {
     if (index === null) return;
     
-    // Ensure levelProgress is properly initialized
-    if (!levelProgress?.currentBatch || !Array.isArray(levelProgress.currentBatch)) {
-      setLevelProgress({
-        currentLevel: 1,
-        currentBatch: [0, 1, 2, 3, 4],
-        masteredCards: []
-      });
-      return;
-    }
-
-    const newProgress = { ...cardProgress };
-    const currentDate = new Date().toISOString();
-    
-    if (!newProgress[index]) {
-      newProgress[index] = { reviews: [], nextReviewDate: currentDate };
-    }
-
-    const nextReview = calculateNextReview(difficulty, newProgress[index]);
-    
-    newProgress[index].reviews.push({
-      date: currentDate,
+    const currentProgress = cardProgress[index] || { reviews: [], nextReviewDate: new Date().toISOString() };
+    const nextReview: Review = {
+      date: new Date().toISOString(),
       difficulty,
-      ...nextReview
-    });
+      ...calculateNextReview(difficulty, currentProgress)
+    };
     
-    newProgress[index].nextReviewDate = nextReview.nextReviewDate;
-    setCardProgress(newProgress);
-
-    // Handle mastery and batch/level progression
-    if (difficulty === 'good' || difficulty === 'easy') {
-      const newLevelProgress = { ...levelProgress };
-      if (!newLevelProgress.masteredCards.includes(index)) {
-        newLevelProgress.masteredCards.push(index);
-        
-        // Check if all current batch cards are mastered
-        const allCurrentBatchMastered = newLevelProgress.currentBatch.every(
-          cardIndex => newLevelProgress.masteredCards.includes(cardIndex)
-        );
-
-        if (allCurrentBatchMastered) {
-          // Move to next batch
-          const nextBatchStart = newLevelProgress.currentLevel * 5;
-          const nextBatch = Array.from(
-            { length: 5 },
-            (_, i) => nextBatchStart + i
-          );
-          
-          // Update level and batch
-          newLevelProgress.currentLevel++;
-          newLevelProgress.currentBatch = nextBatch;
-        }
-        
-        setLevelProgress(newLevelProgress);
+    setCardProgress(prev => ({
+      ...prev,
+      [index]: {
+        ...currentProgress,
+        reviews: [...currentProgress.reviews, nextReview],
+        nextReviewDate: new Date(Date.now() + nextReview.interval * 24 * 60 * 60 * 1000).toISOString()
       }
-    }
-
-    // Get the next card to show
+    }));
+    
+    setShowAnswer(false);
     const nextIndex = getNextCard();
     setIndex(nextIndex);
-    setShowAnswer(false);
-    setIsPlaying(false);
-    setRandomPhrase('');
   };
 
   // Add useEffect to set initial card and handle card changes
@@ -713,130 +593,64 @@ function ThaiFlashcardsInner() {
   };
 
   // Modify getNextReviewDate to handle null index
-  const getNextReviewDate = (cardIndex: number | null) => {
-    if (cardIndex === null) return null;
+  const getNextReviewDate = (cardIndex: number | null): string => {
+    if (cardIndex === null) return '';
     const progress = cardProgress[cardIndex];
-    if (!progress || !progress.nextReviewDate) return null;
-    return new Date(progress.nextReviewDate);
+    return progress?.nextReviewDate || new Date().toISOString();
   };
 
   // Modify isCardDue to handle null index
-  const isCardDue = (cardIndex: number | null) => {
-    const nextReview = getNextReviewDate(cardIndex);
-    if (!nextReview) return true;
-    return nextReview <= new Date();
+  const isCardDue = (cardIndex: number | null): boolean => {
+    if (cardIndex === null) return false;
+    const progress = cardProgress[cardIndex];
+    if (!progress) return true;
+    return new Date(progress.nextReviewDate) <= new Date();
   };
 
   // Modify getCardType to consider cards as new until they get a Good or Easy rating
-  const getCardType = (cardIndex: number): 'new' | 'learning' | 'review' | null => {
+  const getCardType = (cardIndex: number | null): 'new' | 'learning' | 'review' | null => {
+    if (cardIndex === null) return null;
     const progress = cardProgress[cardIndex];
-    if (!progress || !progress.reviews.length) return 'new';
-    
-    const lastReview = progress.reviews[progress.reviews.length - 1];
-    // Consider card as new until it gets a Good or Easy rating
-    if (lastReview.difficulty === 'hard') {
-      return 'new';
-    }
-    
-    return lastReview.interval < 21 ? 'learning' : 'review';
+    if (!progress) return 'new';
+    if (progress.reviews.length < 5) return 'learning';
+    return 'review';
   };
 
   // Add function to get card status text
-  const getCardStatus = (cardIndex: number): string => {
-    const type = getCardType(cardIndex);
-    switch (type) {
-      case 'new':
-        return 'New';
-      case 'learning':
-        return 'Learning';
-      case 'review':
-        return 'Review';
-      default:
-        return '';
-    }
+  const getCardStatus = (cardIndex: number | null): string => {
+    if (cardIndex === null) return '';
+    const progress = cardProgress[cardIndex];
+    if (!progress) return 'New';
+    if (progress.reviews.length < 5) return 'Learning';
+    return 'Review';
   };
 
   // Modify calculateStats to count successful reviews
   const calculateStats = (): Stats => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    let totalReviews = 0;
-    let reviewsToday = 0;
-    let totalIntervals = 0;
-    let successfulReviews = 0;
-    let streak = 0;
-
-    // Calculate streak
-    const reviewDates = Object.values(cardProgress)
-      .flatMap(progress => progress.reviews.map((review: Review) => new Date(review.date)))
-      .sort((a, b) => b.getTime() - a.getTime());
-
-    if (reviewDates.length > 0) {
-      let currentStreak = 1;
-      let currentDate = new Date(reviewDates[0]);
-      currentDate.setHours(0, 0, 0, 0);
-
-      for (let i = 1; i < reviewDates.length; i++) {
-        const reviewDate = new Date(reviewDates[i]);
-        reviewDate.setHours(0, 0, 0, 0);
-        
-        const diffDays = Math.floor((currentDate.getTime() - reviewDate.getTime()) / (1000 * 60 * 60 * 24));
-        if (diffDays === 1) {
-          currentStreak++;
-        } else {
-          break;
-        }
-        currentDate = reviewDate;
-      }
-      streak = currentStreak;
-    }
-
-    // Calculate other stats
-    Object.values(cardProgress).forEach(progress => {
-      progress.reviews.forEach((review: Review) => {
-        totalReviews++;
-        const reviewDate = new Date(review.date);
-        reviewDate.setHours(0, 0, 0, 0);
-        
-        if (reviewDate.getTime() === today.getTime()) {
-          reviewsToday++;
-        }
-
-        // Count 'good' and 'easy' as successful reviews
-        if (review.difficulty === 'good' || review.difficulty === 'easy') {
-          successfulReviews++;
-        }
-
-        if (review.interval) {
-          totalIntervals += review.interval;
-        }
-      });
-    });
-
-    // Get the actual cards that will be shown
-    const dueCards = getDueCards();
-    
-    // Count new cards (only the ones that will actually be shown)
-    const newCards = dueCards.filter(card => card.type === 'new').length;
-    const dueCardsCount = dueCards.length;
-    const learnedCards = Object.entries(cardProgress).filter(([_, progress]) => 
-      progress.reviews.length > 0 && 
-      (progress.reviews[progress.reviews.length - 1].difficulty === 'good' || 
-       progress.reviews[progress.reviews.length - 1].difficulty === 'easy')
-    ).length;
+    const totalCards = phrases.length;
+    const newCards = Object.keys(cardProgress).length;
+    const dueCards = getDueCards().length;
+    const learnedCards = Object.values(cardProgress).filter(p => p.reviews.length >= 5).length;
+    const successRate = calculateSuccessRate();
+    const averageInterval = calculateAverageInterval();
+    const totalReviews = Object.values(cardProgress).reduce((sum, p) => sum + p.reviews.length, 0);
+    const reviewsToday = Object.values(cardProgress).reduce((sum, p) => 
+      sum + p.reviews.filter((r: Review) => new Date(r.date).toDateString() === new Date().toDateString()).length, 0);
+    const streak = calculateStreak();
+    const maxNewCardsPerSession = 5;
 
     return {
-      totalCards: phrases.length,
+      totalCards,
       newCards,
-      dueCards: dueCardsCount,
+      dueCards,
       learnedCards,
-      successRate: totalReviews > 0 ? (successfulReviews / totalReviews) * 100 : 0,
-      averageInterval: totalReviews > 0 ? totalIntervals / totalReviews : 0,
+      successRate,
+      averageInterval,
       totalReviews,
       reviewsToday,
       streak,
       newCardsToday,
-      maxNewCardsPerSession: 5
+      maxNewCardsPerSession
     };
   };
 
@@ -906,6 +720,65 @@ function ThaiFlashcardsInner() {
 
   const nextReview = getNextReviewDate(index);
   const isDue = isCardDue(index);
+
+  const calculateSuccessRate = (): number => {
+    let totalReviews = 0;
+    let successfulReviews = 0;
+
+    Object.values(cardProgress).forEach(progress => {
+      progress.reviews.forEach((review: Review) => {
+        totalReviews++;
+        if (review.difficulty === 'good' || review.difficulty === 'easy') {
+          successfulReviews++;
+        }
+      });
+    });
+
+    return totalReviews > 0 ? (successfulReviews / totalReviews) * 100 : 0;
+  };
+
+  const calculateAverageInterval = (): number => {
+    let totalIntervals = 0;
+    let totalReviews = 0;
+
+    Object.values(cardProgress).forEach(progress => {
+      progress.reviews.forEach((review: Review) => {
+        if (review.interval) {
+          totalIntervals += review.interval;
+        }
+        totalReviews++;
+      });
+    });
+
+    return totalReviews > 0 ? totalIntervals / totalReviews : 0;
+  };
+
+  const calculateStreak = (): number => {
+    const reviewDates = Object.values(cardProgress)
+      .flatMap(progress => progress.reviews.map((review: Review) => new Date(review.date)))
+      .sort((a, b) => b.getTime() - a.getTime());
+
+    if (reviewDates.length === 0) return 0;
+
+    let currentStreak = 1;
+    let currentDate = new Date(reviewDates[0]);
+    currentDate.setHours(0, 0, 0, 0);
+
+    for (let i = 1; i < reviewDates.length; i++) {
+      const reviewDate = new Date(reviewDates[i]);
+      reviewDate.setHours(0, 0, 0, 0);
+      
+      const diffDays = Math.floor((currentDate.getTime() - reviewDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays === 1) {
+        currentStreak++;
+      } else {
+        break;
+      }
+      currentDate = reviewDate;
+    }
+
+    return currentStreak;
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center p-4 bg-[#1a1a1a]">

@@ -25,14 +25,15 @@ export default function SettingsMenu() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative z-50">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 p-3 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-700"
+        className="fixed bottom-4 right-4 p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-colors duration-200 z-50"
+        title="Settings"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
+          className="h-8 w-8"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -53,18 +54,18 @@ export default function SettingsMenu() {
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-20 right-4 bg-white rounded-lg shadow-xl p-4 w-72">
-          <h3 className="text-lg font-bold mb-4">Settings</h3>
+        <div className="fixed bottom-20 right-4 bg-gray-800 rounded-lg shadow-xl p-4 w-72 border border-gray-700 z-50">
+          <h3 className="text-lg font-bold mb-4 text-white">Settings</h3>
           
           <div className="space-y-4">
             <div>
               <button
                 onClick={exportUserData}
-                className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-200"
               >
                 Export Data
               </button>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-400 mt-1">
                 Download your progress and notes
               </p>
             </div>
@@ -72,7 +73,7 @@ export default function SettingsMenu() {
             <div>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors duration-200"
               >
                 Import Data
               </button>
@@ -83,7 +84,7 @@ export default function SettingsMenu() {
                 className="hidden"
                 onChange={handleImport}
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-400 mt-1">
                 Restore from backup file
               </p>
             </div>

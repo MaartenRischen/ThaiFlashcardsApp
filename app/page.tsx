@@ -82,9 +82,43 @@ const GRADUATING_INTERVAL = 1; // First interval after learning in days
 const EASY_INTERVAL = 4; // Interval when rating Easy on new card
 const NEW_CARDS_PER_DAY = 20;
 
+// Add default phrases directly in the code
+const DEFAULT_PHRASES: Phrase[] = [
+  {
+    meaning: "Hello",
+    thai: "สวัสดี",
+    pronunciation: "sa-wat-dee",
+    mnemonic: "Think: 'Swadee' - like saying 'sweet day' quickly"
+  },
+  {
+    meaning: "Thank you",
+    thai: "ขอบคุณ",
+    pronunciation: "khop-khun",
+    mnemonic: "Think: 'Cope-Kun' - you cope with kindness"
+  },
+  {
+    meaning: "Yes",
+    thai: "ใช่",
+    pronunciation: "chai",
+    mnemonic: "Think: 'Chai' - like the tea, say 'yes' to chai"
+  },
+  {
+    meaning: "No",
+    thai: "ไม่",
+    pronunciation: "mai",
+    mnemonic: "Think: 'My' - 'My answer is no'"
+  },
+  {
+    meaning: "How are you?",
+    thai: "สบายดีไหม",
+    pronunciation: "sa-bai-dee-mai",
+    mnemonic: "Think: 'So bye, did I?' - asking about their well-being"
+  }
+];
+
 export default function ThaiFlashcards() {
-  const [phrases, setPhrases] = useState<Phrase[]>([]);
-  const [index, setIndex] = useState<number | null>(null);
+  const [phrases, setPhrases] = useState<Phrase[]>(DEFAULT_PHRASES);
+  const [index, setIndex] = useState<number>(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [localMnemonics, setLocalMnemonics] = useState<MnemonicEdits>(() => {
     try {
@@ -151,6 +185,8 @@ export default function ThaiFlashcards() {
 
   const userData = loadUserData();
 
+  const [isInitialized, setIsInitialized] = useState(true);
+
   // Save progress to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('cardProgress', JSON.stringify(cardProgress));
@@ -184,79 +220,25 @@ export default function ThaiFlashcards() {
     localStorage.setItem('autoplay', JSON.stringify(autoplay));
   }, [autoplay]);
 
+  // Replace the useEffect for fetching phrases with a simpler one
   useEffect(() => {
-    const fetchPhrases = async () => {
+    const loadAdditionalPhrases = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-        
-        // Try to fetch from the public directory
         const response = await fetch('/phrases.json');
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) return; // Just use default phrases if fetch fails
         
         const data = await response.json();
-        
-        if (!Array.isArray(data) || data.length === 0) {
-          // If no data, use fallback phrases
-          const fallbackPhrases = [
-            {
-              meaning: "Hello",
-              thai: "สวัสดี",
-              pronunciation: "sa-wat-dee",
-              mnemonic: "Think: 'Swadee' - like saying 'sweet day' quickly"
-            },
-            {
-              meaning: "Thank you",
-              thai: "ขอบคุณ",
-              pronunciation: "khop-khun",
-              mnemonic: "Think: 'Cope-Kun' - you cope with kindness"
-            },
-            {
-              meaning: "Yes",
-              thai: "ใช่",
-              pronunciation: "chai",
-              mnemonic: "Think: 'Chai' - like the tea, say 'yes' to chai"
-            }
-          ];
-          setPhrases(fallbackPhrases);
-          return;
+        if (Array.isArray(data) && data.length > 0) {
+          setPhrases(data);
         }
-        
-        setPhrases(data);
       } catch (error) {
-        console.error('Error fetching phrases:', error);
-        // Use fallback phrases on error
-        const fallbackPhrases = [
-          {
-            meaning: "Hello",
-            thai: "สวัสดี",
-            pronunciation: "sa-wat-dee",
-            mnemonic: "Think: 'Swadee' - like saying 'sweet day' quickly"
-          },
-          {
-            meaning: "Thank you",
-            thai: "ขอบคุณ",
-            pronunciation: "khop-khun",
-            mnemonic: "Think: 'Cope-Kun' - you cope with kindness"
-          },
-          {
-            meaning: "Yes",
-            thai: "ใช่",
-            pronunciation: "chai",
-            mnemonic: "Think: 'Chai' - like the tea, say 'yes' to chai"
-          }
-        ];
-        setPhrases(fallbackPhrases);
-        setError('Using fallback phrases due to loading error');
-      } finally {
-        setIsLoading(false);
+        console.error('Error loading additional phrases:', error);
+        // Continue with default phrases if there's an error
       }
     };
 
-    fetchPhrases();
+    // Try to load additional phrases, but don't block on it
+    loadAdditionalPhrases();
   }, []);
 
   const speak = (text: string, rate: number = 0.8) => {
@@ -839,39 +821,28 @@ export default function ThaiFlashcards() {
     }
   }, [showAnswer, autoplay]);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-        <div className="text-xl">Loading phrases...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-        <div className="text-xl text-red-500">{error}</div>
-      </div>
-    );
-  }
-
-  if (!phrases.length) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-        <div className="text-xl">No phrases available</div>
-      </div>
-    );
-  }
-
-  if (index === null) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
-  }
-
+  // Ensure we have valid data before rendering
   const currentPhrase = phrases[index];
+  if (!currentPhrase) {
+    setIndex(0);
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-lg mb-4">Resetting...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Create a safe version of the current phrase
+  const safePhrase = {
+    meaning: currentPhrase.meaning || '',
+    thai: currentPhrase.thai || '',
+    pronunciation: currentPhrase.pronunciation || '',
+    mnemonic: currentPhrase.mnemonic || ''
+  };
+
   const nextReview = getNextReviewDate(index);
   const isDue = isCardDue(index);
 
@@ -963,15 +934,15 @@ export default function ThaiFlashcards() {
 
           {/* Current phrase */}
           <div className="text-2xl font-bold text-center mb-6">
-            {currentPhrase.meaning}
+            {safePhrase.meaning}
           </div>
 
           {showAnswer ? (
             <div className="space-y-4">
-              <p className="text-lg mb-3">Thai: <span className="font-semibold">{currentPhrase.thai}</span></p>
+              <p className="text-lg mb-3">Thai: <span className="font-semibold">{safePhrase.thai}</span></p>
               <div className="space-y-2">
                 <p className="mb-2">
-                  Official phonetics: <span className="italic text-gray-400">{currentPhrase.pronunciation}</span>
+                  Official phonetics: <span className="italic text-gray-400">{safePhrase.pronunciation}</span>
                 </p>
                 <div>
                   <div className="flex items-center justify-between text-sm italic text-gray-400 mb-1">
@@ -988,7 +959,7 @@ export default function ThaiFlashcards() {
                   </div>
                   <input
                     type="text"
-                    value={localMnemonics[index]?.pronunciation || currentPhrase.pronunciation}
+                    value={localMnemonics[index]?.pronunciation || safePhrase.pronunciation}
                     onChange={handlePhoneticChange}
                     placeholder="Add your own phonetic spelling..."
                     className="neumorphic-input"
@@ -999,7 +970,7 @@ export default function ThaiFlashcards() {
               {/* Audio controls */}
               <div className="flex justify-center gap-2">
                 <button
-                  onClick={() => speak(currentPhrase.thai)}
+                  onClick={() => speak(safePhrase.thai)}
                   disabled={isPlaying}
                   className="neumorphic-button flex-1"
                 >
@@ -1039,7 +1010,7 @@ export default function ThaiFlashcards() {
                 </div>
                 <input
                   type="text"
-                  value={localMnemonics[index]?.text || currentPhrase.mnemonic}
+                  value={localMnemonics[index]?.text || safePhrase.mnemonic}
                   onChange={handleMnemonicChange}
                   placeholder="Add your own mnemonic..."
                   className="neumorphic-input"

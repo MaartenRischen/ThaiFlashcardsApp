@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.1.0",
-  changes: "Added card status indicators to vocabulary list"
+  version: "1.1.1",
+  changes: "Fixed autoplay to only play once when answer is revealed"
 };
 
 // Update phrases with real example sentences
@@ -230,6 +230,9 @@ export default function ThaiFlashcards() {
   });
   const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
 
+  // Add ref to track previous showAnswer state
+  const prevShowAnswerRef = React.useRef(false);
+
   useEffect(() => {
     localStorage.setItem('cardProgress', JSON.stringify(cardProgress));
   }, [cardProgress]);
@@ -246,11 +249,15 @@ export default function ThaiFlashcards() {
     localStorage.setItem('levelProgress', JSON.stringify(levelProgress));
   }, [levelProgress]);
 
+  // Fix autoplay to only trigger when answer is first revealed
   useEffect(() => {
-    if (autoplay && showAnswer && !isPlaying) {
+    // Only play audio when showAnswer changes from false to true
+    if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlaying) {
       speak(phrases[index].thai);
     }
-  }, [showAnswer, autoplay, isPlaying, phrases, index]);
+    // Update ref with current value for next render
+    prevShowAnswerRef.current = showAnswer;
+  }, [showAnswer, autoplay, phrases, index]);
 
   const handlePhoneticChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalMnemonics(prev => ({

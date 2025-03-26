@@ -9,13 +9,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/app/components/ui/dialog";
+import { Switch } from "@/app/components/ui/switch";
 
 interface Phrase {
-  meaning: string;
   thai: string;
-  pronunciation: string;  // This will be used for official phonetics
+  pronunciation: string;
   mnemonic: string;
-  examples: ExampleSentence[];  // Add example sentences
+  english: string;
 }
 
 interface Review {
@@ -99,570 +99,71 @@ const VERSION_INFO = {
   changes: "Improved mnemonic input field size and position"
 };
 
-// Update phrases with real example sentences
-const DEFAULT_PHRASES: Phrase[] = [
+const INITIAL_PHRASES: Phrase[] = [
   {
-    meaning: "Hello",
-    thai: "สวัสดี",
-    pronunciation: "sa-wat-dee",
-    mnemonic: "Think: 'Swadee' - like saying 'sweet day' quickly",
-    examples: [
-      {
-        thai: "สวัสดีตอนเช้า คุณสบายดีไหม",
-        pronunciation: "sa-wat-dee ton chao, khun sa-bai dee mai",
-        translation: "Good morning, how are you?"
-      },
-      {
-        thai: "สวัสดีครับ ยินดีที่ได้รู้จัก",
-        pronunciation: "sa-wat-dee krap, yin-dee tee dai roo-jak",
-        translation: "Hello, nice to meet you."
-      }
-    ]
+    thai: "ก",
+    pronunciation: "gaw gai",
+    mnemonic: "Looks like a chicken's head and neck",
+    english: "Chicken consonant"
   },
   {
-    meaning: "Thank you",
-    thai: "ขอบคุณ",
-    pronunciation: "khop-khun",
-    mnemonic: "Think: 'Cope-Kun' - you cope with kindness",
-    examples: [
-      {
-        thai: "ขอบคุณมากสำหรับความช่วยเหลือ",
-        pronunciation: "khop-khun mak samrap kwam chuay lue",
-        translation: "Thank you very much for your help."
-      },
-      {
-        thai: "ขอบคุณสำหรับอาหารอร่อย",
-        pronunciation: "khop-khun samrap a-han a-roi",
-        translation: "Thank you for the delicious food."
-      }
-    ]
+    thai: "ข",
+    pronunciation: "kaw kai",
+    mnemonic: "Like an oval egg with a line through it",
+    english: "Egg consonant"
   },
   {
-    meaning: "Yes",
-    thai: "ใช่",
-    pronunciation: "chai",
-    mnemonic: "Think: 'Chai' - like the tea, say 'yes' to chai",
-    examples: [
-      {
-        thai: "ใช่ ฉันเข้าใจแล้ว",
-        pronunciation: "chai, chan kao-jai laew",
-        translation: "Yes, I understand now."
-      },
-      {
-        thai: "ใช่ นี่คือบ้านของฉัน",
-        pronunciation: "chai, nee kue baan kong chan",
-        translation: "Yes, this is my house."
-      }
-    ]
+    thai: "ค",
+    pronunciation: "kaw kwai",
+    mnemonic: "Like horns of a water buffalo",
+    english: "Buffalo consonant"
   },
   {
-    meaning: "No",
-    thai: "ไม่",
-    pronunciation: "mai",
-    mnemonic: "Think: 'My' - 'My answer is no'",
-    examples: [
-      {
-        thai: "ไม่ ฉันไม่เอา",
-        pronunciation: "mai, chan mai ao",
-        translation: "No, I don't want it."
-      },
-      {
-        thai: "ไม่ ฉันไม่ชอบอาหารเผ็ด",
-        pronunciation: "mai, chan mai chop a-han pet",
-        translation: "No, I don't like spicy food."
-      }
-    ]
+    thai: "ง",
+    pronunciation: "ngaw nguu",
+    mnemonic: "Like a snake ready to strike",
+    english: "Snake consonant"
   },
   {
-    meaning: "How are you?",
-    thai: "สบายดีไหม",
-    pronunciation: "sa-bai-dee-mai",
-    mnemonic: "Think: 'So bye, did I?' - asking about their well-being",
-    examples: [
-      {
-        thai: "สบายดีไหม วันนี้อากาศดีนะ",
-        pronunciation: "sa-bai-dee-mai, wan-nee a-kat dee na",
-        translation: "How are you? The weather is nice today."
-      },
-      {
-        thai: "คุณสบายดีไหม ไม่ได้เจอกันนานแล้ว",
-        pronunciation: "khun sa-bai-dee-mai, mai dai jer gan naan laew",
-        translation: "How are you? Haven't seen you in a long time."
-      }
-    ]
+    thai: "จ",
+    pronunciation: "jaw jaan",
+    mnemonic: "Like a plate or dish on a table",
+    english: "Plate consonant"
   },
   {
-    meaning: "What is your name?",
-    thai: "คุณชื่ออะไร",
-    pronunciation: "khun cheu a-rai",
-    mnemonic: "Think: 'Koon chew a rye' - asking someone's name over rye bread",
-    examples: [
-      {
-        thai: "คุณชื่ออะไร ฉันชื่อนิดา",
-        pronunciation: "khun cheu a-rai, chan cheu nida",
-        translation: "What is your name? My name is Nida."
-      },
-      {
-        thai: "สวัสดี คุณชื่ออะไรครับ",
-        pronunciation: "sa-wat-dee, khun cheu a-rai krap",
-        translation: "Hello, what is your name?"
-      }
-    ]
+    thai: "ฉ",
+    pronunciation: "chaw ching",
+    mnemonic: "Like cymbals with a handle",
+    english: "Cymbals consonant"
   },
   {
-    meaning: "My name is...",
-    thai: "ฉันชื่อ...",
-    pronunciation: "chan cheu...",
-    mnemonic: "Think: 'Chan chew' - I'm chewing as I tell my name",
-    examples: [
-      {
-        thai: "ฉันชื่อปีเตอร์ ยินดีที่ได้รู้จัก",
-        pronunciation: "chan cheu Peter, yin-dee tee dai roo-jak",
-        translation: "My name is Peter, nice to meet you."
-      },
-      {
-        thai: "สวัสดี ฉันชื่อมาร์ค ฉันมาจากอเมริกา",
-        pronunciation: "sa-wat-dee, chan cheu Mark, chan ma jak america",
-        translation: "Hello, my name is Mark. I'm from America."
-      }
-    ]
+    thai: "ช",
+    pronunciation: "chaw chaang",
+    mnemonic: "Like an elephant's trunk and tusks",
+    english: "Elephant consonant"
   },
   {
-    meaning: "I don't understand",
-    thai: "ฉันไม่เข้าใจ",
-    pronunciation: "chan mai kao-jai",
-    mnemonic: "Think: 'Chan my cow-chai' - my cow doesn't understand either",
-    examples: [
-      {
-        thai: "ฉันไม่เข้าใจ พูดช้าๆ ได้ไหม",
-        pronunciation: "chan mai kao-jai, pood cha cha dai mai",
-        translation: "I don't understand. Can you speak slowly?"
-      },
-      {
-        thai: "ขอโทษ ฉันไม่เข้าใจภาษาไทยดีนัก",
-        pronunciation: "kor-tote, chan mai kao-jai pasa thai dee nak",
-        translation: "Sorry, I don't understand Thai very well."
-      }
-    ]
+    thai: "ซ",
+    pronunciation: "saw soe",
+    mnemonic: "Like a chain link",
+    english: "Chain consonant"
   },
   {
-    meaning: "Please speak slowly",
-    thai: "กรุณาพูดช้าๆ",
-    pronunciation: "ga-ru-na pood cha-cha",
-    mnemonic: "Think: 'Karuna' (kindness) 'pood cha-cha' (speak cha-cha dance - slowly)",
-    examples: [
-      {
-        thai: "กรุณาพูดช้าๆ ฉันเพิ่งเรียนภาษาไทย",
-        pronunciation: "ga-ru-na pood cha-cha, chan peng rian pasa thai",
-        translation: "Please speak slowly, I just started learning Thai."
-      },
-      {
-        thai: "ขอโทษ กรุณาพูดช้าๆ หน่อยได้ไหม",
-        pronunciation: "kor-tote, ga-ru-na pood cha-cha noi dai mai",
-        translation: "Sorry, could you please speak a bit slower?"
-      }
-    ]
+    thai: "ฌ",
+    pronunciation: "chaw choe",
+    mnemonic: "Like a tree with branches",
+    english: "Tree consonant"
   },
   {
-    meaning: "Where is the bathroom?",
-    thai: "ห้องน้ำอยู่ที่ไหน",
-    pronunciation: "hong-nam yoo tee-nai",
-    mnemonic: "Think: 'Hong-nam' sounds like 'home' with 'nam' (water) - where's the water room?",
-    examples: [
-      {
-        thai: "ขอโทษ ห้องน้ำอยู่ที่ไหนครับ",
-        pronunciation: "kor-tote, hong-nam yoo tee-nai krap",
-        translation: "Excuse me, where is the bathroom?"
-      },
-      {
-        thai: "ห้องน้ำอยู่ที่ไหน ฉันหาไม่เจอ",
-        pronunciation: "hong-nam yoo tee-nai, chan ha mai jer",
-        translation: "Where is the bathroom? I can't find it."
-      }
-    ]
-  },
-  {
-    meaning: "How much is this?",
-    thai: "อันนี้เท่าไหร่",
-    pronunciation: "an-nee tao-rai",
-    mnemonic: "Think: 'Annie, tell me how much!'",
-    examples: [
-      {
-        thai: "อันนี้เท่าไหร่ มันราคาแพงไปไหม",
-        pronunciation: "an-nee tao-rai, man raka paeng pai mai",
-        translation: "How much is this? Is it too expensive?"
-      },
-      {
-        thai: "ขอโทษ อันนี้เท่าไหร่ครับ",
-        pronunciation: "kor-tote, an-nee tao-rai krap",
-        translation: "Excuse me, how much is this?"
-      }
-    ]
-  },
-  {
-    meaning: "Delicious",
-    thai: "อร่อย",
-    pronunciation: "a-roi",
-    mnemonic: "Think: 'Ah, royal' - food fit for royalty",
-    examples: [
-      {
-        thai: "อาหารนี้อร่อยมาก ขอบคุณ",
-        pronunciation: "a-han nee a-roi mak, khop-khun",
-        translation: "This food is very delicious, thank you."
-      },
-      {
-        thai: "ผัดไทยร้านนี้อร่อยที่สุด",
-        pronunciation: "pad thai ran nee a-roi tee-soot",
-        translation: "The pad thai at this place is the most delicious."
-      }
-    ]
-  },
-  {
-    meaning: "Today",
-    thai: "วันนี้",
-    pronunciation: "wan-nee",
-    mnemonic: "Think: 'One knee' - today I hurt one knee",
-    examples: [
-      {
-        thai: "วันนี้อากาศดีมาก",
-        pronunciation: "wan-nee a-kat dee mak",
-        translation: "Today the weather is very nice."
-      },
-      {
-        thai: "วันนี้คุณจะทำอะไร",
-        pronunciation: "wan-nee khun ja tam a-rai",
-        translation: "What will you do today?"
-      }
-    ]
-  },
-  {
-    meaning: "Tomorrow",
-    thai: "พรุ่งนี้",
-    pronunciation: "proong-nee",
-    mnemonic: "Think: 'Prune-knee' - tomorrow I'll fix my pruned knee",
-    examples: [
-      {
-        thai: "พรุ่งนี้เราจะไปทะเล",
-        pronunciation: "proong-nee rao ja pai ta-le",
-        translation: "Tomorrow we will go to the beach."
-      },
-      {
-        thai: "พรุ่งนี้ฉันต้องตื่นเช้า",
-        pronunciation: "proong-nee chan tong teun chao",
-        translation: "Tomorrow I have to wake up early."
-      }
-    ]
-  },
-  {
-    meaning: "Yesterday",
-    thai: "เมื่อวาน",
-    pronunciation: "meua-wan",
-    mnemonic: "Think: 'Mew-a-waan' - the cat meowed all day yesterday",
-    examples: [
-      {
-        thai: "เมื่อวานฉันไปตลาด",
-        pronunciation: "meua-wan chan pai ta-lad",
-        translation: "Yesterday I went to the market."
-      },
-      {
-        thai: "เมื่อวานอากาศร้อนมาก",
-        pronunciation: "meua-wan a-kat ron mak",
-        translation: "Yesterday the weather was very hot."
-      }
-    ]
-  },
-  {
-    meaning: "Water",
-    thai: "น้ำ",
-    pronunciation: "nam",
-    mnemonic: "Think: 'Nom' - like 'nom nom' drinking water",
-    examples: [
-      {
-        thai: "ขอน้ำเปล่าหนึ่งแก้วครับ",
-        pronunciation: "kor nam plao neung kaew krap",
-        translation: "One glass of water, please."
-      },
-      {
-        thai: "น้ำนี้ดื่มได้ไหม",
-        pronunciation: "nam nee duem dai mai",
-        translation: "Is this water drinkable?"
-      }
-    ]
-  },
-  {
-    meaning: "Food",
-    thai: "อาหาร",
-    pronunciation: "a-han",
-    mnemonic: "Think: 'A-han' - 'a hand' full of food",
-    examples: [
-      {
-        thai: "อาหารไทยรสชาติเผ็ดมาก",
-        pronunciation: "a-han thai rot chat pet mak",
-        translation: "Thai food is very spicy."
-      },
-      {
-        thai: "คุณชอบอาหารอะไร",
-        pronunciation: "khun chop a-han a-rai",
-        translation: "What food do you like?"
-      }
-    ]
-  },
-  {
-    meaning: "Hot (temperature)",
-    thai: "ร้อน",
-    pronunciation: "ron",
-    mnemonic: "Think: 'Ron is hot' - Ron is always complaining about the heat",
-    examples: [
-      {
-        thai: "วันนี้อากาศร้อนมาก",
-        pronunciation: "wan-nee a-kat ron mak",
-        translation: "Today the weather is very hot."
-      },
-      {
-        thai: "ระวัง อาหารนี้ร้อน",
-        pronunciation: "ra-wang, a-han nee ron",
-        translation: "Be careful, this food is hot."
-      }
-    ]
-  },
-  {
-    meaning: "Cold",
-    thai: "หนาว",
-    pronunciation: "nao",
-    mnemonic: "Think: 'Now' - 'right now' I feel cold",
-    examples: [
-      {
-        thai: "ฉันรู้สึกหนาว เปิดแอร์เย็นเกินไป",
-        pronunciation: "chan roo-suek nao, perd air yen gern pai",
-        translation: "I feel cold, the air conditioning is too cool."
-      },
-      {
-        thai: "ที่เชียงใหม่อากาศหนาวในฤดูหนาว",
-        pronunciation: "tee chiang mai a-kat nao nai rue-du nao",
-        translation: "In Chiang Mai, the weather is cold during winter."
-      }
-    ]
-  },
-  {
-    meaning: "Good",
-    thai: "ดี",
-    pronunciation: "dee",
-    mnemonic: "Think: 'Dee' - sounds like the English word 'D' (grade) - better than an F!",
-    examples: [
-      {
-        thai: "อาหารนี้รสชาติดีมาก",
-        pronunciation: "a-han nee rot chat dee mak",
-        translation: "This food tastes very good."
-      },
-      {
-        thai: "คุณทำงานได้ดีมาก",
-        pronunciation: "khun tam-ngan dai dee mak",
-        translation: "You work very well."
-      }
-    ]
-  },
-  {
-    meaning: "Bad",
-    thai: "แย่",
-    pronunciation: "yae",
-    mnemonic: "Think: 'Yuck' - that's bad",
-    examples: [
-      {
-        thai: "วันนี้เป็นวันที่แย่มาก",
-        pronunciation: "wan-nee pen wan tee yae mak",
-        translation: "Today is a very bad day."
-      },
-      {
-        thai: "อาหารนี้รสชาติแย่",
-        pronunciation: "a-han nee rot chat yae",
-        translation: "This food tastes bad."
-      }
-    ]
-  },
-  {
-    meaning: "Big",
-    thai: "ใหญ่",
-    pronunciation: "yai",
-    mnemonic: "Think: 'Y-eye' - big like your eye",
-    examples: [
-      {
-        thai: "บ้านหลังนี้ใหญ่มาก",
-        pronunciation: "baan lang nee yai mak",
-        translation: "This house is very big."
-      },
-      {
-        thai: "ฉันต้องการกระเป๋าใบใหญ่",
-        pronunciation: "chan tong-gan kra-pao bai yai",
-        translation: "I need a big bag."
-      }
-    ]
-  },
-  {
-    meaning: "Small",
-    thai: "เล็ก",
-    pronunciation: "lek",
-    mnemonic: "Think: 'Fleck' - something tiny like a fleck of dust",
-    examples: [
-      {
-        thai: "ห้องนี้เล็กเกินไป",
-        pronunciation: "hong nee lek gern pai",
-        translation: "This room is too small."
-      },
-      {
-        thai: "ฉันชอบสุนัขตัวเล็ก",
-        pronunciation: "chan chop su-nak tua lek",
-        translation: "I like small dogs."
-      }
-    ]
-  },
-  {
-    meaning: "Left",
-    thai: "ซ้าย",
-    pronunciation: "sai",
-    mnemonic: "Think: 'Sigh' - I sigh when I go left",
-    examples: [
-      {
-        thai: "เลี้ยวซ้ายตรงแยกหน้า",
-        pronunciation: "liao sai trong yak na",
-        translation: "Turn left at the next intersection."
-      },
-      {
-        thai: "ร้านอาหารอยู่ทางซ้ายมือ",
-        pronunciation: "ran a-han yoo tang sai meu",
-        translation: "The restaurant is on the left side."
-      }
-    ]
-  },
-  {
-    meaning: "Right",
-    thai: "ขวา",
-    pronunciation: "kwaa",
-    mnemonic: "Think: 'Qua' - like 'quaaaack' right turn for ducks",
-    examples: [
-      {
-        thai: "เลี้ยวขวาที่ไฟแดง",
-        pronunciation: "liao kwaa tee fai daeng",
-        translation: "Turn right at the traffic light."
-      },
-      {
-        thai: "ฉันถนัดมือขวา",
-        pronunciation: "chan ta-nat meu kwaa",
-        translation: "I am right-handed."
-      }
-    ]
-  },
-  {
-    meaning: "One",
-    thai: "หนึ่ง",
-    pronunciation: "neung",
-    mnemonic: "Think: 'Nung' - number one",
-    examples: [
-      {
-        thai: "ฉันต้องการกาแฟหนึ่งแก้ว",
-        pronunciation: "chan tong-gan ka-fae neung kaew",
-        translation: "I want one cup of coffee."
-      },
-      {
-        thai: "รถเมล์สายหนึ่งไปไหน",
-        pronunciation: "rot-may sai neung pai nai",
-        translation: "Where does bus number one go?"
-      }
-    ]
-  },
-  {
-    meaning: "Two",
-    thai: "สอง",
-    pronunciation: "song",
-    mnemonic: "Think: 'Song' - I sing two songs",
-    examples: [
-      {
-        thai: "ฉันมีพี่น้องสองคน",
-        pronunciation: "chan mee pee-nong song kon",
-        translation: "I have two siblings."
-      },
-      {
-        thai: "ขอน้ำสองขวดครับ",
-        pronunciation: "kor nam song kuat krap",
-        translation: "Two bottles of water, please."
-      }
-    ]
-  },
-  {
-    meaning: "Three",
-    thai: "สาม",
-    pronunciation: "saam",
-    mnemonic: "Think: 'Sam' - my friend Sam always counts to three",
-    examples: [
-      {
-        thai: "ฉันต้องการจองห้องพักสามคืน",
-        pronunciation: "chan tong-gan jong hong pak saam keun",
-        translation: "I want to book a room for three nights."
-      },
-      {
-        thai: "มีเด็กสามคนกำลังเล่นในสวน",
-        pronunciation: "mee dek saam kon kam-lang len nai suan",
-        translation: "There are three children playing in the park."
-      }
-    ]
-  },
-  {
-    meaning: "Thank you very much",
-    thai: "ขอบคุณมาก",
-    pronunciation: "khop-khun mak",
-    mnemonic: "Think: 'Cope-Kun Mark' - Mark copes with extreme kindness",
-    examples: [
-      {
-        thai: "ขอบคุณมากที่ช่วยเหลือฉัน",
-        pronunciation: "khop-khun mak tee chuay-lue chan",
-        translation: "Thank you very much for helping me."
-      },
-      {
-        thai: "ขอบคุณมากสำหรับของขวัญ",
-        pronunciation: "khop-khun mak sam-rap kong-kwan",
-        translation: "Thank you very much for the gift."
-      }
-    ]
-  },
-  {
-    meaning: "You're welcome",
-    thai: "ด้วยความยินดี",
-    pronunciation: "duay kwaam yin-dee",
-    mnemonic: "Think: 'Doo-why come yin-dee' - do why? because I come with pleasure",
-    examples: [
-      {
-        thai: "ด้วยความยินดี ไม่เป็นไรครับ",
-        pronunciation: "duay kwaam yin-dee, mai pen rai krap",
-        translation: "You're welcome, it's nothing."
-      },
-      {
-        thai: "ด้วยความยินดี ถ้าต้องการความช่วยเหลืออีกก็บอกได้",
-        pronunciation: "duay kwaam yin-dee, ta tong-gan kwam chuay-lue eek gor bok dai",
-        translation: "You're welcome, if you need more help just let me know."
-      }
-    ]
-  },
-  {
-    meaning: "Sorry",
-    thai: "ขอโทษ",
-    pronunciation: "kor-tote",
-    mnemonic: "Think: 'Core-toast' - I accidentally burned your toast, sorry!",
-    examples: [
-      {
-        thai: "ขอโทษที่มาสาย รถติด",
-        pronunciation: "kor-tote tee ma sai, rot tid",
-        translation: "Sorry I'm late, traffic was bad."
-      },
-      {
-        thai: "ขอโทษ ฉันไม่ได้ตั้งใจ",
-        pronunciation: "kor-tote, chan mai dai tang jai",
-        translation: "Sorry, I didn't mean to."
-      }
-    ]
+    thai: "ญ",
+    pronunciation: "yaw ying",
+    mnemonic: "Like a woman with a fancy hairstyle",
+    english: "Woman consonant"
   }
 ];
 
 export default function ThaiFlashcards() {
-  const [phrases] = useState<Phrase[]>(DEFAULT_PHRASES);
+  const [phrases] = useState<Phrase[]>(INITIAL_PHRASES);
   const [index, setIndex] = useState<number>(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [localMnemonics, setLocalMnemonics] = useState<MnemonicEdits>(() => {
@@ -930,7 +431,7 @@ export default function ThaiFlashcards() {
     }
   };
 
-  const handleMnemonicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMnemonicChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setLocalMnemonics(prev => ({
       ...prev,
       [index]: {
@@ -1099,423 +600,119 @@ export default function ThaiFlashcards() {
   };
 
   return (
-    <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      <div className="w-full max-w-lg mx-auto p-4 space-y-4">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-100">Donkey Bridge</h1>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setShowHowItWorks(!showHowItWorks)}
-              className="neumorphic-button"
-            >
-              How It Works
-            </button>
-            <button
-              onClick={() => setShowVocabulary(!showVocabulary)}
-              className="neumorphic-button"
-            >
-              Vocabulary
-            </button>
+    <div className="min-h-screen bg-[#1a1a1a] text-white">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-2xl font-bold mb-2">Thai Flashcards</h1>
+            <p className="text-gray-400">v1.3.13 | {new Date().toLocaleString()}</p>
+            <p className="text-blue-400">Latest: Improved mnemonic input field size and position</p>
           </div>
-        </div>
-
-        {/* Card Status */}
-        <div className="flex justify-between items-center text-sm text-gray-400">
-          <div>Card {activeCards.indexOf(index) + 1} of {activeCards.length} active</div>
-          <div>{index + 1} of {phrases.length} total</div>
-        </div>
-
-        {/* Main Card */}
-        <div className="neumorphic p-6 space-y-4">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-white">
-              {phrases[index].meaning}
-            </h2>
-          </div>
-
-          {/* Display random sentence if available */}
-          {randomSentence && (
-            <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
-              <h3 className="text-sm text-blue-400 uppercase tracking-wider mb-1">In Context</h3>
-              <p className="text-base text-white font-medium">{randomSentence.thai}</p>
-              <p className="text-sm text-gray-400 italic">{randomSentence.english}</p>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setLocalMnemonics({})}
+              className="px-4 py-2 bg-red-600/20 text-red-400 rounded-md hover:bg-red-600/30 transition-colors"
+            >
+              Reset All
+            </button>
+            <div className="flex items-center space-x-2">
+              <span className="text-gray-400">Autoplay</span>
+              <Switch checked={autoplay} onCheckedChange={setAutoplay} />
             </div>
-          )}
+          </div>
+        </div>
 
-          {showAnswer ? (
-            <div className="space-y-4">
-              <div>
-                <p className="text-lg">Thai: <span className="text-white">{phrases[index].thai}</span></p>
-              </div>
+        <div className="relative">
+          <div className="flex justify-center items-center space-x-6 mb-8">
+            <button
+              onClick={() => setIndex(index - 1)}
+              className="text-4xl text-gray-400 hover:text-white transition-colors"
+              disabled={index === 0}
+            >
+              ←
+            </button>
+            <div className="text-center">
+              <div className="text-6xl mb-4">{phrases[index].thai}</div>
+              <div className="text-2xl text-gray-400">{phrases[index].pronunciation}</div>
+              <div className="text-xl text-gray-500 mt-2">{phrases[index].english}</div>
+            </div>
+            <button
+              onClick={() => setIndex(index + 1)}
+              className="text-4xl text-gray-400 hover:text-white transition-colors"
+              disabled={index === phrases.length - 1}
+            >
+              →
+            </button>
+          </div>
 
-              <div>
-                <p className="text-gray-400">
-                  Official pronunciation: <span className="text-gray-300">{phrases[index].pronunciation}</span>
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg text-gray-400">Mnemonic</h2>
+              <div className="flex space-x-2">
                 <button
-                  onClick={() => speak(phrases[index].thai)}
-                  disabled={isPlaying}
-                  className="neumorphic-button flex-1"
+                  onClick={() => {
+                    setLocalMnemonics(prev => ({
+                      ...prev,
+                      [index]: {
+                        text: phrases[index].mnemonic
+                      }
+                    }));
+                  }}
+                  className="px-3 py-1.5 bg-gray-800 text-gray-300 text-sm rounded hover:bg-gray-700 transition-colors"
                 >
-                  {isPlaying ? 'Playing...' : 'Play'}
+                  Reset
                 </button>
-                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                  <DialogTrigger asChild>
-                    <button
-                      onClick={() => {
-                        const phrase = generateRandomPhrase();
-                        if (phrase) {
-                          speak(phrase);
-                        }
-                      }}
-                      disabled={isPlaying}
-                      className="neumorphic-button flex-1"
-                    >
-                      In Context
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Example Usage</DialogTitle>
-                      <DialogDescription className="pt-4">
-                        {randomSentence ? (
-                          <div className="space-y-4">
-                            <div className="text-xl font-medium text-white">
-                              {randomSentence.thai}
-                            </div>
-                            <div className="text-gray-400">
-                              {randomSentence.english}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-gray-400">
-                            No example sentences available for this word.
-                          </div>
-                        )}
-                      </DialogDescription>
-                    </DialogHeader>
-                  </DialogContent>
-                </Dialog>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                <button 
-                  onClick={() => handleCardAction('hard')} 
-                  className="neumorphic-button text-red-500"
+                <button
+                  onClick={() => {
+                    const dataStr = JSON.stringify(localMnemonics);
+                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                    const exportFileDefaultName = 'mnemonics.json';
+                    const linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', exportFileDefaultName);
+                    linkElement.click();
+                  }}
+                  className="px-3 py-1.5 bg-gray-800 text-gray-300 text-sm rounded hover:bg-gray-700 transition-colors"
                 >
-                  Wrong
+                  Export All
                 </button>
-                <button 
-                  onClick={() => handleCardAction('good')} 
-                  className="neumorphic-button text-yellow-500"
-                >
-                  Correct
-                </button>
-                <button 
-                  onClick={() => handleCardAction('easy')} 
-                  className="neumorphic-button text-green-500"
-                >
-                  Easy
-                </button>
-              </div>
-
-              <div className="mt-6">
-                <div className="flex justify-between items-center mb-2">
-                  <p className="text-gray-400">Mnemonic</p>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => {
-                        setLocalMnemonics(prev => ({
-                          ...prev,
-                          [index]: {
-                            text: phrases[index].mnemonic
-                          }
-                        }));
-                      }}
-                      className="neumorphic-button text-sm px-2 py-1"
-                    >
-                      RESET
-                    </button>
-                    <button
-                      onClick={() => {
-                        const dataStr = JSON.stringify(localMnemonics);
-                        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                        const exportFileDefaultName = 'mnemonics.json';
-                        const linkElement = document.createElement('a');
-                        linkElement.setAttribute('href', dataUri);
-                        linkElement.setAttribute('download', exportFileDefaultName);
-                        linkElement.click();
-                      }}
-                      className="neumorphic-button text-sm px-2 py-1"
-                    >
-                      EXPORT ALL
-                    </button>
-                    <button
-                      onClick={() => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = '.json';
-                        input.onchange = (e) => {
-                          const file = (e.target as HTMLInputElement).files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              try {
-                                const importedMnemonics = JSON.parse(event.target?.result as string);
-                                setLocalMnemonics(importedMnemonics);
-                              } catch (error) {
-                                alert('Invalid file format');
-                              }
-                            };
-                            reader.readAsText(file);
+                <button
+                  onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.json';
+                    input.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          try {
+                            const importedMnemonics = JSON.parse(event.target?.result as string);
+                            setLocalMnemonics(importedMnemonics);
+                          } catch (error) {
+                            alert('Invalid file format');
                           }
                         };
-                        input.click();
-                      }}
-                      className="neumorphic-button text-sm px-2 py-1"
-                    >
-                      IMPORT ALL
-                    </button>
-                    <button
-                      onClick={() => {
-                        setLocalMnemonics({});
-                      }}
-                      className="neumorphic-button text-sm px-2 py-1 text-red-500"
-                    >
-                      RESET ALL
-                    </button>
-                  </div>
-                </div>
-                <textarea
-                  value={localMnemonics[index]?.text || `${phrases[index].pronunciation} (${phrases[index].mnemonic})`}
-                  onChange={(e) => handleMnemonicChange(e as any)}
-                  className="neumorphic-input w-full min-h-[120px] resize-none p-4 rounded-sm"
-                  placeholder="Add your own way to remember this sound..."
-                />
+                        reader.readAsText(file);
+                      }
+                    };
+                    input.click();
+                  }}
+                  className="px-3 py-1.5 bg-gray-800 text-gray-300 text-sm rounded hover:bg-gray-700 transition-colors"
+                >
+                  Import All
+                </button>
               </div>
             </div>
-          ) : (
-            <div className="space-y-4">
-              <button 
-                onClick={() => setShowAnswer(true)}
-                className="w-full neumorphic-button"
-              >
-                Show Answer
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Reset Button and Autoplay toggle */}
-        <div className="flex justify-between items-center">
-          <button
-            onClick={handleResetAll}
-            className="neumorphic-button text-red-500"
-          >
-            Reset All
-          </button>
-          
-          <div className="flex items-center space-x-2">
-            <span className="text-gray-400 text-sm">Autoplay</span>
-            <button
-              onClick={() => {
-                const newState = !autoplay;
-                setAutoplay(newState);
-                localStorage.setItem('autoplay', JSON.stringify(newState));
-              }}
-              className={`w-12 h-6 rounded-full transition-colors ${autoplay ? 'bg-blue-500' : 'bg-gray-600'} relative`}
-            >
-              <span 
-                className={`absolute w-5 h-5 rounded-full bg-white transition-transform transform ${autoplay ? 'translate-x-6' : 'translate-x-1'} top-0.5`}
-              />
-            </button>
+            <textarea
+              value={localMnemonics[index]?.text || phrases[index].mnemonic}
+              onChange={(e) => handleMnemonicChange(e)}
+              className="w-full min-h-[120px] bg-gray-800/50 text-white resize-none p-4 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+              placeholder="Add your own way to remember this sound..."
+            />
           </div>
         </div>
       </div>
-
-      {/* Settings Button */}
-      <div className="fixed bottom-16 right-4 z-20">
-        <button
-          onClick={() => setShowStats(!showStats)}
-          className="settings-button"
-        >
-          ⚙️
-        </button>
-      </div>
-
-      {/* Modals */}
-      {showStats && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="neumorphic max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Statistics</h2>
-              <button
-                onClick={() => setShowStats(false)}
-                className="text-gray-400 hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              {(() => {
-                const stats = calculateStats();
-                return (
-                  <>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="neumorphic p-4 text-center">
-                        <div className="text-2xl font-bold text-blue-400">{stats.totalCards}</div>
-                        <div className="text-sm text-gray-400">Total Cards</div>
-                      </div>
-                      <div className="neumorphic p-4 text-center">
-                        <div className="text-2xl font-bold text-green-400">{stats.learnedCards}</div>
-                        <div className="text-sm text-gray-400">Cards Learned</div>
-                      </div>
-                      <div className="neumorphic p-4 text-center">
-                        <div className="text-2xl font-bold text-yellow-400">{stats.dueCards}</div>
-                        <div className="text-sm text-gray-400">Cards Due</div>
-                      </div>
-                      <div className="neumorphic p-4 text-center">
-                        <div className="text-2xl font-bold text-purple-400">{stats.totalReviews}</div>
-                        <div className="text-sm text-gray-400">Total Reviews</div>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-4">
-                      <h3 className="text-lg font-bold mb-2">Progress</h3>
-                      <div className="w-full bg-gray-800 rounded-full h-4">
-                        <div 
-                          className="bg-blue-500 h-4 rounded-full" 
-                          style={{ width: `${(stats.learnedCards / stats.totalCards) * 100}%` }}
-                        ></div>
-                      </div>
-                      <div className="text-right text-sm text-gray-400 mt-1">
-                        {Math.round((stats.learnedCards / stats.totalCards) * 100)}% Complete
-                      </div>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showHowItWorks && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="neumorphic max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">How It Works</h2>
-              <button
-                onClick={() => setShowHowItWorks(false)}
-                className="text-gray-400 hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="space-y-4 text-gray-300">
-              <p>
-                <strong className="text-white">Donkey Bridge</strong> uses spaced repetition to help you learn Thai vocabulary efficiently.
-              </p>
-              
-              <p>
-                <strong className="text-white">Active Cards:</strong> The app keeps 5 cards in active rotation that need your attention. These are cards you haven't seen, got wrong, or are due for review today.
-              </p>
-              
-              <p>
-                <strong className="text-white">Spaced Repetition:</strong> When you rate a card:
-              </p>
-              
-              <ul className="list-disc pl-5 space-y-2">
-                <li><strong className="text-red-500">Wrong</strong> - You didn't remember it. Card will appear again soon.</li>
-                <li><strong className="text-yellow-500">Correct</strong> - You remembered with some effort. Card will repeat at a moderate interval.</li>
-                <li><strong className="text-green-500">Easy</strong> - You knew it well. Card will appear after a longer interval.</li>
-              </ul>
-              
-              <p>
-                <strong className="text-white">Personalization:</strong> You can customize mnemonics and phonetic spellings to help your learning.
-              </p>
-              
-              <p>
-                <strong className="text-white">Example Sentences:</strong> Each word comes with authentic Thai example sentences to learn the word in context.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showVocabulary && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="neumorphic max-w-md w-full p-6 max-h-[80vh] overflow-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Vocabulary List</h2>
-              <button
-                onClick={() => setShowVocabulary(false)}
-                className="text-gray-400 hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="space-y-2">
-              {phrases.map((phrase, idx) => {
-                const isCurrentCard = idx === index;
-                const status = getCardStatus(idx);
-                const { color, label } = getStatusInfo(status);
-                
-                return (
-                  <div 
-                    key={idx}
-                    className={`neumorphic p-3 flex items-center justify-between cursor-pointer hover:bg-gray-800 transition-colors ${isCurrentCard ? 'border-l-4 border-blue-500' : ''}`}
-                    onClick={() => {
-                      setIndex(idx);
-                      setShowVocabulary(false);
-                      setShowAnswer(false);
-                      setRandomSentence(null);
-                    }}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${color}`} />
-                      <span>{phrase.meaning}</span>
-                    </div>
-                    <div className="flex items-center space-x-3 text-sm">
-                      <span className="text-gray-400">
-                        {phrase.thai}
-                      </span>
-                      <span className={`px-2 py-0.5 rounded text-xs ${color.replace('bg-', 'bg-opacity-20 text-')}`}>
-                        {label}
-                      </span>
-                      <button
-                        className="neumorphic-circle opacity-75 hover:opacity-100 w-8 h-8"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!isPlaying) {
-                            speak(phrase.thai);
-                          }
-                        }}
-                      >
-                        🔊
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Version indicator at the bottom - shows changes and timestamp in Amsterdam timezone */}
-      <div className="w-full py-2 px-3 text-center text-xs border-t border-gray-700 bg-gray-800 sticky bottom-0 z-20">
-        <div className="flex flex-col sm:flex-row sm:justify-between items-center">
-          <p className="text-gray-300 font-medium">
-            v{VERSION_INFO.version} | {new Date(VERSION_INFO.lastUpdated).toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' })}
-          </p>
-          <p className="text-blue-400">Latest: {VERSION_INFO.changes}</p>
-        </div>
-      </div>
-    </main>
+    </div>
   );
 } 

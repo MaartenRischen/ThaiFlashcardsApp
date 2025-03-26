@@ -86,11 +86,11 @@ interface ExampleSentence {
   translation: string;
 }
 
-// Update version info with new app name
+// Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.4",
-  changes: "Fixed audio on iOS Chrome with visible player"
+  version: "1.3.5",
+  changes: "Completely redesigned audio player for iOS"
 };
 
 // Update phrases with real example sentences
@@ -696,8 +696,8 @@ export default function ThaiFlashcards() {
     }
   });
   const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [showAudioPlayer, setShowAudioPlayer] = useState(false);
+  const [currentAudioText, setCurrentAudioText] = useState("");
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -718,125 +718,29 @@ export default function ThaiFlashcards() {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
 
-  // Create a function that uses a visible audio element for iOS Chrome
-  const playAudio = (text: string) => {
+  // Create a simplified audio approach - just show text to speak
+  const initiateAudio = (text: string) => {
     setIsPlaying(true);
-    
-    // Create synthetic URL for the text
-    const encodedText = encodeURIComponent(text);
-    // Add a cache-busting parameter to prevent caching issues
-    const googleTTSUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=th&client=tw-ob&cb=${Date.now()}`;
-    
-    // Set the audio URL for the visible audio element
-    setAudioUrl(googleTTSUrl);
-    
-    // For non-iOS devices, use the Audio API directly
-    if (!/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-      try {
-        // Create or use existing audio element
-        if (!audioRef.current) {
-          audioRef.current = new Audio();
-        }
-        
-        // Set up event handlers
-        audioRef.current.onended = () => {
-          console.log('Audio playback ended');
-          setIsPlaying(false);
-        };
-        
-        audioRef.current.onerror = (e) => {
-          console.error('Audio playback error:', e);
-          setIsPlaying(false);
-        };
-        
-        // Set source and play
-        audioRef.current.src = googleTTSUrl;
-        
-        // Play the audio
-        const playPromise = audioRef.current.play();
-        
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              console.log('Audio playing successfully');
-            })
-            .catch(error => {
-              console.error('Playback failed:', error);
-              setIsPlaying(false);
-            });
-        }
-      } catch (error) {
-        console.error('Audio play error:', error);
-        setIsPlaying(false);
-      }
-    }
+    setCurrentAudioText(text);
+    setShowAudioPlayer(true);
   };
   
-  // Handle the audio element's events for iOS
-  const handleAudioEnded = () => {
+  // Close the audio player
+  const closeAudioPlayer = () => {
+    setShowAudioPlayer(false);
     setIsPlaying(false);
-    setAudioUrl(null);
   };
   
-  const handleAudioError = (e: React.SyntheticEvent<HTMLAudioElement, Event>) => {
-    console.error('Audio element error:', e);
-    setIsPlaying(false);
-    setAudioUrl(null);
-    fallbackToSpeechSynthesis(phrases[index].thai);
-  };
-
-  // Keep the original speech synthesis as a fallback
-  const fallbackToSpeechSynthesis = (text: string) => {
-    try {
-      if (!window.speechSynthesis) {
-        console.error('Speech synthesis not supported');
-        return;
-      }
-      
-      // Cancel any ongoing speech
-      window.speechSynthesis.cancel();
-      
-      // Create a new utterance
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'th-TH';
-      utterance.volume = 1;
-      utterance.rate = 0.9;
-      
-      utterance.onend = () => {
-        setIsPlaying(false);
-      };
-      
-      utterance.onerror = () => {
-        setIsPlaying(false);
-      };
-      
-      // Speak
-      window.speechSynthesis.speak(utterance);
-      
-      // iOS Safari needs special handling
-      if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-        setTimeout(() => {
-          window.speechSynthesis.pause();
-          window.speechSynthesis.resume();
-        }, 50);
-      }
-    } catch (error) {
-      console.error('Speech synthesis fallback error:', error);
-      setIsPlaying(false);
-    }
-  };
-
-  // Use a button click handler that ensures user interaction
+  // Handle Play button actions
   const handlePlayButtonClick = (text: string) => {
-    // This function is directly called by button click, which counts as user interaction
-    playAudio(text);
+    initiateAudio(text);
   };
   
   // Fix autoplay to only trigger when answer is first revealed
   useEffect(() => {
     // Only play audio when showAnswer changes from false to true
     if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlaying) {
-      playAudio(phrases[index].thai);
+      initiateAudio(phrases[index].thai);
     }
     // Update ref with current value for next render
     prevShowAnswerRef.current = showAnswer;
@@ -1141,16 +1045,40 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Visible audio element for iOS - positioned off-screen but still active */}
-      {audioUrl && (
-        <audio
-          controls
-          autoPlay
-          src={audioUrl}
-          onEnded={handleAudioEnded}
-          onError={handleAudioError}
-          className="ios-audio-element"
-        />
+      {/* Audio player popup for iOS devices */}
+      {showAudioPlayer && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50">
+          <div className="neumorphic max-w-md w-full p-6 bg-[#222] rounded-xl">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-white">Speak Thai</h2>
+              <button
+                onClick={closeAudioPlayer}
+                className="text-gray-400 hover:text-white text-xl"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-6 text-center">
+              <div className="text-4xl font-bold text-white mb-4">
+                {currentAudioText}
+              </div>
+              
+              <p className="text-gray-300">
+                Speak the Thai text above out loud. This helps you practice pronunciation.
+              </p>
+              
+              <div className="flex justify-center gap-4 mt-8">
+                <button 
+                  onClick={closeAudioPlayer}
+                  className="neumorphic-button px-8 py-4"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
       
       <div className="w-full max-w-lg mx-auto p-4 space-y-4">
@@ -1176,6 +1104,11 @@ export default function ThaiFlashcards() {
         <div className="flex justify-between items-center text-sm text-gray-400">
           <div>Card {activeCards.indexOf(index) + 1} of {activeCards.length} active</div>
           <div>{index + 1} of {phrases.length} total</div>
+        </div>
+
+        {/* Show a notice about audio at the top */}
+        <div className="bg-blue-900 bg-opacity-30 rounded-lg p-3 text-blue-300 text-sm">
+          <p>Due to iOS audio limitations, tap "Play" to see the Thai text you should speak aloud.</p>
         </div>
 
         {/* Main Card */}
@@ -1222,17 +1155,15 @@ export default function ThaiFlashcards() {
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => handlePlayButtonClick(phrases[index].thai)}
-                  disabled={isPlaying}
-                  className="neumorphic-button flex-1"
+                  className="neumorphic-button flex-1 text-blue-400"
                 >
-                  {isPlaying ? 'Playing...' : 'Play'}
+                  {isPlaying ? 'Speaking...' : 'Play'}
                 </button>
                 <button
                   onClick={() => {
                     const phrase = generateRandomPhrase();
                     handlePlayButtonClick(phrase);
                   }}
-                  disabled={isPlaying}
                   className="neumorphic-button flex-1"
                 >
                   In Context

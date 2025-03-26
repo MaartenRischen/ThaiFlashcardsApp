@@ -1,6 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/app/components/ui/dialog";
 
 interface Phrase {
   meaning: string;
@@ -39,11 +47,10 @@ interface Stats {
   maxNewCardsPerSession: number;
 }
 
-// Update MnemonicEdits interface to include pronunciation
+// Update MnemonicEdits interface to have a single text field
 interface MnemonicEdits {
   [key: number]: {
     text: string;
-    pronunciation: string;
   };
 }
 
@@ -75,8 +82,7 @@ const NEW_CARDS_PER_DAY = 20;
 // Add a new interface for the random sentence
 interface RandomSentence {
   thai: string;
-  pronunciation: string;
-  translation: string;
+  english: string;
 }
 
 // Replace the random phrases generator function with one that selects real examples
@@ -89,8 +95,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.8",
-  changes: "Simplified audio playback"
+  version: "1.3.13",
+  changes: "Improved mnemonic input field size and position"
 };
 
 // Update phrases with real example sentences
@@ -696,9 +702,33 @@ export default function ThaiFlashcards() {
     }
   });
   const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
+  const [voicesLoaded, setVoicesLoaded] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
+
+  // Load voices when component mounts
+  useEffect(() => {
+    function loadVoices() {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        setVoicesLoaded(true);
+        console.log('Voices loaded:', voices.length);
+        console.log('Thai voices:', voices.filter(v => v.lang.includes('th')).length);
+      }
+    }
+
+    // Load voices immediately if available
+    loadVoices();
+
+    // Also listen for voices changed event
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('cardProgress', JSON.stringify(cardProgress));
@@ -716,33 +746,68 @@ export default function ThaiFlashcards() {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
 
-  // Simple speech function
-  const speak = (text: string) => {
+  // Simplified speak function
+  const speak = async (text: string) => {
+    if (!voicesLoaded) {
+      console.log('Voices not loaded yet');
+      return;
+    }
+
     setIsPlaying(true);
+    
     try {
+      // iOS requires cancelling any ongoing speech
+      window.speechSynthesis.cancel();
+
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'th-TH';
-      utterance.onend = () => setIsPlaying(false);
-      utterance.onerror = () => setIsPlaying(false);
       
-      // Clear any previous speech
-      window.speechSynthesis.cancel();
-      
-      // Speak the text
-      window.speechSynthesis.speak(utterance);
+      // Get Thai voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const thaiVoice = voices.find(voice => voice.lang.includes('th'));
+      if (thaiVoice) {
+        utterance.voice = thaiVoice;
+      }
+
+      // iOS Safari requires a slight delay after cancel
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      return new Promise<void>((resolve, reject) => {
+        utterance.onend = () => {
+          setIsPlaying(false);
+          resolve();
+        };
+        
+        utterance.onerror = (event) => {
+          console.error('Speech synthesis error:', event.error);
+          setIsPlaying(false);
+          reject(event);
+        };
+
+        // iOS Safari sometimes needs a kick to start
+        setTimeout(() => {
+          if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.pause();
+            window.speechSynthesis.resume();
+          }
+        }, 1000);
+
+        window.speechSynthesis.speak(utterance);
+      });
     } catch (error) {
-      console.error('Speech synthesis error:', error);
+      console.error('Speech playback error:', error);
       setIsPlaying(false);
+      alert('Speech playback failed. Please try tapping the screen first.');
     }
   };
-  
+
   // Auto-play when answer is shown
   useEffect(() => {
-    if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlaying) {
+    if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlaying && voicesLoaded) {
       speak(phrases[index].thai);
     }
     prevShowAnswerRef.current = showAnswer;
-  }, [showAnswer, autoplay, phrases, index, isPlaying]);
+  }, [showAnswer, autoplay, phrases, index, isPlaying, voicesLoaded]);
 
   // Add a new useEffect to update the active cards on component mount and when cardProgress changes
   useEffect(() => {
@@ -865,21 +930,10 @@ export default function ThaiFlashcards() {
     }
   };
 
-  const handlePhoneticChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalMnemonics(prev => ({
-      ...prev,
-      [index]: {
-        ...prev[index],
-        pronunciation: e.target.value
-      }
-    }));
-  };
-
   const handleMnemonicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalMnemonics(prev => ({
       ...prev,
       [index]: {
-        ...prev[index],
         text: e.target.value
       }
     }));
@@ -890,22 +944,25 @@ export default function ThaiFlashcards() {
     window.location.reload();
   };
 
-  // Replace the random phrase generator function with one that selects real examples
+  // Function to generate a random sentence
   const generateRandomPhrase = () => {
-    if (index === null) return "";
+    const currentWord = phrases[index].thai;
+    const examples = phrases[index].examples || [];
     
-    const currentPhrase = phrases[index];
-    
-    // Select a random example sentence for the current phrase
-    if (currentPhrase.examples && currentPhrase.examples.length > 0) {
-      const randomIndex = Math.floor(Math.random() * currentPhrase.examples.length);
-      const example = currentPhrase.examples[randomIndex];
-      
-      setRandomSentence(example);
-      return example.thai; // Return the Thai text for speaking
+    if (examples.length > 0) {
+      const randomIndex = Math.floor(Math.random() * examples.length);
+      const example = examples[randomIndex];
+      setRandomSentence({
+        thai: example.thai,
+        english: example.translation
+      });
+      setDialogOpen(true);
+      return example.thai;
+    } else {
+      setRandomSentence(null);
+      setDialogOpen(true);
+      return currentWord;
     }
-    
-    return currentPhrase.thai; // Fallback if no examples exist
   };
 
   // Add a function to calculate stats
@@ -1081,8 +1138,7 @@ export default function ThaiFlashcards() {
             <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
               <h3 className="text-sm text-blue-400 uppercase tracking-wider mb-1">In Context</h3>
               <p className="text-base text-white font-medium">{randomSentence.thai}</p>
-              <p className="text-sm text-gray-400 italic">{randomSentence.pronunciation}</p>
-              <p className="text-sm text-gray-300 mt-2">{randomSentence.translation}</p>
+              <p className="text-sm text-gray-400 italic">{randomSentence.english}</p>
             </div>
           )}
 
@@ -1094,21 +1150,10 @@ export default function ThaiFlashcards() {
 
               <div>
                 <p className="text-gray-400">
-                  Official phonetics: <span className="text-gray-300">{phrases[index].pronunciation}</span>
+                  Official pronunciation: <span className="text-gray-300">{phrases[index].pronunciation}</span>
                 </p>
               </div>
 
-              <div>
-                <p className="text-gray-400 mb-2">Personal phonetics:</p>
-                <input
-                  type="text"
-                  value={localMnemonics[index]?.pronunciation || phrases[index].pronunciation}
-                  onChange={handlePhoneticChange}
-                  className="neumorphic-input"
-                  placeholder="Add your own phonetic spelling..."
-                />
-              </div>
-              
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => speak(phrases[index].thai)}
@@ -1117,27 +1162,43 @@ export default function ThaiFlashcards() {
                 >
                   {isPlaying ? 'Playing...' : 'Play'}
                 </button>
-                <button
-                  onClick={() => {
-                    const phrase = generateRandomPhrase();
-                    speak(phrase);
-                  }}
-                  disabled={isPlaying}
-                  className="neumorphic-button flex-1"
-                >
-                  In Context
-                </button>
-              </div>
-
-              <div>
-                <p className="text-gray-400 mb-2">Mnemonic:</p>
-                <input
-                  type="text"
-                  value={localMnemonics[index]?.text || phrases[index].mnemonic}
-                  onChange={handleMnemonicChange}
-                  className="neumorphic-input"
-                  placeholder="Add your own mnemonic..."
-                />
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <button
+                      onClick={() => {
+                        const phrase = generateRandomPhrase();
+                        if (phrase) {
+                          speak(phrase);
+                        }
+                      }}
+                      disabled={isPlaying}
+                      className="neumorphic-button flex-1"
+                    >
+                      In Context
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Example Usage</DialogTitle>
+                      <DialogDescription className="pt-4">
+                        {randomSentence ? (
+                          <div className="space-y-4">
+                            <div className="text-xl font-medium text-white">
+                              {randomSentence.thai}
+                            </div>
+                            <div className="text-gray-400">
+                              {randomSentence.english}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-gray-400">
+                            No example sentences available for this word.
+                          </div>
+                        )}
+                      </DialogDescription>
+                    </DialogHeader>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               <div className="grid grid-cols-3 gap-2">
@@ -1159,6 +1220,81 @@ export default function ThaiFlashcards() {
                 >
                   Easy
                 </button>
+              </div>
+
+              <div className="mt-6">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-gray-400">Mnemonic</p>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => {
+                        setLocalMnemonics(prev => ({
+                          ...prev,
+                          [index]: {
+                            text: phrases[index].mnemonic
+                          }
+                        }));
+                      }}
+                      className="neumorphic-button text-sm px-2 py-1"
+                    >
+                      RESET
+                    </button>
+                    <button
+                      onClick={() => {
+                        const dataStr = JSON.stringify(localMnemonics);
+                        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                        const exportFileDefaultName = 'mnemonics.json';
+                        const linkElement = document.createElement('a');
+                        linkElement.setAttribute('href', dataUri);
+                        linkElement.setAttribute('download', exportFileDefaultName);
+                        linkElement.click();
+                      }}
+                      className="neumorphic-button text-sm px-2 py-1"
+                    >
+                      EXPORT ALL
+                    </button>
+                    <button
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = '.json';
+                        input.onchange = (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              try {
+                                const importedMnemonics = JSON.parse(event.target?.result as string);
+                                setLocalMnemonics(importedMnemonics);
+                              } catch (error) {
+                                alert('Invalid file format');
+                              }
+                            };
+                            reader.readAsText(file);
+                          }
+                        };
+                        input.click();
+                      }}
+                      className="neumorphic-button text-sm px-2 py-1"
+                    >
+                      IMPORT ALL
+                    </button>
+                    <button
+                      onClick={() => {
+                        setLocalMnemonics({});
+                      }}
+                      className="neumorphic-button text-sm px-2 py-1 text-red-500"
+                    >
+                      RESET ALL
+                    </button>
+                  </div>
+                </div>
+                <textarea
+                  value={localMnemonics[index]?.text || `${phrases[index].pronunciation} (${phrases[index].mnemonic})`}
+                  onChange={(e) => handleMnemonicChange(e as any)}
+                  className="neumorphic-input w-full min-h-[120px] resize-none p-4 rounded-sm"
+                  placeholder="Add your own way to remember this sound..."
+                />
               </div>
             </div>
           ) : (

@@ -86,11 +86,11 @@ interface ExampleSentence {
   translation: string;
 }
 
-// Update version info with fixed timestamp
+// Update version info with Amsterdam time zone
 const VERSION_INFO = {
-  lastUpdated: "2025-03-26T11:30:00Z", // Corrected timestamp to 11:30 AM
-  version: "1.1.3",
-  changes: "Fixed timestamp to show correct update time (11:30 AM)"
+  lastUpdated: new Date().toISOString(), // Current time that will be displayed in Amsterdam timezone
+  version: "1.1.4",
+  changes: "Updated timestamp to show actual time in Amsterdam timezone"
 };
 
 // Update phrases with real example sentences
@@ -770,10 +770,12 @@ export default function ThaiFlashcards() {
         </div>
       )}
 
-      {/* Version indicator at the bottom - shows changes and timestamp */}
+      {/* Version indicator at the bottom - shows changes and timestamp in Amsterdam timezone */}
       <div className="w-full py-2 px-3 text-center text-xs border-t border-gray-700 bg-gray-800 sticky bottom-0 z-20">
         <div className="flex flex-col sm:flex-row sm:justify-between items-center">
-          <p className="text-gray-300 font-medium">v{VERSION_INFO.version} | {new Date(VERSION_INFO.lastUpdated).toLocaleString()}</p>
+          <p className="text-gray-300 font-medium">
+            v{VERSION_INFO.version} | {new Date(VERSION_INFO.lastUpdated).toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' })}
+          </p>
           <p className="text-blue-400">Latest: {VERSION_INFO.changes}</p>
         </div>
       </div>

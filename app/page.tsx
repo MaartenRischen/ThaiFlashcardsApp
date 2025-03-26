@@ -606,6 +606,18 @@ export default function ThaiFlashcards() {
     setRandomSentence(null);
   };
 
+  const prevCard = () => {
+    if (index > 0) {
+      setIndex(index - 1);
+    }
+  };
+
+  const nextCard = () => {
+    if (index < phrases.length - 1) {
+      setIndex(index + 1);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#1a1a1a] text-white">
       <div className="container mx-auto px-4 py-8">
@@ -632,7 +644,7 @@ export default function ThaiFlashcards() {
         <div className="relative">
           <div className="flex justify-center items-center space-x-6 mb-8">
             <button
-              onClick={() => setIndex(index - 1)}
+              onClick={prevCard}
               className="text-4xl text-gray-400 hover:text-white transition-colors"
               disabled={index === 0}
             >
@@ -640,11 +652,88 @@ export default function ThaiFlashcards() {
             </button>
             <div className="text-center">
               <div className="text-6xl mb-4">{phrases[index].thai}</div>
-              <div className="text-2xl text-gray-400">{phrases[index].pronunciation}</div>
-              <div className="text-xl text-gray-500 mt-2">{phrases[index].english}</div>
+              {showAnswer ? (
+                <>
+                  <div className="text-2xl text-gray-400">{phrases[index].pronunciation}</div>
+                  <div className="text-xl text-gray-500 mt-2">{phrases[index].english}</div>
+                  <div className="flex justify-center space-x-4 mt-6">
+                    <button
+                      onClick={() => handleCardAction('hard')}
+                      className="px-4 py-2 bg-red-600/20 text-red-400 rounded-md hover:bg-red-600/30 transition-colors"
+                    >
+                      Wrong
+                    </button>
+                    <button
+                      onClick={() => handleCardAction('good')}
+                      className="px-4 py-2 bg-yellow-600/20 text-yellow-400 rounded-md hover:bg-yellow-600/30 transition-colors"
+                    >
+                      Correct
+                    </button>
+                    <button
+                      onClick={() => handleCardAction('easy')}
+                      className="px-4 py-2 bg-green-600/20 text-green-400 rounded-md hover:bg-green-600/30 transition-colors"
+                    >
+                      Easy
+                    </button>
+                  </div>
+                  <div className="flex justify-center space-x-4 mt-4">
+                    <button
+                      onClick={() => speak(phrases[index].thai)}
+                      disabled={isPlaying}
+                      className="px-4 py-2 bg-blue-600/20 text-blue-400 rounded-md hover:bg-blue-600/30 transition-colors"
+                    >
+                      {isPlaying ? 'Playing...' : 'Play Sound'}
+                    </button>
+                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                      <DialogTrigger asChild>
+                        <button
+                          onClick={() => {
+                            const phrase = generateRandomPhrase();
+                            if (phrase) {
+                              speak(phrase);
+                            }
+                          }}
+                          disabled={isPlaying}
+                          className="px-4 py-2 bg-purple-600/20 text-purple-400 rounded-md hover:bg-purple-600/30 transition-colors"
+                        >
+                          In Context
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Example Usage</DialogTitle>
+                          <DialogDescription className="pt-4">
+                            {randomSentence ? (
+                              <div className="space-y-4">
+                                <div className="text-xl font-medium text-white">
+                                  {randomSentence.thai}
+                                </div>
+                                <div className="text-gray-400">
+                                  {randomSentence.english}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="text-gray-400">
+                                No example sentences available for this word.
+                              </div>
+                            )}
+                          </DialogDescription>
+                        </DialogHeader>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </>
+              ) : (
+                <button
+                  onClick={() => setShowAnswer(true)}
+                  className="mt-6 px-6 py-3 bg-blue-600/20 text-blue-400 rounded-md hover:bg-blue-600/30 transition-colors text-lg"
+                >
+                  Show Answer
+                </button>
+              )}
             </div>
             <button
-              onClick={() => setIndex(index + 1)}
+              onClick={nextCard}
               className="text-4xl text-gray-400 hover:text-white transition-colors"
               disabled={index === phrases.length - 1}
             >

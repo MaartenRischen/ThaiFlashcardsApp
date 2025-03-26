@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface Phrase {
   meaning: string;
@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info with new app name
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.2",
-  changes: "Fixed mobile audio playback and autoplay toggle"
+  version: "1.3.3",
+  changes: "Implemented fallback audio system for mobile devices"
 };
 
 // Update phrases with real example sentences
@@ -696,6 +696,7 @@ export default function ThaiFlashcards() {
     }
   });
   const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -716,15 +717,116 @@ export default function ThaiFlashcards() {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
 
+  // Create a function that uses direct HTML5 Audio API instead of speech synthesis
+  const playAudio = (text: string) => {
+    setIsPlaying(true);
+    
+    // Create synthetic URL for the text
+    const encodedText = encodeURIComponent(text);
+    const googleTTSUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=th&client=tw-ob`;
+    
+    try {
+      // Create or use existing audio element
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
+      }
+      
+      // Set up event handlers
+      audioRef.current.onended = () => {
+        console.log('Audio playback ended');
+        setIsPlaying(false);
+      };
+      
+      audioRef.current.onerror = (e) => {
+        console.error('Audio playback error:', e);
+        setIsPlaying(false);
+      };
+      
+      // Set source and play
+      audioRef.current.src = googleTTSUrl;
+      
+      // Play the audio - wrapped in a user interaction event handler
+      const playPromise = audioRef.current.play();
+      
+      // Handle play promise (required for newer browsers)
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('Audio playing successfully');
+          })
+          .catch(error => {
+            console.error('Playback failed:', error);
+            setIsPlaying(false);
+            
+            // Fall back to speech synthesis as last resort
+            fallbackToSpeechSynthesis(text);
+          });
+      }
+    } catch (error) {
+      console.error('Audio play error:', error);
+      setIsPlaying(false);
+      
+      // Fall back to speech synthesis
+      fallbackToSpeechSynthesis(text);
+    }
+  };
+  
+  // Keep the original speech synthesis as a fallback
+  const fallbackToSpeechSynthesis = (text: string) => {
+    try {
+      if (!window.speechSynthesis) {
+        console.error('Speech synthesis not supported');
+        return;
+      }
+      
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      // Create a new utterance
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'th-TH';
+      utterance.volume = 1;
+      utterance.rate = 0.9;
+      
+      utterance.onend = () => {
+        setIsPlaying(false);
+      };
+      
+      utterance.onerror = () => {
+        setIsPlaying(false);
+      };
+      
+      // Speak
+      window.speechSynthesis.speak(utterance);
+      
+      // iOS Safari needs special handling
+      if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        setTimeout(() => {
+          window.speechSynthesis.pause();
+          window.speechSynthesis.resume();
+        }, 50);
+      }
+    } catch (error) {
+      console.error('Speech synthesis fallback error:', error);
+      setIsPlaying(false);
+    }
+  };
+
+  // Use a button click handler that ensures user interaction
+  const handlePlayButtonClick = (text: string) => {
+    // This function is directly called by button click, which counts as user interaction
+    playAudio(text);
+  };
+  
   // Fix autoplay to only trigger when answer is first revealed
   useEffect(() => {
     // Only play audio when showAnswer changes from false to true
     if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlaying) {
-      speak(phrases[index].thai);
+      playAudio(phrases[index].thai);
     }
     // Update ref with current value for next render
     prevShowAnswerRef.current = showAnswer;
-  }, [showAnswer, autoplay, phrases, index]);
+  }, [showAnswer, autoplay, phrases, index, isPlaying]);
 
   // Add a new useEffect to update the active cards on component mount and when cardProgress changes
   useEffect(() => {
@@ -867,162 +969,6 @@ export default function ThaiFlashcards() {
     }));
   };
 
-  // Improved speak function for better mobile compatibility
-  const speak = async (text: string) => {
-    // Ensure the user has interacted with the page first (required for mobile)
-    if (!document.documentElement.hasAttribute('data-user-interacted')) {
-      document.documentElement.setAttribute('data-user-interacted', 'true');
-    }
-
-    setIsPlaying(true);
-
-    try {
-      // Create a fresh speech synthesis instance
-      if (!window.speechSynthesis) {
-        console.error('Speech synthesis not supported');
-        setIsPlaying(false);
-        return;
-      }
-
-      // Cancel any ongoing speech
-      window.speechSynthesis.cancel();
-
-      // Create a new utterance for the specified text
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'th-TH';
-      utterance.volume = 1;
-      utterance.rate = 0.9; // Slightly slower for better clarity
-
-      // Set event handlers
-      utterance.onend = () => {
-        console.log('Speech ended successfully');
-        setIsPlaying(false);
-      };
-
-      utterance.onerror = (event) => {
-        console.error('Speech synthesis error:', event);
-        setIsPlaying(false);
-      };
-
-      // Special handling for iOS Safari
-      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-      
-      // Speak the text
-      window.speechSynthesis.speak(utterance);
-
-      // iOS Safari needs special handling
-      if (isIOS) {
-        // iOS requires an immediate pause and resume to kick-start speech in some cases
-        setTimeout(() => {
-          window.speechSynthesis.pause();
-          window.speechSynthesis.resume();
-        }, 50);
-
-        // iOS sometimes stops speech synthesis when the app goes to background
-        // Set a timer to ensure isPlaying is reset even if onend doesn't fire
-        setTimeout(() => {
-          if (isPlaying) {
-            setIsPlaying(false);
-          }
-        }, 5000); // 5 second timeout
-      }
-    } catch (error) {
-      console.error('Speech synthesis error:', error);
-      setIsPlaying(false);
-    }
-  };
-  
-  // Add user interaction detection to help with mobile audio
-  useEffect(() => {
-    const handleUserInteraction = () => {
-      document.documentElement.setAttribute('data-user-interacted', 'true');
-    };
-    
-    // Add event listeners for common user interactions
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('touchstart', handleUserInteraction);
-    document.addEventListener('keydown', handleUserInteraction);
-    
-    return () => {
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    };
-  }, []);
-
-  // Helper function to calculate next interval using Anki SM-2 algorithm
-  const calculateNextReview = (difficulty: 'hard' | 'good' | 'easy', currentProgress: any) => {
-    const easeFactor = currentProgress?.reviews?.length > 0 
-      ? currentProgress.reviews[currentProgress.reviews.length - 1].easeFactor 
-      : INITIAL_EASE_FACTOR;
-    
-    let newEaseFactor = easeFactor;
-    let interval = currentProgress?.reviews?.length > 0 
-      ? currentProgress.reviews[currentProgress.reviews.length - 1].interval 
-      : INITIAL_INTERVAL;
-    let repetitions = currentProgress?.reviews?.length > 0
-      ? currentProgress.reviews[currentProgress.reviews.length - 1].repetitions
-      : 0;
-      
-    // Adjust ease factor based on difficulty
-    if (difficulty === 'hard') {
-      newEaseFactor = Math.max(MIN_EASE_FACTOR, easeFactor - 0.2);
-      interval = Math.max(MIN_INTERVAL, Math.ceil(interval * HARD_INTERVAL_MULTIPLIER));
-      repetitions = 0; // Reset repetitions on hard
-    } else if (difficulty === 'good') {
-      interval = Math.ceil(interval * easeFactor);
-      repetitions += 1;
-    } else if (difficulty === 'easy') {
-      newEaseFactor = easeFactor + 0.1;
-      interval = Math.ceil(interval * EASY_INTERVAL_MULTIPLIER);
-      repetitions += 1;
-    }
-    
-    // Cap interval at max
-    interval = Math.min(interval, MAX_INTERVAL);
-    
-    return { interval, easeFactor: newEaseFactor, repetitions };
-  };
-
-  // Modify handleCardAction to use the active cards
-  const handleCardAction = (difficulty: 'hard' | 'good' | 'easy') => {
-    // Create or get the current card progress
-    const currentProgress = cardProgress[index] || { reviews: [], nextReviewDate: new Date().toISOString() };
-    
-    // Calculate the next review data using the SM-2 algorithm
-    const nextReviewData = calculateNextReview(difficulty, currentProgress);
-    
-    // Create the new review entry
-    const newReview: Review = {
-      date: new Date().toISOString(),
-      difficulty,
-      interval: nextReviewData.interval,
-      easeFactor: nextReviewData.easeFactor,
-      repetitions: nextReviewData.repetitions
-    };
-    
-    // Calculate the next review date
-    const nextReviewDate = new Date();
-    nextReviewDate.setDate(nextReviewDate.getDate() + nextReviewData.interval);
-    
-    // Update the card progress
-    setCardProgress(prev => ({
-      ...prev,
-      [index]: {
-        ...currentProgress,
-        reviews: [...currentProgress.reviews, newReview],
-        nextReviewDate: nextReviewDate.toISOString()
-      }
-    }));
-    
-    // Move to the next card in the active cards list
-    const currentActiveIndex = activeCards.indexOf(index);
-    const nextActiveIndex = (currentActiveIndex + 1) % activeCards.length;
-    setIndex(activeCards[nextActiveIndex]);
-    setShowAnswer(false);
-    setRandomSentence(null);
-  };
-
   const handleResetAll = () => {
     localStorage.clear();
     window.location.reload();
@@ -1106,6 +1052,79 @@ export default function ThaiFlashcards() {
     }
   };
 
+  // Helper function to calculate next interval using Anki SM-2 algorithm
+  const calculateNextReview = (difficulty: 'hard' | 'good' | 'easy', currentProgress: any) => {
+    const easeFactor = currentProgress?.reviews?.length > 0 
+      ? currentProgress.reviews[currentProgress.reviews.length - 1].easeFactor 
+      : INITIAL_EASE_FACTOR;
+    
+    let newEaseFactor = easeFactor;
+    let interval = currentProgress?.reviews?.length > 0 
+      ? currentProgress.reviews[currentProgress.reviews.length - 1].interval 
+      : INITIAL_INTERVAL;
+    let repetitions = currentProgress?.reviews?.length > 0
+      ? currentProgress.reviews[currentProgress.reviews.length - 1].repetitions
+      : 0;
+      
+    // Adjust ease factor based on difficulty
+    if (difficulty === 'hard') {
+      newEaseFactor = Math.max(MIN_EASE_FACTOR, easeFactor - 0.2);
+      interval = Math.max(MIN_INTERVAL, Math.ceil(interval * HARD_INTERVAL_MULTIPLIER));
+      repetitions = 0; // Reset repetitions on hard
+    } else if (difficulty === 'good') {
+      interval = Math.ceil(interval * easeFactor);
+      repetitions += 1;
+    } else if (difficulty === 'easy') {
+      newEaseFactor = easeFactor + 0.1;
+      interval = Math.ceil(interval * EASY_INTERVAL_MULTIPLIER);
+      repetitions += 1;
+    }
+    
+    // Cap interval at max
+    interval = Math.min(interval, MAX_INTERVAL);
+    
+    return { interval, easeFactor: newEaseFactor, repetitions };
+  };
+
+  // Modify handleCardAction to use the active cards
+  const handleCardAction = (difficulty: 'hard' | 'good' | 'easy') => {
+    // Create or get the current card progress
+    const currentProgress = cardProgress[index] || { reviews: [], nextReviewDate: new Date().toISOString() };
+    
+    // Calculate the next review data using the SM-2 algorithm
+    const nextReviewData = calculateNextReview(difficulty, currentProgress);
+    
+    // Create the new review entry
+    const newReview: Review = {
+      date: new Date().toISOString(),
+      difficulty,
+      interval: nextReviewData.interval,
+      easeFactor: nextReviewData.easeFactor,
+      repetitions: nextReviewData.repetitions
+    };
+    
+    // Calculate the next review date
+    const nextReviewDate = new Date();
+    nextReviewDate.setDate(nextReviewDate.getDate() + nextReviewData.interval);
+    
+    // Update the card progress
+    setCardProgress(prev => ({
+      ...prev,
+      [index]: {
+        ...currentProgress,
+        reviews: [...currentProgress.reviews, newReview],
+        nextReviewDate: nextReviewDate.toISOString()
+      }
+    }));
+    
+    // Move to the next card in the active cards list
+    const currentActiveIndex = activeCards.indexOf(index);
+    const nextActiveIndex = (currentActiveIndex + 1) % activeCards.length;
+    setIndex(activeCards[nextActiveIndex]);
+    setShowAnswer(false);
+    setRandomSentence(null);
+  };
+
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       <div className="w-full max-w-lg mx-auto p-4 space-y-4">
@@ -1176,7 +1195,7 @@ export default function ThaiFlashcards() {
               
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => speak(phrases[index].thai)}
+                  onClick={() => handlePlayButtonClick(phrases[index].thai)}
                   disabled={isPlaying}
                   className="neumorphic-button flex-1"
                 >
@@ -1185,7 +1204,7 @@ export default function ThaiFlashcards() {
                 <button
                   onClick={() => {
                     const phrase = generateRandomPhrase();
-                    speak(phrase);
+                    handlePlayButtonClick(phrase);
                   }}
                   disabled={isPlaying}
                   className="neumorphic-button flex-1"
@@ -1255,11 +1274,9 @@ export default function ThaiFlashcards() {
                 setAutoplay(newState);
                 localStorage.setItem('autoplay', JSON.stringify(newState));
                 
-                // Play a test sound on enable to request audio permission on mobile
+                // Play a test sound when enabling autoplay
                 if (newState) {
-                  const shortSound = new SpeechSynthesisUtterance(".");
-                  shortSound.volume = 0.1;
-                  speechSynthesis.speak(shortSound);
+                  handlePlayButtonClick('สวัสดี');
                 }
               }}
               className={`w-12 h-6 rounded-full transition-colors ${autoplay ? 'bg-blue-500' : 'bg-gray-600'} relative`}
@@ -1428,7 +1445,7 @@ export default function ThaiFlashcards() {
                         onClick={(e) => {
                           e.stopPropagation();
                           if (!isPlaying) {
-                            speak(phrase.thai);
+                            handlePlayButtonClick(phrase.thai);
                           }
                         }}
                       >

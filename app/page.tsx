@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info with new app name
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.0",
-  changes: "Implemented proper Anki-like spaced repetition with 5 active cards"
+  version: "1.3.1",
+  changes: "Fixed play button on mobile and restored autoplay toggle"
 };
 
 // Update phrases with real example sentences
@@ -863,14 +863,37 @@ export default function ThaiFlashcards() {
   const speak = async (text: string) => {
     setIsPlaying(true);
     try {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'th-TH';
-    utterance.onend = () => setIsPlaying(false);
-      speechSynthesis.speak(utterance);
-      } catch (error) {
-      console.error('Speech synthesis error:', error);
+      // Create a new utterance for the specified text
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'th-TH';
+      utterance.volume = 1;
+      
+      // Make sure to set the onend callback before calling speak
+      utterance.onend = () => {
         setIsPlaying(false);
+      };
+      
+      // Handle errors that might not trigger onend
+      utterance.onerror = (event) => {
+        console.error('Speech synthesis error:', event);
+        setIsPlaying(false);
+      };
+      
+      // Cancel any ongoing speech synthesis first to avoid issues
+      window.speechSynthesis.cancel();
+      
+      // Speak the text
+      window.speechSynthesis.speak(utterance);
+      
+      // For iOS Safari - it sometimes needs a nudge
+      if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        window.speechSynthesis.pause();
+        window.speechSynthesis.resume();
       }
+    } catch (error) {
+      console.error('Speech synthesis error:', error);
+      setIsPlaying(false);
+    }
   };
 
   // Helper function to calculate next interval using Anki SM-2 algorithm
@@ -1161,14 +1184,26 @@ export default function ThaiFlashcards() {
           )}
         </div>
 
-        {/* Reset Button */}
-        <div>
+        {/* Reset Button and Autoplay toggle */}
+        <div className="flex justify-between items-center">
           <button
             onClick={handleResetAll}
             className="neumorphic-button text-red-500"
           >
             Reset All
           </button>
+          
+          <div className="flex items-center space-x-2">
+            <span className="text-gray-400 text-sm">Autoplay</span>
+            <button
+              onClick={() => setAutoplay(!autoplay)}
+              className={`w-12 h-6 rounded-full transition-colors ${autoplay ? 'bg-blue-500' : 'bg-gray-600'} relative`}
+            >
+              <span 
+                className={`absolute w-5 h-5 rounded-full bg-white transition-transform transform ${autoplay ? 'translate-x-6' : 'translate-x-1'} top-0.5`}
+              />
+            </button>
+          </div>
         </div>
       </div>
 

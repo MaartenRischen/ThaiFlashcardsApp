@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.0.8",
-  changes: "Fixed visibility of version indicator"
+  version: "1.0.9",
+  changes: "Added status indicators to vocabulary list"
 };
 
 // Update phrases with real example sentences
@@ -342,6 +342,36 @@ export default function ThaiFlashcards() {
       totalReviews,
       remainingCards: phrases.length - learnedCards
     };
+  };
+
+  // Add a function to determine the status of a card
+  const getCardStatus = (cardIndex: number) => {
+    const card = cardProgress[cardIndex];
+    
+    // If no reviews, it's unseen
+    if (!card || !card.reviews || card.reviews.length === 0) {
+      return 'unseen';
+    }
+    
+    // Get the last review
+    const lastReview = card.reviews[card.reviews.length - 1];
+    return lastReview.difficulty; // 'hard', 'good', or 'easy'
+  };
+
+  // Helper function to get status color and label
+  const getStatusInfo = (status: string) => {
+    switch(status) {
+      case 'unseen':
+        return { color: 'bg-gray-500', label: 'Unseen' };
+      case 'hard':
+        return { color: 'bg-red-500', label: 'Wrong' };
+      case 'good':
+        return { color: 'bg-yellow-500', label: 'Correct' };
+      case 'easy':
+        return { color: 'bg-green-500', label: 'Easy' };
+      default:
+        return { color: 'bg-gray-500', label: 'Unseen' };
+    }
   };
 
   return (
@@ -622,11 +652,14 @@ export default function ThaiFlashcards() {
             </div>
             <div className="space-y-2">
               {phrases.map((phrase, idx) => {
-                const statusColor = idx === index ? "bg-blue-500" : "bg-gray-700";
+                const isCurrentCard = idx === index;
+                const status = getCardStatus(idx);
+                const { color, label } = getStatusInfo(status);
+                
                 return (
                   <div 
                     key={idx}
-                    className="neumorphic p-3 flex items-center justify-between cursor-pointer hover:bg-gray-800 transition-colors"
+                    className={`neumorphic p-3 flex items-center justify-between cursor-pointer hover:bg-gray-800 transition-colors ${isCurrentCard ? 'border-l-4 border-blue-500' : ''}`}
                     onClick={() => {
                       setIndex(idx);
                       setShowVocabulary(false);
@@ -635,11 +668,16 @@ export default function ThaiFlashcards() {
                     }}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${statusColor}`} />
+                      <div className={`w-3 h-3 rounded-full ${color}`} />
                       <span>{phrase.meaning}</span>
                     </div>
-                    <div className="flex items-center space-x-4 text-sm text-gray-400">
-                      <span>{phrase.thai}</span>
+                    <div className="flex items-center space-x-3 text-sm">
+                      <span className="text-gray-400">
+                        {phrase.thai}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-xs ${color.replace('bg-', 'bg-opacity-20 text-')}`}>
+                        {label}
+                      </span>
                       <button
                         className="neumorphic-circle opacity-75 hover:opacity-100 w-8 h-8"
                         onClick={(e) => {

@@ -1119,26 +1119,30 @@ export default function ThaiFlashcards() {
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       <div className="w-full max-w-lg mx-auto p-4 space-y-4">
-        {/* Header with Logo */}
-        <div className="flex items-center justify-between mb-8">
-          <img 
-            src="/images/donkey-bridge-logo.png" 
-            alt="Donkey Bridge Thai Learning"
-            className="h-32 w-32 object-contain"
-          />
-          <div className="flex space-x-3">
-            <button
-              onClick={() => setShowHowItWorks(!showHowItWorks)}
-              className="neumorphic-button text-sm px-4 py-2"
-            >
-              How It Works
-            </button>
-            <button
-              onClick={() => setShowVocabulary(!showVocabulary)}
-              className="neumorphic-button text-sm px-4 py-2"
-            >
-              Vocabulary
-            </button>
+        {/* Header */}
+        <div className="flex flex-col mb-8">
+          <div className="w-full flex items-center justify-between bg-[#1E1E1E] rounded-xl p-4">
+            <div className="w-48">
+              <img 
+                src="/images/donkey-bridge-logo.png" 
+                alt="Donkey Bridge Thai Learning"
+                className="w-full h-auto"
+              />
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowHowItWorks(!showHowItWorks)}
+                className="neumorphic-button text-sm px-4 py-2"
+              >
+                How It Works
+              </button>
+              <button
+                onClick={() => setShowVocabulary(!showVocabulary)}
+                className="neumorphic-button text-sm px-4 py-2"
+              >
+                Vocabulary
+              </button>
+            </div>
           </div>
         </div>
 

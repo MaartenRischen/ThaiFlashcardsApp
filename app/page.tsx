@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.0.6",
-  changes: "Restored Vocabulary List and Autoplay functionality"
+  version: "1.0.7",
+  changes: "Made version indicator smaller and less intrusive"
 };
 
 // Update phrases with real example sentences
@@ -660,10 +660,9 @@ export default function ThaiFlashcards() {
         </div>
       )}
 
-      {/* Version indicator at the bottom */}
-      <div className="w-full py-4 px-4 text-center text-sm border-t border-gray-800 bg-blue-600 sticky bottom-0 z-50 font-bold">
-        <p className="text-white">v{VERSION_INFO.version} | UPDATED: {new Date(VERSION_INFO.lastUpdated).toLocaleDateString()} {new Date(VERSION_INFO.lastUpdated).toLocaleTimeString()}</p>
-        <p className="text-yellow-300 mt-1">{VERSION_INFO.changes}</p>
+      {/* Version indicator at the bottom - smaller and with lower z-index */}
+      <div className="w-full py-1 px-2 text-center text-xs border-t border-gray-800 bg-gray-900 fixed bottom-0 z-10">
+        <p className="text-gray-400">v{VERSION_INFO.version} | {new Date(VERSION_INFO.lastUpdated).toLocaleDateString()}</p>
       </div>
     </main>
   );

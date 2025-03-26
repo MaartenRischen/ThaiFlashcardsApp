@@ -5,14 +5,12 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  // Make sure the basePath matches your GitHub repository name
-  basePath: process.env.GITHUB_ACTIONS ? '/ThaiFlashcardsApp' : '',
-  assetPrefix: process.env.GITHUB_ACTIONS ? '/ThaiFlashcardsApp/' : '',
+  // Remove GitHub Pages specific settings
+  basePath: '',
+  trailingSlash: true,
   webpack: (config) => {
     return config;
   },
-  // Ensure trailingSlash is enabled for static export
-  trailingSlash: true,
 }
 
 module.exports = nextConfig 

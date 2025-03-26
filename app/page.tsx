@@ -133,11 +133,11 @@ const DEFAULT_PHRASES: Phrase[] = [
   }
 ];
 
-// Add the VERSION_INFO constant at the top of the file
+// Update version info with a timestamp that will clearly show it's updated
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.0.2",
-  changes: "Added Random Phrase contextual sentences and fixed button styling"
+  version: "1.0.3",
+  changes: "Added highly visible version indicator"
 };
 
 export default function ThaiFlashcards() {
@@ -571,9 +571,9 @@ export default function ThaiFlashcards() {
       )}
 
       {/* Version indicator at the bottom */}
-      <div className="w-full py-3 px-4 text-center text-xs border-t border-gray-800 bg-[#222] sticky bottom-0 z-10">
-        <p className="text-blue-400 font-bold">v{VERSION_INFO.version} | {new Date(VERSION_INFO.lastUpdated).toLocaleDateString()} {new Date(VERSION_INFO.lastUpdated).toLocaleTimeString()}</p>
-        <p className="text-gray-400 mt-1">{VERSION_INFO.changes}</p>
+      <div className="w-full py-4 px-4 text-center text-sm border-t border-gray-800 bg-blue-600 sticky bottom-0 z-50 font-bold">
+        <p className="text-white">v{VERSION_INFO.version} | UPDATED: {new Date(VERSION_INFO.lastUpdated).toLocaleDateString()} {new Date(VERSION_INFO.lastUpdated).toLocaleTimeString()}</p>
+        <p className="text-yellow-300 mt-1">{VERSION_INFO.changes}</p>
       </div>
     </main>
   );

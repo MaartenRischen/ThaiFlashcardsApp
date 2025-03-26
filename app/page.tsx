@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info with new app name
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.2.1",
-  changes: "Added back all 30 phrases"
+  version: "1.3.0",
+  changes: "Implemented proper Anki-like spaced repetition with 5 active cards"
 };
 
 // Update phrases with real example sentences
@@ -680,20 +680,12 @@ export default function ThaiFlashcards() {
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showVocabulary, setShowVocabulary] = useState(false);
   const [autoplay, setAutoplay] = useState<boolean>(false);
-  const [levelProgress, setLevelProgress] = useState<LevelProgress>(() => {
+  const [activeCards, setActiveCards] = useState<number[]>(() => {
     try {
-      const saved = localStorage.getItem('levelProgress');
-      return saved ? JSON.parse(saved) : {
-        currentLevel: 1,
-        currentBatch: [0, 1, 2, 3, 4],
-        masteredCards: []
-      };
+      const saved = localStorage.getItem('activeCards');
+      return saved ? JSON.parse(saved) : [0, 1, 2, 3, 4]; // Default first 5 cards
     } catch {
-      return {
-        currentLevel: 1,
-        currentBatch: [0, 1, 2, 3, 4],
-        masteredCards: []
-      };
+      return [0, 1, 2, 3, 4];
     }
   });
   const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
@@ -714,8 +706,8 @@ export default function ThaiFlashcards() {
   }, [autoplay]);
 
   useEffect(() => {
-    localStorage.setItem('levelProgress', JSON.stringify(levelProgress));
-  }, [levelProgress]);
+    localStorage.setItem('activeCards', JSON.stringify(activeCards));
+  }, [activeCards]);
 
   // Fix autoplay to only trigger when answer is first revealed
   useEffect(() => {
@@ -726,6 +718,127 @@ export default function ThaiFlashcards() {
     // Update ref with current value for next render
     prevShowAnswerRef.current = showAnswer;
   }, [showAnswer, autoplay, phrases, index]);
+
+  // Add a new useEffect to update the active cards on component mount and when cardProgress changes
+  useEffect(() => {
+    updateActiveCards();
+  }, [cardProgress]);
+  
+  // Function to update active cards based on review status
+  const updateActiveCards = () => {
+    // Get all cards that are due for review (either unseen, marked wrong, or due today)
+    const today = new Date();
+    
+    // First collect all unseen cards
+    const unseenCards = [];
+    for (let i = 0; i < phrases.length; i++) {
+      if (!cardProgress[i] || !cardProgress[i].reviews || cardProgress[i].reviews.length === 0) {
+        unseenCards.push(i);
+      }
+    }
+    
+    // Then collect all cards marked "hard" (wrong) in their last review
+    const wrongCards = [];
+    for (let i = 0; i < phrases.length; i++) {
+      if (cardProgress[i] && cardProgress[i].reviews && cardProgress[i].reviews.length > 0) {
+        const lastReview = cardProgress[i].reviews[cardProgress[i].reviews.length - 1];
+        if (lastReview.difficulty === 'hard') {
+          wrongCards.push(i);
+        }
+      }
+    }
+    
+    // Then collect all due cards (cards that were previously marked "good" or "easy" and are due today)
+    const dueCards = [];
+    for (let i = 0; i < phrases.length; i++) {
+      if (cardProgress[i] && cardProgress[i].nextReviewDate) {
+        const nextReviewDate = new Date(cardProgress[i].nextReviewDate);
+        if (nextReviewDate <= today && !wrongCards.includes(i)) {
+          // Get last review to check if it was marked good or easy
+          const lastReview = cardProgress[i].reviews[cardProgress[i].reviews.length - 1];
+          if (lastReview.difficulty === 'good' || lastReview.difficulty === 'easy') {
+            dueCards.push(i);
+          }
+        }
+      }
+    }
+    
+    // Prioritize wrong cards, then unseen cards, then due cards to get 5 active cards
+    let newActiveCards = [...wrongCards];
+    
+    // Add unseen cards until we reach 5 cards or run out
+    let remainingSlots = 5 - newActiveCards.length;
+    if (remainingSlots > 0 && unseenCards.length > 0) {
+      // Sort unseen cards by index to start with earlier cards
+      const sortedUnseenCards = [...unseenCards].sort((a, b) => a - b);
+      newActiveCards = [...newActiveCards, ...sortedUnseenCards.slice(0, remainingSlots)];
+    }
+    
+    // If we still have slots, add due cards
+    remainingSlots = 5 - newActiveCards.length;
+    if (remainingSlots > 0 && dueCards.length > 0) {
+      // Sort due cards by next review date (earliest first)
+      const sortedDueCards = [...dueCards].sort((a, b) => {
+        const dateA = new Date(cardProgress[a].nextReviewDate);
+        const dateB = new Date(cardProgress[b].nextReviewDate);
+        return dateA.getTime() - dateB.getTime();
+      });
+      newActiveCards = [...newActiveCards, ...sortedDueCards.slice(0, remainingSlots)];
+    }
+    
+    // If we still have fewer than 5 cards, add cards that haven't been seen in a while
+    remainingSlots = 5 - newActiveCards.length;
+    if (remainingSlots > 0) {
+      // Get all cards that aren't already in newActiveCards
+      const remainingCards = [];
+      for (let i = 0; i < phrases.length; i++) {
+        if (!newActiveCards.includes(i)) {
+          remainingCards.push(i);
+        }
+      }
+      
+      // Sort by last review date (oldest first) or by index if never reviewed
+      const sortedRemainingCards = remainingCards.sort((a, b) => {
+        // If neither card has been reviewed, sort by index
+        if ((!cardProgress[a] || !cardProgress[a].reviews || cardProgress[a].reviews.length === 0) &&
+            (!cardProgress[b] || !cardProgress[b].reviews || cardProgress[b].reviews.length === 0)) {
+          return a - b;
+        }
+        
+        // If only a has been reviewed, b comes first
+        if (!cardProgress[b] || !cardProgress[b].reviews || cardProgress[b].reviews.length === 0) {
+          return 1;
+        }
+        
+        // If only b has been reviewed, a comes first
+        if (!cardProgress[a] || !cardProgress[a].reviews || cardProgress[a].reviews.length === 0) {
+          return -1;
+        }
+        
+        // Both have been reviewed, sort by last review date
+        const lastReviewA = new Date(cardProgress[a].reviews[cardProgress[a].reviews.length - 1].date);
+        const lastReviewB = new Date(cardProgress[b].reviews[cardProgress[b].reviews.length - 1].date);
+        return lastReviewA.getTime() - lastReviewB.getTime();
+      });
+      
+      newActiveCards = [...newActiveCards, ...sortedRemainingCards.slice(0, remainingSlots)];
+    }
+    
+    // If newActiveCards is empty (should not happen), use the first 5 cards
+    if (newActiveCards.length === 0) {
+      newActiveCards = [0, 1, 2, 3, 4];
+    }
+    
+    // Update active cards if they have changed
+    if (JSON.stringify(newActiveCards) !== JSON.stringify(activeCards)) {
+      setActiveCards(newActiveCards);
+      
+      // If current index is not in active cards, update it to the first active card
+      if (!newActiveCards.includes(index)) {
+        setIndex(newActiveCards[0]);
+      }
+    }
+  };
 
   const handlePhoneticChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalMnemonics(prev => ({
@@ -794,7 +907,7 @@ export default function ThaiFlashcards() {
     return { interval, easeFactor: newEaseFactor, repetitions };
   };
 
-  // Update the handleCardAction function to save progress
+  // Modify handleCardAction to use the active cards
   const handleCardAction = (difficulty: 'hard' | 'good' | 'easy') => {
     // Create or get the current card progress
     const currentProgress = cardProgress[index] || { reviews: [], nextReviewDate: new Date().toISOString() };
@@ -825,8 +938,10 @@ export default function ThaiFlashcards() {
       }
     }));
     
-    // Move to the next card
-    setIndex((prevIndex) => (prevIndex + 1) % phrases.length);
+    // Move to the next card in the active cards list
+    const currentActiveIndex = activeCards.indexOf(index);
+    const nextActiveIndex = (currentActiveIndex + 1) % activeCards.length;
+    setIndex(activeCards[nextActiveIndex]);
     setShowAnswer(false);
     setRandomSentence(null);
   };
@@ -935,10 +1050,10 @@ export default function ThaiFlashcards() {
           </div>
         </div>
 
-        {/* Card Status */}
+        {/* Card Status - Updated to show active cards */}
         <div className="flex justify-between items-center text-sm text-gray-400">
-          <div>Card {index + 1} of {phrases.length}</div>
-          <div>Level {levelProgress.currentLevel}</div>
+          <div>Card {activeCards.indexOf(index) + 1} of {activeCards.length} active</div>
+          <div>{index + 1} of {phrases.length} total</div>
         </div>
 
         {/* Main Card */}
@@ -1127,7 +1242,7 @@ export default function ThaiFlashcards() {
 
       {showHowItWorks && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="neumorphic max-w-md w-full p-6 max-h-[80vh] overflow-auto">
+          <div className="neumorphic max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">How It Works</h2>
               <button
@@ -1139,22 +1254,17 @@ export default function ThaiFlashcards() {
             </div>
             <div className="space-y-4 text-gray-300">
               <p>
-                <strong className="text-white">Donkey Bridge:</strong> This app helps you learn Thai vocabulary using spaced repetition and mnemonics (memory aids or "donkey bridges").
+                <strong className="text-white">Donkey Bridge</strong> uses spaced repetition to help you learn Thai vocabulary efficiently.
               </p>
               
               <p>
-                <strong className="text-white">Controls:</strong>
+                <strong className="text-white">Active Cards:</strong> The app keeps 5 cards in active rotation that need your attention. These are cards you haven't seen, got wrong, or are due for review today.
               </p>
-              <ul className="list-disc pl-5 space-y-2">
-                <li><strong className="text-white">Show Answer</strong> - Reveals the Thai word, pronunciation and mnemonic.</li>
-                <li><strong className="text-white">Play</strong> - Listen to the Thai pronunciation.</li>
-                <li><strong className="text-white">In Context</strong> - See and hear the word used in a real Thai sentence.</li>
-                <li><strong className="text-white">Autoplay</strong> - Automatically plays the pronunciation when you reveal the answer.</li>
-              </ul>
               
               <p>
-                <strong className="text-white">Learning:</strong> After reviewing a card, rate your knowledge:
+                <strong className="text-white">Spaced Repetition:</strong> When you rate a card:
               </p>
+              
               <ul className="list-disc pl-5 space-y-2">
                 <li><strong className="text-red-500">Wrong</strong> - You didn't remember it. Card will appear again soon.</li>
                 <li><strong className="text-yellow-500">Correct</strong> - You remembered with some effort. Card will repeat at a moderate interval.</li>
@@ -1163,6 +1273,10 @@ export default function ThaiFlashcards() {
               
               <p>
                 <strong className="text-white">Personalization:</strong> You can customize mnemonics and phonetic spellings to help your learning.
+              </p>
+              
+              <p>
+                <strong className="text-white">Example Sentences:</strong> Each word comes with authentic Thai example sentences to learn the word in context.
               </p>
             </div>
           </div>

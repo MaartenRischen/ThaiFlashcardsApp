@@ -133,6 +133,13 @@ const DEFAULT_PHRASES: Phrase[] = [
   }
 ];
 
+// Add the VERSION_INFO constant at the top of the file
+const VERSION_INFO = {
+  lastUpdated: new Date().toISOString(),
+  version: "1.0.2",
+  changes: "Added Random Phrase contextual sentences and fixed button styling"
+};
+
 export default function ThaiFlashcards() {
   const [phrases] = useState<Phrase[]>(DEFAULT_PHRASES);
   const [index, setIndex] = useState<number>(0);
@@ -502,7 +509,7 @@ export default function ThaiFlashcards() {
       </div>
 
       {/* Settings Button */}
-      <div className="fixed bottom-4 right-4">
+      <div className="fixed bottom-16 right-4 z-20">
         <button
           onClick={() => setShowStats(!showStats)}
           className="settings-button"
@@ -562,6 +569,12 @@ export default function ThaiFlashcards() {
           </div>
         </div>
       )}
+
+      {/* Version indicator at the bottom */}
+      <div className="w-full py-3 px-4 text-center text-xs border-t border-gray-800 bg-[#222] sticky bottom-0 z-10">
+        <p className="text-blue-400 font-bold">v{VERSION_INFO.version} | {new Date(VERSION_INFO.lastUpdated).toLocaleDateString()} {new Date(VERSION_INFO.lastUpdated).toLocaleTimeString()}</p>
+        <p className="text-gray-400 mt-1">{VERSION_INFO.changes}</p>
+      </div>
     </main>
   );
 } 

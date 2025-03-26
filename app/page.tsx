@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.6",
-  changes: "Fixed deployment issues with server-side rendering"
+  version: "1.3.7",
+  changes: "Restored original audio functionality"
 };
 
 // Update phrases with real example sentences
@@ -725,33 +725,61 @@ export default function ThaiFlashcards() {
     setIsIOS(/iPhone|iPad|iPod/.test(navigator.userAgent));
   }, []);
 
-  // Create a simplified audio approach - just show text to speak
-  const initiateAudio = (text: string) => {
+  // Restore the original speak function
+  const speak = async (text: string) => {
     setIsPlaying(true);
-    setCurrentAudioText(text);
-    setShowAudioPlayer(true);
+    try {
+      // Check if speech synthesis is available
+      if (!window.speechSynthesis) {
+        console.error('Speech synthesis not supported');
+        setIsPlaying(false);
+        return;
+      }
+      
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      // Create a new utterance
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'th-TH';
+      utterance.volume = 1;
+      
+      // Set up event handlers
+      utterance.onend = () => {
+        setIsPlaying(false);
+      };
+      
+      utterance.onerror = (e) => {
+        console.error('Speech synthesis error:', e);
+        setIsPlaying(false);
+      };
+      
+      // Speak the text
+      window.speechSynthesis.speak(utterance);
+      
+    } catch (error) {
+      console.error('Speech synthesis error:', error);
+      setIsPlaying(false);
+    }
   };
   
-  // Close the audio player
-  const closeAudioPlayer = () => {
-    setShowAudioPlayer(false);
-    setIsPlaying(false);
-  };
-  
-  // Handle Play button actions
-  const handlePlayButtonClick = (text: string) => {
-    initiateAudio(text);
-  };
-  
-  // Fix autoplay to only trigger when answer is first revealed
+  // Use client-side approach to handle button clicks
   useEffect(() => {
     // Only play audio when showAnswer changes from false to true
     if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlaying) {
-      initiateAudio(phrases[index].thai);
+      // Use setTimeout to ensure this runs after render
+      setTimeout(() => {
+        speak(phrases[index].thai);
+      }, 100);
     }
     // Update ref with current value for next render
     prevShowAnswerRef.current = showAnswer;
   }, [showAnswer, autoplay, phrases, index, isPlaying]);
+  
+  // Handle play button click
+  const handlePlayButtonClick = (text: string) => {
+    speak(text);
+  };
 
   // Add a new useEffect to update the active cards on component mount and when cardProgress changes
   useEffect(() => {
@@ -1059,7 +1087,7 @@ export default function ThaiFlashcards() {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-white">Speak Thai</h2>
               <button
-                onClick={closeAudioPlayer}
+                onClick={() => setShowAudioPlayer(false)}
                 className="text-gray-400 hover:text-white text-xl"
               >
                 ✕
@@ -1077,7 +1105,7 @@ export default function ThaiFlashcards() {
               
               <div className="flex justify-center gap-4 mt-8">
                 <button 
-                  onClick={closeAudioPlayer}
+                  onClick={() => setShowAudioPlayer(false)}
                   className="neumorphic-button px-8 py-4"
                 >
                   Done
@@ -1164,15 +1192,17 @@ export default function ThaiFlashcards() {
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => handlePlayButtonClick(phrases[index].thai)}
-                  className="neumorphic-button flex-1 text-blue-400"
+                  disabled={isPlaying}
+                  className="neumorphic-button flex-1"
                 >
-                  {isPlaying ? 'Speaking...' : 'Play'}
+                  {isPlaying ? 'Playing...' : 'Play'}
                 </button>
                 <button
                   onClick={() => {
                     const phrase = generateRandomPhrase();
                     handlePlayButtonClick(phrase);
                   }}
+                  disabled={isPlaying}
                   className="neumorphic-button flex-1"
                 >
                   In Context
@@ -1239,11 +1269,6 @@ export default function ThaiFlashcards() {
                 const newState = !autoplay;
                 setAutoplay(newState);
                 localStorage.setItem('autoplay', JSON.stringify(newState));
-                
-                // Play a test sound when enabling autoplay
-                if (newState) {
-                  handlePlayButtonClick('สวัสดี');
-                }
               }}
               className={`w-12 h-6 rounded-full transition-colors ${autoplay ? 'bg-blue-500' : 'bg-gray-600'} relative`}
             >

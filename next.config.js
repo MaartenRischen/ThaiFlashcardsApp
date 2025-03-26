@@ -5,6 +5,7 @@ const nextConfig = {
     unoptimized: true
   },
   output: 'export',
+  basePath: '/ThaiFlashcardsApp',
   webpack: (config) => {
     return config;
   }

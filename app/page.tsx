@@ -133,6 +133,13 @@ const DEFAULT_PHRASES: Phrase[] = [
   }
 ];
 
+// Update version info constants with more detailed information and current timestamp
+const VERSION_INFO = {
+  lastUpdated: new Date().toISOString(),
+  version: "1.0.1",
+  changes: "Added Random Phrase feature with contextual sentences and improved neumorphic button styling"
+};
+
 export default function ThaiFlashcards() {
   const [phrases] = useState<Phrase[]>(DEFAULT_PHRASES);
   const [index, setIndex] = useState<number>(0);
@@ -236,6 +243,11 @@ export default function ThaiFlashcards() {
     window.location.reload();
   };
 
+  // Add a function to calculate the current level
+  const calculateLevel = () => {
+    return levelProgress.currentLevel || 1;
+  };
+
   // Create a sentence using the current word and random elements from common phrases
   const generateRandomPhrase = () => {
     const currentPhrase = phrases[index];
@@ -330,8 +342,8 @@ export default function ThaiFlashcards() {
   };
 
   return (
-    <main className="min-h-screen bg-[#1a1a1a]">
-      <div className="max-w-lg mx-auto p-4 space-y-4">
+    <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
+      <div className="w-full max-w-lg mx-auto p-4 space-y-4">
         {/* Top Navigation */}
         <div className="flex justify-between items-center">
           <label className="flex items-center space-x-2 text-gray-400">
@@ -343,6 +355,7 @@ export default function ThaiFlashcards() {
             />
             <span>Autoplay</span>
           </label>
+          
           <div className="flex space-x-2">
             <button
               onClick={() => setShowHowItWorks(!showHowItWorks)}
@@ -358,11 +371,19 @@ export default function ThaiFlashcards() {
             </button>
           </div>
         </div>
-
-        {/* Card Status */}
-        <div className="flex justify-between items-center text-sm text-gray-400">
-          <div>Card {index + 1} of {phrases.length}</div>
-          <div>Level {levelProgress.currentLevel}</div>
+        
+        {/* Card status display */}
+        <div className="flex justify-between items-center">
+          <div className="neumorphic px-3 py-1 text-sm">
+            <span className="bg-blue-500 rounded-full h-3 w-3 inline-block mr-2"></span>
+            New
+          </div>
+          <div className="text-gray-400">
+            Card {index + 1} of {phrases.length}
+          </div>
+          <div className="neumorphic px-3 py-1 text-sm">
+            <span>Level {calculateLevel()}</span>
+          </div>
         </div>
 
         {/* Main Card */}
@@ -491,7 +512,7 @@ export default function ThaiFlashcards() {
         </div>
 
         {/* Reset Button */}
-        <div>
+        <div className="mt-4">
           <button
             onClick={handleResetAll}
             className="neumorphic-button text-red-500"
@@ -500,7 +521,7 @@ export default function ThaiFlashcards() {
           </button>
         </div>
       </div>
-
+      
       {/* Settings Button */}
       <div className="fixed bottom-4 right-4">
         <button
@@ -513,7 +534,7 @@ export default function ThaiFlashcards() {
 
       {/* Modals */}
       {showStats && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="neumorphic max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Statistics</h2>
@@ -530,7 +551,7 @@ export default function ThaiFlashcards() {
       )}
 
       {showHowItWorks && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="neumorphic max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">How It Works</h2>
@@ -547,7 +568,7 @@ export default function ThaiFlashcards() {
       )}
 
       {showVocabulary && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="neumorphic max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Vocabulary List</h2>
@@ -562,6 +583,15 @@ export default function ThaiFlashcards() {
           </div>
         </div>
       )}
+      
+      {/* Flex spacer to push footer to bottom */}
+      <div className="flex-grow"></div>
+      
+      {/* Version indicator at the bottom */}
+      <div className="w-full py-3 px-4 text-center text-xs border-t border-gray-800 bg-[#222]">
+        <p className="text-blue-400">v{VERSION_INFO.version} - Last updated: {new Date(VERSION_INFO.lastUpdated).toLocaleString()}</p>
+        <p className="text-gray-400 mt-1">Changes: {VERSION_INFO.changes}</p>
+      </div>
     </main>
   );
 } 

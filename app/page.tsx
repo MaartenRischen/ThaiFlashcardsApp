@@ -11,11 +11,18 @@ import {
 } from "@/app/components/ui/dialog";
 import { Switch } from "@/app/components/ui/switch";
 
+interface ExampleSentence {
+  thai: string;
+  pronunciation: string;
+  translation: string;
+}
+
 interface Phrase {
   thai: string;
   pronunciation: string;
   mnemonic: string;
   english: string;
+  examples?: ExampleSentence[];
 }
 
 interface Review {

@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.0.9",
-  changes: "Added status indicators to vocabulary list"
+  version: "1.1.0",
+  changes: "Added card status indicators to vocabulary list"
 };
 
 // Update phrases with real example sentences
@@ -285,7 +285,72 @@ export default function ThaiFlashcards() {
       }
   };
 
+  // Helper function to calculate next interval using Anki SM-2 algorithm
+  const calculateNextReview = (difficulty: 'hard' | 'good' | 'easy', currentProgress: any) => {
+    const easeFactor = currentProgress?.reviews?.length > 0 
+      ? currentProgress.reviews[currentProgress.reviews.length - 1].easeFactor 
+      : INITIAL_EASE_FACTOR;
+    
+    let newEaseFactor = easeFactor;
+    let interval = currentProgress?.reviews?.length > 0 
+      ? currentProgress.reviews[currentProgress.reviews.length - 1].interval 
+      : INITIAL_INTERVAL;
+    let repetitions = currentProgress?.reviews?.length > 0
+      ? currentProgress.reviews[currentProgress.reviews.length - 1].repetitions
+      : 0;
+      
+    // Adjust ease factor based on difficulty
+    if (difficulty === 'hard') {
+      newEaseFactor = Math.max(MIN_EASE_FACTOR, easeFactor - 0.2);
+      interval = Math.max(MIN_INTERVAL, Math.ceil(interval * HARD_INTERVAL_MULTIPLIER));
+      repetitions = 0; // Reset repetitions on hard
+    } else if (difficulty === 'good') {
+      interval = Math.ceil(interval * easeFactor);
+      repetitions += 1;
+    } else if (difficulty === 'easy') {
+      newEaseFactor = easeFactor + 0.1;
+      interval = Math.ceil(interval * EASY_INTERVAL_MULTIPLIER);
+      repetitions += 1;
+    }
+    
+    // Cap interval at max
+    interval = Math.min(interval, MAX_INTERVAL);
+    
+    return { interval, easeFactor: newEaseFactor, repetitions };
+  };
+
+  // Update the handleCardAction function to save progress
   const handleCardAction = (difficulty: 'hard' | 'good' | 'easy') => {
+    // Create or get the current card progress
+    const currentProgress = cardProgress[index] || { reviews: [], nextReviewDate: new Date().toISOString() };
+    
+    // Calculate the next review data using the SM-2 algorithm
+    const nextReviewData = calculateNextReview(difficulty, currentProgress);
+    
+    // Create the new review entry
+    const newReview: Review = {
+      date: new Date().toISOString(),
+      difficulty,
+      interval: nextReviewData.interval,
+      easeFactor: nextReviewData.easeFactor,
+      repetitions: nextReviewData.repetitions
+    };
+    
+    // Calculate the next review date
+    const nextReviewDate = new Date();
+    nextReviewDate.setDate(nextReviewDate.getDate() + nextReviewData.interval);
+    
+    // Update the card progress
+    setCardProgress(prev => ({
+      ...prev,
+      [index]: {
+        ...currentProgress,
+        reviews: [...currentProgress.reviews, newReview],
+        nextReviewDate: nextReviewDate.toISOString()
+      }
+    }));
+    
+    // Move to the next card
     setIndex((prevIndex) => (prevIndex + 1) % phrases.length);
     setShowAnswer(false);
     setRandomSentence(null);
@@ -698,9 +763,12 @@ export default function ThaiFlashcards() {
         </div>
       )}
 
-      {/* Version indicator at the bottom - more visible but not intrusive */}
-      <div className="w-full py-1 px-2 text-center text-xs border-t border-gray-700 bg-gray-800 sticky bottom-0 z-20">
-        <p className="text-gray-300">v{VERSION_INFO.version} | {new Date(VERSION_INFO.lastUpdated).toLocaleDateString()}</p>
+      {/* Version indicator at the bottom - shows changes and timestamp */}
+      <div className="w-full py-2 px-3 text-center text-xs border-t border-gray-700 bg-gray-800 sticky bottom-0 z-20">
+        <div className="flex flex-col sm:flex-row sm:justify-between items-center">
+          <p className="text-gray-300 font-medium">v{VERSION_INFO.version} | {new Date(VERSION_INFO.lastUpdated).toLocaleString()}</p>
+          <p className="text-blue-400">Latest: {VERSION_INFO.changes}</p>
+        </div>
       </div>
     </main>
   );

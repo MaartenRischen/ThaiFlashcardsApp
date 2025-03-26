@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.0.4",
-  changes: "Added authentic Thai example sentences for proper context"
+  version: "1.0.5",
+  changes: "Fixed button placement and renamed to In Context"
 };
 
 // Update phrases with real example sentences
@@ -401,7 +401,7 @@ export default function ThaiFlashcards() {
                   disabled={isPlaying}
                   className="neumorphic-button flex-1"
                 >
-                  Random Phrase
+                  In Context
                 </button>
               </div>
 
@@ -439,33 +439,13 @@ export default function ThaiFlashcards() {
             </div>
           ) : (
             <div className="space-y-4">
-            <button 
+              <button 
                 onClick={() => setShowAnswer(true)}
                 className="w-full neumorphic-button"
-            >
-              Show Answer
-            </button>
-              
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => speak(phrases[index].thai)}
-                  disabled={isPlaying}
-                  className="neumorphic-button flex-1"
-                >
-                  {isPlaying ? 'Playing...' : 'Play'}
-                </button>
-                <button
-                  onClick={() => {
-                    const phrase = generateRandomPhrase();
-                    speak(phrase);
-                  }}
-                  disabled={isPlaying}
-                  className="neumorphic-button flex-1"
-                >
-                  Random Phrase
-                </button>
-              </div>
-              </div>
+              >
+                Show Answer
+              </button>
+            </div>
           )}
               </div>
 

@@ -90,7 +90,7 @@ interface ExampleSentence {
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
   version: "1.2.0",
-  changes: "Renamed app to Donkey Bridge"
+  changes: "Added back all 30 phrases"
 };
 
 // Update phrases with real example sentences
@@ -182,6 +182,474 @@ const DEFAULT_PHRASES: Phrase[] = [
         thai: "คุณสบายดีไหม ไม่ได้เจอกันนานแล้ว",
         pronunciation: "khun sa-bai-dee-mai, mai dai jer gan naan laew",
         translation: "How are you? Haven't seen you in a long time."
+      }
+    ]
+  },
+  {
+    meaning: "What is your name?",
+    thai: "คุณชื่ออะไร",
+    pronunciation: "khun cheu a-rai",
+    mnemonic: "Think: 'Koon chew a rye' - asking someone's name over rye bread",
+    examples: [
+      {
+        thai: "คุณชื่ออะไร ฉันชื่อนิดา",
+        pronunciation: "khun cheu a-rai, chan cheu nida",
+        translation: "What is your name? My name is Nida."
+      },
+      {
+        thai: "สวัสดี คุณชื่ออะไรครับ",
+        pronunciation: "sa-wat-dee, khun cheu a-rai krap",
+        translation: "Hello, what is your name?"
+      }
+    ]
+  },
+  {
+    meaning: "My name is...",
+    thai: "ฉันชื่อ...",
+    pronunciation: "chan cheu...",
+    mnemonic: "Think: 'Chan chew' - I'm chewing as I tell my name",
+    examples: [
+      {
+        thai: "ฉันชื่อปีเตอร์ ยินดีที่ได้รู้จัก",
+        pronunciation: "chan cheu Peter, yin-dee tee dai roo-jak",
+        translation: "My name is Peter, nice to meet you."
+      },
+      {
+        thai: "สวัสดี ฉันชื่อมาร์ค ฉันมาจากอเมริกา",
+        pronunciation: "sa-wat-dee, chan cheu Mark, chan ma jak america",
+        translation: "Hello, my name is Mark. I'm from America."
+      }
+    ]
+  },
+  {
+    meaning: "I don't understand",
+    thai: "ฉันไม่เข้าใจ",
+    pronunciation: "chan mai kao-jai",
+    mnemonic: "Think: 'Chan my cow-chai' - my cow doesn't understand either",
+    examples: [
+      {
+        thai: "ฉันไม่เข้าใจ พูดช้าๆ ได้ไหม",
+        pronunciation: "chan mai kao-jai, pood cha cha dai mai",
+        translation: "I don't understand. Can you speak slowly?"
+      },
+      {
+        thai: "ขอโทษ ฉันไม่เข้าใจภาษาไทยดีนัก",
+        pronunciation: "kor-tote, chan mai kao-jai pasa thai dee nak",
+        translation: "Sorry, I don't understand Thai very well."
+      }
+    ]
+  },
+  {
+    meaning: "Please speak slowly",
+    thai: "กรุณาพูดช้าๆ",
+    pronunciation: "ga-ru-na pood cha-cha",
+    mnemonic: "Think: 'Karuna' (kindness) 'pood cha-cha' (speak cha-cha dance - slowly)",
+    examples: [
+      {
+        thai: "กรุณาพูดช้าๆ ฉันเพิ่งเรียนภาษาไทย",
+        pronunciation: "ga-ru-na pood cha-cha, chan peng rian pasa thai",
+        translation: "Please speak slowly, I just started learning Thai."
+      },
+      {
+        thai: "ขอโทษ กรุณาพูดช้าๆ หน่อยได้ไหม",
+        pronunciation: "kor-tote, ga-ru-na pood cha-cha noi dai mai",
+        translation: "Sorry, could you please speak a bit slower?"
+      }
+    ]
+  },
+  {
+    meaning: "Where is the bathroom?",
+    thai: "ห้องน้ำอยู่ที่ไหน",
+    pronunciation: "hong-nam yoo tee-nai",
+    mnemonic: "Think: 'Hong-nam' sounds like 'home' with 'nam' (water) - where's the water room?",
+    examples: [
+      {
+        thai: "ขอโทษ ห้องน้ำอยู่ที่ไหนครับ",
+        pronunciation: "kor-tote, hong-nam yoo tee-nai krap",
+        translation: "Excuse me, where is the bathroom?"
+      },
+      {
+        thai: "ห้องน้ำอยู่ที่ไหน ฉันหาไม่เจอ",
+        pronunciation: "hong-nam yoo tee-nai, chan ha mai jer",
+        translation: "Where is the bathroom? I can't find it."
+      }
+    ]
+  },
+  {
+    meaning: "How much is this?",
+    thai: "อันนี้เท่าไหร่",
+    pronunciation: "an-nee tao-rai",
+    mnemonic: "Think: 'Annie, tell me how much!'",
+    examples: [
+      {
+        thai: "อันนี้เท่าไหร่ มันราคาแพงไปไหม",
+        pronunciation: "an-nee tao-rai, man raka paeng pai mai",
+        translation: "How much is this? Is it too expensive?"
+      },
+      {
+        thai: "ขอโทษ อันนี้เท่าไหร่ครับ",
+        pronunciation: "kor-tote, an-nee tao-rai krap",
+        translation: "Excuse me, how much is this?"
+      }
+    ]
+  },
+  {
+    meaning: "Delicious",
+    thai: "อร่อย",
+    pronunciation: "a-roi",
+    mnemonic: "Think: 'Ah, royal' - food fit for royalty",
+    examples: [
+      {
+        thai: "อาหารนี้อร่อยมาก ขอบคุณ",
+        pronunciation: "a-han nee a-roi mak, khop-khun",
+        translation: "This food is very delicious, thank you."
+      },
+      {
+        thai: "ผัดไทยร้านนี้อร่อยที่สุด",
+        pronunciation: "pad thai ran nee a-roi tee-soot",
+        translation: "The pad thai at this place is the most delicious."
+      }
+    ]
+  },
+  {
+    meaning: "Today",
+    thai: "วันนี้",
+    pronunciation: "wan-nee",
+    mnemonic: "Think: 'One knee' - today I hurt one knee",
+    examples: [
+      {
+        thai: "วันนี้อากาศดีมาก",
+        pronunciation: "wan-nee a-kat dee mak",
+        translation: "Today the weather is very nice."
+      },
+      {
+        thai: "วันนี้คุณจะทำอะไร",
+        pronunciation: "wan-nee khun ja tam a-rai",
+        translation: "What will you do today?"
+      }
+    ]
+  },
+  {
+    meaning: "Tomorrow",
+    thai: "พรุ่งนี้",
+    pronunciation: "proong-nee",
+    mnemonic: "Think: 'Prune-knee' - tomorrow I'll fix my pruned knee",
+    examples: [
+      {
+        thai: "พรุ่งนี้เราจะไปทะเล",
+        pronunciation: "proong-nee rao ja pai ta-le",
+        translation: "Tomorrow we will go to the beach."
+      },
+      {
+        thai: "พรุ่งนี้ฉันต้องตื่นเช้า",
+        pronunciation: "proong-nee chan tong teun chao",
+        translation: "Tomorrow I have to wake up early."
+      }
+    ]
+  },
+  {
+    meaning: "Yesterday",
+    thai: "เมื่อวาน",
+    pronunciation: "meua-wan",
+    mnemonic: "Think: 'Mew-a-waan' - the cat meowed all day yesterday",
+    examples: [
+      {
+        thai: "เมื่อวานฉันไปตลาด",
+        pronunciation: "meua-wan chan pai ta-lad",
+        translation: "Yesterday I went to the market."
+      },
+      {
+        thai: "เมื่อวานอากาศร้อนมาก",
+        pronunciation: "meua-wan a-kat ron mak",
+        translation: "Yesterday the weather was very hot."
+      }
+    ]
+  },
+  {
+    meaning: "Water",
+    thai: "น้ำ",
+    pronunciation: "nam",
+    mnemonic: "Think: 'Nom' - like 'nom nom' drinking water",
+    examples: [
+      {
+        thai: "ขอน้ำเปล่าหนึ่งแก้วครับ",
+        pronunciation: "kor nam plao neung kaew krap",
+        translation: "One glass of water, please."
+      },
+      {
+        thai: "น้ำนี้ดื่มได้ไหม",
+        pronunciation: "nam nee duem dai mai",
+        translation: "Is this water drinkable?"
+      }
+    ]
+  },
+  {
+    meaning: "Food",
+    thai: "อาหาร",
+    pronunciation: "a-han",
+    mnemonic: "Think: 'A-han' - 'a hand' full of food",
+    examples: [
+      {
+        thai: "อาหารไทยรสชาติเผ็ดมาก",
+        pronunciation: "a-han thai rot chat pet mak",
+        translation: "Thai food is very spicy."
+      },
+      {
+        thai: "คุณชอบอาหารอะไร",
+        pronunciation: "khun chop a-han a-rai",
+        translation: "What food do you like?"
+      }
+    ]
+  },
+  {
+    meaning: "Hot (temperature)",
+    thai: "ร้อน",
+    pronunciation: "ron",
+    mnemonic: "Think: 'Ron is hot' - Ron is always complaining about the heat",
+    examples: [
+      {
+        thai: "วันนี้อากาศร้อนมาก",
+        pronunciation: "wan-nee a-kat ron mak",
+        translation: "Today the weather is very hot."
+      },
+      {
+        thai: "ระวัง อาหารนี้ร้อน",
+        pronunciation: "ra-wang, a-han nee ron",
+        translation: "Be careful, this food is hot."
+      }
+    ]
+  },
+  {
+    meaning: "Cold",
+    thai: "หนาว",
+    pronunciation: "nao",
+    mnemonic: "Think: 'Now' - 'right now' I feel cold",
+    examples: [
+      {
+        thai: "ฉันรู้สึกหนาว เปิดแอร์เย็นเกินไป",
+        pronunciation: "chan roo-suek nao, perd air yen gern pai",
+        translation: "I feel cold, the air conditioning is too cool."
+      },
+      {
+        thai: "ที่เชียงใหม่อากาศหนาวในฤดูหนาว",
+        pronunciation: "tee chiang mai a-kat nao nai rue-du nao",
+        translation: "In Chiang Mai, the weather is cold during winter."
+      }
+    ]
+  },
+  {
+    meaning: "Good",
+    thai: "ดี",
+    pronunciation: "dee",
+    mnemonic: "Think: 'Dee' - sounds like the English word 'D' (grade) - better than an F!",
+    examples: [
+      {
+        thai: "อาหารนี้รสชาติดีมาก",
+        pronunciation: "a-han nee rot chat dee mak",
+        translation: "This food tastes very good."
+      },
+      {
+        thai: "คุณทำงานได้ดีมาก",
+        pronunciation: "khun tam-ngan dai dee mak",
+        translation: "You work very well."
+      }
+    ]
+  },
+  {
+    meaning: "Bad",
+    thai: "แย่",
+    pronunciation: "yae",
+    mnemonic: "Think: 'Yuck' - that's bad",
+    examples: [
+      {
+        thai: "วันนี้เป็นวันที่แย่มาก",
+        pronunciation: "wan-nee pen wan tee yae mak",
+        translation: "Today is a very bad day."
+      },
+      {
+        thai: "อาหารนี้รสชาติแย่",
+        pronunciation: "a-han nee rot chat yae",
+        translation: "This food tastes bad."
+      }
+    ]
+  },
+  {
+    meaning: "Big",
+    thai: "ใหญ่",
+    pronunciation: "yai",
+    mnemonic: "Think: 'Y-eye' - big like your eye",
+    examples: [
+      {
+        thai: "บ้านหลังนี้ใหญ่มาก",
+        pronunciation: "baan lang nee yai mak",
+        translation: "This house is very big."
+      },
+      {
+        thai: "ฉันต้องการกระเป๋าใบใหญ่",
+        pronunciation: "chan tong-gan kra-pao bai yai",
+        translation: "I need a big bag."
+      }
+    ]
+  },
+  {
+    meaning: "Small",
+    thai: "เล็ก",
+    pronunciation: "lek",
+    mnemonic: "Think: 'Fleck' - something tiny like a fleck of dust",
+    examples: [
+      {
+        thai: "ห้องนี้เล็กเกินไป",
+        pronunciation: "hong nee lek gern pai",
+        translation: "This room is too small."
+      },
+      {
+        thai: "ฉันชอบสุนัขตัวเล็ก",
+        pronunciation: "chan chop su-nak tua lek",
+        translation: "I like small dogs."
+      }
+    ]
+  },
+  {
+    meaning: "Left",
+    thai: "ซ้าย",
+    pronunciation: "sai",
+    mnemonic: "Think: 'Sigh' - I sigh when I go left",
+    examples: [
+      {
+        thai: "เลี้ยวซ้ายตรงแยกหน้า",
+        pronunciation: "liao sai trong yak na",
+        translation: "Turn left at the next intersection."
+      },
+      {
+        thai: "ร้านอาหารอยู่ทางซ้ายมือ",
+        pronunciation: "ran a-han yoo tang sai meu",
+        translation: "The restaurant is on the left side."
+      }
+    ]
+  },
+  {
+    meaning: "Right",
+    thai: "ขวา",
+    pronunciation: "kwaa",
+    mnemonic: "Think: 'Qua' - like 'quaaaack' right turn for ducks",
+    examples: [
+      {
+        thai: "เลี้ยวขวาที่ไฟแดง",
+        pronunciation: "liao kwaa tee fai daeng",
+        translation: "Turn right at the traffic light."
+      },
+      {
+        thai: "ฉันถนัดมือขวา",
+        pronunciation: "chan ta-nat meu kwaa",
+        translation: "I am right-handed."
+      }
+    ]
+  },
+  {
+    meaning: "One",
+    thai: "หนึ่ง",
+    pronunciation: "neung",
+    mnemonic: "Think: 'Nung' - number one",
+    examples: [
+      {
+        thai: "ฉันต้องการกาแฟหนึ่งแก้ว",
+        pronunciation: "chan tong-gan ka-fae neung kaew",
+        translation: "I want one cup of coffee."
+      },
+      {
+        thai: "รถเมล์สายหนึ่งไปไหน",
+        pronunciation: "rot-may sai neung pai nai",
+        translation: "Where does bus number one go?"
+      }
+    ]
+  },
+  {
+    meaning: "Two",
+    thai: "สอง",
+    pronunciation: "song",
+    mnemonic: "Think: 'Song' - I sing two songs",
+    examples: [
+      {
+        thai: "ฉันมีพี่น้องสองคน",
+        pronunciation: "chan mee pee-nong song kon",
+        translation: "I have two siblings."
+      },
+      {
+        thai: "ขอน้ำสองขวดครับ",
+        pronunciation: "kor nam song kuat krap",
+        translation: "Two bottles of water, please."
+      }
+    ]
+  },
+  {
+    meaning: "Three",
+    thai: "สาม",
+    pronunciation: "saam",
+    mnemonic: "Think: 'Sam' - my friend Sam always counts to three",
+    examples: [
+      {
+        thai: "ฉันต้องการจองห้องพักสามคืน",
+        pronunciation: "chan tong-gan jong hong pak saam keun",
+        translation: "I want to book a room for three nights."
+      },
+      {
+        thai: "มีเด็กสามคนกำลังเล่นในสวน",
+        pronunciation: "mee dek saam kon kam-lang len nai suan",
+        translation: "There are three children playing in the park."
+      }
+    ]
+  },
+  {
+    meaning: "Thank you very much",
+    thai: "ขอบคุณมาก",
+    pronunciation: "khop-khun mak",
+    mnemonic: "Think: 'Cope-Kun Mark' - Mark copes with extreme kindness",
+    examples: [
+      {
+        thai: "ขอบคุณมากที่ช่วยเหลือฉัน",
+        pronunciation: "khop-khun mak tee chuay-lue chan",
+        translation: "Thank you very much for helping me."
+      },
+      {
+        thai: "ขอบคุณมากสำหรับของขวัญ",
+        pronunciation: "khop-khun mak sam-rap kong-kwan",
+        translation: "Thank you very much for the gift."
+      }
+    ]
+  },
+  {
+    meaning: "You're welcome",
+    thai: "ด้วยความยินดี",
+    pronunciation: "duay kwaam yin-dee",
+    mnemonic: "Think: 'Doo-why come yin-dee' - do why? because I come with pleasure",
+    examples: [
+      {
+        thai: "ด้วยความยินดี ไม่เป็นไรครับ",
+        pronunciation: "duay kwaam yin-dee, mai pen rai krap",
+        translation: "You're welcome, it's nothing."
+      },
+      {
+        thai: "ด้วยความยินดี ถ้าต้องการความช่วยเหลืออีกก็บอกได้",
+        pronunciation: "duay kwaam yin-dee, ta tong-gan kwam chuay-lue eek gor bok dai",
+        translation: "You're welcome, if you need more help just let me know."
+      }
+    ]
+  },
+  {
+    meaning: "Sorry",
+    thai: "ขอโทษ",
+    pronunciation: "kor-tote",
+    mnemonic: "Think: 'Core-toast' - I accidentally burned your toast, sorry!",
+    examples: [
+      {
+        thai: "ขอโทษที่มาสาย รถติด",
+        pronunciation: "kor-tote tee ma sai, rot tid",
+        translation: "Sorry I'm late, traffic was bad."
+      },
+      {
+        thai: "ขอโทษ ฉันไม่ได้ตั้งใจ",
+        pronunciation: "kor-tote, chan mai dai tang jai",
+        translation: "Sorry, I didn't mean to."
       }
     ]
   }

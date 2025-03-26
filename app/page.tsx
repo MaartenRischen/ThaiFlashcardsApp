@@ -86,11 +86,11 @@ interface ExampleSentence {
   translation: string;
 }
 
-// Update version info
+// Update version info with fixed timestamp
 const VERSION_INFO = {
-  lastUpdated: new Date().toISOString(),
-  version: "1.1.1",
-  changes: "Fixed autoplay to only play once when answer is revealed"
+  lastUpdated: "2025-03-26T11:45:00Z", // Fixed timestamp of when v1.1.1 was released
+  version: "1.1.2",
+  changes: "Fixed version indicator to show actual update time"
 };
 
 // Update phrases with real example sentences

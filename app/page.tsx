@@ -89,7 +89,7 @@ interface ExampleSentence {
 // Update version info with new app name
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.2.0",
+  version: "1.2.1",
   changes: "Added back all 30 phrases"
 };
 

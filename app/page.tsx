@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info with new app name
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.3",
-  changes: "Implemented fallback audio system for mobile devices"
+  version: "1.3.4",
+  changes: "Fixed audio on iOS Chrome with visible player"
 };
 
 // Update phrases with real example sentences
@@ -697,6 +697,7 @@ export default function ThaiFlashcards() {
   });
   const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -717,60 +718,73 @@ export default function ThaiFlashcards() {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
 
-  // Create a function that uses direct HTML5 Audio API instead of speech synthesis
+  // Create a function that uses a visible audio element for iOS Chrome
   const playAudio = (text: string) => {
     setIsPlaying(true);
     
     // Create synthetic URL for the text
     const encodedText = encodeURIComponent(text);
-    const googleTTSUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=th&client=tw-ob`;
+    // Add a cache-busting parameter to prevent caching issues
+    const googleTTSUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=th&client=tw-ob&cb=${Date.now()}`;
     
-    try {
-      // Create or use existing audio element
-      if (!audioRef.current) {
-        audioRef.current = new Audio();
-      }
-      
-      // Set up event handlers
-      audioRef.current.onended = () => {
-        console.log('Audio playback ended');
+    // Set the audio URL for the visible audio element
+    setAudioUrl(googleTTSUrl);
+    
+    // For non-iOS devices, use the Audio API directly
+    if (!/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      try {
+        // Create or use existing audio element
+        if (!audioRef.current) {
+          audioRef.current = new Audio();
+        }
+        
+        // Set up event handlers
+        audioRef.current.onended = () => {
+          console.log('Audio playback ended');
+          setIsPlaying(false);
+        };
+        
+        audioRef.current.onerror = (e) => {
+          console.error('Audio playback error:', e);
+          setIsPlaying(false);
+        };
+        
+        // Set source and play
+        audioRef.current.src = googleTTSUrl;
+        
+        // Play the audio
+        const playPromise = audioRef.current.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Audio playing successfully');
+            })
+            .catch(error => {
+              console.error('Playback failed:', error);
+              setIsPlaying(false);
+            });
+        }
+      } catch (error) {
+        console.error('Audio play error:', error);
         setIsPlaying(false);
-      };
-      
-      audioRef.current.onerror = (e) => {
-        console.error('Audio playback error:', e);
-        setIsPlaying(false);
-      };
-      
-      // Set source and play
-      audioRef.current.src = googleTTSUrl;
-      
-      // Play the audio - wrapped in a user interaction event handler
-      const playPromise = audioRef.current.play();
-      
-      // Handle play promise (required for newer browsers)
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            console.log('Audio playing successfully');
-          })
-          .catch(error => {
-            console.error('Playback failed:', error);
-            setIsPlaying(false);
-            
-            // Fall back to speech synthesis as last resort
-            fallbackToSpeechSynthesis(text);
-          });
       }
-    } catch (error) {
-      console.error('Audio play error:', error);
-      setIsPlaying(false);
-      
-      // Fall back to speech synthesis
-      fallbackToSpeechSynthesis(text);
     }
   };
   
+  // Handle the audio element's events for iOS
+  const handleAudioEnded = () => {
+    setIsPlaying(false);
+    setAudioUrl(null);
+  };
+  
+  const handleAudioError = (e: React.SyntheticEvent<HTMLAudioElement, Event>) => {
+    console.error('Audio element error:', e);
+    setIsPlaying(false);
+    setAudioUrl(null);
+    fallbackToSpeechSynthesis(phrases[index].thai);
+  };
+
   // Keep the original speech synthesis as a fallback
   const fallbackToSpeechSynthesis = (text: string) => {
     try {
@@ -1127,6 +1141,18 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
+      {/* Visible audio element for iOS - positioned off-screen but still active */}
+      {audioUrl && (
+        <audio
+          controls
+          autoPlay
+          src={audioUrl}
+          onEnded={handleAudioEnded}
+          onError={handleAudioError}
+          className="ios-audio-element"
+        />
+      )}
+      
       <div className="w-full max-w-lg mx-auto p-4 space-y-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-100">Donkey Bridge</h1>
@@ -1469,6 +1495,19 @@ export default function ThaiFlashcards() {
           <p className="text-blue-400">Latest: {VERSION_INFO.changes}</p>
         </div>
       </div>
+
+      {/* Add CSS at the end of the file for the iOS audio element */}
+      <style jsx>{`
+        .ios-audio-element {
+          position: fixed;
+          top: 10px;
+          left: 10px;
+          z-index: 1000;
+          height: 40px;
+          width: 300px;
+          display: ${/iPhone|iPad|iPod/.test(navigator.userAgent) ? 'block' : 'none'};
+        }
+      `}</style>
     </main>
   );
 } 

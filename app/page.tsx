@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.7",
-  changes: "Restored original audio functionality"
+  version: "1.3.8",
+  changes: "Simplified audio playback"
 };
 
 // Update phrases with real example sentences
@@ -696,9 +696,6 @@ export default function ThaiFlashcards() {
     }
   });
   const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
-  const [showAudioPlayer, setShowAudioPlayer] = useState(false);
-  const [currentAudioText, setCurrentAudioText] = useState("");
-  const [isIOS, setIsIOS] = useState(false);
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -719,73 +716,39 @@ export default function ThaiFlashcards() {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
 
-  // Client-side detection of iOS devices
-  useEffect(() => {
-    // Only run on client side
-    setIsIOS(/iPhone|iPad|iPod/.test(navigator.userAgent));
-  }, []);
-
-  // Restore the original speak function
-  const speak = async (text: string) => {
+  // Simple speech function
+  const speak = (text: string) => {
     setIsPlaying(true);
     try {
-      // Check if speech synthesis is available
-      if (!window.speechSynthesis) {
-        console.error('Speech synthesis not supported');
-        setIsPlaying(false);
-        return;
-      }
-      
-      // Cancel any ongoing speech
-      window.speechSynthesis.cancel();
-      
-      // Create a new utterance
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'th-TH';
-      utterance.volume = 1;
+      utterance.onend = () => setIsPlaying(false);
+      utterance.onerror = () => setIsPlaying(false);
       
-      // Set up event handlers
-      utterance.onend = () => {
-        setIsPlaying(false);
-      };
-      
-      utterance.onerror = (e) => {
-        console.error('Speech synthesis error:', e);
-        setIsPlaying(false);
-      };
+      // Clear any previous speech
+      window.speechSynthesis.cancel();
       
       // Speak the text
       window.speechSynthesis.speak(utterance);
-      
     } catch (error) {
       console.error('Speech synthesis error:', error);
       setIsPlaying(false);
     }
   };
   
-  // Use client-side approach to handle button clicks
+  // Auto-play when answer is shown
   useEffect(() => {
-    // Only play audio when showAnswer changes from false to true
     if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlaying) {
-      // Use setTimeout to ensure this runs after render
-      setTimeout(() => {
-        speak(phrases[index].thai);
-      }, 100);
+      speak(phrases[index].thai);
     }
-    // Update ref with current value for next render
     prevShowAnswerRef.current = showAnswer;
   }, [showAnswer, autoplay, phrases, index, isPlaying]);
-  
-  // Handle play button click
-  const handlePlayButtonClick = (text: string) => {
-    speak(text);
-  };
 
   // Add a new useEffect to update the active cards on component mount and when cardProgress changes
   useEffect(() => {
     updateActiveCards();
   }, [cardProgress]);
-  
+
   // Function to update active cards based on review status
   const updateActiveCards = () => {
     // Get all cards that are due for review (either unseen, marked wrong, or due today)
@@ -1080,42 +1043,6 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Audio player popup for iOS devices */}
-      {showAudioPlayer && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50">
-          <div className="neumorphic max-w-md w-full p-6 bg-[#222] rounded-xl">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-white">Speak Thai</h2>
-              <button
-                onClick={() => setShowAudioPlayer(false)}
-                className="text-gray-400 hover:text-white text-xl"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="space-y-6 text-center">
-              <div className="text-4xl font-bold text-white mb-4">
-                {currentAudioText}
-              </div>
-              
-              <p className="text-gray-300">
-                Speak the Thai text above out loud. This helps you practice pronunciation.
-              </p>
-              
-              <div className="flex justify-center gap-4 mt-8">
-                <button 
-                  onClick={() => setShowAudioPlayer(false)}
-                  className="neumorphic-button px-8 py-4"
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
       <div className="w-full max-w-lg mx-auto p-4 space-y-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-100">Donkey Bridge</h1>
@@ -1135,18 +1062,11 @@ export default function ThaiFlashcards() {
           </div>
         </div>
 
-        {/* Card Status - Updated to show active cards */}
+        {/* Card Status */}
         <div className="flex justify-between items-center text-sm text-gray-400">
           <div>Card {activeCards.indexOf(index) + 1} of {activeCards.length} active</div>
           <div>{index + 1} of {phrases.length} total</div>
         </div>
-
-        {/* Show a notice about audio at the top - only for iOS */}
-        {isIOS && (
-          <div className="bg-blue-900 bg-opacity-30 rounded-lg p-3 text-blue-300 text-sm">
-            <p>Due to iOS audio limitations, tap "Play" to see the Thai text you should speak aloud.</p>
-          </div>
-        )}
 
         {/* Main Card */}
         <div className="neumorphic p-6 space-y-4">
@@ -1191,7 +1111,7 @@ export default function ThaiFlashcards() {
               
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => handlePlayButtonClick(phrases[index].thai)}
+                  onClick={() => speak(phrases[index].thai)}
                   disabled={isPlaying}
                   className="neumorphic-button flex-1"
                 >
@@ -1200,7 +1120,7 @@ export default function ThaiFlashcards() {
                 <button
                   onClick={() => {
                     const phrase = generateRandomPhrase();
-                    handlePlayButtonClick(phrase);
+                    speak(phrase);
                   }}
                   disabled={isPlaying}
                   className="neumorphic-button flex-1"
@@ -1436,7 +1356,7 @@ export default function ThaiFlashcards() {
                         onClick={(e) => {
                           e.stopPropagation();
                           if (!isPlaying) {
-                            handlePlayButtonClick(phrase.thai);
+                            speak(phrase.thai);
                           }
                         }}
                       >
@@ -1460,19 +1380,6 @@ export default function ThaiFlashcards() {
           <p className="text-blue-400">Latest: {VERSION_INFO.changes}</p>
         </div>
       </div>
-
-      {/* Use client-side styles to avoid navigator at build time */}
-      <style jsx>{`
-        .ios-audio-element {
-          position: fixed;
-          top: 10px;
-          left: 10px;
-          z-index: 1000;
-          height: 40px;
-          width: 300px;
-          display: block;
-        }
-      `}</style>
     </main>
   );
 } 

@@ -88,9 +88,9 @@ interface ExampleSentence {
 
 // Update version info with fixed timestamp
 const VERSION_INFO = {
-  lastUpdated: "2025-03-26T11:45:00Z", // Fixed timestamp of when v1.1.1 was released
-  version: "1.1.2",
-  changes: "Fixed version indicator to show actual update time"
+  lastUpdated: "2025-03-26T11:30:00Z", // Corrected timestamp to 11:30 AM
+  version: "1.1.3",
+  changes: "Fixed timestamp to show correct update time (11:30 AM)"
 };
 
 // Update phrases with real example sentences

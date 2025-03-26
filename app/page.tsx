@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.5",
-  changes: "Completely redesigned audio player for iOS"
+  version: "1.3.6",
+  changes: "Fixed deployment issues with server-side rendering"
 };
 
 // Update phrases with real example sentences
@@ -698,6 +698,7 @@ export default function ThaiFlashcards() {
   const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
   const [showAudioPlayer, setShowAudioPlayer] = useState(false);
   const [currentAudioText, setCurrentAudioText] = useState("");
+  const [isIOS, setIsIOS] = useState(false);
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -717,6 +718,12 @@ export default function ThaiFlashcards() {
   useEffect(() => {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
+
+  // Client-side detection of iOS devices
+  useEffect(() => {
+    // Only run on client side
+    setIsIOS(/iPhone|iPad|iPod/.test(navigator.userAgent));
+  }, []);
 
   // Create a simplified audio approach - just show text to speak
   const initiateAudio = (text: string) => {
@@ -1106,10 +1113,12 @@ export default function ThaiFlashcards() {
           <div>{index + 1} of {phrases.length} total</div>
         </div>
 
-        {/* Show a notice about audio at the top */}
-        <div className="bg-blue-900 bg-opacity-30 rounded-lg p-3 text-blue-300 text-sm">
-          <p>Due to iOS audio limitations, tap "Play" to see the Thai text you should speak aloud.</p>
-        </div>
+        {/* Show a notice about audio at the top - only for iOS */}
+        {isIOS && (
+          <div className="bg-blue-900 bg-opacity-30 rounded-lg p-3 text-blue-300 text-sm">
+            <p>Due to iOS audio limitations, tap "Play" to see the Thai text you should speak aloud.</p>
+          </div>
+        )}
 
         {/* Main Card */}
         <div className="neumorphic p-6 space-y-4">
@@ -1427,7 +1436,7 @@ export default function ThaiFlashcards() {
         </div>
       </div>
 
-      {/* Add CSS at the end of the file for the iOS audio element */}
+      {/* Use client-side styles to avoid navigator at build time */}
       <style jsx>{`
         .ios-audio-element {
           position: fixed;
@@ -1436,7 +1445,7 @@ export default function ThaiFlashcards() {
           z-index: 1000;
           height: 40px;
           width: 300px;
-          display: ${/iPhone|iPad|iPod/.test(navigator.userAgent) ? 'block' : 'none'};
+          display: block;
         }
       `}</style>
     </main>

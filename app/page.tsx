@@ -58,7 +58,21 @@ const commonPhrases = {
   greetings: ['ครับ', 'ค่ะ', 'ครับ/ค่ะ', 'ค่ะ/ครับ'],
   timeOfDay: ['ตอนเช้า', 'ตอนบ่าย', 'ตอนเย็น', 'ตอนกลางคืน'],
   questions: ['ครับ/ค่ะ?', 'ค่ะ/ครับ?', 'ครับ?', 'ค่ะ?'],
-  responses: ['ครับ/ค่ะ', 'ค่ะ/ครับ', 'ครับ', 'ค่ะ']
+  responses: ['ครับ/ค่ะ', 'ค่ะ/ครับ', 'ครับ', 'ค่ะ'],
+  sentenceStarters: [
+    { thai: 'ฉันชอบ', pronunciation: 'chan chop', meaning: 'I like' },
+    { thai: 'นี่คือ', pronunciation: 'nee keu', meaning: 'This is' },
+    { thai: 'ฉันต้องการ', pronunciation: 'chan tong karn', meaning: 'I want' },
+    { thai: 'เขาชอบ', pronunciation: 'kao chop', meaning: 'He/she likes' },
+    { thai: 'ฉันมี', pronunciation: 'chan mee', meaning: 'I have' }
+  ],
+  sentenceEndings: [
+    { thai: 'มาก', pronunciation: 'mak', meaning: 'a lot' },
+    { thai: 'เล็กน้อย', pronunciation: 'lek noi', meaning: 'a little' },
+    { thai: 'ทุกวัน', pronunciation: 'took wan', meaning: 'every day' },
+    { thai: 'ตอนนี้', pronunciation: 'ton nee', meaning: 'right now' },
+    { thai: 'แล้ว', pronunciation: 'laew', meaning: 'already' }
+  ]
 };
 
 // Anki SRS constants
@@ -78,6 +92,13 @@ const LEARNING_STEPS = [1, 10]; // Initial learning steps in minutes
 const GRADUATING_INTERVAL = 1; // First interval after learning in days
 const EASY_INTERVAL = 4; // Interval when rating Easy on new card
 const NEW_CARDS_PER_DAY = 20;
+
+// Add a new interface for the random sentence
+interface RandomSentence {
+  thai: string;
+  pronunciation: string;
+  translation: string;
+}
 
 const DEFAULT_PHRASES: Phrase[] = [
   {
@@ -153,6 +174,7 @@ export default function ThaiFlashcards() {
       };
     }
   });
+  const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
 
   useEffect(() => {
     localStorage.setItem('cardProgress', JSON.stringify(cardProgress));
@@ -206,6 +228,7 @@ export default function ThaiFlashcards() {
   const handleCardAction = (difficulty: 'hard' | 'good' | 'easy') => {
     setIndex((prevIndex) => (prevIndex + 1) % phrases.length);
     setShowAnswer(false);
+    setRandomSentence(null);
   };
 
   const handleResetAll = () => {
@@ -213,13 +236,97 @@ export default function ThaiFlashcards() {
     window.location.reload();
   };
 
-  // Add function to generate a random phrase
+  // Create a sentence using the current word and random elements from common phrases
   const generateRandomPhrase = () => {
-    // Get a random phrase different from the current one
-    const otherPhrases = phrases.filter((_, i) => i !== index);
-    const randomIndex = Math.floor(Math.random() * otherPhrases.length);
-    const randomPhrase = otherPhrases[randomIndex];
-    return randomPhrase.thai;
+    const currentPhrase = phrases[index];
+    
+    // Generate components for a random sentence
+    const getRandom = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
+    
+    // Create different sentence patterns
+    const sentencePatterns = [
+      // Pattern 1: current word + greeting
+      () => {
+        const greeting = getRandom(commonPhrases.greetings);
+        return {
+          thai: `${currentPhrase.thai}${greeting}`,
+          pronunciation: `${currentPhrase.pronunciation} ${greeting === 'ครับ' ? 'krap' : 'ka'}`,
+          translation: `${currentPhrase.meaning} (polite particle)`
+        };
+      },
+      
+      // Pattern 2: current word + time of day
+      () => {
+        const timeOfDay = getRandom(commonPhrases.timeOfDay);
+        return {
+          thai: `${currentPhrase.thai}${timeOfDay}`,
+          pronunciation: `${currentPhrase.pronunciation} ${timeOfDay === 'ตอนเช้า' ? 'ton chao' : 
+                         timeOfDay === 'ตอนบ่าย' ? 'ton bai' : 
+                         timeOfDay === 'ตอนเย็น' ? 'ton yen' : 'ton klang keun'}`,
+          translation: `${currentPhrase.meaning} ${timeOfDay === 'ตอนเช้า' ? 'in the morning' : 
+                        timeOfDay === 'ตอนบ่าย' ? 'in the afternoon' : 
+                        timeOfDay === 'ตอนเย็น' ? 'in the evening' : 'at night'}`
+        };
+      },
+      
+      // Pattern 3: current word as a question
+      () => {
+        const question = getRandom(commonPhrases.questions);
+        return {
+          thai: `${currentPhrase.thai}${question}`,
+          pronunciation: `${currentPhrase.pronunciation} ${question.includes('ครับ') ? 'krap?' : 'ka?'}`,
+          translation: `${currentPhrase.meaning}? (question form)`
+        };
+      },
+      
+      // Pattern 4: Sentence starter + current word
+      () => {
+        const starter = getRandom(commonPhrases.sentenceStarters);
+        return {
+          thai: `${starter.thai}${currentPhrase.thai}`,
+          pronunciation: `${starter.pronunciation} ${currentPhrase.pronunciation}`,
+          translation: `${starter.meaning} ${currentPhrase.meaning.toLowerCase()}`
+        };
+      },
+      
+      // Pattern 5: Sentence starter + current word + ending
+      () => {
+        const starter = getRandom(commonPhrases.sentenceStarters);
+        const ending = getRandom(commonPhrases.sentenceEndings);
+        return {
+          thai: `${starter.thai}${currentPhrase.thai}${ending.thai}`,
+          pronunciation: `${starter.pronunciation} ${currentPhrase.pronunciation} ${ending.pronunciation}`,
+          translation: `${starter.meaning} ${currentPhrase.meaning.toLowerCase()} ${ending.meaning}`
+        };
+      },
+      
+      // Pattern 6: Time of day + current word
+      () => {
+        const timeOfDay = getRandom(commonPhrases.timeOfDay);
+        const timeMap: {[key: string]: {pronunciation: string, translation: string}} = {
+          'ตอนเช้า': {pronunciation: 'ton chao', translation: 'In the morning'},
+          'ตอนบ่าย': {pronunciation: 'ton bai', translation: 'In the afternoon'},
+          'ตอนเย็น': {pronunciation: 'ton yen', translation: 'In the evening'},
+          'ตอนกลางคืน': {pronunciation: 'ton klang keun', translation: 'At night'}
+        };
+        
+        return {
+          thai: `${timeOfDay}${currentPhrase.thai}`,
+          pronunciation: `${timeMap[timeOfDay].pronunciation} ${currentPhrase.pronunciation}`,
+          translation: `${timeMap[timeOfDay].translation}, ${currentPhrase.meaning.toLowerCase()}`
+        };
+      }
+    ];
+    
+    // Pick a random sentence pattern
+    const patternIndex = Math.floor(Math.random() * sentencePatterns.length);
+    const newSentence = sentencePatterns[patternIndex]();
+    
+    // Update the state with the new random sentence
+    setRandomSentence(newSentence);
+    
+    // Return the Thai text for speech
+    return newSentence.thai;
   };
 
   return (
@@ -265,6 +372,16 @@ export default function ThaiFlashcards() {
               {phrases[index].meaning}
             </h2>
           </div>
+
+          {/* Display random sentence if available */}
+          {randomSentence && (
+            <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
+              <h3 className="text-sm text-blue-400 uppercase tracking-wider mb-1">In Context</h3>
+              <p className="text-base text-white font-medium">{randomSentence.thai}</p>
+              <p className="text-sm text-gray-400 italic">{randomSentence.pronunciation}</p>
+              <p className="text-sm text-gray-300 mt-2">{randomSentence.translation}</p>
+            </div>
+          )}
 
           {showAnswer ? (
             <div className="space-y-4">
@@ -342,12 +459,34 @@ export default function ThaiFlashcards() {
               </div>
             </div>
           ) : (
-            <button
-              onClick={() => setShowAnswer(true)}
-              className="w-full neumorphic-button"
-            >
-              Show Answer
-            </button>
+            <div className="space-y-4">
+              <button
+                onClick={() => setShowAnswer(true)}
+                className="w-full neumorphic-button"
+              >
+                Show Answer
+              </button>
+              
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => speak(phrases[index].thai)}
+                  disabled={isPlaying}
+                  className="neumorphic-button flex-1"
+                >
+                  {isPlaying ? 'Playing...' : 'Play'}
+                </button>
+                <button
+                  onClick={() => {
+                    const phrase = generateRandomPhrase();
+                    speak(phrase);
+                  }}
+                  disabled={isPlaying}
+                  className="neumorphic-button flex-1"
+                >
+                  Random Phrase
+                </button>
+              </div>
+            </div>
           )}
         </div>
 

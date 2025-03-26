@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.0.5",
-  changes: "Fixed button placement and renamed to In Context"
+  version: "1.0.6",
+  changes: "Restored Vocabulary List and Autoplay functionality"
 };
 
 // Update phrases with real example sentences
@@ -246,6 +246,12 @@ export default function ThaiFlashcards() {
     localStorage.setItem('levelProgress', JSON.stringify(levelProgress));
   }, [levelProgress]);
 
+  useEffect(() => {
+    if (autoplay && showAnswer && !isPlaying) {
+      speak(phrases[index].thai);
+    }
+  }, [showAnswer, autoplay, isPlaying, phrases, index]);
+
   const handlePhoneticChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalMnemonics(prev => ({
       ...prev,
@@ -306,6 +312,36 @@ export default function ThaiFlashcards() {
     }
     
     return currentPhrase.thai; // Fallback if no examples exist
+  };
+
+  // Add a function to calculate stats
+  const calculateStats = () => {
+    // Calculate total learned cards
+    const learnedCards = Object.keys(cardProgress).length;
+    
+    // Calculate total reviews
+    let totalReviews = 0;
+    Object.values(cardProgress).forEach(card => {
+      totalReviews += card.reviews.length;
+    });
+    
+    // Count cards due today
+    const today = new Date().toDateString();
+    let dueCards = 0;
+    Object.values(cardProgress).forEach(card => {
+      const nextReviewDate = new Date(card.nextReviewDate).toDateString();
+      if (nextReviewDate <= today) {
+        dueCards++;
+      }
+    });
+    
+    return {
+      totalCards: phrases.length,
+      learnedCards,
+      dueCards,
+      totalReviews,
+      remainingCards: phrases.length - learnedCards
+    };
   };
 
   return (
@@ -472,7 +508,7 @@ export default function ThaiFlashcards() {
 
       {/* Modals */}
       {showStats && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="neumorphic max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Statistics</h2>
@@ -483,14 +519,54 @@ export default function ThaiFlashcards() {
                 ✕
             </button>
           </div>
-            {/* Add statistics content here */}
+            
+            <div className="space-y-4">
+              {(() => {
+                const stats = calculateStats();
+                return (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="neumorphic p-4 text-center">
+                        <div className="text-2xl font-bold text-blue-400">{stats.totalCards}</div>
+                        <div className="text-sm text-gray-400">Total Cards</div>
+                      </div>
+                      <div className="neumorphic p-4 text-center">
+                        <div className="text-2xl font-bold text-green-400">{stats.learnedCards}</div>
+                        <div className="text-sm text-gray-400">Cards Learned</div>
+                      </div>
+                      <div className="neumorphic p-4 text-center">
+                        <div className="text-2xl font-bold text-yellow-400">{stats.dueCards}</div>
+                        <div className="text-sm text-gray-400">Cards Due</div>
+                      </div>
+                      <div className="neumorphic p-4 text-center">
+                        <div className="text-2xl font-bold text-purple-400">{stats.totalReviews}</div>
+                        <div className="text-sm text-gray-400">Total Reviews</div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <h3 className="text-lg font-bold mb-2">Progress</h3>
+                      <div className="w-full bg-gray-800 rounded-full h-4">
+                        <div 
+                          className="bg-blue-500 h-4 rounded-full" 
+                          style={{ width: `${(stats.learnedCards / stats.totalCards) * 100}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-right text-sm text-gray-400 mt-1">
+                        {Math.round((stats.learnedCards / stats.totalCards) * 100)}% Complete
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
         </div>
-      </div>
       )}
 
       {showHowItWorks && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="neumorphic max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="neumorphic max-w-md w-full p-6 max-h-[80vh] overflow-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">How It Works</h2>
               <button
@@ -500,14 +576,41 @@ export default function ThaiFlashcards() {
                 ✕
               </button>
             </div>
-            {/* Add how it works content here */}
+            <div className="space-y-4 text-gray-300">
+              <p>
+                <strong className="text-white">Flashcards:</strong> This app helps you learn Thai vocabulary using spaced repetition.
+              </p>
+              
+              <p>
+                <strong className="text-white">Controls:</strong>
+              </p>
+              <ul className="list-disc pl-5 space-y-2">
+                <li><strong className="text-white">Show Answer</strong> - Reveals the Thai word, pronunciation and mnemonic.</li>
+                <li><strong className="text-white">Play</strong> - Listen to the Thai pronunciation.</li>
+                <li><strong className="text-white">In Context</strong> - See and hear the word used in a real Thai sentence.</li>
+                <li><strong className="text-white">Autoplay</strong> - Automatically plays the pronunciation when you reveal the answer.</li>
+              </ul>
+              
+              <p>
+                <strong className="text-white">Learning:</strong> After reviewing a card, rate your knowledge:
+              </p>
+              <ul className="list-disc pl-5 space-y-2">
+                <li><strong className="text-red-500">Wrong</strong> - You didn't remember it. Card will appear again soon.</li>
+                <li><strong className="text-yellow-500">Correct</strong> - You remembered with some effort. Card will repeat at a moderate interval.</li>
+                <li><strong className="text-green-500">Easy</strong> - You knew it well. Card will appear after a longer interval.</li>
+              </ul>
+              
+              <p>
+                <strong className="text-white">Personalization:</strong> You can customize mnemonics and phonetic spellings to help your learning.
+              </p>
+            </div>
           </div>
         </div>
       )}
 
       {showVocabulary && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="neumorphic max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="neumorphic max-w-md w-full p-6 max-h-[80vh] overflow-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Vocabulary List</h2>
               <button
@@ -517,7 +620,42 @@ export default function ThaiFlashcards() {
                 ✕
               </button>
             </div>
-            {/* Add vocabulary list content here */}
+            <div className="space-y-2">
+              {phrases.map((phrase, idx) => {
+                const statusColor = idx === index ? "bg-blue-500" : "bg-gray-700";
+                return (
+                  <div 
+                    key={idx}
+                    className="neumorphic p-3 flex items-center justify-between cursor-pointer hover:bg-gray-800 transition-colors"
+                    onClick={() => {
+                      setIndex(idx);
+                      setShowVocabulary(false);
+                      setShowAnswer(false);
+                      setRandomSentence(null);
+                    }}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-3 h-3 rounded-full ${statusColor}`} />
+                      <span>{phrase.meaning}</span>
+                    </div>
+                    <div className="flex items-center space-x-4 text-sm text-gray-400">
+                      <span>{phrase.thai}</span>
+                      <button
+                        className="neumorphic-circle opacity-75 hover:opacity-100 w-8 h-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isPlaying) {
+                            speak(phrase.thai);
+                          }
+                        }}
+                      >
+                        🔊
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

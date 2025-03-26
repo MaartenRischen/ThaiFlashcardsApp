@@ -89,8 +89,8 @@ interface ExampleSentence {
 // Update version info with new app name
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.1",
-  changes: "Fixed play button on mobile and restored autoplay toggle"
+  version: "1.3.2",
+  changes: "Fixed mobile audio playback and autoplay toggle"
 };
 
 // Update phrases with real example sentences
@@ -679,7 +679,14 @@ export default function ThaiFlashcards() {
   const [showStats, setShowStats] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showVocabulary, setShowVocabulary] = useState(false);
-  const [autoplay, setAutoplay] = useState<boolean>(false);
+  const [autoplay, setAutoplay] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('autoplay');
+      return saved ? JSON.parse(saved) === true : false;
+    } catch {
+      return false;
+    }
+  });
   const [activeCards, setActiveCards] = useState<number[]>(() => {
     try {
       const saved = localStorage.getItem('activeCards');
@@ -860,41 +867,88 @@ export default function ThaiFlashcards() {
     }));
   };
 
+  // Improved speak function for better mobile compatibility
   const speak = async (text: string) => {
+    // Ensure the user has interacted with the page first (required for mobile)
+    if (!document.documentElement.hasAttribute('data-user-interacted')) {
+      document.documentElement.setAttribute('data-user-interacted', 'true');
+    }
+
     setIsPlaying(true);
+
     try {
+      // Create a fresh speech synthesis instance
+      if (!window.speechSynthesis) {
+        console.error('Speech synthesis not supported');
+        setIsPlaying(false);
+        return;
+      }
+
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+
       // Create a new utterance for the specified text
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'th-TH';
       utterance.volume = 1;
-      
-      // Make sure to set the onend callback before calling speak
+      utterance.rate = 0.9; // Slightly slower for better clarity
+
+      // Set event handlers
       utterance.onend = () => {
+        console.log('Speech ended successfully');
         setIsPlaying(false);
       };
-      
-      // Handle errors that might not trigger onend
+
       utterance.onerror = (event) => {
         console.error('Speech synthesis error:', event);
         setIsPlaying(false);
       };
-      
-      // Cancel any ongoing speech synthesis first to avoid issues
-      window.speechSynthesis.cancel();
+
+      // Special handling for iOS Safari
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
       
       // Speak the text
       window.speechSynthesis.speak(utterance);
-      
-      // For iOS Safari - it sometimes needs a nudge
-      if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-        window.speechSynthesis.pause();
-        window.speechSynthesis.resume();
+
+      // iOS Safari needs special handling
+      if (isIOS) {
+        // iOS requires an immediate pause and resume to kick-start speech in some cases
+        setTimeout(() => {
+          window.speechSynthesis.pause();
+          window.speechSynthesis.resume();
+        }, 50);
+
+        // iOS sometimes stops speech synthesis when the app goes to background
+        // Set a timer to ensure isPlaying is reset even if onend doesn't fire
+        setTimeout(() => {
+          if (isPlaying) {
+            setIsPlaying(false);
+          }
+        }, 5000); // 5 second timeout
       }
     } catch (error) {
       console.error('Speech synthesis error:', error);
       setIsPlaying(false);
     }
   };
+  
+  // Add user interaction detection to help with mobile audio
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      document.documentElement.setAttribute('data-user-interacted', 'true');
+    };
+    
+    // Add event listeners for common user interactions
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('touchstart', handleUserInteraction);
+    document.addEventListener('keydown', handleUserInteraction);
+    
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, []);
 
   // Helper function to calculate next interval using Anki SM-2 algorithm
   const calculateNextReview = (difficulty: 'hard' | 'good' | 'easy', currentProgress: any) => {
@@ -1196,7 +1250,18 @@ export default function ThaiFlashcards() {
           <div className="flex items-center space-x-2">
             <span className="text-gray-400 text-sm">Autoplay</span>
             <button
-              onClick={() => setAutoplay(!autoplay)}
+              onClick={() => {
+                const newState = !autoplay;
+                setAutoplay(newState);
+                localStorage.setItem('autoplay', JSON.stringify(newState));
+                
+                // Play a test sound on enable to request audio permission on mobile
+                if (newState) {
+                  const shortSound = new SpeechSynthesisUtterance(".");
+                  shortSound.volume = 0.1;
+                  speechSynthesis.speak(shortSound);
+                }
+              }}
               className={`w-12 h-6 rounded-full transition-colors ${autoplay ? 'bg-blue-500' : 'bg-gray-600'} relative`}
             >
               <span 

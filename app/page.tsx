@@ -1119,21 +1119,51 @@ export default function ThaiFlashcards() {
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       <div className="w-full max-w-lg mx-auto p-4 space-y-4">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-100">Donkey Bridge</h1>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setShowHowItWorks(!showHowItWorks)}
-              className="neumorphic-button"
-            >
-              How It Works
-            </button>
-            <button
-              onClick={() => setShowVocabulary(!showVocabulary)}
-              className="neumorphic-button"
-            >
-              Vocabulary
-            </button>
+        {/* Header with Logo and Title */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-full bg-[#222] rounded-xl p-6 mb-4 flex items-center justify-between relative overflow-hidden neumorphic">
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-10 transform translate-x-8 -translate-y-8">
+              <svg viewBox="0 0 500 500" className="w-full h-full">
+                <g fill="#FFD700">
+                  <path d="M200 150l50-30 50 30-20-60h-60z"/>
+                  <path d="M150 200l30-50 30 50-60-20z"/>
+                  <path d="M300 200l-30-50-30 50 60-20z"/>
+                </g>
+              </svg>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16">
+                <svg viewBox="0 0 500 500" className="w-full h-full">
+                  <circle cx="250" cy="250" r="240" fill="#1a1a1a"/>
+                  <path d="M250 50c110.457 0 200 89.543 200 200s-89.543 200-200 200S50 360.457 50 250 139.543 50 250 50" fill="#222"/>
+                  <g fill="#FFD700">
+                    <path d="M200 150l50-30 50 30-20-60h-60z"/>
+                    <path d="M150 200l30-50 30 50-60-20z"/>
+                    <path d="M300 200l-30-50-30 50 60-20z"/>
+                  </g>
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-100">Donkey Bridge</h1>
+                <p className="text-gray-400 text-sm">Thai Learning</p>
+              </div>
+            </div>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowHowItWorks(!showHowItWorks)}
+                className="neumorphic-button text-sm px-3 py-1"
+              >
+                How It Works
+              </button>
+              <button
+                onClick={() => setShowVocabulary(!showVocabulary)}
+                className="neumorphic-button text-sm px-3 py-1"
+              >
+                Vocabulary
+              </button>
+            </div>
           </div>
         </div>
 

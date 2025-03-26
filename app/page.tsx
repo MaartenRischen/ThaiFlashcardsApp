@@ -619,196 +619,404 @@ export default function ThaiFlashcards() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a] text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-bold mb-2">Thai Flashcards</h1>
-            <p className="text-gray-400">v1.3.13 | {new Date().toLocaleString()}</p>
-            <p className="text-blue-400">Latest: Improved mnemonic input field size and position</p>
-          </div>
-          <div className="flex items-center space-x-4">
+    <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
+      <div className="w-full max-w-lg mx-auto p-4 space-y-4">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-100">Donkey Bridge</h1>
+          <div className="flex space-x-2">
             <button
-              onClick={() => setLocalMnemonics({})}
-              className="px-4 py-2 bg-red-600/20 text-red-400 rounded-md hover:bg-red-600/30 transition-colors"
+              onClick={() => setShowHowItWorks(!showHowItWorks)}
+              className="neumorphic-button"
             >
-              Reset All
+              How It Works
             </button>
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-400">Autoplay</span>
-              <Switch checked={autoplay} onCheckedChange={setAutoplay} />
-            </div>
+            <button
+              onClick={() => setShowVocabulary(!showVocabulary)}
+              className="neumorphic-button"
+            >
+              Vocabulary
+            </button>
           </div>
         </div>
 
-        <div className="relative">
-          <div className="flex justify-center items-center space-x-6 mb-8">
-            <button
-              onClick={prevCard}
-              className="text-4xl text-gray-400 hover:text-white transition-colors"
-              disabled={index === 0}
-            >
-              ←
-            </button>
-            <div className="text-center">
-              <div className="text-6xl mb-4">{phrases[index].thai}</div>
-              {showAnswer ? (
-                <>
-                  <div className="text-2xl text-gray-400">{phrases[index].pronunciation}</div>
-                  <div className="text-xl text-gray-500 mt-2">{phrases[index].english}</div>
-                  <div className="flex justify-center space-x-4 mt-6">
-                    <button
-                      onClick={() => handleCardAction('hard')}
-                      className="px-4 py-2 bg-red-600/20 text-red-400 rounded-md hover:bg-red-600/30 transition-colors"
-                    >
-                      Wrong
-                    </button>
-                    <button
-                      onClick={() => handleCardAction('good')}
-                      className="px-4 py-2 bg-yellow-600/20 text-yellow-400 rounded-md hover:bg-yellow-600/30 transition-colors"
-                    >
-                      Correct
-                    </button>
-                    <button
-                      onClick={() => handleCardAction('easy')}
-                      className="px-4 py-2 bg-green-600/20 text-green-400 rounded-md hover:bg-green-600/30 transition-colors"
-                    >
-                      Easy
-                    </button>
-                  </div>
-                  <div className="flex justify-center space-x-4 mt-4">
-                    <button
-                      onClick={() => speak(phrases[index].thai)}
-                      disabled={isPlaying}
-                      className="px-4 py-2 bg-blue-600/20 text-blue-400 rounded-md hover:bg-blue-600/30 transition-colors"
-                    >
-                      {isPlaying ? 'Playing...' : 'Play Sound'}
-                    </button>
-                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                      <DialogTrigger asChild>
-                        <button
-                          onClick={() => {
-                            const phrase = generateRandomPhrase();
-                            if (phrase) {
-                              speak(phrase);
-                            }
-                          }}
-                          disabled={isPlaying}
-                          className="px-4 py-2 bg-purple-600/20 text-purple-400 rounded-md hover:bg-purple-600/30 transition-colors"
-                        >
-                          In Context
-                        </button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Example Usage</DialogTitle>
-                          <DialogDescription className="pt-4">
-                            {randomSentence ? (
-                              <div className="space-y-4">
-                                <div className="text-xl font-medium text-white">
-                                  {randomSentence.thai}
-                                </div>
-                                <div className="text-gray-400">
-                                  {randomSentence.english}
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="text-gray-400">
-                                No example sentences available for this word.
-                              </div>
-                            )}
-                          </DialogDescription>
-                        </DialogHeader>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </>
-              ) : (
-                <button
-                  onClick={() => setShowAnswer(true)}
-                  className="mt-6 px-6 py-3 bg-blue-600/20 text-blue-400 rounded-md hover:bg-blue-600/30 transition-colors text-lg"
-                >
-                  Show Answer
-                </button>
-              )}
-            </div>
-            <button
-              onClick={nextCard}
-              className="text-4xl text-gray-400 hover:text-white transition-colors"
-              disabled={index === phrases.length - 1}
-            >
-              →
-            </button>
+        {/* Card Status */}
+        <div className="flex justify-between items-center text-sm text-gray-400">
+          <div>Card {activeCards.indexOf(index) + 1} of {activeCards.length} active</div>
+          <div>{index + 1} of {phrases.length} total</div>
+        </div>
+
+        {/* Main Card */}
+        <div className="neumorphic p-6 space-y-4">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white">
+              {phrases[index].english}
+            </h2>
           </div>
 
-          <div className="mt-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg text-gray-400">Mnemonic</h2>
-              <div className="flex space-x-2">
+          {/* Display random sentence if available */}
+          {randomSentence && (
+            <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
+              <h3 className="text-sm text-blue-400 uppercase tracking-wider mb-1">In Context</h3>
+              <p className="text-base text-white font-medium">{randomSentence.thai}</p>
+              <p className="text-sm text-gray-400 italic">{randomSentence.english}</p>
+            </div>
+          )}
+
+          {showAnswer ? (
+            <div className="space-y-4">
+              <div>
+                <p className="text-lg">Thai: <span className="text-white">{phrases[index].thai}</span></p>
+              </div>
+
+              <div>
+                <p className="text-gray-400">
+                  Official pronunciation: <span className="text-gray-300">{phrases[index].pronunciation}</span>
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => {
-                    setLocalMnemonics(prev => ({
-                      ...prev,
-                      [index]: {
-                        text: phrases[index].mnemonic
-                      }
-                    }));
-                  }}
-                  className="px-3 py-1.5 bg-gray-800 text-gray-300 text-sm rounded hover:bg-gray-700 transition-colors"
+                  onClick={() => speak(phrases[index].thai)}
+                  disabled={isPlaying}
+                  className="neumorphic-button flex-1"
                 >
-                  Reset
+                  {isPlaying ? 'Playing...' : 'Play'}
+                </button>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <button
+                      onClick={() => {
+                        const phrase = generateRandomPhrase();
+                        if (phrase) {
+                          speak(phrase);
+                        }
+                      }}
+                      disabled={isPlaying}
+                      className="neumorphic-button flex-1"
+                    >
+                      In Context
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Example Usage</DialogTitle>
+                      <DialogDescription className="pt-4">
+                        {randomSentence ? (
+                          <div className="space-y-4">
+                            <div className="text-xl font-medium text-white">
+                              {randomSentence.thai}
+                            </div>
+                            <div className="text-gray-400">
+                              {randomSentence.english}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-gray-400">
+                            No example sentences available for this word.
+                          </div>
+                        )}
+                      </DialogDescription>
+                    </DialogHeader>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => handleCardAction('hard')} 
+                  className="neumorphic-button text-red-500"
+                >
+                  Wrong
                 </button>
                 <button
-                  onClick={() => {
-                    const dataStr = JSON.stringify(localMnemonics);
-                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                    const exportFileDefaultName = 'mnemonics.json';
-                    const linkElement = document.createElement('a');
-                    linkElement.setAttribute('href', dataUri);
-                    linkElement.setAttribute('download', exportFileDefaultName);
-                    linkElement.click();
-                  }}
-                  className="px-3 py-1.5 bg-gray-800 text-gray-300 text-sm rounded hover:bg-gray-700 transition-colors"
+                  onClick={() => handleCardAction('good')} 
+                  className="neumorphic-button text-yellow-500"
                 >
-                  Export All
+                  Correct
                 </button>
-                <button
-                  onClick={() => {
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = '.json';
-                    input.onchange = (e) => {
-                      const file = (e.target as HTMLInputElement).files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                          try {
-                            const importedMnemonics = JSON.parse(event.target?.result as string);
-                            setLocalMnemonics(importedMnemonics);
-                          } catch (error) {
-                            alert('Invalid file format');
-                          }
-                        };
-                        reader.readAsText(file);
-                      }
-                    };
-                    input.click();
-                  }}
-                  className="px-3 py-1.5 bg-gray-800 text-gray-300 text-sm rounded hover:bg-gray-700 transition-colors"
+                <button 
+                  onClick={() => handleCardAction('easy')} 
+                  className="neumorphic-button text-green-500"
                 >
-                  Import All
+                  Easy
                 </button>
               </div>
+
+              <div className="mt-6">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-gray-400">What does this sound like for you?</p>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => {
+                        setLocalMnemonics(prev => ({
+                          ...prev,
+                          [index]: {
+                            text: phrases[index].mnemonic
+                          }
+                        }));
+                      }}
+                      className="neumorphic-button text-sm px-2 py-1"
+                    >
+                      Reset
+                    </button>
+                    <button
+                      onClick={() => {
+                        const dataStr = JSON.stringify(localMnemonics);
+                        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                        const exportFileDefaultName = 'mnemonics.json';
+                        const linkElement = document.createElement('a');
+                        linkElement.setAttribute('href', dataUri);
+                        linkElement.setAttribute('download', exportFileDefaultName);
+                        linkElement.click();
+                      }}
+                      className="neumorphic-button text-sm px-2 py-1"
+                    >
+                      Export All
+                    </button>
+                    <button
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = '.json';
+                        input.onchange = (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              try {
+                                const importedMnemonics = JSON.parse(event.target?.result as string);
+                                setLocalMnemonics(importedMnemonics);
+                              } catch (error) {
+                                alert('Invalid file format');
+                              }
+                            };
+                            reader.readAsText(file);
+                          }
+                        };
+                        input.click();
+                      }}
+                      className="neumorphic-button text-sm px-2 py-1"
+                    >
+                      Import All
+                    </button>
+                  </div>
+                </div>
+                <textarea
+                  value={localMnemonics[index]?.text || phrases[index].mnemonic}
+                  onChange={(e) => handleMnemonicChange(e)}
+                  className="neumorphic-input w-full min-h-[120px] resize-none p-4 rounded-sm"
+                  placeholder="Add your own way to remember this sound..."
+                />
+              </div>
             </div>
-            <textarea
-              value={localMnemonics[index]?.text || phrases[index].mnemonic}
-              onChange={(e) => handleMnemonicChange(e)}
-              className="w-full min-h-[120px] bg-gray-800/50 text-white resize-none p-4 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
-              placeholder="Add your own way to remember this sound..."
-            />
+          ) : (
+            <div className="space-y-4">
+              <button 
+                onClick={() => setShowAnswer(true)}
+                className="w-full neumorphic-button"
+              >
+                Show Answer
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Reset Button and Autoplay toggle */}
+        <div className="flex justify-between items-center">
+          <button
+            onClick={handleResetAll}
+            className="neumorphic-button text-red-500"
+          >
+            Reset All
+          </button>
+          
+          <div className="flex items-center space-x-2">
+            <span className="text-gray-400 text-sm">Autoplay</span>
+            <Switch checked={autoplay} onCheckedChange={setAutoplay} />
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Settings Button */}
+      <div className="fixed bottom-16 right-4 z-20">
+        <button
+          onClick={() => setShowStats(!showStats)}
+          className="settings-button"
+        >
+          ⚙️
+        </button>
+      </div>
+
+      {/* Modals */}
+      {showStats && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="neumorphic max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Statistics</h2>
+              <button
+                onClick={() => setShowStats(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {(() => {
+                const stats = calculateStats();
+                return (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="neumorphic p-4 text-center">
+                        <div className="text-2xl font-bold text-blue-400">{stats.totalCards}</div>
+                        <div className="text-sm text-gray-400">Total Cards</div>
+                      </div>
+                      <div className="neumorphic p-4 text-center">
+                        <div className="text-2xl font-bold text-green-400">{stats.learnedCards}</div>
+                        <div className="text-sm text-gray-400">Cards Learned</div>
+                      </div>
+                      <div className="neumorphic p-4 text-center">
+                        <div className="text-2xl font-bold text-yellow-400">{stats.dueCards}</div>
+                        <div className="text-sm text-gray-400">Cards Due</div>
+                      </div>
+                      <div className="neumorphic p-4 text-center">
+                        <div className="text-2xl font-bold text-purple-400">{stats.totalReviews}</div>
+                        <div className="text-sm text-gray-400">Total Reviews</div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <h3 className="text-lg font-bold mb-2">Progress</h3>
+                      <div className="w-full bg-gray-800 rounded-full h-4">
+                        <div 
+                          className="bg-blue-500 h-4 rounded-full" 
+                          style={{ width: `${(stats.learnedCards / stats.totalCards) * 100}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-right text-sm text-gray-400 mt-1">
+                        {Math.round((stats.learnedCards / stats.totalCards) * 100)}% Complete
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showHowItWorks && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="neumorphic max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">How It Works</h2>
+              <button
+                onClick={() => setShowHowItWorks(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-4 text-gray-300">
+              <p>
+                <strong className="text-white">Donkey Bridge</strong> uses spaced repetition to help you learn Thai vocabulary efficiently.
+              </p>
+              
+              <p>
+                <strong className="text-white">Active Cards:</strong> The app keeps 5 cards in active rotation that need your attention. These are cards you haven't seen, got wrong, or are due for review today.
+              </p>
+              
+              <p>
+                <strong className="text-white">Spaced Repetition:</strong> When you rate a card:
+              </p>
+              
+              <ul className="list-disc pl-5 space-y-2">
+                <li><strong className="text-red-500">Wrong</strong> - You didn't remember it. Card will appear again soon.</li>
+                <li><strong className="text-yellow-500">Correct</strong> - You remembered with some effort. Card will repeat at a moderate interval.</li>
+                <li><strong className="text-green-500">Easy</strong> - You knew it well. Card will appear after a longer interval.</li>
+              </ul>
+              
+              <p>
+                <strong className="text-white">Personalization:</strong> You can customize mnemonics and phonetic spellings to help your learning.
+              </p>
+              
+              <p>
+                <strong className="text-white">Example Sentences:</strong> Each word comes with authentic Thai example sentences to learn the word in context.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showVocabulary && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="neumorphic max-w-md w-full p-6 max-h-[80vh] overflow-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Vocabulary List</h2>
+              <button
+                onClick={() => setShowVocabulary(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-2">
+              {phrases.map((phrase, idx) => {
+                const isCurrentCard = idx === index;
+                const status = getCardStatus(idx);
+                const { color, label } = getStatusInfo(status);
+                
+                return (
+                  <div 
+                    key={idx}
+                    className={`neumorphic p-3 flex items-center justify-between cursor-pointer hover:bg-gray-800 transition-colors ${isCurrentCard ? 'border-l-4 border-blue-500' : ''}`}
+                    onClick={() => {
+                      setIndex(idx);
+                      setShowVocabulary(false);
+                      setShowAnswer(false);
+                      setRandomSentence(null);
+                    }}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-3 h-3 rounded-full ${color}`} />
+                      <span>{phrase.english}</span>
+                    </div>
+                    <div className="flex items-center space-x-3 text-sm">
+                      <span className="text-gray-400">
+                        {phrase.thai}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-xs ${color.replace('bg-', 'bg-opacity-20 text-')}`}>
+                        {label}
+                      </span>
+                      <button
+                        className="neumorphic-circle opacity-75 hover:opacity-100 w-8 h-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isPlaying) {
+                            speak(phrase.thai);
+                          }
+                        }}
+                      >
+                        🔊
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Version indicator at the bottom - shows changes and timestamp in Amsterdam timezone */}
+      <div className="w-full py-2 px-3 text-center text-xs border-t border-gray-700 bg-gray-800 sticky bottom-0 z-20">
+        <div className="flex flex-col sm:flex-row sm:justify-between items-center">
+          <p className="text-gray-300 font-medium">
+            v{VERSION_INFO.version} | {new Date(VERSION_INFO.lastUpdated).toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' })}
+          </p>
+          <p className="text-blue-400">Latest: {VERSION_INFO.changes}</p>
+        </div>
+      </div>
+    </main>
   );
 } 

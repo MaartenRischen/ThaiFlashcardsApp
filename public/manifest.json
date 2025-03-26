@@ -1,7 +1,7 @@
 {
-  "name": "Thai Flashcards",
-  "short_name": "ThaiCards",
-  "description": "Learn Thai with spaced repetition flashcards",
+  "name": "Donkey Bridge",
+  "short_name": "DonkeyBridge",
+  "description": "Learn Thai vocabulary effectively with mnemonics and spaced repetition",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

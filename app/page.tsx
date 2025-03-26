@@ -50,6 +50,12 @@ interface MnemonicEdits {
   };
 }
 
+// Update UserData interface to match the storage utility
+interface UserData {
+  mnemonics?: { [phraseId: string]: string };
+  [key: string]: any;
+}
+
 // Add level-related interfaces
 interface LevelProgress {
   currentLevel: number;
@@ -122,12 +128,19 @@ function ThaiFlashcardsInner() {
   const [index, setIndex] = useState<number | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [localMnemonics, setLocalMnemonics] = useState<MnemonicEdits>(() => {
-    try {
-      const saved = localStorage.getItem('mnemonicEdits');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
+    const saved = loadUserData() as unknown as UserData;
+    const mnemonics = saved?.mnemonics || {};
+    // Convert string-based mnemonics to the new format
+    return Object.entries(mnemonics).reduce((acc, [key, value]) => {
+      const numKey = parseInt(key, 10);
+      if (!isNaN(numKey)) {
+        acc[numKey] = {
+          text: value,
+          pronunciation: phrases[numKey]?.pronunciation || ''
+        };
+      }
+      return acc;
+    }, {} as MnemonicEdits);
   });
   const [cardProgress, setCardProgress] = useState<CardProgress>(() => {
     try {
@@ -363,18 +376,13 @@ function ThaiFlashcardsInner() {
   };
 
   const generateRandomPhrase = () => {
-    if (!phrases.length || index === null) return '';
-    
+    if (index === null) return;
     const currentPhrase = phrases[index];
-    const phraseTypes = Object.keys(commonPhrases);
-    const randomType = phraseTypes[Math.floor(Math.random() * phraseTypes.length)];
-    const randomWord = commonPhrases[randomType as keyof typeof commonPhrases][
-      Math.floor(Math.random() * commonPhrases[randomType as keyof typeof commonPhrases].length)
-    ];
-
-    const newPhrase = `${currentPhrase.thai} ${randomWord}`;
-    setRandomPhrase(newPhrase);
-    return newPhrase;
+    const otherPhrases = phrases.filter((_, i) => i !== index);
+    const randomIndex = Math.floor(Math.random() * otherPhrases.length);
+    const randomPhrase = otherPhrases[randomIndex];
+    setRandomPhrase(`${randomPhrase.thai} (${randomPhrase.pronunciation})`);
+    return randomPhrase.thai; // Return the Thai text for speaking
   };
 
   const calculateNextReview = (difficulty: Review['difficulty'], currentProgress: CardProgress[number] | undefined) => {
@@ -507,7 +515,7 @@ function ThaiFlashcardsInner() {
 
   // Modify handleCardAction to ensure levelProgress is valid
   const handleCardAction = (difficulty: Review['difficulty']) => {
-    if (index === null) return;
+    if (index === null || !currentPhrase) return;
     
     const currentProgress = cardProgress[index] || { reviews: [], nextReviewDate: new Date().toISOString() };
     const nextReview: Review = {
@@ -559,7 +567,7 @@ function ThaiFlashcardsInner() {
 
   // Add handler for personal phonetics
   const handlePhoneticChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (index === null) return;
+    if (index === null || !currentPhrase) return;
     
     const newPhonetic = e.target.value;
     setLocalMnemonics({ 
@@ -572,7 +580,7 @@ function ThaiFlashcardsInner() {
   };
 
   const handleMnemonicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (index === null) return;
+    if (index === null || !currentPhrase) return;
     
     const newText = e.target.value;
     setLocalMnemonics({ 
@@ -656,38 +664,8 @@ function ThaiFlashcardsInner() {
 
   const stats = calculateStats();
 
-  // Add useEffect for autoplay
-  useEffect(() => {
-    if (autoplay && showAnswer && !isPlaying) {
-      speak(currentPhrase.thai);
-    }
-  }, [showAnswer, autoplay]);
-
-  // Ensure we have valid data before rendering
-  if (!Array.isArray(phrases) || phrases.length === 0) {
-    console.error('Invalid phrases data:', { phrases });
-    return (
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <h1 className="text-2xl font-bold mb-4">Something went wrong!</h1>
-          <p className="text-gray-300 mb-6">Unable to load phrases. Please try refreshing the page.</p>
-          <button
-            onClick={() => {
-              setPhrases(DEFAULT_PHRASES);
-              setIndex(0);
-              window.location.reload();
-            }}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded transition-colors duration-200"
-          >
-            Refresh Page
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   // Get the current phrase safely
-  const currentPhrase = phrases[index];
+  const currentPhrase = index !== null ? phrases[index] : null;
   if (!currentPhrase || typeof currentPhrase !== 'object') {
     console.error('Invalid current phrase:', { index, currentPhrase, phrasesLength: phrases.length });
     return (
@@ -780,6 +758,13 @@ function ThaiFlashcardsInner() {
     return currentStreak;
   };
 
+  // Add useEffect for autoplay
+  useEffect(() => {
+    if (autoplay && showAnswer && !isPlaying && currentPhrase) {
+      speak(currentPhrase.thai);
+    }
+  }, [showAnswer, autoplay, currentPhrase]);
+
   return (
     <main className="flex min-h-screen flex-col items-center p-4 bg-[#1a1a1a]">
       <div className="w-full max-w-md space-y-4">
@@ -834,12 +819,12 @@ function ThaiFlashcardsInner() {
                 <span className={`px-2 py-1 rounded ${
                   isDue ? 'bg-red-600' : 'bg-gray-600'
                 }`}>
-                  {isDue ? 'Due now' : `Due in ${Math.ceil((nextReview.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days`}
+                  {isDue ? 'Due now' : `Due in ${Math.ceil((new Date(nextReview).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days`}
                 </span>
               )}
             </div>
             <div className="text-gray-400">
-              Card {index + 1} of {phrases.length}
+              Card {index !== null ? index + 1 : 0} of {phrases.length}
             </div>
           </div>
 
@@ -857,7 +842,7 @@ function ThaiFlashcardsInner() {
 
           {/* Review info */}
           <div className="text-sm text-gray-400 mb-4">
-            {cardProgress[index]?.reviews.length > 0 && (
+            {index !== null && cardProgress[index]?.reviews.length > 0 && (
               <div>
                 Last review: {new Date(cardProgress[index].reviews[cardProgress[index].reviews.length - 1].date).toLocaleDateString()}
                 <br />
@@ -871,6 +856,33 @@ function ThaiFlashcardsInner() {
             {safePhrase.meaning}
           </div>
 
+          {/* Audio controls - moved outside showAnswer condition */}
+          <div className="flex justify-center gap-2 mb-4">
+            <button
+              onClick={() => speak(safePhrase.thai)}
+              disabled={isPlaying}
+              className="neumorphic-button flex-1"
+            >
+              {isPlaying ? 'Playing...' : 'Play'}
+            </button>
+            <button
+              onClick={() => {
+                const phrase = generateRandomPhrase();
+                if (phrase) speak(phrase);
+              }}
+              disabled={isPlaying}
+              className="neumorphic-button flex-1"
+            >
+              Random Phrase
+            </button>
+          </div>
+
+          {randomPhrase && (
+            <p className="text-sm text-center text-gray-400 mb-4">
+              {randomPhrase}
+            </p>
+          )}
+
           {showAnswer ? (
             <div className="space-y-4">
               <p className="text-lg mb-3">Thai: <span className="font-semibold">{safePhrase.thai}</span></p>
@@ -881,9 +893,9 @@ function ThaiFlashcardsInner() {
                 <div>
                   <div className="flex items-center justify-between text-sm italic text-gray-400 mb-1">
                     <span>Personal phonetics:</span>
-                    {localMnemonics[index]?.pronunciation !== undefined && (
+                    {index !== null && localMnemonics[index]?.pronunciation !== undefined && (
                       <button
-                        onClick={() => revertMnemonic(index)}
+                        onClick={() => index !== null && revertMnemonic(index)}
                         className="neumorphic-button text-xs"
                         title="Revert to original"
                       >
@@ -893,48 +905,21 @@ function ThaiFlashcardsInner() {
                   </div>
                   <input
                     type="text"
-                    value={localMnemonics[index]?.pronunciation || safePhrase.pronunciation}
+                    value={index !== null ? (localMnemonics[index]?.pronunciation || safePhrase.pronunciation) : safePhrase.pronunciation}
                     onChange={handlePhoneticChange}
                     placeholder="Add your own phonetic spelling..."
                     className="neumorphic-input"
                   />
                 </div>
               </div>
-              
-              {/* Audio controls */}
-              <div className="flex justify-center gap-2">
-                <button
-                  onClick={() => speak(safePhrase.thai)}
-                  disabled={isPlaying}
-                  className="neumorphic-button flex-1"
-                >
-                  {isPlaying ? 'Playing...' : 'Play'}
-                </button>
-                <button
-                  onClick={() => {
-                    const phrase = generateRandomPhrase();
-                    speak(phrase);
-                  }}
-                  disabled={isPlaying}
-                  className="neumorphic-button flex-1"
-                >
-                  Random Phrase
-                </button>
-              </div>
-
-              {randomPhrase && (
-                <p className="mt-2 text-sm text-center text-gray-400">
-                  {randomPhrase}
-                </p>
-              )}
 
               {/* Mnemonic section */}
               <div className="mt-4">
                 <div className="flex items-center justify-between text-sm italic text-gray-400 mb-1">
                   <span>Mnemonic:</span>
-                  {localMnemonics[index]?.text !== undefined && (
+                  {index !== null && localMnemonics[index]?.text !== undefined && (
                     <button
-                      onClick={() => revertMnemonic(index)}
+                      onClick={() => index !== null && revertMnemonic(index)}
                       className="neumorphic-button text-xs"
                       title="Revert to original mnemonic"
                     >
@@ -944,7 +929,7 @@ function ThaiFlashcardsInner() {
                 </div>
                 <input
                   type="text"
-                  value={localMnemonics[index]?.text || safePhrase.mnemonic}
+                  value={index !== null ? (localMnemonics[index]?.text || safePhrase.mnemonic) : safePhrase.mnemonic}
                   onChange={handleMnemonicChange}
                   placeholder="Add your own mnemonic..."
                   className="neumorphic-input"
@@ -1046,7 +1031,7 @@ function ThaiFlashcardsInner() {
             onClick={resetProgress}
             className="neumorphic-button text-red-400"
           >
-            Reset Progress
+            Reset All
           </button>
           <div className="flex space-x-2">
             <button
@@ -1212,7 +1197,7 @@ function ThaiFlashcardsInner() {
                     <div className="flex items-center space-x-4 text-sm text-gray-400">
                       <span>{phrase.thai}</span>
                       <button
-                        className="opacity-50 hover:opacity-100"
+                        className="neumorphic-circle opacity-75 hover:opacity-100 w-8 h-8"
                         onClick={(e) => {
                           e.stopPropagation();
                           if (!isPlaying) {

@@ -136,8 +136,8 @@ const DEFAULT_PHRASES: Phrase[] = [
 // Update version info constants with more detailed information and current timestamp
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.0.1",
-  changes: "Added Random Phrase feature with contextual sentences and improved neumorphic button styling"
+  version: "1.0.2",
+  changes: "Added Random Phrase contextual sentences and fixed button styling"
 };
 
 export default function ThaiFlashcards() {
@@ -523,7 +523,7 @@ export default function ThaiFlashcards() {
       </div>
       
       {/* Settings Button */}
-      <div className="fixed bottom-4 right-4">
+      <div className="fixed bottom-16 right-4 z-20">
         <button
           onClick={() => setShowStats(!showStats)}
           className="settings-button"
@@ -588,9 +588,9 @@ export default function ThaiFlashcards() {
       <div className="flex-grow"></div>
       
       {/* Version indicator at the bottom */}
-      <div className="w-full py-3 px-4 text-center text-xs border-t border-gray-800 bg-[#222]">
-        <p className="text-blue-400">v{VERSION_INFO.version} - Last updated: {new Date(VERSION_INFO.lastUpdated).toLocaleString()}</p>
-        <p className="text-gray-400 mt-1">Changes: {VERSION_INFO.changes}</p>
+      <div className="w-full py-3 px-4 text-center text-xs border-t border-gray-800 bg-[#222] sticky bottom-0 z-10">
+        <p className="text-blue-400 font-bold">v{VERSION_INFO.version} | {new Date(VERSION_INFO.lastUpdated).toLocaleDateString()} {new Date(VERSION_INFO.lastUpdated).toLocaleTimeString()}</p>
+        <p className="text-gray-400 mt-1">{VERSION_INFO.changes}</p>
       </div>
     </main>
   );

@@ -86,11 +86,11 @@ interface ExampleSentence {
   translation: string;
 }
 
-// Update version info with Amsterdam time zone
+// Update version info with new app name
 const VERSION_INFO = {
-  lastUpdated: new Date().toISOString(), // Current time that will be displayed in Amsterdam timezone
-  version: "1.1.4",
-  changes: "Updated timestamp to show actual time in Amsterdam timezone"
+  lastUpdated: new Date().toISOString(),
+  version: "1.2.0",
+  changes: "Renamed app to Donkey Bridge"
 };
 
 // Update phrases with real example sentences
@@ -447,19 +447,10 @@ export default function ThaiFlashcards() {
   };
 
   return (
-    <main className="min-h-screen bg-[#1a1a1a]">
-      <div className="max-w-lg mx-auto p-4 space-y-4">
-        {/* Top Navigation */}
-        <div className="flex justify-between items-center">
-          <label className="flex items-center space-x-2 text-gray-400">
-              <input
-                type="checkbox"
-                checked={autoplay}
-                onChange={(e) => setAutoplay(e.target.checked)}
-              className="form-checkbox h-4 w-4"
-              />
-              <span>Autoplay</span>
-            </label>
+    <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
+      <div className="w-full max-w-lg mx-auto p-4 space-y-4">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-100">Donkey Bridge</h1>
           <div className="flex space-x-2">
             <button
               onClick={() => setShowHowItWorks(!showHowItWorks)}
@@ -480,7 +471,7 @@ export default function ThaiFlashcards() {
         <div className="flex justify-between items-center text-sm text-gray-400">
           <div>Card {index + 1} of {phrases.length}</div>
           <div>Level {levelProgress.currentLevel}</div>
-          </div>
+        </div>
 
         {/* Main Card */}
         <div className="neumorphic p-6 space-y-4">
@@ -497,14 +488,14 @@ export default function ThaiFlashcards() {
               <p className="text-base text-white font-medium">{randomSentence.thai}</p>
               <p className="text-sm text-gray-400 italic">{randomSentence.pronunciation}</p>
               <p className="text-sm text-gray-300 mt-2">{randomSentence.translation}</p>
-              </div>
-            )}
+            </div>
+          )}
 
           {showAnswer ? (
             <div className="space-y-4">
-                <div>
+              <div>
                 <p className="text-lg">Thai: <span className="text-white">{phrases[index].thai}</span></p>
-                  </div>
+              </div>
 
               <div>
                 <p className="text-gray-400">
@@ -514,13 +505,13 @@ export default function ThaiFlashcards() {
 
               <div>
                 <p className="text-gray-400 mb-2">Personal phonetics:</p>
-                  <input
-                    type="text"
+                <input
+                  type="text"
                   value={localMnemonics[index]?.pronunciation || phrases[index].pronunciation}
-                    onChange={handlePhoneticChange}
-                    className="neumorphic-input"
+                  onChange={handlePhoneticChange}
+                  className="neumorphic-input"
                   placeholder="Add your own phonetic spelling..."
-                  />
+                />
               </div>
               
               <div className="grid grid-cols-2 gap-2">
@@ -585,7 +576,7 @@ export default function ThaiFlashcards() {
               </button>
             </div>
           )}
-              </div>
+        </div>
 
         {/* Reset Button */}
         <div>
@@ -595,17 +586,17 @@ export default function ThaiFlashcards() {
           >
             Reset All
           </button>
-              </div>
-              </div>
+        </div>
+      </div>
 
       {/* Settings Button */}
       <div className="fixed bottom-16 right-4 z-20">
-          <button
+        <button
           onClick={() => setShowStats(!showStats)}
           className="settings-button"
-          >
+        >
           ⚙️
-          </button>
+        </button>
       </div>
 
       {/* Modals */}
@@ -614,13 +605,13 @@ export default function ThaiFlashcards() {
           <div className="neumorphic max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Statistics</h2>
-            <button
+              <button
                 onClick={() => setShowStats(false)}
                 className="text-gray-400 hover:text-white"
-            >
+              >
                 ✕
-            </button>
-          </div>
+              </button>
+            </div>
             
             <div className="space-y-4">
               {(() => {
@@ -680,7 +671,7 @@ export default function ThaiFlashcards() {
             </div>
             <div className="space-y-4 text-gray-300">
               <p>
-                <strong className="text-white">Flashcards:</strong> This app helps you learn Thai vocabulary using spaced repetition.
+                <strong className="text-white">Donkey Bridge:</strong> This app helps you learn Thai vocabulary using spaced repetition and mnemonics (memory aids or "donkey bridges").
               </p>
               
               <p>

@@ -1,0 +1,26 @@
+name: Auto Merge to Main
+
+on:
+  push:
+    branches:
+      - manual-fix
+
+jobs:
+  merge-to-main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set Git Config
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+
+      - name: Merge to main
+        run: |
+          git checkout main
+          git merge --no-ff manual-fix -m "Auto-merge manual-fix to main"
+          git push origin main 

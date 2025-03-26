@@ -213,6 +213,15 @@ export default function ThaiFlashcards() {
     window.location.reload();
   };
 
+  // Add function to generate a random phrase
+  const generateRandomPhrase = () => {
+    // Get a random phrase different from the current one
+    const otherPhrases = phrases.filter((_, i) => i !== index);
+    const randomIndex = Math.floor(Math.random() * otherPhrases.length);
+    const randomPhrase = otherPhrases[randomIndex];
+    return randomPhrase.thai;
+  };
+
   return (
     <main className="min-h-screen bg-[#1a1a1a]">
       <div className="max-w-lg mx-auto p-4 space-y-4">
@@ -284,9 +293,19 @@ export default function ThaiFlashcards() {
                 <button
                   onClick={() => speak(phrases[index].thai)}
                   disabled={isPlaying}
-                  className="neumorphic-button"
+                  className="neumorphic-button flex-1"
                 >
-                  Play
+                  {isPlaying ? 'Playing...' : 'Play'}
+                </button>
+                <button
+                  onClick={() => {
+                    const phrase = generateRandomPhrase();
+                    speak(phrase);
+                  }}
+                  disabled={isPlaying}
+                  className="neumorphic-button flex-1"
+                >
+                  Random Phrase
                 </button>
               </div>
 

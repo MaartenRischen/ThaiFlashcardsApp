@@ -11,25 +11,84 @@
   --text: #ffffff;
   --text-secondary: #999999;
   --border: #333333;
-  --shadow-color: rgba(0, 0, 0, 0.3);
-  --highlight-color: rgba(255, 255, 255, 0.05);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --highlight-color: rgba(255, 255, 255, 0.07);
 }
 
 @layer components {
   .neumorphic {
-    @apply bg-[#2a2a2a] rounded-2xl shadow-lg;
+    @apply bg-[#2a2a2a] rounded-2xl;
+    box-shadow: 
+      8px 8px 16px var(--shadow-color),
+      -8px -8px 16px var(--highlight-color);
   }
 
   .neumorphic-button {
-    @apply px-4 py-2 bg-[#2a2a2a] text-white rounded-full hover:bg-[#333] transition-colors;
+    @apply px-4 py-2 bg-[#2a2a2a] text-white rounded-full transition-all;
+    box-shadow: 
+      5px 5px 10px var(--shadow-color),
+      -5px -5px 10px var(--highlight-color);
+  }
+
+  .neumorphic-button:hover {
+    @apply bg-[#2a2a2a];
+    box-shadow: 
+      3px 3px 6px var(--shadow-color),
+      -3px -3px 6px var(--highlight-color);
+    transform: translateY(1px);
+  }
+
+  .neumorphic-button:active {
+    box-shadow: inset 
+      2px 2px 4px var(--shadow-color),
+      inset -2px -2px 4px var(--highlight-color);
+  }
+
+  .neumorphic-button:disabled {
+    @apply opacity-60 cursor-not-allowed;
+    box-shadow: 
+      3px 3px 6px var(--shadow-color),
+      -3px -3px 6px var(--highlight-color);
   }
 
   .neumorphic-input {
-    @apply w-full px-4 py-2 bg-[#2a2a2a] text-white rounded-full border border-[#333] focus:outline-none focus:border-blue-500 transition-colors;
+    @apply w-full px-4 py-2 bg-[#2a2a2a] text-white rounded-full focus:outline-none transition-all;
+    box-shadow: inset 
+      3px 3px 6px var(--shadow-color),
+      inset -3px -3px 6px var(--highlight-color);
+    border: none;
   }
 
+  .neumorphic-input:focus {
+    box-shadow: inset 
+      4px 4px 8px var(--shadow-color),
+      inset -4px -4px 8px var(--highlight-color);
+  }
+
+  .neumorphic-circle {
+    @apply w-9 h-9 flex items-center justify-center bg-[#2a2a2a] rounded-full transition-all;
+    box-shadow: 
+      4px 4px 8px var(--shadow-color),
+      -4px -4px 8px var(--highlight-color);
+  }
+
+  .neumorphic-circle:hover {
+    box-shadow: 
+      2px 2px 4px var(--shadow-color),
+      -2px -2px 4px var(--highlight-color);
+  }
+
+  .neumorphic-circle:active {
+    box-shadow: inset 
+      2px 2px 4px var(--shadow-color),
+      inset -2px -2px 4px var(--highlight-color);
+  }
+  
   .settings-button {
-    @apply w-12 h-12 flex items-center justify-center bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-colors;
+    @apply w-12 h-12 flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors;
+    box-shadow: 
+      5px 5px 10px var(--shadow-color),
+      -5px -5px 10px var(--highlight-color);
   }
 }
 

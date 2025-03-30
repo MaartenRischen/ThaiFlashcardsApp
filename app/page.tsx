@@ -112,8 +112,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.15",
-  changes: "Added gender-specific voices and fixed pronoun display"
+  version: "1.3.16",
+  changes: "Added debug logging for pronoun pronunciation"
 };
 
 const INITIAL_PHRASES: Phrase[] = [

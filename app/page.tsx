@@ -112,8 +112,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.16",
-  changes: "Added debug logging for pronoun pronunciation"
+  version: "1.3.17",
+  changes: "Fixed gender switch symbol labels (♂/♀)"
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -1494,9 +1494,9 @@ export default function ThaiFlashcards() {
             <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
               <h3 className="text-sm text-blue-400 uppercase tracking-wider mb-1">In Context</h3>
               <div className="flex items-center justify-end space-x-2 pb-2">
-                <span className="text-gray-400 text-sm">♂</span>
-                <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
                 <span className="text-gray-400 text-sm">♀</span>
+                <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
+                <span className="text-gray-400 text-sm">♂</span>
               </div>
               <p className="text-base text-white font-medium">{randomSentence.thai}</p>
               <p className="text-sm text-gray-400 italic">{randomSentence.english}</p>
@@ -1547,9 +1547,9 @@ export default function ThaiFlashcards() {
                           <div className="space-y-4">
                             {/* Add the mirrored switch here */}
                             <div className="flex items-center justify-end space-x-2 pb-2">
-                              <span className="text-gray-400 text-sm">♂</span>
-                              <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
                               <span className="text-gray-400 text-sm">♀</span>
+                              <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
+                              <span className="text-gray-400 text-sm">♂</span>
                             </div>
                             {/* Use the already selected gender-specific randomSentence.thai */}
                             <div className="text-xl font-medium text-white">
@@ -1681,9 +1681,9 @@ export default function ThaiFlashcards() {
           
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <span className="text-gray-400 text-sm">♂</span>
-              <Switch checked={isMale} onCheckedChange={setIsMale} />
               <span className="text-gray-400 text-sm">♀</span>
+              <Switch checked={isMale} onCheckedChange={setIsMale} />
+              <span className="text-gray-400 text-sm">♂</span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-gray-400 text-sm">Autoplay</span>

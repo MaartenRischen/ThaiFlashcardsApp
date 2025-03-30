@@ -104,8 +104,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.19",
-  changes: "Added debug logs for 'In Context' error"
+  version: "1.3.20",
+  changes: "Fixed 'In Context' display error"
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -1485,27 +1485,18 @@ export default function ThaiFlashcards() {
           </div>
 
           {/* Display random sentence if available */}
-          {(() => {
-            console.log("ThaiFlashcards: Checking if randomSentence exists for rendering:", randomSentence); // DEBUG
-            if (randomSentence) {
-              console.log("ThaiFlashcards: Rendering randomSentence block"); // DEBUG
-              return (
-                <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
-                  <h3 className="text-sm text-blue-400 uppercase tracking-wider mb-1">In Context</h3>
-                  <div className="flex items-center justify-end space-x-2 pb-2">
-                    <span className="text-gray-400 text-sm\">♀</span>
-                    <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
-                    <span className="text-gray-400 text-sm\">♂</span>
-                  </div>
-                  <p className="text-base text-white font-medium">{randomSentence.thai}</p>
-                  <p className="text-sm text-gray-400 italic">{randomSentence.english}</p>
-                </div>
-              );
-            } else {
-              console.log("ThaiFlashcards: randomSentence is null, not rendering block"); // DEBUG
-              return null;
-            }
-          })()}
+          {randomSentence ? (
+            <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
+              <h3 className="text-sm text-blue-400 uppercase tracking-wider mb-1">In Context</h3>
+              <div className="flex items-center justify-end space-x-2 pb-2">
+                <span className="text-gray-400 text-sm">♀</span>
+                <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
+                <span className="text-gray-400 text-sm">♂</span>
+              </div>
+              <p className="text-base text-white font-medium">{randomSentence.thai}</p>
+              <p className="text-sm text-gray-400 italic">{randomSentence.english}</p>
+            </div>
+          ) : null}
 
           {showAnswer ? (
             <div className="space-y-4">

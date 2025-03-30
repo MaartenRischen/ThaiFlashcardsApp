@@ -109,8 +109,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.13",
-  changes: "Improved mnemonic input field size and position"
+  version: "1.3.14",
+  changes: "Added gender switch - masculine & feminine Thai phrases"
 };
 
 const INITIAL_PHRASES: Phrase[] = [

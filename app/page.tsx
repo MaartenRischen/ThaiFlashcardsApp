@@ -104,8 +104,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.20",
-  changes: "Fixed 'In Context' display error"
+  version: "1.3.21",
+  changes: "Fixed React hydration issue with gender symbols"
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -905,6 +905,21 @@ const getGenderedMnemonic = (phrase: Phrase, isMale: boolean) => {
   return isMale ? (phrase.mnemonic.masculine || phrase.mnemonic.feminine) : phrase.mnemonic.feminine;
 };
 
+// This helps suppress hydration warnings
+const ClientOnly = ({ children }: { children: React.ReactNode }) => {
+  const [hasMounted, setHasMounted] = useState(false);
+  
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+  
+  if (!hasMounted) {
+    return null;
+  }
+  
+  return <>{children}</>;
+};
+
 export default function ThaiFlashcards() {
   const [phrases] = useState<Phrase[]>(INITIAL_PHRASES);
   const [index, setIndex] = useState<number>(0);
@@ -1488,11 +1503,13 @@ export default function ThaiFlashcards() {
           {randomSentence ? (
             <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
               <h3 className="text-sm text-blue-400 uppercase tracking-wider mb-1">In Context</h3>
-              <div className="flex items-center justify-end space-x-2 pb-2">
-                <span className="text-gray-400 text-sm">♀</span>
-                <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
-                <span className="text-gray-400 text-sm">♂</span>
-              </div>
+              <ClientOnly>
+                <div className="flex items-center justify-end space-x-2 pb-2">
+                  <span className="text-gray-400 text-sm">♀</span>
+                  <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
+                  <span className="text-gray-400 text-sm">♂</span>
+                </div>
+              </ClientOnly>
               <p className="text-base text-white font-medium">{randomSentence.thai}</p>
               <p className="text-sm text-gray-400 italic">{randomSentence.english}</p>
             </div>
@@ -1642,11 +1659,13 @@ export default function ThaiFlashcards() {
           </button>
           
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-400 text-sm">♀</span>
-              <Switch checked={isMale} onCheckedChange={setIsMale} />
-              <span className="text-gray-400 text-sm">♂</span>
-            </div>
+            <ClientOnly>
+              <div className="flex items-center space-x-2">
+                <span className="text-gray-400 text-sm">♀</span>
+                <Switch checked={isMale} onCheckedChange={setIsMale} />
+                <span className="text-gray-400 text-sm">♂</span>
+              </div>
+            </ClientOnly>
             <div className="flex items-center space-x-2">
               <span className="text-gray-400 text-sm">Autoplay</span>
               <Switch checked={autoplay} onCheckedChange={setAutoplay} />

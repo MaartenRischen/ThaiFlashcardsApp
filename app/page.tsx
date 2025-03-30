@@ -1,14 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/app/components/ui/dialog";
 import { Switch } from "@/app/components/ui/switch";
 
 interface ExampleSentence {
@@ -112,8 +104,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.17",
-  changes: "Fixed gender switch symbol labels (♂/♀)"
+  version: "1.3.18",
+  changes: "Removed 'In Context' dialog, show sentence in card"
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -963,7 +955,6 @@ export default function ThaiFlashcards() {
   });
   const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
   const [voicesLoaded, setVoicesLoaded] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -1289,13 +1280,11 @@ export default function ThaiFlashcards() {
         thai: thaiText,
         english: example.translation
       });
-      setDialogOpen(true);
       return thaiText;
     } else {
       // If no examples, return the main phrase with gender
       const currentWord = getThaiWithGender(phrases[index], isMale);
       setRandomSentence(null);
-      setDialogOpen(true);
       return currentWord;
     }
   };
@@ -1523,51 +1512,18 @@ export default function ThaiFlashcards() {
                 >
                   {isPlaying ? 'Playing...' : 'Play'}
                 </button>
-                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                  <DialogTrigger asChild>
-                    <button
-                      onClick={() => {
-                        // generateRandomPhrase now returns the correct gender form
-                        const phraseToSpeak = generateRandomPhrase(); 
-                        if (phraseToSpeak) {
-                          speak(phraseToSpeak);
-                        }
-                      }}
-                      disabled={isPlaying}
-                      className="neumorphic-button flex-1"
-                    >
-                      In Context
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Example Usage</DialogTitle>
-                      <DialogDescription className="pt-4">
-                        {randomSentence ? (
-                          <div className="space-y-4">
-                            {/* Add the mirrored switch here */}
-                            <div className="flex items-center justify-end space-x-2 pb-2">
-                              <span className="text-gray-400 text-sm">♀</span>
-                              <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
-                              <span className="text-gray-400 text-sm">♂</span>
-                            </div>
-                            {/* Use the already selected gender-specific randomSentence.thai */}
-                            <div className="text-xl font-medium text-white">
-                              {randomSentence.thai} 
-                            </div>
-                            <div className="text-gray-400">
-                              {randomSentence.english}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-gray-400">
-                            No example sentences available for this word.
-                          </div>
-                        )}
-                      </DialogDescription>
-                    </DialogHeader>
-                  </DialogContent>
-                </Dialog>
+                <button
+                  onClick={() => {
+                    const phraseToSpeak = generateRandomPhrase(); 
+                    if (phraseToSpeak) {
+                      speak(phraseToSpeak);
+                    }
+                  }}
+                  disabled={isPlaying}
+                  className="neumorphic-button flex-1"
+                >
+                  In Context
+                </button>
               </div>
 
               <div className="grid grid-cols-3 gap-2">

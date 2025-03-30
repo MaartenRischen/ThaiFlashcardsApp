@@ -109,8 +109,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.14",
-  changes: "Added gender switch - masculine & feminine Thai phrases"
+  version: "1.3.15",
+  changes: "Added gender-specific voices and fixed pronoun display"
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -919,7 +919,34 @@ export default function ThaiFlashcards() {
       
       // Get Thai voice if available
       const voices = window.speechSynthesis.getVoices();
-      const thaiVoice = voices.find(voice => voice.lang.includes('th'));
+      
+      // Try to get gender-specific Thai voice first
+      let thaiVoice = null;
+      
+      // Look for gender-specific voices
+      if (isMale) {
+        // Try to find a male Thai voice
+        thaiVoice = voices.find(voice => 
+          voice.lang.includes('th') && 
+          (voice.name.toLowerCase().includes('male') || 
+           voice.name.toLowerCase().includes('man') ||
+           voice.name.toLowerCase().includes('พ'))
+        );
+      } else {
+        // Try to find a female Thai voice
+        thaiVoice = voices.find(voice => 
+          voice.lang.includes('th') && 
+          (voice.name.toLowerCase().includes('female') || 
+           voice.name.toLowerCase().includes('woman') ||
+           voice.name.toLowerCase().includes('ห'))
+        );
+      }
+      
+      // If no gender-specific voice found, fall back to any Thai voice
+      if (!thaiVoice) {
+        thaiVoice = voices.find(voice => voice.lang.includes('th'));
+      }
+      
       if (thaiVoice) {
         utterance.voice = thaiVoice;
       }

@@ -699,6 +699,14 @@ export default function ThaiFlashcards() {
       return false;
     }
   });
+  const [isMale, setIsMale] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('isMale');
+      return saved ? JSON.parse(saved) === true : true; // Default to male
+    } catch {
+      return true;
+    }
+  });
   const [activeCards, setActiveCards] = useState<number[]>(() => {
     try {
       const saved = localStorage.getItem('activeCards');
@@ -747,6 +755,10 @@ export default function ThaiFlashcards() {
   useEffect(() => {
     localStorage.setItem('autoplay', JSON.stringify(autoplay));
   }, [autoplay]);
+
+  useEffect(() => {
+    localStorage.setItem('isMale', JSON.stringify(isMale));
+  }, [isMale]);
 
   useEffect(() => {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
@@ -1328,7 +1340,7 @@ export default function ThaiFlashcards() {
           )}
         </div>
 
-        {/* Reset Button and Autoplay toggle */}
+        {/* Reset Button and Switches */}
         <div className="flex justify-between items-center">
           <button
             onClick={handleResetAll}
@@ -1337,9 +1349,16 @@ export default function ThaiFlashcards() {
             Reset All
           </button>
           
-          <div className="flex items-center space-x-2">
-            <span className="text-gray-400 text-sm">Autoplay</span>
-            <Switch checked={autoplay} onCheckedChange={setAutoplay} />
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-gray-400 text-sm">♂</span>
+              <Switch checked={isMale} onCheckedChange={setIsMale} />
+              <span className="text-gray-400 text-sm">♀</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-gray-400 text-sm">Autoplay</span>
+              <Switch checked={autoplay} onCheckedChange={setAutoplay} />
+            </div>
           </div>
         </div>
       </div>

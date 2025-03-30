@@ -896,11 +896,14 @@ const getThaiWithGender = (phrase: Phrase, isMale: boolean) => {
 
 // Add helper function for gendered pronunciation (refined)
 const getGenderedPronunciation = (phrase: Phrase, isMale: boolean) => {
+  console.log(`[getGenderedPronunciation] Input: isMale=${isMale}, pronunciation='${phrase.pronunciation}'`);
   let updatedPronunciation = phrase.pronunciation;
   // Replace first-person pronouns
   updatedPronunciation = updatedPronunciation.replace("phom/chan", isMale ? "phom" : "chan");
+  console.log(`[getGenderedPronunciation] After phom/chan: '${updatedPronunciation}'`);
   // Replace polite particles
   updatedPronunciation = updatedPronunciation.replace("krap/ka", isMale ? "krap" : "ka");
+  console.log(`[getGenderedPronunciation] After krap/ka: '${updatedPronunciation}'`);
   return updatedPronunciation;
 };
 

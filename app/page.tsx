@@ -12,13 +12,18 @@ import {
 import { Switch } from "@/app/components/ui/switch";
 
 interface ExampleSentence {
-  thai: string;
+  thai: string; // Default/neutral form
+  thaiMasculine?: string; // Optional masculine form
+  thaiFeminine?: string; // Optional feminine form
   pronunciation: string;
   translation: string;
 }
 
 interface Phrase {
-  thai: string;
+  thai: {
+    masculine: string;
+    feminine: string;
+  };
   pronunciation: string;
   mnemonic: string;
   english: string;
@@ -86,9 +91,11 @@ const GRADUATING_INTERVAL = 1; // First interval after learning in days
 const EASY_INTERVAL = 4; // Interval when rating Easy on new card
 const NEW_CARDS_PER_DAY = 20;
 
-// Add a new interface for the random sentence
+// Update RandomSentence interface to potentially hold both forms
 interface RandomSentence {
-  thai: string;
+  thai: string; // Default/neutral form
+  thaiMasculine?: string;
+  thaiFeminine?: string;
   english: string;
 }
 
@@ -109,8 +116,11 @@ const VERSION_INFO = {
 const INITIAL_PHRASES: Phrase[] = [
   {
     english: "Hello",
-    thai: "สวัสดี",
-    pronunciation: "sa-wat-dee",
+    thai: {
+      masculine: "สวัสดีครับ",
+      feminine: "สวัสดีค่ะ"
+    },
+    pronunciation: "sa-wat-dee krap/ka",
     mnemonic: "Think: 'Swadee' - like saying 'sweet day' quickly",
     examples: [
       {
@@ -127,8 +137,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Thank you",
-    thai: "ขอบคุณ",
-    pronunciation: "khop-khun",
+    thai: {
+      masculine: "ขอบคุณครับ",
+      feminine: "ขอบคุณค่ะ"
+    },
+    pronunciation: "khop-khun krap/ka",
     mnemonic: "Think: 'Cope-Kun' - you cope with kindness",
     examples: [
       {
@@ -145,8 +158,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Yes",
-    thai: "ใช่",
-    pronunciation: "chai",
+    thai: {
+      masculine: "ใช่ครับ",
+      feminine: "ใช่ค่ะ"
+    },
+    pronunciation: "chai krap/ka",
     mnemonic: "Think: 'Chai' - like the tea, say 'yes' to chai",
     examples: [
       {
@@ -163,8 +179,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "No",
-    thai: "ไม่",
-    pronunciation: "mai",
+    thai: {
+      masculine: "ไม่ครับ",
+      feminine: "ไม่ค่ะ"
+    },
+    pronunciation: "mai krap/ka",
     mnemonic: "Think: 'My' - 'My answer is no'",
     examples: [
       {
@@ -181,8 +200,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "How are you?",
-    thai: "สบายดีไหม",
-    pronunciation: "sa-bai-dee-mai",
+    thai: {
+      masculine: "สบายดีไหมครับ",
+      feminine: "สบายดีไหมคะ"
+    },
+    pronunciation: "sa-bai-dee-mai krap/ka",
     mnemonic: "Think: 'So bye, did I?' - asking about their well-being",
     examples: [
       {
@@ -199,8 +221,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "What is your name?",
-    thai: "คุณชื่ออะไร",
-    pronunciation: "khun cheu a-rai",
+    thai: {
+      masculine: "คุณชื่ออะไรครับ",
+      feminine: "คุณชื่ออะไรคะ"
+    },
+    pronunciation: "khun cheu a-rai krap/ka",
     mnemonic: "Think: 'Koon chew a rye' - asking someone's name over rye bread",
     examples: [
       {
@@ -217,44 +242,61 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "My name is...",
-    thai: "ฉันชื่อ...",
-    pronunciation: "chan cheu...",
+    thai: {
+      masculine: "ผมชื่อ...",
+      feminine: "ฉันชื่อ..."
+    },
+    pronunciation: "phom/chan cheu...",
     mnemonic: "Think: 'Chan chew' - I'm chewing as I tell my name",
     examples: [
       {
         thai: "ฉันชื่อปีเตอร์ ยินดีที่ได้รู้จัก",
-        pronunciation: "chan cheu Peter, yin-dee tee dai roo-jak",
+        thaiMasculine: "ผมชื่อปีเตอร์ ยินดีที่ได้รู้จักครับ",
+        thaiFeminine: "ฉันชื่อปีเตอร์ ยินดีที่ได้รู้จักค่ะ",
+        pronunciation: "phom/chan cheu Peter, yin-dee tee dai roo-jak krap/ka",
         translation: "My name is Peter, nice to meet you."
       },
       {
         thai: "สวัสดี ฉันชื่อมาร์ค ฉันมาจากอเมริกา",
-        pronunciation: "sa-wat-dee, chan cheu Mark, chan ma jak america",
+        thaiMasculine: "สวัสดีครับ ผมชื่อมาร์ค ผมมาจากอเมริกาครับ",
+        thaiFeminine: "สวัสดีค่ะ ฉันชื่อมาร์ค ฉันมาจากอเมริกาค่ะ",
+        pronunciation: "sa-wat-dee krap/ka, phom/chan cheu Mark, phom/chan ma jak america krap/ka",
         translation: "Hello, my name is Mark. I'm from America."
       }
     ]
   },
   {
     english: "I don't understand",
-    thai: "ฉันไม่เข้าใจ",
-    pronunciation: "chan mai kao-jai",
+    thai: {
+      masculine: "ผมไม่เข้าใจครับ",
+      feminine: "ฉันไม่เข้าใจค่ะ"
+    },
+    pronunciation: "phom/chan mai kao-jai krap/ka",
     mnemonic: "Think: 'Chan my cow-chai' - my cow doesn't understand either",
     examples: [
       {
         thai: "ฉันไม่เข้าใจ พูดช้าๆ ได้ไหม",
-        pronunciation: "chan mai kao-jai, pood cha cha dai mai",
+        thaiMasculine: "ผมไม่เข้าใจ พูดช้าๆ ได้ไหมครับ",
+        thaiFeminine: "ฉันไม่เข้าใจ พูดช้าๆ ได้ไหมคะ",
+        pronunciation: "phom/chan mai kao-jai, pood cha cha dai mai krap/ka",
         translation: "I don't understand. Can you speak slowly?"
       },
       {
         thai: "ขอโทษ ฉันไม่เข้าใจภาษาไทยดีนัก",
-        pronunciation: "kor-tote, chan mai kao-jai pasa thai dee nak",
+        thaiMasculine: "ขอโทษครับ ผมไม่เข้าใจภาษาไทยดีนักครับ",
+        thaiFeminine: "ขอโทษค่ะ ฉันไม่เข้าใจภาษาไทยดีนักค่ะ",
+        pronunciation: "kor-tote krap/ka, phom/chan mai kao-jai pasa thai dee nak krap/ka",
         translation: "Sorry, I don't understand Thai very well."
       }
     ]
   },
   {
     english: "Please speak slowly",
-    thai: "กรุณาพูดช้าๆ",
-    pronunciation: "ga-ru-na pood cha-cha",
+    thai: {
+      masculine: "กรุณาพูดช้าๆ ครับ",
+      feminine: "กรุณาพูดช้าๆ ค่ะ"
+    },
+    pronunciation: "ga-ru-na pood cha-cha krap/ka",
     mnemonic: "Think: 'Karuna' (kindness) 'pood cha-cha' (speak cha-cha dance - slowly)",
     examples: [
       {
@@ -271,8 +313,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Where is the bathroom?",
-    thai: "ห้องน้ำอยู่ที่ไหน",
-    pronunciation: "hong-nam yoo tee-nai",
+    thai: {
+      masculine: "ห้องน้ำอยู่ที่ไหนครับ",
+      feminine: "ห้องน้ำอยู่ที่ไหนคะ"
+    },
+    pronunciation: "hong-nam yoo tee-nai krap/ka",
     mnemonic: "Think: 'Hong-nam' sounds like 'home' with 'nam' (water) - where's the water room?",
     examples: [
       {
@@ -289,8 +334,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "How much is this?",
-    thai: "อันนี้เท่าไหร่",
-    pronunciation: "an-nee tao-rai",
+    thai: {
+      masculine: "อันนี้เท่าไหร่ครับ",
+      feminine: "อันนี้เท่าไหร่คะ"
+    },
+    pronunciation: "an-nee tao-rai krap/ka",
     mnemonic: "Think: 'Annie, tell me how much!'",
     examples: [
       {
@@ -307,8 +355,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Delicious",
-    thai: "อร่อย",
-    pronunciation: "a-roi",
+    thai: {
+      masculine: "อร่อยครับ",
+      feminine: "อร่อยค่ะ"
+    },
+    pronunciation: "a-roi krap/ka",
     mnemonic: "Think: 'Ah, royal' - food fit for royalty",
     examples: [
       {
@@ -325,8 +376,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Today",
-    thai: "วันนี้",
-    pronunciation: "wan-nee",
+    thai: {
+      masculine: "วันนี้ครับ",
+      feminine: "วันนี้ค่ะ"
+    },
+    pronunciation: "wan-nee krap/ka",
     mnemonic: "Think: 'One knee' - today I hurt one knee",
     examples: [
       {
@@ -343,8 +397,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Tomorrow",
-    thai: "พรุ่งนี้",
-    pronunciation: "proong-nee",
+    thai: {
+      masculine: "พรุ่งนี้ครับ",
+      feminine: "พรุ่งนี้ค่ะ"
+    },
+    pronunciation: "proong-nee krap/ka",
     mnemonic: "Think: 'Prune-knee' - tomorrow I'll fix my pruned knee",
     examples: [
       {
@@ -361,13 +418,18 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Yesterday",
-    thai: "เมื่อวาน",
-    pronunciation: "meua-wan",
+    thai: {
+      masculine: "เมื่อวานครับ",
+      feminine: "เมื่อวานค่ะ"
+    },
+    pronunciation: "meua-wan krap/ka",
     mnemonic: "Think: 'Mew-a-waan' - the cat meowed all day yesterday",
     examples: [
       {
         thai: "เมื่อวานฉันไปตลาด",
-        pronunciation: "meua-wan chan pai ta-lad",
+        thaiMasculine: "เมื่อวานผมไปตลาด",
+        thaiFeminine: "เมื่อวานฉันไปตลาด",
+        pronunciation: "meua-wan phom/chan pai ta-lad",
         translation: "Yesterday I went to the market."
       },
       {
@@ -379,8 +441,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Water",
-    thai: "น้ำ",
-    pronunciation: "nam",
+    thai: {
+      masculine: "น้ำครับ",
+      feminine: "น้ำค่ะ"
+    },
+    pronunciation: "nam krap/ka",
     mnemonic: "Think: 'Nom' - like 'nom nom' drinking water",
     examples: [
       {
@@ -397,8 +462,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Food",
-    thai: "อาหาร",
-    pronunciation: "a-han",
+    thai: {
+      masculine: "อาหารครับ",
+      feminine: "อาหารค่ะ"
+    },
+    pronunciation: "a-han krap/ka",
     mnemonic: "Think: 'A-han' - 'a hand' full of food",
     examples: [
       {
@@ -415,8 +483,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Hot (temperature)",
-    thai: "ร้อน",
-    pronunciation: "ron",
+    thai: {
+      masculine: "ร้อนครับ",
+      feminine: "ร้อนค่ะ"
+    },
+    pronunciation: "ron krap/ka",
     mnemonic: "Think: 'Ron is hot' - Ron is always complaining about the heat",
     examples: [
       {
@@ -433,13 +504,18 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Cold",
-    thai: "หนาว",
-    pronunciation: "nao",
+    thai: {
+      masculine: "หนาวครับ",
+      feminine: "หนาวค่ะ"
+    },
+    pronunciation: "nao krap/ka",
     mnemonic: "Think: 'Now' - 'right now' I feel cold",
     examples: [
       {
         thai: "ฉันรู้สึกหนาว เปิดแอร์เย็นเกินไป",
-        pronunciation: "chan roo-suek nao, perd air yen gern pai",
+        thaiMasculine: "ผมรู้สึกหนาว เปิดแอร์เย็นเกินไป",
+        thaiFeminine: "ฉันรู้สึกหนาว เปิดแอร์เย็นเกินไป",
+        pronunciation: "phom/chan roo-suek nao, perd air yen gern pai",
         translation: "I feel cold, the air conditioning is too cool."
       },
       {
@@ -451,8 +527,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Good",
-    thai: "ดี",
-    pronunciation: "dee",
+    thai: {
+      masculine: "ดีครับ",
+      feminine: "ดีค่ะ"
+    },
+    pronunciation: "dee krap/ka",
     mnemonic: "Think: 'Dee' - sounds like the English word 'D' (grade) - better than an F!",
     examples: [
       {
@@ -469,8 +548,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Bad",
-    thai: "แย่",
-    pronunciation: "yae",
+    thai: {
+      masculine: "แย่ครับ",
+      feminine: "แย่ค่ะ"
+    },
+    pronunciation: "yae krap/ka",
     mnemonic: "Think: 'Yuck' - that's bad",
     examples: [
       {
@@ -487,8 +569,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Big",
-    thai: "ใหญ่",
-    pronunciation: "yai",
+    thai: {
+      masculine: "ใหญ่ครับ",
+      feminine: "ใหญ่ค่ะ"
+    },
+    pronunciation: "yai krap/ka",
     mnemonic: "Think: 'Y-eye' - big like your eye",
     examples: [
       {
@@ -505,8 +590,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Small",
-    thai: "เล็ก",
-    pronunciation: "lek",
+    thai: {
+      masculine: "เล็กครับ",
+      feminine: "เล็กค่ะ"
+    },
+    pronunciation: "lek krap/ka",
     mnemonic: "Think: 'Fleck' - something tiny like a fleck of dust",
     examples: [
       {
@@ -516,15 +604,20 @@ const INITIAL_PHRASES: Phrase[] = [
       },
       {
         thai: "ฉันชอบสุนัขตัวเล็ก",
-        pronunciation: "chan chop su-nak tua lek",
+        thaiMasculine: "ผมชอบสุนัขตัวเล็ก",
+        thaiFeminine: "ฉันชอบสุนัขตัวเล็ก",
+        pronunciation: "phom/chan chop su-nak tua lek",
         translation: "I like small dogs."
       }
     ]
   },
   {
     english: "Left",
-    thai: "ซ้าย",
-    pronunciation: "sai",
+    thai: {
+      masculine: "ซ้ายครับ",
+      feminine: "ซ้ายค่ะ"
+    },
+    pronunciation: "sai krap/ka",
     mnemonic: "Think: 'Sigh' - I sigh when I go left",
     examples: [
       {
@@ -541,8 +634,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Right",
-    thai: "ขวา",
-    pronunciation: "kwaa",
+    thai: {
+      masculine: "ขวาครับ",
+      feminine: "ขวาค่ะ"
+    },
+    pronunciation: "kwaa krap/ka",
     mnemonic: "Think: 'Qua' - like 'quaaaack' right turn for ducks",
     examples: [
       {
@@ -552,20 +648,27 @@ const INITIAL_PHRASES: Phrase[] = [
       },
       {
         thai: "ฉันถนัดมือขวา",
-        pronunciation: "chan ta-nat meu kwaa",
+        thaiMasculine: "ผมถนัดมือขวา",
+        thaiFeminine: "ฉันถนัดมือขวา",
+        pronunciation: "phom/chan ta-nat meu kwaa",
         translation: "I am right-handed."
       }
     ]
   },
   {
     english: "One",
-    thai: "หนึ่ง",
-    pronunciation: "neung",
+    thai: {
+      masculine: "หนึ่งครับ",
+      feminine: "หนึ่งค่ะ"
+    },
+    pronunciation: "neung krap/ka",
     mnemonic: "Think: 'Nung' - number one",
     examples: [
       {
         thai: "ฉันต้องการกาแฟหนึ่งแก้ว",
-        pronunciation: "chan tong-gan ka-fae neung kaew",
+        thaiMasculine: "ผมต้องการกาแฟหนึ่งแก้ว",
+        thaiFeminine: "ฉันต้องการกาแฟหนึ่งแก้ว",
+        pronunciation: "phom/chan tong-gan ka-fae neung kaew",
         translation: "I want one cup of coffee."
       },
       {
@@ -577,13 +680,18 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Two",
-    thai: "สอง",
-    pronunciation: "song",
+    thai: {
+      masculine: "สองครับ",
+      feminine: "สองค่ะ"
+    },
+    pronunciation: "song krap/ka",
     mnemonic: "Think: 'Song' - I sing two songs",
     examples: [
       {
         thai: "ฉันมีพี่น้องสองคน",
-        pronunciation: "chan mee pee-nong song kon",
+        thaiMasculine: "ผมมีพี่น้องสองคน",
+        thaiFeminine: "ฉันมีพี่น้องสองคน",
+        pronunciation: "phom/chan mee pee-nong song kon",
         translation: "I have two siblings."
       },
       {
@@ -595,13 +703,18 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Three",
-    thai: "สาม",
-    pronunciation: "saam",
+    thai: {
+      masculine: "สามครับ",
+      feminine: "สามค่ะ"
+    },
+    pronunciation: "saam krap/ka",
     mnemonic: "Think: 'Sam' - my friend Sam always counts to three",
     examples: [
       {
         thai: "ฉันต้องการจองห้องพักสามคืน",
-        pronunciation: "chan tong-gan jong hong pak saam keun",
+        thaiMasculine: "ผมต้องการจองห้องพักสามคืน",
+        thaiFeminine: "ฉันต้องการจองห้องพักสามคืน",
+        pronunciation: "phom/chan tong-gan jong hong pak saam keun",
         translation: "I want to book a room for three nights."
       },
       {
@@ -613,13 +726,18 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Thank you very much",
-    thai: "ขอบคุณมาก",
-    pronunciation: "khop-khun mak",
+    thai: {
+      masculine: "ขอบคุณมากครับ",
+      feminine: "ขอบคุณมากค่ะ"
+    },
+    pronunciation: "khop-khun mak krap/ka",
     mnemonic: "Think: 'Cope-Kun Mark' - Mark copes with extreme kindness",
     examples: [
       {
         thai: "ขอบคุณมากที่ช่วยเหลือฉัน",
-        pronunciation: "khop-khun mak tee chuay-lue chan",
+        thaiMasculine: "ขอบคุณมากที่ช่วยเหลือผม",
+        thaiFeminine: "ขอบคุณมากที่ช่วยเหลือฉัน",
+        pronunciation: "khop-khun mak tee chuay-lue phom/chan",
         translation: "Thank you very much for helping me."
       },
       {
@@ -631,8 +749,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "You're welcome",
-    thai: "ด้วยความยินดี",
-    pronunciation: "duay kwaam yin-dee",
+    thai: {
+      masculine: "ด้วยความยินดีครับ",
+      feminine: "ด้วยความยินดีค่ะ"
+    },
+    pronunciation: "duay kwaam yin-dee krap/ka",
     mnemonic: "Think: 'Doo-why come yin-dee' - do why? because I come with pleasure",
     examples: [
       {
@@ -649,8 +770,11 @@ const INITIAL_PHRASES: Phrase[] = [
   },
   {
     english: "Sorry",
-    thai: "ขอโทษ",
-    pronunciation: "kor-tote",
+    thai: {
+      masculine: "ขอโทษครับ",
+      feminine: "ขอโทษค่ะ"
+    },
+    pronunciation: "kor-tote krap/ka",
     mnemonic: "Think: 'Core-toast' - I accidentally burned your toast, sorry!",
     examples: [
       {
@@ -660,12 +784,25 @@ const INITIAL_PHRASES: Phrase[] = [
       },
       {
         thai: "ขอโทษ ฉันไม่ได้ตั้งใจ",
-        pronunciation: "kor-tote, chan mai dai tang jai",
+        thaiMasculine: "ขอโทษ ผมไม่ได้ตั้งใจ",
+        thaiFeminine: "ขอโทษ ฉันไม่ได้ตั้งใจ",
+        pronunciation: "kor-tote, phom/chan mai dai tang jai",
         translation: "Sorry, I didn't mean to."
       }
     ]
   }
 ];
+
+// Add a helper function to get the correct gender form
+const getThaiWithGender = (phrase: Phrase, isMale: boolean) => {
+  return isMale ? phrase.thai.masculine : phrase.thai.feminine;
+};
+
+// Add helper function for gendered pronunciation
+const getGenderedPronunciation = (phrase: Phrase, isMale: boolean) => {
+  // For phrases where the first-person pronoun might change between phom/chan
+  return phrase.pronunciation.replace("phom/chan", isMale ? "phom" : "chan");
+};
 
 export default function ThaiFlashcards() {
   const [phrases] = useState<Phrase[]>(INITIAL_PHRASES);
@@ -822,10 +959,10 @@ export default function ThaiFlashcards() {
   // Auto-play when answer is shown
   useEffect(() => {
     if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlaying && voicesLoaded) {
-      speak(phrases[index].thai);
+      speak(getThaiWithGender(phrases[index], isMale));
     }
     prevShowAnswerRef.current = showAnswer;
-  }, [showAnswer, autoplay, phrases, index, isPlaying, voicesLoaded]);
+  }, [showAnswer, autoplay, phrases, index, isPlaying, voicesLoaded, isMale]);
 
   // Add a new useEffect to update the active cards on component mount and when cardProgress changes
   useEffect(() => {
@@ -962,21 +1099,56 @@ export default function ThaiFlashcards() {
     window.location.reload();
   };
 
+  // Add a useEffect to update random sentence when gender changes
+  useEffect(() => {
+    if (randomSentence) {
+      // Regenerate the random sentence when gender changes
+      const examples = phrases[index].examples || [];
+      if (examples.length > 0) {
+        // Find the example that matches the current randomSentence
+        // This ensures we keep the same example but update the gender
+        const currentExample = examples.find(ex => 
+          ex.thai === randomSentence.thai || 
+          ex.thaiMasculine === randomSentence.thai || 
+          ex.thaiFeminine === randomSentence.thai
+        );
+        
+        if (currentExample) {
+          const thaiText = isMale
+            ? (currentExample.thaiMasculine || currentExample.thai)
+            : (currentExample.thaiFeminine || currentExample.thai);
+          
+          setRandomSentence({
+            thai: thaiText,
+            english: currentExample.translation
+          });
+        }
+      }
+    }
+  }, [isMale, phrases, index, randomSentence]);
+
   // Function to generate a random sentence
   const generateRandomPhrase = () => {
-    const currentWord = phrases[index].thai;
     const examples = phrases[index].examples || [];
     
     if (examples.length > 0) {
       const randomIndex = Math.floor(Math.random() * examples.length);
       const example = examples[randomIndex];
+
+      // Select the correct Thai form based on gender
+      const thaiText = isMale 
+        ? (example.thaiMasculine || example.thai)
+        : (example.thaiFeminine || example.thai);
+
       setRandomSentence({
-        thai: example.thai,
+        thai: thaiText,
         english: example.translation
       });
       setDialogOpen(true);
-      return example.thai;
+      return thaiText;
     } else {
+      // If no examples, return the main phrase with gender
+      const currentWord = getThaiWithGender(phrases[index], isMale);
       setRandomSentence(null);
       setDialogOpen(true);
       return currentWord;
@@ -1176,6 +1348,11 @@ export default function ThaiFlashcards() {
           {randomSentence && (
             <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
               <h3 className="text-sm text-blue-400 uppercase tracking-wider mb-1">In Context</h3>
+              <div className="flex items-center justify-end space-x-2 pb-2">
+                <span className="text-gray-400 text-sm">♂</span>
+                <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
+                <span className="text-gray-400 text-sm">♀</span>
+              </div>
               <p className="text-base text-white font-medium">{randomSentence.thai}</p>
               <p className="text-sm text-gray-400 italic">{randomSentence.english}</p>
             </div>
@@ -1184,18 +1361,18 @@ export default function ThaiFlashcards() {
           {showAnswer ? (
             <div className="space-y-4">
               <div>
-                <p className="text-lg">Thai: <span className="text-white">{phrases[index].thai}</span></p>
+                <p className="text-lg">Thai: <span className="text-white">{getThaiWithGender(phrases[index], isMale)}</span></p>
               </div>
 
               <div>
                 <p className="text-gray-400">
-                  Official pronunciation: <span className="text-gray-300">{phrases[index].pronunciation}</span>
+                  Official pronunciation: <span className="text-gray-300">{getGenderedPronunciation(phrases[index], isMale)}</span>
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => speak(phrases[index].thai)}
+                  onClick={() => speak(getThaiWithGender(phrases[index], isMale))}
                   disabled={isPlaying}
                   className="neumorphic-button flex-1"
                 >
@@ -1205,9 +1382,10 @@ export default function ThaiFlashcards() {
                   <DialogTrigger asChild>
                     <button
                       onClick={() => {
-                        const phrase = generateRandomPhrase();
-                        if (phrase) {
-                          speak(phrase);
+                        // generateRandomPhrase now returns the correct gender form
+                        const phraseToSpeak = generateRandomPhrase(); 
+                        if (phraseToSpeak) {
+                          speak(phraseToSpeak);
                         }
                       }}
                       disabled={isPlaying}
@@ -1222,8 +1400,15 @@ export default function ThaiFlashcards() {
                       <DialogDescription className="pt-4">
                         {randomSentence ? (
                           <div className="space-y-4">
+                            {/* Add the mirrored switch here */}
+                            <div className="flex items-center justify-end space-x-2 pb-2">
+                              <span className="text-gray-400 text-sm">♂</span>
+                              <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
+                              <span className="text-gray-400 text-sm">♀</span>
+                            </div>
+                            {/* Use the already selected gender-specific randomSentence.thai */}
                             <div className="text-xl font-medium text-white">
-                              {randomSentence.thai}
+                              {randomSentence.thai} 
                             </div>
                             <div className="text-gray-400">
                               {randomSentence.english}
@@ -1509,7 +1694,7 @@ export default function ThaiFlashcards() {
                     </div>
                     <div className="flex items-center space-x-3 text-sm">
                       <span className="text-gray-400">
-                        {phrase.thai}
+                        {getThaiWithGender(phrase, isMale)}
                       </span>
                       <span className={`px-2 py-0.5 rounded text-xs ${color.replace('bg-', 'bg-opacity-20 text-')}`}>
                         {label}
@@ -1519,7 +1704,7 @@ export default function ThaiFlashcards() {
                         onClick={(e) => {
                           e.stopPropagation();
                           if (!isPlaying) {
-                            speak(phrase.thai);
+                            speak(getThaiWithGender(phrase, isMale));
                           }
                         }}
                       >

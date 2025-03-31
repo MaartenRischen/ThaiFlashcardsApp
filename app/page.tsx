@@ -107,8 +107,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.37",
-  changes: "Added support for premium male Thai voices"
+  version: "1.3.38",
+  changes: "Redesigned UI layout for better usability"
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -1006,6 +1006,7 @@ export default function ThaiFlashcards() {
   const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
   const [voicesLoaded, setVoicesLoaded] = useState(false);
   const [showAdminSettings, setShowAdminSettings] = useState(false);
+  const [mnemonics, setMnemonics] = useState<{[key: number]: string}>({});
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -1529,256 +1530,269 @@ export default function ThaiFlashcards() {
     setIsPlaying(false);
   };
 
+  // Function to update mnemonics
+  const updateMnemonics = (cardIndex: number, text: string) => {
+    setMnemonics(prev => ({
+      ...prev,
+      [cardIndex]: text
+    }));
+    // Save to local storage
+    localStorage.setItem('mnemonics', JSON.stringify({
+      ...mnemonics,
+      [cardIndex]: text
+    }));
+  };
+
+  // Load mnemonics from localStorage
+  useEffect(() => {
+    const savedMnemonics = localStorage.getItem('mnemonics');
+    if (savedMnemonics) {
+      try {
+        setMnemonics(JSON.parse(savedMnemonics));
+      } catch (error) {
+        console.error('Error loading mnemonics:', error);
+      }
+    }
+  }, []);
+
+  // Function to reset current card
+  const resetCard = () => {
+    // Remove card progress
+    const newCardProgress = { ...cardProgress };
+    delete newCardProgress[index];
+    setCardProgress(newCardProgress);
+    localStorage.setItem('cardProgress', JSON.stringify(newCardProgress));
+    
+    // Clear mnemonic for this card
+    const newMnemonics = { ...mnemonics };
+    delete newMnemonics[index];
+    setMnemonics(newMnemonics);
+    localStorage.setItem('mnemonics', JSON.stringify(newMnemonics));
+    
+    // Reset the card
+    setShowAnswer(false);
+    setRandomSentence(null);
+  };
+
+  // Export card progress to JSON file
+  const exportCardProgress = () => {
+    const data = {
+      cardProgress,
+      mnemonics
+    };
+    
+    const dataStr = JSON.stringify(data);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const exportFileDefaultName = 'thai-flashcards-data.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  // Import card progress from JSON file
+  const importCardProgress = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const data = JSON.parse(event.target?.result as string);
+            if (data.cardProgress) {
+              setCardProgress(data.cardProgress);
+              localStorage.setItem('cardProgress', JSON.stringify(data.cardProgress));
+            }
+            if (data.mnemonics) {
+              setMnemonics(data.mnemonics);
+              localStorage.setItem('mnemonics', JSON.stringify(data.mnemonics));
+            }
+            alert('Data imported successfully');
+            // Update active cards
+            updateActiveCards();
+          } catch (error) {
+            alert('Invalid file format');
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  };
+
+  // Reset all progress
+  const resetAllProgress = () => {
+    if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+      setCardProgress({});
+      setMnemonics({});
+      localStorage.removeItem('cardProgress');
+      localStorage.removeItem('mnemonics');
+      setIndex(0);
+      setShowAnswer(false);
+      setRandomSentence(null);
+      updateActiveCards();
+      
+      alert('All progress has been reset');
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      <div className="w-full max-w-lg mx-auto p-4 space-y-4">
-        {/* Header */}
-        <div className="flex flex-col mb-8">
-          <div className="w-full flex items-center justify-between bg-[#1E1E1E] rounded-xl p-4">
-            <div className="w-48">
-              <img 
-                src="/images/donkey-bridge-logo.png" 
-                alt="Donkey Bridge Thai Learning"
-                className="w-full h-auto"
-              />
-          </div>
-            <div className="flex space-x-3">
-            <button
-              onClick={() => setShowHowItWorks(!showHowItWorks)}
-                className="neumorphic-button text-sm px-4 py-2"
-            >
-              How It Works
-            </button>
-            <button
-              onClick={() => setShowVocabulary(!showVocabulary)}
-                className="neumorphic-button text-sm px-4 py-2"
-            >
-                Vocabulary
-            </button>
-            </div>
-          </div>
+      {/* Header with app logo and navigation buttons */}
+      <div className="p-4 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-bold text-white">🇹🇭 Thai Flashcards</h1>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => setShowHowItWorks(true)} className="neumorphic-button text-xs text-blue-400">How It Works</button>
+          <button onClick={() => setShowVocabulary(true)} className="neumorphic-button text-xs text-blue-400">Vocabulary</button>
+          <button onClick={() => resetCard()} className="neumorphic-button text-xs text-blue-400">Reset</button>
+          <button onClick={() => exportCardProgress()} className="neumorphic-button text-xs text-blue-400">Export All</button>
+          <button onClick={() => importCardProgress()} className="neumorphic-button text-xs text-blue-400">Import All</button>
+          <button onClick={() => resetAllProgress()} className="neumorphic-button text-xs text-red-400">Reset All</button>
         </div>
+      </div>
 
-        {/* Card Status */}
-        <ClientOnly>
-          <div className="flex justify-between items-center text-sm text-gray-400">
-            <div>Card {activeCards.indexOf(index) + 1} of {activeCards.length} active</div>
-            <div>{index + 1} of {phrases.length} total</div>
-            </div>
-        </ClientOnly>
-
-        {/* Main Card */}
-        <div className="neumorphic p-6 space-y-4">
-          <div className="text-center">
-            <ClientOnly>
-              <h2 className="text-2xl font-bold text-white">
-                {phrases[index].english}
-              </h2>
-            </ClientOnly>
+      <div className="flex-1 flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {/* Progress Counter */}
+          <div className="text-center mb-2">
+            <p className="text-sm text-gray-400">
+              {activeCards.length} cards due today ({Math.round((index === 0 ? 0 : (activeCards.indexOf(index) / activeCards.length) * 100))}% complete)
+            </p>
+          </div>
+          
+          <div className="mb-4 rounded-xl overflow-hidden neumorphic">
+            <div className="neumorphic-progress" style={{ width: `${Math.round((index === 0 ? 0 : (activeCards.indexOf(index) / activeCards.length) * 100))}%` }}></div>
           </div>
 
-          {showAnswer ? (
-            <div className="space-y-4">
-              <div>
-                <p className="text-lg">Thai: 
-                  <ClientOnly>
-                    <span className="text-white">{getThaiWithGender(phrases[index], isMale)}</span>
-                  </ClientOnly>
-                </p>
-              </div>
-
-              <div>
-                <p className="text-gray-400">
-                  Official pronunciation: 
-                  <ClientOnly>
-                    <span className="text-gray-300">{getGenderedPronunciation(phrases[index], isMale)}</span>
-                  </ClientOnly>
-                </p>
-              </div>
+          {/* Card */}
+          <div className="neumorphic rounded-xl flex flex-col">
+            {/* Card Front */}
+            <div className="p-6">
+              <div className="text-2xl font-bold mb-2 text-center">{phrases[index].english}</div>
               
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => speak(getThaiWithGender(phrases[index], isMale))}
-                  disabled={isPlaying}
-                  className="neumorphic-button flex-1"
-                >
-                  {isPlaying ? 'Playing...' : 'Play Word'}
-                </button>
-                <button
-                  onClick={() => {
-                    const phraseToSpeak = randomSentence?.thai || getThaiWithGender(phrases[index], isMale);
-                    speak(phraseToSpeak);
-                  }}
-                  disabled={isPlaying}
-                  className="neumorphic-button flex-1"
-                >
-                  {isPlaying ? 'Playing...' : 'Play Context'}
-                </button>
-              </div>
-
-              {/* Context section */}
-              <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm text-blue-400 uppercase tracking-wider">In Context</h3>
-                </div>
-                <ClientOnly>
-                  <p className="text-base text-white font-medium">{randomSentence?.thai || getThaiWithGender(phrases[index], isMale)}</p>
-                  <p className="text-sm text-gray-300 italic">{randomSentence?.pronunciation || phrases[index].pronunciation}</p>
-                  <p className="text-sm text-gray-400 italic">{randomSentence?.english || "Loading example..."}</p>
-                </ClientOnly>
-                <div className="flex items-center justify-between mt-2">
-                  <button
-                    onClick={() => generateRandomPhrase('prev')}
-                    className="neumorphic-button text-blue-400 px-4"
-                    aria-label="Previous example"
+              {!showAnswer && (
+                <div className="flex justify-center mt-4">
+                  <button 
+                    onClick={() => setShowAnswer(true)}
+                    className="neumorphic-button text-blue-400 px-6 py-2"
                   >
-                    ←
-                  </button>
-                  <button
-                    onClick={() => speak(randomSentence?.thai || getThaiWithGender(phrases[index], isMale))}
-                    disabled={isPlaying}
-                    className="neumorphic-button text-blue-400"
-                  >
-                    {isPlaying ? 'Playing...' : 'Play Context'}
-                  </button>
-                  <button
-                    onClick={() => generateRandomPhrase('next')}
-                    className="neumorphic-button text-blue-400 px-4"
-                    aria-label="Next example"
-                  >
-                    →
+                    Show Answer
                   </button>
                 </div>
-              </div>
+              )}
+            </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                <button 
-                  onClick={() => handleCardAction('hard')} 
-                  className="neumorphic-button text-red-500"
-                >
-                  Wrong
-                </button>
-                <button 
-                  onClick={() => handleCardAction('good')} 
-                  className="neumorphic-button text-yellow-500"
-                >
-                  Correct
-                </button>
-                <button 
-                  onClick={() => handleCardAction('easy')} 
-                  className="neumorphic-button text-green-500"
-                >
-                  Easy
-                </button>
-              </div>
+            {/* Card Back */}
+            {showAnswer && (
+              <div className="border-t border-[#333] p-6">
+                <div className="flex items-center justify-center mb-4">
+                  {/* Thai word with pronunciation */}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white mb-2">
+                      {getThaiWithGender(phrases[index], isMale)}
+                    </div>
+                    <div className="text-sm text-gray-400 italic mb-3">
+                      {phrases[index].pronunciation}
+                    </div>
+                    
+                    {/* Play word button */}
+                    <div className="flex justify-center mb-4">
+                      <button
+                        onClick={() => speak(getThaiWithGender(phrases[index], isMale))}
+                        disabled={isPlaying}
+                        className="neumorphic-button text-blue-400"
+                      >
+                        {isPlaying ? 'Playing...' : 'Play Word'}
+                      </button>
+                    </div>
+                    
+                    {/* Difficulty buttons moved here */}
+                    <div className="flex justify-center space-x-2 mb-4">
+                      <button
+                        onClick={() => handleCardAction('hard')}
+                        className="neumorphic-button text-red-400"
+                      >
+                        Wrong
+                      </button>
+                      <button
+                        onClick={() => handleCardAction('good')}
+                        className="neumorphic-button text-yellow-400"
+                      >
+                        Correct
+                      </button>
+                      <button
+                        onClick={() => handleCardAction('easy')}
+                        className="neumorphic-button text-green-400"
+                      >
+                        Easy
+                      </button>
+                    </div>
+                  </div>
+                </div>
 
-              <div className="mt-6">
-                <div className="flex justify-between items-center mb-2">
-                  <p className="text-gray-400">What does this sound like for you?</p>
-                  <div className="flex space-x-2">
+                {/* Mnemonic */}
+                <div className="mb-4">
+                  <div className="text-sm text-gray-400 mb-1">Mnemonic:</div>
+                  <textarea
+                    value={mnemonics[index] || ''}
+                    onChange={(e) => updateMnemonics(index, e.target.value)}
+                    placeholder="Enter a memory aid to help you remember this word..."
+                    className="w-full p-2 rounded-sm bg-[#2a2a2a] text-white border border-[#444] focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                
+                {/* Context section moved under mnemonic */}
+                <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic mb-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm text-blue-400 uppercase tracking-wider">In Context</h3>
+                  </div>
+                  <ClientOnly>
+                    <p className="text-base text-white font-medium">{randomSentence?.thai || getThaiWithGender(phrases[index], isMale)}</p>
+                    <p className="text-sm text-gray-300 italic">{randomSentence?.pronunciation || phrases[index].pronunciation}</p>
+                    <p className="text-sm text-gray-400 italic">{randomSentence?.english || "Loading example..."}</p>
+                  </ClientOnly>
+                  <div className="flex items-center justify-between mt-2">
                     <button
-                      onClick={() => {
-                        setLocalMnemonics(prev => ({
-                          ...prev,
-                          [index]: {
-                            text: getGenderedMnemonic(phrases[index], isMale)
-                          }
-                        }));
-                      }}
-                      className="neumorphic-button text-sm px-2 py-1"
+                      onClick={() => generateRandomPhrase('prev')}
+                      className="neumorphic-button text-blue-400 px-4"
+                      aria-label="Previous example"
                     >
-                      Reset
+                      ←
                     </button>
                     <button
-                      onClick={() => {
-                        const dataStr = JSON.stringify(localMnemonics);
-                        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                        const exportFileDefaultName = 'mnemonics.json';
-                        const linkElement = document.createElement('a');
-                        linkElement.setAttribute('href', dataUri);
-                        linkElement.setAttribute('download', exportFileDefaultName);
-                        linkElement.click();
-                      }}
-                      className="neumorphic-button text-sm px-2 py-1"
+                      onClick={() => speak(randomSentence?.thai || getThaiWithGender(phrases[index], isMale))}
+                      disabled={isPlaying}
+                      className="neumorphic-button text-blue-400"
                     >
-                      Export All
+                      {isPlaying ? 'Playing...' : 'Play Context'}
                     </button>
                     <button
-                      onClick={() => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = '.json';
-                        input.onchange = (e) => {
-                          const file = (e.target as HTMLInputElement).files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              try {
-                                const importedMnemonics = JSON.parse(event.target?.result as string);
-                                setLocalMnemonics(importedMnemonics);
-                              } catch (error) {
-                                alert('Invalid file format');
-                              }
-                            };
-                            reader.readAsText(file);
-                          }
-                        };
-                        input.click();
-                      }}
-                      className="neumorphic-button text-sm px-2 py-1"
+                      onClick={() => generateRandomPhrase('next')}
+                      className="neumorphic-button text-blue-400 px-4"
+                      aria-label="Next example"
                     >
-                      Import All
+                      →
                     </button>
                   </div>
                 </div>
-                <ClientOnly>
-                  <textarea
-                    value={localMnemonics[index]?.text || getGenderedMnemonic(phrases[index], isMale)}
-                    onChange={(e) => handleMnemonicChange(e)}
-                    className="neumorphic-input w-full min-h-[120px] resize-none p-4 rounded-sm"
-                    placeholder="Add your own way to remember this sound..."
-                  />
-                </ClientOnly>
+                
+                {/* Gender Switch */}
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-400 text-sm">♀</span>
+                    <Switch checked={isMale} onCheckedChange={setIsMale} />
+                    <span className="text-gray-400 text-sm">♂</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <button 
-                onClick={() => setShowAnswer(true)}
-                className="w-full neumorphic-button"
-              >
-                Show Answer
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-
-        {/* Reset Button and Switches */}
-        <div className="flex justify-between items-center">
-          <button
-            onClick={handleResetAll}
-            className="neumorphic-button text-red-500"
-          >
-            Reset All
-          </button>
-          
-          <div className="flex items-center space-x-4">
-            <ClientOnly>
-              <div className="flex items-center space-x-2">
-                <span className="text-gray-400 text-sm">♀</span>
-                <Switch checked={isMale} onCheckedChange={setIsMale} />
-                <span className="text-gray-400 text-sm">♂</span>
-              </div>
-            </ClientOnly>
-            <ClientOnly>
-              <div className="flex items-center space-x-2">
-                <span className="text-gray-400 text-sm">Autoplay</span>
-                <Switch checked={autoplay} onCheckedChange={setAutoplay} />
-              </div>
-            </ClientOnly>
-              </div>
-              </div>
-              </div>
+      </div>
 
       {/* Settings Button */}
       <div className="fixed bottom-16 right-4 z-20">
@@ -1805,63 +1819,27 @@ export default function ThaiFlashcards() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="neumorphic max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Statistics</h2>
+              <h2 className="text-xl font-bold">Settings</h2>
               <button
                 onClick={() => setShowStats(false)}
                 className="text-gray-400 hover:text-white"
               >
                 ✕
               </button>
-              </div>
+            </div>
             
             <div className="space-y-4">
-              <ClientOnly>
-                {(() => {
-                  const stats = calculateStats();
-                  return (
-                    <>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="neumorphic p-4 text-center">
-                          <div className="text-2xl font-bold text-blue-400">{stats.totalCards}</div>
-                          <div className="text-sm text-gray-400">Total Cards</div>
-                </div>
-                        <div className="neumorphic p-4 text-center">
-                          <div className="text-2xl font-bold text-green-400">{stats.learnedCards}</div>
-                          <div className="text-sm text-gray-400">Cards Learned</div>
-                </div>
-                        <div className="neumorphic p-4 text-center">
-                          <div className="text-2xl font-bold text-yellow-400">{stats.dueCards}</div>
-                          <div className="text-sm text-gray-400">Cards Due</div>
-                </div>
-                        <div className="neumorphic p-4 text-center">
-                          <div className="text-2xl font-bold text-purple-400">{stats.totalReviews}</div>
-                          <div className="text-sm text-gray-400">Total Reviews</div>
-                </div>
-                </div>
-                      
-                      <div className="mt-4">
-                        <h3 className="text-lg font-bold mb-2">Progress</h3>
-                        <div className="w-full bg-gray-800 rounded-full h-4">
-                          <div 
-                            className="bg-blue-500 h-4 rounded-full" 
-                            style={{ width: `${(stats.learnedCards / stats.totalCards) * 100}%` }}
-                          ></div>
+              <div className="flex items-center justify-between">
+                <span>Auto-play on reveal</span>
+                <Switch checked={autoplay} onCheckedChange={setAutoplay} />
               </div>
-                        <div className="text-right text-sm text-gray-400 mt-1">
-                          {Math.round((stats.learnedCards / stats.totalCards) * 100)}% Complete
             </div>
-            </div>
-                    </>
-                  );
-                })()}
-              </ClientOnly>
-        </div>
-      </div>
+          </div>
         </div>
       )}
-
+      
       {showHowItWorks && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-auto">
           <div className="neumorphic max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">How It Works</h2>
@@ -1872,41 +1850,24 @@ export default function ThaiFlashcards() {
                 ✕
               </button>
             </div>
+            
             <div className="space-y-4 text-gray-300">
-              <p>
-                <strong className="text-white">Donkey Bridge</strong> uses spaced repetition to help you learn Thai vocabulary efficiently.
-              </p>
-              
-              <p>
-                <strong className="text-white">Active Cards:</strong> The app keeps 5 cards in active rotation that need your attention. These are cards you haven't seen, got wrong, or are due for review today.
-              </p>
-              
-              <p>
-                <strong className="text-white">Spaced Repetition:</strong> When you rate a card:
-              </p>
-              
-              <ul className="list-disc pl-5 space-y-2">
-                <li><strong className="text-red-500">Wrong</strong> - You didn't remember it. Card will appear again soon.</li>
-                <li><strong className="text-yellow-500">Correct</strong> - You remembered with some effort. Card will repeat at a moderate interval.</li>
-                <li><strong className="text-green-500">Easy</strong> - You knew it well. Card will appear after a longer interval.</li>
-                </ul>
-              
-              <p>
-                <strong className="text-white">Personalization:</strong> You can customize mnemonics and phonetic spellings to help your learning.
-              </p>
-              
-              <p>
-                <strong className="text-white">Example Sentences:</strong> Each word comes with authentic Thai example sentences to learn the word in context.
-              </p>
+              <p><strong>Spaced Repetition:</strong> This app uses the SM-2 algorithm to optimize your learning. Cards you find difficult will appear more frequently.</p>
+              <p><strong>Gender Toggle:</strong> Switch between masculine (ครับ) and feminine (ค่ะ) endings.</p>
+              <p><strong>Mnemonics:</strong> Create memory aids to help remember words.</p>
+              <p><strong>Context Examples:</strong> See how words are used in sentences.</p>
+              <p><strong>Progress:</strong> Your progress is automatically saved in your browser.</p>
+              <p><strong>Audio:</strong> Hear the correct pronunciation with text-to-speech.</p>
+              <p><strong>Offline Use:</strong> This app works offline once loaded.</p>
             </div>
           </div>
         </div>
       )}
-
+      
       {showVocabulary && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-auto">
           <div className="neumorphic max-w-md w-full p-6 max-h-[80vh] overflow-auto">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 sticky top-0 bg-[#1a1a1a] py-2">
               <h2 className="text-xl font-bold">Vocabulary List</h2>
               <button
                 onClick={() => setShowVocabulary(false)}
@@ -1915,54 +1876,26 @@ export default function ThaiFlashcards() {
                 ✕
               </button>
             </div>
+            
             <div className="space-y-2">
-              <ClientOnly>
-              {phrases.map((phrase, idx) => {
-                  const isCurrentCard = idx === index;
-                  const status = getCardStatus(idx);
-                  const { color, label } = getStatusInfo(status);
-                
-                return (
-                  <div 
-                    key={idx}
-                      className={`neumorphic p-3 flex items-center justify-between cursor-pointer hover:bg-gray-800 transition-colors ${isCurrentCard ? 'border-l-4 border-blue-500' : ''}`}
-                    onClick={() => {
-                        setIndex(idx);
-                        setShowVocabulary(false);
-                        setShowAnswer(false);
-                        setRandomSentence(null);
-                    }}
-                  >
-                    <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${color}`} />
-                        <span>{phrase.english}</span>
-                    </div>
-                      <div className="flex items-center space-x-3 text-sm">
-                        {/* Existing ClientOnly for Thai text is fine */}
-                        <ClientOnly>
-                          <span className="text-gray-400">
-                            {getThaiWithGender(phrase, isMale)}
-                          </span>
-                        </ClientOnly>
-                        <span className={`px-2 py-0.5 rounded text-xs ${color.replace('bg-', 'bg-opacity-20 text-')}`}>
-                          {label}
-                        </span>
-                      <button
-                          className="neumorphic-circle opacity-75 hover:opacity-100 w-8 h-8"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!isPlaying) {
-                              speak(getThaiWithGender(phrase, isMale));
-                          }
-                        }}
-                      >
-                        🔊
-                      </button>
-                    </div>
+              {phrases.map((phrase, i) => (
+                <div key={i} className="p-2 border-b border-[#333] flex justify-between">
+                  <div>
+                    <p className="text-white">{phrase.thai}</p>
+                    <p className="text-gray-400 text-sm">{phrase.english}</p>
                   </div>
-                );
-              })}
-              </ClientOnly>
+                  <button 
+                    onClick={() => {
+                      setIndex(i);
+                      setShowVocabulary(false);
+                      setShowAnswer(true);
+                    }}
+                    className="text-blue-400 text-sm"
+                  >
+                    Study
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -1975,15 +1908,8 @@ export default function ThaiFlashcards() {
       />
 
       {/* Version indicator at the bottom - shows changes and timestamp in Amsterdam timezone */}
-      <div className="w-full py-2 px-3 text-center text-xs border-t border-gray-700 bg-gray-800 sticky bottom-0 z-20">
-        <div className="flex flex-col sm:flex-row sm:justify-between items-center">
-          <p className="text-gray-300 font-medium">
-            <ClientOnly>
-              v{VERSION_INFO.version} | {new Date(VERSION_INFO.lastUpdated).toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' })}
-            </ClientOnly>
-          </p>
-          <p className="text-blue-400">Latest: {VERSION_INFO.changes}</p>
-        </div>
+      <div className="text-center p-2 text-xs text-gray-600">
+        <span>v{VERSION_INFO.version} - {VERSION_INFO.changes}</span>
       </div>
     </main>
   );

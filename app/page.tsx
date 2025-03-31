@@ -104,8 +104,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.24",
-  changes: "Aggressive hydration fix attempts by wrapping more client-side elements."
+  version: "1.3.25",
+  changes: "Redesigned context feature: always visible with separate play button, no more popups."
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -1503,21 +1503,21 @@ export default function ThaiFlashcards() {
             </ClientOnly>
           </div>
 
-          {/* Display random sentence if available */}
-          {randomSentence ? (
-            <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
-              <h3 className="text-sm text-blue-400 uppercase tracking-wider mb-1">In Context</h3>
-              <ClientOnly>
-                <div className="flex items-center justify-end space-x-2 pb-2">
-                  <span className="text-gray-400 text-sm">♀</span>
-                  <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
-                  <span className="text-gray-400 text-sm">♂</span>
+          {/* Always display context sentence */}
+          <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm text-blue-400 uppercase tracking-wider">In Context</h3>
+              <div className="flex items-center space-x-2">
+                <span className="text-gray-400 text-sm">♀</span>
+                <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
+                <span className="text-gray-400 text-sm">♂</span>
               </div>
-              </ClientOnly>
-              <p className="text-base text-white font-medium">{randomSentence.thai}</p>
-              <p className="text-sm text-gray-400 italic">{randomSentence.english}</p>
+            </div>
+            <ClientOnly>
+              <p className="text-base text-white font-medium">{randomSentence?.thai || getThaiWithGender(phrases[index], isMale)}</p>
+              <p className="text-sm text-gray-400 italic">{randomSentence?.english || "Click 'New context example' to see this word in context"}</p>
+            </ClientOnly>
           </div>
-          ) : null}
 
           {showAnswer ? (
             <div className="space-y-4">
@@ -1529,7 +1529,7 @@ export default function ThaiFlashcards() {
                 </p>
               </div>
 
-                <div>
+              <div>
                 <p className="text-gray-400">
                   Official pronunciation: 
                   <ClientOnly>
@@ -1544,19 +1544,17 @@ export default function ThaiFlashcards() {
                   disabled={isPlaying}
                   className="neumorphic-button flex-1"
                 >
-                  {isPlaying ? 'Playing...' : 'Play'}
+                  {isPlaying ? 'Playing...' : 'Play Word'}
                 </button>
                 <button
                   onClick={() => {
-                    const phraseToSpeak = generateRandomPhrase(); 
-                    if (phraseToSpeak) {
-                      speak(phraseToSpeak);
-                    }
+                    const phraseToSpeak = randomSentence?.thai || getThaiWithGender(phrases[index], isMale);
+                    speak(phraseToSpeak);
                   }}
                   disabled={isPlaying}
                   className="neumorphic-button flex-1"
                 >
-                  In Context
+                  {isPlaying ? 'Playing...' : 'Play Context'}
                 </button>
               </div>
 
@@ -1652,12 +1650,18 @@ export default function ThaiFlashcards() {
             </div>
           ) : (
             <div className="space-y-4">
-            <button 
+              <button 
                 onClick={() => setShowAnswer(true)}
                 className="w-full neumorphic-button"
-            >
-              Show Answer
-            </button>
+              >
+                Show Answer
+              </button>
+              <button
+                onClick={() => generateRandomPhrase()}
+                className="w-full neumorphic-button text-blue-400"
+              >
+                New context example
+              </button>
             </div>
           )}
         </div>

@@ -91,6 +91,7 @@ interface RandomSentence {
   thai: string; // Default/neutral form
   thaiMasculine?: string;
   thaiFeminine?: string;
+  pronunciation: string; // Add pronunciation field
   english: string;
 }
 
@@ -104,8 +105,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.35",
-  changes: "Fixed context examples to always show proper examples for the current phrase"
+  version: "1.3.36",
+  changes: "Added pronunciation text for context examples"
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -1313,6 +1314,7 @@ export default function ThaiFlashcards() {
           
           setRandomSentence({
             thai: thaiText,
+            pronunciation: currentExample.pronunciation,
             english: currentExample.translation
           });
         }
@@ -1331,6 +1333,7 @@ export default function ThaiFlashcards() {
         console.log("No examples found for phrase", index);
         setRandomSentence({
           thai: getThaiWithGender(phrases[index], isMale),
+          pronunciation: phrases[index].pronunciation,
           english: phrases[index].english
         });
         return;
@@ -1346,6 +1349,7 @@ export default function ThaiFlashcards() {
         
         setRandomSentence({
           thai: thaiText,
+          pronunciation: firstExample.pronunciation,
           english: firstExample.translation
         });
         return;
@@ -1368,6 +1372,7 @@ export default function ThaiFlashcards() {
         
         setRandomSentence({
           thai: thaiText,
+          pronunciation: firstExample.pronunciation,
           english: firstExample.translation
         });
         return;
@@ -1389,6 +1394,7 @@ export default function ThaiFlashcards() {
       
       setRandomSentence({
         thai: thaiText,
+        pronunciation: nextExample.pronunciation,
         english: nextExample.translation
       });
     } catch (error) {
@@ -1396,6 +1402,7 @@ export default function ThaiFlashcards() {
       // Fallback to main phrase if there's an error
       setRandomSentence({
         thai: getThaiWithGender(phrases[index], isMale),
+        pronunciation: phrases[index].pronunciation,
         english: phrases[index].english
       });
     }
@@ -1642,6 +1649,7 @@ export default function ThaiFlashcards() {
                 </div>
                 <ClientOnly>
                   <p className="text-base text-white font-medium">{randomSentence?.thai || getThaiWithGender(phrases[index], isMale)}</p>
+                  <p className="text-sm text-gray-300 italic">{randomSentence?.pronunciation || phrases[index].pronunciation}</p>
                   <p className="text-sm text-gray-400 italic">{randomSentence?.english || "Loading example..."}</p>
                 </ClientOnly>
                 <div className="flex items-center justify-between mt-2">

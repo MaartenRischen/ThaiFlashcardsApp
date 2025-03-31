@@ -12,6 +12,7 @@ export interface Phrase {
   thaiMasculine?: string;
   thaiFeminine?: string;
   pronunciation: string;
+  mnemonic?: string;
   examples?: ExampleSentence[];
 }
 
@@ -22,6 +23,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "สวัสดีครับ",
     thaiFeminine: "สวัสดีค่ะ",
     pronunciation: "sa-wat-dee krap/ka",
+    mnemonic: "Think: 'Swadee' - like saying 'sweet day' quickly",
     examples: [
       {
         thai: "สวัสดีตอนเช้า",
@@ -66,6 +68,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "ขอบคุณครับ",
     thaiFeminine: "ขอบคุณค่ะ",
     pronunciation: "khop-khun krap/ka",
+    mnemonic: "Think: 'Cope-Kun' - you cope with kindness",
     examples: [
       {
         thai: "ขอบคุณมากสำหรับความช่วยเหลือ",
@@ -89,6 +92,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "ใช่ครับ",
     thaiFeminine: "ใช่ค่ะ",
     pronunciation: "chai krap/ka",
+    mnemonic: "Think: 'Chai' - like the tea, say 'yes' to chai",
     examples: [
       {
         thai: "ใช่ ฉันเข้าใจ",
@@ -105,6 +109,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "ไม่ครับ",
     thaiFeminine: "ไม่ค่ะ",
     pronunciation: "mai krap/ka",
+    mnemonic: "Think: 'My' - 'My answer is no'",
     examples: [
       {
         thai: "ไม่ ขอบคุณ",
@@ -121,6 +126,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "สบายดีไหมครับ",
     thaiFeminine: "สบายดีไหมคะ",
     pronunciation: "sa-bai-dee-mai krap/ka",
+    mnemonic: "Think: 'So bye, did I?' - asking about their well-being",
     examples: [
       {
         thai: "สบายดีไหม วันนี้",
@@ -137,6 +143,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "คุณชื่ออะไรครับ",
     thaiFeminine: "คุณชื่ออะไรคะ",
     pronunciation: "khun cheu a-rai krap/ka",
+    mnemonic: "Think: 'Koon chew a rye' - asking someone's name over rye bread",
     examples: [
       {
         thai: "คุณชื่ออะไร",
@@ -153,6 +160,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "ผมชื่อ...",
     thaiFeminine: "ฉันชื่อ...",
     pronunciation: "phom/chan cheu...",
+    mnemonic: "Think: 'Phom/Chan chew' - I'm chewing as I tell my name",
     examples: [
       {
         thai: "ชื่อปีเตอร์ ยินดีที่ได้รู้จัก",
@@ -169,6 +177,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "ผมไม่เข้าใจครับ",
     thaiFeminine: "ฉันไม่เข้าใจค่ะ",
     pronunciation: "phom/chan mai kao-jai krap/ka",
+    mnemonic: "Think: 'My cow-chai' - my cow doesn't understand",
     examples: [
       {
         thai: "ไม่เข้าใจ พูดช้าๆ ได้ไหม",
@@ -192,6 +201,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "กรุณาพูดช้าๆ ครับ",
     thaiFeminine: "กรุณาพูดช้าๆ ค่ะ",
     pronunciation: "ga-ru-na pood cha-cha krap/ka",
+    mnemonic: "Think: 'Karuna' (kindness) 'pood cha-cha' (speak cha-cha dance - slowly)",
     examples: [
       {
         thai: "กรุณาพูดช้าๆ ฉันกำลังเรียนภาษาไทย",
@@ -208,6 +218,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "ห้องน้ำอยู่ที่ไหนครับ",
     thaiFeminine: "ห้องน้ำอยู่ที่ไหนคะ",
     pronunciation: "hong-nam yoo tee-nai krap/ka",
+    mnemonic: "Think: 'Hong-nam' sounds like 'home' with 'nam' (water) - where's the water room?",
     examples: [
       {
         thai: "ห้องน้ำอยู่ที่ไหน",
@@ -224,6 +235,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "อันนี้เท่าไหร่ครับ",
     thaiFeminine: "อันนี้เท่าไหร่คะ",
     pronunciation: "an-nee tao-rai krap/ka",
+    mnemonic: "Think: 'Annie, tell me how much!'",
     examples: [
       {
         thai: "อันนี้เท่าไหร่",
@@ -240,6 +252,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "อร่อยครับ",
     thaiFeminine: "อร่อยค่ะ",
     pronunciation: "a-roi krap/ka",
+    mnemonic: "Think: 'Ah, royal' - food fit for royalty",
     examples: [
       {
         thai: "อาหารนี้อร่อยมาก",
@@ -256,6 +269,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "วันนี้ครับ",
     thaiFeminine: "วันนี้ค่ะ",
     pronunciation: "wan-nee krap/ka",
+    mnemonic: "Think: 'One knee' - today I hurt one knee",
     examples: [
       {
         thai: "วันนี้อากาศดีมาก",
@@ -272,6 +286,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "พรุ่งนี้ครับ",
     thaiFeminine: "พรุ่งนี้ค่ะ",
     pronunciation: "proong-nee krap/ka",
+    mnemonic: "Think: 'Prune-knee' - tomorrow I'll fix my pruned knee",
     examples: [
       {
         thai: "พรุ่งนี้เราจะไปเที่ยว",
@@ -288,6 +303,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "เมื่อวานครับ", 
     thaiFeminine: "เมื่อวานค่ะ",
     pronunciation: "meua-wan krap/ka",
+    mnemonic: "Think: 'Mew-a-waan' - the cat meowed all day yesterday",
     examples: [
       {
         thai: "เมื่อวานไปตลาด",
@@ -304,6 +320,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "น้ำครับ",
     thaiFeminine: "น้ำค่ะ",
     pronunciation: "nam krap/ka",
+    mnemonic: "Think: 'Nom' - like 'nom nom' drinking water",
     examples: [
       {
         thai: "ขอน้ำหน่อย",
@@ -320,6 +337,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "อาหารครับ", 
     thaiFeminine: "อาหารค่ะ",
     pronunciation: "a-han krap/ka",
+    mnemonic: "Think: 'A-han' - 'a hand' full of food",
     examples: [
       {
         thai: "อาหารไทยอร่อย",
@@ -336,6 +354,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiMasculine: "ร้อนครับ",
     thaiFeminine: "ร้อนค่ะ",
     pronunciation: "ron krap/ka",
+    mnemonic: "Think: 'Ron is hot' - Ron is always complaining about the heat",
     examples: [
       {
         thai: "วันนี้อากาศร้อนมาก",

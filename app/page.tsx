@@ -104,8 +104,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.27",
-  changes: "Added arrow navigation for context examples and immediate example display"
+  version: "1.3.28",
+  changes: "Enhanced example sentences for 'Hello' with more diverse contexts"
 };
 
 const INITIAL_PHRASES: Phrase[] = [

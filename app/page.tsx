@@ -104,8 +104,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.25",
-  changes: "Redesigned context feature: always visible with separate play button, no more popups."
+  version: "1.3.26",
+  changes: "Moved context section to back of card for better learning flow."
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -1503,22 +1503,6 @@ export default function ThaiFlashcards() {
             </ClientOnly>
           </div>
 
-          {/* Always display context sentence */}
-          <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm text-blue-400 uppercase tracking-wider">In Context</h3>
-              <div className="flex items-center space-x-2">
-                <span className="text-gray-400 text-sm">♀</span>
-                <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
-                <span className="text-gray-400 text-sm">♂</span>
-              </div>
-            </div>
-            <ClientOnly>
-              <p className="text-base text-white font-medium">{randomSentence?.thai || getThaiWithGender(phrases[index], isMale)}</p>
-              <p className="text-sm text-gray-400 italic">{randomSentence?.english || "Click 'New context example' to see this word in context"}</p>
-            </ClientOnly>
-          </div>
-
           {showAnswer ? (
             <div className="space-y-4">
               <div>
@@ -1556,6 +1540,22 @@ export default function ThaiFlashcards() {
                 >
                   {isPlaying ? 'Playing...' : 'Play Context'}
                 </button>
+              </div>
+
+              {/* Context section moved here */}
+              <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm text-blue-400 uppercase tracking-wider">In Context</h3>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-400 text-sm">♀</span>
+                    <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
+                    <span className="text-gray-400 text-sm">♂</span>
+                  </div>
+                </div>
+                <ClientOnly>
+                  <p className="text-base text-white font-medium">{randomSentence?.thai || getThaiWithGender(phrases[index], isMale)}</p>
+                  <p className="text-sm text-gray-400 italic">{randomSentence?.english || "Click 'New context example' to see this word in context"}</p>
+                </ClientOnly>
               </div>
 
               <div className="grid grid-cols-3 gap-2">

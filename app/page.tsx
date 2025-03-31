@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Switch } from "@/app/components/ui/switch";
+import { ttsService, initTTSService } from './lib/tts-service';
+import AdminSettings from './components/AdminSettings';
 
 interface ExampleSentence {
   thai: string; // Default/neutral form
@@ -105,8 +107,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.36",
-  changes: "Added pronunciation text for context examples"
+  version: "1.3.37",
+  changes: "Added support for premium male Thai voices"
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -1003,6 +1005,7 @@ export default function ThaiFlashcards() {
   });
   const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
   const [voicesLoaded, setVoicesLoaded] = useState(false);
+  const [showAdminSettings, setShowAdminSettings] = useState(false);
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -1051,94 +1054,59 @@ export default function ThaiFlashcards() {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
 
-  // Simplified speak function
-  const speak = async (text: string) => {
-    if (!voicesLoaded) {
-      console.log('Voices not loaded yet');
-          return;
+  // Initialize TTS service with API key from localStorage or env
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Try to get API key from localStorage first (for admin settings)
+      const localApiKey = localStorage.getItem('ttsApiKey');
+      // Fall back to env variable
+      const envApiKey = process.env.NEXT_PUBLIC_GOOGLE_CLOUD_TTS_API_KEY;
+      
+      const apiKey = localApiKey || envApiKey;
+      
+      if (apiKey && apiKey !== 'your_api_key_here') {
+        console.log('Initializing Google Cloud TTS');
+        initTTSService(apiKey);
+        
+        // Use the provider from localStorage
+        const savedProvider = localStorage.getItem('ttsProvider');
+        if (savedProvider) {
+          ttsService.useProvider(savedProvider);
         }
+      } else {
+        console.log('Using browser TTS (no API key found)');
+      }
+    }
+  }, []);
+
+  // Replace the speak function with our new service
+  const speak = async (text: string) => {
+    if (!voicesLoaded && !ttsService.getProvider) {
+      console.log('TTS not initialized yet');
+      return;
+    }
 
     setIsPlaying(true);
     
     try {
-      // iOS requires cancelling any ongoing speech
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'th-TH';
-      
-      // Get Thai voice if available
-      const voices = window.speechSynthesis.getVoices();
-      console.log("Available voices:", voices.map(v => `${v.name} (${v.lang})`)); // Log available voices
-      
-      // Try to get gender-specific Thai voice first
-      let thaiVoice = null;
-      
-      // Look for gender-specific voices
-      if (isMale) {
-        // Try to find a male Thai voice
-        thaiVoice = voices.find(voice => 
-          voice.lang.includes('th') && 
-          (voice.name.toLowerCase().includes('male') || 
-           voice.name.toLowerCase().includes('man') ||
-           voice.name.toLowerCase().includes('พ') || // Explicit check for Thai male char
-           voice.name.toLowerCase().includes('krittin')) // Add specific known male voice names if needed
-        );
-        console.log("Searching for male Thai voice. Found:", thaiVoice ? thaiVoice.name : "None");
-      } else {
-        // Try to find a female Thai voice
-        thaiVoice = voices.find(voice => 
-          voice.lang.includes('th') && 
-          (voice.name.toLowerCase().includes('female') || 
-           voice.name.toLowerCase().includes('woman') ||
-           voice.name.toLowerCase().includes('ห') || // Explicit check for Thai female char
-           voice.name.toLowerCase().includes('kanya')) // Add specific known female voice names if needed
-        );
-        console.log("Searching for female Thai voice. Found:", thaiVoice ? thaiVoice.name : "None");
-      }
-      
-      // If no gender-specific voice found, fall back to any Thai voice
-      if (!thaiVoice) {
-        thaiVoice = voices.find(voice => voice.lang.includes('th'));
-        console.log("Falling back to default Thai voice. Found:", thaiVoice ? thaiVoice.name : "None");
-      }
-      
-      if (thaiVoice) {
-        utterance.voice = thaiVoice;
-        console.log("Using voice:", thaiVoice.name);
-        } else {
-        console.log("No Thai voice found for speaking.");
-      }
-
-      // iOS Safari requires a slight delay after cancel
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      return new Promise<void>((resolve, reject) => {
-        utterance.onend = () => {
+      await ttsService.speak({
+        text,
+        isMale,
+        onStart: () => console.log('Speech started'),
+        onEnd: () => {
+          console.log('Speech ended');
           setIsPlaying(false);
-          resolve();
-        };
-        
-    utterance.onerror = (event) => {
-          console.error('Speech synthesis error:', event.error);
-      setIsPlaying(false);
-          reject(event);
-        };
-
-        // iOS Safari sometimes needs a kick to start
-        setTimeout(() => {
-          if (window.speechSynthesis.speaking) {
-            window.speechSynthesis.pause();
-            window.speechSynthesis.resume();
-          }
-        }, 1000);
-
-        window.speechSynthesis.speak(utterance);
+        },
+        onError: (error) => {
+          console.error('TTS error:', error);
+          setIsPlaying(false);
+          alert('Speech playback failed. Please try again.');
+        }
       });
-      } catch (error) {
+    } catch (error) {
       console.error('Speech playback error:', error);
-        setIsPlaying(false);
-      alert('Speech playback failed. Please try tapping the screen first.');
+      setIsPlaying(false);
+      alert('Speech playback failed. Please try again.');
     }
   };
 
@@ -1555,6 +1523,12 @@ export default function ThaiFlashcards() {
     }
   };
 
+  // Add a cancel function to stop speech when needed
+  const cancelSpeech = () => {
+    ttsService.cancel();
+    setIsPlaying(false);
+  };
+
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       <div className="w-full max-w-lg mx-auto p-4 space-y-4">
@@ -1814,7 +1788,17 @@ export default function ThaiFlashcards() {
         >
           ⚙️
         </button>
-              </div>
+      </div>
+      
+      {/* Admin Settings Button (hidden in lower corner) */}
+      <div className="fixed bottom-4 right-4 z-20">
+        <button
+          onClick={() => setShowAdminSettings(true)}
+          className="text-xs text-gray-600 hover:text-gray-400"
+        >
+          Admin
+        </button>
+      </div>
 
       {/* Modals */}
       {showStats && (
@@ -1983,6 +1967,12 @@ export default function ThaiFlashcards() {
           </div>
         </div>
       )}
+
+      {/* Admin Settings Modal */}
+      <AdminSettings
+        isOpen={showAdminSettings}
+        onClose={() => setShowAdminSettings(false)}
+      />
 
       {/* Version indicator at the bottom - shows changes and timestamp in Amsterdam timezone */}
       <div className="w-full py-2 px-3 text-center text-xs border-t border-gray-700 bg-gray-800 sticky bottom-0 z-20">

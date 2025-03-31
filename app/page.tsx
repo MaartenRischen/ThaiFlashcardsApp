@@ -24,8 +24,8 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.42",
-  changes: "Improved progress tracking and vocabulary list"
+  version: "1.3.43",
+  changes: "Removed progress bar and improved vocabulary list styling"
 };
 
 interface Review {
@@ -545,15 +545,15 @@ export default function ThaiFlashcards() {
   const getStatusInfo = (status: string) => {
     switch(status) {
       case 'unseen':
-        return { color: 'bg-gray-500', label: 'Unseen' };
+        return { color: 'bg-gray-700 text-gray-300', label: 'Unseen' };
       case 'hard':
-        return { color: 'bg-red-500', label: 'Wrong' };
+        return { color: 'bg-red-600 text-white', label: 'Wrong' };
       case 'good':
-        return { color: 'bg-yellow-500', label: 'Correct' };
+        return { color: 'bg-yellow-500 text-black', label: 'Correct' };
       case 'easy':
-        return { color: 'bg-green-500', label: 'Easy' };
+        return { color: 'bg-green-500 text-white', label: 'Easy' };
       default:
-        return { color: 'bg-gray-500', label: 'Unseen' };
+        return { color: 'bg-gray-700 text-gray-300', label: 'Unseen' };
     }
   };
 
@@ -861,17 +861,6 @@ export default function ThaiFlashcards() {
 
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-md">
-          {/* Progress Counter */}
-          <div className="text-center mb-2">
-            <p className="text-sm text-gray-400">
-              {totalDueToday} cards due today ({totalDueToday > 0 ? Math.round((reviewsCompletedToday / totalDueToday) * 100) : 0}% complete)
-            </p>
-          </div>
-          
-          <div className="mb-4 rounded-xl overflow-hidden neumorphic">
-            <div className="neumorphic-progress" style={{ width: `${totalDueToday > 0 ? Math.round((reviewsCompletedToday / totalDueToday) * 100) : 0}%` }}></div>
-          </div>
-
           {/* Card */}
           <div className="neumorphic rounded-xl flex flex-col">
             {/* Card Front */}
@@ -1094,7 +1083,7 @@ export default function ThaiFlashcards() {
                       <p className="text-gray-400 text-sm">{phrase.english}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1 rounded text-xs font-medium ${color.replace('bg-', 'bg-opacity-20 text-')}`}>
+                      <span className={`px-3 py-1 rounded text-xs font-medium ${color}`}>
                         {label}
                       </span>
                       <button 

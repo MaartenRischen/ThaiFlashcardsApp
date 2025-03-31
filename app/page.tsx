@@ -1542,20 +1542,21 @@ export default function ThaiFlashcards() {
                 </button>
               </div>
 
-              {/* Context section moved here */}
+              {/* Context section */}
               <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm text-blue-400 uppercase tracking-wider">In Context</h3>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-400 text-sm">♀</span>
-                    <Switch checked={isMale} onCheckedChange={setIsMale} aria-label="Toggle Gender"/>
-                    <span className="text-gray-400 text-sm">♂</span>
-                  </div>
                 </div>
                 <ClientOnly>
                   <p className="text-base text-white font-medium">{randomSentence?.thai || getThaiWithGender(phrases[index], isMale)}</p>
                   <p className="text-sm text-gray-400 italic">{randomSentence?.english || "Click 'New context example' to see this word in context"}</p>
                 </ClientOnly>
+                <button
+                  onClick={() => generateRandomPhrase()}
+                  className="w-full neumorphic-button text-blue-400 mt-2"
+                >
+                  New context example
+                </button>
               </div>
 
               <div className="grid grid-cols-3 gap-2">
@@ -1655,12 +1656,6 @@ export default function ThaiFlashcards() {
                 className="w-full neumorphic-button"
               >
                 Show Answer
-              </button>
-              <button
-                onClick={() => generateRandomPhrase()}
-                className="w-full neumorphic-button text-blue-400"
-              >
-                New context example
               </button>
             </div>
           )}

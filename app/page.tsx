@@ -24,8 +24,8 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.41",
-  changes: "Fixed default mnemonics and progress indicator"
+  version: "1.3.42",
+  changes: "Improved progress tracking and vocabulary list"
 };
 
 interface Review {
@@ -125,6 +125,10 @@ export default function ThaiFlashcards() {
 
   // Track active cards position
   const [activeCardsIndex, setActiveCardsIndex] = useState<number>(0);
+
+  // Track how many reviews completed today
+  const [reviewsCompletedToday, setReviewsCompletedToday] = useState<number>(0);
+  const [totalDueToday, setTotalDueToday] = useState<number>(0);
 
   console.log("ThaiFlashcards: Component rendering/re-rendering. randomSentence:", randomSentence); // DEBUG
 
@@ -587,7 +591,73 @@ export default function ThaiFlashcards() {
     return { interval, easeFactor: newEaseFactor, repetitions };
   };
 
-  // Modify handleCardAction to use the active cards index
+  // Function to count cards due today based on SRS schedule
+  const countCardsDueToday = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
+    
+    let dueCount = 0;
+    
+    // Count unseen cards (always due)
+    for (let i = 0; i < phrases.length; i++) {
+      if (!cardProgress[i] || !cardProgress[i].reviews || cardProgress[i].reviews.length === 0) {
+        dueCount++;
+        continue;
+      }
+      
+      // Count cards marked as "hard" in their last review (always due)
+      const lastReview = cardProgress[i].reviews[cardProgress[i].reviews.length - 1];
+      if (lastReview.difficulty === 'hard') {
+        dueCount++;
+        continue;
+      }
+      
+      // Count cards whose next review date is today or earlier
+      if (cardProgress[i].nextReviewDate) {
+        const nextReviewDate = new Date(cardProgress[i].nextReviewDate);
+        nextReviewDate.setHours(0, 0, 0, 0); // Start of review date
+        
+        if (nextReviewDate <= today) {
+          dueCount++;
+        }
+      }
+    }
+    
+    return dueCount;
+  };
+
+  // Function to check for reviews completed today
+  const countReviewsCompletedToday = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
+    
+    let completedCount = 0;
+    
+    // Count reviews that happened today
+    Object.values(cardProgress).forEach(card => {
+      card.reviews.forEach((review: Review) => {
+        const reviewDate = new Date(review.date);
+        reviewDate.setHours(0, 0, 0, 0); // Start of review date
+        
+        if (reviewDate.getTime() === today.getTime()) {
+          completedCount++;
+        }
+      });
+    });
+    
+    return completedCount;
+  };
+
+  // Add a useEffect to update due counts when component mounts or cardProgress changes
+  useEffect(() => {
+    const dueCount = countCardsDueToday();
+    const completedCount = countReviewsCompletedToday();
+    
+    setTotalDueToday(dueCount);
+    setReviewsCompletedToday(completedCount);
+  }, [cardProgress]);
+
+  // Modify handleCardAction to increment reviewsCompletedToday
   const handleCardAction = (difficulty: 'hard' | 'good' | 'easy') => {
     // Create or get the current card progress
     const currentProgress = cardProgress[index] || { reviews: [], nextReviewDate: new Date().toISOString() };
@@ -629,6 +699,16 @@ export default function ThaiFlashcards() {
     setRandomSentence(null);
     setShowAnswer(false);
     setIndex(activeCards[nextActiveIndex]);
+
+    // Increment completed reviews counter
+    setReviewsCompletedToday(prev => prev + 1);
+    
+    // After marking a card as reviewed, it's no longer due today,
+    // so we should update the total due count
+    // If difficulty is 'hard', the card remains due
+    if (difficulty !== 'hard') {
+      setTotalDueToday(prev => Math.max(0, prev - 1));
+    }
   };
 
   const prevCard = () => {
@@ -784,12 +864,12 @@ export default function ThaiFlashcards() {
           {/* Progress Counter */}
           <div className="text-center mb-2">
             <p className="text-sm text-gray-400">
-              {activeCards.length} cards due today ({activeCards.length > 0 ? Math.round((activeCardsIndex / activeCards.length) * 100) : 0}% complete)
+              {totalDueToday} cards due today ({totalDueToday > 0 ? Math.round((reviewsCompletedToday / totalDueToday) * 100) : 0}% complete)
             </p>
           </div>
           
           <div className="mb-4 rounded-xl overflow-hidden neumorphic">
-            <div className="neumorphic-progress" style={{ width: `${activeCards.length > 0 ? Math.round((activeCardsIndex / activeCards.length) * 100) : 0}%` }}></div>
+            <div className="neumorphic-progress" style={{ width: `${totalDueToday > 0 ? Math.round((reviewsCompletedToday / totalDueToday) * 100) : 0}%` }}></div>
           </div>
 
           {/* Card */}
@@ -1008,13 +1088,13 @@ export default function ThaiFlashcards() {
                 const { color, label } = getStatusInfo(status);
                 
                 return (
-                  <div key={i} className="p-2 border-b border-[#333] flex justify-between">
+                  <div key={i} className={`p-3 border-b border-[#333] flex justify-between ${index === i ? 'bg-opacity-20 bg-blue-900' : ''}`}>
                     <div>
                       <p className="text-white">{phrase.thai}</p>
                       <p className="text-gray-400 text-sm">{phrase.english}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded text-xs ${color.replace('bg-', 'bg-opacity-20 text-')}`}>
+                      <span className={`px-3 py-1 rounded text-xs font-medium ${color.replace('bg-', 'bg-opacity-20 text-')}`}>
                         {label}
                       </span>
                       <button 
@@ -1022,8 +1102,9 @@ export default function ThaiFlashcards() {
                           setIndex(i);
                           setShowVocabulary(false);
                           setShowAnswer(true);
+                          setRandomSentence(null);
                         }}
-                        className="text-blue-400 text-sm"
+                        className={`px-3 py-1 rounded text-blue-400 text-sm ${status === 'unseen' ? 'bg-blue-900 bg-opacity-20 font-medium' : ''}`}
                       >
                         Study
                       </button>

@@ -104,8 +104,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.33",
-  changes: "Fixed deployment configuration to resolve startup issues"
+  version: "1.3.34",
+  changes: "Fixed example sentence navigation crash with arrow buttons"
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -1314,35 +1314,66 @@ export default function ThaiFlashcards() {
 
   // Function to generate a random sentence
   const generateRandomPhrase = (direction: 'next' | 'prev' = 'next') => {
-    const examples = phrases[index].examples || [];
-    if (examples.length === 0) {
-      // If no examples, set a default sentence using the main phrase
+    try {
+      const examples = phrases[index].examples || [];
+      if (examples.length === 0) {
+        // If no examples, set a default sentence using the main phrase
+        setRandomSentence({
+          thai: getThaiWithGender(phrases[index], isMale),
+          english: phrases[index].english
+        });
+        return;
+      }
+
+      // If no current random sentence, start with the first example
+      if (!randomSentence) {
+        const firstExample = examples[0];
+        setRandomSentence({
+          thai: isMale ? (firstExample.thaiMasculine || firstExample.thai) : (firstExample.thaiFeminine || firstExample.thai),
+          english: firstExample.translation
+        });
+        return;
+      }
+
+      // Find current example index
+      const currentIndex = examples.findIndex(ex => 
+        ex.thai === randomSentence.thai || 
+        ex.thaiMasculine === randomSentence.thai || 
+        ex.thaiFeminine === randomSentence.thai
+      );
+
+      // If current example not found, start with first example
+      if (currentIndex === -1) {
+        const firstExample = examples[0];
+        setRandomSentence({
+          thai: isMale ? (firstExample.thaiMasculine || firstExample.thai) : (firstExample.thaiFeminine || firstExample.thai),
+          english: firstExample.translation
+        });
+        return;
+      }
+
+      // Calculate next index
+      let nextIndex: number;
+      if (direction === 'next') {
+        nextIndex = (currentIndex + 1) % examples.length;
+      } else {
+        nextIndex = (currentIndex - 1 + examples.length) % examples.length;
+      }
+
+      // Get the next example
+      const nextExample = examples[nextIndex];
+      setRandomSentence({
+        thai: isMale ? (nextExample.thaiMasculine || nextExample.thai) : (nextExample.thaiFeminine || nextExample.thai),
+        english: nextExample.translation
+      });
+    } catch (error) {
+      console.error('Error in generateRandomPhrase:', error);
+      // Fallback to main phrase if there's an error
       setRandomSentence({
         thai: getThaiWithGender(phrases[index], isMale),
         english: phrases[index].english
       });
-      return;
     }
-
-    // Find current example index
-    const currentExample = randomSentence ? examples.findIndex(ex => 
-      ex.thai === randomSentence.thai || 
-      ex.thaiMasculine === randomSentence.thai || 
-      ex.thaiFeminine === randomSentence.thai
-    ) : -1;
-
-    let nextIndex: number;
-    if (direction === 'next') {
-      nextIndex = currentExample === -1 ? 0 : (currentExample + 1) % examples.length;
-    } else {
-      nextIndex = currentExample === -1 ? examples.length - 1 : (currentExample - 1 + examples.length) % examples.length;
-    }
-
-    const example = examples[nextIndex];
-    setRandomSentence({
-      thai: isMale ? (example.thaiMasculine || example.thai) : (example.thaiFeminine || example.thai),
-      english: example.translation
-    });
   };
 
   // Add a function to calculate stats

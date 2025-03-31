@@ -104,8 +104,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.31",
-  changes: "Reverted deployment configuration changes"
+  version: "1.3.32",
+  changes: "Fixed example sentence navigation crash"
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -1315,7 +1315,14 @@ export default function ThaiFlashcards() {
   // Function to generate a random sentence
   const generateRandomPhrase = (direction: 'next' | 'prev' = 'next') => {
     const examples = phrases[index].examples || [];
-    if (examples.length === 0) return;
+    if (examples.length === 0) {
+      // If no examples, set a default sentence using the main phrase
+      setRandomSentence({
+        thai: getThaiWithGender(phrases[index], isMale),
+        english: phrases[index].english
+      });
+      return;
+    }
 
     // Find current example index
     const currentExample = randomSentence ? examples.findIndex(ex => 

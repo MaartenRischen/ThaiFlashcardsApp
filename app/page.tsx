@@ -123,13 +123,45 @@ const INITIAL_PHRASES: Phrase[] = [
     examples: [
       {
         thai: "สวัสดีตอนเช้า คุณสบายดีไหม",
+        thaiMasculine: "สวัสดีตอนเช้าครับ คุณสบายดีไหม",
+        thaiFeminine: "สวัสดีตอนเช้าค่ะ คุณสบายดีไหม",
         pronunciation: "sa-wat-dee ton chao, khun sa-bai dee mai",
         translation: "Good morning, how are you?"
       },
       {
         thai: "สวัสดีครับ ยินดีที่ได้รู้จัก",
-        pronunciation: "sa-wat-dee krap, yin-dee tee dai roo-jak",
+        thaiMasculine: "สวัสดีครับ ยินดีที่ได้รู้จัก",
+        thaiFeminine: "สวัสดีค่ะ ยินดีที่ได้รู้จัก",
+        pronunciation: "sa-wat-dee krap/ka, yin-dee tee dai roo-jak",
         translation: "Hello, nice to meet you."
+      },
+      {
+        thai: "สวัสดีค่ะ ต้องการความช่วยเหลือไหมคะ",
+        thaiMasculine: "สวัสดีครับ ต้องการความช่วยเหลือไหมครับ",
+        thaiFeminine: "สวัสดีค่ะ ต้องการความช่วยเหลือไหมคะ",
+        pronunciation: "sa-wat-dee krap/ka, tong-gan kwam chuay-lue mai krap/ka",
+        translation: "Hello, do you need any help?"
+      },
+      {
+        thai: "สวัสดีตอนเย็น กลับมาจากทำงานหรือยัง",
+        thaiMasculine: "สวัสดีตอนเย็นครับ กลับมาจากทำงานหรือยัง",
+        thaiFeminine: "สวัสดีตอนเย็นค่ะ กลับมาจากทำงานหรือยัง",
+        pronunciation: "sa-wat-dee ton yen, glap ma jak tam-ngan rue yang",
+        translation: "Good evening, have you returned from work yet?"
+      },
+      {
+        thai: "สวัสดีค่ะ มาสายไปหน่อยนะคะ",
+        thaiMasculine: "สวัสดีครับ มาสายไปหน่อยนะครับ",
+        thaiFeminine: "สวัสดีค่ะ มาสายไปหน่อยนะคะ",
+        pronunciation: "sa-wat-dee krap/ka, ma sai pai noi na krap/ka",
+        translation: "Hello, I'm a bit late."
+      },
+      {
+        thai: "สวัสดีครับ ฝนตกหนักมากเลย",
+        thaiMasculine: "สวัสดีครับ ฝนตกหนักมากเลย",
+        thaiFeminine: "สวัสดีค่ะ ฝนตกหนักมากเลย",
+        pronunciation: "sa-wat-dee krap/ka, fon tok nak mak loie",
+        translation: "Hello, it's raining very hard."
       }
     ]
   },

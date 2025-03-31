@@ -24,8 +24,8 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.39",
-  changes: "Fixed data structure and UI improvements"
+  version: "1.3.40",
+  changes: "Fixed progress indicator, default mnemonics, and card status"
 };
 
 interface Review {
@@ -770,12 +770,12 @@ export default function ThaiFlashcards() {
           {/* Progress Counter */}
           <div className="text-center mb-2">
             <p className="text-sm text-gray-400">
-              {activeCards.length} cards due today ({Math.round((index === 0 ? 0 : (activeCards.indexOf(index) / activeCards.length) * 100))}% complete)
+              {activeCards.length} cards due today ({activeCards.length > 0 ? Math.round((activeCards.indexOf(index) / activeCards.length) * 100) : 0}% complete)
             </p>
           </div>
           
           <div className="mb-4 rounded-xl overflow-hidden neumorphic">
-            <div className="neumorphic-progress" style={{ width: `${Math.round((index === 0 ? 0 : (activeCards.indexOf(index) / activeCards.length) * 100))}%` }}></div>
+            <div className="neumorphic-progress" style={{ width: `${activeCards.length > 0 ? Math.round((activeCards.indexOf(index) / activeCards.length) * 100) : 0}%` }}></div>
           </div>
 
           {/* Card */}
@@ -850,7 +850,7 @@ export default function ThaiFlashcards() {
                   <textarea
                     value={mnemonics[index] || ''}
                     onChange={(e) => updateMnemonics(index, e.target.value)}
-                    placeholder="Enter a memory aid to help you remember this word..."
+                    placeholder={phrases[index].mnemonic || "Enter a memory aid to help you remember this word..."}
                     className="w-full p-2 rounded-sm bg-[#2a2a2a] text-white border border-[#444] focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -988,24 +988,35 @@ export default function ThaiFlashcards() {
             </div>
             
             <div className="space-y-2">
-              {phrases.map((phrase, i) => (
-                <div key={i} className="p-2 border-b border-[#333] flex justify-between">
-                  <div>
-                    <p className="text-white">{phrase.thai}</p>
-                    <p className="text-gray-400 text-sm">{phrase.english}</p>
+              {phrases.map((phrase, i) => {
+                // Get the status of the card
+                const status = getCardStatus(i);
+                const { color, label } = getStatusInfo(status);
+                
+                return (
+                  <div key={i} className="p-2 border-b border-[#333] flex justify-between">
+                    <div>
+                      <p className="text-white">{phrase.thai}</p>
+                      <p className="text-gray-400 text-sm">{phrase.english}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded text-xs ${color.replace('bg-', 'bg-opacity-20 text-')}`}>
+                        {label}
+                      </span>
+                      <button 
+                        onClick={() => {
+                          setIndex(i);
+                          setShowVocabulary(false);
+                          setShowAnswer(true);
+                        }}
+                        className="text-blue-400 text-sm"
+                      >
+                        Study
+                      </button>
+                    </div>
                   </div>
-                  <button 
-                    onClick={() => {
-                      setIndex(i);
-                      setShowVocabulary(false);
-                      setShowAnswer(true);
-                    }}
-                    className="text-blue-400 text-sm"
-                  >
-                    Study
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

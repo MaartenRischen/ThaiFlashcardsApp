@@ -104,8 +104,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.34",
-  changes: "Fixed example sentence navigation crash with arrow buttons"
+  version: "1.3.35",
+  changes: "Fixed context examples to always show proper examples for the current phrase"
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -1149,7 +1149,15 @@ export default function ThaiFlashcards() {
     prevShowAnswerRef.current = showAnswer;
   }, [showAnswer, autoplay, phrases, index, isPlaying, voicesLoaded, isMale]);
 
-  // Add a new useEffect to update the active cards on component mount and when cardProgress changes
+  // Add a useEffect to initialize the random sentence when the answer is shown
+  useEffect(() => {
+    if (showAnswer && randomSentence === null) {
+      // Initialize with the first example when card is revealed
+      generateRandomPhrase();
+    }
+  }, [showAnswer, index]);
+
+  // Add a useEffect to update active cards on component mount and when cardProgress changes
   useEffect(() => {
     updateActiveCards();
   }, [cardProgress]);
@@ -1310,14 +1318,17 @@ export default function ThaiFlashcards() {
         }
       }
     }
-  }, [isMale, phrases, index, randomSentence]);
+  // Remove randomSentence from the dependency array to avoid infinite loops
+  }, [isMale, phrases, index]);
 
   // Function to generate a random sentence
   const generateRandomPhrase = (direction: 'next' | 'prev' = 'next') => {
     try {
       const examples = phrases[index].examples || [];
-      if (examples.length === 0) {
-        // If no examples, set a default sentence using the main phrase
+      
+      // If no examples, set a default sentence using the main phrase
+      if (!examples || examples.length === 0) {
+        console.log("No examples found for phrase", index);
         setRandomSentence({
           thai: getThaiWithGender(phrases[index], isMale),
           english: phrases[index].english
@@ -1325,28 +1336,38 @@ export default function ThaiFlashcards() {
         return;
       }
 
-      // If no current random sentence, start with the first example
+      // If no current random sentence, always start with the first example
       if (!randomSentence) {
+        console.log("Initializing with first example");
         const firstExample = examples[0];
+        const thaiText = isMale 
+          ? (firstExample.thaiMasculine || firstExample.thai) 
+          : (firstExample.thaiFeminine || firstExample.thai);
+        
         setRandomSentence({
-          thai: isMale ? (firstExample.thaiMasculine || firstExample.thai) : (firstExample.thaiFeminine || firstExample.thai),
+          thai: thaiText,
           english: firstExample.translation
         });
         return;
       }
 
       // Find current example index
-      const currentIndex = examples.findIndex(ex => 
+      let currentIndex = examples.findIndex(ex => 
         ex.thai === randomSentence.thai || 
-        ex.thaiMasculine === randomSentence.thai || 
-        ex.thaiFeminine === randomSentence.thai
+        (ex.thaiMasculine && ex.thaiMasculine === randomSentence.thai) || 
+        (ex.thaiFeminine && ex.thaiFeminine === randomSentence.thai)
       );
 
       // If current example not found, start with first example
       if (currentIndex === -1) {
+        console.log("Current example not found, resetting to first example");
         const firstExample = examples[0];
+        const thaiText = isMale 
+          ? (firstExample.thaiMasculine || firstExample.thai) 
+          : (firstExample.thaiFeminine || firstExample.thai);
+        
         setRandomSentence({
-          thai: isMale ? (firstExample.thaiMasculine || firstExample.thai) : (firstExample.thaiFeminine || firstExample.thai),
+          thai: thaiText,
           english: firstExample.translation
         });
         return;
@@ -1362,8 +1383,12 @@ export default function ThaiFlashcards() {
 
       // Get the next example
       const nextExample = examples[nextIndex];
+      const thaiText = isMale 
+        ? (nextExample.thaiMasculine || nextExample.thai) 
+        : (nextExample.thaiFeminine || nextExample.thai);
+      
       setRandomSentence({
-        thai: isMale ? (nextExample.thaiMasculine || nextExample.thai) : (nextExample.thaiFeminine || nextExample.thai),
+        thai: thaiText,
         english: nextExample.translation
       });
     } catch (error) {
@@ -1504,9 +1529,11 @@ export default function ThaiFlashcards() {
     // Move to the next card in the active cards list
     const currentActiveIndex = activeCards.indexOf(index);
     const nextActiveIndex = (currentActiveIndex + 1) % activeCards.length;
-    setIndex(activeCards[nextActiveIndex]);
-    setShowAnswer(false);
+    
+    // Clear the random sentence first, then update the index
     setRandomSentence(null);
+    setShowAnswer(false);
+    setIndex(activeCards[nextActiveIndex]);
   };
 
   const prevCard = () => {

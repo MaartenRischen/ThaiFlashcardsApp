@@ -104,8 +104,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.26",
-  changes: "Moved context section to back of card for better learning flow."
+  version: "1.3.27",
+  changes: "Added arrow navigation for context examples and immediate example display"
 };
 
 const INITIAL_PHRASES: Phrase[] = [
@@ -1281,33 +1281,21 @@ export default function ThaiFlashcards() {
   }, [isMale, phrases, index, randomSentence]);
 
   // Function to generate a random sentence
-  const generateRandomPhrase = () => {
-    console.log("generateRandomPhrase: Called"); // DEBUG
-    const examples = phrases[index].examples || [];
+  const generateRandomPhrase = (direction: 'next' | 'prev' = 'next') => {
+    const currentIndex = randomSentence ? phrases.findIndex(p => p.english === randomSentence.english) : -1;
+    let nextIndex: number;
     
-    if (examples.length > 0) {
-      const randomIndex = Math.floor(Math.random() * examples.length);
-      const example = examples[randomIndex];
-
-      const thaiText = isMale 
-        ? (example.thaiMasculine || example.thai)
-        : (example.thaiFeminine || example.thai);
-
-      const newSentence = {
-        thai: thaiText,
-        english: example.translation
-      };
-      console.log("generateRandomPhrase: Setting randomSentence:", newSentence); // DEBUG
-      setRandomSentence(newSentence);
-      console.log("generateRandomPhrase: Finished setting randomSentence"); // DEBUG
-      return thaiText;
+    if (direction === 'next') {
+      nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % phrases.length;
     } else {
-      console.log("generateRandomPhrase: No examples found, clearing randomSentence"); // DEBUG
-      setRandomSentence(null);
-      const currentWord = getThaiWithGender(phrases[index], isMale);
-      console.log("generateRandomPhrase: Returning current word:", currentWord); // DEBUG
-      return currentWord;
+      nextIndex = currentIndex === -1 ? phrases.length - 1 : (currentIndex - 1 + phrases.length) % phrases.length;
     }
+    
+    const phrase = phrases[nextIndex];
+    setRandomSentence({
+      thai: getThaiWithGender(phrase, isMale),
+      english: phrase.english
+    });
   };
 
   // Add a function to calculate stats
@@ -1549,14 +1537,31 @@ export default function ThaiFlashcards() {
                 </div>
                 <ClientOnly>
                   <p className="text-base text-white font-medium">{randomSentence?.thai || getThaiWithGender(phrases[index], isMale)}</p>
-                  <p className="text-sm text-gray-400 italic">{randomSentence?.english || "Click 'New context example' to see this word in context"}</p>
+                  <p className="text-sm text-gray-400 italic">{randomSentence?.english || "Loading example..."}</p>
                 </ClientOnly>
-                <button
-                  onClick={() => generateRandomPhrase()}
-                  className="w-full neumorphic-button text-blue-400 mt-2"
-                >
-                  New context example
-                </button>
+                <div className="flex items-center justify-between mt-2">
+                  <button
+                    onClick={() => generateRandomPhrase('prev')}
+                    className="neumorphic-button text-blue-400 px-4"
+                    aria-label="Previous example"
+                  >
+                    ←
+                  </button>
+                  <button
+                    onClick={() => speak(randomSentence?.thai || getThaiWithGender(phrases[index], isMale))}
+                    disabled={isPlaying}
+                    className="neumorphic-button text-blue-400"
+                  >
+                    {isPlaying ? 'Playing...' : 'Play Context'}
+                  </button>
+                  <button
+                    onClick={() => generateRandomPhrase('next')}
+                    className="neumorphic-button text-blue-400 px-4"
+                    aria-label="Next example"
+                  >
+                    →
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-3 gap-2">

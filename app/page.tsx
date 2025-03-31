@@ -104,8 +104,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.29",
-  changes: "Fixed context examples to show proper sentences for each phrase"
+  version: "1.3.30",
+  changes: "Fixed deployment configuration for Railway"
 };
 
 const INITIAL_PHRASES: Phrase[] = [

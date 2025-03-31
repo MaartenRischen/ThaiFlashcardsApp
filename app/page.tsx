@@ -24,8 +24,8 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.40",
-  changes: "Fixed progress indicator, default mnemonics, and card status"
+  version: "1.3.41",
+  changes: "Fixed default mnemonics and progress indicator"
 };
 
 interface Review {
@@ -122,6 +122,9 @@ export default function ThaiFlashcards() {
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
+
+  // Track active cards position
+  const [activeCardsIndex, setActiveCardsIndex] = useState<number>(0);
 
   console.log("ThaiFlashcards: Component rendering/re-rendering. randomSentence:", randomSentence); // DEBUG
 
@@ -357,6 +360,9 @@ export default function ThaiFlashcards() {
       if (!newActiveCards.includes(index)) {
         setIndex(newActiveCards[0]);
       }
+
+      // Reset the active cards index when we update active cards
+      setActiveCardsIndex(0);
     }
   };
 
@@ -581,7 +587,7 @@ export default function ThaiFlashcards() {
     return { interval, easeFactor: newEaseFactor, repetitions };
   };
 
-  // Modify handleCardAction to use the active cards
+  // Modify handleCardAction to use the active cards index
   const handleCardAction = (difficulty: 'hard' | 'good' | 'easy') => {
     // Create or get the current card progress
     const currentProgress = cardProgress[index] || { reviews: [], nextReviewDate: new Date().toISOString() };
@@ -612,9 +618,12 @@ export default function ThaiFlashcards() {
       }
     }));
     
+    // Increment the completed cards counter
+    const newActiveCardsIndex = activeCardsIndex + 1;
+    setActiveCardsIndex(newActiveCardsIndex);
+    
     // Move to the next card in the active cards list
-    const currentActiveIndex = activeCards.indexOf(index);
-    const nextActiveIndex = (currentActiveIndex + 1) % activeCards.length;
+    const nextActiveIndex = (activeCardsIndex + 1) % activeCards.length;
     
     // Clear the random sentence first, then update the index
     setRandomSentence(null);
@@ -682,6 +691,10 @@ export default function ThaiFlashcards() {
     // Reset the card
     setShowAnswer(false);
     setRandomSentence(null);
+    
+    // Update active cards and reset progress
+    updateActiveCards();
+    setActiveCardsIndex(0);
   };
 
   // Export card progress to JSON file
@@ -744,6 +757,7 @@ export default function ThaiFlashcards() {
       setIndex(0);
       setShowAnswer(false);
       setRandomSentence(null);
+      setActiveCardsIndex(0);
       updateActiveCards();
       
       alert('All progress has been reset');
@@ -770,12 +784,12 @@ export default function ThaiFlashcards() {
           {/* Progress Counter */}
           <div className="text-center mb-2">
             <p className="text-sm text-gray-400">
-              {activeCards.length} cards due today ({activeCards.length > 0 ? Math.round((activeCards.indexOf(index) / activeCards.length) * 100) : 0}% complete)
+              {activeCards.length} cards due today ({activeCards.length > 0 ? Math.round((activeCardsIndex / activeCards.length) * 100) : 0}% complete)
             </p>
           </div>
           
           <div className="mb-4 rounded-xl overflow-hidden neumorphic">
-            <div className="neumorphic-progress" style={{ width: `${activeCards.length > 0 ? Math.round((activeCards.indexOf(index) / activeCards.length) * 100) : 0}%` }}></div>
+            <div className="neumorphic-progress" style={{ width: `${activeCards.length > 0 ? Math.round((activeCardsIndex / activeCards.length) * 100) : 0}%` }}></div>
           </div>
 
           {/* Card */}
@@ -848,9 +862,9 @@ export default function ThaiFlashcards() {
                 <div className="mb-4">
                   <div className="text-sm text-gray-400 mb-1">Mnemonic:</div>
                   <textarea
-                    value={mnemonics[index] || ''}
+                    value={mnemonics[index] || phrases[index].mnemonic || ''}
                     onChange={(e) => updateMnemonics(index, e.target.value)}
-                    placeholder={phrases[index].mnemonic || "Enter a memory aid to help you remember this word..."}
+                    placeholder="Enter a memory aid to help you remember this word..."
                     className="w-full p-2 rounded-sm bg-[#2a2a2a] text-white border border-[#444] focus:outline-none focus:border-blue-500"
                   />
                 </div>

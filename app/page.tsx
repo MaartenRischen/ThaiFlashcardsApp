@@ -104,8 +104,8 @@ interface ExampleSentence {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.30",
-  changes: "Fixed deployment configuration for Railway"
+  version: "1.3.31",
+  changes: "Reverted deployment configuration changes"
 };
 
 const INITIAL_PHRASES: Phrase[] = [

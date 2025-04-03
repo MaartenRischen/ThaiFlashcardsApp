@@ -24,8 +24,8 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.44",
-  changes: "Reorganized mnemonic controls and restored custom logo"
+  version: "1.3.45",
+  changes: "Reverted logo change in header, kept mnemonic menu updates"
 };
 
 interface Review {
@@ -848,10 +848,7 @@ export default function ThaiFlashcards() {
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       {/* Header with app logo and navigation buttons */}
       <div className="p-4 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-8 w-auto" />
-          <h1 className="text-xl font-bold text-white">Thai Flashcards</h1>
-        </div>
+        <h1 className="text-xl font-bold text-white">🇹🇭 Thai Flashcards</h1>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setShowHowItWorks(true)} className="neumorphic-button text-xs text-blue-400">How It Works</button>
           <button onClick={() => setShowVocabulary(true)} className="neumorphic-button text-xs text-blue-400">Vocabulary</button>

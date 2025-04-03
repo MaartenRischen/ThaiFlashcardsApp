@@ -24,8 +24,8 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.46",
-  changes: "Restored logo in header with increased size"
+  version: "1.3.47",
+  changes: "Increased header logo size to h-12"
 };
 
 interface Review {
@@ -849,7 +849,7 @@ export default function ThaiFlashcards() {
       {/* Header with app logo and navigation buttons */}
       <div className="p-4 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-10 w-auto" />
+          <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-12 w-auto" />
           <h1 className="text-xl font-bold text-white">Thai Flashcards</h1>
         </div>
         <div className="flex flex-wrap gap-2">

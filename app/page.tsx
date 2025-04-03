@@ -24,8 +24,8 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.48",
-  changes: "Increased header logo size to h-16"
+  version: "1.3.52",
+  changes: "Dynamically add krap/ka to pronunciation based on gender switch and phrase type"
 };
 
 interface Review {
@@ -60,9 +60,28 @@ function getThaiWithGender(phrase: Phrase, isMale: boolean): string {
 }
 
 // Add helper function for gendered pronunciation
-function getGenderedPronunciation(phrase: Phrase, isMale: boolean): string {
-  const pronWithoutSuffix = phrase.pronunciation.split(" krap/ka")[0];
-  return pronWithoutSuffix + (isMale ? " krap" : " ka");
+// Check if the main phrase definition includes gendered forms to decide if particle is needed
+function getGenderedPronunciation(
+  phraseData: Phrase | ExampleSentence | null, 
+  isMale: boolean,
+  mainPhraseDefinition?: Phrase // Pass the main phrase def to check its type
+): string {
+  if (!phraseData) return ''; // Handle null case (e.g., randomSentence initially)
+  
+  const basePronunciation = phraseData.pronunciation;
+  
+  // Determine if the *type* of phrase generally needs a particle
+  // Use the main phrase definition if provided (for examples), otherwise use phraseData itself.
+  const definitionToCheck = mainPhraseDefinition || (phraseData as Phrase); 
+  const needsParticle = !!definitionToCheck?.thaiMasculine || !!definitionToCheck?.thaiFeminine;
+
+  if (needsParticle) {
+    // Append the correct particle if the phrase type requires it
+    return basePronunciation + (isMale ? " krap" : " ka");
+  } else {
+    // Return only the base pronunciation if the phrase type doesn't use particles
+    return basePronunciation;
+  }
 }
 
 // Anki SRS constants
@@ -849,8 +868,7 @@ export default function ThaiFlashcards() {
       {/* Header with app logo and navigation buttons */}
       <div className="p-4 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-16 w-auto" />
-          <h1 className="text-xl font-bold text-white">Thai Flashcards</h1>
+          <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-48 w-auto" />
         </div>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setShowHowItWorks(true)} className="neumorphic-button text-xs text-blue-400">How It Works</button>
@@ -896,10 +914,10 @@ export default function ThaiFlashcards() {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-white mb-2">
                       {getThaiWithGender(phrases[index], isMale)}
-            </div>
+                    </div>
                     <div className="text-sm text-gray-400 italic mb-3">
-                      {phrases[index].pronunciation}
-          </div>
+                      {getGenderedPronunciation(phrases[index], isMale, phrases[index])}
+                    </div>
 
                     {/* Play word button */}
                     <div className="flex justify-center mb-4">
@@ -958,7 +976,9 @@ export default function ThaiFlashcards() {
                   </div>
                   <ClientOnly>
                     <p className="text-base text-white font-medium">{randomSentence?.thai || getThaiWithGender(phrases[index], isMale)}</p>
-                    <p className="text-sm text-gray-300 italic">{randomSentence?.pronunciation || phrases[index].pronunciation}</p>
+                    <p className="text-sm text-gray-300 italic">
+                      {getGenderedPronunciation(randomSentence, isMale, phrases[index]) || getGenderedPronunciation(phrases[index], isMale, phrases[index])}
+                    </p>
                     <p className="text-sm text-gray-400 italic">{randomSentence?.english || "Loading example..."}</p>
                   </ClientOnly>
                   <div className="flex items-center justify-between mt-2">

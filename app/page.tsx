@@ -24,8 +24,8 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.43",
-  changes: "Removed progress bar and improved vocabulary list styling"
+  version: "1.3.44",
+  changes: "Reorganized mnemonic controls and restored custom logo"
 };
 
 interface Review {
@@ -372,7 +372,7 @@ export default function ThaiFlashcards() {
 
   const handleMnemonicChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setLocalMnemonics(prev => ({
-      ...prev,
+        ...prev,
       [index]: e.target.value
     }));
   };
@@ -834,7 +834,7 @@ export default function ThaiFlashcards() {
       setMnemonics({});
       localStorage.removeItem('cardProgress');
       localStorage.removeItem('mnemonics');
-      setIndex(0);
+              setIndex(0);
       setShowAnswer(false);
       setRandomSentence(null);
       setActiveCardsIndex(0);
@@ -844,18 +844,27 @@ export default function ThaiFlashcards() {
     }
   };
 
-  return (
+    return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       {/* Header with app logo and navigation buttons */}
       <div className="p-4 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-bold text-white">🇹🇭 Thai Flashcards</h1>
+        <div className="flex items-center gap-2">
+          <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-8 w-auto" />
+          <h1 className="text-xl font-bold text-white">Thai Flashcards</h1>
+        </div>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setShowHowItWorks(true)} className="neumorphic-button text-xs text-blue-400">How It Works</button>
           <button onClick={() => setShowVocabulary(true)} className="neumorphic-button text-xs text-blue-400">Vocabulary</button>
-          <button onClick={() => resetCard()} className="neumorphic-button text-xs text-blue-400">Reset</button>
-          <button onClick={() => exportCardProgress()} className="neumorphic-button text-xs text-blue-400">Export All</button>
-          <button onClick={() => importCardProgress()} className="neumorphic-button text-xs text-blue-400">Import All</button>
-          <button onClick={() => resetAllProgress()} className="neumorphic-button text-xs text-red-400">Reset All</button>
+          <div className="relative inline-block text-left group">
+            <button className="neumorphic-button text-xs text-blue-400">Mnemonics</button>
+            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 hidden group-hover:block">
+              <div className="py-1" role="menu">
+                <button onClick={() => exportCardProgress()} className="block w-full text-left px-4 py-2 text-sm text-blue-400 hover:bg-[#333]">Export All</button>
+                <button onClick={() => importCardProgress()} className="block w-full text-left px-4 py-2 text-sm text-blue-400 hover:bg-[#333]">Import All</button>
+                <button onClick={() => resetAllProgress()} className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-[#333]">Reset All</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -869,15 +878,15 @@ export default function ThaiFlashcards() {
               
               {!showAnswer && (
                 <div className="flex justify-center mt-4">
-                  <button 
+            <button
                     onClick={() => setShowAnswer(true)}
                     className="neumorphic-button text-blue-400 px-6 py-2"
                   >
                     Show Answer
-                  </button>
-                </div>
+            </button>
+          </div>
               )}
-            </div>
+          </div>
 
             {/* Card Back */}
             {showAnswer && (
@@ -887,11 +896,11 @@ export default function ThaiFlashcards() {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-white mb-2">
                       {getThaiWithGender(phrases[index], isMale)}
-                    </div>
+            </div>
                     <div className="text-sm text-gray-400 italic mb-3">
                       {phrases[index].pronunciation}
-                    </div>
-                    
+          </div>
+
                     {/* Play word button */}
                     <div className="flex justify-center mb-4">
                       <button
@@ -901,43 +910,47 @@ export default function ThaiFlashcards() {
                       >
                         {isPlaying ? 'Playing...' : 'Play Word'}
                       </button>
-                    </div>
-                    
+              </div>
+              
                     {/* Difficulty buttons moved here */}
                     <div className="flex justify-center space-x-2 mb-4">
-                      <button
+                <button
                         onClick={() => handleCardAction('hard')}
                         className="neumorphic-button text-red-400"
-                      >
+                >
                         Wrong
-                      </button>
-                      <button
+                </button>
+                <button
                         onClick={() => handleCardAction('good')}
                         className="neumorphic-button text-yellow-400"
                       >
                         Correct
-                      </button>
-                      <button
+                </button>
+                    <button
                         onClick={() => handleCardAction('easy')}
                         className="neumorphic-button text-green-400"
-                      >
+                    >
                         Easy
-                      </button>
-                    </div>
+                    </button>
+                </div>
                   </div>
                 </div>
 
                 {/* Mnemonic */}
-                <div className="mb-4">
-                  <div className="text-sm text-gray-400 mb-1">Mnemonic:</div>
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm text-gray-400">Mnemonic</label>
+                    <button onClick={() => resetCard()} className="text-xs text-blue-400 hover:text-blue-300">Reset</button>
+                  </div>
                   <textarea
-                    value={mnemonics[index] || phrases[index].mnemonic || ''}
-                    onChange={(e) => updateMnemonics(index, e.target.value)}
-                    placeholder="Enter a memory aid to help you remember this word..."
-                    className="w-full p-2 rounded-sm bg-[#2a2a2a] text-white border border-[#444] focus:outline-none focus:border-blue-500"
+                    value={localMnemonics[index] || ''}
+                    onChange={handleMnemonicChange}
+                    onBlur={() => updateMnemonics(index, localMnemonics[index] || '')}
+                    placeholder="Create a memory aid to help remember this word..."
+                    className="neumorphic-input w-full h-24 resize-none"
                   />
                 </div>
-                
+
                 {/* Context section moved under mnemonic */}
                 <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic mb-4">
                   <div className="flex items-center justify-between">
@@ -949,43 +962,43 @@ export default function ThaiFlashcards() {
                     <p className="text-sm text-gray-400 italic">{randomSentence?.english || "Loading example..."}</p>
                   </ClientOnly>
                   <div className="flex items-center justify-between mt-2">
-                    <button
+                <button 
                       onClick={() => generateRandomPhrase('prev')}
                       className="neumorphic-button text-blue-400 px-4"
                       aria-label="Previous example"
-                    >
+                >
                       ←
-                    </button>
-                    <button
+                </button>
+                <button 
                       onClick={() => speak(randomSentence?.thai || getThaiWithGender(phrases[index], isMale))}
                       disabled={isPlaying}
                       className="neumorphic-button text-blue-400"
-                    >
+                >
                       {isPlaying ? 'Playing...' : 'Play Context'}
-                    </button>
-                    <button
+                </button>
+                <button 
                       onClick={() => generateRandomPhrase('next')}
                       className="neumorphic-button text-blue-400 px-4"
                       aria-label="Next example"
-                    >
+                >
                       →
-                    </button>
-                  </div>
-                </div>
-                
+                </button>
+              </div>
+        </div>
+
                 {/* Gender Switch */}
                 <div className="flex items-center justify-center space-x-2">
                   <div className="flex items-center space-x-2">
                     <span className="text-gray-400 text-sm">♀</span>
                     <Switch checked={isMale} onCheckedChange={setIsMale} />
                     <span className="text-gray-400 text-sm">♂</span>
-                  </div>
-                </div>
+              </div>
+              </div>
               </div>
             )}
-          </div>
-        </div>
-      </div>
+              </div>
+              </div>
+              </div>
 
       {/* Settings Button */}
       <div className="fixed bottom-16 right-4 z-20">
@@ -995,16 +1008,16 @@ export default function ThaiFlashcards() {
         >
           ⚙️
         </button>
-      </div>
+              </div>
       
       {/* Admin Settings Button (hidden in lower corner) */}
       <div className="fixed bottom-4 right-4 z-20">
-        <button
+          <button
           onClick={() => setShowAdminSettings(true)}
           className="text-xs text-gray-600 hover:text-gray-400"
-        >
+          >
           Admin
-        </button>
+          </button>
       </div>
 
       {/* Modals */}
@@ -1013,24 +1026,24 @@ export default function ThaiFlashcards() {
           <div className="neumorphic max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Settings</h2>
-              <button
+            <button
                 onClick={() => setShowStats(false)}
                 className="text-gray-400 hover:text-white"
-              >
+            >
                 ✕
-              </button>
-            </div>
+            </button>
+          </div>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span>Auto-play on reveal</span>
                 <Switch checked={autoplay} onCheckedChange={setAutoplay} />
-              </div>
-            </div>
+        </div>
+      </div>
           </div>
         </div>
       )}
-      
+
       {showHowItWorks && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-auto">
           <div className="neumorphic max-w-md w-full p-6">
@@ -1043,7 +1056,7 @@ export default function ThaiFlashcards() {
                 ✕
               </button>
             </div>
-            
+
             <div className="space-y-4 text-gray-300">
               <p><strong>Spaced Repetition:</strong> This app uses the SM-2 algorithm to optimize your learning. Cards you find difficult will appear more frequently.</p>
               <p><strong>Gender Toggle:</strong> Switch between masculine (ครับ) and feminine (ค่ะ) endings.</p>
@@ -1056,7 +1069,7 @@ export default function ThaiFlashcards() {
           </div>
         </div>
       )}
-      
+
       {showVocabulary && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-auto">
           <div className="neumorphic max-w-md w-full p-6 max-h-[80vh] overflow-auto">
@@ -1069,7 +1082,7 @@ export default function ThaiFlashcards() {
                 ✕
               </button>
             </div>
-            
+
             <div className="space-y-2">
               {phrases.map((phrase, i) => {
                 // Get the status of the card
@@ -1086,7 +1099,7 @@ export default function ThaiFlashcards() {
                       <span className={`px-3 py-1 rounded text-xs font-medium ${color}`}>
                         {label}
                       </span>
-                      <button 
+                      <button
                         onClick={() => {
                           setIndex(i);
                           setShowVocabulary(false);

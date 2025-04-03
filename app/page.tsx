@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Switch } from "@/app/components/ui/switch";
-import { ttsService, initTTSService } from './lib/tts-service';
+import { ttsService } from './lib/tts-service';
 import AdminSettings from './components/AdminSettings';
 import { INITIAL_PHRASES, type Phrase, type ExampleSentence } from './data/phrases';
 
@@ -193,38 +193,13 @@ export default function ThaiFlashcards() {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
 
-  // Initialize TTS service with API key from localStorage or env
+  // Initialize TTS Service on component mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Try to get API key from localStorage first (for admin settings)
-      const localApiKey = localStorage.getItem('ttsApiKey');
-      // Fall back to env variable
-      const envApiKey = process.env.NEXT_PUBLIC_GOOGLE_CLOUD_TTS_API_KEY;
-      
-      const apiKey = localApiKey || envApiKey;
-      
-      if (apiKey && apiKey !== 'your_api_key_here') {
-        console.log('Initializing Google Cloud TTS');
-        initTTSService(apiKey);
-        
-        // Use the provider from localStorage
-        const savedProvider = localStorage.getItem('ttsProvider');
-        if (savedProvider) {
-          ttsService.useProvider(savedProvider);
-        }
-      } else {
-        console.log('Using browser TTS (no API key found)');
-      }
-    }
+    ttsService.initialize();
   }, []);
 
   // Replace the speak function with our new service
   const speak = async (text: string) => {
-    if (!voicesLoaded && !ttsService.getProvider) {
-      console.log('TTS not initialized yet');
-      return;
-    }
-
     setIsPlaying(true);
     
     try {
@@ -239,13 +214,11 @@ export default function ThaiFlashcards() {
         onError: (error) => {
           console.error('TTS error:', error);
           setIsPlaying(false);
-          alert('Speech playback failed. Please try again.');
         }
       });
     } catch (error) {
-      console.error('Speech playback error:', error);
+      console.error('Error calling ttsService.speak:', error);
       setIsPlaying(false);
-      alert('Speech playback failed. Please try again.');
     }
   };
 
@@ -743,8 +716,9 @@ export default function ThaiFlashcards() {
   };
 
   // Add a cancel function to stop speech when needed
-  const cancelSpeech = () => {
-    ttsService.cancel();
+  const handleStop = () => {
+    console.log("Stop button clicked");
+    ttsService.stop();
     setIsPlaying(false);
   };
 
@@ -922,13 +896,16 @@ export default function ThaiFlashcards() {
                     {/* Play word button */}
                     <div className="flex justify-center mb-4">
                       <button
-                        onClick={() => speak(getThaiWithGender(phrases[index], isMale))}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          speak(getThaiWithGender(phrases[index], isMale));
+                        }}
                         disabled={isPlaying}
                         className="neumorphic-button text-blue-400"
                       >
                         {isPlaying ? 'Playing...' : 'Play Word'}
                       </button>
-              </div>
+                    </div>
               
                     {/* Difficulty buttons moved here */}
                     <div className="flex justify-center space-x-2 mb-4">
@@ -990,7 +967,15 @@ export default function ThaiFlashcards() {
                       ←
                 </button>
                 <button 
-                      onClick={() => speak(randomSentence?.thai || getThaiWithGender(phrases[index], isMale))}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        if (randomSentence) {
+                          speak(randomSentence.thai);
+                        } else {
+                          // Fallback to current word if no example
+                          speak(getThaiWithGender(phrases[index], isMale));
+                        }
+                      }}
                       disabled={isPlaying}
                       className="neumorphic-button text-blue-400"
                 >

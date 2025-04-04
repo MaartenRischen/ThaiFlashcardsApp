@@ -43,46 +43,82 @@ interface CardProgress {
   };
 }
 
-interface RandomSentence {
-  thai: string;
-  pronunciation: string;
-  english: string;
-}
+// Restore getThaiWithGender to handle both gender (slider value) and politeness
+const getThaiWithGender = (phrase: Phrase | ExampleSentence | null, genderValue: number, isPoliteMode: boolean): string => {
+  if (!phrase) return '';
+  const isTextMale = genderValue >= 50; // Determine text gender based on slider midpoint
 
-// Get Thai word with appropriate gender marker
-function getThaiWithGender(phrase: Phrase, isMale: boolean): string {
-  if (isMale && phrase.thaiMasculine) {
-    return phrase.thaiMasculine;
-  } else if (!isMale && phrase.thaiFeminine) {
-    return phrase.thaiFeminine;
+  // Step 1: Select the correct base phrase including gender-specific pronouns if available
+  let baseThai = phrase.thai; // Default to base
+  if (isTextMale && phrase.thaiMasculine) {
+      baseThai = phrase.thaiMasculine;
+  } else if (!isTextMale && phrase.thaiFeminine) {
+      baseThai = phrase.thaiFeminine;
   }
-  return phrase.thai; // Fallback to neutral form
-}
 
-// Add helper function for gendered pronunciation
-// Check if the main phrase definition includes gendered forms to decide if particle is needed
-function getGenderedPronunciation(
-  phraseData: Phrase | ExampleSentence | null, 
-  isMale: boolean,
-  mainPhraseDefinition?: Phrase // Pass the main phrase def to check its type
-): string {
-  if (!phraseData) return ''; // Handle null case (e.g., randomSentence initially)
-  
-  const basePronunciation = phraseData.pronunciation;
-  
-  // Determine if the *type* of phrase generally needs a particle
-  // Use the main phrase definition if provided (for examples), otherwise use phraseData itself.
-  const definitionToCheck = mainPhraseDefinition || (phraseData as Phrase); 
-  const needsParticle = !!definitionToCheck?.thaiMasculine || !!definitionToCheck?.thaiFeminine;
+  // Step 2: Apply politeness particle logic based on toggle
+  if (!isPoliteMode) {
+    return baseThai; // Return potentially gendered base if polite mode off
+  }
 
-  if (needsParticle) {
-    // Append the correct particle if the phrase type requires it
-    return basePronunciation + (isMale ? " krap" : " ka");
-  } else {
-    // Return only the base pronunciation if the phrase type doesn't use particles
+  // Polite Mode ON: Check if adding krap/ka is appropriate
+  const politeEndingsToAvoid = [
+    'ไหม', 'อะไร', 'ไหน', 'เท่าไหร่', 'เหรอ',
+    'หรือ', 'ใช่ไหม', 'เมื่อไหร่', 'ทำไม', 'อย่างไร',
+    'ที่ไหน', 'ครับ', 'ค่ะ'
+  ];
+
+  const endsWithPoliteEnding = politeEndingsToAvoid.some(ending => baseThai.endsWith(ending));
+
+  if (!endsWithPoliteEnding) {
+    return isTextMale ? `${baseThai}ครับ` : `${baseThai}ค่ะ`; // Use isTextMale for particle
+  }
+
+  return baseThai; // Return base (potentially gendered) if polite mode ON but ending found
+};
+
+// Restore getGenderedPronunciation to handle both gender (slider value) and politeness
+const getGenderedPronunciation = (
+  phraseData: Phrase | ExampleSentence | null,
+  genderValue: number,
+  isPoliteMode: boolean
+): string => {
+  if (!phraseData) return '';
+  const isTextMale = genderValue >= 50; // Determine text gender based on slider midpoint
+
+  let basePronunciation = phraseData.pronunciation;
+  const baseThaiForEndingCheck = phraseData.thai; // Use original thai for ending check
+
+  // Step 1: Replace gender placeholders in pronunciation
+  if (basePronunciation.includes('chan/phom')) {
+    basePronunciation = basePronunciation.replace('chan/phom', isTextMale ? 'phom' : 'chan');
+  } else if (basePronunciation.includes('phom/chan')) {
+    basePronunciation = basePronunciation.replace('phom/chan', isTextMale ? 'phom' : 'chan');
+  }
+
+  // Step 2: Apply politeness particle logic
+  if (!isPoliteMode) {
     return basePronunciation;
   }
-}
+
+  // Polite Mode ON: Check if adding krap/ka is appropriate (based on original Thai ending)
+  const politeEndingsToAvoid = [
+    'ไหม', 'อะไร', 'ไหน', 'เท่าไหร่', 'เหรอ',
+    'หรือ', 'ใช่ไหม', 'เมื่อไหร่', 'ทำไม', 'อย่างไร',
+    'ที่ไหน', 'ครับ', 'ค่ะ'
+  ];
+
+  const endsWithPoliteEnding = politeEndingsToAvoid.some(ending => baseThaiForEndingCheck.endsWith(ending));
+
+  if (!endsWithPoliteEnding) {
+    const endsWithKrapKa = basePronunciation.endsWith(' krap') || basePronunciation.endsWith(' ka');
+    if (!endsWithKrapKa) {
+      return basePronunciation + (isTextMale ? " krap" : " ka"); // Use isTextMale for particle
+    }
+  }
+
+  return basePronunciation;
+};
 
 // Anki SRS constants
 const INITIAL_EASE_FACTOR = 2.5;
@@ -106,7 +142,8 @@ export default function ThaiFlashcards() {
       return {};
     }
   });
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlayingWord, setIsPlayingWord] = useState(false);
+  const [isPlayingContext, setIsPlayingContext] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showVocabulary, setShowVocabulary] = useState(false);
@@ -118,12 +155,14 @@ export default function ThaiFlashcards() {
       return false;
     }
   });
-  const [isMale, setIsMale] = useState<boolean>(() => {
+  const [genderValue, setGenderValue] = useState<number>(() => {
     try {
-      const saved = localStorage.getItem('isMale');
-      return saved ? JSON.parse(saved) === true : true; // Default to male
+      const saved = localStorage.getItem('genderValue');
+      // Default to 100 (Male) if not saved or invalid
+      const num = saved ? parseInt(saved, 10) : 100;
+      return !isNaN(num) && num >= 0 && num <= 100 ? num : 100;
     } catch {
-      return true;
+      return 100; 
     }
   });
   const [activeCards, setActiveCards] = useState<number[]>(() => {
@@ -134,10 +173,11 @@ export default function ThaiFlashcards() {
       return [0, 1, 2, 3, 4];
     }
   });
-  const [randomSentence, setRandomSentence] = useState<RandomSentence | null>(null);
+  const [randomSentence, setRandomSentence] = useState<ExampleSentence | null>(null);
   const [voicesLoaded, setVoicesLoaded] = useState(false);
   const [showAdminSettings, setShowAdminSettings] = useState(false);
   const [mnemonics, setMnemonics] = useState<{[key: number]: string}>({});
+  const [isPoliteMode, setIsPoliteMode] = useState(true);
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -186,49 +226,62 @@ export default function ThaiFlashcards() {
   }, [autoplay]);
 
   useEffect(() => {
-    localStorage.setItem('isMale', JSON.stringify(isMale));
-  }, [isMale]);
+    localStorage.setItem('genderValue', genderValue.toString());
+  }, [genderValue]);
 
   useEffect(() => {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
 
-  // Initialize TTS Service on component mount
-  useEffect(() => {
-    ttsService.initialize();
-  }, []);
-
-  // Replace the speak function with our new service
-  const speak = async (text: string) => {
-    setIsPlaying(true);
+  // Update the speak helper function definition in page.tsx
+  const speak = async (text: string, isWord: boolean = true, genderValue: number) => {
+    // Set the appropriate playing state
+    if (isWord) {
+      setIsPlayingWord(true);
+    } else {
+      setIsPlayingContext(true);
+    }
     
     try {
+      // Pass genderValue within the object to ttsService.speak
       await ttsService.speak({
         text,
-        isMale,
+        genderValue, // Pass it here
         onStart: () => console.log('Speech started'),
         onEnd: () => {
           console.log('Speech ended');
-          setIsPlaying(false);
+          if (isWord) {
+            setIsPlayingWord(false);
+          } else {
+            setIsPlayingContext(false);
+          }
         },
         onError: (error) => {
           console.error('TTS error:', error);
-          setIsPlaying(false);
+          if (isWord) {
+            setIsPlayingWord(false);
+          } else {
+            setIsPlayingContext(false);
+          }
         }
       });
     } catch (error) {
       console.error('Error calling ttsService.speak:', error);
-      setIsPlaying(false);
+      if (isWord) {
+        setIsPlayingWord(false);
+      } else {
+        setIsPlayingContext(false);
+      }
     }
   };
 
-  // Auto-play when answer is shown
+  // Auto-play useEffect - Restore call to getThaiWithGender with isPoliteMode
   useEffect(() => {
-    if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlaying && voicesLoaded) {
-      speak(getThaiWithGender(phrases[index], isMale));
+    if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlayingWord && !isPlayingContext && voicesLoaded) {
+      speak(getThaiWithGender(phrases[index], genderValue, isPoliteMode), true, genderValue);
     }
     prevShowAnswerRef.current = showAnswer;
-  }, [showAnswer, autoplay, phrases, index, isPlaying, voicesLoaded, isMale]);
+  }, [showAnswer, autoplay, phrases, index, isPlayingWord, isPlayingContext, voicesLoaded, genderValue, isPoliteMode]); // Use genderValue dependency
 
   // Add a useEffect to initialize the random sentence when the answer is shown
   useEffect(() => {
@@ -362,11 +415,16 @@ export default function ThaiFlashcards() {
     }
   };
 
+  // Update mnemonic state locally on change
   const handleMnemonicChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setLocalMnemonics(prev => ({
-        ...prev,
-      [index]: e.target.value
-    }));
+    setMnemonics(prev => ({ ...prev, [index]: e.target.value }));
+  };
+
+  // Persist mnemonic change (e.g., on blur or explicit save)
+  const updateMnemonics = (cardIndex: number, text: string) => {
+    // The state is already updated by handleMnemonicChange, just save to localStorage
+    localStorage.setItem('mnemonics', JSON.stringify(mnemonics)); 
+    console.log(`Mnemonic for card ${cardIndex} saved.`);
   };
 
   const handleResetAll = () => {
@@ -374,118 +432,28 @@ export default function ThaiFlashcards() {
     window.location.reload();
   };
 
-  // Add a useEffect to update random sentence when gender changes
-  useEffect(() => {
-    if (randomSentence) {
-      // Regenerate the random sentence when gender changes
-      const examples = phrases[index].examples || [];
-      if (examples.length > 0) {
-        // Find the example that matches the current randomSentence
-        // This ensures we keep the same example but update the gender
-        const currentExample = examples.find(ex => 
-          ex.thai === randomSentence.thai || 
-          ex.thaiMasculine === randomSentence.thai || 
-          ex.thaiFeminine === randomSentence.thai
-        );
-        
-        if (currentExample) {
-          const thaiText = isMale
-            ? (currentExample.thaiMasculine || currentExample.thai)
-            : (currentExample.thaiFeminine || currentExample.thai);
-          
-          setRandomSentence({
-            thai: thaiText,
-            pronunciation: currentExample.pronunciation,
-            english: currentExample.translation
-          });
-        }
-      }
-    }
-  // Remove randomSentence from the dependency array to avoid infinite loops
-  }, [isMale, phrases, index]);
-
-  // Function to generate a random sentence
+  // Update generateRandomPhrase to ensure it just sets the ExampleSentence
   const generateRandomPhrase = (direction: 'next' | 'prev' = 'next') => {
     try {
       const examples = phrases[index].examples || [];
-      
-      // If no examples, set a default sentence using the main phrase
       if (!examples || examples.length === 0) {
-        console.log("No examples found for phrase", index);
-        setRandomSentence({
-          thai: getThaiWithGender(phrases[index], isMale),
-          pronunciation: phrases[index].pronunciation,
-          english: phrases[index].english
-        });
-        return;
+        setRandomSentence(null); return;
       }
-
-      // If no current random sentence, always start with the first example
+      let nextExampleData: ExampleSentence;
       if (!randomSentence) {
-        console.log("Initializing with first example");
-        const firstExample = examples[0];
-        const thaiText = isMale 
-          ? (firstExample.thaiMasculine || firstExample.thai) 
-          : (firstExample.thaiFeminine || firstExample.thai);
-        
-        setRandomSentence({
-          thai: thaiText,
-          pronunciation: firstExample.pronunciation,
-          english: firstExample.translation
-        });
-        return;
-      }
-
-      // Find current example index
-      let currentIndex = examples.findIndex(ex => 
-        ex.thai === randomSentence.thai || 
-        (ex.thaiMasculine && ex.thaiMasculine === randomSentence.thai) || 
-        (ex.thaiFeminine && ex.thaiFeminine === randomSentence.thai)
-      );
-
-      // If current example not found, start with first example
-      if (currentIndex === -1) {
-        console.log("Current example not found, resetting to first example");
-        const firstExample = examples[0];
-        const thaiText = isMale 
-          ? (firstExample.thaiMasculine || firstExample.thai) 
-          : (firstExample.thaiFeminine || firstExample.thai);
-        
-        setRandomSentence({
-          thai: thaiText,
-          pronunciation: firstExample.pronunciation,
-          english: firstExample.translation
-        });
-        return;
-      }
-
-      // Calculate next index
-      let nextIndex: number;
-      if (direction === 'next') {
-        nextIndex = (currentIndex + 1) % examples.length;
+        nextExampleData = examples[0];
       } else {
-        nextIndex = (currentIndex - 1 + examples.length) % examples.length;
+        let currentIndex = examples.findIndex(ex => ex.thai === randomSentence.thai);
+        if (currentIndex === -1) currentIndex = 0;
+        let nextIndex = (direction === 'next')
+          ? (currentIndex + 1) % examples.length
+          : (currentIndex - 1 + examples.length) % examples.length;
+        nextExampleData = examples[nextIndex];
       }
-
-      // Get the next example
-      const nextExample = examples[nextIndex];
-      const thaiText = isMale 
-        ? (nextExample.thaiMasculine || nextExample.thai) 
-        : (nextExample.thaiFeminine || nextExample.thai);
-      
-      setRandomSentence({
-        thai: thaiText,
-        pronunciation: nextExample.pronunciation,
-        english: nextExample.translation
-      });
+      setRandomSentence(nextExampleData);
     } catch (error) {
-      console.error('Error in generateRandomPhrase:', error);
-      // Fallback to main phrase if there's an error
-      setRandomSentence({
-        thai: getThaiWithGender(phrases[index], isMale),
-        pronunciation: phrases[index].pronunciation,
-        english: phrases[index].english
-      });
+      console.error('Error generating random phrase:', error);
+      setRandomSentence(null);
     }
   };
 
@@ -715,24 +683,12 @@ export default function ThaiFlashcards() {
     }
   };
 
-  // Add a cancel function to stop speech when needed
+  // Update handleStop function
   const handleStop = () => {
     console.log("Stop button clicked");
     ttsService.stop();
-    setIsPlaying(false);
-  };
-
-  // Function to update mnemonics
-  const updateMnemonics = (cardIndex: number, text: string) => {
-    setMnemonics(prev => ({
-      ...prev,
-      [cardIndex]: text
-    }));
-    // Save to local storage
-    localStorage.setItem('mnemonics', JSON.stringify({
-      ...mnemonics,
-      [cardIndex]: text
-    }));
+    setIsPlayingWord(false);
+    setIsPlayingContext(false);
   };
 
   // Load mnemonics from localStorage
@@ -883,129 +839,164 @@ export default function ThaiFlashcards() {
             {/* Card Back */}
             {showAnswer && (
               <div className="border-t border-[#333] p-6">
+                {/* Main Phrase Section */} 
                 <div className="flex items-center justify-center mb-4">
-                  {/* Thai word with pronunciation */}
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-white mb-2">
-                      {getThaiWithGender(phrases[index], isMale)}
+                    {/* Thai word with pronunciation - Use restored helper */}
+                    <div className="text-4xl md:text-5xl font-bold mb-4 text-gray-700">
+                      {getThaiWithGender(phrases[index], genderValue, isPoliteMode)}
                     </div>
                     <div className="text-sm text-gray-400 italic mb-3">
-                      {getGenderedPronunciation(phrases[index], isMale, phrases[index])}
+                      ({getGenderedPronunciation(phrases[index], genderValue, isPoliteMode)})
                     </div>
-
-                    {/* Play word button */}
+                    {/* Play Word Button */} 
                     <div className="flex justify-center mb-4">
                       <button
                         onClick={(event) => {
                           event.stopPropagation();
-                          speak(getThaiWithGender(phrases[index], isMale));
+                          const textToSpeak = getThaiWithGender(phrases[index], genderValue, isPoliteMode);
+                          console.log("Play Word - Text to Speak:", textToSpeak);
+                          speak(textToSpeak, true, genderValue);
                         }}
-                        disabled={isPlaying}
+                        disabled={isPlayingWord || isPlayingContext}
                         className="neumorphic-button text-blue-400"
                       >
-                        {isPlaying ? 'Playing...' : 'Play Word'}
+                        {isPlayingWord ? 'Playing...' : 'Play Word'}
                       </button>
                     </div>
-              
-                    {/* Difficulty buttons moved here */}
+
+                    {/* Difficulty Buttons (Restored Here) */} 
                     <div className="flex justify-center space-x-2 mb-4">
-                <button
+                      <button
                         onClick={() => handleCardAction('hard')}
                         className="neumorphic-button text-red-400"
-                >
+                      >
                         Wrong
-                </button>
-                <button
+                      </button>
+                      <button
                         onClick={() => handleCardAction('good')}
                         className="neumorphic-button text-yellow-400"
                       >
                         Correct
-                </button>
-                    <button
+                      </button>
+                      <button
                         onClick={() => handleCardAction('easy')}
                         className="neumorphic-button text-green-400"
-                    >
+                      >
                         Easy
-                    </button>
-                </div>
-                  </div>
-                </div>
+                      </button>
+                    </div>
 
-                {/* Mnemonic */}
+                  </div>
+                </div> {/* <<< End Main Phrase Section div */} 
+
+                {/* === Mnemonic Section (Restored Here) === */} 
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm text-gray-400">Mnemonic</label>
                     <button onClick={() => resetCard()} className="text-xs text-blue-400 hover:text-blue-300">Reset</button>
                   </div>
                   <textarea
-                    value={localMnemonics[index] || ''}
+                    value={mnemonics[index] ?? phrases[index].mnemonic ?? ''}
                     onChange={handleMnemonicChange}
-                    onBlur={() => updateMnemonics(index, localMnemonics[index] || '')}
+                    onBlur={() => updateMnemonics(index, mnemonics[index] ?? phrases[index].mnemonic ?? '')}
                     placeholder="Create a memory aid to help remember this word..."
-                    className="neumorphic-input w-full h-24 resize-none"
+                    className="neumorphic-input w-full h-24 resize-none rounded-lg"
                   />
                 </div>
 
-                {/* Context section moved under mnemonic */}
+                {/* === Context section === */} 
                 <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic mb-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm text-blue-400 uppercase tracking-wider">In Context</h3>
                   </div>
                   <ClientOnly>
-                    <p className="text-base text-white font-medium">{randomSentence?.thai || getThaiWithGender(phrases[index], isMale)}</p>
-                    <p className="text-sm text-gray-300 italic">
-                      {getGenderedPronunciation(randomSentence, isMale, phrases[index]) || getGenderedPronunciation(phrases[index], isMale, phrases[index])}
+                    <p className="text-base text-white font-medium">
+                      {randomSentence ? getThaiWithGender(randomSentence, genderValue, isPoliteMode) : "(No example available)"}
                     </p>
-                    <p className="text-sm text-gray-400 italic">{randomSentence?.english || "Loading example..."}</p>
+                    <p className="text-sm text-gray-300 italic">
+                      {randomSentence ? getGenderedPronunciation(randomSentence, genderValue, isPoliteMode) : ""}
+                    </p>
+                    <p className="text-sm text-gray-400 italic">{randomSentence?.translation || ""}</p>
                   </ClientOnly>
                   <div className="flex items-center justify-between mt-2">
-                <button 
-                      onClick={() => generateRandomPhrase('prev')}
-                      className="neumorphic-button text-blue-400 px-4"
-                      aria-label="Previous example"
-                >
-                      ←
-                </button>
-                <button 
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        if (randomSentence) {
-                          speak(randomSentence.thai);
-                        } else {
-                          // Fallback to current word if no example
-                          speak(getThaiWithGender(phrases[index], isMale));
-                        }
-                      }}
-                      disabled={isPlaying}
-                      className="neumorphic-button text-blue-400"
-                >
-                      {isPlaying ? 'Playing...' : 'Play Context'}
-                </button>
-                <button 
-                      onClick={() => generateRandomPhrase('next')}
-                      className="neumorphic-button text-blue-400 px-4"
-                      aria-label="Next example"
-                >
-                      →
-                </button>
-              </div>
-        </div>
+                    <button 
+                          onClick={() => generateRandomPhrase('prev')}
+                          className="neumorphic-button text-blue-400 px-4"
+                          aria-label="Previous example"
+                    >
+                          ←
+                    </button>
+                    <button 
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            if (randomSentence) {
+                              const textToSpeak = getThaiWithGender(randomSentence, genderValue, isPoliteMode);
+                              console.log("Play Context - Text to Speak:", textToSpeak);
+                              speak(textToSpeak, false, genderValue);
+                            }
+                          }}
+                          disabled={isPlayingWord || isPlayingContext || !randomSentence}
+                          className="neumorphic-button text-blue-400"
+                    >
+                          {isPlayingContext ? 'Playing...' : 'Play Context'}
+                    </button>
+                    <button 
+                          onClick={() => generateRandomPhrase('next')}
+                          className="neumorphic-button text-blue-400 px-4"
+                          aria-label="Next example"
+                    >
+                          →
+                    </button>
+                  </div>
+                </div> {/* End Context Section */} 
 
-                {/* Gender Switch */}
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-400 text-sm">♀</span>
-                    <Switch checked={isMale} onCheckedChange={setIsMale} />
-                    <span className="text-gray-400 text-sm">♂</span>
-              </div>
-              </div>
+                {/* === Gender Slider and Polite Mode Toggle Section === */} 
+                <div className="flex items-center justify-center space-x-4 mb-6">
+                  {/* Gender Slider */} 
+                  <div className="flex items-center space-x-2 w-full max-w-xs">
+                    <span className="text-sm font-medium text-gray-400">Female</span>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="100" 
+                      value={genderValue}
+                      onChange={(e) => setGenderValue(parseInt(e.target.value, 10))}
+                      className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer range-lg dark:bg-gray-700"
+                      style={{
+                        // Calculate hue based on genderValue (0=320, 100=220)
+                        accentColor: `hsl(${320 - (1.0 * genderValue)}, 80%, 60%)` 
+                      }}
+                      id="gender-slider"
+                    />
+                    <span className="text-sm font-medium text-gray-400">Male</span>
+                  </div>
+
+                  {/* Polite Mode Toggle */} 
+                  <label htmlFor="polite-toggle" className="flex items-center cursor-pointer">
+                    <span className="mr-2 text-sm font-medium text-gray-400">Casual</span>
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        id="polite-toggle"
+                        className="sr-only"
+                        checked={isPoliteMode}
+                        onChange={() => setIsPoliteMode(!isPoliteMode)}
+                      />
+                      <div className="block bg-gray-600 w-10 h-6 rounded-full"></div>
+                      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isPoliteMode ? 'translate-x-full bg-green-400' : 'bg-gray-400'}`}></div>
+                    </div>
+                    <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
+                  </label>
+                </div> {/* End Toggle Section */} 
+
               </div>
             )}
-              </div>
-              </div>
-              </div>
+          </div>
+        </div>
+      </div>
 
-      {/* Settings Button */}
+      {/* Settings Button, Modals, Admin Button, Version Indicator */}
       <div className="fixed bottom-16 right-4 z-20">
         <button
           onClick={() => setShowStats(!showStats)}
@@ -1013,9 +1004,8 @@ export default function ThaiFlashcards() {
         >
           ⚙️
         </button>
-              </div>
+      </div>
       
-      {/* Admin Settings Button (hidden in lower corner) */}
       <div className="fixed bottom-4 right-4 z-20">
           <button
           onClick={() => setShowAdminSettings(true)}
@@ -1025,7 +1015,6 @@ export default function ThaiFlashcards() {
           </button>
       </div>
 
-      {/* Modals */}
       {showStats && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="neumorphic max-w-md w-full p-6">

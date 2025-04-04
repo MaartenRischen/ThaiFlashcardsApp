@@ -11,63 +11,59 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
   const [apiKey, setApiKey] = useState('');
   const [provider, setProvider] = useState('browser');
   const [testVoice, setTestVoice] = useState('');
-  const [voices, setVoices] = useState<string[]>([]);
   const [isMale, setIsMale] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   
   useEffect(() => {
-    // Load API key from localStorage
-    const savedApiKey = localStorage.getItem('ttsApiKey') || '';
+    // Load API key from localStorage (if you still want to use it for Google as a fallback/option?)
+    // Or potentially adapt this for AWS keys if needed, though .env.local is better.
+    const savedApiKey = localStorage.getItem('ttsApiKey') || ''; 
     setApiKey(savedApiKey);
     
-    // Load current provider
-    const savedProvider = localStorage.getItem('ttsProvider') || 'browser';
-    setProvider(savedProvider);
+    // Determine provider based on AWS initialization status (or localStorage if needed)
+    // This logic might need refinement based on how you want to manage providers now
+    const awsInitialized = process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID && process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY;
+    setProvider(awsInitialized ? 'awsPolly' : 'browser');
     
-    // Load available voices
-    loadVoices();
+    // Remove call to loadVoices
+    // loadVoices();
   }, [isOpen]);
   
-  const loadVoices = async () => {
-    try {
-      const voiceList = await ttsService.getVoices();
-      setVoices(voiceList);
-    } catch (error) {
-      console.error('Error loading voices:', error);
-    }
-  };
+  // Remove loadVoices function
+  // const loadVoices = async () => { ... };
   
   const handleSave = () => {
-    // Save API key to localStorage
+    // This save logic likely needs adjustment if primarily using AWS via .env.local
+    // Maybe remove the API key field if not used for Google anymore?
     if (apiKey) {
       localStorage.setItem('ttsApiKey', apiKey);
-      
-      // Reload the page to initialize with new API key
-      window.location.reload();
     }
-    
+    // No page reload needed if using .env.local for AWS
+    // window.location.reload();
     onClose();
   };
   
-  const handleProviderChange = (checked: boolean) => {
-    const newProvider = checked ? 'googleCloud' : 'browser';
-    setProvider(newProvider);
-    localStorage.setItem('ttsProvider', newProvider);
-    ttsService.useProvider(newProvider);
-  };
+  // Remove provider change handler (controlled by AWS env vars primarily now)
+  // const handleProviderChange = (checked: boolean) => { ... };
   
   const handleTestVoice = async () => {
     setIsPlaying(true);
     
     try {
+      // ttsService.speak should now correctly use AWS if initialized, or browser fallback
       await ttsService.speak({
-        text: testVoice || 'สวัสดีครับ ทดสอบเสียง',
+        text: testVoice || 'สวัสดีครับ ทดสอบเสียง', // Default Thai test phrase
         isMale,
         onEnd: () => setIsPlaying(false),
-        onError: () => setIsPlaying(false)
+        onError: (err) => {
+            console.error('Test voice error:', err);
+            setIsPlaying(false);
+            alert('Test voice playback failed. Check console.'); // Give user feedback
+        }
       });
     } catch (error) {
-      console.error('Test voice error:', error);
+      // Catch sync errors just in case, though async errors handled by onError
+      console.error('Error calling test voice function:', error);
       setIsPlaying(false);
     }
   };
@@ -105,10 +101,9 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
           </div>
           
           <div className="flex items-center justify-between">
-            <span>Use Premium TTS</span>
+            <span>Use Premium TTS (AWS)</span>
             <Switch 
-              checked={provider === 'googleCloud'} 
-              onCheckedChange={handleProviderChange} 
+              checked={provider === 'awsPolly'}
             />
           </div>
           

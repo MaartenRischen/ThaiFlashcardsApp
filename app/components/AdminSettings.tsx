@@ -13,6 +13,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
   const [testVoice, setTestVoice] = useState('');
   const [isMale, setIsMale] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
   
   useEffect(() => {
     // Load API key from localStorage (if you still want to use it for Google as a fallback/option?)
@@ -47,24 +48,27 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
   // const handleProviderChange = (checked: boolean) => { ... };
   
   const handleTestVoice = async () => {
-    setIsPlaying(true);
-    
+    if (!ttsService) {
+      alert('TTS Service not available');
+      return;
+    }
     try {
-      // ttsService.speak should now correctly use AWS if initialized, or browser fallback
+      setIsTesting(true);
+      // Use genderValue: 100 (Male) for the test call
       await ttsService.speak({
         text: testVoice || 'สวัสดีครับ ทดสอบเสียง', // Default Thai test phrase
-        isMale,
-        onEnd: () => setIsPlaying(false),
+        genderValue: 100, // Use genderValue instead of isMale
+        onEnd: () => setIsTesting(false),
         onError: (err) => {
-            console.error('Test voice error:', err);
-            setIsPlaying(false);
-            alert('Test voice playback failed. Check console.'); // Give user feedback
+          console.error("TTS Test Error:", err);
+          alert(`TTS Test Error: ${err.message || err}`);
+          setIsTesting(false);
         }
       });
-    } catch (error) {
-      // Catch sync errors just in case, though async errors handled by onError
-      console.error('Error calling test voice function:', error);
-      setIsPlaying(false);
+    } catch (error: any) {
+      console.error("TTS Test Error:", error);
+      alert(`TTS Test Error: ${error.message || error}`);
+      setIsTesting(false);
     }
   };
   
@@ -121,10 +125,10 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
               />
               <button
                 onClick={handleTestVoice}
-                disabled={isPlaying}
+                disabled={isTesting}
                 className="neumorphic-button"
               >
-                {isPlaying ? 'Playing...' : 'Test'}
+                {isTesting ? 'Testing...' : 'Test'}
               </button>
             </div>
           </div>

@@ -1,149 +1,118 @@
-import { PollyClient, SynthesizeSpeechCommand, SynthesizeSpeechCommandInput, LanguageCode, VoiceId, Engine } from "@aws-sdk/client-polly";
+// Remove AWS imports
+// import { PollyClient, SynthesizeSpeechCommand, SynthesizeSpeechCommandInput, LanguageCode, VoiceId, Engine } from "@aws-sdk/client-polly";
 
 // Define interfaces for parameters
 interface SpeakParams {
   text: string;
-  isMale: boolean;
+  genderValue: number; // 0=Female, 100=Male
   onStart?: () => void;
   onEnd?: () => void;
   onError?: (error: any) => void;
 }
 
-// Module-level variables for state
-let pollyClient: PollyClient | null = null;
-let audioContext: AudioContext | null = null;
-let currentAudioSource: AudioBufferSourceNode | null = null; // To manage playback cancellation
-let isAwsInitializedInternal = false; // Internal flag for initialization status
+// Remove AWS-related state variables
+// let pollyClient: PollyClient | null = null;
+// let audioContext: AudioContext | null = null;
+// let currentAudioSource: AudioBufferSourceNode | null = null; // To manage playback cancellation
+// let isAwsInitializedInternal = false; // Internal flag for initialization status
 
-// Function to initialize AWS Polly client (V3) if credentials are available
+// Remove AWS initialization function
+/*
 function initAwsPollyV3(): boolean {
-  // Prevent execution on server side
-  if (typeof window === 'undefined') {
-      return false;
-  }
-
-  const accessKeyId = process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY;
-  const region = process.env.NEXT_PUBLIC_AWS_REGION;
-
-  if (accessKeyId && secretAccessKey && region) {
-    try {
-      // V3 uses credential object directly in client config
-      pollyClient = new PollyClient({
-        region: region,
-        credentials: {
-          accessKeyId: accessKeyId,
-          secretAccessKey: secretAccessKey,
-        }
-      });
-      console.log('AWS SDK V3 PollyClient Initialized. Region:', region);
-      return true; // Indicate success
-    } catch (error) {
-      console.error("Failed to initialize AWS SDK V3 PollyClient:", error);
-      pollyClient = null; // Ensure client is null on failure
-      return false; // Indicate failure
-    }
-  } else {
-    console.log('AWS Polly credentials not found. Falling back to browser TTS.');
-    pollyClient = null;
-    return false; // Indicate AWS is not initialized
-  }
+  // ... implementation removed ...
 }
+*/
 
-// Function to lazily initialize and get the AudioContext
+// Remove AudioContext function
+/*
 function getAudioContext(): AudioContext | null {
-    // Prevent execution on server side and ensure AudioContext is available
-    if (typeof window !== 'undefined' && (window.AudioContext || (window as any).webkitAudioContext)) {
-        if (!audioContext) {
-            try {
-                audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-            } catch (e) {
-                console.error("AudioContext not supported:", e);
-                return null;
-            }
-        }
-        // Resume context if suspended (required after user interaction in some browsers)
-        if (audioContext.state === 'suspended') {
-            audioContext.resume().catch(err => console.error('Failed to resume AudioContext:', err));
-        }
-        return audioContext;
-    } else {
-        console.error('AudioContext not supported or not in browser environment.');
-        return null;
-    }
+    // ... implementation removed ...
 }
+*/
 
 // --- Main TTS Service Object ---
 export const ttsService = {
   
-  // Call this once from the client-side, e.g., in a top-level component's useEffect
+  // Remove initialize method
+  /*
   initialize: function() {
     if (!isAwsInitializedInternal) { 
         isAwsInitializedInternal = initAwsPollyV3(); // Use V3 initializer
     }
   },
+  */
 
-  speak: async function({ text, isMale, onStart, onEnd, onError }: SpeakParams): Promise<void> {
-    this.initialize(); 
+  speak: async function({ text, genderValue, onStart, onEnd, onError }: SpeakParams): Promise<void> {
+    // Remove initialize call
+    // this.initialize(); 
     
-    // ********************************************************************
-    // NOTE: After extensive testing, AWS Polly access for Thai language and
-    // Thai voices (Niwat, Patchara) appears to be limited on this account.
-    // Therefore, we're defaulting to browser TTS for Thai text. To enable
-    // AWS Polly for Thai in the future, you would need to:
-    // 1. Verify your AWS account has access to Thai voices
-    // 2. Check AWS Service Quotas for Polly
-    // 3. Contact AWS Support if needed
-    // ********************************************************************
+    // Remove AudioContext logic
+    // const localAudioContext = getAudioContext();
     
-    // Get AudioContext ready (might be needed for future non-Thai Polly use)
-    const localAudioContext = getAudioContext();
-    
-    // Stop any currently playing audio
+    // Stop any currently playing audio (from this service)
     this.stop(); 
 
-    // Try to resume AudioContext in case needed for future use
+    // Remove AudioContext resume logic
+    /*
     if (localAudioContext && localAudioContext.state === 'suspended') {
         try {
             await localAudioContext.resume();
         } catch (resumeError) {
             console.error('Failed to resume AudioContext:', resumeError);
+            // Proceed anyway, playback might still work or fail later
         }
     }
+    */
 
-    // --- AWS Polly Path (V3) for non-Thai languages (disabled for Thai) ---
-    // The commented code below could be reactivated for non-Thai languages
-    // or if AWS Polly access to Thai voices is enabled on the account
+    // Remove entire AWS Polly attempt block
     /*
     if (isAwsInitializedInternal && pollyClient && localAudioContext) {
-      // AWS Polly implementation (currently disabled for Thai)
-      // See previous code for full implementation
+      // ... AWS Polly try/catch block removed ...
+    } else {
+      // --- Browser TTS Fallback (if AWS not initialized) ---
+      console.log('AWS not initialized or AudioContext not available. Using Browser TTS.');
+      this._speakWithBrowserTTS({ text, genderValue, onStart, onEnd, onError });
     }
-    else 
     */
-    
-    // --- Browser TTS Fallback (currently used as primary for Thai) ---
+
+    // Directly call the Browser TTS method
+    console.log('Using Browser TTS.'); // Simplified log message
+    this._speakWithBrowserTTS({ text, genderValue, onStart, onEnd, onError });
+
+  },
+
+  // --- Helper function for Browser TTS --- 
+  _speakWithBrowserTTS: function({ text, genderValue, onStart, onEnd, onError }: SpeakParams): void {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        console.log('Using Browser TTS for Thai text.');
-        onStart?.();
+        // console.log('Using Browser TTS.'); // Log moved to parent speak function
+        
+        // Call onStart directly (no AWS check needed)
+        // if (!isAwsInitializedInternal) { 
+            onStart?.(); 
+        // }
 
         const voices = window.speechSynthesis.getVoices();
         if (voices.length === 0) {
             console.warn("Browser voices not loaded yet, attempting to speak anyway...");
+            // Consider adding a small delay and retry for voices?
         }
 
         const utterance = new SpeechSynthesisUtterance(text);
         const thaiVoices = voices.filter(v => v.lang.startsWith('th'));
         let targetVoice: SpeechSynthesisVoice | undefined;
+        
+        // Determine if text requires male or female voice characteristics (for selection)
+        const isTextMale = genderValue >= 50;
 
-        if (isMale) {
-            // Look for male name clues (no reliable gender property)
-            targetVoice = thaiVoices.find(v => v.name.toLowerCase().includes('male') || v.name.includes('Niwat'));
+        // Attempt to find gender-specific voice name clues
+        if (isTextMale) {
+            targetVoice = thaiVoices.find(v => v.name.toLowerCase().includes('male') || v.name.includes('Niwat') || v.name.includes('Kritt'));
         }
-        if (!targetVoice && !isMale) { // If male not found OR we want female
-            targetVoice = thaiVoices.find(v => v.name.toLowerCase().includes('female') || v.name.includes('Patchara'));
+        if (!targetVoice && !isTextMale) { 
+            targetVoice = thaiVoices.find(v => v.name.toLowerCase().includes('female') || v.name.includes('Patchara') || v.name.includes('Ayutthaya') || v.name.includes('Kanya')); // Added Kanya
         }
-        if (!targetVoice && thaiVoices.length > 0) { // Fallback to first available Thai voice
+        if (!targetVoice && thaiVoices.length > 0) { 
+            console.warn('Specific gender voice not found, using first available Thai voice.');
             targetVoice = thaiVoices[0];
         }
 
@@ -151,23 +120,38 @@ export const ttsService = {
             utterance.voice = targetVoice;
             console.log('Using browser voice:', targetVoice.name);
         } else {
-             console.warn('No specific Thai voice found for browser TTS. Using default for th-TH.');
-             utterance.lang = 'th-TH';
+             // Fallback if no Thai voices found at all
+             console.warn('No Thai voices found for browser TTS. Using default lang=th-TH.');
+             utterance.lang = 'th-TH'; 
         }
+
+        // *** Calculate pitch based on genderValue (0-100) ***
+        // Map 0 -> 2.0, 100 -> 0.5 (Range of 1.5)
+        const pitch = 2.0 - (1.5 * (genderValue / 100.0));
+        utterance.pitch = Math.max(0.0, Math.min(2.0, pitch)); // Clamp between 0.0 and 2.0
+        
+        // *** Calculate rate based on genderValue ***
+        // Slightly slower for male range
+        utterance.rate = genderValue >= 50 ? 0.95 : 1.0;
+        
+        console.log(`GenderValue: ${genderValue}, Applied pitch: ${utterance.pitch.toFixed(2)}, rate: ${utterance.rate.toFixed(2)}`);
+        // *************************************************************
 
         utterance.onend = () => {
             console.log('Browser TTS playback finished.');
-            onEnd?.();
+            onEnd?.(); // Call original onEnd callback
         };
         utterance.onerror = (event) => {
             console.error('Browser TTS Error:', event.error);
-            onError?.(event.error);
+            onError?.(event.error); // Call original onError callback
         };
 
-        window.speechSynthesis.cancel();
+        // Cancel any previous speech and speak the new utterance
+        window.speechSynthesis.cancel(); 
         window.speechSynthesis.speak(utterance);
 
     } else {
+      // If browser TTS is not supported at all
       const errorMsg = 'TTS not supported (No browser speechSynthesis available)';
       console.error(errorMsg);
       onError?.(new Error(errorMsg));
@@ -176,17 +160,21 @@ export const ttsService = {
 
   // Function to explicitly stop any ongoing playback initiated by this service
   stop: function() {
-      // Stop AWS Polly playback (kept for potential future use)
+      // Remove AWS Polly stop logic
+      /*
       if (currentAudioSource) {
           try {
             console.log("Attempting to stop AWS Polly playback.");
-            currentAudioSource.onended = null; 
+            currentAudioSource.onended = null; // Prevent onEnd callback if manually stopped
             currentAudioSource.stop();
           } catch(e) {
-              // Ignore errors if already stopped
+              // Ignore errors if already stopped or node is invalid
+              // console.warn("Error stopping Polly source:", e);
           }
-          currentAudioSource = null;
+          currentAudioSource = null; // Clear the reference
       }
+      */
+
       // Stop Browser TTS playback
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
            if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {

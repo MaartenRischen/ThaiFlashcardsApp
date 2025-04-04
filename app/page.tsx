@@ -243,10 +243,10 @@ export default function ThaiFlashcards() {
     }
     
     try {
-      // Pass genderValue within the object to ttsService.speak
+      // Ensure genderValue is passed correctly within the object to ttsService.speak
       await ttsService.speak({
         text,
-        genderValue, // Pass it here
+        genderValue, // Correctly passing genderValue
         onStart: () => console.log('Speech started'),
         onEnd: () => {
           console.log('Speech ended');

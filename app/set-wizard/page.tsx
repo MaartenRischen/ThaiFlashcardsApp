@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { generateCustomSet, createCustomSet, Phrase, generateSingleFlashcard, BatchError } from '../lib/set-generator';
 import * as storage from '../lib/storage'; // Import storage functions
+import { SetMetaData } from '../lib/storage'; // Import SetMetaData type
 
 // Card Editor component for previewing and editing generated cards
 const CardEditor = ({ 
@@ -178,7 +179,7 @@ const SetWizardPage = () => {
   const [thaiLevel, setThaiLevel] = useState<string>('beginner');
   const [learningGoals, setLearningGoals] = useState<string[]>([]);
   const [specificTopics, setSpecificTopics] = useState<string>('');
-  const [cardCount, setCardCount] = useState<number>(10);
+  const [cardCount, setCardCount] = useState<number>(8);
   const [customSetName, setCustomSetName] = useState<string>(`Thai ${thaiLevel} for ${learningGoals.length ? learningGoals[0] : 'Beginners'} Set`);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generationProgress, setGenerationProgress] = useState<{ completed: number, total: number }>({ completed: 0, total: 0 });
@@ -192,6 +193,8 @@ const SetWizardPage = () => {
     userMessage: string;
   } | null>(null);
   const [totalSteps] = useState(5); // Total steps including generation and preview
+  const [aiGeneratedTitle, setAiGeneratedTitle] = useState<string | undefined>(undefined);
+  const [generatingDisplayPhrases, setGeneratingDisplayPhrases] = useState<Phrase[]>([]);
 
   // Generate a unique set name when component mounts
   useEffect(() => {
@@ -204,6 +207,11 @@ const SetWizardPage = () => {
       generateSetName();
     }
   }, [thaiLevel, learningGoals]);
+
+  // NEW: useEffect to log changes to generatingDisplayPhrases
+  useEffect(() => {
+    console.log(`Effect: generatingDisplayPhrases updated. New length: ${generatingDisplayPhrases.length}`);
+  }, [generatingDisplayPhrases]);
 
   const generateSetName = () => {
     const date = new Date();
@@ -222,8 +230,12 @@ const SetWizardPage = () => {
     }
     
     // Add date to ensure uniqueness
-    const setName = `${baseName} Set (${dateStr})`;
-    setCustomSetName(setName);
+    const autoName = `${baseName} Set (${dateStr})`;
+    
+    // Set initial customSetName to the auto-generated one, user can edit later
+    if (!customSetName) { // Only set if not already edited by user or AI title
+        setCustomSetName(autoName);
+    }
   };
 
   const handleNext = () => {
@@ -238,8 +250,13 @@ const SetWizardPage = () => {
   };
 
   const handleBack = () => {
-    if (currentStep > 1) {
+    // Prevent going back to Generation step (4) from Preview step (5)
+    if (currentStep > 1 && currentStep !== 5) { 
       setCurrentStep(currentStep - 1);
+    } else if (currentStep === 5) {
+      // Optionally go back to Step 3 (Inputs) from Preview
+      console.log("Navigating back from Preview (5) to Input (3)");
+      setCurrentStep(3); 
     }
   };
 
@@ -253,9 +270,11 @@ const SetWizardPage = () => {
     setIsGenerating(true);
     setGenerationProgress({ completed: 0, total: cardCount });
     setCurrentStep(4); // Move to generation step
+    setErrorSummary(null); // Clear previous errors
+    setAiGeneratedTitle(undefined); // Clear previous AI title
+    setGeneratingDisplayPhrases([]); // Reset
 
     try {
-      // Call the generation service
       const result = await generateCustomSet(
         {
           level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
@@ -264,14 +283,36 @@ const SetWizardPage = () => {
         },
         cardCount,
         (progress) => {
-          setGenerationProgress(progress);
+          console.log(`Wizard CB Received: Completed=${progress.completed}, Total=${progress.total}, Latest#=${progress.latestPhrases?.length || 0}`);
+          setGenerationProgress({ completed: progress.completed, total: progress.total });
+
+          if (progress.latestPhrases && progress.latestPhrases.length > 0) {
+            setGeneratingDisplayPhrases(prev => {
+              const newPhrases = progress.latestPhrases || [];
+              console.log(`Wizard CB State Update: Prev#: ${prev.length}, New#: ${newPhrases.length}, Total#: ${prev.length + newPhrases.length}`);
+              const uniqueNewPhrases = newPhrases.filter(np => !prev.some(p => p.english === np.english));
+              if(uniqueNewPhrases.length !== newPhrases.length) {
+                  console.warn("Wizard CB: Filtered out duplicate phrases before adding to display list.");
+              }
+              return [...prev, ...uniqueNewPhrases]; 
+            });
+          } else {
+             console.log(`Wizard CB: No new latestPhrases to add to display.`);
+          }
         }
       );
 
       setGeneratedPhrases(result.phrases);
       setGenerationErrors(result.aggregatedErrors);
       
-      // Store error summary for UI display
+      // Capture AI Title and update customSetName if not already manually set
+      if (result.cleverTitle) {
+        setAiGeneratedTitle(result.cleverTitle);
+        // Automatically use AI title if user hasn't typed a custom one yet
+        // Or maybe use a flag to track if user edited the name?
+        setCustomSetName(result.cleverTitle); 
+      }
+      
       if (result.errorSummary) {
         console.log("Generation completed with errors:", result.errorSummary);
         setErrorSummary(result.errorSummary);
@@ -331,19 +372,18 @@ const SetWizardPage = () => {
 
     // Create the data that will be added to the sets registry
     const setData = {
-      name: customSetName,
+      name: customSetName || `Generated Set ${new Date().toLocaleDateString()}`, 
+      cleverTitle: aiGeneratedTitle, 
       level: thaiLevel,
       goals: learningGoals,
       specificTopics: specificTopics,
       source: 'wizard' as const
     };
 
-    // Generate a new set ID
     const newId = storage.generateUUID();
     const now = new Date().toISOString();
     
-    // Prepare the complete metadata with ID and timestamps
-    const newMetaData = {
+    const newMetaData: SetMetaData = {
       ...setData,
       id: newId,
       createdAt: now,
@@ -361,29 +401,12 @@ const SetWizardPage = () => {
     // Set this new set as active immediately
     storage.setActiveSetId(newId);
 
-    // Still provide download option
-    const dataToExport = {
-      ...setData,
-      createdAt: now,
-      phrases: generatedPhrases,
-    };
-
-    const dataStr = JSON.stringify(dataToExport, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileName = customSetName.replace(/\s+/g, '-').toLowerCase() + '.json';
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileName);
-    linkElement.click();
-    
-    // Show completion message
-    alert(`Your set "${customSetName}" has been created and will be loaded when you return to the main app!`);
+    // Update completion message
+    alert(`Your set "${customSetName}" has been created and loaded! You can export it later from the Set Manager if needed.`);
     
     // Offer to return to main app
     if (confirm('Would you like to return to the main app now?')) {
-      // Force full page reload to ensure context is refreshed with the new set
-      window.location.href = '/';
+      window.location.href = '/'; // Force reload to ensure context update
     }
   };
 
@@ -392,9 +415,18 @@ const SetWizardPage = () => {
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Thai Flashcards Set Wizard</h1>
-          <div className="text-sm text-gray-400">
-            Step {currentStep} of {totalSteps}
-          </div>
+          {/* Home Link */}
+          <a href="/" 
+             className="text-sm text-blue-400 hover:text-blue-300 underline" 
+             title="Return to Main App (Discards Wizard Progress)"
+             onClick={(e) => {
+                 if (!confirm('Return to main app? Any wizard progress will be lost.')) {
+                     e.preventDefault(); // Prevent navigation if user cancels
+                 }
+             }}
+          >
+            Back to Main App
+          </a>
         </div>
         
         <div className="neumorphic rounded-xl p-6 mb-8">
@@ -467,17 +499,20 @@ const SetWizardPage = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   How many cards would you like in your set?
                 </label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="range"
-                    min="5"
-                    max="30"
-                    step="5"
-                    value={cardCount}
-                    onChange={(e) => setCardCount(parseInt(e.target.value))}
-                    className="w-full"
-                  />
-                  <span className="font-medium text-blue-400">{cardCount}</span>
+                <div className="flex items-center gap-4 bg-gray-800 rounded-lg p-3 border border-gray-700">
+                  {[8, 16, 24].map(countOption => (
+                    <label key={countOption} className="flex items-center space-x-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="cardCount" 
+                        value={countOption} 
+                        checked={cardCount === countOption}
+                        onChange={(e) => setCardCount(parseInt(e.target.value))}
+                        className="accent-blue-400 h-4 w-4"
+                      />
+                      <span className="font-medium text-blue-400">{countOption} cards</span>
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
@@ -485,29 +520,74 @@ const SetWizardPage = () => {
           
           {/* Step 4: Generation */}
           {currentStep === 4 && (
-            <div className="text-center py-10">
+            <div className="text-center py-10 flex flex-col items-center">
               <h2 className="text-2xl font-bold mb-6 text-blue-400">
                 Generating Your Custom Set
               </h2>
               
-              <div className="relative pt-1 mb-8">
-                <div className="h-2 bg-gray-700 rounded-full">
-                  <div 
-                    className="h-2 bg-blue-600 rounded-full" 
-                    style={{ width: `${Math.round((generationProgress.completed / generationProgress.total) * 100)}%` }}
-                  ></div>
-                </div>
-                <div className="mt-2 text-gray-400">
-                  Generated {generationProgress.completed} of {generationProgress.total} cards
-                </div>
+              {/* Input Summary - NEW */}
+              <div className="w-full max-w-md text-left bg-gray-700 bg-opacity-40 rounded-lg p-3 mb-4 text-sm">
+                 <p className="text-gray-400">
+                   <span className="font-semibold text-gray-300">Level:</span> {thaiLevel.charAt(0).toUpperCase() + thaiLevel.slice(1)}
+                 </p>
+                 <p className="text-gray-400">
+                   <span className="font-semibold text-gray-300">Goals:</span> {learningGoals.join(', ') || 'General'}
+                 </p>
+                 {specificTopics && (
+                   <p className="text-gray-400">
+                     <span className="font-semibold text-gray-300">Topics:</span> {specificTopics}
+                   </p>
+                 )}
               </div>
               
-              <div className="text-gray-300 animate-pulse">
-                {isGenerating 
-                  ? "Please wait while Gemini creates your custom Thai flashcards..." 
-                  : "Finishing up..."
-                }
-              </div>
+              {/* Progress Bar */} 
+              <div className="w-full max-w-md relative pt-1 mb-4">
+                 <div className="h-2 bg-gray-700 rounded-full">
+                   <div 
+                     className="h-2 bg-blue-600 rounded-full transition-width duration-300 ease-linear"
+                     style={{ width: `${Math.round((generationProgress.completed / generationProgress.total) * 100)}%` }}
+                   ></div>
+                 </div>
+                 <div className="mt-2 text-gray-400">
+                   Generated {generationProgress.completed} of {generationProgress.total} cards
+                 </div>
+               </div>
+               
+               {/* Loading Text */} 
+               <div className="text-gray-300 animate-pulse mb-6">
+                  {isGenerating 
+                    ? "Please wait while Gemini creates your custom Thai flashcards..." 
+                    : "Finishing up..."
+                  }
+                </div>
+
+                {/* Real-time Phrase Display - Simplified Render */} 
+                <div className="w-full max-w-md text-left bg-gray-800 rounded-lg p-4 h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                  <h4 className="text-sm font-semibold text-gray-400 mb-2">
+                    Generated Phrases: ({generatingDisplayPhrases.length} / {cardCount})
+                  </h4>
+                  {/* Log right before mapping */} 
+                  {(() => { 
+                      console.log(`Wizard Render Pass (Step 4): generatingDisplayPhrases length = ${generatingDisplayPhrases.length}`); 
+                      return null; 
+                  })()} 
+                  
+                  {/* --- Simplified Rendering (Temporary Diagnostic) --- */} 
+                  {generatingDisplayPhrases.length === 0 && (
+                     <p className="text-gray-500 text-sm italic">Waiting for first batch...</p>
+                  )}
+                  {generatingDisplayPhrases.map((phrase, index) => {
+                     // Log inside map 
+                     console.log(`Wizard Step 4 Render: Mapping item index ${index}, phrase: ${phrase.english}`);
+                     // Render directly, not inside ul/li 
+                     return (
+                       <p key={`${index}-${phrase.english}`} className="text-gray-300 text-sm">
+                         {index + 1}. {phrase.english} 
+                       </p>
+                     ); 
+                  })}
+                  {/* --- End Simplified Rendering --- */} 
+                </div>
             </div>
           )}
           
@@ -547,14 +627,17 @@ const SetWizardPage = () => {
               
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Set Name
+                  Set Title (Edit if desired)
                 </label>
                 <input
                   type="text"
                   value={customSetName}
-                  onChange={(e) => setCustomSetName(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
+                  onChange={(e) => setCustomSetName(e.target.value)} // Allow user editing
+                  className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white font-semibold text-lg"
                 />
+                {aiGeneratedTitle && customSetName === aiGeneratedTitle && (
+                    <p className="text-xs text-gray-400 mt-1 italic">✨ AI suggested title</p>
+                )}
               </div>
               
               <div className="bg-gray-800 p-4 rounded mb-6">
@@ -631,33 +714,34 @@ const SetWizardPage = () => {
         </div>
         
         {/* Navigation Buttons */}
-        <div className="flex justify-between">
+        <div className="flex justify-between mt-8"> {/* Added margin top */} 
           <button 
             onClick={handleBack} 
-            disabled={currentStep === 1 || currentStep === 4}
-            className={`py-2 px-6 rounded ${
-              currentStep === 1 || currentStep === 4 ? 'bg-gray-700 text-gray-500' : 'bg-blue-600 hover:bg-blue-700 text-white'
+            // Disable back button on Step 1 and Step 4 (Generation in progress) 
+            disabled={currentStep === 1 || currentStep === 4} 
+            className={`py-2 px-6 rounded ${ 
+              (currentStep === 1 || currentStep === 4) ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
             }`}
           >
             Back
           </button>
           
           {currentStep < totalSteps && currentStep !== 4 && (
-            <button 
-              onClick={handleNext}
-              disabled={
-                (currentStep === 2 && !thaiLevel) || 
-                (currentStep === 3 && learningGoals.length === 0)
-              }
-              className={`py-2 px-6 rounded ${
-                ((currentStep === 2 && !thaiLevel) || 
-                (currentStep === 3 && learningGoals.length === 0)) 
-                  ? 'bg-gray-700 text-gray-500' 
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
-            >
-              {currentStep === 3 ? 'Generate Cards' : 'Next'}
-            </button>
+              <button 
+                onClick={handleNext}
+                disabled={ 
+                  (currentStep === 2 && !thaiLevel) || 
+                  (currentStep === 3 && learningGoals.length === 0) 
+                }
+                className={`py-2 px-6 rounded ${ 
+                  ((currentStep === 2 && !thaiLevel) || 
+                  (currentStep === 3 && learningGoals.length === 0)) 
+                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                {currentStep === 3 ? 'Generate Cards' : 'Next'}
+              </button>
           )}
         </div>
       </div>

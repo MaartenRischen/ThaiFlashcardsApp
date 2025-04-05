@@ -147,9 +147,12 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     
     // Update state
     setAvailableSets(prev => [...prev, newMetaData]);
+    
+    // Automatically switch to the new set
+    await switchSet(newId);
 
     return newId;
-  }, []);
+  }, [switchSet]);
 
   const deleteSet = useCallback(async (setId: string) => {
     if (setId === DEFAULT_SET_ID) {

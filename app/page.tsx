@@ -336,7 +336,8 @@ export default function ThaiFlashcards() {
     addSet,
     isLoading,
     exportSet,
-    switchSet
+    switchSet,
+    deleteSet
   } = useSet();
   
   // Log activeSetProgress whenever the component renders
@@ -389,6 +390,8 @@ export default function ThaiFlashcards() {
   const [totalDueToday, setTotalDueToday] = useState<number>(0);
   const [isTesting, setIsTesting] = useState(false);
   const [showSetWizardModal, setShowSetWizardModal] = useState(false);
+  // --- NEW: State for Set Management Modal ---
+  const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -950,32 +953,62 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header with app logo and navigation buttons */}
-      <div className="p-4 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-3">
-          <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-48 w-auto" />
-          <div className="flex flex-col">
-            <div className="text-xl text-white font-semibold">Thai Flashcards</div>
-            <SetSelector />
-          </div>
+      {/* Header Rewritten */}
+      <div className="p-4 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-4">
+        {/* Left Side: Logo and Set Selector */}
+        <div className="flex items-center gap-4">
+          {/* Restore Logo Size */}
+          <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-16 w-auto" /> 
+          <SetSelector /> 
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => setShowHowItWorks(true)} className="neumorphic-button text-xs text-blue-400">How It Works</button>
-          <button onClick={() => setShowVocabulary(true)} className="neumorphic-button text-xs text-blue-400">
-            Vocabulary
-          </button>
-          <button 
-            onClick={() => setShowMnemonicsModal(true)} 
-            className="neumorphic-button text-xs text-blue-400"
-          >
-            Mnemonics
-          </button>
-          <button 
-            onClick={() => window.open('/set-wizard', '_blank')} 
-            className="neumorphic-button text-xs text-green-400 border-green-500"
-          >
-            Make Your Own Set!
-          </button>
+
+        {/* Right Side: Action Buttons */}
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Group 1: Set-Dependent Actions (Vocab, Mnemonics) */}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setShowVocabulary(true)} 
+              className="neumorphic-button text-sm text-blue-400 px-3 py-1.5" 
+              title="Vocabulary for current set"
+            >
+              Vocabulary
+            </button>
+            <button 
+              onClick={() => setShowMnemonicsModal(true)} 
+              className="neumorphic-button text-sm text-blue-400 px-3 py-1.5" 
+              title="Mnemonics for current set"
+            >
+              Mnemonics
+            </button>
+          </div>
+
+          {/* Optional Separator */}
+          <div className="h-6 w-px bg-gray-600 hidden md:block"></div> 
+
+          {/* Group 2: General Tools */}
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsManagementModalOpen(true)} 
+              className="neumorphic-button text-sm text-blue-400 px-3 py-1.5" 
+              title="Set Manager"
+            >
+              Set Manager
+            </button>
+            <button 
+              onClick={() => setShowHowItWorks(true)} 
+              className="neumorphic-icon-button text-lg font-bold text-blue-400 p-2 leading-none" // Increased size/weight
+              title="How It Works"
+            >
+              ?
+            </button>
+            {/* Make Your Own Set Button - Updated */}
+            <button 
+              onClick={() => window.open('/set-wizard', '_blank')} 
+              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981]"
+            >
+              Make Your Own Set With AI!
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1359,6 +1392,107 @@ export default function ThaiFlashcards() {
         isOpen={showSetWizardModal}
         onClose={() => setShowSetWizardModal(false)}
       />
+
+      {/* --- NEW: Moved Set Management Modal --- */}
+      {isManagementModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setIsManagementModalOpen(false)}>
+          <div className="neumorphic max-w-2xl w-full p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-200">Set Manager</h2> 
+              <button
+                onClick={() => setIsManagementModalOpen(false)}
+                className="text-gray-400 hover:text-white text-2xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Current Set Info */}
+              <div className="bg-gray-800 p-4 rounded-lg">
+                <h3 className="text-blue-400 font-medium mb-2">Current Set:</h3>
+                <div className="text-lg text-white font-bold">
+                  {currentSetName} 
+                </div>
+                <div className="text-sm text-gray-400 mt-1">
+                  {phrases.length} cards 
+                </div>
+                <div className="mt-3">
+                  <button
+                    onClick={() => activeSetId && exportSet(activeSetId)}
+                    className="neumorphic-button text-xs text-green-400 mr-2"
+                    disabled={!activeSetId || isLoading}
+                  >
+                    Export Current Set
+                  </button>
+                </div>
+              </div>
+
+              {/* Available Sets List */}
+              <div>
+                <h3 className="text-white font-medium mb-3">Available Sets:</h3>
+                
+                {availableSets.filter(set => set.id !== 'default').length === 0 ? (
+                  <div className="text-gray-400 text-center py-6">
+                    <p>No custom sets available.</p>
+                    <p className="text-sm mt-2">Create a set using the "Make Your Own Set!" button or import one below.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                    {availableSets.filter(set => set.id !== 'default').map(set => (
+                      <div key={set.id} className="flex items-center justify-between bg-gray-700 p-3 rounded-lg">
+                        <div>
+                          <div className="font-medium text-white">{set.name}</div>
+                          <div className="text-xs text-gray-400">
+                            {set.phraseCount} cards • Created {new Date(set.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => switchSet(set.id)}
+                            className="neumorphic-button text-xs text-blue-400"
+                            disabled={activeSetId === set.id || isLoading}
+                          >
+                            {activeSetId === set.id ? 'Active' : 'Switch'}
+                          </button>
+                          <button
+                            onClick={() => exportSet(set.id)}
+                            className="neumorphic-button text-xs text-green-400"
+                            disabled={isLoading}
+                          >
+                            Export
+                          </button>
+                          <button
+                            onClick={() => deleteSet(set.id)} // Assuming deleteSet is from context
+                            className="neumorphic-button text-xs text-red-400"
+                            disabled={isLoading}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Import Set Section - Use the main importSet function */}
+              <div className="border-t border-gray-700 pt-4">
+                <h3 className="text-white font-medium mb-3">Import Set:</h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={importSet} // Use the importSet defined in this component
+                    className="neumorphic-button text-blue-400 text-sm"
+                    disabled={isLoading}
+                  >
+                    Import Set File (.json)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Version indicator at the bottom - shows changes and timestamp in Amsterdam timezone */}
       <div className="text-center p-2 text-xs text-gray-600">

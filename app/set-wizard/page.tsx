@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { generateCustomSet, createCustomSet, Phrase, generateSingleFlashcard } from '../lib/set-generator';
+import { generateCustomSet, createCustomSet, Phrase, generateSingleFlashcard, BatchError } from '../lib/set-generator';
 import * as storage from '../lib/storage'; // Import storage functions
 
 // Card Editor component for previewing and editing generated cards
@@ -174,20 +174,24 @@ const CardEditor = ({
 
 const SetWizardPage = () => {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const [thaiLevel, setThaiLevel] = useState<string>('beginner');
   const [learningGoals, setLearningGoals] = useState<string[]>([]);
   const [specificTopics, setSpecificTopics] = useState<string>('');
-  const [generatedSetName, setGeneratedSetName] = useState<string>('');
-  const [customSetName, setCustomSetName] = useState<string>('');
-  const [totalSteps] = useState(5); // Now 5 steps including generation and preview
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generationProgress, setGenerationProgress] = useState({ completed: 0, total: 0 });
+  const [cardCount, setCardCount] = useState<number>(10);
+  const [customSetName, setCustomSetName] = useState<string>(`Thai ${thaiLevel} for ${learningGoals.length ? learningGoals[0] : 'Beginners'} Set`);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [generationProgress, setGenerationProgress] = useState<{ completed: number, total: number }>({ completed: 0, total: 0 });
   const [generatedPhrases, setGeneratedPhrases] = useState<Phrase[]>([]);
-  const [generationErrors, setGenerationErrors] = useState<any[]>([]);
-  const [cardCount, setCardCount] = useState(15); // Default to 15 cards
-  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
-  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [generationErrors, setGenerationErrors] = useState<(BatchError & { batchIndex: number })[]>([]);
+  const [currentPreviewIndex, setCurrentPreviewIndex] = useState<number>(0);
+  const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
+  const [errorSummary, setErrorSummary] = useState<{
+    errorTypes: string[]; 
+    totalErrors: number;
+    userMessage: string;
+  } | null>(null);
+  const [totalSteps] = useState(5); // Total steps including generation and preview
 
   // Generate a unique set name when component mounts
   useEffect(() => {
@@ -219,7 +223,6 @@ const SetWizardPage = () => {
     
     // Add date to ensure uniqueness
     const setName = `${baseName} Set (${dateStr})`;
-    setGeneratedSetName(setName);
     setCustomSetName(setName);
   };
 
@@ -266,7 +269,13 @@ const SetWizardPage = () => {
       );
 
       setGeneratedPhrases(result.phrases);
-      setGenerationErrors(result.errors);
+      setGenerationErrors(result.aggregatedErrors);
+      
+      // Store error summary for UI display
+      if (result.errorSummary) {
+        console.log("Generation completed with errors:", result.errorSummary);
+        setErrorSummary(result.errorSummary);
+      }
       
       // Automatically move to preview step after generation completes
       setCurrentStep(5);
@@ -284,16 +293,21 @@ const SetWizardPage = () => {
     setIsRegenerating(true);
     
     try {
-      const newCard = await generateSingleFlashcard({
+      const result = await generateSingleFlashcard({
         level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
         goals: learningGoals,
         specificTopics: specificTopics || undefined
       });
       
-      if (newCard) {
+      if (result.phrase) {
         const updatedPhrases = [...generatedPhrases];
-        updatedPhrases[index] = newCard;
+        updatedPhrases[index] = result.phrase;
         setGeneratedPhrases(updatedPhrases);
+      } else if (result.error) {
+        console.error("Error regenerating card:", result.error);
+        alert(`Error regenerating this card: ${result.error.message}`);
+      } else {
+        alert("Could not regenerate the card. Please try again.");
       }
     } catch (error) {
       console.error("Failed to regenerate card:", error);
@@ -507,11 +521,27 @@ const SetWizardPage = () => {
               {generationErrors.length > 0 && (
                 <div className="bg-red-900 bg-opacity-30 border border-red-700 rounded p-4 mb-6">
                   <p className="text-red-400 mb-1">
-                    There were some issues with card generation. {generatedPhrases.length} cards were generated successfully.
+                    {errorSummary?.userMessage || 
+                      `There were some issues with card generation. ${generatedPhrases.length} cards were generated successfully.`}
                   </p>
                   <p className="text-gray-400 text-sm">
                     You can continue with the cards that were generated, or go back and try again.
                   </p>
+                  {errorSummary?.errorTypes.includes('NETWORK') && (
+                    <p className="text-orange-400 text-sm mt-2">
+                      Network issues detected. Please check your internet connection and try again.
+                    </p>
+                  )}
+                  {errorSummary?.errorTypes.includes('API') && (
+                    <p className="text-orange-400 text-sm mt-2">
+                      API errors occurred. The service might be experiencing high traffic or temporary issues.
+                    </p>
+                  )}
+                  {errorSummary?.errorTypes.includes('VALIDATION') && (
+                    <p className="text-orange-400 text-sm mt-2">
+                      The AI had trouble generating valid flashcards for "{specificTopics}". Try simplifying your topic or using different terms.
+                    </p>
+                  )}
                 </div>
               )}
               

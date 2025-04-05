@@ -118,6 +118,8 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
   const updateSetProgress = useCallback((newProgress: SetProgress) => {
     if (!activeSetId) return;
+    console.log(`SetContext: updateSetProgress called for activeSetId=${activeSetId}`);
+    console.log(`SetContext: Updating progress state with:`, JSON.stringify(newProgress));
     
     setActiveSetProgress(newProgress);
     storage.saveSetProgress(activeSetId, newProgress);

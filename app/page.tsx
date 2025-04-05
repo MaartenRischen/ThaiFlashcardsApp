@@ -932,6 +932,22 @@ export default function ThaiFlashcards() {
     return status;
   };
 
+  // --- NEW: useEffect to reset state when the active set changes --- 
+  useEffect(() => {
+    console.log(`Active set changed to: ${activeSetId}. Resetting component state.`);
+    // Reset card index and UI state
+    setIndex(0);
+    setActiveCardsIndex(0);
+    setShowAnswer(false);
+    setRandomSentence(null);
+    
+    // Recalculate active cards for the new set
+    // Note: updateActiveCards depends on activeSetProgress and phrases, 
+    // which should be updated by the context before this effect runs.
+    updateActiveCards(); 
+    
+  }, [activeSetId]); // Re-run this effect only when activeSetId changes
+
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       {/* Header with app logo and navigation buttons */}
@@ -1288,6 +1304,7 @@ export default function ThaiFlashcards() {
 
             <div className="space-y-2">
               {phrases.map((phrase, i) => {
+                console.log(`Vocabulary List: Rendering item ${i}`); // Log inside map
                 // Get the status of the card
                 const status = getCardStatus(i);
                 const { color, label } = getStatusInfo(status);

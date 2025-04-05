@@ -306,6 +306,14 @@ const SetWizardModal: React.FC<SetWizardModalProps> = ({ isOpen, onClose }) => {
 
 export default function ThaiFlashcards() {
   const [phrases, setPhrases] = useState<Phrase[]>(INITIAL_PHRASES);
+  const [currentSetName, setCurrentSetName] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem('currentSetName');
+      return saved || "Default Set";
+    } catch {
+      return "Default Set";
+    }
+  });
   const [index, setIndex] = useState<number>(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [localMnemonics, setLocalMnemonics] = useState<{[key: number]: string}>({});
@@ -402,6 +410,11 @@ export default function ThaiFlashcards() {
   useEffect(() => {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
+
+  // Save current set name whenever it changes
+  useEffect(() => {
+    localStorage.setItem('currentSetName', currentSetName);
+  }, [currentSetName]);
 
   // Update the speak helper function definition in page.tsx
   const speak = async (text: string, isWord: boolean = true, isMale: boolean) => {
@@ -939,39 +952,130 @@ export default function ThaiFlashcards() {
             const importedData = JSON.parse(event.target?.result as string);
             
             // Validate imported data structure (basic check)
-            if (!Array.isArray(importedData.phrases) || typeof importedData.mnemonics !== 'object') {
-              throw new Error('Invalid file structure. Expected { phrases: [], mnemonics: {} }');
+            if (!Array.isArray(importedData.phrases)) {
+              throw new Error('Invalid file structure. Expected phrases array in the imported set.');
             }
 
             // --- Apply Imported Data --- 
-            // 1. Replace Phrases (Careful: This replaces the base data the app uses)
-            // Note: For full safety, you might want deeper validation of phrase objects
+            // 1. Replace Phrases
             setPhrases(importedData.phrases);
-            alert(`Imported ${importedData.phrases.length} phrases.`);
             
-            // 2. Replace Mnemonics
-            setMnemonics(importedData.mnemonics || {}); // Use imported or empty object
-            localStorage.setItem('mnemonics', JSON.stringify(importedData.mnemonics || {}));
+            // 2. Replace Mnemonics if they exist
+            if (importedData.mnemonics) {
+              setMnemonics(importedData.mnemonics);
+              localStorage.setItem('mnemonics', JSON.stringify(importedData.mnemonics));
+            }
             
-            // 3. Reset Learning Progress
+            // 3. Set the name if it exists, otherwise use the file name
+            if (importedData.name) {
+              setCurrentSetName(importedData.name);
+            } else {
+              // Extract name from filename (remove extension)
+              const fileName = file.name.replace(/\.[^/.]+$/, "");
+              setCurrentSetName(fileName);
+            }
+            
+            // 4. Reset Learning Progress
             setCardProgress({});
             localStorage.removeItem('cardProgress');
-            console.log("Learning progress reset due to new phrase set import.");
+            console.log("Learning progress reset due to new set import.");
             
-            // 4. Reset UI State
+            // 5. Reset UI State
             setIndex(0); 
             setActiveCardsIndex(0);
             setShowAnswer(false);
             setRandomSentence(null);
-            // Recalculate active cards based on the new (empty) progress
-            // Need to pass the new phrase length to updateActiveCards or ensure it uses the state
-            // Let's reset active cards simply for now
+            
+            // 6. Reset active cards
             const initialActive = Array.from({ length: Math.min(5, importedData.phrases.length) }, (_, i) => i);
             setActiveCards(initialActive);
             localStorage.setItem('activeCards', JSON.stringify(initialActive));
             
-            // Optional: Force a re-render or use a key prop on the main component if necessary
-            // alert('Import successful! Learning progress has been reset for the new set.');
+            alert(`Successfully imported "${currentSetName}" with ${importedData.phrases.length} phrases.`);
+
+          } catch (error: any) {
+            alert(`Import failed: ${error.message}`);
+            console.error("Import error:", error);
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  };
+
+  // Rename and refactor Export function
+  const exportCurrentSet = () => {
+    // Prepare data: Base phrases and current user mnemonics
+    const dataToExport = {
+      phrases: phrases, // Export the current state of phrases
+      mnemonics: mnemonics // Export the current state of mnemonics
+    };
+    
+    const dataStr = JSON.stringify(dataToExport, null, 2); // Pretty print JSON
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const exportFileDefaultName = 'thai-flashcards-set.json'; // New default name
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  // Rename and refactor Import function
+  const importSet = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const importedData = JSON.parse(event.target?.result as string);
+            
+            // Validate imported data structure (basic check)
+            if (!Array.isArray(importedData.phrases)) {
+              throw new Error('Invalid file structure. Expected phrases array in the imported set.');
+            }
+
+            // --- Apply Imported Data --- 
+            // 1. Replace Phrases
+            setPhrases(importedData.phrases);
+            
+            // 2. Replace Mnemonics if they exist
+            if (importedData.mnemonics) {
+              setMnemonics(importedData.mnemonics);
+              localStorage.setItem('mnemonics', JSON.stringify(importedData.mnemonics));
+            }
+            
+            // 3. Set the name if it exists, otherwise use the file name
+            if (importedData.name) {
+              setCurrentSetName(importedData.name);
+            } else {
+              // Extract name from filename (remove extension)
+              const fileName = file.name.replace(/\.[^/.]+$/, "");
+              setCurrentSetName(fileName);
+            }
+            
+            // 4. Reset Learning Progress
+            setCardProgress({});
+            localStorage.removeItem('cardProgress');
+            console.log("Learning progress reset due to new set import.");
+            
+            // 5. Reset UI State
+            setIndex(0); 
+            setActiveCardsIndex(0);
+            setShowAnswer(false);
+            setRandomSentence(null);
+            
+            // 6. Reset active cards
+            const initialActive = Array.from({ length: Math.min(5, importedData.phrases.length) }, (_, i) => i);
+            setActiveCards(initialActive);
+            localStorage.setItem('activeCards', JSON.stringify(initialActive));
+            
+            alert(`Successfully imported "${currentSetName}" with ${importedData.phrases.length} phrases.`);
 
           } catch (error: any) {
             alert(`Import failed: ${error.message}`);
@@ -990,15 +1094,21 @@ export default function ThaiFlashcards() {
       <div className="p-4 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-48 w-auto" />
+          <div className="flex flex-col">
+            <div className="text-xl text-white font-semibold">Thai Flashcards</div>
+            <div className="text-sm text-gray-400">Current Set: <span className="text-blue-400 font-medium">{currentSetName}</span></div>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setShowHowItWorks(true)} className="neumorphic-button text-xs text-blue-400">How It Works</button>
-          <button onClick={() => setShowVocabulary(true)} className="neumorphic-button text-xs text-blue-400">Vocabulary</button>
+          <button onClick={() => setShowVocabulary(true)} className="neumorphic-button text-xs text-blue-400">
+            {currentSetName === "Default Set" ? "Vocabulary" : `${currentSetName} Cards`}
+          </button>
           <button 
             onClick={() => setShowMnemonicsModal(true)} 
             className="neumorphic-button text-xs text-blue-400"
           >
-            Mnemonics
+            {currentSetName === "Default Set" ? "Mnemonics" : `${currentSetName} Mnemonics`}
           </button>
           <button 
             onClick={() => window.open('/set-wizard', '_blank')} 
@@ -1211,7 +1321,7 @@ export default function ThaiFlashcards() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowStats(false)}>
           <div className="neumorphic max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-200">Settings</h2> {/* Updated Title */} 
+              <h2 className="text-xl font-bold text-gray-200">Settings</h2>
               <button
                   onClick={() => setShowStats(false)}
                   className="text-gray-400 hover:text-white text-2xl"
@@ -1221,6 +1331,45 @@ export default function ThaiFlashcards() {
             </div>
             
             <div className="space-y-4">
+              {/* Set Management Section */}
+              <div className="py-2 border-b border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-200 mb-2">Set Management</h3>
+                <div className="text-sm text-gray-400 mb-3">
+                  Currently using: <span className="text-blue-400 font-medium">{currentSetName}</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button 
+                    onClick={exportCurrentSet} 
+                    className="neumorphic-button text-xs text-green-400"
+                  >
+                    Export Set
+                  </button>
+                  <button 
+                    onClick={importSet} 
+                    className="neumorphic-button text-xs text-blue-400"
+                  >
+                    Import Set
+                  </button>
+                  {currentSetName !== "Default Set" && (
+                    <button 
+                      onClick={() => {
+                        if (confirm(`Reset to Default Set? Your current set "${currentSetName}" will remain saved.`)) {
+                          setPhrases(INITIAL_PHRASES);
+                          setCurrentSetName("Default Set");
+                          setIndex(0);
+                          setShowAnswer(false);
+                          setRandomSentence(null);
+                          updateActiveCards();
+                        }
+                      }} 
+                      className="neumorphic-button text-xs text-yellow-400"
+                    >
+                      Switch to Default Set
+                    </button>
+                  )}
+                </div>
+              </div>
+
               {/* Autoplay Toggle */}
               <div className="flex items-center justify-between py-2 border-b border-gray-700">
                 <span className="text-gray-300">Auto-play audio on reveal</span>

@@ -27,9 +27,25 @@ export interface GeneratePromptOptions {
   existingPhrases?: string[];
 }
 
+// Define structured error types for better error handling
+export type BatchErrorType = 'API' | 'PARSE' | 'NETWORK' | 'VALIDATION' | 'UNKNOWN';
+
+export interface BatchError {
+  type: BatchErrorType;
+  message: string;
+  details?: any; // e.g., status code for API, snippet of text for PARSE
+  timestamp: string;
+}
+
 export interface GenerationResult {
   phrases: Phrase[];
-  errors: any[];
+  aggregatedErrors: (BatchError & { batchIndex: number })[];
+  // Include summary data for client
+  errorSummary?: {
+    errorTypes: BatchErrorType[];
+    totalErrors: number;
+    userMessage: string;
+  };
 }
 
 export interface CustomSet {
@@ -146,32 +162,108 @@ function validatePhrase(data: any): data is Phrase {
 }
 
 /**
- * Generates a batch of flashcards using the Gemini API
+ * Creates a BatchError object with the specified type and message
  */
-async function generateFlashcardsBatch(prompt: string): Promise<Phrase[]> {
+function createBatchError(
+  type: BatchErrorType, 
+  message: string, 
+  details?: any
+): BatchError {
+  return {
+    type,
+    message,
+    details,
+    timestamp: new Date().toISOString()
+  };
+}
+
+/**
+ * Generates a batch of flashcards using the Gemini API
+ * Enhanced with detailed logging and structured error handling
+ */
+async function generateFlashcardsBatch(
+  prompt: string, 
+  batchIndex: number
+): Promise<{phrases: Phrase[], error?: BatchError}> {
+  // Log the prompt being sent to the API (truncated for brevity)
+  console.log(`[Batch ${batchIndex}] Sending prompt to Gemini API (first 200 chars): 
+    ${prompt.substring(0, 200)}...`);
+  
   try {
-    // Call Gemini API to generate content
-    const result = await geminiPro.generateContent(prompt);
-    const responseText = result.response.text();
+    // Call Gemini API inside a try-catch
+    let responseText: string;
+    try {
+      console.log(`[Batch ${batchIndex}] Making API call to Gemini...`);
+      const result = await geminiPro.generateContent(prompt);
+      responseText = result.response.text();
+      console.log(`[Batch ${batchIndex}] Successfully received response from Gemini API`);
+    } catch (apiError: any) {
+      console.error(`[Batch ${batchIndex}] Gemini API call failed:`, apiError);
+      
+      // Detect network errors
+      if (apiError.message && 
+         (apiError.message.includes('network') || 
+          apiError.message.includes('connection') ||
+          apiError.message.includes('timeout'))) {
+        return {
+          phrases: [],
+          error: createBatchError('NETWORK', 
+            `Network error when calling Gemini API: ${apiError.message}`, 
+            { originalError: apiError })
+        };
+      }
+      
+      // General API errors
+      return {
+        phrases: [],
+        error: createBatchError('API', 
+          `Error calling Gemini API: ${apiError.message}`, 
+          { originalError: apiError, statusCode: apiError.statusCode })
+      };
+    }
+
+    // Log the received raw text (truncated)
+    console.log(`[Batch ${batchIndex}] Raw response text (first 200 chars): 
+      ${responseText.substring(0, 200)}...`);
 
     // Clean the response (Gemini might sometimes wrap JSON in markdown)
     const cleanedText = responseText.replace(/^```json\s*|```$/g, '').trim();
 
+    // Try to parse the JSON response in its own try-catch
     let parsedResponse: any;
     try {
       parsedResponse = JSON.parse(cleanedText);
-    } catch (parseError) {
-      console.error("Failed to parse JSON response:", cleanedText, parseError);
-      throw new Error("Invalid JSON response from API");
+      console.log(`[Batch ${batchIndex}] Successfully parsed JSON response`);
+    } catch (parseError: any) {
+      console.error(`[Batch ${batchIndex}] Failed to parse JSON response:`, parseError);
+      console.error(`[Batch ${batchIndex}] Problematic text: ${cleanedText.substring(0, 500)}...`);
+      
+      return {
+        phrases: [],
+        error: createBatchError('PARSE', 
+          `Failed to parse JSON response: ${parseError.message}`, 
+          { 
+            originalError: parseError, 
+            responseSnippet: cleanedText.substring(0, 1000),
+            apiResponse: responseText.substring(0, 1000)
+          })
+      };
     }
 
+    // Validate the response structure
     if (!Array.isArray(parsedResponse)) {
-      console.error("API response is not a JSON array:", parsedResponse);
-      throw new Error("API response is not in the expected array format");
+      console.error(`[Batch ${batchIndex}] API response is not a JSON array:`, parsedResponse);
+      return {
+        phrases: [],
+        error: createBatchError('VALIDATION', 
+          `API response is not in the expected array format`,
+          { receivedType: typeof parsedResponse, value: parsedResponse })
+      };
     }
 
+    // Process and validate each item
     const validPhrases: Phrase[] = [];
-    const invalidData: any[] = [];
+    const invalidItems: any[] = [];
 
     for (const item of parsedResponse) {
       if (validatePhrase(item)) {
@@ -185,23 +277,54 @@ async function generateFlashcardsBatch(prompt: string): Promise<Phrase[]> {
         
         validPhrases.push(item as Phrase);
       } else {
-        console.warn("Invalid phrase structure received:", item);
-        invalidData.push(item);
+        console.warn(`[Batch ${batchIndex}] Invalid phrase structure received:`, JSON.stringify(item));
+        invalidItems.push(item);
       }
     }
 
-    // Log the result summary
-    console.log(`Generated batch: ${validPhrases.length} valid, ${invalidData.length} invalid.`);
-    return validPhrases;
+    // Log the validation results
+    console.log(`[Batch ${batchIndex}] Validation summary: ${validPhrases.length} valid phrases, ${invalidItems.length} invalid items`);
 
-  } catch (error) {
-    console.error("Error generating flashcards batch:", error);
-    throw error; // Propagate error for retry logic
+    // If we have valid phrases but also some invalid ones, we'll return the valid ones with a partial error
+    if (validPhrases.length > 0 && invalidItems.length > 0) {
+      return {
+        phrases: validPhrases,
+        error: createBatchError('VALIDATION', 
+          `Some phrases (${invalidItems.length}) failed validation and were omitted`,
+          { invalidItems })
+      };
+    }
+    
+    // If all items failed validation
+    if (validPhrases.length === 0 && parsedResponse.length > 0) {
+      return {
+        phrases: [],
+        error: createBatchError('VALIDATION', 
+          `All phrases failed validation checks`,
+          { invalidItems })
+      };
+    }
+
+    // Success case - all valid or empty array returned
+    return {
+      phrases: validPhrases,
+    };
+
+  } catch (unexpectedError: any) {
+    // Catch any other unexpected errors
+    console.error(`[Batch ${batchIndex}] Unexpected error in batch generation:`, unexpectedError);
+    return {
+      phrases: [],
+      error: createBatchError('UNKNOWN', 
+        `Unexpected error in batch generation: ${unexpectedError.message}`,
+        { originalError: unexpectedError })
+    };
   }
 }
 
 /**
  * Main function to generate a complete custom flashcard set
+ * Enhanced with improved error handling and detailed error reporting
  */
 export async function generateCustomSet(
   preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>,
@@ -209,8 +332,12 @@ export async function generateCustomSet(
   onProgressUpdate?: (progress: { completed: number, total: number }) => void
 ): Promise<GenerationResult> {
   const allGeneratedPhrases: Phrase[] = [];
-  const errors: any[] = [];
+  const aggregatedErrors: (BatchError & { batchIndex: number })[] = [];
+  
   let remainingCount = totalCount;
+  let batchIndex = 0;
+
+  console.log(`Starting card generation: ${totalCount} total cards requested with preferences:`, JSON.stringify(preferences));
 
   while (remainingCount > 0 && allGeneratedPhrases.length < totalCount) {
     const currentBatchSize = Math.min(remainingCount, BATCH_SIZE);
@@ -222,45 +349,108 @@ export async function generateCustomSet(
       existingPhrases: existingEnglish,
     });
 
+    console.log(`[Batch ${batchIndex}] Starting generation of batch with ${currentBatchSize} cards`);
+    console.log(`[Batch ${batchIndex}] User preferences: Level=${preferences.level}, Goals=${preferences.goals.join(',')}, Topics=${preferences.specificTopics || 'none'}`);
+
     let retries = 0;
     let success = false;
     
     while (retries < MAX_RETRIES && !success) {
+      console.log(`[Batch ${batchIndex}] Attempt ${retries + 1}/${MAX_RETRIES} start`);
+      
       try {
-        console.log(`Attempting to generate batch of ${currentBatchSize} cards... (Retry ${retries})`);
-        const batchResult = await generateFlashcardsBatch(prompt);
+        const batchResult = await generateFlashcardsBatch(prompt, batchIndex);
+        
+        // Check for batch error
+        if (batchResult.error) {
+          console.error(`[Batch ${batchIndex}] Error in batch generation:`, batchResult.error);
+          
+          // Store the error with batch index
+          const errorWithBatch = { 
+            ...batchResult.error, 
+            batchIndex 
+          };
+          
+          // Only retry certain types of errors
+          const retryableErrorTypes: BatchErrorType[] = ['NETWORK', 'API', 'UNKNOWN'];
+          
+          if (retryableErrorTypes.includes(batchResult.error.type)) {
+            retries++;
+            
+            if (retries >= MAX_RETRIES) {
+              console.error(`[Batch ${batchIndex}] Max retries reached for batch.`);
+              aggregatedErrors.push(errorWithBatch);
+              break; // Stop retrying this batch
+            }
+            
+            // Add exponential backoff delay
+            const backoffMs = 1000 * Math.pow(2, retries);
+            console.log(`[Batch ${batchIndex}] Retrying after ${backoffMs}ms delay...`);
+            await new Promise(resolve => setTimeout(resolve, backoffMs));
+            continue; // Try again
+          } else {
+            // Non-retryable error, save and continue to next batch
+            aggregatedErrors.push(errorWithBatch);
+            // If we got some valid phrases despite the error, we'll consider it a partial success
+            if (batchResult.phrases.length > 0) {
+              success = true;
+            } else {
+              break; // No phrases and non-retryable error, move to next batch
+            }
+          }
+        } else {
+          // No errors, mark as success
+          success = true;
+        }
 
-        // Filter out potential duplicates
-        const newPhrases = batchResult.filter(p => 
-          !existingEnglish.includes(p.english)
-        );
+        // We got some valid phrases (either with or without error)
+        if (batchResult.phrases.length > 0) {
+          // Filter out potential duplicates
+          const newPhrases = batchResult.phrases.filter(p => 
+            !existingEnglish.includes(p.english)
+          );
 
-        allGeneratedPhrases.push(...newPhrases);
-        remainingCount -= newPhrases.length;
-        success = true;
+          console.log(`[Batch ${batchIndex}] Generated ${newPhrases.length} unique phrases (${batchResult.phrases.length} total, ${batchResult.phrases.length - newPhrases.length} duplicates filtered)`);
+          
+          allGeneratedPhrases.push(...newPhrases);
+          remainingCount -= newPhrases.length;
 
-        // Call progress update callback if provided
-        if (onProgressUpdate) {
-          onProgressUpdate({
-            completed: allGeneratedPhrases.length,
-            total: totalCount
+          // Call progress update callback if provided
+          if (onProgressUpdate) {
+            onProgressUpdate({
+              completed: allGeneratedPhrases.length,
+              total: totalCount
+            });
+          }
+
+          // If the API returned fewer valid cards than requested, log it
+          if (batchResult.phrases.length < currentBatchSize) {
+            console.warn(`[Batch ${batchIndex}] Batch generation returned ${batchResult.phrases.length}/${currentBatchSize} valid cards.`);
+          }
+        } else if (success) {
+          // This is the case where we got no phrases but no error either
+          console.warn(`[Batch ${batchIndex}] Batch generated 0 phrases but no error was reported.`);
+          aggregatedErrors.push({
+            type: 'VALIDATION',
+            message: 'Batch generated 0 valid phrases',
+            details: { prompt: prompt.substring(0, 200) + '...' },
+            timestamp: new Date().toISOString(),
+            batchIndex
           });
         }
-
-        // If the API returned fewer valid cards than requested, log it
-        if (batchResult.length < currentBatchSize) {
-          console.warn(`Batch generation returned ${batchResult.length}/${currentBatchSize} valid cards.`);
-        }
-      } catch (error) {
+      } catch (error: any) {
+        // This should rarely happen now that generateFlashcardsBatch handles its errors internally
         retries++;
-        console.error(`Error generating batch (Attempt ${retries}/${MAX_RETRIES}):`, error);
+        console.error(`[Batch ${batchIndex}] Uncaught error in generateCustomSet (Attempt ${retries}/${MAX_RETRIES}):`, error);
         
         if (retries >= MAX_RETRIES) {
-          console.error(`Max retries reached for batch. Skipping.`);
-          errors.push({
-            message: `Failed to generate a batch of ${currentBatchSize} cards after ${MAX_RETRIES} attempts.`,
-            details: error,
-            promptSnippet: prompt.substring(0, 200) + '...' // Log part of the prompt for debugging
+          console.error(`[Batch ${batchIndex}] Max retries reached for uncaught error.`);
+          aggregatedErrors.push({
+            type: 'UNKNOWN',
+            message: `Uncaught error: ${error.message}`,
+            details: { error: error.toString(), stack: error.stack },
+            timestamp: new Date().toISOString(),
+            batchIndex
           });
           break; // Stop retrying this batch
         }
@@ -273,14 +463,42 @@ export async function generateCustomSet(
     // If a batch permanently failed, adjust the remaining count
     if (!success) {
       remainingCount -= currentBatchSize;
+      console.log(`[Batch ${batchIndex}] Batch failed, adjusting remaining count to ${remainingCount}`);
     }
+    
+    // Move to next batch
+    batchIndex++;
   }
 
-  console.log(`Total generation complete. Generated ${allGeneratedPhrases.length} phrases. ${errors.length} batch errors.`);
+  // Create an error summary for client consumption
+  const errorTypes = aggregatedErrors.map(err => err.type)
+    .filter((value, index, self) => self.indexOf(value) === index); // Unique error types
+  const totalErrors = aggregatedErrors.length;
+  
+  let userMessage = '';
+  if (allGeneratedPhrases.length === 0) {
+    userMessage = `No cards could be generated. This might be due to ${errorTypes.join(', ').toLowerCase()} issues.`;
+  } else if (allGeneratedPhrases.length < totalCount) {
+    userMessage = `Some cards couldn't be generated (${allGeneratedPhrases.length}/${totalCount} created). There were issues with ${errorTypes.join(', ').toLowerCase()}.`;
+  }
+
+  const errorSummary = {
+    errorTypes,
+    totalErrors,
+    userMessage
+  };
+
+  console.log(`Total generation complete. Generated ${allGeneratedPhrases.length}/${totalCount} phrases. ${aggregatedErrors.length} batch errors.`);
+  
+  if (aggregatedErrors.length > 0) {
+    console.log('Error summary:', JSON.stringify(errorSummary));
+    console.log('Detailed errors:', JSON.stringify(aggregatedErrors));
+  }
 
   return {
     phrases: allGeneratedPhrases,
-    errors: errors
+    aggregatedErrors,
+    errorSummary
   };
 }
 
@@ -315,12 +533,18 @@ export function createCustomSet(
 
 /**
  * Generates a single flashcard (useful for regenerating a specific card)
+ * Enhanced with better error handling
  */
 export async function generateSingleFlashcard(
   preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>,
   targetEnglishMeaning?: string
-): Promise<Phrase | null> {
+): Promise<{ phrase: Phrase | null, error?: BatchError }> {
   try {
+    console.log(`Generating single flashcard with preferences:`, JSON.stringify(preferences));
+    if (targetEnglishMeaning) {
+      console.log(`Target English meaning: ${targetEnglishMeaning}`);
+    }
+    
     const prompt = buildGenerationPrompt({
       ...preferences,
       count: 1,
@@ -330,23 +554,49 @@ export async function generateSingleFlashcard(
     let retries = 0;
     while (retries < MAX_RETRIES) {
       try {
-        const result = await generateFlashcardsBatch(prompt);
-        if (result.length > 0) {
-          return result[0];
+        console.log(`Single card generation attempt ${retries + 1}/${MAX_RETRIES}`);
+        const result = await generateFlashcardsBatch(prompt, -1); // Using -1 to indicate this is not a regular batch
+        
+        if (result.error) {
+          console.error(`Error generating single flashcard (attempt ${retries + 1}):`, result.error);
+          retries++;
+          
+          if (retries >= MAX_RETRIES) {
+            return { phrase: null, error: result.error };
+          }
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
+          continue;
         }
+        
+        if (result.phrases.length > 0) {
+          return { phrase: result.phrases[0] };
+        }
+        
         retries++;
-      } catch (error) {
+        console.warn(`No phrases returned for single card generation (attempt ${retries})`);
+      } catch (error: any) {
         retries++;
+        console.error(`Uncaught error in single card generation (attempt ${retries}):`, error);
+        
         if (retries >= MAX_RETRIES) {
-          throw error;
+          return { 
+            phrase: null, 
+            error: createBatchError('UNKNOWN', `Error generating single flashcard: ${error.message}`, { error })
+          };
         }
         await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
       }
     }
     
-    return null;
-  } catch (error) {
-    console.error("Error generating single flashcard:", error);
-    return null;
+    return { 
+      phrase: null, 
+      error: createBatchError('UNKNOWN', 'Failed to generate single flashcard after multiple attempts', {})
+    };
+  } catch (error: any) {
+    console.error("Unexpected error in generateSingleFlashcard:", error);
+    return { 
+      phrase: null, 
+      error: createBatchError('UNKNOWN', `Unexpected error in generateSingleFlashcard: ${error.message}`, { error })
+    };
   }
 } 

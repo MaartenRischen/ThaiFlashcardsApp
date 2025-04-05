@@ -43,81 +43,61 @@ interface CardProgress {
   };
 }
 
-// Restore getThaiWithGender to handle both gender (slider value) and politeness
-const getThaiWithGender = (phrase: Phrase | ExampleSentence | null, genderValue: number, isPoliteMode: boolean): string => {
+// Correct getThaiWithGender to ONLY add particles based on isPoliteMode
+const getThaiWithGender = (phrase: Phrase | ExampleSentence | null, isMale: boolean, isPoliteMode: boolean): string => {
   if (!phrase) return '';
-  const isTextMale = genderValue >= 50; // Determine text gender based on slider midpoint
+  // ALWAYS start with the absolute base Thai
+  const baseThai = phrase.thai; 
 
-  // Step 1: Select the correct base phrase including gender-specific pronouns if available
-  let baseThai = phrase.thai; // Default to base
-  if (isTextMale && phrase.thaiMasculine) {
-      baseThai = phrase.thaiMasculine;
-  } else if (!isTextMale && phrase.thaiFeminine) {
-      baseThai = phrase.thaiFeminine;
-  }
+  // Do NOT use thaiMasculine/thaiFeminine here, as they pre-include particles
+  /*
+  if (isMale && phrase.thaiMasculine) baseThai = phrase.thaiMasculine;
+  else if (!isMale && phrase.thaiFeminine) baseThai = phrase.thaiFeminine;
+  */
 
-  // Step 2: Apply politeness particle logic based on toggle
+  // If Polite Mode is OFF, return the absolute base
   if (!isPoliteMode) {
-    return baseThai; // Return potentially gendered base if polite mode off
+    return baseThai;
   }
 
-  // Polite Mode ON: Check if adding krap/ka is appropriate
-  const politeEndingsToAvoid = [
-    'ไหม', 'อะไร', 'ไหน', 'เท่าไหร่', 'เหรอ',
-    'หรือ', 'ใช่ไหม', 'เมื่อไหร่', 'ทำไม', 'อย่างไร',
-    'ที่ไหน', 'ครับ', 'ค่ะ'
-  ];
-
+  // Polite Mode is ON: Check endings and add particle if appropriate
+  const politeEndingsToAvoid = ['ไหม', 'อะไร', 'ไหน', 'เท่าไหร่', 'เหรอ', 'หรือ', 'ใช่ไหม', 'เมื่อไหร่', 'ทำไม', 'อย่างไร', 'ที่ไหน', 'ครับ', 'ค่ะ'];
   const endsWithPoliteEnding = politeEndingsToAvoid.some(ending => baseThai.endsWith(ending));
 
   if (!endsWithPoliteEnding) {
-    return isTextMale ? `${baseThai}ครับ` : `${baseThai}ค่ะ`; // Use isTextMale for particle
+    return isMale ? `${baseThai}ครับ` : `${baseThai}ค่ะ`;
   }
-
-  return baseThai; // Return base (potentially gendered) if polite mode ON but ending found
+  
+  // If Polite Mode is ON but ending is unsuitable, return the base
+  return baseThai; 
 };
 
-// Restore getGenderedPronunciation to handle both gender (slider value) and politeness
-const getGenderedPronunciation = (
-  phraseData: Phrase | ExampleSentence | null,
-  genderValue: number,
-  isPoliteMode: boolean
-): string => {
+// Correct getGenderedPronunciation (logic was likely already okay, but ensure consistency)
+const getGenderedPronunciation = (phraseData: Phrase | ExampleSentence | null, isMale: boolean, isPoliteMode: boolean): string => {
   if (!phraseData) return '';
-  const isTextMale = genderValue >= 50; // Determine text gender based on slider midpoint
-
   let basePronunciation = phraseData.pronunciation;
-  const baseThaiForEndingCheck = phraseData.thai; // Use original thai for ending check
+  const baseThaiForEndingCheck = phraseData.thai; // Check ending on BASE Thai
 
-  // Step 1: Replace gender placeholders in pronunciation
-  if (basePronunciation.includes('chan/phom')) {
-    basePronunciation = basePronunciation.replace('chan/phom', isTextMale ? 'phom' : 'chan');
-  } else if (basePronunciation.includes('phom/chan')) {
-    basePronunciation = basePronunciation.replace('phom/chan', isTextMale ? 'phom' : 'chan');
-  }
+  // Step 1: Handle gendered pronouns in pronunciation
+  if (basePronunciation.includes('chan/phom')) basePronunciation = basePronunciation.replace('chan/phom', isMale ? 'phom' : 'chan');
+  else if (basePronunciation.includes('phom/chan')) basePronunciation = basePronunciation.replace('phom/chan', isMale ? 'phom' : 'chan');
 
-  // Step 2: Apply politeness particle logic
+  // Step 2: Check Polite Mode for adding particles
   if (!isPoliteMode) {
-    return basePronunciation;
+    return basePronunciation; // Return pronoun-adjusted if mode is off
   }
 
-  // Polite Mode ON: Check if adding krap/ka is appropriate (based on original Thai ending)
-  const politeEndingsToAvoid = [
-    'ไหม', 'อะไร', 'ไหน', 'เท่าไหร่', 'เหรอ',
-    'หรือ', 'ใช่ไหม', 'เมื่อไหร่', 'ทำไม', 'อย่างไร',
-    'ที่ไหน', 'ครับ', 'ค่ะ'
-  ];
-
+  // Polite Mode ON: Check endings on BASE Thai and add particle if appropriate
+  const politeEndingsToAvoid = ['ไหม', 'อะไร', 'ไหน', 'เท่าไหร่', 'เหรอ', 'หรือ', 'ใช่ไหม', 'เมื่อไหร่', 'ทำไม', 'อย่างไร', 'ที่ไหน', 'ครับ', 'ค่ะ'];
   const endsWithPoliteEnding = politeEndingsToAvoid.some(ending => baseThaiForEndingCheck.endsWith(ending));
 
   if (!endsWithPoliteEnding) {
     const endsWithKrapKa = basePronunciation.endsWith(' krap') || basePronunciation.endsWith(' ka');
-    if (!endsWithKrapKa) {
-      return basePronunciation + (isTextMale ? " krap" : " ka"); // Use isTextMale for particle
-    }
+    if (!endsWithKrapKa) return basePronunciation + (isMale ? " krap" : " ka");
   }
-
-  return basePronunciation;
+  
+  // If Polite Mode is ON but ending is unsuitable, return pronoun-adjusted base
+  return basePronunciation; 
 };
 
 // Anki SRS constants
@@ -129,8 +109,203 @@ const EASY_INTERVAL_MULTIPLIER = 2.5;
 const MIN_INTERVAL = 1; // Minimum interval in days
 const MAX_INTERVAL = 36500; // Maximum interval in days (100 years)
 
+// --- Define MnemonicsListModal Component --- 
+interface MnemonicsListModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  allPhrases: Phrase[];
+  userMnemonics: { [key: number]: string };
+  onReset: () => void;
+}
+
+const MnemonicsListModal: React.FC<MnemonicsListModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  allPhrases, 
+  userMnemonics, 
+  onReset 
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="neumorphic max-w-xl w-full p-6" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-200">Create Your Custom Set</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white text-2xl leading-none"
+            aria-label="Close modal"
+          >
+            &times;
+          </button>
+        </div>
+        <div className="text-gray-300">
+          <p>Welcome to the Set Wizard!</p>
+          <p className="mt-4">This feature will guide you through creating a personalized vocabulary and mnemonic set based on your goals.</p>
+          <p className="mt-2">(Wizard steps and logic will be implemented here.)</p>
+          {/* Placeholder for future steps/content */}
+        </div>
+      </div>
+    </div>
+  );
+};
+// --- End of MnemonicsListModal Component Definition ---
+
+// --- Define SetWizardModal Component --- 
+interface SetWizardModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const SetWizardModal: React.FC<SetWizardModalProps> = ({ isOpen, onClose }) => {
+  // Add state for wizard steps and user input
+  const [currentStep, setCurrentStep] = useState(1);
+  const [thaiLevel, setThaiLevel] = useState<string>(''); 
+  const [learningGoals, setLearningGoals] = useState<string[]>([]); 
+
+  const totalSteps = 3; // Example total steps (Welcome, Level, Goals)
+
+  if (!isOpen) return null;
+
+  // Navigation handlers
+  const handleNext = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  // Handler for goal checkboxes
+  const toggleGoal = (goal: string) => {
+    setLearningGoals(prev => 
+      prev.includes(goal) ? prev.filter(g => g !== goal) : [...prev, goal]
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="neumorphic max-w-xl w-full p-6 flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}> {/* Added flex-col, max-h */} 
+        <div className="flex justify-between items-center mb-4 flex-shrink-0"> {/* Prevent header shrinking */} 
+          <h2 className="text-xl font-bold text-gray-200">Create Your Custom Set (Step {currentStep}/{totalSteps})</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white text-2xl leading-none"
+            aria-label="Close modal"
+          >
+            &times;
+          </button>
+        </div>
+        
+        {/* Wizard Content Area (Scrollable) */}
+        <div className="text-gray-300 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"> 
+          {currentStep === 1 && (
+            <div>
+              <p>Welcome to the Set Wizard!</p>
+              <p className="mt-4">This will guide you through creating a personalized vocabulary and mnemonic set.</p>
+              <p className="mt-2">Let's start by understanding your current level and goals.</p>
+            </div>
+          )}
+
+          {currentStep === 2 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-3 text-blue-400">What is your current Thai level?</h3>
+              <div className="space-y-2">
+                {['Beginner', 'Intermediate', 'Advanced'].map(level => (
+                  <label key={level} className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-gray-700">
+                    <input 
+                      type="radio" 
+                      name="thaiLevel" 
+                      value={level.toLowerCase()} 
+                      checked={thaiLevel === level.toLowerCase()}
+                      onChange={(e) => setThaiLevel(e.target.value)}
+                      className="accent-blue-400 h-4 w-4"
+                    />
+                    <span>{level}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {currentStep === 3 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-3 text-blue-400">What are your learning goals? (Select all that apply)</h3>
+              <div className="space-y-2">
+                {['Travel Basics', 'Everyday Conversation', 'Reading/Writing', 'Business Thai', 'Specific Topics (Specify below)'].map(goal => {
+                  const goalValue = goal.toLowerCase().split(' ')[0].replace(/\/|\(/g, ''); // Simpler value
+                  return (
+                    <label key={goal} className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-gray-700">
+                      <input 
+                        type="checkbox" 
+                        value={goalValue} 
+                        checked={learningGoals.includes(goalValue)}
+                        onChange={() => toggleGoal(goalValue)}
+                        className="accent-green-400 h-4 w-4 rounded"
+                      />
+                      <span>{goal}</span>
+                    </label>
+                  );
+                })}
+                 {/* Text input for 'Specific Topics' */}
+                 {learningGoals.includes('specific') && (
+                    <textarea 
+                        placeholder="Specify topics (e.g., food ingredients, medical terms, IT vocabulary)... Separate by commas."
+                        className="neumorphic-input w-full mt-2 text-sm h-20 resize-none"
+                        // Add state and handler for this input if needed for generation
+                    />
+                 )}
+              </div>
+            </div>
+          )}
+          
+          {/* Placeholder for future steps like phrase selection, mnemonic suggestions */}
+        </div>
+
+        {/* Navigation Footer (Fixed position) */}
+        <div className="mt-6 pt-4 border-t border-gray-700 flex justify-between flex-shrink-0"> {/* Prevent footer shrinking */} 
+          <button 
+            onClick={handleBack} 
+            disabled={currentStep === 1} 
+            className="neumorphic-button text-xs text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Back
+          </button>
+          
+          {/* Show Next or Generate button */} 
+          {currentStep < totalSteps ? (
+             <button 
+               onClick={handleNext} 
+               className="neumorphic-button text-xs text-blue-400"
+             >
+               Next
+             </button>
+          ) : (
+             <button 
+               onClick={() => {
+                 // TODO: Add logic to generate the set based on selections
+                 alert(`Generating Set...\nLevel: ${thaiLevel}\nGoals: ${learningGoals.join(', ')}\n(Generation logic not implemented yet)`);
+                 onClose(); // Close modal for now
+               }} 
+               className="neumorphic-button text-xs text-green-400"
+             >
+               Generate Set
+             </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+// --- End of SetWizardModal Component Definition ---
+
 export default function ThaiFlashcards() {
-  const [phrases] = useState<Phrase[]>(INITIAL_PHRASES);
+  const [phrases, setPhrases] = useState<Phrase[]>(INITIAL_PHRASES);
   const [index, setIndex] = useState<number>(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [localMnemonics, setLocalMnemonics] = useState<{[key: number]: string}>({});
@@ -155,15 +330,11 @@ export default function ThaiFlashcards() {
       return false;
     }
   });
-  const [genderValue, setGenderValue] = useState<number>(() => {
+  const [isMale, setIsMale] = useState<boolean>(() => {
     try {
-      const saved = localStorage.getItem('genderValue');
-      // Default to 100 (Male) if not saved or invalid
-      const num = saved ? parseInt(saved, 10) : 100;
-      return !isNaN(num) && num >= 0 && num <= 100 ? num : 100;
-    } catch {
-      return 100; 
-    }
+      const saved = localStorage.getItem('isMale');
+      return saved ? JSON.parse(saved) === true : true;
+    } catch { return true; }
   });
   const [activeCards, setActiveCards] = useState<number[]>(() => {
     try {
@@ -178,16 +349,15 @@ export default function ThaiFlashcards() {
   const [showAdminSettings, setShowAdminSettings] = useState(false);
   const [mnemonics, setMnemonics] = useState<{[key: number]: string}>({});
   const [isPoliteMode, setIsPoliteMode] = useState(true);
+  const [activeCardsIndex, setActiveCardsIndex] = useState<number>(0);
+  const [showMnemonicsModal, setShowMnemonicsModal] = useState(false);
+  const [reviewsCompletedToday, setReviewsCompletedToday] = useState<number>(0);
+  const [totalDueToday, setTotalDueToday] = useState<number>(0);
+  const [isTesting, setIsTesting] = useState(false);
+  const [showSetWizardModal, setShowSetWizardModal] = useState(false);
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
-
-  // Track active cards position
-  const [activeCardsIndex, setActiveCardsIndex] = useState<number>(0);
-
-  // Track how many reviews completed today
-  const [reviewsCompletedToday, setReviewsCompletedToday] = useState<number>(0);
-  const [totalDueToday, setTotalDueToday] = useState<number>(0);
 
   console.log("ThaiFlashcards: Component rendering/re-rendering. randomSentence:", randomSentence); // DEBUG
 
@@ -226,44 +396,23 @@ export default function ThaiFlashcards() {
   }, [autoplay]);
 
   useEffect(() => {
-    localStorage.setItem('genderValue', genderValue.toString());
-  }, [genderValue]);
+    localStorage.setItem('isMale', JSON.stringify(isMale));
+  }, [isMale]);
 
   useEffect(() => {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
 
   // Update the speak helper function definition in page.tsx
-  const speak = async (text: string, isWord: boolean = true, genderValue: number) => {
-    // Set the appropriate playing state
-    if (isWord) {
-      setIsPlayingWord(true);
-    } else {
-      setIsPlayingContext(true);
-    }
-    
+  const speak = async (text: string, isWord: boolean = true, isMale: boolean) => {
+    if (isWord) setIsPlayingWord(true); else setIsPlayingContext(true);
     try {
-      // Ensure genderValue is passed correctly within the object to ttsService.speak
       await ttsService.speak({
         text,
-        genderValue, // Correctly passing genderValue
+        isMale,
         onStart: () => console.log('Speech started'),
-        onEnd: () => {
-          console.log('Speech ended');
-          if (isWord) {
-            setIsPlayingWord(false);
-          } else {
-            setIsPlayingContext(false);
-          }
-        },
-        onError: (error) => {
-          console.error('TTS error:', error);
-          if (isWord) {
-            setIsPlayingWord(false);
-          } else {
-            setIsPlayingContext(false);
-          }
-        }
+        onEnd: () => { if (isWord) setIsPlayingWord(false); else setIsPlayingContext(false); console.log('Speech ended'); },
+        onError: (error) => { if (isWord) setIsPlayingWord(false); else setIsPlayingContext(false); console.error('TTS error:', error); }
       });
     } catch (error) {
       console.error('Error calling ttsService.speak:', error);
@@ -278,10 +427,10 @@ export default function ThaiFlashcards() {
   // Auto-play useEffect - Restore call to getThaiWithGender with isPoliteMode
   useEffect(() => {
     if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlayingWord && !isPlayingContext && voicesLoaded) {
-      speak(getThaiWithGender(phrases[index], genderValue, isPoliteMode), true, genderValue);
+      speak(getThaiWithGender(phrases[index], isMale, isPoliteMode), true, isMale);
     }
     prevShowAnswerRef.current = showAnswer;
-  }, [showAnswer, autoplay, phrases, index, isPlayingWord, isPlayingContext, voicesLoaded, genderValue, isPoliteMode]); // Use genderValue dependency
+  }, [showAnswer, autoplay, phrases, index, isPlayingWord, isPlayingContext, voicesLoaded, isMale, isPoliteMode]);
 
   // Add a useEffect to initialize the random sentence when the answer is shown
   useEffect(() => {
@@ -427,10 +576,41 @@ export default function ThaiFlashcards() {
     console.log(`Mnemonic for card ${cardIndex} saved.`);
   };
 
-  const handleResetAll = () => {
-    localStorage.clear();
-    window.location.reload();
+  // Function to reset only the mnemonic for the current card
+  const resetCurrentMnemonic = () => {
+    const newMnemonics = { ...mnemonics };
+    if (newMnemonics.hasOwnProperty(index)) { // Check if a custom mnemonic exists
+      delete newMnemonics[index]; // Remove the custom mnemonic for the current index
+      setMnemonics(newMnemonics); // Update state (triggers localStorage save via useEffect)
+      console.log(`Mnemonic for card ${index} reset to default.`);
+    } else {
+      console.log(`No custom mnemonic to reset for card ${index}.`);
+    }
   };
+
+  // Original Reset All (keeps card progress reset too)
+  const resetAllProgress = () => {
+    if (confirm('Are you sure you want to reset all progress AND mnemonics? This cannot be undone.')) { // Clarify confirmation
+      setCardProgress({});
+      setMnemonics({});
+      localStorage.removeItem('cardProgress');
+      localStorage.removeItem('mnemonics');
+      setIndex(0);
+      setShowAnswer(false);
+      setRandomSentence(null);
+      setActiveCardsIndex(0);
+      updateActiveCards();
+      alert('All progress and mnemonics have been reset');
+    }
+  };
+
+  // --- NEW: Function to reset only mnemonics --- 
+  const resetAllMnemonics = () => {
+    setMnemonics({}); // Clear custom mnemonics state (useEffect handles localStorage)
+    console.log('All custom mnemonics reset to default.');
+    alert('All custom mnemonics have been reset to their defaults.');
+  };
+  // --- End of new function ---
 
   // Update generateRandomPhrase to ensure it just sets the ExampleSentence
   const generateRandomPhrase = (direction: 'next' | 'prev' = 'next') => {
@@ -726,16 +906,18 @@ export default function ThaiFlashcards() {
     setActiveCardsIndex(0);
   };
 
-  // Export card progress to JSON file
-  const exportCardProgress = () => {
-    const data = {
-      cardProgress,
-      mnemonics
+  // Rename and refactor Export function
+  const exportPhraseData = () => {
+    // Prepare data: Base phrases and current user mnemonics
+    const dataToExport = {
+      phrases: INITIAL_PHRASES, // Export the base phrases definition
+      mnemonics: mnemonics // Export the current state of mnemonics
+      // DO NOT include cardProgress
     };
     
-    const dataStr = JSON.stringify(data);
+    const dataStr = JSON.stringify(dataToExport, null, 2); // Pretty print JSON
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = 'thai-flashcards-data.json';
+    const exportFileDefaultName = 'thai-flashcards-phrases.json'; // New default name
     
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
@@ -743,8 +925,8 @@ export default function ThaiFlashcards() {
     linkElement.click();
   };
 
-  // Import card progress from JSON file
-  const importCardProgress = () => {
+  // Rename and refactor Import function
+  const importPhraseData = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
@@ -754,20 +936,46 @@ export default function ThaiFlashcards() {
         const reader = new FileReader();
         reader.onload = (event) => {
           try {
-            const data = JSON.parse(event.target?.result as string);
-            if (data.cardProgress) {
-              setCardProgress(data.cardProgress);
-              localStorage.setItem('cardProgress', JSON.stringify(data.cardProgress));
+            const importedData = JSON.parse(event.target?.result as string);
+            
+            // Validate imported data structure (basic check)
+            if (!Array.isArray(importedData.phrases) || typeof importedData.mnemonics !== 'object') {
+              throw new Error('Invalid file structure. Expected { phrases: [], mnemonics: {} }');
             }
-            if (data.mnemonics) {
-              setMnemonics(data.mnemonics);
-              localStorage.setItem('mnemonics', JSON.stringify(data.mnemonics));
-            }
-            alert('Data imported successfully');
-            // Update active cards
-            updateActiveCards();
-          } catch (error) {
-            alert('Invalid file format');
+
+            // --- Apply Imported Data --- 
+            // 1. Replace Phrases (Careful: This replaces the base data the app uses)
+            // Note: For full safety, you might want deeper validation of phrase objects
+            setPhrases(importedData.phrases);
+            alert(`Imported ${importedData.phrases.length} phrases.`);
+            
+            // 2. Replace Mnemonics
+            setMnemonics(importedData.mnemonics || {}); // Use imported or empty object
+            localStorage.setItem('mnemonics', JSON.stringify(importedData.mnemonics || {}));
+            
+            // 3. Reset Learning Progress
+            setCardProgress({});
+            localStorage.removeItem('cardProgress');
+            console.log("Learning progress reset due to new phrase set import.");
+            
+            // 4. Reset UI State
+            setIndex(0); 
+            setActiveCardsIndex(0);
+            setShowAnswer(false);
+            setRandomSentence(null);
+            // Recalculate active cards based on the new (empty) progress
+            // Need to pass the new phrase length to updateActiveCards or ensure it uses the state
+            // Let's reset active cards simply for now
+            const initialActive = Array.from({ length: Math.min(5, importedData.phrases.length) }, (_, i) => i);
+            setActiveCards(initialActive);
+            localStorage.setItem('activeCards', JSON.stringify(initialActive));
+            
+            // Optional: Force a re-render or use a key prop on the main component if necessary
+            // alert('Import successful! Learning progress has been reset for the new set.');
+
+          } catch (error: any) {
+            alert(`Import failed: ${error.message}`);
+            console.error("Import error:", error);
           }
         };
         reader.readAsText(file);
@@ -776,24 +984,7 @@ export default function ThaiFlashcards() {
     input.click();
   };
 
-  // Reset all progress
-  const resetAllProgress = () => {
-    if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
-      setCardProgress({});
-      setMnemonics({});
-      localStorage.removeItem('cardProgress');
-      localStorage.removeItem('mnemonics');
-              setIndex(0);
-      setShowAnswer(false);
-      setRandomSentence(null);
-      setActiveCardsIndex(0);
-      updateActiveCards();
-      
-      alert('All progress has been reset');
-    }
-  };
-
-    return (
+  return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       {/* Header with app logo and navigation buttons */}
       <div className="p-4 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-2">
@@ -803,16 +994,18 @@ export default function ThaiFlashcards() {
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setShowHowItWorks(true)} className="neumorphic-button text-xs text-blue-400">How It Works</button>
           <button onClick={() => setShowVocabulary(true)} className="neumorphic-button text-xs text-blue-400">Vocabulary</button>
-          <div className="relative inline-block text-left group">
-            <button className="neumorphic-button text-xs text-blue-400">Mnemonics</button>
-            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 hidden group-hover:block">
-              <div className="py-1" role="menu">
-                <button onClick={() => exportCardProgress()} className="block w-full text-left px-4 py-2 text-sm text-blue-400 hover:bg-[#333]">Export All</button>
-                <button onClick={() => importCardProgress()} className="block w-full text-left px-4 py-2 text-sm text-blue-400 hover:bg-[#333]">Import All</button>
-                <button onClick={() => resetAllProgress()} className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-[#333]">Reset All</button>
-              </div>
-            </div>
-          </div>
+          <button 
+            onClick={() => setShowMnemonicsModal(true)} 
+            className="neumorphic-button text-xs text-blue-400"
+          >
+            Mnemonics
+          </button>
+          <button 
+            onClick={() => window.open('/set-wizard', '_blank')} 
+            className="neumorphic-button text-xs text-green-400 border-green-500"
+          >
+            Make Your Own Set!
+          </button>
         </div>
       </div>
 
@@ -844,19 +1037,19 @@ export default function ThaiFlashcards() {
                   <div className="text-center">
                     {/* Thai word with pronunciation - Use restored helper */}
                     <div className="text-4xl md:text-5xl font-bold mb-4 text-gray-700">
-                      {getThaiWithGender(phrases[index], genderValue, isPoliteMode)}
+                      {getThaiWithGender(phrases[index], isMale, isPoliteMode)}
                     </div>
                     <div className="text-sm text-gray-400 italic mb-3">
-                      ({getGenderedPronunciation(phrases[index], genderValue, isPoliteMode)})
+                      ({getGenderedPronunciation(phrases[index], isMale, isPoliteMode)})
                     </div>
                     {/* Play Word Button */} 
                     <div className="flex justify-center mb-4">
                       <button
                         onClick={(event) => {
                           event.stopPropagation();
-                          const textToSpeak = getThaiWithGender(phrases[index], genderValue, isPoliteMode);
+                          const textToSpeak = getThaiWithGender(phrases[index], isMale, isPoliteMode);
                           console.log("Play Word - Text to Speak:", textToSpeak);
-                          speak(textToSpeak, true, genderValue);
+                          speak(textToSpeak, true, isMale);
                         }}
                         disabled={isPlayingWord || isPlayingContext}
                         className="neumorphic-button text-blue-400"
@@ -894,7 +1087,7 @@ export default function ThaiFlashcards() {
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm text-gray-400">Mnemonic</label>
-                    <button onClick={() => resetCard()} className="text-xs text-blue-400 hover:text-blue-300">Reset</button>
+                    <button onClick={resetCurrentMnemonic} className="text-xs text-blue-400 hover:text-blue-300">Reset</button>
                   </div>
                   <textarea
                     value={mnemonics[index] ?? phrases[index].mnemonic ?? ''}
@@ -912,10 +1105,10 @@ export default function ThaiFlashcards() {
                   </div>
                   <ClientOnly>
                     <p className="text-base text-white font-medium">
-                      {randomSentence ? getThaiWithGender(randomSentence, genderValue, isPoliteMode) : "(No example available)"}
+                      {randomSentence ? getThaiWithGender(randomSentence, isMale, isPoliteMode) : "(No example available)"}
                     </p>
                     <p className="text-sm text-gray-300 italic">
-                      {randomSentence ? getGenderedPronunciation(randomSentence, genderValue, isPoliteMode) : ""}
+                      {randomSentence ? getGenderedPronunciation(randomSentence, isMale, isPoliteMode) : ""}
                     </p>
                     <p className="text-sm text-gray-400 italic">{randomSentence?.translation || ""}</p>
                   </ClientOnly>
@@ -931,9 +1124,9 @@ export default function ThaiFlashcards() {
                           onClick={(event) => {
                             event.stopPropagation();
                             if (randomSentence) {
-                              const textToSpeak = getThaiWithGender(randomSentence, genderValue, isPoliteMode);
+                              const textToSpeak = getThaiWithGender(randomSentence, isMale, isPoliteMode);
                               console.log("Play Context - Text to Speak:", textToSpeak);
-                              speak(textToSpeak, false, genderValue);
+                              speak(textToSpeak, false, isMale);
                             }
                           }}
                           disabled={isPlayingWord || isPlayingContext || !randomSentence}
@@ -953,24 +1146,22 @@ export default function ThaiFlashcards() {
 
                 {/* === Gender Slider and Polite Mode Toggle Section === */} 
                 <div className="flex items-center justify-center space-x-4 mb-6">
-                  {/* Gender Slider */} 
-                  <div className="flex items-center space-x-2 w-full max-w-xs">
-                    <span className="text-sm font-medium text-gray-400">Female</span>
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="100" 
-                      value={genderValue}
-                      onChange={(e) => setGenderValue(parseInt(e.target.value, 10))}
-                      className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer range-lg dark:bg-gray-700"
-                      style={{
-                        // Calculate hue based on genderValue (0=320, 100=220)
-                        accentColor: `hsl(${320 - (1.0 * genderValue)}, 80%, 60%)` 
-                      }}
-                      id="gender-slider"
-                    />
-                    <span className="text-sm font-medium text-gray-400">Male</span>
-                  </div>
+                  {/* Gender Toggle */} 
+                  <label htmlFor="gender-toggle" className="flex items-center cursor-pointer">
+                    <span className="mr-2 text-sm font-medium text-gray-400">Female (Ka)</span>
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        id="gender-toggle"
+                        className="sr-only"
+                        checked={isMale}
+                        onChange={() => setIsMale(!isMale)}
+                      />
+                      <div className="block bg-gray-600 w-10 h-6 rounded-full"></div>
+                      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isMale ? 'translate-x-full bg-blue-400' : 'bg-pink-400'}`}></div>
+                    </div>
+                    <span className="ml-2 text-sm font-medium text-gray-400">Male (Krap)</span>
+                  </label>
 
                   {/* Polite Mode Toggle */} 
                   <label htmlFor="polite-toggle" className="flex items-center cursor-pointer">
@@ -1015,25 +1206,50 @@ export default function ThaiFlashcards() {
           </button>
       </div>
 
+      {/* Settings Modal (controlled by showStats) */}
       {showStats && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="neumorphic max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowStats(false)}>
+          <div className="neumorphic max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Settings</h2>
-            <button
-                onClick={() => setShowStats(false)}
-                className="text-gray-400 hover:text-white"
-            >
-                ✕
-            </button>
-          </div>
+              <h2 className="text-xl font-bold text-gray-200">Settings</h2> {/* Updated Title */} 
+              <button
+                  onClick={() => setShowStats(false)}
+                  className="text-gray-400 hover:text-white text-2xl"
+              >
+                  ✕
+              </button>
+            </div>
             
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span>Auto-play on reveal</span>
+              {/* Autoplay Toggle */}
+              <div className="flex items-center justify-between py-2 border-b border-gray-700">
+                <span className="text-gray-300">Auto-play audio on reveal</span>
                 <Switch checked={autoplay} onCheckedChange={setAutoplay} />
-        </div>
-      </div>
+              </div>
+              
+              {/* Data Management Buttons - Added */}
+              <div className="pt-4 space-y-3">
+                <h3 className="text-lg font-semibold text-blue-400 mb-2">Data Management</h3>
+                <button 
+                  onClick={exportPhraseData} 
+                  className="neumorphic-button w-full text-blue-400"
+                >
+                  Export Set
+                </button>
+                <button 
+                  onClick={importPhraseData} 
+                  className="neumorphic-button w-full text-blue-400"
+                >
+                  Import Set
+                </button>
+                <button 
+                  onClick={resetAllProgress} 
+                  className="neumorphic-button w-full text-red-400"
+                >
+                  Reset All Progress & Mnemonics
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1117,6 +1333,21 @@ export default function ThaiFlashcards() {
       <AdminSettings
         isOpen={showAdminSettings}
         onClose={() => setShowAdminSettings(false)}
+      />
+
+      {/* Render the Modal */}
+      <MnemonicsListModal 
+        isOpen={showMnemonicsModal}
+        onClose={() => setShowMnemonicsModal(false)}
+        allPhrases={phrases}
+        userMnemonics={mnemonics}
+        onReset={resetAllMnemonics}
+      />
+
+      {/* Render the Set Wizard Modal */}
+      <SetWizardModal 
+        isOpen={showSetWizardModal}
+        onClose={() => setShowSetWizardModal(false)}
       />
 
       {/* Version indicator at the bottom - shows changes and timestamp in Amsterdam timezone */}

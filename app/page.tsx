@@ -8,6 +8,14 @@ import { INITIAL_PHRASES, type Phrase, type ExampleSentence } from './data/phras
 import { SetSelector } from './components/SetSelector';
 import { useSet } from './context/SetContext';
 import { Phrase as GeneratorPhrase } from './lib/set-generator';
+import { SetMetaData, SetProgress } from './lib/storage';
+
+// Define a simple CardStatus type locally for now
+type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';
+
+// Type for card progress data used locally (can be removed later)
+// Define the CardProgressData type based on SetProgress
+type CardProgressData = SetProgress[number];
 
 // ClientOnly wrapper for client-side only rendering
 function ClientOnly({ children }: { children: React.ReactNode }) {
@@ -307,6 +315,16 @@ const SetWizardModal: React.FC<SetWizardModalProps> = ({ isOpen, onClose }) => {
 };
 // --- End of SetWizardModal Component Definition ---
 
+// Helper function to shuffle an array (Fisher-Yates algorithm)
+const shuffleArray = <T extends any>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 export default function ThaiFlashcards() {
   // Replace phrases state with context
   const { 
@@ -330,14 +348,6 @@ export default function ThaiFlashcards() {
   const [index, setIndex] = useState<number>(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [localMnemonics, setLocalMnemonics] = useState<{[key: number]: string}>({});
-  const [cardProgress, setCardProgress] = useState<CardProgress>(() => {
-    try {
-      // Initialize from the activeSetProgress if available
-      return activeSetProgress as unknown as CardProgress || {};
-    } catch {
-      return {};
-    }
-  });
   const [isPlayingWord, setIsPlayingWord] = useState(false);
   const [isPlayingContext, setIsPlayingContext] = useState(false);
   const [showStats, setShowStats] = useState(false);
@@ -405,14 +415,6 @@ export default function ThaiFlashcards() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('cardProgress', JSON.stringify(cardProgress));
-  }, [cardProgress]);
-
-  useEffect(() => {
-    localStorage.setItem('mnemonicEdits', JSON.stringify(localMnemonics));
-  }, [localMnemonics]);
-
-  useEffect(() => {
     localStorage.setItem('autoplay', JSON.stringify(autoplay));
   }, [autoplay]);
 
@@ -423,31 +425,6 @@ export default function ThaiFlashcards() {
   useEffect(() => {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
-
-  // Convert and update progress tracking to context format
-  useEffect(() => {
-    if (Object.keys(cardProgress).length > 0) {
-      // Convert from CardProgress to SetProgress format
-      const setProgressData: typeof activeSetProgress = {};
-      
-      // Convert each card's progress data to the new format
-      Object.entries(cardProgress).forEach(([cardIndexStr, progressData]) => {
-        const cardIndex = parseInt(cardIndexStr);
-        const lastReview = progressData.reviews[progressData.reviews.length - 1];
-        
-        setProgressData[cardIndex] = {
-          srsLevel: lastReview.repetitions || 0,
-          nextReviewDate: progressData.nextReviewDate,
-          lastReviewedDate: lastReview.date,
-          difficulty: lastReview.difficulty,
-          repetitions: lastReview.repetitions,
-          easeFactor: lastReview.easeFactor
-        };
-      });
-      
-      updateSetProgress(setProgressData);
-    }
-  }, [cardProgress, updateSetProgress]);
 
   // Update the speak helper function definition in page.tsx
   const speak = async (text: string, isWord: boolean = true, isMale: boolean) => {
@@ -489,7 +466,7 @@ export default function ThaiFlashcards() {
   // Add a useEffect to update active cards on component mount and when cardProgress changes
   useEffect(() => {
     updateActiveCards();
-  }, [cardProgress]);
+  }, [activeSetProgress, phrases]);
 
   // Function to update active cards based on review status
   const updateActiveCards = () => {
@@ -499,7 +476,8 @@ export default function ThaiFlashcards() {
     // First collect all unseen cards
     const unseenCards = [];
     for (let i = 0; i < phrases.length; i++) {
-      if (!cardProgress[i] || !cardProgress[i].reviews || cardProgress[i].reviews.length === 0) {
+      // Use activeSetProgress directly
+      if (!activeSetProgress[i] || !activeSetProgress[i].lastReviewedDate) { // Check a defining progress field
         unseenCards.push(i);
       }
     }
@@ -507,23 +485,22 @@ export default function ThaiFlashcards() {
     // Then collect all cards marked "hard" (wrong) in their last review
     const wrongCards = [];
     for (let i = 0; i < phrases.length; i++) {
-      if (cardProgress[i] && cardProgress[i].reviews && cardProgress[i].reviews.length > 0) {
-        const lastReview = cardProgress[i].reviews[cardProgress[i].reviews.length - 1];
-        if (lastReview.difficulty === 'hard') {
-          wrongCards.push(i);
-        }
+      // Use activeSetProgress directly
+      if (activeSetProgress[i] && activeSetProgress[i].difficulty === 'hard') {
+        wrongCards.push(i);
       }
     }
     
     // Then collect all due cards (cards that were previously marked "good" or "easy" and are due today)
     const dueCards = [];
     for (let i = 0; i < phrases.length; i++) {
-      if (cardProgress[i] && cardProgress[i].nextReviewDate) {
-        const nextReviewDate = new Date(cardProgress[i].nextReviewDate);
+      // Use activeSetProgress directly
+      if (activeSetProgress[i] && activeSetProgress[i].nextReviewDate) {
+        const nextReviewDate = new Date(activeSetProgress[i].nextReviewDate);
         if (nextReviewDate <= today && !wrongCards.includes(i)) {
-          // Get last review to check if it was marked good or easy
-          const lastReview = cardProgress[i].reviews[cardProgress[i].reviews.length - 1];
-          if (lastReview.difficulty === 'good' || lastReview.difficulty === 'easy') {
+          // Get difficulty to check if it was marked good or easy
+          const lastDifficulty = activeSetProgress[i].difficulty;
+          if (lastDifficulty === 'good' || lastDifficulty === 'easy') {
             dueCards.push(i);
           }
         }
@@ -546,8 +523,9 @@ export default function ThaiFlashcards() {
     if (remainingSlots > 0 && dueCards.length > 0) {
       // Sort due cards by next review date (earliest first)
       const sortedDueCards = [...dueCards].sort((a, b) => {
-        const dateA = new Date(cardProgress[a].nextReviewDate);
-        const dateB = new Date(cardProgress[b].nextReviewDate);
+        // Use activeSetProgress directly
+        const dateA = new Date(activeSetProgress[a].nextReviewDate);
+        const dateB = new Date(activeSetProgress[b].nextReviewDate);
         return dateA.getTime() - dateB.getTime();
       });
       newActiveCards = [...newActiveCards, ...sortedDueCards.slice(0, remainingSlots)];
@@ -563,103 +541,82 @@ export default function ThaiFlashcards() {
           remainingCards.push(i);
         }
       }
-      
-      // Sort by last review date (oldest first) or by index if never reviewed
+      // Add remaining cards sorted by their index or last reviewed date (oldest first)
       const sortedRemainingCards = remainingCards.sort((a, b) => {
-        // If neither card has been reviewed, sort by index
-        if ((!cardProgress[a] || !cardProgress[a].reviews || cardProgress[a].reviews.length === 0) &&
-            (!cardProgress[b] || !cardProgress[b].reviews || cardProgress[b].reviews.length === 0)) {
-          return a - b;
+        // Use activeSetProgress directly
+        const progressA = activeSetProgress[a];
+        const progressB = activeSetProgress[b];
+        // Handle potential undefined dates safely
+        const dateA = progressA?.lastReviewedDate ? new Date(progressA.lastReviewedDate).getTime() : Infinity;
+        const dateB = progressB?.lastReviewedDate ? new Date(progressB.lastReviewedDate).getTime() : Infinity;
+
+        if (dateA !== Infinity && dateB !== Infinity) {
+          return dateA - dateB; // Sort by actual date if both exist
+        } else if (dateA !== Infinity) {
+          return -1; // A reviewed, B not -> A comes first
+        } else if (dateB !== Infinity) {
+          return 1; // B reviewed, A not -> B comes first
+        } else {
+          return a - b; // Sort by index if neither reviewed
         }
-        
-        // If only a has been reviewed, b comes first
-        if (!cardProgress[b] || !cardProgress[b].reviews || cardProgress[b].reviews.length === 0) {
-          return 1;
-        }
-        
-        // If only b has been reviewed, a comes first
-        if (!cardProgress[a] || !cardProgress[a].reviews || cardProgress[a].reviews.length === 0) {
-          return -1;
-        }
-        
-        // Both have been reviewed, sort by last review date
-        const lastReviewA = new Date(cardProgress[a].reviews[cardProgress[a].reviews.length - 1].date);
-        const lastReviewB = new Date(cardProgress[b].reviews[cardProgress[b].reviews.length - 1].date);
-        return lastReviewA.getTime() - lastReviewB.getTime();
       });
-      
       newActiveCards = [...newActiveCards, ...sortedRemainingCards.slice(0, remainingSlots)];
     }
     
-    // If newActiveCards is empty (should not happen), use the first 5 cards
-    if (newActiveCards.length === 0) {
-      newActiveCards = [0, 1, 2, 3, 4];
-    }
-    
-    // Update active cards if they have changed
-    if (JSON.stringify(newActiveCards) !== JSON.stringify(activeCards)) {
-      setActiveCards(newActiveCards);
-      
-      // If current index is not in active cards, update it to the first active card
-      if (!newActiveCards.includes(index)) {
-        setIndex(newActiveCards[0]);
-      }
+    // Shuffle the selected cards for variety
+    newActiveCards = shuffleArray(newActiveCards);
 
-      // Reset the active cards index when we update active cards
-      setActiveCardsIndex(0);
+    // Update the activeCards state
+    setActiveCards(newActiveCards);
+
+    // Calculate total due count based on activeSetProgress
+    const dueCount = wrongCards.length + dueCards.length + unseenCards.length; // Consider unseen due as well?
+    setTotalDueToday(dueCount);
+    
+    // Reset active card index if needed
+    setActiveCardsIndex(0);
+    if (newActiveCards.length > 0) {
+      setIndex(newActiveCards[0]);
+    } else {
+      // Handle case where there are no cards to review
+      setIndex(0);
     }
   };
 
-  // Update mnemonic state locally on change
+  // Function to update mnemonics
+  const updateMnemonics = (cardIndex: number, newMnemonic: string) => {
+    const updated = { ...mnemonics, [cardIndex]: newMnemonic };
+    setMnemonics(updated);
+    // TODO: Decide if mnemonics should be per-set in storage/context
+    localStorage.setItem('mnemonics', JSON.stringify(updated));
+  };
+
+  const resetCurrentMnemonic = () => {
+    // TODO: Get default mnemonic from Phrase definition if available?
+    const { [index]: _, ...rest } = mnemonics;
+    setMnemonics(rest);
+    localStorage.setItem('mnemonics', JSON.stringify(rest));
+  };
+
   const handleMnemonicChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMnemonics(prev => ({ ...prev, [index]: e.target.value }));
   };
 
-  // Persist mnemonic change (e.g., on blur or explicit save)
-  const updateMnemonics = (cardIndex: number, text: string) => {
-    // The state is already updated by handleMnemonicChange, just save to localStorage
-    localStorage.setItem('mnemonics', JSON.stringify(mnemonics)); 
-    console.log(`Mnemonic for card ${cardIndex} saved.`);
-  };
-
-  // Function to reset only the mnemonic for the current card
-  const resetCurrentMnemonic = () => {
-    const newMnemonics = { ...mnemonics };
-    if (newMnemonics.hasOwnProperty(index)) { // Check if a custom mnemonic exists
-      delete newMnemonics[index]; // Remove the custom mnemonic for the current index
-      setMnemonics(newMnemonics); // Update state (triggers localStorage save via useEffect)
-      console.log(`Mnemonic for card ${index} reset to default.`);
-    } else {
-      console.log(`No custom mnemonic to reset for card ${index}.`);
-    }
-  };
-
-  // Original Reset All (keeps card progress reset too)
+  // Function to reset all progress and mnemonics
   const resetAllProgress = () => {
-    if (confirm('Are you sure you want to reset all progress AND mnemonics? This cannot be undone.')) { // Clarify confirmation
-      setCardProgress({});
+    if (confirm('Are you sure you want to reset all progress AND mnemonics? This cannot be undone.')) {
+      updateSetProgress({}); 
       setMnemonics({});
-      localStorage.removeItem('cardProgress');
       localStorage.removeItem('mnemonics');
       setIndex(0);
       setShowAnswer(false);
       setRandomSentence(null);
-      setActiveCardsIndex(0);
       updateActiveCards();
-      alert('All progress and mnemonics have been reset');
     }
   };
 
-  // --- NEW: Function to reset only mnemonics --- 
-  const resetAllMnemonics = () => {
-    setMnemonics({}); // Clear custom mnemonics state (useEffect handles localStorage)
-    console.log('All custom mnemonics reset to default.');
-    alert('All custom mnemonics have been reset to their defaults.');
-  };
-  // --- End of new function ---
-
   // Update generateRandomPhrase to ensure it just sets the ExampleSentence
-  const generateRandomPhrase = (direction: 'next' | 'prev' = 'next') => {
+  const generateRandomPhrase = (direction: 'next' | 'prev' | 'first' = 'first') => {
     try {
       const examples = phrases[index].examples || [];
       if (!examples || examples.length === 0) {
@@ -683,48 +640,32 @@ export default function ThaiFlashcards() {
     }
   };
 
-  // Add a function to calculate stats
+  // Function to calculate statistics based on activeSetProgress
   const calculateStats = () => {
-    // Calculate total learned cards
-    const learnedCards = Object.keys(cardProgress).length;
-    
-    // Calculate total reviews
-    let totalReviews = 0;
-    Object.values(cardProgress).forEach(card => {
-      totalReviews += card.reviews.length;
-    });
-    
-    // Count cards due today
+    const learnedCards = Object.keys(activeSetProgress).length;
+    // Removed totalReviews calculation as 'reviews' history is not in SetProgress
+    // let totalReviews = 0;
+    // Object.values(activeSetProgress).forEach(card => {
+    //   totalReviews += card.reviews.length; // Cannot access reviews
+    // });
+
     const today = new Date().toDateString();
     let dueCards = 0;
-    Object.values(cardProgress).forEach(card => {
+    Object.values(activeSetProgress).forEach(card => {
+      if (!card || !card.nextReviewDate) return; // Skip if no progress or next review date
       const nextReviewDate = new Date(card.nextReviewDate).toDateString();
-      if (nextReviewDate <= today) {
+      if (nextReviewDate <= today || card.difficulty === 'hard') { // Due if date is today/past OR marked hard
         dueCards++;
       }
     });
-    
-    return {
+
+    const stats = {
       totalCards: phrases.length,
       learnedCards,
       dueCards,
-      totalReviews,
-      remainingCards: phrases.length - learnedCards
+      // totalReviews: totalReviews, // Removed
     };
-  };
-
-  // Add a function to determine the status of a card
-  const getCardStatus = (cardIndex: number) => {
-    const card = cardProgress[cardIndex];
-    
-    // If no reviews, it's unseen
-    if (!card || !card.reviews || card.reviews.length === 0) {
-      return 'unseen';
-    }
-    
-    // Get the last review
-    const lastReview = card.reviews[card.reviews.length - 1];
-    return lastReview.difficulty; // 'hard', 'good', or 'easy'
+    return stats;
   };
 
   // Helper function to get status color and label
@@ -743,157 +684,87 @@ export default function ThaiFlashcards() {
     }
   };
 
-  // Helper function to calculate next interval using Anki SM-2 algorithm
-  const calculateNextReview = (difficulty: 'hard' | 'good' | 'easy', currentProgress: any) => {
-    const easeFactor = currentProgress?.reviews?.length > 0 
-      ? currentProgress.reviews[currentProgress.reviews.length - 1].easeFactor 
-      : INITIAL_EASE_FACTOR;
-    
-    let newEaseFactor = easeFactor;
-    let interval = currentProgress?.reviews?.length > 0 
-      ? currentProgress.reviews[currentProgress.reviews.length - 1].interval 
-      : INITIAL_INTERVAL;
-    let repetitions = currentProgress?.reviews?.length > 0
-      ? currentProgress.reviews[currentProgress.reviews.length - 1].repetitions
-      : 0;
-      
-    // Adjust ease factor based on difficulty
-    if (difficulty === 'hard') {
-      newEaseFactor = Math.max(MIN_EASE_FACTOR, easeFactor - 0.2);
-      interval = Math.max(MIN_INTERVAL, Math.ceil(interval * HARD_INTERVAL_MULTIPLIER));
-      repetitions = 0; // Reset repetitions on hard
-    } else if (difficulty === 'good') {
-      interval = Math.ceil(interval * easeFactor);
-      repetitions += 1;
-    } else if (difficulty === 'easy') {
-      newEaseFactor = easeFactor + 0.1;
-      interval = Math.ceil(interval * EASY_INTERVAL_MULTIPLIER);
-      repetitions += 1;
-    }
-    
-    // Cap interval at max
-    interval = Math.min(interval, MAX_INTERVAL);
-    
-    return { interval, easeFactor: newEaseFactor, repetitions };
-  };
-
-  // Function to count cards due today based on SRS schedule
-  const countCardsDueToday = () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Start of today
-    
-    let dueCount = 0;
-    
-    // Count unseen cards (always due)
-    for (let i = 0; i < phrases.length; i++) {
-      if (!cardProgress[i] || !cardProgress[i].reviews || cardProgress[i].reviews.length === 0) {
-        dueCount++;
-        continue;
-      }
-      
-      // Count cards marked as "hard" in their last review (always due)
-      const lastReview = cardProgress[i].reviews[cardProgress[i].reviews.length - 1];
-      if (lastReview.difficulty === 'hard') {
-        dueCount++;
-        continue;
-      }
-      
-      // Count cards whose next review date is today or earlier
-      if (cardProgress[i].nextReviewDate) {
-        const nextReviewDate = new Date(cardProgress[i].nextReviewDate);
-        nextReviewDate.setHours(0, 0, 0, 0); // Start of review date
-        
-        if (nextReviewDate <= today) {
-          dueCount++;
-        }
-      }
-    }
-    
-    return dueCount;
-  };
-
-  // Function to check for reviews completed today
-  const countReviewsCompletedToday = () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Start of today
-    
-    let completedCount = 0;
-    
-    // Count reviews that happened today
-    Object.values(cardProgress).forEach(card => {
-      card.reviews.forEach((review: Review) => {
-        const reviewDate = new Date(review.date);
-        reviewDate.setHours(0, 0, 0, 0); // Start of review date
-        
-        if (reviewDate.getTime() === today.getTime()) {
-          completedCount++;
-        }
-      });
-    });
-    
-    return completedCount;
-  };
-
-  // Add a useEffect to update due counts when component mounts or cardProgress changes
+  // Function to calculate and update daily review stats
   useEffect(() => {
-    const dueCount = countCardsDueToday();
-    const completedCount = countReviewsCompletedToday();
-    
+    let dueCount = 0;
+    let completedCount = 0;
+    const today = new Date().toDateString();
+
+    for (let i = 0; i < phrases.length; i++) {
+      const progress = activeSetProgress[i];
+      if (!progress || !progress.lastReviewedDate || progress.lastReviewedDate === 'never') {
+        dueCount++; // Unseen are due
+        continue;
+      }
+
+      if (progress.difficulty === 'hard') {
+        dueCount++; // Marked hard are due
+      } else {
+        // Check if next review date is today or earlier
+        if (progress.nextReviewDate) {
+          const nextReviewDate = new Date(progress.nextReviewDate);
+          nextReviewDate.setHours(0, 0, 0, 0); // Start of review date
+          const todayStart = new Date();
+          todayStart.setHours(0, 0, 0, 0);
+          if (nextReviewDate <= todayStart) {
+            dueCount++;
+          }
+        }
+      }
+
+      // Check if the last review was today
+      const lastReviewDate = new Date(progress.lastReviewedDate).toDateString();
+      if (lastReviewDate === today) {
+        completedCount++;
+      }
+    }
+
     setTotalDueToday(dueCount);
     setReviewsCompletedToday(completedCount);
-  }, [cardProgress]);
+  }, [activeSetProgress, phrases]); // Depend on progress and phrases
 
-  // Modify handleCardAction to increment reviewsCompletedToday
-  const handleCardAction = (difficulty: 'hard' | 'good' | 'easy') => {
-    // Create or get the current card progress
-    const currentProgress = cardProgress[index] || { reviews: [], nextReviewDate: new Date().toISOString() };
+  // Function to handle card review actions (difficulty buttons)
+  // --- Simplified version without external sm2 function --- 
+  const handleCardAction = (difficulty: 'easy' | 'good' | 'hard') => {
+    const now = new Date();
+    const currentProgress = activeSetProgress[index];
     
-    // Calculate the next review data using the SM-2 algorithm
-    const nextReviewData = calculateNextReview(difficulty, currentProgress);
-    
-    // Create the new review entry
-    const newReview: Review = {
-      date: new Date().toISOString(),
-      difficulty,
-      interval: nextReviewData.interval,
-      easeFactor: nextReviewData.easeFactor,
-      repetitions: nextReviewData.repetitions
+    // Simplified SRS logic placeholder:
+    let daysToAdd = 1; // Default next review tomorrow
+    if (difficulty === 'easy') daysToAdd = 7;
+    if (difficulty === 'good') daysToAdd = 3;
+    if (difficulty === 'hard') daysToAdd = 0; // Review again soon
+
+    const nextReviewDate = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+
+    const updatedCardProgressData: CardProgressData = {
+      srsLevel: (currentProgress?.srsLevel || 0) + (difficulty !== 'hard' ? 1 : 0),
+      nextReviewDate: nextReviewDate.toISOString(),
+      lastReviewedDate: now.toISOString(),
+      difficulty: difficulty,
+      // Placeholder values for missing SRS fields
+      repetitions: (currentProgress?.repetitions || 0) + 1,
+      easeFactor: currentProgress?.easeFactor || 2.5 
     };
-    
-    // Calculate the next review date
-    const nextReviewDate = new Date();
-    nextReviewDate.setDate(nextReviewDate.getDate() + nextReviewData.interval);
-    
-    // Update the card progress
-    setCardProgress(prev => ({
-      ...prev,
-      [index]: {
-        ...currentProgress,
-        reviews: [...currentProgress.reviews, newReview],
-        nextReviewDate: nextReviewDate.toISOString()
-      }
-    }));
-    
-    // Increment the completed cards counter
+
+    // Update the context progress state
+    updateSetProgress({
+      ...activeSetProgress,
+      [index]: updatedCardProgressData
+    });
+
+    // --- Rest of handleCardAction logic (moving to next card) remains the same --- 
     const newActiveCardsIndex = activeCardsIndex + 1;
     setActiveCardsIndex(newActiveCardsIndex);
-    
-    // Move to the next card in the active cards list
+
     const nextActiveIndex = (activeCardsIndex + 1) % activeCards.length;
-    
-    // Clear the random sentence first, then update the index
+
     setRandomSentence(null);
     setShowAnswer(false);
-    setIndex(activeCards[nextActiveIndex]);
-
-    // Increment completed reviews counter
-    setReviewsCompletedToday(prev => prev + 1);
-    
-    // After marking a card as reviewed, it's no longer due today,
-    // so we should update the total due count
-    // If difficulty is 'hard', the card remains due
-    if (difficulty !== 'hard') {
-      setTotalDueToday(prev => Math.max(0, prev - 1));
+    if (activeCards.length > 0) {
+      setIndex(activeCards[nextActiveIndex]);
+    } else {
+      setIndex(0); // Fallback if no active cards
     }
   };
 
@@ -932,10 +803,9 @@ export default function ThaiFlashcards() {
   // Function to reset current card
   const resetCard = () => {
     // Remove card progress
-    const newCardProgress = { ...cardProgress };
+    const newCardProgress = { ...activeSetProgress };
     delete newCardProgress[index];
-    setCardProgress(newCardProgress);
-    localStorage.setItem('cardProgress', JSON.stringify(newCardProgress));
+    updateSetProgress(newCardProgress);
     
     // Clear mnemonic for this card
     const newMnemonics = { ...mnemonics };
@@ -1024,6 +894,25 @@ export default function ThaiFlashcards() {
       }
     };
     input.click();
+  };
+
+  // Helper function to get card status based on activeSetProgress
+  const getCardStatus = (cardIndex: number): CardStatus => {
+    // Use activeSetProgress directly
+    const progress = activeSetProgress[cardIndex];
+    if (!progress || !progress.lastReviewedDate || progress.lastReviewedDate === 'never') {
+      return 'unseen';
+    }
+    // Directly use difficulty from SetProgress
+    if (progress.difficulty === 'hard') {
+      return 'wrong'; 
+    }
+    const nextReviewDate = new Date(progress.nextReviewDate);
+    if (nextReviewDate <= new Date()) {
+      return 'due';
+    }
+    // If not hard and not due, consider it 'reviewed'
+    return 'reviewed'; 
   };
 
   return (
@@ -1428,7 +1317,7 @@ export default function ThaiFlashcards() {
         onClose={() => setShowMnemonicsModal(false)}
         allPhrases={phrases}
         userMnemonics={mnemonics}
-        onReset={resetAllMnemonics}
+        onReset={resetAllProgress}
       />
 
       {/* Render the Set Wizard Modal */}

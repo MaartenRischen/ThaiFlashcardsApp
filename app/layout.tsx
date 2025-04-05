@@ -1,6 +1,7 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import { SetProvider } from './context/SetContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -41,7 +42,11 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#ffffff" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <SetProvider>
+          {children}
+        </SetProvider>
+      </body>
     </html>
   )
 } 

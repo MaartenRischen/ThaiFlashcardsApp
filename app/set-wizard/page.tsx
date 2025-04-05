@@ -368,7 +368,8 @@ const SetWizardPage = () => {
     
     // Offer to return to main app
     if (confirm('Would you like to return to the main app now?')) {
-      router.push('/');
+      // Force full page reload to ensure context is refreshed with the new set
+      window.location.href = '/';
     }
   };
 

@@ -12,7 +12,8 @@ export const SetSelector = () => {
     switchSet, 
     isLoading,
     exportSet,
-    deleteSet
+    deleteSet,
+    addSet
   } = useSet();
 
   const handleSetChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -166,8 +167,22 @@ export const SetSelector = () => {
                               // Close modal
                               setIsManagementModalOpen(false);
                               
-                              // Process import based on your import logic
-                              alert(`Successfully imported set "${importedData.name || file.name}" with ${importedData.phrases.length} phrases.`);
+                              // Prepare metadata for the set
+                              const setData = {
+                                name: importedData.name || file.name.replace(/\.[^/.]+$/, ""),
+                                level: importedData.level || 'beginner',
+                                goals: importedData.goals || [],
+                                specificTopics: importedData.specificTopics,
+                                source: 'import' as const
+                              };
+                              
+                              // Add the set using context
+                              const newSetId = await addSet(setData, importedData.phrases);
+                              
+                              alert(`Successfully imported set "${setData.name}" with ${importedData.phrases.length} phrases.`);
+                              
+                              // Force page reload to ensure UI updates correctly
+                              window.location.reload();
                             } catch (error) {
                               alert(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
                             }

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { generateCustomSet, createCustomSet, Phrase, generateSingleFlashcard } from '../lib/set-generator';
+import * as storage from '../lib/storage'; // Import storage functions
 
 // Card Editor component for previewing and editing generated cards
 const CardEditor = ({ 
@@ -314,17 +315,46 @@ const SetWizardPage = () => {
       return;
     }
 
-    // Create the final set object
-    const customSet = createCustomSet(
-      customSetName,
-      thaiLevel,
-      learningGoals,
-      specificTopics,
-      generatedPhrases
-    );
+    // Create the data that will be added to the sets registry
+    const setData = {
+      name: customSetName,
+      level: thaiLevel,
+      goals: learningGoals,
+      specificTopics: specificTopics,
+      source: 'wizard' as const
+    };
+
+    // Generate a new set ID
+    const newId = storage.generateUUID();
+    const now = new Date().toISOString();
     
-    // Convert to JSON and trigger download
-    const dataStr = JSON.stringify(customSet, null, 2);
+    // Prepare the complete metadata with ID and timestamps
+    const newMetaData = {
+      ...setData,
+      id: newId,
+      createdAt: now,
+      phraseCount: generatedPhrases.length,
+    };
+
+    // Save the set content and metadata
+    storage.saveSetContent(newId, generatedPhrases);
+    
+    // Update available sets list
+    const currentSets = storage.getAvailableSets();
+    const updatedSets = [...currentSets, newMetaData];
+    storage.saveAvailableSets(updatedSets);
+    
+    // Set this new set as active immediately
+    storage.setActiveSetId(newId);
+
+    // Still provide download option
+    const dataToExport = {
+      ...setData,
+      createdAt: now,
+      phrases: generatedPhrases,
+    };
+
+    const dataStr = JSON.stringify(dataToExport, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
     const exportFileName = customSetName.replace(/\s+/g, '-').toLowerCase() + '.json';
     
@@ -334,7 +364,7 @@ const SetWizardPage = () => {
     linkElement.click();
     
     // Show completion message
-    alert(`Your set "${customSetName}" has been created! You can import it from the main app's Settings menu.`);
+    alert(`Your set "${customSetName}" has been created and will be loaded when you return to the main app!`);
     
     // Offer to return to main app
     if (confirm('Would you like to return to the main app now?')) {

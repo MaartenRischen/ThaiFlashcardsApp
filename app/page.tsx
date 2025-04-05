@@ -5,6 +5,9 @@ import { Switch } from "@/app/components/ui/switch";
 import { ttsService } from './lib/tts-service';
 import AdminSettings from './components/AdminSettings';
 import { INITIAL_PHRASES, type Phrase, type ExampleSentence } from './data/phrases';
+import { SetSelector } from './components/SetSelector';
+import { useSet } from './context/SetContext';
+import { Phrase as GeneratorPhrase } from './lib/set-generator';
 
 // ClientOnly wrapper for client-side only rendering
 function ClientOnly({ children }: { children: React.ReactNode }) {
@@ -305,22 +308,24 @@ const SetWizardModal: React.FC<SetWizardModalProps> = ({ isOpen, onClose }) => {
 // --- End of SetWizardModal Component Definition ---
 
 export default function ThaiFlashcards() {
-  const [phrases, setPhrases] = useState<Phrase[]>(INITIAL_PHRASES);
-  const [currentSetName, setCurrentSetName] = useState<string>(() => {
-    try {
-      const saved = localStorage.getItem('currentSetName');
-      return saved || "Default Set";
-    } catch {
-      return "Default Set";
-    }
-  });
+  // Replace phrases state with context
+  const { 
+    activeSetContent: phrases, 
+    activeSetProgress,
+    activeSetId,
+    updateSetProgress,
+    addSet,
+    isLoading,
+    exportSet 
+  } = useSet();
+  
   const [index, setIndex] = useState<number>(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [localMnemonics, setLocalMnemonics] = useState<{[key: number]: string}>({});
   const [cardProgress, setCardProgress] = useState<CardProgress>(() => {
     try {
-      const saved = localStorage.getItem('cardProgress');
-      return saved ? JSON.parse(saved) : {};
+      // Initialize from the activeSetProgress if available
+      return activeSetProgress as unknown as CardProgress || {};
     } catch {
       return {};
     }
@@ -411,10 +416,30 @@ export default function ThaiFlashcards() {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));
   }, [activeCards]);
 
-  // Save current set name whenever it changes
+  // Convert and update progress tracking to context format
   useEffect(() => {
-    localStorage.setItem('currentSetName', currentSetName);
-  }, [currentSetName]);
+    if (Object.keys(cardProgress).length > 0) {
+      // Convert from CardProgress to SetProgress format
+      const setProgressData: typeof activeSetProgress = {};
+      
+      // Convert each card's progress data to the new format
+      Object.entries(cardProgress).forEach(([cardIndexStr, progressData]) => {
+        const cardIndex = parseInt(cardIndexStr);
+        const lastReview = progressData.reviews[progressData.reviews.length - 1];
+        
+        setProgressData[cardIndex] = {
+          srsLevel: lastReview.repetitions || 0,
+          nextReviewDate: progressData.nextReviewDate,
+          lastReviewedDate: lastReview.date,
+          difficulty: lastReview.difficulty,
+          repetitions: lastReview.repetitions,
+          easeFactor: lastReview.easeFactor
+        };
+      });
+      
+      updateSetProgress(setProgressData);
+    }
+  }, [cardProgress, updateSetProgress]);
 
   // Update the speak helper function definition in page.tsx
   const speak = async (text: string, isWord: boolean = true, isMale: boolean) => {
@@ -1004,25 +1029,14 @@ export default function ThaiFlashcards() {
     input.click();
   };
 
-  // Rename and refactor Export function
+  // Updated exportCurrentSet function to use context
   const exportCurrentSet = () => {
-    // Prepare data: Base phrases and current user mnemonics
-    const dataToExport = {
-      phrases: phrases, // Export the current state of phrases
-      mnemonics: mnemonics // Export the current state of mnemonics
-    };
-    
-    const dataStr = JSON.stringify(dataToExport, null, 2); // Pretty print JSON
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = 'thai-flashcards-set.json'; // New default name
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    if (activeSetId) {
+      exportSet(activeSetId);
+    }
   };
 
-  // Rename and refactor Import function
+  // Updated importSet function to use context
   const importSet = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -1031,52 +1045,34 @@ export default function ThaiFlashcards() {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
           try {
             const importedData = JSON.parse(event.target?.result as string);
             
-            // Validate imported data structure (basic check)
+            // Validate imported data structure
             if (!Array.isArray(importedData.phrases)) {
               throw new Error('Invalid file structure. Expected phrases array in the imported set.');
             }
 
-            // --- Apply Imported Data --- 
-            // 1. Replace Phrases
-            setPhrases(importedData.phrases);
+            // Prepare metadata for the set
+            const setData = {
+              name: importedData.name || file.name.replace(/\.[^/.]+$/, ""),
+              level: importedData.level || 'beginner',
+              goals: importedData.goals || [],
+              specificTopics: importedData.specificTopics,
+              source: 'import' as const
+            };
             
-            // 2. Replace Mnemonics if they exist
-            if (importedData.mnemonics) {
-              setMnemonics(importedData.mnemonics);
-              localStorage.setItem('mnemonics', JSON.stringify(importedData.mnemonics));
-            }
+            // Add the set using context
+            const newSetId = await addSet(setData, importedData.phrases as GeneratorPhrase[]);
             
-            // 3. Set the name if it exists, otherwise use the file name
-            if (importedData.name) {
-              setCurrentSetName(importedData.name);
-            } else {
-              // Extract name from filename (remove extension)
-              const fileName = file.name.replace(/\.[^/.]+$/, "");
-              setCurrentSetName(fileName);
-            }
-            
-            // 4. Reset Learning Progress
-            setCardProgress({});
-            localStorage.removeItem('cardProgress');
-            console.log("Learning progress reset due to new set import.");
-            
-            // 5. Reset UI State
+            // Reset UI State
             setIndex(0); 
             setActiveCardsIndex(0);
             setShowAnswer(false);
             setRandomSentence(null);
             
-            // 6. Reset active cards
-            const initialActive = Array.from({ length: Math.min(5, importedData.phrases.length) }, (_, i) => i);
-            setActiveCards(initialActive);
-            localStorage.setItem('activeCards', JSON.stringify(initialActive));
-            
-            alert(`Successfully imported "${currentSetName}" with ${importedData.phrases.length} phrases.`);
-
+            alert(`Successfully imported "${setData.name}" with ${importedData.phrases.length} phrases.`);
           } catch (error: any) {
             alert(`Import failed: ${error.message}`);
             console.error("Import error:", error);
@@ -1096,19 +1092,19 @@ export default function ThaiFlashcards() {
           <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-48 w-auto" />
           <div className="flex flex-col">
             <div className="text-xl text-white font-semibold">Thai Flashcards</div>
-            <div className="text-sm text-gray-400">Current Set: <span className="text-blue-400 font-medium">{currentSetName}</span></div>
+            <SetSelector />
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setShowHowItWorks(true)} className="neumorphic-button text-xs text-blue-400">How It Works</button>
           <button onClick={() => setShowVocabulary(true)} className="neumorphic-button text-xs text-blue-400">
-            {currentSetName === "Default Set" ? "Vocabulary" : `${currentSetName} Cards`}
+            Vocabulary
           </button>
           <button 
             onClick={() => setShowMnemonicsModal(true)} 
             className="neumorphic-button text-xs text-blue-400"
           >
-            {currentSetName === "Default Set" ? "Mnemonics" : `${currentSetName} Mnemonics`}
+            Mnemonics
           </button>
           <button 
             onClick={() => window.open('/set-wizard', '_blank')} 

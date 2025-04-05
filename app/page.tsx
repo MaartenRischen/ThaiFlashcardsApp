@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Switch } from "@/app/components/ui/switch";
 import { ttsService } from './lib/tts-service';
 import AdminSettings from './components/AdminSettings';
@@ -313,11 +313,19 @@ export default function ThaiFlashcards() {
     activeSetContent: phrases, 
     activeSetProgress,
     activeSetId,
+    availableSets,
     updateSetProgress,
     addSet,
     isLoading,
-    exportSet 
+    exportSet,
+    switchSet
   } = useSet();
+  
+  // Derive current set name from context instead of using state
+  const currentSetName = useMemo(() => {
+    const activeSet = availableSets.find(set => set.id === activeSetId);
+    return activeSet?.name || "Default Set";
+  }, [availableSets, activeSetId]);
   
   const [index, setIndex] = useState<number>(0);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -963,72 +971,6 @@ export default function ThaiFlashcards() {
     linkElement.click();
   };
 
-  // Rename and refactor Import function
-  const importPhraseData = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          try {
-            const importedData = JSON.parse(event.target?.result as string);
-            
-            // Validate imported data structure (basic check)
-            if (!Array.isArray(importedData.phrases)) {
-              throw new Error('Invalid file structure. Expected phrases array in the imported set.');
-            }
-
-            // --- Apply Imported Data --- 
-            // 1. Replace Phrases
-            setPhrases(importedData.phrases);
-            
-            // 2. Replace Mnemonics if they exist
-            if (importedData.mnemonics) {
-              setMnemonics(importedData.mnemonics);
-              localStorage.setItem('mnemonics', JSON.stringify(importedData.mnemonics));
-            }
-            
-            // 3. Set the name if it exists, otherwise use the file name
-            if (importedData.name) {
-              setCurrentSetName(importedData.name);
-            } else {
-              // Extract name from filename (remove extension)
-              const fileName = file.name.replace(/\.[^/.]+$/, "");
-              setCurrentSetName(fileName);
-            }
-            
-            // 4. Reset Learning Progress
-            setCardProgress({});
-            localStorage.removeItem('cardProgress');
-            console.log("Learning progress reset due to new set import.");
-            
-            // 5. Reset UI State
-            setIndex(0); 
-            setActiveCardsIndex(0);
-            setShowAnswer(false);
-            setRandomSentence(null);
-            
-            // 6. Reset active cards
-            const initialActive = Array.from({ length: Math.min(5, importedData.phrases.length) }, (_, i) => i);
-            setActiveCards(initialActive);
-            localStorage.setItem('activeCards', JSON.stringify(initialActive));
-            
-            alert(`Successfully imported "${currentSetName}" with ${importedData.phrases.length} phrases.`);
-
-          } catch (error: any) {
-            alert(`Import failed: ${error.message}`);
-            console.error("Import error:", error);
-          }
-        };
-        reader.readAsText(file);
-      }
-    };
-    input.click();
-  };
-
   // Updated exportCurrentSet function to use context
   const exportCurrentSet = () => {
     if (activeSetId) {
@@ -1350,12 +1292,12 @@ export default function ThaiFlashcards() {
                     <button 
                       onClick={() => {
                         if (confirm(`Reset to Default Set? Your current set "${currentSetName}" will remain saved.`)) {
-                          setPhrases(INITIAL_PHRASES);
-                          setCurrentSetName("Default Set");
+                          // Use switchSet from context to switch to default set
+                          switchSet('default');
+                          // Reset UI state
                           setIndex(0);
                           setShowAnswer(false);
                           setRandomSentence(null);
-                          updateActiveCards();
                         }
                       }} 
                       className="neumorphic-button text-xs text-yellow-400"
@@ -1382,7 +1324,7 @@ export default function ThaiFlashcards() {
                   Export Set
                 </button>
                 <button 
-                  onClick={importPhraseData} 
+                  onClick={importSet} 
                   className="neumorphic-button w-full text-blue-400"
                 >
                   Import Set

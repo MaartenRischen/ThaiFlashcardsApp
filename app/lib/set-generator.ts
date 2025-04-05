@@ -39,6 +39,7 @@ export interface BatchError {
 
 export interface GenerationResult {
   phrases: Phrase[];
+  cleverTitle?: string;
   aggregatedErrors: (BatchError & { batchIndex: number })[];
   // Include summary data for client
   errorSummary?: {
@@ -71,7 +72,9 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
   // Define the output schema clearly for the AI
   const schemaDescription = `
   **Output Format:**
-  Generate a JSON array containing exactly ${count} unique flashcard objects. Each object MUST conform to the following TypeScript interface:
+  Generate a JSON object containing two keys: "cleverTitle" and "phrases".
+  - "cleverTitle": A short, witty, and clever title (under 50 characters) in English for this flashcard set, reflecting the level, goals, and topics.
+  - "phrases": An array containing exactly ${count} unique flashcard objects. Each phrase object MUST conform to the following TypeScript interface:
 
   \`\`\`typescript
   interface Phrase {
@@ -93,12 +96,12 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
   }
   \`\`\`
 
-  Ensure the entire response is ONLY the JSON array, starting with '[' and ending with ']'. Do not include any introductory text, explanations, or markdown formatting outside the JSON structure itself.
+  Ensure the entire response is ONLY the JSON object, starting with '{' and ending with '}'. Do not include any introductory text, explanations, or markdown formatting outside the JSON structure itself.
   `;
 
   // Construct the main prompt content
   let prompt = `
-  You are an expert AI assistant specialized in creating Thai language learning flashcards for English speakers. Your task is to generate ${count} flashcards tailored to the user's preferences.
+  You are an expert AI assistant specialized in creating Thai language learning flashcards for English speakers. Your task is to generate ${count} flashcards tailored to the user's preferences AND create a clever title for the set.
 
   **User Preferences:**
   - Proficiency Level: ${level}
@@ -106,8 +109,8 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
   ${specificTopics ? `- Specific Topics: ${specificTopics}` : ''}
 
   **Instructions:**
-  1.  Generate ${count} unique Thai vocabulary words or short phrases relevant to the user's preferences.
-  2.  For each entry, provide the data strictly following the JSON schema defined below.
+  1.  **Generate a Clever Title:** Create a short, witty, clever title (English, under 50 chars) for this flashcard set based on the preferences. Store this in the "cleverTitle" key.
+  2.  Generate ${count} unique Thai vocabulary words or short phrases relevant to the user's preferences for the "phrases" array.
   3.  **Politeness:** Correctly generate both masculine ("ครับ") and feminine ("ค่ะ") versions where appropriate (usually for full sentences or polite expressions). If the main 'thai' phrase is just a single word (like a noun), the polite versions might be the same as the base 'thai' version unless context implies politeness. Apply the same logic to example sentences.
   4.  **Pronunciation:** Use a clear, simple phonetic romanization system understandable to English speakers.
   5.  **Mnemonics:** Create helpful and concise mnemonics in English if possible.
@@ -116,7 +119,7 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
   8.  **Relevance:** Prioritize content directly related to the user's goals (${goals.join(', ')}) ${specificTopics ? `and specific topics (${specificTopics})` : ''}.
   9.  **Accuracy:** Ensure Thai spelling, translations, and pronunciations are accurate.
   10. **Cultural Nuance:** Generate culturally appropriate content.
-  ${existingPhrases && existingPhrases.length > 0 ? `11. **Avoid Duplicates:** Do not generate flashcards for the following English phrases: ${existingPhrases.join(', ')}` : ''}
+  11. **Avoid Duplicates:** Do not generate flashcards for the following English phrases: ${existingPhrases && existingPhrases.length > 0 ? existingPhrases.join(', ') : 'None'}
 
   ${schemaDescription}
   `;
@@ -180,11 +183,12 @@ function createBatchError(
 /**
  * Generates a batch of flashcards using the Gemini API
  * Enhanced with detailed logging and structured error handling
+ * Now expects { cleverTitle: string, phrases: Phrase[] } structure
  */
 async function generateFlashcardsBatch(
   prompt: string, 
   batchIndex: number
-): Promise<{phrases: Phrase[], error?: BatchError}> {
+): Promise<{phrases: Phrase[], cleverTitle?: string, error?: BatchError}> {
   // Log the prompt being sent to the API (truncated for brevity)
   console.log(`[Batch ${batchIndex}] Sending prompt to Gemini API (first 200 chars): 
     ${prompt.substring(0, 200)}...`);
@@ -226,14 +230,14 @@ async function generateFlashcardsBatch(
     console.log(`[Batch ${batchIndex}] Raw response text (first 200 chars): 
       ${responseText.substring(0, 200)}...`);
 
-    // Clean the response (Gemini might sometimes wrap JSON in markdown)
+    // Clean the response 
     const cleanedText = responseText.replace(/^```json\s*|```$/g, '').trim();
 
-    // Try to parse the JSON response in its own try-catch
+    // Try to parse the JSON object response
     let parsedResponse: any;
     try {
       parsedResponse = JSON.parse(cleanedText);
-      console.log(`[Batch ${batchIndex}] Successfully parsed JSON response`);
+      console.log(`[Batch ${batchIndex}] Successfully parsed JSON response object`);
     } catch (parseError: any) {
       console.error(`[Batch ${batchIndex}] Failed to parse JSON response:`, parseError);
       console.error(`[Batch ${batchIndex}] Problematic text: ${cleanedText.substring(0, 500)}...`);
@@ -250,22 +254,30 @@ async function generateFlashcardsBatch(
       };
     }
 
-    // Validate the response structure
-    if (!Array.isArray(parsedResponse)) {
-      console.error(`[Batch ${batchIndex}] API response is not a JSON array:`, parsedResponse);
+    // Validate the response structure - Expect an object with phrases array and title
+    if (typeof parsedResponse !== 'object' || parsedResponse === null || !Array.isArray(parsedResponse.phrases)) {
+      console.error(`[Batch ${batchIndex}] API response is not the expected object structure:`, parsedResponse);
       return {
         phrases: [],
         error: createBatchError('VALIDATION', 
-          `API response is not in the expected array format`,
+          `API response is not in the expected object format { cleverTitle: string, phrases: [] }`,
           { receivedType: typeof parsedResponse, value: parsedResponse })
       };
     }
+    
+    const phrasesArray = parsedResponse.phrases;
+    const cleverTitle = typeof parsedResponse.cleverTitle === 'string' ? parsedResponse.cleverTitle.trim() : undefined;
+    if (cleverTitle) {
+        console.log(`[Batch ${batchIndex}] Extracted cleverTitle: "${cleverTitle}"`);
+    } else {
+        console.warn(`[Batch ${batchIndex}] cleverTitle missing or not a string in response.`);
+    }
 
-    // Process and validate each item
+    // Process and validate each item in the phrases array
     const validPhrases: Phrase[] = [];
     const invalidItems: any[] = [];
 
-    for (const item of parsedResponse) {
+    for (const item of phrasesArray) {
       if (validatePhrase(item)) {
         // Clean and normalize data
         item.english = item.english.trim();
@@ -285,29 +297,32 @@ async function generateFlashcardsBatch(
     // Log the validation results
     console.log(`[Batch ${batchIndex}] Validation summary: ${validPhrases.length} valid phrases, ${invalidItems.length} invalid items`);
 
-    // If we have valid phrases but also some invalid ones, we'll return the valid ones with a partial error
+    // Handle partial validation errors
     if (validPhrases.length > 0 && invalidItems.length > 0) {
       return {
         phrases: validPhrases,
+        cleverTitle,
         error: createBatchError('VALIDATION', 
           `Some phrases (${invalidItems.length}) failed validation and were omitted`,
           { invalidItems })
       };
     }
     
-    // If all items failed validation
-    if (validPhrases.length === 0 && parsedResponse.length > 0) {
+    // Handle all items failing validation
+    if (validPhrases.length === 0 && phrasesArray.length > 0) {
       return {
         phrases: [],
+        cleverTitle,
         error: createBatchError('VALIDATION', 
           `All phrases failed validation checks`,
           { invalidItems })
       };
     }
 
-    // Success case - all valid or empty array returned
+    // Success case
     return {
       phrases: validPhrases,
+      cleverTitle
     };
 
   } catch (unexpectedError: any) {
@@ -324,15 +339,16 @@ async function generateFlashcardsBatch(
 
 /**
  * Main function to generate a complete custom flashcard set
- * Enhanced with improved error handling and detailed error reporting
+ * Updated to handle cleverTitle generation
  */
 export async function generateCustomSet(
   preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>,
   totalCount: number,
-  onProgressUpdate?: (progress: { completed: number, total: number }) => void
+  onProgressUpdate?: (progress: { completed: number, total: number, latestPhrases?: Phrase[] }) => void
 ): Promise<GenerationResult> {
   const allGeneratedPhrases: Phrase[] = [];
   const aggregatedErrors: (BatchError & { batchIndex: number })[] = [];
+  let extractedCleverTitle: string | undefined = undefined;
   
   let remainingCount = totalCount;
   let batchIndex = 0;
@@ -341,8 +357,7 @@ export async function generateCustomSet(
 
   while (remainingCount > 0 && allGeneratedPhrases.length < totalCount) {
     const currentBatchSize = Math.min(remainingCount, BATCH_SIZE);
-    const existingEnglish = allGeneratedPhrases.map(p => p.english); // Get already generated phrases
-
+    const existingEnglish = allGeneratedPhrases.map(p => p.english);
     const prompt = buildGenerationPrompt({
       ...preferences,
       count: currentBatchSize,
@@ -354,120 +369,130 @@ export async function generateCustomSet(
 
     let retries = 0;
     let success = false;
+    let batchAttemptPhrases: Phrase[] = []; // Phrases from the latest successful attempt within this batch's retries
     
     while (retries < MAX_RETRIES && !success) {
       console.log(`[Batch ${batchIndex}] Attempt ${retries + 1}/${MAX_RETRIES} start`);
+      batchAttemptPhrases = []; // Reset for this attempt
       
       try {
         const batchResult = await generateFlashcardsBatch(prompt, batchIndex);
         
-        // Check for batch error
+        // Capture title on first success
+        if (!extractedCleverTitle && batchResult.cleverTitle) {
+          extractedCleverTitle = batchResult.cleverTitle;
+          console.log(`[Batch ${batchIndex}] Captured cleverTitle: "${extractedCleverTitle}"`);
+        }
+        
         if (batchResult.error) {
-          console.error(`[Batch ${batchIndex}] Error in batch generation:`, batchResult.error);
-          
-          // Store the error with batch index
-          const errorWithBatch = { 
-            ...batchResult.error, 
-            batchIndex 
-          };
-          
-          // Only retry certain types of errors
-          const retryableErrorTypes: BatchErrorType[] = ['NETWORK', 'API', 'UNKNOWN'];
-          
-          if (retryableErrorTypes.includes(batchResult.error.type)) {
+          console.error(`[Batch ${batchIndex}] Error in batch attempt:`, batchResult.error);
+          const errorWithBatch = { ...batchResult.error, batchIndex };
+          const retryable = ['NETWORK', 'API', 'UNKNOWN'].includes(batchResult.error.type);
+
+          if (retryable) {
             retries++;
-            
             if (retries >= MAX_RETRIES) {
-              console.error(`[Batch ${batchIndex}] Max retries reached for batch.`);
+              console.error(`[Batch ${batchIndex}] Max retries reached.`);
               aggregatedErrors.push(errorWithBatch);
-              break; // Stop retrying this batch
+              break; // Exit retry loop for this batch
             }
-            
-            // Add exponential backoff delay
+            // Wait and continue retry loop
             const backoffMs = 1000 * Math.pow(2, retries);
-            console.log(`[Batch ${batchIndex}] Retrying after ${backoffMs}ms delay...`);
+            console.log(`[Batch ${batchIndex}] Retrying after ${backoffMs}ms...`);
             await new Promise(resolve => setTimeout(resolve, backoffMs));
-            continue; // Try again
+            continue;
           } else {
-            // Non-retryable error, save and continue to next batch
+            // Non-retryable error
             aggregatedErrors.push(errorWithBatch);
-            // If we got some valid phrases despite the error, we'll consider it a partial success
+            // Check if we still got *some* phrases despite the error (e.g., validation error)
             if (batchResult.phrases.length > 0) {
-              success = true;
-            } else {
-              break; // No phrases and non-retryable error, move to next batch
+               const newPhrases = batchResult.phrases.filter(p => 
+                 !allGeneratedPhrases.some(existing => existing.english === p.english)
+               );
+               if (newPhrases.length > 0) {
+                   console.log(`[Batch ${batchIndex}] Partial success with non-retryable error. Adding ${newPhrases.length} phrases.`);
+                   allGeneratedPhrases.push(...newPhrases);
+                   remainingCount -= newPhrases.length;
+                   batchAttemptPhrases = newPhrases; // Store for progress update
+               }
             }
+            success = true; // Mark batch as processed (even if failed non-retryably)
+            break; // Exit retry loop
           }
         } else {
-          // No errors, mark as success
-          success = true;
-        }
-
-        // We got some valid phrases (either with or without error)
-        if (batchResult.phrases.length > 0) {
-          // Filter out potential duplicates
-          const newPhrases = batchResult.phrases.filter(p => 
-            !existingEnglish.includes(p.english)
-          );
-
-          console.log(`[Batch ${batchIndex}] Generated ${newPhrases.length} unique phrases (${batchResult.phrases.length} total, ${batchResult.phrases.length - newPhrases.length} duplicates filtered)`);
-          
-          allGeneratedPhrases.push(...newPhrases);
-          remainingCount -= newPhrases.length;
-
-          // Call progress update callback if provided
-          if (onProgressUpdate) {
-            onProgressUpdate({
-              completed: allGeneratedPhrases.length,
-              total: totalCount
-            });
+          // SUCCESSFUL BATCH ATTEMPT (no errors)
+          success = true; // Mark as successful
+          if (batchResult.phrases.length > 0) {
+            const newPhrases = batchResult.phrases.filter(p => 
+              !allGeneratedPhrases.some(existing => existing.english === p.english)
+            );
+            console.log(`[Batch ${batchIndex}] Success. Generated ${newPhrases.length} unique phrases.`);
+            allGeneratedPhrases.push(...newPhrases);
+            remainingCount -= newPhrases.length;
+            batchAttemptPhrases = newPhrases; // Store successful phrases
+          } else {
+            console.warn(`[Batch ${batchIndex}] Success, but 0 phrases returned.`);
           }
-
-          // If the API returned fewer valid cards than requested, log it
-          if (batchResult.phrases.length < currentBatchSize) {
-            console.warn(`[Batch ${batchIndex}] Batch generation returned ${batchResult.phrases.length}/${currentBatchSize} valid cards.`);
-          }
-        } else if (success) {
-          // This is the case where we got no phrases but no error either
-          console.warn(`[Batch ${batchIndex}] Batch generated 0 phrases but no error was reported.`);
-          aggregatedErrors.push({
-            type: 'VALIDATION',
-            message: 'Batch generated 0 valid phrases',
-            details: { prompt: prompt.substring(0, 200) + '...' },
-            timestamp: new Date().toISOString(),
-            batchIndex
-          });
         }
       } catch (error: any) {
-        // This should rarely happen now that generateFlashcardsBatch handles its errors internally
         retries++;
-        console.error(`[Batch ${batchIndex}] Uncaught error in generateCustomSet (Attempt ${retries}/${MAX_RETRIES}):`, error);
-        
+        console.error(`[Batch ${batchIndex}] Uncaught error in generateCustomSet loop (Attempt ${retries}/${MAX_RETRIES}):`, error);
         if (retries >= MAX_RETRIES) {
           console.error(`[Batch ${batchIndex}] Max retries reached for uncaught error.`);
           aggregatedErrors.push({
-            type: 'UNKNOWN',
-            message: `Uncaught error: ${error.message}`,
+            type: 'UNKNOWN', message: `Uncaught error: ${error.message}`,
             details: { error: error.toString(), stack: error.stack },
-            timestamp: new Date().toISOString(),
-            batchIndex
+            timestamp: new Date().toISOString(), batchIndex
           });
-          break; // Stop retrying this batch
+          break; 
         }
-        
-        // Add exponential backoff delay
         await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
       }
-    }
+    } // End retry loop
     
-    // If a batch permanently failed, adjust the remaining count
+    // --- Logging and Progress Update Call --- 
+    if (success) {
+        console.log(`[Batch ${batchIndex}] Overall SUCCEEDED.`);
+        if (onProgressUpdate) {
+            if (batchAttemptPhrases.length > 0) {
+                console.log(` --> Calling onProgressUpdate with ${batchAttemptPhrases.length} latest phrases.`);
+                onProgressUpdate({
+                    completed: allGeneratedPhrases.length,
+                    total: totalCount,
+                    latestPhrases: batchAttemptPhrases
+                });
+            } else {
+                console.log(` --> Batch succeeded but 0 new phrases. Calling onProgressUpdate just for count.`);
+                onProgressUpdate({
+                    completed: allGeneratedPhrases.length,
+                    total: totalCount,
+                    latestPhrases: [] // Send empty array
+                });
+            }
+        } else {
+            console.log(` --> onProgressUpdate callback not provided.`);
+        }
+    } else {
+        console.log(`[Batch ${batchIndex}] Overall FAILED (Max retries or non-retryable error with 0 phrases).`);
+        // Optionally, still call onProgressUpdate to update the count even on failure
+        if (onProgressUpdate) {
+             console.log(` --> Calling onProgressUpdate to update completed count despite batch failure.`);
+             onProgressUpdate({
+                completed: allGeneratedPhrases.length,
+                total: totalCount,
+                latestPhrases: [] // No new phrases on failure
+             });
+        }
+    }
+    // --- End Logging and Progress Update Call ---
+    
     if (!success) {
-      remainingCount -= currentBatchSize;
-      console.log(`[Batch ${batchIndex}] Batch failed, adjusting remaining count to ${remainingCount}`);
+      remainingCount -= currentBatchSize; // Assume the whole batch size failed
+      console.log(`[Batch ${batchIndex}] Adjusting remaining count to ${remainingCount}`);
     }
     
-    // Move to next batch
     batchIndex++;
+    console.log(`[Batch ${batchIndex-1}] Finished processing batch.`);
   }
 
   // Create an error summary for client consumption
@@ -488,7 +513,7 @@ export async function generateCustomSet(
     userMessage
   };
 
-  console.log(`Total generation complete. Generated ${allGeneratedPhrases.length}/${totalCount} phrases. ${aggregatedErrors.length} batch errors.`);
+  console.log(`Total generation complete. Generated ${allGeneratedPhrases.length}/${totalCount} phrases. Title: "${extractedCleverTitle || 'N/A'}". ${aggregatedErrors.length} batch errors.`);
   
   if (aggregatedErrors.length > 0) {
     console.log('Error summary:', JSON.stringify(errorSummary));
@@ -497,6 +522,7 @@ export async function generateCustomSet(
 
   return {
     phrases: allGeneratedPhrases,
+    cleverTitle: extractedCleverTitle,
     aggregatedErrors,
     errorSummary
   };

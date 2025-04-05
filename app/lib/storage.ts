@@ -12,6 +12,7 @@ const setProgressKey = (id: string) => `${PREFIX}progress_${id}`;
 export interface SetMetaData {
   id: string;
   name: string;
+  cleverTitle?: string;
   createdAt: string;
   phraseCount: number;
   level?: string;
@@ -23,16 +24,15 @@ export interface SetMetaData {
 export interface CardProgressData {
   srsLevel: number;
   nextReviewDate: string;
-  lastReviewedDate?: string;
-  difficulty?: 'hard' | 'good' | 'easy';
-  repetitions?: number;
-  easeFactor?: number;
-  isLearned?: boolean;
+  lastReviewedDate: string;
+  difficulty: 'new' | 'hard' | 'good' | 'easy';
+  repetitions: number;
+  easeFactor: number;
 }
 
-export type SetProgress = {
-  [phraseIndex: number]: CardProgressData;
-};
+export interface SetProgress {
+  [cardIndex: number]: CardProgressData;
+}
 
 // Helper Functions
 

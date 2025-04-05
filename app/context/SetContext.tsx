@@ -17,6 +17,7 @@ interface SetContextProps {
   updateSetProgress: (newProgress: SetProgress) => void;
   deleteSet: (setId: string) => Promise<void>;
   exportSet: (setId: string) => void;
+  renameSet: (setId: string, newTitle: string) => Promise<void>;
 }
 
 const SetContext = createContext<SetContextProps | undefined>(undefined);
@@ -230,6 +231,37 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [availableSets]);
 
+  const renameSet = useCallback(async (setId: string, newTitle: string) => {
+    console.log(`renameSet called: setId=${setId}, newTitle="${newTitle}"`);
+    if (!newTitle.trim()) {
+      alert("Set title cannot be empty.");
+      return;
+    }
+    
+    const currentSets = storage.getAvailableSets();
+    const setIndex = currentSets.findIndex(set => set.id === setId);
+    
+    if (setIndex === -1) {
+      console.error(`Set with ID ${setId} not found for renaming.`);
+      alert("Error: Could not find the set to rename.");
+      return;
+    }
+    
+    const updatedSetData = { 
+      ...currentSets[setIndex], 
+      cleverTitle: newTitle.trim(), // Update cleverTitle primarily
+      name: newTitle.trim() // Also update name for consistency/fallback
+    };
+    
+    const updatedSets = [...currentSets];
+    updatedSets[setIndex] = updatedSetData;
+    
+    storage.saveAvailableSets(updatedSets);
+    setAvailableSets(updatedSets);
+    console.log(`Set ${setId} renamed to "${newTitle.trim()}"`);
+    
+  }, []); // Dependency array might need other state if used
+
   return (
     <SetContext.Provider
       value={{
@@ -242,7 +274,8 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
         addSet,
         updateSetProgress,
         deleteSet,
-        exportSet
+        exportSet,
+        renameSet
       }}
     >
       {children}

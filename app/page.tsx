@@ -409,7 +409,7 @@ export default function ThaiFlashcards() {
     try {
       await ttsService.speak({
         text,
-        isMale,
+        genderValue: isMale,
         onStart: () => console.log('Speech started'),
         onEnd: () => { if (isWord) setIsPlayingWord(false); else setIsPlayingContext(false); console.log('Speech ended'); },
         onError: (error) => { if (isWord) setIsPlayingWord(false); else setIsPlayingContext(false); console.error('TTS error:', error); }

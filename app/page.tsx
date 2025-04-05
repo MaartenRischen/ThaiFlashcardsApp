@@ -339,6 +339,9 @@ export default function ThaiFlashcards() {
     switchSet
   } = useSet();
   
+  // Log activeSetProgress whenever the component renders
+  console.log("ThaiFlashcards Rendering - ActiveSetProgress:", JSON.stringify(activeSetProgress));
+  
   // Derive current set name from context instead of using state
   const currentSetName = useMemo(() => {
     const activeSet = availableSets.find(set => set.id === activeSetId);
@@ -669,18 +672,20 @@ export default function ThaiFlashcards() {
   };
 
   // Helper function to get status color and label
-  const getStatusInfo = (status: string) => {
+  const getStatusInfo = (status: CardStatus): { color: string, label: string } => {
+    console.log(`getStatusInfo called with status: ${status}`); // Log input status
     switch(status) {
       case 'unseen':
         return { color: 'bg-gray-700 text-gray-300', label: 'Unseen' };
-      case 'hard':
+      case 'wrong': // Changed from 'hard' to match getCardStatus output
         return { color: 'bg-red-600 text-white', label: 'Wrong' };
-      case 'good':
-        return { color: 'bg-yellow-500 text-black', label: 'Correct' };
-      case 'easy':
-        return { color: 'bg-green-500 text-white', label: 'Easy' };
+      case 'due': // Added case for 'due'
+        return { color: 'bg-blue-500 text-white', label: 'Due' };
+      case 'reviewed': // Changed from 'easy'/'good' to 'reviewed'
+        return { color: 'bg-green-500 text-white', label: 'Learned' }; // Label it 'Learned' for simplicity
       default:
-        return { color: 'bg-gray-700 text-gray-300', label: 'Unseen' };
+        console.warn(`getStatusInfo: Unknown status '${status}'`);
+        return { color: 'bg-gray-700 text-gray-300', label: 'Unknown' }; // Default fallback
     }
   };
 
@@ -748,10 +753,12 @@ export default function ThaiFlashcards() {
     };
 
     // Update the context progress state
-    updateSetProgress({
+    const newProgressState = {
       ...activeSetProgress,
       [index]: updatedCardProgressData
-    });
+    };
+    console.log(`handleCardAction: Updating progress for index ${index} with:`, JSON.stringify(updatedCardProgressData)); // Log update data
+    updateSetProgress(newProgressState);
 
     // --- Rest of handleCardAction logic (moving to next card) remains the same --- 
     const newActiveCardsIndex = activeCardsIndex + 1;
@@ -900,19 +907,29 @@ export default function ThaiFlashcards() {
   const getCardStatus = (cardIndex: number): CardStatus => {
     // Use activeSetProgress directly
     const progress = activeSetProgress[cardIndex];
+    console.log(`getCardStatus(${cardIndex}): Progress =`, JSON.stringify(progress)); // Log progress being read
+    
+    let status: CardStatus = 'unseen'; // Default status
     if (!progress || !progress.lastReviewedDate || progress.lastReviewedDate === 'never') {
-      return 'unseen';
+      status = 'unseen';
+    } else if (progress.difficulty === 'hard') {
+      status = 'wrong'; 
+    } else {
+      try {
+        const nextReviewDate = new Date(progress.nextReviewDate);
+        if (nextReviewDate <= new Date()) {
+          status = 'due';
+        } else {
+          status = 'reviewed';
+        }
+      } catch (e) {
+        console.error(`Error parsing nextReviewDate for card ${cardIndex}:`, progress.nextReviewDate, e);
+        status = 'unseen'; // Fallback if date is invalid
+      }
     }
-    // Directly use difficulty from SetProgress
-    if (progress.difficulty === 'hard') {
-      return 'wrong'; 
-    }
-    const nextReviewDate = new Date(progress.nextReviewDate);
-    if (nextReviewDate <= new Date()) {
-      return 'due';
-    }
-    // If not hard and not due, consider it 'reviewed'
-    return 'reviewed'; 
+    
+    console.log(`getCardStatus(${cardIndex}): Returning Status =`, status); // Log calculated status
+    return status;
   };
 
   return (

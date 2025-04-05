@@ -54,10 +54,10 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
     }
     try {
       setIsTesting(true);
-      // Use genderValue: 100 (Male) for the test call
+      // Use genderValue: isMale for the test call (true is male, false is female)
       await ttsService.speak({
         text: testVoice || 'สวัสดีครับ ทดสอบเสียง', // Default Thai test phrase
-        genderValue: 100, // Use genderValue instead of isMale
+        genderValue: isMale, // Use genderValue matching the isMale state
         onEnd: () => setIsTesting(false),
         onError: (err) => {
           console.error("TTS Test Error:", err);

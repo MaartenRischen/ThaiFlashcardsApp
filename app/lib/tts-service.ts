@@ -4,7 +4,7 @@
 // Define interfaces for parameters
 interface SpeakParams {
   text: string;
-  genderValue: number; // 0=Female, 100=Male
+  genderValue: boolean; // Use boolean for gender value: true for Male, false for Female
   onStart?: () => void;
   onEnd?: () => void;
   onError?: (error: any) => void;
@@ -102,13 +102,10 @@ export const ttsService = {
         let targetVoice: SpeechSynthesisVoice | undefined;
         
         // Determine if text requires male or female voice characteristics (for selection)
-        const isTextMale = genderValue >= 50;
-
-        // Attempt to find gender-specific voice name clues
-        if (isTextMale) {
+        if (genderValue) { // Check genderValue (true for Male)
             targetVoice = thaiVoices.find(v => v.name.toLowerCase().includes('male') || v.name.includes('Niwat') || v.name.includes('Kritt'));
         }
-        if (!targetVoice && !isTextMale) { 
+        if (!targetVoice && !genderValue) { // Check genderValue (false for Female)
             targetVoice = thaiVoices.find(v => v.name.toLowerCase().includes('female') || v.name.includes('Patchara') || v.name.includes('Ayutthaya') || v.name.includes('Kanya')); // Added Kanya
         }
         if (!targetVoice && thaiVoices.length > 0) { 
@@ -125,18 +122,17 @@ export const ttsService = {
              utterance.lang = 'th-TH'; 
         }
 
-        // *** Calculate pitch based on genderValue (0-100) ***
-        // Map 0 -> 2.0, 100 -> 0.5 (Range of 1.5)
-        const pitch = 2.0 - (1.5 * (genderValue / 100.0));
-        utterance.pitch = Math.max(0.0, Math.min(2.0, pitch)); // Clamp between 0.0 and 2.0
+        // *** Set pitch based on genderValue ***
+        if (genderValue) { // Check genderValue (true for Male)
+            utterance.pitch = 0.25; // Two octaves lower
+            utterance.rate = 0.95;
+            console.log(`Applied pitch: ${utterance.pitch.toFixed(2)}, rate: ${utterance.rate.toFixed(2)} for male voice.`);
+        } else { // Female voice
+            utterance.pitch = 1.0; // Default pitch
+            utterance.rate = 1.0;
+            console.log(`Applied pitch: ${utterance.pitch.toFixed(2)}, rate: ${utterance.rate.toFixed(2)} for female voice.`);
+        }
         
-        // *** Calculate rate based on genderValue ***
-        // Slightly slower for male range
-        utterance.rate = genderValue >= 50 ? 0.95 : 1.0;
-        
-        console.log(`GenderValue: ${genderValue}, Applied pitch: ${utterance.pitch.toFixed(2)}, rate: ${utterance.rate.toFixed(2)}`);
-        // *************************************************************
-
         utterance.onend = () => {
             console.log('Browser TTS playback finished.');
             onEnd?.(); // Call original onEnd callback

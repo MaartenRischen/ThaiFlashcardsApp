@@ -2,6 +2,174 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { generateCustomSet, createCustomSet, Phrase, generateSingleFlashcard } from '../lib/set-generator';
+
+// Card Editor component for previewing and editing generated cards
+const CardEditor = ({ 
+  phrase, 
+  onChange,
+  onRegenerate,
+  index,
+  level,
+  goals,
+  specificTopics
+}: { 
+  phrase: Phrase, 
+  onChange: (index: number, updatedPhrase: Phrase) => void,
+  onRegenerate: (index: number) => void,
+  index: number,
+  level: string,
+  goals: string[],
+  specificTopics?: string
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedPhrase, setEditedPhrase] = useState<Phrase>(phrase);
+
+  const handleUpdate = () => {
+    onChange(index, editedPhrase);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditedPhrase(phrase);
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="bg-gray-800 rounded-lg p-4 mb-4">
+      {isEditing ? (
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">English</label>
+            <input 
+              value={editedPhrase.english}
+              onChange={(e) => setEditedPhrase({...editedPhrase, english: e.target.value})}
+              className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Thai</label>
+            <input 
+              value={editedPhrase.thai}
+              onChange={(e) => setEditedPhrase({...editedPhrase, thai: e.target.value})}
+              className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Thai (Masculine)</label>
+            <input 
+              value={editedPhrase.thaiMasculine}
+              onChange={(e) => setEditedPhrase({...editedPhrase, thaiMasculine: e.target.value})}
+              className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Thai (Feminine)</label>
+            <input 
+              value={editedPhrase.thaiFeminine}
+              onChange={(e) => setEditedPhrase({...editedPhrase, thaiFeminine: e.target.value})}
+              className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Pronunciation</label>
+            <input 
+              value={editedPhrase.pronunciation}
+              onChange={(e) => setEditedPhrase({...editedPhrase, pronunciation: e.target.value})}
+              className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Mnemonic</label>
+            <textarea 
+              value={editedPhrase.mnemonic || ''}
+              onChange={(e) => setEditedPhrase({...editedPhrase, mnemonic: e.target.value})}
+              className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white"
+              rows={2}
+            />
+          </div>
+          
+          <div className="flex space-x-2">
+            <button 
+              onClick={handleUpdate}
+              className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+            >
+              Save
+            </button>
+            <button 
+              onClick={handleCancel}
+              className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div className="flex justify-between mb-2">
+            <h3 className="text-lg font-bold text-white">
+              {phrase.english}
+            </h3>
+            <div className="flex space-x-2">
+              <button 
+                onClick={() => setIsEditing(true)}
+                className="text-blue-400 hover:text-blue-300 text-sm"
+              >
+                Edit
+              </button>
+              <button 
+                onClick={() => onRegenerate(index)}
+                className="text-green-400 hover:text-green-300 text-sm"
+              >
+                Regenerate
+              </button>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-2xl mb-1">{phrase.thai}</p>
+              <div className="flex space-x-4 text-sm text-gray-400">
+                <span>♂ {phrase.thaiMasculine}</span>
+                <span>♀ {phrase.thaiFeminine}</span>
+              </div>
+              <p className="text-gray-400 mt-2 italic">
+                {phrase.pronunciation}
+              </p>
+            </div>
+            
+            <div>
+              {phrase.mnemonic && (
+                <div className="mb-3">
+                  <p className="text-sm text-gray-400">Mnemonic:</p>
+                  <p className="text-gray-300">{phrase.mnemonic}</p>
+                </div>
+              )}
+              
+              {phrase.examples && phrase.examples.length > 0 && (
+                <div>
+                  <p className="text-sm text-gray-400 mb-1">Example:</p>
+                  <p className="text-gray-300">{phrase.examples[0].thai}</p>
+                  <p className="text-gray-400 italic text-sm">
+                    {phrase.examples[0].pronunciation}
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    {phrase.examples[0].translation}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const SetWizardPage = () => {
   const router = useRouter();
@@ -11,8 +179,14 @@ const SetWizardPage = () => {
   const [specificTopics, setSpecificTopics] = useState<string>('');
   const [generatedSetName, setGeneratedSetName] = useState<string>('');
   const [customSetName, setCustomSetName] = useState<string>('');
-  const [totalSteps] = useState(4);
+  const [totalSteps] = useState(5); // Now 5 steps including generation and preview
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState({ completed: 0, total: 0 });
+  const [generatedPhrases, setGeneratedPhrases] = useState<Phrase[]>([]);
+  const [generationErrors, setGenerationErrors] = useState<any[]>([]);
+  const [cardCount, setCardCount] = useState(15); // Default to 15 cards
+  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   // Generate a unique set name when component mounts
   useEffect(() => {
@@ -50,7 +224,12 @@ const SetWizardPage = () => {
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
+      if (currentStep === 3) {
+        // About to enter the generation step - start generation process
+        startGeneration();
+      } else {
+        setCurrentStep(currentStep + 1);
+      }
     }
   };
 
@@ -66,47 +245,101 @@ const SetWizardPage = () => {
     );
   };
 
-  const handleCreateSet = () => {
-    // In the future, this will generate a custom set based on user preferences
-    // For now, we'll just export a simple structure
+  const startGeneration = async () => {
     setIsGenerating(true);
-    
-    setTimeout(() => {
-      // Placeholder for actual set generation
-      // In a real implementation, this would create phrases based on level and goals
-      const newSet = {
-        name: customSetName,
-        level: thaiLevel,
-        goals: learningGoals,
-        specificTopics: specificTopics,
-        createdAt: new Date().toISOString(),
-        phrases: [
-          // This would be filled with actual phrases based on the user's selections
-          // Just a placeholder for now
-        ],
-        mnemonics: {}
-      };
+    setGenerationProgress({ completed: 0, total: cardCount });
+    setCurrentStep(4); // Move to generation step
+
+    try {
+      // Call the generation service
+      const result = await generateCustomSet(
+        {
+          level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
+          goals: learningGoals,
+          specificTopics: specificTopics || undefined
+        },
+        cardCount,
+        (progress) => {
+          setGenerationProgress(progress);
+        }
+      );
+
+      setGeneratedPhrases(result.phrases);
+      setGenerationErrors(result.errors);
       
-      // Open the download dialog
-      const dataStr = JSON.stringify(newSet, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-      const exportFileName = customSetName.replace(/\s+/g, '-').toLowerCase() + '.json';
-      
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileName);
-      linkElement.click();
-      
+      // Automatically move to preview step after generation completes
+      setCurrentStep(5);
+    } catch (error) {
+      console.error("Failed to generate flashcard set:", error);
+      alert("There was an error generating your flashcard set. Please try again.");
+    } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleRegenerateCard = async (index: number) => {
+    if (isRegenerating) return;
+    
+    setIsRegenerating(true);
+    
+    try {
+      const newCard = await generateSingleFlashcard({
+        level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
+        goals: learningGoals,
+        specificTopics: specificTopics || undefined
+      });
       
-      // Show completion message
-      alert(`Your set "${customSetName}" has been created! You can import it from the main app's Settings menu.`);
-      
-      // Optionally redirect back to main app
-      if (confirm('Would you like to return to the main app now?')) {
-        router.push('/');
+      if (newCard) {
+        const updatedPhrases = [...generatedPhrases];
+        updatedPhrases[index] = newCard;
+        setGeneratedPhrases(updatedPhrases);
       }
-    }, 1500); // Simulate generation time
+    } catch (error) {
+      console.error("Failed to regenerate card:", error);
+      alert("Error regenerating this card. Please try again.");
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
+  const handleUpdateCard = (index: number, updatedPhrase: Phrase) => {
+    const updatedPhrases = [...generatedPhrases];
+    updatedPhrases[index] = updatedPhrase;
+    setGeneratedPhrases(updatedPhrases);
+  };
+
+  const handleCreateSet = () => {
+    if (generatedPhrases.length === 0) {
+      alert("No cards have been generated. Please go back and generate cards first.");
+      return;
+    }
+
+    // Create the final set object
+    const customSet = createCustomSet(
+      customSetName,
+      thaiLevel,
+      learningGoals,
+      specificTopics,
+      generatedPhrases
+    );
+    
+    // Convert to JSON and trigger download
+    const dataStr = JSON.stringify(customSet, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const exportFileName = customSetName.replace(/\s+/g, '-').toLowerCase() + '.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileName);
+    linkElement.click();
+    
+    // Show completion message
+    alert(`Your set "${customSetName}" has been created! You can import it from the main app's Settings menu.`);
+    
+    // Offer to return to main app
+    if (confirm('Would you like to return to the main app now?')) {
+      router.push('/');
+    }
   };
 
   return (
@@ -125,8 +358,8 @@ const SetWizardPage = () => {
             <div>
               <h2 className="text-2xl font-bold mb-4 text-blue-400">Welcome to the Set Wizard!</h2>
               <p className="mb-4">This tool will help you create a custom Thai flashcard set tailored to your learning goals.</p>
-              <p className="mb-6">We'll ask you a few questions about your Thai level and what you want to learn.</p>
-              <p className="text-yellow-400 mb-4">Note: Currently in development. In this version, you can set up your preferences but the generated set will be a placeholder.</p>
+              <p className="mb-6">We'll ask you a few questions about your Thai level and what you want to learn, then use AI to generate a personalized set of flashcards for you.</p>
+              <p className="text-yellow-400 mb-4">The flashcards will be generated using Gemini, which may take a few moments to complete.</p>
             </div>
           )}
           
@@ -184,14 +417,72 @@ const SetWizardPage = () => {
                   rows={3}
                 />
               </div>
+
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  How many cards would you like in your set?
+                </label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="5"
+                    max="30"
+                    step="5"
+                    value={cardCount}
+                    onChange={(e) => setCardCount(parseInt(e.target.value))}
+                    className="w-full"
+                  />
+                  <span className="font-medium text-blue-400">{cardCount}</span>
+                </div>
+              </div>
             </div>
           )}
           
-          {/* Step 4: Set Name */}
+          {/* Step 4: Generation */}
           {currentStep === 4 && (
+            <div className="text-center py-10">
+              <h2 className="text-2xl font-bold mb-6 text-blue-400">
+                Generating Your Custom Set
+              </h2>
+              
+              <div className="relative pt-1 mb-8">
+                <div className="h-2 bg-gray-700 rounded-full">
+                  <div 
+                    className="h-2 bg-blue-600 rounded-full" 
+                    style={{ width: `${Math.round((generationProgress.completed / generationProgress.total) * 100)}%` }}
+                  ></div>
+                </div>
+                <div className="mt-2 text-gray-400">
+                  Generated {generationProgress.completed} of {generationProgress.total} cards
+                </div>
+              </div>
+              
+              <div className="text-gray-300 animate-pulse">
+                {isGenerating 
+                  ? "Please wait while Gemini creates your custom Thai flashcards..." 
+                  : "Finishing up..."
+                }
+              </div>
+            </div>
+          )}
+          
+          {/* Step 5: Preview and Edit */}
+          {currentStep === 5 && (
             <div>
-              <h2 className="text-2xl font-bold mb-4 text-blue-400">Name Your Set</h2>
-              <p className="mb-4 text-gray-300">We've generated a name based on your preferences, but you can customize it:</p>
+              <h2 className="text-2xl font-bold mb-4 text-blue-400">
+                Review Your Flashcards
+              </h2>
+              
+              {generationErrors.length > 0 && (
+                <div className="bg-red-900 bg-opacity-30 border border-red-700 rounded p-4 mb-6">
+                  <p className="text-red-400 mb-1">
+                    There were some issues with card generation. {generatedPhrases.length} cards were generated successfully.
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    You can continue with the cards that were generated, or go back and try again.
+                  </p>
+                </div>
+              )}
               
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -208,7 +499,7 @@ const SetWizardPage = () => {
               <div className="bg-gray-800 p-4 rounded mb-6">
                 <h3 className="font-semibold mb-2">Set Summary</h3>
                 <ul className="space-y-2 text-gray-300">
-                  <li><span className="text-gray-400">Name:</span> {customSetName}</li>
+                  <li><span className="text-gray-400">Cards:</span> {generatedPhrases.length}</li>
                   <li><span className="text-gray-400">Level:</span> {thaiLevel.charAt(0).toUpperCase() + thaiLevel.slice(1)}</li>
                   <li>
                     <span className="text-gray-400">Goals:</span> {learningGoals.length > 0 
@@ -221,16 +512,58 @@ const SetWizardPage = () => {
                 </ul>
               </div>
               
+              <div className="mb-6">
+                <h3 className="font-semibold mb-4">Card Preview</h3>
+                
+                <div className="flex justify-between items-center mb-4">
+                  <div className="text-sm text-gray-400">
+                    Showing card {currentPreviewIndex + 1} of {generatedPhrases.length}
+                  </div>
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => setCurrentPreviewIndex(prev => Math.max(0, prev - 1))}
+                      disabled={currentPreviewIndex === 0}
+                      className={`px-3 py-1 rounded ${currentPreviewIndex === 0 ? 'bg-gray-700 text-gray-500' : 'bg-blue-600 text-white'}`}
+                    >
+                      Previous
+                    </button>
+                    <button 
+                      onClick={() => setCurrentPreviewIndex(prev => Math.min(generatedPhrases.length - 1, prev + 1))}
+                      disabled={currentPreviewIndex === generatedPhrases.length - 1}
+                      className={`px-3 py-1 rounded ${currentPreviewIndex === generatedPhrases.length - 1 ? 'bg-gray-700 text-gray-500' : 'bg-blue-600 text-white'}`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+                
+                {generatedPhrases.length > 0 ? (
+                  <CardEditor
+                    phrase={generatedPhrases[currentPreviewIndex]}
+                    onChange={handleUpdateCard}
+                    onRegenerate={handleRegenerateCard}
+                    index={currentPreviewIndex}
+                    level={thaiLevel}
+                    goals={learningGoals}
+                    specificTopics={specificTopics}
+                  />
+                ) : (
+                  <div className="text-center p-8 bg-gray-800 rounded">
+                    <p className="text-gray-400">No cards have been generated.</p>
+                  </div>
+                )}
+              </div>
+              
               <button 
                 onClick={handleCreateSet} 
-                disabled={isGenerating || !customSetName.trim()}
+                disabled={generatedPhrases.length === 0 || !customSetName.trim()}
                 className={`w-full py-3 rounded-lg font-bold ${
-                  isGenerating || !customSetName.trim() 
+                  generatedPhrases.length === 0 || !customSetName.trim() 
                     ? 'bg-gray-600 text-gray-400' 
                     : 'bg-green-600 hover:bg-green-700 text-white'
                 }`}
               >
-                {isGenerating ? 'Generating Set...' : 'Create My Custom Set'}
+                Create My Custom Set
               </button>
             </div>
           )}
@@ -240,20 +573,29 @@ const SetWizardPage = () => {
         <div className="flex justify-between">
           <button 
             onClick={handleBack} 
-            disabled={currentStep === 1}
+            disabled={currentStep === 1 || currentStep === 4}
             className={`py-2 px-6 rounded ${
-              currentStep === 1 ? 'bg-gray-700 text-gray-500' : 'bg-blue-600 hover:bg-blue-700 text-white'
+              currentStep === 1 || currentStep === 4 ? 'bg-gray-700 text-gray-500' : 'bg-blue-600 hover:bg-blue-700 text-white'
             }`}
           >
             Back
           </button>
           
-          {currentStep < totalSteps && (
+          {currentStep < totalSteps && currentStep !== 4 && (
             <button 
               onClick={handleNext}
-              className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded"
+              disabled={
+                (currentStep === 2 && !thaiLevel) || 
+                (currentStep === 3 && learningGoals.length === 0)
+              }
+              className={`py-2 px-6 rounded ${
+                ((currentStep === 2 && !thaiLevel) || 
+                (currentStep === 3 && learningGoals.length === 0)) 
+                  ? 'bg-gray-700 text-gray-500' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
             >
-              Next
+              {currentStep === 3 ? 'Generate Cards' : 'Next'}
             </button>
           )}
         </div>

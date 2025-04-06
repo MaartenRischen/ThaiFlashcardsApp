@@ -269,10 +269,10 @@ const SetWizardPage = () => {
   const startGeneration = async () => {
     setIsGenerating(true);
     setGenerationProgress({ completed: 0, total: cardCount });
-    setCurrentStep(4); // Move to generation step
-    setErrorSummary(null); // Clear previous errors
-    setAiGeneratedTitle(undefined); // Clear previous AI title
-    setGeneratingDisplayPhrases([]); // Reset
+    setCurrentStep(4); 
+    setErrorSummary(null); 
+    setAiGeneratedTitle(undefined); 
+    setGeneratingDisplayPhrases([]); // Reset display list
 
     try {
       const result = await generateCustomSet(
@@ -302,14 +302,14 @@ const SetWizardPage = () => {
         }
       );
 
-      setGeneratedPhrases(result.phrases);
+      setGeneratedPhrases(result.phrases); // Store the final complete list
       setGenerationErrors(result.aggregatedErrors);
       
-      // Capture AI Title and update customSetName if not already manually set
+      // Set final display list to the complete generated list
+      setGeneratingDisplayPhrases(result.phrases); 
+
       if (result.cleverTitle) {
         setAiGeneratedTitle(result.cleverTitle);
-        // Automatically use AI title if user hasn't typed a custom one yet
-        // Or maybe use a flag to track if user edited the name?
         setCustomSetName(result.cleverTitle); 
       }
       
@@ -318,13 +318,16 @@ const SetWizardPage = () => {
         setErrorSummary(result.errorSummary);
       }
       
-      // Automatically move to preview step after generation completes
-      setCurrentStep(5);
+      // --- REMOVED: No longer auto-advance --- 
+      // setCurrentStep(5);
+
     } catch (error) {
       console.error("Failed to generate flashcard set:", error);
       alert("There was an error generating your flashcard set. Please try again.");
+      // Optionally, handle error by allowing user to go back
+      // setCurrentStep(3); 
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false); // Mark generation as complete
     }
   };
 
@@ -518,14 +521,15 @@ const SetWizardPage = () => {
             </div>
           )}
           
-          {/* Step 4: Generation */}
+          {/* Step 4: Generation - Updated Logic */} 
           {currentStep === 4 && (
-            <div className="text-center py-10 flex flex-col items-center">
+            <div className="text-center py-10 flex flex-col items-center"> 
+              {/* Title changes based on generation state */} 
               <h2 className="text-2xl font-bold mb-6 text-blue-400">
-                Generating Your Custom Set
+                {isGenerating ? 'Generating Your Custom Set' : 'Generation Complete!'} 
               </h2>
               
-              {/* Input Summary - NEW */}
+              {/* Input Summary - Show always in Step 4 */} 
               <div className="w-full max-w-md text-left bg-gray-700 bg-opacity-40 rounded-lg p-3 mb-4 text-sm">
                  <p className="text-gray-400">
                    <span className="font-semibold text-gray-300">Level:</span> {thaiLevel.charAt(0).toUpperCase() + thaiLevel.slice(1)}
@@ -540,58 +544,77 @@ const SetWizardPage = () => {
                  )}
               </div>
               
-              {/* Progress Bar */} 
-              <div className="w-full max-w-md relative pt-1 mb-4">
-                 <div className="h-2 bg-gray-700 rounded-full">
-                   <div 
-                     className="h-2 bg-blue-600 rounded-full transition-width duration-300 ease-linear"
-                     style={{ width: `${Math.round((generationProgress.completed / generationProgress.total) * 100)}%` }}
-                   ></div>
-                 </div>
-                 <div className="mt-2 text-gray-400">
-                   Generated {generationProgress.completed} of {generationProgress.total} cards
-                 </div>
-               </div>
+              {/* Display minor error summary if present, even on success */} 
+              {errorSummary && errorSummary.totalErrors > 0 && (
+                  <div className="w-full max-w-md bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded p-3 mb-4 text-sm">
+                    <p className="text-yellow-400 mb-1">
+                        Note: {errorSummary.userMessage || 'Some minor issues occurred during generation.'}
+                    </p>
+                  </div>
+              )}
+              
+              {/* Show Progress Bar and Loading Text ONLY when generating */} 
+              {isGenerating && (
+                <>
+                  <div className="w-full max-w-md relative pt-1 mb-4">
+                    <div className="h-2 bg-gray-700 rounded-full">
+                      <div 
+                        className="h-2 bg-blue-600 rounded-full transition-width duration-300 ease-linear"
+                        style={{ width: `${Math.round((generationProgress.completed / generationProgress.total) * 100)}%` }}
+                      ></div>
+                    </div>
+                    <div className="mt-2 text-gray-400">
+                      Generated {generationProgress.completed} of {generationProgress.total} cards
+                    </div>
+                  </div>
+                  <div className="text-gray-300 animate-pulse mb-6">
+                    Please wait while Gemini creates your custom Thai flashcards...
+                  </div>
+                </>
+              )}
                
-               {/* Loading Text */} 
-               <div className="text-gray-300 animate-pulse mb-6">
-                  {isGenerating 
-                    ? "Please wait while Gemini creates your custom Thai flashcards..." 
-                    : "Finishing up..."
-                  }
-                </div>
-
-                {/* Real-time Phrase Display - Simplified Render */} 
-                <div className="w-full max-w-md text-left bg-gray-800 rounded-lg p-4 h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-                  <h4 className="text-sm font-semibold text-gray-400 mb-2">
-                    Generated Phrases: ({generatingDisplayPhrases.length} / {cardCount})
-                  </h4>
-                  {/* Log right before mapping */} 
-                  {(() => { 
-                      console.log(`Wizard Render Pass (Step 4): generatingDisplayPhrases length = ${generatingDisplayPhrases.length}`); 
-                      return null; 
-                  })()} 
-                  
-                  {/* --- Simplified Rendering (Temporary Diagnostic) --- */} 
-                  {generatingDisplayPhrases.length === 0 && (
-                     <p className="text-gray-500 text-sm italic">Waiting for first batch...</p>
-                  )}
-                  {generatingDisplayPhrases.map((phrase, index) => {
-                     // Log inside map 
-                     console.log(`Wizard Step 4 Render: Mapping item index ${index}, phrase: ${phrase.english}`);
-                     // Render directly, not inside ul/li 
-                     return (
-                       <p key={`${index}-${phrase.english}`} className="text-gray-300 text-sm">
-                         {index + 1}. {phrase.english} 
-                       </p>
-                     ); 
-                  })}
-                  {/* --- End Simplified Rendering --- */} 
-                </div>
+              {/* Real-time/Final Phrase Display */} 
+              <div className="w-full max-w-md text-left bg-gray-800 rounded-lg p-4 min-h-[12rem] max-h-[24rem] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                <h4 className="text-sm font-semibold text-gray-400 mb-2">
+                  Generated Phrases: ({generatingDisplayPhrases.length} / {cardCount})
+                </h4>
+                {/* ... logging ... */} 
+                {generatingDisplayPhrases.length === 0 && !isGenerating && ( // Show if empty AND finished
+                    <p className="text-red-400 text-sm italic">No phrases were generated. Please go back and adjust your inputs.</p>
+                )}
+                {generatingDisplayPhrases.length === 0 && isGenerating && (
+                   <p className="text-gray-500 text-sm italic">Waiting for first batch...</p>
+                )}
+                {generatingDisplayPhrases.map((phrase, index) => (
+                     <p key={`${index}-${phrase.english}`} className="text-gray-300 text-sm">
+                       {index + 1}. {phrase.thai} - {phrase.english}
+                     </p>
+                   )
+                )}
+              </div>
+              
+              {/* Show "Review" button if generation is complete AND *at least one card* was generated */} 
+              {!isGenerating && generatedPhrases.length > 0 && ( 
+                <button
+                  onClick={() => setCurrentStep(5)} 
+                  className="mt-6 neumorphic-button py-2 px-6 text-lg font-semibold text-green-400 hover:text-green-300"
+                >
+                  Review Set & Mnemonics ({generatedPhrases.length} cards)
+                </button>
+              )}
+              
+              {/* Show critical failure message ONLY if generation is complete AND *zero cards* were generated */} 
+              {!isGenerating && generatedPhrases.length === 0 && ( 
+                 <p className="mt-4 text-red-400">
+                    Generation failed or produced no cards. Please go back and adjust your inputs. 
+                    {/* Optionally display error type summary here too */} 
+                    {errorSummary?.userMessage && ` (${errorSummary.userMessage})`}
+                 </p>
+              )}
             </div>
           )}
           
-          {/* Step 5: Preview and Edit */}
+          {/* Step 5: Preview and Edit */} 
           {currentStep === 5 && (
             <div>
               <h2 className="text-2xl font-bold mb-4 text-blue-400">
@@ -632,11 +655,11 @@ const SetWizardPage = () => {
                 <input
                   type="text"
                   value={customSetName}
-                  onChange={(e) => setCustomSetName(e.target.value)} // Allow user editing
+                  onChange={(e) => setCustomSetName(e.target.value)}
                   className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white font-semibold text-lg"
                 />
                 {aiGeneratedTitle && customSetName === aiGeneratedTitle && (
-                    <p className="text-xs text-gray-400 mt-1 italic">✨ AI suggested title</p>
+                    <p className="text-xs text-gray-400 mt-1 italic">AI suggested title</p>
                 )}
               </div>
               
@@ -713,37 +736,40 @@ const SetWizardPage = () => {
           )}
         </div>
         
-        {/* Navigation Buttons */}
-        <div className="flex justify-between mt-8"> {/* Added margin top */} 
-          <button 
-            onClick={handleBack} 
-            // Disable back button on Step 1 and Step 4 (Generation in progress) 
-            disabled={currentStep === 1 || currentStep === 4} 
-            className={`py-2 px-6 rounded ${ 
-              (currentStep === 1 || currentStep === 4) ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }`}
-          >
-            Back
-          </button>
-          
-          {currentStep < totalSteps && currentStep !== 4 && (
-              <button 
+        {/* Navigation Buttons - Hide when generation complete but before review */}
+        {currentStep !== 4 || isGenerating ? ( 
+          <div className="flex justify-between mt-8">
+            {/* Back Button */} 
+            <button 
+              onClick={handleBack} 
+              disabled={currentStep === 1 || currentStep === 4} // Disable during generation
+              className={`neumorphic-button py-2 px-6 text-sm ${ 
+                (currentStep === 1 || currentStep === 4) ? 'text-gray-500 cursor-not-allowed' : 'text-blue-400 hover:text-blue-300'
+              }`}
+            >
+              Back
+            </button>
+            
+            {/* Next/Generate Button */} 
+            {currentStep < totalSteps && currentStep !== 4 && (
+              <button
                 onClick={handleNext}
                 disabled={ 
                   (currentStep === 2 && !thaiLevel) || 
                   (currentStep === 3 && learningGoals.length === 0) 
                 }
-                className={`py-2 px-6 rounded ${ 
+                className={`neumorphic-button py-2 px-6 text-sm font-semibold ${ 
                   ((currentStep === 2 && !thaiLevel) || 
                   (currentStep === 3 && learningGoals.length === 0)) 
-                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    ? 'text-gray-500 cursor-not-allowed'
+                    : (currentStep === 3 ? 'text-green-400 hover:text-green-300' : 'text-blue-400 hover:text-blue-300')
                 }`}
               >
                 {currentStep === 3 ? 'Generate Cards' : 'Next'}
               </button>
-          )}
-        </div>
+            )}
+          </div>
+        ) : null} {/* Hide nav buttons when generation is done, before clicking Review */} 
       </div>
     </div>
   );

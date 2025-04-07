@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "./prisma";
+import { prisma } from "@/app/lib/prisma";
 import bcrypt from "bcrypt";
 
 // Ensure we have a secret
@@ -36,7 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         try {
           const user = await prisma.user.findUnique({
             where: {
-              email: credentials.email,
+              email: credentials.email as string,
             },
           });
 
@@ -45,7 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
 
           const isPasswordValid = await bcrypt.compare(
-            credentials.password,
+            credentials.password as string,
             user.password
           );
 
@@ -67,16 +67,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async session({ session, token }) {  // Changed back to token parameter instead of user
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.name = token.name as string | null;
-        session.user.email = token.email as string | null;
+    async session({ session, token }) {
+      if (session.user && token.id) {
+        // Assign the id from token to session.user
+        session.user.id = token.id;
+        
+        // Keep the name and email if they exist
+        if (token.name) session.user.name = token.name;
+        if (token.email) session.user.email = token.email;
       }
       return session;
     },
-    async jwt({ token, user }) {  // Re-enabled the JWT callback
-      if (user) {
+    async jwt({ token, user }) {
+      if (user && typeof user.id === 'string') {
+        // Ensure user.id is copied to token
         token.id = user.id;
       }
       return token;

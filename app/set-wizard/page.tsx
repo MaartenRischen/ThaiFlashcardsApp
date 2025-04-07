@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { generateCustomSet, createCustomSet, Phrase, generateSingleFlashcard, BatchError } from '../lib/set-generator';
 import * as storage from '../lib/storage'; // Import storage functions
 import { SetMetaData } from '../lib/storage'; // Import SetMetaData type
+import { Slider } from "@/components/ui/slider"; // Import the slider component
 
 // Card Editor component for previewing and editing generated cards
 const CardEditor = ({ 
@@ -15,7 +16,12 @@ const CardEditor = ({
   index,
   level,
   goals,
-  specificTopics
+  specificTopics,
+  friendNames,
+  userName,
+  topicsToDiscuss,
+  topicsToAvoid,
+  seriousnessLevel
 }: { 
   phrase: Phrase, 
   onChange: (index: number, updatedPhrase: Phrase) => void,
@@ -23,7 +29,12 @@ const CardEditor = ({
   index: number,
   level: string,
   goals: string[],
-  specificTopics?: string
+  specificTopics?: string,
+  friendNames?: string[],
+  userName?: string,
+  topicsToDiscuss?: string,
+  topicsToAvoid?: string,
+  seriousnessLevel?: number
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPhrase, setEditedPhrase] = useState<Phrase>(phrase);
@@ -179,10 +190,13 @@ const SetWizardPage = () => {
   const { data: session, status } = useSession();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [thaiLevel, setThaiLevel] = useState<string>('beginner');
-  const [learningGoals, setLearningGoals] = useState<string[]>([]);
   const [specificTopics, setSpecificTopics] = useState<string>('');
+  const [friendNames, setFriendNames] = useState<string>('');
+  const [topicsToDiscuss, setTopicsToDiscuss] = useState<string>('');
+  const [topicsToAvoid, setTopicsToAvoid] = useState<string>('');
+  const [seriousnessLevel, setSeriousnessLevel] = useState<number>(50);
   const [cardCount, setCardCount] = useState<number>(8);
-  const [customSetName, setCustomSetName] = useState<string>(`Thai ${thaiLevel} for ${learningGoals.length ? learningGoals[0] : 'Beginners'} Set`);
+  const [customSetName, setCustomSetName] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generationProgress, setGenerationProgress] = useState<{ completed: number, total: number }>({ completed: 0, total: 0 });
   const [generatedPhrases, setGeneratedPhrases] = useState<Phrase[]>([]);
@@ -205,10 +219,10 @@ const SetWizardPage = () => {
 
   // Update set name when relevant inputs change
   useEffect(() => {
-    if (thaiLevel || learningGoals.length > 0) {
+    if (thaiLevel) {
       generateSetName();
     }
-  }, [thaiLevel, learningGoals]);
+  }, [thaiLevel]);
 
   // NEW: useEffect to log changes to generatingDisplayPhrases
   useEffect(() => {
@@ -216,34 +230,20 @@ const SetWizardPage = () => {
   }, [generatingDisplayPhrases]);
 
   const generateSetName = () => {
-    const date = new Date();
-    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    
-    // Base name on level and goals if available
-    let baseName = 'Thai';
-    if (thaiLevel) {
-      baseName += ` ${thaiLevel.charAt(0).toUpperCase() + thaiLevel.slice(1)}`;
-    }
-    
-    if (learningGoals.length > 0) {
-      // Take only the first goal for the name to keep it concise
-      const primaryGoal = learningGoals[0].charAt(0).toUpperCase() + learningGoals[0].slice(1);
-      baseName += ` for ${primaryGoal}`;
-    }
-    
-    // Add date to ensure uniqueness
-    const autoName = `${baseName} Set (${dateStr})`;
-    
-    // Set initial customSetName to the auto-generated one, user can edit later
-    if (!customSetName) { // Only set if not already edited by user or AI title
-        setCustomSetName(autoName);
+    if (!customSetName && session?.user?.name) {
+      const date = new Date();
+      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      setCustomSetName(`${session.user.name}'s ${thaiLevel} Set (${dateStr})`);
+    } else if (!customSetName) {
+      const date = new Date();
+      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      setCustomSetName(`My ${thaiLevel} Set (${dateStr})`);
     }
   };
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
       if (currentStep === 3) {
-        // About to enter the generation step - start generation process
         startGeneration();
       } else {
         setCurrentStep(currentStep + 1);
@@ -262,26 +262,27 @@ const SetWizardPage = () => {
     }
   };
 
-  const toggleGoal = (goal: string) => {
-    setLearningGoals(prev => 
-      prev.includes(goal) ? prev.filter(g => g !== goal) : [...prev, goal]
-    );
-  };
-
   const startGeneration = async () => {
     setIsGenerating(true);
     setGenerationProgress({ completed: 0, total: cardCount });
     setCurrentStep(4); 
     setErrorSummary(null); 
     setAiGeneratedTitle(undefined); 
-    setGeneratingDisplayPhrases([]); // Reset display list
+    setGeneratingDisplayPhrases([]);
+
+    const userName = session?.user?.name || 'You';
+    const friendNamesArray = friendNames.split(',').map(name => name.trim()).filter(name => name !== '');
 
     try {
       const result = await generateCustomSet(
         {
           level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
-          goals: learningGoals,
-          specificTopics: specificTopics || undefined
+          specificTopics: specificTopics || undefined,
+          friendNames: friendNamesArray,
+          userName: userName,
+          topicsToDiscuss: topicsToDiscuss || undefined,
+          topicsToAvoid: topicsToAvoid || undefined,
+          seriousnessLevel: seriousnessLevel,
         },
         cardCount,
         (progress) => {
@@ -338,11 +339,18 @@ const SetWizardPage = () => {
     
     setIsRegenerating(true);
     
+    const userName = session?.user?.name || 'You';
+    const friendNamesArray = friendNames.split(',').map(name => name.trim()).filter(name => name !== '');
+    
     try {
       const result = await generateSingleFlashcard({
         level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
-        goals: learningGoals,
-        specificTopics: specificTopics || undefined
+        specificTopics: specificTopics || undefined,
+        friendNames: friendNamesArray,
+        userName: userName,
+        topicsToDiscuss: topicsToDiscuss || undefined,
+        topicsToAvoid: topicsToAvoid || undefined,
+        seriousnessLevel: seriousnessLevel,
       });
       
       if (result.phrase) {
@@ -383,7 +391,6 @@ const SetWizardPage = () => {
         name: customSetName || `Generated Set ${new Date().toLocaleDateString()}`, 
         cleverTitle: aiGeneratedTitle, 
         level: thaiLevel,
-        goals: learningGoals,
         specificTopics: specificTopics,
         source: 'wizard' as const,
         phrases: generatedPhrases
@@ -527,39 +534,88 @@ const SetWizardPage = () => {
             </div>
           )}
           
-          {/* Step 3: Learning Goals */}
+          {/* Step 3: Customization - UPDATED */}
           {currentStep === 3 && (
             <div>
-              <h2 className="text-2xl font-bold mb-4 text-blue-400">What are your learning goals?</h2>
-              <p className="mb-4 text-gray-300">Select all that apply:</p>
-              <div className="space-y-3">
-                {['travel', 'conversation', 'reading', 'business', 'culture', 'food'].map(goal => (
-                  <label key={goal} className="flex items-center space-x-2 cursor-pointer p-3 rounded hover:bg-gray-800">
-                    <input 
-                      type="checkbox" 
-                      value={goal} 
-                      checked={learningGoals.includes(goal)}
-                      onChange={() => toggleGoal(goal)}
-                      className="accent-green-400 h-4 w-4 rounded"
-                    />
-                    <span className="capitalize">{goal}</span>
-                  </label>
-                ))}
-              </div>
+              <h2 className="text-2xl font-bold mb-4 text-blue-400">Customize Your Set</h2>
               
-              <div className="mt-6">
+              {/* Friend Names Input */}
+              <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Any specific topics you're interested in?
+                  Enter a few names of people you know (nicknames ok, comma-separated):
+                </label>
+                <input
+                  type="text"
+                  value={friendNames}
+                  onChange={(e) => setFriendNames(e.target.value)}
+                  placeholder="E.g., Somchai, Priya, Alex, Bo"
+                  className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
+                />
+                 <p className="text-xs text-gray-400 mt-1 italic">These names (and yours!) will be used in example sentences.</p>
+              </div>
+
+              {/* Topics to Discuss Input */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  What do you want to be able to talk about? (Required)
                 </label>
                 <textarea
-                  value={specificTopics}
-                  onChange={(e) => setSpecificTopics(e.target.value)}
-                  placeholder="E.g., ordering food, asking for directions, talking about weather..."
+                  value={topicsToDiscuss}
+                  onChange={(e) => setTopicsToDiscuss(e.target.value)}
+                  placeholder="Anything goes! E.g., ordering street food, quantum physics, conspiracy theories about pigeons, ancient history, your favorite movies..."
                   className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
                   rows={3}
+                  required
                 />
               </div>
 
+              {/* Topics to Avoid Input */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Any topics to strictly avoid? (Optional)
+                </label>
+                <textarea
+                  value={topicsToAvoid}
+                  onChange={(e) => setTopicsToAvoid(e.target.value)}
+                  placeholder="E.g., politics, specific sensitive subjects..."
+                  className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
+                  rows={2}
+                />
+              </div>
+              
+              {/* Specific Topics (Optional Refinement) - Keep or remove? Keeping for now */}
+               <div className="mb-6">
+                 <label className="block text-sm font-medium text-gray-300 mb-2">
+                   Any *very* specific focus within your topics? (Optional)
+                 </label>
+                 <textarea
+                   value={specificTopics}
+                   onChange={(e) => setSpecificTopics(e.target.value)}
+                   placeholder="E.g., types of noodles, names of Bangkok districts, specific movie titles..."
+                   className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
+                   rows={2}
+                 />
+               </div>
+
+              {/* Seriousness Slider */}
+              <div className="mb-6">
+                 <label className="block text-sm font-medium text-gray-300 mb-2">
+                   Tone: Serious vs. Ridiculous ({seriousnessLevel}%)
+                 </label>
+                 <div className="flex items-center space-x-4">
+                    <span className="text-xs text-gray-400">Serious</span>
+                    <Slider 
+                        defaultValue={[seriousnessLevel]} 
+                        min={0} max={100} step={1} 
+                        onValueChange={(value: number[]) => setSeriousnessLevel(value[0])}
+                        className="w-full"
+                    />
+                    <span className="text-xs text-gray-400">Ridiculous</span>
+                 </div>
+                 <p className="text-xs text-gray-400 mt-1 italic">Controls the tone from textbook-dry (0%) to absurd humor (100%).</p>
+              </div>
+
+              {/* Card Count */}
               <div className="mt-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   How many cards would you like in your set?
@@ -583,27 +639,39 @@ const SetWizardPage = () => {
             </div>
           )}
           
-          {/* Step 4: Generation - Updated Logic */} 
+          {/* Step 4: Generation - Update Summary */} 
           {currentStep === 4 && (
             <div className="text-center py-10 flex flex-col items-center"> 
-              {/* Title changes based on generation state */} 
               <h2 className="text-2xl font-bold mb-6 text-blue-400">
                 {isGenerating ? 'Generating Your Custom Set' : 'Generation Complete!'} 
               </h2>
               
-              {/* Input Summary - Show always in Step 4 */} 
+              {/* UPDATED Input Summary */} 
               <div className="w-full max-w-md text-left bg-gray-700 bg-opacity-40 rounded-lg p-3 mb-4 text-sm">
                  <p className="text-gray-400">
                    <span className="font-semibold text-gray-300">Level:</span> {thaiLevel.charAt(0).toUpperCase() + thaiLevel.slice(1)}
                  </p>
                  <p className="text-gray-400">
-                   <span className="font-semibold text-gray-300">Goals:</span> {learningGoals.join(', ') || 'General'}
+                   <span className="font-semibold text-gray-300">Discuss:</span> {topicsToDiscuss || 'General'}
                  </p>
                  {specificTopics && (
                    <p className="text-gray-400">
-                     <span className="font-semibold text-gray-300">Topics:</span> {specificTopics}
+                     <span className="font-semibold text-gray-300">Specific Focus:</span> {specificTopics}
                    </p>
                  )}
+                  {topicsToAvoid && (
+                    <p className="text-gray-400">
+                      <span className="font-semibold text-gray-300">Avoid:</span> {topicsToAvoid}
+                    </p>
+                  )}
+                   <p className="text-gray-400">
+                      <span className="font-semibold text-gray-300">Tone:</span> {seriousnessLevel}% Ridiculous
+                    </p>
+                    {friendNames && (
+                      <p className="text-gray-400">
+                        <span className="font-semibold text-gray-300">Featuring:</span> {friendNames}
+                      </p>
+                    )}
               </div>
               
               {/* Display minor error summary if present, even on success */} 
@@ -676,40 +744,22 @@ const SetWizardPage = () => {
             </div>
           )}
           
-          {/* Step 5: Preview and Edit */} 
+          {/* Step 5: Preview & Save - Update Summary */}
           {currentStep === 5 && (
             <div>
-              <h2 className="text-2xl font-bold mb-4 text-blue-400">
-                Review Your Flashcards
-              </h2>
+              <h2 className="text-2xl font-bold mb-4 text-blue-400">Review & Create Your Set</h2>
               
-              {generationErrors.length > 0 && (
-                <div className="bg-red-900 bg-opacity-30 border border-red-700 rounded p-4 mb-6">
-                  <p className="text-red-400 mb-1">
-                    {errorSummary?.userMessage || 
-                      `There were some issues with card generation. ${generatedPhrases.length} cards were generated successfully.`}
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    You can continue with the cards that were generated, or go back and try again.
-                  </p>
-                  {errorSummary?.errorTypes.includes('NETWORK') && (
-                    <p className="text-orange-400 text-sm mt-2">
-                      Network issues detected. Please check your internet connection and try again.
-                    </p>
-                  )}
-                  {errorSummary?.errorTypes.includes('API') && (
-                    <p className="text-orange-400 text-sm mt-2">
-                      API errors occurred. The service might be experiencing high traffic or temporary issues.
-                    </p>
-                  )}
-                  {errorSummary?.errorTypes.includes('VALIDATION') && (
-                    <p className="text-orange-400 text-sm mt-2">
-                      The AI had trouble generating valid flashcards for "{specificTopics}". Try simplifying your topic or using different terms.
-                    </p>
-                  )}
-                </div>
-              )}
+               {/* Error Summary */}
+               {errorSummary && errorSummary.totalErrors > 0 && (
+                 <div className="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded p-3 mb-4 text-sm">
+                   <p className="text-yellow-400 mb-1">
+                       Note: {errorSummary.userMessage || 'Some minor issues occurred during generation.'}
+                       {errorSummary.errorTypes.includes('VALIDATION') && ' Try simplifying your topics.'}
+                   </p>
+                 </div>
+               )}
               
+              {/* Set Title */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Set Title (Edit if desired)
@@ -725,25 +775,29 @@ const SetWizardPage = () => {
                 )}
               </div>
               
+              {/* UPDATED Set Summary */}
               <div className="bg-gray-800 p-4 rounded mb-6">
                 <h3 className="font-semibold mb-2">Set Summary</h3>
-                <ul className="space-y-2 text-gray-300">
+                <ul className="space-y-1 text-gray-300 text-sm">
                   <li><span className="text-gray-400">Cards:</span> {generatedPhrases.length}</li>
                   <li><span className="text-gray-400">Level:</span> {thaiLevel.charAt(0).toUpperCase() + thaiLevel.slice(1)}</li>
-                  <li>
-                    <span className="text-gray-400">Goals:</span> {learningGoals.length > 0 
-                      ? learningGoals.map(g => g.charAt(0).toUpperCase() + g.slice(1)).join(', ') 
-                      : 'None specified'}
-                  </li>
-                  {specificTopics && (
-                    <li><span className="text-gray-400">Specific Topics:</span> {specificTopics}</li>
-                  )}
+                  <li><span className="text-gray-400">Discuss:</span> {topicsToDiscuss || 'General'}</li>
+                   {specificTopics && (
+                     <li><span className="text-gray-400">Specific Focus:</span> {specificTopics}</li>
+                   )}
+                   {topicsToAvoid && (
+                    <li><span className="text-gray-400">Avoid:</span> {topicsToAvoid}</li>
+                   )}
+                   <li><span className="text-gray-400">Tone:</span> {seriousnessLevel}% Ridiculous</li>
+                   {friendNames && (
+                     <li><span className="text-gray-400">Featuring:</span> {friendNames}</li>
+                   )}
                 </ul>
               </div>
               
+              {/* Card Preview */}
               <div className="mb-6">
                 <h3 className="font-semibold mb-4">Card Preview</h3>
-                
                 <div className="flex justify-between items-center mb-4">
                   <div className="text-sm text-gray-400">
                     Showing card {currentPreviewIndex + 1} of {generatedPhrases.length}
@@ -773,8 +827,13 @@ const SetWizardPage = () => {
                     onRegenerate={handleRegenerateCard}
                     index={currentPreviewIndex}
                     level={thaiLevel}
-                    goals={learningGoals}
+                    goals={[]}
                     specificTopics={specificTopics}
+                    friendNames={friendNames.split(',').map(n=>n.trim()).filter(n=>n)}
+                    userName={session?.user?.name || 'You'}
+                    topicsToDiscuss={topicsToDiscuss}
+                    topicsToAvoid={topicsToAvoid}
+                    seriousnessLevel={seriousnessLevel}
                   />
                 ) : (
                   <div className="text-center p-8 bg-gray-800 rounded">
@@ -783,28 +842,28 @@ const SetWizardPage = () => {
                 )}
               </div>
               
+              {/* Create Set Button */}
               <button 
                 onClick={handleCreateSet} 
-                disabled={generatedPhrases.length === 0 || !customSetName.trim()}
-                className={`w-full py-3 rounded-lg font-bold ${
-                  generatedPhrases.length === 0 || !customSetName.trim() 
-                    ? 'bg-gray-600 text-gray-400' 
+                disabled={generatedPhrases.length === 0 || !customSetName.trim() || isGenerating}
+                className={`w-full py-3 rounded-lg font-bold transition-colors ${
+                  generatedPhrases.length === 0 || !customSetName.trim() || isGenerating
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
                     : 'bg-green-600 hover:bg-green-700 text-white'
                 }`}
               >
-                Create My Custom Set
+                {isGenerating ? 'Saving...' : 'Create My Custom Set'}
               </button>
             </div>
           )}
         </div>
         
-        {/* Navigation Buttons - Hide when generation complete but before review */}
+        {/* Navigation Buttons */}
         {currentStep !== 4 || isGenerating ? ( 
           <div className="flex justify-between mt-8">
-            {/* Back Button */} 
             <button 
               onClick={handleBack} 
-              disabled={currentStep === 1 || currentStep === 4} // Disable during generation
+              disabled={currentStep === 1 || currentStep === 4} 
               className={`neumorphic-button py-2 px-6 text-sm ${ 
                 (currentStep === 1 || currentStep === 4) ? 'text-gray-500 cursor-not-allowed' : 'text-blue-400 hover:text-blue-300'
               }`}
@@ -812,17 +871,16 @@ const SetWizardPage = () => {
               Back
             </button>
             
-            {/* Next/Generate Button */} 
             {currentStep < totalSteps && currentStep !== 4 && (
               <button
                 onClick={handleNext}
                 disabled={ 
                   (currentStep === 2 && !thaiLevel) || 
-                  (currentStep === 3 && learningGoals.length === 0) 
+                  (currentStep === 3 && !topicsToDiscuss.trim())
                 }
                 className={`neumorphic-button py-2 px-6 text-sm font-semibold ${ 
                   ((currentStep === 2 && !thaiLevel) || 
-                  (currentStep === 3 && learningGoals.length === 0)) 
+                  (currentStep === 3 && !topicsToDiscuss.trim()))
                     ? 'text-gray-500 cursor-not-allowed'
                     : (currentStep === 3 ? 'text-green-400 hover:text-green-300' : 'text-blue-400 hover:text-blue-300')
                 }`}
@@ -831,7 +889,7 @@ const SetWizardPage = () => {
               </button>
             )}
           </div>
-        ) : null} {/* Hide nav buttons when generation is done, before clicking Review */} 
+        ) : null} 
       </div>
     </div>
   );

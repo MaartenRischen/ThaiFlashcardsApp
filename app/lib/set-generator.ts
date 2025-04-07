@@ -21,7 +21,6 @@ export interface ExampleSentence {
 
 export interface GeneratePromptOptions {
   level: 'beginner' | 'intermediate' | 'advanced';
-  goals: string[];
   specificTopics?: string;
   count: number;
   existingPhrases?: string[];

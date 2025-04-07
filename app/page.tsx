@@ -1117,10 +1117,18 @@ export default function ThaiFlashcards() {
                     <label className="text-sm text-gray-400">Mnemonic</label>
                     <button onClick={resetCurrentMnemonic} className="text-xs text-blue-400 hover:text-blue-300">Reset</button>
                   </div>
+                  
+                  {/* Pronunciation displayed above the mnemonic */}
+                  {phrases[index]?.pronunciation && (
+                    <div className="mb-2 p-2 bg-gray-800 rounded text-gray-300 font-medium">
+                      <span className="text-blue-400">Pronunciation:</span> {phrases[index].pronunciation}
+                    </div>
+                  )}
+                  
                   <textarea
-                    value={mnemonics[index] ?? phrases[index].mnemonic ?? ''}
+                    value={mnemonics[index] ?? phrases[index]?.mnemonic ?? ''}
                     onChange={handleMnemonicChange}
-                    onBlur={() => updateMnemonics(index, mnemonics[index] ?? phrases[index].mnemonic ?? '')}
+                    onBlur={() => updateMnemonics(index, mnemonics[index] ?? phrases[index]?.mnemonic ?? '')}
                     placeholder="Create a memory aid to help remember this word..."
                     className="neumorphic-input w-full h-24 resize-none rounded-lg"
                   />

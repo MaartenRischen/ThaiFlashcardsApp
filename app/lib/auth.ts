@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/app/lib/prisma";
 import bcrypt from "bcrypt";
+import { PrismaClientInitializationError, PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 // Ensure we have a secret
 const secret = process.env.NEXTAUTH_SECRET;
@@ -34,6 +35,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         try {
+          // Test database connection first with a simple query
+          try {
+            await prisma.$queryRaw`SELECT 1`;
+            console.log("Database connection test successful");
+          } catch (error: any) {
+            console.error("Database connection test failed:", {
+              message: error?.message,
+              code: error?.code,
+              clientVersion: error?.clientVersion,
+              meta: error?.meta
+            });
+            throw error; // Re-throw to be caught by the outer try/catch
+          }
+          
           const user = await prisma.user.findUnique({
             where: {
               email: credentials.email as string,
@@ -59,8 +74,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             name: user.name,
             image: user.image,
           };
-        } catch (error) {
+        } catch (error: any) {
           console.error("Error in authorize:", error);
+          // Enhanced error logging with details
+          if (error?.name === 'PrismaClientInitializationError' || 
+              error?.name === 'PrismaClientKnownRequestError') {
+            console.error("Database connection error details:", {
+              message: error?.message,
+              code: error?.code,
+              clientVersion: error?.clientVersion,
+              meta: error?.meta
+            });
+          }
           return null;
         }
       },

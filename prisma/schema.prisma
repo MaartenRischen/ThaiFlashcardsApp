@@ -9,12 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // For PgBouncer support with Supabase
-  directUrl = env("DATABASE_URL")
-  // For Railway deployment, use this instead of concatenation
-  // Add this as a comment to postgresql://USER:PASSWORD@HOST:PORT/DATABASE?pgbouncer=true
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // Connection pooled URL for queries
+  directUrl = env("DIRECT_DATABASE_URL") // Direct connection URL for migrations
 }
 
 // -------------------------------------

@@ -132,37 +132,38 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
 
   **CRITICAL INSTRUCTIONS:**
 
-  1.  **Level-Specific Content:**
-      *   **Beginner:** Mostly essential single words or short phrases (2-4 words). Simple Subject-Verb-Object sentences *only* if necessary. Examples must be extremely simple.
-      *   **Intermediate:** Primarily conversational sentences (5-10 words). Common vocabulary/grammar. Phrases okay. Examples reflect typical usage.
-      *   **Advanced:** ONLY complex sentences (10+ words). Nuanced vocabulary, varied grammar, potential idioms (matching TONE). NO simple phrases. Examples showcase complex usage.
+  1.  **Level-Specific Content:** (Ensure strict adherence)
+      *   Beginner: Mostly essential words/short phrases. Simple S-V-O sentences rarely. Simple examples.
+      *   Intermediate: Conversational sentences (5-10 words). Common grammar. Phrases ok. Typical examples.
+      *   Advanced: ONLY complex sentences (10+ words). Nuanced vocabulary, varied grammar. NO simple phrases. Complex examples.
 
-  2.  **TONE Implementation (${seriousnessLevel}% Ridiculous / ${100 - seriousnessLevel}% Serious):** This is CRUCIAL. The tone MUST heavily influence ALL generated content. Be BOLD with the ridiculousness.
+  2.  **TONE Implementation (${seriousnessLevel}% Ridiculous / ${100 - seriousnessLevel}% Serious):** THIS IS PARAMOUNT. The tone MUST heavily influence ALL content. **For high ridiculousness (60%+), the TONE OVERRIDES the literal interpretation of the 'Situations'.** Use the situations as a *springboard* for absurdity, don't just generate serious content *about* the situation.
+      *   **Style Guide for Ridiculousness:** Think **absurdist humor** like **Monty Python**, **'I Think You Should Leave'**, or the surrealism of **Hans Teeuwen**. Unexpected juxtapositions, non-sequiturs, bizarre characters/events, and breaking logical expectations are highly encouraged.
       *   **Phrases/Sentences:**
-          *   0-10% Ridiculous: Generate standard, textbook-like, polite, dry, factual content.
-          *   20-40% Ridiculous: Mostly serious but inject occasional mild quirks, slightly unusual phrasing, or unexpected word choices.
-          *   50-70% Ridiculous: Generate noticeably quirky, surreal, or humorously unexpected content. Use metaphors, wordplay, and create amusing or odd scenarios. Blend standard vocabulary with surprising twists.
-          *   80-90% Ridiculous: Generate highly absurd, nonsensical, or surreal sentences. Use hyperbole, impossible combinations, and illogical situations. Prioritize humor and strangeness while maintaining grammatical structure appropriate for the level.
-          *   91-100% Ridiculous: Maximum absurdity. Push boundaries of meaning. Generate sentences that are grammatically plausible but almost incomprehensible due to extreme surrealism, non-sequiturs, or bizarre philosophical tangents. Make it weird and funny.
-      *   **Mnemonics:** MUST match the tone intensely. 0% = factual; 50% = quirky/punny; 100% = completely unhinged and bizarre, barely related memory aid.
+          *   0-10%: Standard, textbook, dry, factual.
+          *   20-40%: Mostly serious; occasional mild quirks or unusual phrasing.
+          *   50-70%: Noticeably quirky, surreal, or humorously unexpected. Use metaphors, wordplay, odd scenarios. Blend standard vocab with surprising twists.
+          *   80-90%: Highly absurd, nonsensical, surreal sentences. Use hyperbole, impossible combinations, illogical situations. Prioritize humor/strangeness over literal meaning, while maintaining grammatical structure for the level.
+          *   91-100%: Maximum absurdity. Push boundaries. Generate grammatically plausible sentences that are almost *meaningless* due to extreme surrealism, non-sequiturs, bizarre tangents. Make it weird, funny, unpredictable. The phrase itself can be nonsensical.
+      *   **Mnemonics:** MUST match the tone intensely. 0% = factual; 50% = quirky/punny; 100% = completely unhinged, bizarre, barely related memory aid.
       *   **Example Sentences:** MUST strongly reflect the tone. 
           *   Low Ridiculousness: Practical, standard examples.
-          *   Medium Ridiculousness: Mildly amusing or odd situations, perhaps involving ${userName} or ${friendNames.join(', ')}.
-          *   High Ridiculousness: Feature ${userName} and friends (${friendNames.join(', ')}) in BIZARRE, IMPOSSIBLE, or HILARIOUS situations related to the '${topicsToDiscuss || 'general situations'}'. Make them highly memorable through sheer absurdity.
+          *   Medium Ridiculousness: Mildly amusing or odd situations.
+          *   High Ridiculousness (60%+): Create **SURREAL or NONSENSICAL scenarios** featuring ${userName} and friends (${friendNames.join(', ')}) *loosely inspired* by '${topicsToDiscuss || 'general situations'}'. **Do not just describe the situation seriously; make the *example situation itself* absurd, illogical, or hilarious.**
       *   **Clever Title:** MUST reflect the chosen tone. 0% = Dry/Descriptive; 50% = Witty/Intriguing; 100% = Absurd/Nonsensical.
 
-  3.  **Personalization - NAME USAGE:** Integrate the user's name ('${userName}') and their friends' names (${friendNames.join(', ')}) into the EXAMPLE SENTENCES frequently. Aim for **AT LEAST ONE NAME in approximately EVERY THIRD example sentence**. Use them naturally within the context of the sentence's TONE (e.g., normal situations for low ridiculousness, absurd situations for high ridiculousness).
+  3.  **Personalization - NAME USAGE:** Integrate '${userName}' and friends (${friendNames.join(', ')}) into **AT LEAST ONE out of every THREE example sentences**. In high ridiculousness scenarios, place them in the absurd situations.
 
   4.  **Topic/Situation Control:**
-      *   Focus content *primarily* on the 'Situations for Use': ${topicsToDiscuss || 'General conversation'}.
-      *   If 'Specific Focus' (${specificTopics || 'None'}) provided, prioritize it.
+      *   Focus content *primarily* on the 'Situations for Use': ${topicsToDiscuss || 'General conversation'}. Use this as inspiration, especially for absurd examples.
+      *   If 'Specific Focus' (${specificTopics || 'None'}) provided, try to incorporate it.
       *   ABSOLUTELY DO NOT generate content related to 'Topics to STRICTLY AVOID': ${topicsToAvoid || 'None specified'}.
 
   5.  **Politeness & Pronunciation:** Correctly generate polite versions. Use clear, simple phonetic romanization.
 
   6.  **Accuracy & Culture:** Ensure accuracy for the LEVEL and TONE. Maintain cultural sensitivity even when being absurd.
 
-  7.  **Avoid Duplicates:** Do not generate flashcards for these existing English phrases: ${existingPhrases && existingPhrases.length > 0 ? existingPhrases.join(', ') : 'None'}
+  7.  **Avoid Duplicates:** Do not generate for these existing English phrases: ${existingPhrases && existingPhrases.length > 0 ? existingPhrases.join(', ') : 'None'}
 
   ${schemaDescription}
   `;

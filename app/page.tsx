@@ -1553,6 +1553,11 @@ export default function ThaiFlashcards() {
       <div className="text-center p-2 text-xs text-gray-600">
         <span>v{VERSION_INFO.version} - {VERSION_INFO.changes}</span>
       </div>
+
+      {/* STAGING ENVIRONMENT INDICATOR */}
+      <div className="fixed bottom-1 right-1 bg-yellow-300 text-black text-xs px-2 py-1 rounded-full">
+        STAGING
+      </div>
     </main>
   );
 } 

@@ -123,8 +123,8 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
 
   **User Preferences:**
   - Proficiency Level: ${level}
-  - Topics to Discuss: ${topicsToDiscuss || 'General conversation'}
-  ${specificTopics ? `- Specific Focus Within Topics: ${specificTopics}` : ''}
+  - Situations for Use: ${topicsToDiscuss || 'General conversation'}
+  ${specificTopics ? `- Specific Focus Within Topics/Situations: ${specificTopics}` : ''}
   - Topics to STRICTLY AVOID: ${topicsToAvoid || 'None specified'}
   - User's Name: ${userName}
   - User's Friends' Names: ${friendNames.length > 0 ? friendNames.join(', ') : 'None specified'}
@@ -133,34 +133,39 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
   **CRITICAL INSTRUCTIONS:**
 
   1.  **Level-Specific Content:**
-      *   **Beginner:** Generate mostly essential single words or very short phrases (2-4 words). If sentences are used (sparingly), they MUST be extremely simple (Subject-Verb-Object). Examples should also be very simple.
-      *   **Intermediate:** Generate primarily short to medium-length sentences (5-10 words) typical of everyday conversation. Use common vocabulary and grammar structures suitable for this level. Phrases can still be included. Examples should reflect conversational usage.
-      *   **Advanced:** Generate ONLY longer, more complex sentences (10+ words) using nuanced vocabulary, varied grammar, idioms (if appropriate for the TONE), and structures a native speaker would understand. Examples should showcase complex usage. NO simple phrases.
+      *   **Beginner:** Mostly essential single words or short phrases (2-4 words). Simple Subject-Verb-Object sentences *only* if necessary. Examples must be extremely simple.
+      *   **Intermediate:** Primarily conversational sentences (5-10 words). Common vocabulary/grammar. Phrases okay. Examples reflect typical usage.
+      *   **Advanced:** ONLY complex sentences (10+ words). Nuanced vocabulary, varied grammar, potential idioms (matching TONE). NO simple phrases. Examples showcase complex usage.
 
-  2.  **TONE Implementation (${seriousnessLevel}% Ridiculous / ${100 - seriousnessLevel}% Serious):** This is the MOST important instruction. The desired tone MUST influence ALL generated content:
+  2.  **TONE Implementation (${seriousnessLevel}% Ridiculous / ${100 - seriousnessLevel}% Serious):** This is CRUCIAL. The tone MUST heavily influence ALL generated content. Be BOLD with the ridiculousness.
       *   **Phrases/Sentences:**
-          *   Low Ridiculousness (0-20%): Generate standard, textbook-like, polite vocabulary and sentences. Extremely dry and factual.
-          *   Medium Ridiculousness (40-60%): A balanced mix. Standard vocabulary but with slightly quirky or unexpected phrasing. Examples can be mildly amusing or odd.
-          *   High Ridiculousness (80-100%): Generate absurd, nonsensical, surreal, or humorously inappropriate words and sentences (while still being grammatically valid Thai for the level). Use hyperbole, unexpected combinations, and extreme scenarios. Aim for maximum absurdity and humor.
-      *   **Mnemonics:** MUST match the tone. Serious mnemonics for serious tone, wildly absurd mnemonics for ridiculous tone.
-      *   **Example Sentences:** MUST strongly reflect the tone. For high ridiculousness, examples should feature ${userName} and friends (${friendNames.join(', ')}) in bizarre, impossible, or hilarious situations related to the '${topicsToDiscuss || 'general topics'}'
-      *   **Clever Title:** MUST reflect the chosen tone. A dry title for serious, a witty/absurd title for ridiculous.
+          *   0-10% Ridiculous: Generate standard, textbook-like, polite, dry, factual content.
+          *   20-40% Ridiculous: Mostly serious but inject occasional mild quirks, slightly unusual phrasing, or unexpected word choices.
+          *   50-70% Ridiculous: Generate noticeably quirky, surreal, or humorously unexpected content. Use metaphors, wordplay, and create amusing or odd scenarios. Blend standard vocabulary with surprising twists.
+          *   80-90% Ridiculous: Generate highly absurd, nonsensical, or surreal sentences. Use hyperbole, impossible combinations, and illogical situations. Prioritize humor and strangeness while maintaining grammatical structure appropriate for the level.
+          *   91-100% Ridiculous: Maximum absurdity. Push boundaries of meaning. Generate sentences that are grammatically plausible but almost incomprehensible due to extreme surrealism, non-sequiturs, or bizarre philosophical tangents. Make it weird and funny.
+      *   **Mnemonics:** MUST match the tone intensely. 0% = factual; 50% = quirky/punny; 100% = completely unhinged and bizarre, barely related memory aid.
+      *   **Example Sentences:** MUST strongly reflect the tone. 
+          *   Low Ridiculousness: Practical, standard examples.
+          *   Medium Ridiculousness: Mildly amusing or odd situations, perhaps involving ${userName} or ${friendNames.join(', ')}.
+          *   High Ridiculousness: Feature ${userName} and friends (${friendNames.join(', ')}) in BIZARRE, IMPOSSIBLE, or HILARIOUS situations related to the '${topicsToDiscuss || 'general situations'}'. Make them highly memorable through sheer absurdity.
+      *   **Clever Title:** MUST reflect the chosen tone. 0% = Dry/Descriptive; 50% = Witty/Intriguing; 100% = Absurd/Nonsensical.
 
-  3.  **Personalization:** Integrate the user's name ('${userName}') and their friends' names (${friendNames.join(', ')}) naturally into the EXAMPLE SENTENCES, especially for medium-to-high ridiculousness levels.
+  3.  **Personalization - NAME USAGE:** Integrate the user's name ('${userName}') and their friends' names (${friendNames.join(', ')}) into the EXAMPLE SENTENCES frequently. Aim for **AT LEAST ONE NAME in approximately EVERY THIRD example sentence**. Use them naturally within the context of the sentence's TONE (e.g., normal situations for low ridiculousness, absurd situations for high ridiculousness).
 
-  4.  **Topic Control:**
-      *   Focus vocabulary and examples *primarily* on the 'Topics to Discuss': ${topicsToDiscuss || 'General conversation'}.
-      *   If 'Specific Focus' is provided (${specificTopics || 'None'}), prioritize that within the main topics.
+  4.  **Topic/Situation Control:**
+      *   Focus content *primarily* on the 'Situations for Use': ${topicsToDiscuss || 'General conversation'}.
+      *   If 'Specific Focus' (${specificTopics || 'None'}) provided, prioritize it.
       *   ABSOLUTELY DO NOT generate content related to 'Topics to STRICTLY AVOID': ${topicsToAvoid || 'None specified'}.
 
-  5.  **Politeness & Pronunciation:** Correctly generate masculine ("ครับ") and feminine ("ค่ะ") versions. Use clear, simple phonetic romanization.
+  5.  **Politeness & Pronunciation:** Correctly generate polite versions. Use clear, simple phonetic romanization.
 
-  6.  **Accuracy & Culture:** Ensure Thai spelling, translations, and grammar are accurate for the specified LEVEL and TONE. Maintain cultural appropriateness even in absurd contexts (avoid genuinely offensive content unless specifically requested within the absurd tone).
+  6.  **Accuracy & Culture:** Ensure accuracy for the LEVEL and TONE. Maintain cultural sensitivity even when being absurd.
 
-  7.  **Avoid Duplicates:** Do not generate flashcards for the following English phrases that might already exist: ${existingPhrases && existingPhrases.length > 0 ? existingPhrases.join(', ') : 'None'}
+  7.  **Avoid Duplicates:** Do not generate flashcards for these existing English phrases: ${existingPhrases && existingPhrases.length > 0 ? existingPhrases.join(', ') : 'None'}
 
   ${schemaDescription}
-  `; // End of template literal
+  `;
 
   return prompt.trim();
 }

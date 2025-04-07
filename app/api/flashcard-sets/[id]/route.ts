@@ -2,7 +2,6 @@ import { prisma } from "@/app/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
 import { z } from "zod";
-import type { Phrase } from "@prisma/client";
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -63,7 +62,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     // Transform the phrases to match the expected format
     const transformedSet = {
       ...set,
-      phrases: set.phrases.map((phrase: Phrase) => {
+      phrases: set.phrases.map((phrase: any) => {
         const { examplesJson, ...rest } = phrase;
         return {
           ...rest,

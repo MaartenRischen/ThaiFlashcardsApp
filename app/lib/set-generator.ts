@@ -25,6 +25,11 @@ export interface GeneratePromptOptions {
   specificTopics?: string;
   count: number;
   existingPhrases?: string[];
+  friendNames?: string[];
+  userName?: string;
+  topicsToDiscuss?: string;
+  topicsToAvoid?: string;
+  seriousnessLevel?: number;
 }
 
 // Define structured error types for better error handling
@@ -52,11 +57,11 @@ export interface GenerationResult {
 export interface CustomSet {
   name: string;
   level: string;
-  goals: string[];
   specificTopics?: string;
   createdAt: string;
   phrases: Phrase[];
   mnemonics: {[key: number]: string};
+  seriousness?: number;
 }
 
 // Configuration constants
@@ -64,65 +69,99 @@ const MAX_RETRIES = 3;
 const BATCH_SIZE = 8;
 
 /**
- * Builds a detailed prompt for generating Thai flashcards
+ * Builds a significantly updated prompt for generating Thai flashcards based on detailed user preferences.
  */
 function buildGenerationPrompt(options: GeneratePromptOptions): string {
-  const { level, goals, specificTopics, count, existingPhrases } = options;
+  const { 
+    level, 
+    specificTopics, 
+    count, 
+    existingPhrases,
+    friendNames = [], 
+    userName = 'I', 
+    topicsToDiscuss, 
+    topicsToAvoid, 
+    seriousnessLevel = 50 // Default to 50%
+  } = options;
 
-  // Define the output schema clearly for the AI
+  const seriousness = seriousnessLevel / 100; // Convert to 0.0 - 1.0
+  const ridiculousness = 1.0 - seriousness;
+
+  // Define the output schema (remains the same)
+  // Use escaped backticks for the schema description
   const schemaDescription = `
   **Output Format:**
   Generate a JSON object containing two keys: "cleverTitle" and "phrases".
-  - "cleverTitle": A short, witty, and clever title (under 50 characters) in English for this flashcard set, reflecting the level, goals, and topics.
+  - "cleverTitle": A short, witty title (under 50 chars) in English for this flashcard set, reflecting the level, topics, and SERIOUSNESS/RIDICULOUSNESS TONE (${Math.round(ridiculousness * 100)}% ridiculous).
   - "phrases": An array containing exactly ${count} unique flashcard objects. Each phrase object MUST conform to the following TypeScript interface:
 
   \`\`\`typescript
   interface Phrase {
-    english: string; // The English translation of the phrase/word. Keep it concise.
-    thai: string; // The Thai phrase/word in Thai script. This is the base form.
-    thaiMasculine: string; // The Thai phrase including the male polite particle "ครับ" (krap) where appropriate for a complete sentence or polite expression. If the base thai phrase is just a noun or adjective, this might be the same as 'thai'.
-    thaiFeminine: string; // The Thai phrase including the female polite particle "ค่ะ" (ka) where appropriate for a complete sentence or polite expression. If the base thai phrase is just a noun or adjective, this might be the same as 'thai'.
-    pronunciation: string; // An easy-to-read phonetic pronunciation guide (e.g., 'sa-wat-dee krap'). Use informal romanization, not IPA. Focus on clarity for learners.
-    mnemonic?: string; // Optional (but highly encouraged): A short, creative mnemonic suggestion in English to help remember the Thai phrase. Make it relevant and memorable. If you cannot create a good one, omit the field or set it to null.
-    examples?: ExampleSentence[]; // Optional (but highly encouraged): An array of 1-2 simple example sentences demonstrating the usage of the main Thai phrase.
+    english: string; // Concise English translation.
+    thai: string; // Thai script (base form).
+    thaiMasculine: string; // Polite male version ("ครับ").
+    thaiFeminine: string; // Polite female version ("ค่ะ").
+    pronunciation: string; // Simple phonetic guide (e.g., 'sa-wat-dee krap').
+    mnemonic?: string; // Optional, creative mnemonic reflecting the TONE.
+    examples?: ExampleSentence[]; // 1-2 example sentences reflecting the TONE and LEVEL.
   }
 
   interface ExampleSentence {
-    thai: string; // The example sentence in Thai script (base form).
-    thaiMasculine: string; // The example sentence in Thai script, ending with "ครับ" (krap) if grammatically appropriate for politeness.
-    thaiFeminine: string; // The example sentence in Thai script, ending with "ค่ะ" (ka) if grammatically appropriate for politeness.
-    pronunciation: string; // Phonetic pronunciation for the example sentence.
-    translation: string; // English translation of the example sentence.
+    thai: string; // Example sentence in Thai script.
+    thaiMasculine: string; // Polite male version.
+    thaiFeminine: string; // Polite female version.
+    pronunciation: string; // Phonetic pronunciation.
+    translation: string; // English translation.
   }
   \`\`\`
 
   Ensure the entire response is ONLY the JSON object, starting with '{' and ending with '}'. Do not include any introductory text, explanations, or markdown formatting outside the JSON structure itself.
   `;
 
-  // Construct the main prompt content
+  // Construct the detailed main prompt content using a standard template literal
   let prompt = `
-  You are an expert AI assistant specialized in creating Thai language learning flashcards for English speakers. Your task is to generate ${count} flashcards tailored to the user's preferences AND create a clever title for the set.
+  You are an expert AI assistant specialized in creating Thai language learning flashcards for English speakers. Your task is to generate ${count} flashcards and a clever title, tailored precisely to the user's preferences, including a specific TONE.
 
   **User Preferences:**
   - Proficiency Level: ${level}
-  - Learning Goals: ${goals.join(', ')}
-  ${specificTopics ? `- Specific Topics: ${specificTopics}` : ''}
+  - Topics to Discuss: ${topicsToDiscuss || 'General conversation'}
+  ${specificTopics ? `- Specific Focus Within Topics: ${specificTopics}` : ''}
+  - Topics to STRICTLY AVOID: ${topicsToAvoid || 'None specified'}
+  - User's Name: ${userName}
+  - User's Friends' Names: ${friendNames.length > 0 ? friendNames.join(', ') : 'None specified'}
+  - **TONE CONTROL: ${seriousnessLevel}% Ridiculous / ${100 - seriousnessLevel}% Serious**
 
-  **Instructions:**
-  1.  **Generate a Clever Title:** Create a short, witty, clever title (English, under 50 chars) for this flashcard set based on the preferences. Store this in the "cleverTitle" key.
-  2.  Generate ${count} unique Thai vocabulary words or short phrases relevant to the user's preferences for the "phrases" array.
-  3.  **Politeness:** Correctly generate both masculine ("ครับ") and feminine ("ค่ะ") versions where appropriate (usually for full sentences or polite expressions). If the main 'thai' phrase is just a single word (like a noun), the polite versions might be the same as the base 'thai' version unless context implies politeness. Apply the same logic to example sentences.
-  4.  **Pronunciation:** Use a clear, simple phonetic romanization system understandable to English speakers.
-  5.  **Mnemonics:** Create helpful and concise mnemonics in English if possible.
-  6.  **Examples:** Provide 1-2 relevant and simple example sentences showing context, especially for verbs and adjectives. Examples should also be appropriate for the specified proficiency level.
-  7.  **Level Appropriateness:** Ensure vocabulary complexity, sentence structure, and concepts match the '${level}' level. For beginners, focus on common, essential words and simple sentence patterns. For advanced, include more nuanced vocabulary and complex structures.
-  8.  **Relevance:** Prioritize content directly related to the user's goals (${goals.join(', ')}) ${specificTopics ? `and specific topics (${specificTopics})` : ''}.
-  9.  **Accuracy:** Ensure Thai spelling, translations, and pronunciations are accurate.
-  10. **Cultural Nuance:** Generate culturally appropriate content.
-  11. **Avoid Duplicates:** Do not generate flashcards for the following English phrases: ${existingPhrases && existingPhrases.length > 0 ? existingPhrases.join(', ') : 'None'}
+  **CRITICAL INSTRUCTIONS:**
+
+  1.  **Level-Specific Content:**
+      *   **Beginner:** Generate mostly essential single words or very short phrases (2-4 words). If sentences are used (sparingly), they MUST be extremely simple (Subject-Verb-Object). Examples should also be very simple.
+      *   **Intermediate:** Generate primarily short to medium-length sentences (5-10 words) typical of everyday conversation. Use common vocabulary and grammar structures suitable for this level. Phrases can still be included. Examples should reflect conversational usage.
+      *   **Advanced:** Generate ONLY longer, more complex sentences (10+ words) using nuanced vocabulary, varied grammar, idioms (if appropriate for the TONE), and structures a native speaker would understand. Examples should showcase complex usage. NO simple phrases.
+
+  2.  **TONE Implementation (${seriousnessLevel}% Ridiculous / ${100 - seriousnessLevel}% Serious):** This is the MOST important instruction. The desired tone MUST influence ALL generated content:
+      *   **Phrases/Sentences:**
+          *   Low Ridiculousness (0-20%): Generate standard, textbook-like, polite vocabulary and sentences. Extremely dry and factual.
+          *   Medium Ridiculousness (40-60%): A balanced mix. Standard vocabulary but with slightly quirky or unexpected phrasing. Examples can be mildly amusing or odd.
+          *   High Ridiculousness (80-100%): Generate absurd, nonsensical, surreal, or humorously inappropriate words and sentences (while still being grammatically valid Thai for the level). Use hyperbole, unexpected combinations, and extreme scenarios. Aim for maximum absurdity and humor.
+      *   **Mnemonics:** MUST match the tone. Serious mnemonics for serious tone, wildly absurd mnemonics for ridiculous tone.
+      *   **Example Sentences:** MUST strongly reflect the tone. For high ridiculousness, examples should feature ${userName} and friends (${friendNames.join(', ')}) in bizarre, impossible, or hilarious situations related to the '${topicsToDiscuss || 'general topics'}'
+      *   **Clever Title:** MUST reflect the chosen tone. A dry title for serious, a witty/absurd title for ridiculous.
+
+  3.  **Personalization:** Integrate the user's name ('${userName}') and their friends' names (${friendNames.join(', ')}) naturally into the EXAMPLE SENTENCES, especially for medium-to-high ridiculousness levels.
+
+  4.  **Topic Control:**
+      *   Focus vocabulary and examples *primarily* on the 'Topics to Discuss': ${topicsToDiscuss || 'General conversation'}.
+      *   If 'Specific Focus' is provided (${specificTopics || 'None'}), prioritize that within the main topics.
+      *   ABSOLUTELY DO NOT generate content related to 'Topics to STRICTLY AVOID': ${topicsToAvoid || 'None specified'}.
+
+  5.  **Politeness & Pronunciation:** Correctly generate masculine ("ครับ") and feminine ("ค่ะ") versions. Use clear, simple phonetic romanization.
+
+  6.  **Accuracy & Culture:** Ensure Thai spelling, translations, and grammar are accurate for the specified LEVEL and TONE. Maintain cultural appropriateness even in absurd contexts (avoid genuinely offensive content unless specifically requested within the absurd tone).
+
+  7.  **Avoid Duplicates:** Do not generate flashcards for the following English phrases that might already exist: ${existingPhrases && existingPhrases.length > 0 ? existingPhrases.join(', ') : 'None'}
 
   ${schemaDescription}
-  `;
+  `; // End of template literal
 
   return prompt.trim();
 }
@@ -143,9 +182,10 @@ function validatePhrase(data: any): data is Phrase {
   if (!hasRequiredFields) return false;
 
   // Optional fields validation
-  if (data.mnemonic !== undefined && typeof data.mnemonic !== 'string') return false;
+  if (data.mnemonic !== undefined && data.mnemonic !== null && typeof data.mnemonic !== 'string') return false; // Allow null
+  if (data.mnemonic === '') data.mnemonic = undefined; // Treat empty string as undefined
   
-  if (data.examples !== undefined) {
+  if (data.examples !== undefined && data.examples !== null) { // Allow null
     if (!Array.isArray(data.examples)) return false;
     
     // Validate each example sentence
@@ -156,6 +196,7 @@ function validatePhrase(data: any): data is Phrase {
           typeof ex.thaiFeminine !== 'string' || ex.thaiFeminine.trim() === '' ||
           typeof ex.pronunciation !== 'string' || ex.pronunciation.trim() === '' ||
           typeof ex.translation !== 'string' || ex.translation.trim() === '') {
+        console.warn("Invalid example structure:", ex); // Log invalid example
         return false; // Invalid example sentence structure
       }
     }
@@ -189,12 +230,11 @@ async function generateFlashcardsBatch(
   prompt: string, 
   batchIndex: number
 ): Promise<{phrases: Phrase[], cleverTitle?: string, error?: BatchError}> {
-  // Log the prompt being sent to the API (truncated for brevity)
-  console.log(`[Batch ${batchIndex}] Sending prompt to Gemini API (first 200 chars): 
-    ${prompt.substring(0, 200)}...`);
+  // Use standard template literals for logging
+  console.log(`[Batch ${batchIndex}] Sending prompt to Gemini API (first 300 chars): 
+    ${prompt.substring(0, 300)}...`);
   
   try {
-    // Call Gemini API inside a try-catch
     let responseText: string;
     try {
       console.log(`[Batch ${batchIndex}] Making API call to Gemini...`);
@@ -226,9 +266,8 @@ async function generateFlashcardsBatch(
       };
     }
 
-    // Log the received raw text (truncated)
-    console.log(`[Batch ${batchIndex}] Raw response text (first 200 chars): 
-      ${responseText.substring(0, 200)}...`);
+    console.log(`[Batch ${batchIndex}] Raw response text (first 300 chars): 
+      ${responseText.substring(0, 300)}...`);
 
     // Clean the response 
     const cleanedText = responseText.replace(/^```json\s*|```$/g, '').trim();
@@ -286,16 +325,25 @@ async function generateFlashcardsBatch(
         item.thaiFeminine = item.thaiFeminine.trim();
         item.pronunciation = item.pronunciation.trim();
         if (item.mnemonic) item.mnemonic = item.mnemonic.trim();
-        
+        if (item.examples) {
+          item.examples = item.examples.map((ex: ExampleSentence) => ({
+            ...ex,
+            thai: ex.thai.trim(),
+            thaiMasculine: ex.thaiMasculine.trim(),
+            thaiFeminine: ex.thaiFeminine.trim(),
+            pronunciation: ex.pronunciation.trim(),
+            translation: ex.translation.trim(),
+          }));
+        }
         validPhrases.push(item as Phrase);
       } else {
-        console.warn(`[Batch ${batchIndex}] Invalid phrase structure received:`, JSON.stringify(item));
+        console.warn(`[Batch ${batchIndex}] Invalid phrase structure received and skipped:`, JSON.stringify(item));
         invalidItems.push(item);
       }
     }
 
     // Log the validation results
-    console.log(`[Batch ${batchIndex}] Validation summary: ${validPhrases.length} valid phrases, ${invalidItems.length} invalid items`);
+    console.log(`[Batch ${batchIndex}] Validation summary: ${validPhrases.length} valid phrases, ${invalidItems.length} invalid items skipped`);
 
     // Handle partial validation errors
     if (validPhrases.length > 0 && invalidItems.length > 0) {
@@ -304,7 +352,7 @@ async function generateFlashcardsBatch(
         cleverTitle,
         error: createBatchError('VALIDATION', 
           `Some phrases (${invalidItems.length}) failed validation and were omitted`,
-          { invalidItems })
+          { invalidItems: invalidItems.slice(0, 5) }) // Log only first few invalid
       };
     }
     
@@ -314,8 +362,8 @@ async function generateFlashcardsBatch(
         phrases: [],
         cleverTitle,
         error: createBatchError('VALIDATION', 
-          `All phrases failed validation checks`,
-          { invalidItems })
+          `All ${phrasesArray.length} phrases failed validation checks`,
+          { invalidItems: invalidItems.slice(0, 5) })
       };
     }
 
@@ -365,7 +413,7 @@ export async function generateCustomSet(
     });
 
     console.log(`[Batch ${batchIndex}] Starting generation of batch with ${currentBatchSize} cards`);
-    console.log(`[Batch ${batchIndex}] User preferences: Level=${preferences.level}, Goals=${preferences.goals.join(',')}, Topics=${preferences.specificTopics || 'none'}`);
+    console.log(`[Batch ${batchIndex}] User preferences: Level=${preferences.level}, Topics=${preferences.topicsToDiscuss || 'none'}, Avoid=${preferences.topicsToAvoid || 'none'}, Tone=${preferences.seriousnessLevel}%`);
 
     let retries = 0;
     let success = false;
@@ -385,14 +433,14 @@ export async function generateCustomSet(
         }
         
         if (batchResult.error) {
-          console.error(`[Batch ${batchIndex}] Error in batch attempt:`, batchResult.error);
+          console.error(`[Batch ${batchIndex}] Error in batch attempt (${batchResult.error.type}):`, batchResult.error.message);
           const errorWithBatch = { ...batchResult.error, batchIndex };
           const retryable = ['NETWORK', 'API', 'UNKNOWN'].includes(batchResult.error.type);
 
           if (retryable) {
             retries++;
             if (retries >= MAX_RETRIES) {
-              console.error(`[Batch ${batchIndex}] Max retries reached.`);
+              console.error(`[Batch ${batchIndex}] Max retries reached for retryable error.`);
               aggregatedErrors.push(errorWithBatch);
               break; // Exit retry loop for this batch
             }
@@ -410,11 +458,15 @@ export async function generateCustomSet(
                  !allGeneratedPhrases.some(existing => existing.english === p.english)
                );
                if (newPhrases.length > 0) {
-                   console.log(`[Batch ${batchIndex}] Partial success with non-retryable error. Adding ${newPhrases.length} phrases.`);
+                   console.log(`[Batch ${batchIndex}] Partial success with non-retryable error (${batchResult.error.type}). Adding ${newPhrases.length} valid phrases.`);
                    allGeneratedPhrases.push(...newPhrases);
                    remainingCount -= newPhrases.length;
                    batchAttemptPhrases = newPhrases; // Store for progress update
+               } else {
+                   console.warn(`[Batch ${batchIndex}] Non-retryable error (${batchResult.error.type}) occurred, and 0 valid new phrases were extracted.`);
                }
+            } else {
+                console.error(`[Batch ${batchIndex}] Non-retryable error (${batchResult.error.type}) occurred, and 0 phrases were returned.`);
             }
             success = true; // Mark batch as processed (even if failed non-retryably)
             break; // Exit retry loop
@@ -426,17 +478,17 @@ export async function generateCustomSet(
             const newPhrases = batchResult.phrases.filter(p => 
               !allGeneratedPhrases.some(existing => existing.english === p.english)
             );
-            console.log(`[Batch ${batchIndex}] Success. Generated ${newPhrases.length} unique phrases.`);
+            console.log(`[Batch ${batchIndex}] Success. Generated ${newPhrases.length} unique phrases (out of ${batchResult.phrases.length} returned).`);
             allGeneratedPhrases.push(...newPhrases);
             remainingCount -= newPhrases.length;
             batchAttemptPhrases = newPhrases; // Store successful phrases
           } else {
-            console.warn(`[Batch ${batchIndex}] Success, but 0 phrases returned.`);
+            console.warn(`[Batch ${batchIndex}] Success, but 0 phrases returned by API or all were duplicates/invalid.`);
           }
         }
       } catch (error: any) {
         retries++;
-        console.error(`[Batch ${batchIndex}] Uncaught error in generateCustomSet loop (Attempt ${retries}/${MAX_RETRIES}):`, error);
+        console.error(`[Batch ${batchIndex}] UNCAUGHT error during batch attempt ${retries}/${MAX_RETRIES}:`, error);
         if (retries >= MAX_RETRIES) {
           console.error(`[Batch ${batchIndex}] Max retries reached for uncaught error.`);
           aggregatedErrors.push({
@@ -450,74 +502,46 @@ export async function generateCustomSet(
       }
     } // End retry loop
     
-    // --- Logging and Progress Update Call --- 
-    if (success) {
-        console.log(`[Batch ${batchIndex}] Overall SUCCEEDED.`);
-        if (onProgressUpdate) {
-            if (batchAttemptPhrases.length > 0) {
-                console.log(` --> Calling onProgressUpdate with ${batchAttemptPhrases.length} latest phrases.`);
-                onProgressUpdate({
-                    completed: allGeneratedPhrases.length,
-                    total: totalCount,
-                    latestPhrases: batchAttemptPhrases
-                });
-            } else {
-                console.log(` --> Batch succeeded but 0 new phrases. Calling onProgressUpdate just for count.`);
-                onProgressUpdate({
-                    completed: allGeneratedPhrases.length,
-                    total: totalCount,
-                    latestPhrases: [] // Send empty array
-                });
-            }
-        } else {
-            console.log(` --> onProgressUpdate callback not provided.`);
-        }
-    } else {
-        console.log(`[Batch ${batchIndex}] Overall FAILED (Max retries or non-retryable error with 0 phrases).`);
-        // Optionally, still call onProgressUpdate to update the count even on failure
-        if (onProgressUpdate) {
-             console.log(` --> Calling onProgressUpdate to update completed count despite batch failure.`);
-             onProgressUpdate({
-                completed: allGeneratedPhrases.length,
-                total: totalCount,
-                latestPhrases: [] // No new phrases on failure
-             });
-        }
+    // --- Progress Update Call --- 
+    if (onProgressUpdate) {
+        console.log(` --> Calling onProgressUpdate. Completed: ${allGeneratedPhrases.length}/${totalCount}. Latest: ${batchAttemptPhrases.length}. Batch success: ${success}`);
+         onProgressUpdate({
+             completed: allGeneratedPhrases.length,
+             total: totalCount,
+             latestPhrases: batchAttemptPhrases
+         });
     }
-    // --- End Logging and Progress Update Call ---
+    // --- End Progress Update Call ---
     
     if (!success) {
       remainingCount -= currentBatchSize; // Assume the whole batch size failed
-      console.log(`[Batch ${batchIndex}] Adjusting remaining count to ${remainingCount}`);
+      console.warn(`[Batch ${batchIndex}] Batch FAILED after max retries. Assuming ${currentBatchSize} cards failed.`);
     }
     
     batchIndex++;
-    console.log(`[Batch ${batchIndex-1}] Finished processing batch.`);
+    console.log(`[Batch ${batchIndex-1}] Finished processing batch. ${remainingCount} cards remaining.`);
   }
 
   // Create an error summary for client consumption
-  const errorTypes = aggregatedErrors.map(err => err.type)
-    .filter((value, index, self) => self.indexOf(value) === index); // Unique error types
+  const errorTypes = aggregatedErrors.map(err => err.type).filter((value, index, self) => self.indexOf(value) === index);
   const totalErrors = aggregatedErrors.length;
   
   let userMessage = '';
-  if (allGeneratedPhrases.length === 0) {
-    userMessage = `No cards could be generated. This might be due to ${errorTypes.join(', ').toLowerCase()} issues.`;
-  } else if (allGeneratedPhrases.length < totalCount) {
-    userMessage = `Some cards couldn't be generated (${allGeneratedPhrases.length}/${totalCount} created). There were issues with ${errorTypes.join(', ').toLowerCase()}.`;
+  if (totalErrors > 0) {
+      if (allGeneratedPhrases.length === 0) {
+          userMessage = `Generation failed completely. Issues encountered: ${errorTypes.join(', ')}.`;
+      } else if (allGeneratedPhrases.length < totalCount) {
+          userMessage = `Finished with some issues (${allGeneratedPhrases.length}/${totalCount} cards created). Problems included: ${errorTypes.join(', ')}.`;
+      } else {
+          userMessage = `Generation completed, but some minor issues occurred (${errorTypes.join(', ')}).`;
+      }
   }
-
-  const errorSummary = {
-    errorTypes,
-    totalErrors,
-    userMessage
-  };
+  const errorSummary = totalErrors > 0 ? { errorTypes, totalErrors, userMessage } : undefined;
 
   console.log(`Total generation complete. Generated ${allGeneratedPhrases.length}/${totalCount} phrases. Title: "${extractedCleverTitle || 'N/A'}". ${aggregatedErrors.length} batch errors.`);
   
-  if (aggregatedErrors.length > 0) {
+  if (errorSummary) {
     console.log('Error summary:', JSON.stringify(errorSummary));
-    console.log('Detailed errors:', JSON.stringify(aggregatedErrors));
   }
 
   return {
@@ -529,31 +553,23 @@ export async function generateCustomSet(
 }
 
 /**
- * Creates a complete CustomSet object from generated phrases
+ * Creates a partial CustomSet object from generated phrases
+ * (Mnemonics are handled separately)
  */
 export function createCustomSet(
   name: string, 
   level: string, 
-  goals: string[], 
   specificTopics: string | undefined, 
-  phrases: Phrase[]
-): CustomSet {
-  // Create mnemonics lookup object from phrases that have mnemonics
-  const mnemonics: {[key: number]: string} = {};
-  phrases.forEach((phrase, index) => {
-    if (phrase.mnemonic) {
-      mnemonics[index] = phrase.mnemonic;
-    }
-  });
-
+  phrases: Phrase[],
+  seriousness?: number // Optional
+): Omit<CustomSet, 'mnemonics' | 'goals'> {
   return {
     name,
     level,
-    goals,
     specificTopics,
     createdAt: new Date().toISOString(),
     phrases,
-    mnemonics
+    seriousness
   };
 }
 
@@ -568,7 +584,7 @@ export async function generateSingleFlashcard(
   try {
     console.log(`Generating single flashcard with preferences:`, JSON.stringify(preferences));
     if (targetEnglishMeaning) {
-      console.log(`Target English meaning: ${targetEnglishMeaning}`);
+      console.log(`Target English meaning for single card: ${targetEnglishMeaning}`);
     }
     
     const prompt = buildGenerationPrompt({
@@ -581,48 +597,54 @@ export async function generateSingleFlashcard(
     while (retries < MAX_RETRIES) {
       try {
         console.log(`Single card generation attempt ${retries + 1}/${MAX_RETRIES}`);
-        const result = await generateFlashcardsBatch(prompt, -1); // Using -1 to indicate this is not a regular batch
+        const result = await generateFlashcardsBatch(prompt, -1);
         
         if (result.error) {
-          console.error(`Error generating single flashcard (attempt ${retries + 1}):`, result.error);
+          console.error(`Error generating single flashcard (attempt ${retries + 1}, type ${result.error.type}):`, result.error.message);
           retries++;
           
-          if (retries >= MAX_RETRIES) {
-            return { phrase: null, error: result.error };
+          if (!['NETWORK', 'API', 'UNKNOWN'].includes(result.error.type) || retries >= MAX_RETRIES) {
+             console.error(`Max retries reached or non-retryable error (${result.error.type}) for single card.`);
+             return { phrase: null, error: result.error };
           }
           await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
           continue;
         }
         
         if (result.phrases.length > 0) {
+          console.log(`Successfully generated single card: ${result.phrases[0].english}`);
           return { phrase: result.phrases[0] };
         }
         
         retries++;
-        console.warn(`No phrases returned for single card generation (attempt ${retries})`);
+        console.warn(`API succeeded but returned 0 phrases for single card generation (attempt ${retries})`);
+        if (retries >= MAX_RETRIES) break;
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
+
       } catch (error: any) {
         retries++;
         console.error(`Uncaught error in single card generation (attempt ${retries}):`, error);
-        
         if (retries >= MAX_RETRIES) {
           return { 
             phrase: null, 
-            error: createBatchError('UNKNOWN', `Error generating single flashcard: ${error.message}`, { error })
+            error: createBatchError('UNKNOWN', `Uncaught error generating single card: ${error.message}`, { error })
           };
         }
         await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
       }
     }
     
+    console.error('Failed to generate single flashcard after multiple attempts.');
     return { 
       phrase: null, 
-      error: createBatchError('UNKNOWN', 'Failed to generate single flashcard after multiple attempts', {})
+      error: createBatchError('UNKNOWN', 'Failed to generate single flashcard after multiple attempts (e.g., API consistently returned 0 phrases).', {})
     };
+
   } catch (error: any) {
-    console.error("Unexpected error in generateSingleFlashcard:", error);
+    console.error("Unexpected error setting up generateSingleFlashcard:", error);
     return { 
       phrase: null, 
-      error: createBatchError('UNKNOWN', `Unexpected error in generateSingleFlashcard: ${error.message}`, { error })
+      error: createBatchError('UNKNOWN', `Unexpected setup error in generateSingleFlashcard: ${error.message}`, { error })
     };
   }
 } 

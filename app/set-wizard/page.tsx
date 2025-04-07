@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { generateCustomSet, createCustomSet, Phrase, generateSingleFlashcard, BatchError } from '../lib/set-generator';
 import * as storage from '../lib/storage'; // Import storage functions
 import { SetMetaData } from '../lib/storage'; // Import SetMetaData type
@@ -175,6 +176,7 @@ const CardEditor = ({
 
 const SetWizardPage = () => {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [thaiLevel, setThaiLevel] = useState<string>('beginner');
   const [learningGoals, setLearningGoals] = useState<string[]>([]);
@@ -367,45 +369,105 @@ const SetWizardPage = () => {
     setGeneratedPhrases(updatedPhrases);
   };
 
-  const handleCreateSet = () => {
+  const handleCreateSet = async () => {
     if (generatedPhrases.length === 0) {
       alert("No cards have been generated. Please go back and generate cards first.");
       return;
     }
 
-    // Create the data that will be added to the sets registry
-    const setData = {
-      name: customSetName || `Generated Set ${new Date().toLocaleDateString()}`, 
-      cleverTitle: aiGeneratedTitle, 
-      level: thaiLevel,
-      goals: learningGoals,
-      specificTopics: specificTopics,
-      source: 'wizard' as const
-    };
+    try {
+      setIsGenerating(true); // Show loading state while saving
+      
+      // Create the data for the set
+      const setData = {
+        name: customSetName || `Generated Set ${new Date().toLocaleDateString()}`, 
+        cleverTitle: aiGeneratedTitle, 
+        level: thaiLevel,
+        goals: learningGoals,
+        specificTopics: specificTopics,
+        source: 'wizard' as const,
+        phrases: generatedPhrases
+      };
 
-    const newId = storage.generateUUID();
-    const now = new Date().toISOString();
-    
-    const newMetaData: SetMetaData = {
-      ...setData,
-      id: newId,
-      createdAt: now,
-      phraseCount: generatedPhrases.length,
-    };
+      // Log the first phrase to see its structure (for debugging)
+      if (generatedPhrases.length > 0) {
+        console.log("First phrase example:", JSON.stringify(generatedPhrases[0], null, 2));
+        
+        // Check if examples have the correct structure
+        if (generatedPhrases[0].examples && generatedPhrases[0].examples.length > 0) {
+          console.log("Example structure:", JSON.stringify(generatedPhrases[0].examples[0], null, 2));
+        }
+      }
 
-    // Save the set content and metadata
-    storage.saveSetContent(newId, generatedPhrases);
-    
-    // Update available sets list
-    const currentSets = storage.getAvailableSets();
-    const updatedSets = [...currentSets, newMetaData];
-    storage.saveAvailableSets(updatedSets);
-    
-    // Set this new set as active immediately
-    storage.setActiveSetId(newId);
+      if (status === 'authenticated') {
+        // User is logged in, save to database via API
+        console.log("Saving set to database for authenticated user");
+        
+        try {
+          const response = await fetch('/api/flashcard-sets', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(setData),
+          });
 
-    // Update completion message
-    alert(`Your set "${customSetName}" has been created and loaded! You can export it later from the Set Manager if needed.`);
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Error response from API:", errorData);
+            
+            if (response.status === 401) {
+              // Authentication error
+              alert("Your session has expired. Please sign in again to save your set.");
+              window.location.href = '/login'; // Redirect to login
+              return;
+            }
+            
+            throw new Error(errorData.error || errorData.message || 'Failed to create set');
+          }
+
+          const result = await response.json();
+          console.log("Set saved successfully:", result);
+          
+          // Update success message
+          alert(`Your set "${customSetName}" has been created and saved to your account!`);
+        } catch (error) {
+          console.error("Fetch error:", error);
+          throw error; // Re-throw to be caught by outer try/catch
+        }
+      } else {
+        // User is not logged in, save to localStorage
+        console.log("Saving set to localStorage for unauthenticated user");
+        const newId = storage.generateUUID();
+        const now = new Date().toISOString();
+        
+        const newMetaData: SetMetaData = {
+          ...setData,
+          id: newId,
+          createdAt: now,
+          phraseCount: generatedPhrases.length,
+        };
+
+        // Save the set content and metadata
+        storage.saveSetContent(newId, generatedPhrases);
+        
+        // Update available sets list
+        const currentSets = storage.getAvailableSets();
+        const updatedSets = [...currentSets, newMetaData];
+        storage.saveAvailableSets(updatedSets);
+        
+        // Set this new set as active immediately
+        storage.setActiveSetId(newId);
+        
+        // Update completion message
+        alert(`Your set "${customSetName}" has been created and saved locally. Sign in to save it to your account!`);
+      }
+    } catch (error) {
+      console.error('Error saving set:', error);
+      alert(`Error saving set: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsGenerating(false);
+    }
     
     // Offer to return to main app
     if (confirm('Would you like to return to the main app now?')) {

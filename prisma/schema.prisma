@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------------------------
+// NextAuth.js Models (Required for Prisma Adapter)
+// -------------------------------------
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String? // To store the hashed password
+  accounts      Account[]
+  sessions      Session[]
+
+  // Application-specific relations
+  flashcardSets   FlashcardSet[]
+  userSetProgress UserSetProgress[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// -------------------------------------
+// Application-Specific Models
+// -------------------------------------
+
+model FlashcardSet {
+  id             String   @id @default(cuid())
+  userId         String   // Foreign key to User
+  name           String   // User-defined or auto-generated name
+  cleverTitle    String?  // Optional AI-generated title
+  level          String?  // e.g., beginner, intermediate
+  goals          String[] // Array of goal strings
+  specificTopics String?
+  source         String   // default, wizard, import
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phrases Phrase[] // Relation to Phrases belonging to this set
+  progress UserSetProgress[] // Relation to user progress for this set
+
+  @@index([userId])
+}
+
+model Phrase {
+  id              String   @id @default(cuid())
+  setId           String   // Foreign key to FlashcardSet
+  english         String
+  thai            String
+  thaiMasculine   String
+  thaiFeminine    String
+  pronunciation   String
+  mnemonic        String?
+  // Example sentences could be JSON or a separate related table if needed often
+  examplesJson    Json?    @db.JsonB // Store examples array as JSON
+
+  flashcardSet FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@index([setId])
+}
+
+// Stores user-specific progress for a particular set
+model UserSetProgress {
+  id             String   @id @default(cuid())
+  userId         String   // Foreign key to User
+  setId          String   // Foreign key to FlashcardSet
+  // Store the progress map { cardIndex: CardProgressData } as JSON
+  progressData   Json     @db.JsonB 
+  lastAccessedAt DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  set  FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, setId]) // Ensure only one progress record per user per set
+  @@index([userId])
+  @@index([setId])
+}

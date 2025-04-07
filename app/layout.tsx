@@ -2,6 +2,8 @@ import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { SetProvider } from './context/SetContext'
+import { Providers } from './providers'
+import { Navbar } from './components/Navbar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -43,9 +45,14 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body className={inter.className}>
-        <SetProvider>
-          {children}
-        </SetProvider>
+        <Providers>
+          <SetProvider>
+            <Navbar />
+            <main>
+              {children}
+            </main>
+          </SetProvider>
+        </Providers>
       </body>
     </html>
   )

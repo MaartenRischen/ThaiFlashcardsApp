@@ -30,6 +30,12 @@ export function Navbar() {
                 <Link href="/my-sets" className="text-sm font-medium transition-colors hover:text-primary">
                   My Sets
                 </Link>
+                <Link href="/set-wizard" className="text-sm font-medium transition-colors hover:text-primary">
+                  Set Wizard
+                </Link>
+                <Link href="/example-wizard" className="text-sm font-medium transition-colors hover:text-primary">
+                  Example Wizard
+                </Link>
                 <Link href="/profile" className="text-sm font-medium transition-colors hover:text-primary">
                   Profile
                 </Link>

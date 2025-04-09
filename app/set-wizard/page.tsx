@@ -7,6 +7,7 @@ import { generateCustomSet, createCustomSet, Phrase, generateSingleFlashcard, Ba
 import * as storage from '../lib/storage'; // Import storage functions
 import { SetMetaData } from '../lib/storage'; // Import SetMetaData type
 import { Slider } from "@/components/ui/slider"; // Import the slider component
+import { generateMnemonicOptions } from '../lib/gemini';
 
 // Card Editor component for previewing and editing generated cards
 const CardEditor = ({ 
@@ -208,9 +209,12 @@ const SetWizardPage = () => {
     totalErrors: number;
     userMessage: string;
   } | null>(null);
-  const [totalSteps] = useState(5); // Total steps including generation and preview
+  const [totalSteps] = useState(6); // Total steps including generation and preview
   const [aiGeneratedTitle, setAiGeneratedTitle] = useState<string | undefined>(undefined);
   const [generatingDisplayPhrases, setGeneratingDisplayPhrases] = useState<Phrase[]>([]);
+  const [mnemonicOptions, setMnemonicOptions] = useState<string[]>([]);
+  const [selectedMnemonics, setSelectedMnemonics] = useState<Record<number, string>>({});
+  const [isGeneratingMnemonics, setIsGeneratingMnemonics] = useState<boolean>(false);
 
   // Generate a unique set name when component mounts
   useEffect(() => {
@@ -243,23 +247,21 @@ const SetWizardPage = () => {
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
-      if (currentStep === 3) {
-        startGeneration();
-      } else {
-        setCurrentStep(currentStep + 1);
-      }
+      if (currentStep === 3) { startGeneration(); }
+      else if (currentStep === 4) { // Moving from Generate to Mnemonics
+        if (generatedPhrases.length > 0) {
+          setCurrentPreviewIndex(0);
+          fetchMnemonicOptionsForCard(0);
+          setCurrentStep(5);
+        } else { setCurrentStep(6); }
+      } else { setCurrentStep(currentStep + 1); }
     }
   };
 
   const handleBack = () => {
-    // Prevent going back to Generation step (4) from Preview step (5)
-    if (currentStep > 1 && currentStep !== 5) { 
-      setCurrentStep(currentStep - 1);
-    } else if (currentStep === 5) {
-      // Optionally go back to Step 3 (Inputs) from Preview
-      console.log("Navigating back from Preview (5) to Input (3)");
-      setCurrentStep(3); 
-    }
+    if (currentStep === 6) { setCurrentStep(5); }
+    else if (currentStep === 5) { setCurrentStep(3); }
+    else if (currentStep > 1 && currentStep !== 4) { setCurrentStep(currentStep - 1); }
   };
 
   const startGeneration = async () => {
@@ -377,6 +379,43 @@ const SetWizardPage = () => {
     setGeneratedPhrases(updatedPhrases);
   };
 
+  const fetchMnemonicOptionsForCard = async (cardIndex: number) => {
+    if (!generatedPhrases[cardIndex]) return;
+    setIsGeneratingMnemonics(true);
+    setMnemonicOptions([]);
+    try {
+      const phrase = generatedPhrases[cardIndex];
+      const result = await generateMnemonicOptions(phrase.thai, phrase.english, seriousnessLevel, 3);
+      if (result.options) { setMnemonicOptions(result.options); }
+      else { setMnemonicOptions(["Error: Could not generate options."]); }
+    } catch (error) { setMnemonicOptions(["Error loading options."]); }
+    finally { setIsGeneratingMnemonics(false); }
+  };
+
+  const handleMnemonicSelection = (cardIndex: number, mnemonic: string) => {
+    setSelectedMnemonics(prev => ({ ...prev, [cardIndex]: mnemonic }));
+    if (cardIndex < generatedPhrases.length - 1) {
+      handleMnemonicNavigate(cardIndex + 1);
+    } else {
+      console.log("Finished mnemonic selection.");
+      // Optionally auto-navigate to step 6 after last selection?
+      // setCurrentStep(6);
+    }
+  };
+
+  const handleMnemonicNavigate = (nextIndex: number) => {
+    if (nextIndex >= 0 && nextIndex < generatedPhrases.length) {
+      setCurrentPreviewIndex(nextIndex);
+      // Fetch new options only if not already selected by user for that card
+      if (!selectedMnemonics[nextIndex]) {
+         fetchMnemonicOptionsForCard(nextIndex);
+      } else {
+         // If already selected, maybe clear options or show the selected one?
+         setMnemonicOptions([]); // Clear options if already selected
+      }
+    }
+  };
+
   const handleCreateSet = async () => {
     if (generatedPhrases.length === 0) {
       alert("No cards have been generated. Please go back and generate cards first.");
@@ -387,13 +426,19 @@ const SetWizardPage = () => {
       setIsGenerating(true); // Show loading state while saving
       
       // Create the data for the set
+      const finalPhrasesWithMnemonics = generatedPhrases.map((phrase, index) => ({
+        ...phrase,
+        mnemonic: selectedMnemonics[index] || phrase.mnemonic || undefined
+      }));
+
       const setData = {
         name: customSetName || `Generated Set ${new Date().toLocaleDateString()}`, 
         cleverTitle: aiGeneratedTitle, 
         level: thaiLevel,
         specificTopics: specificTopics,
+        seriousness: seriousnessLevel,
         source: 'wizard' as const,
-        phrases: generatedPhrases
+        phrases: finalPhrasesWithMnemonics
       };
 
       // Log the first phrase to see its structure (for debugging)
@@ -744,152 +789,148 @@ const SetWizardPage = () => {
             </div>
           )}
           
-          {/* Step 5: Preview & Save - Update Summary */}
-          {currentStep === 5 && (
+          {/* Step 5: Mnemonic Review */}
+          {currentStep === 5 && generatedPhrases.length > 0 && (
             <div>
-              <h2 className="text-2xl font-bold mb-4 text-blue-400">Review & Create Your Set</h2>
-              
-               {/* Error Summary */}
-               {errorSummary && errorSummary.totalErrors > 0 && (
-                 <div className="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded p-3 mb-4 text-sm">
-                   <p className="text-yellow-400 mb-1">
-                       Note: {errorSummary.userMessage || 'Some minor issues occurred during generation.'}
-                       {errorSummary.errorTypes.includes('VALIDATION') && ' Try simplifying your topics.'}
-                   </p>
-                 </div>
-               )}
-              
-              {/* Set Title */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Set Title (Edit if desired)
-                </label>
-                <input
-                  type="text"
-                  value={customSetName}
-                  onChange={(e) => setCustomSetName(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white font-semibold text-lg"
-                />
-                {aiGeneratedTitle && customSetName === aiGeneratedTitle && (
-                    <p className="text-xs text-gray-400 mt-1 italic">AI suggested title</p>
-                )}
+              <h2 className="text-2xl font-bold mb-2 text-blue-400">Step 5: Add Memory Aids</h2>
+              <p className="text-sm text-gray-400 mb-4">For card {currentPreviewIndex + 1} of {generatedPhrases.length}. Let's create a mnemonic!</p>
+              <div className="bg-gray-800 p-4 rounded mb-4 border border-gray-700">
+                 {/* Card Display */}
               </div>
-              
-              {/* UPDATED Set Summary */}
-              <div className="bg-gray-800 p-4 rounded mb-6">
-                <h3 className="font-semibold mb-2">Set Summary</h3>
-                <ul className="space-y-1 text-gray-300 text-sm">
-                  <li><span className="text-gray-400">Cards:</span> {generatedPhrases.length}</li>
-                  <li><span className="text-gray-400">Level:</span> {thaiLevel.charAt(0).toUpperCase() + thaiLevel.slice(1)}</li>
-                  <li><span className="text-gray-400">Discuss:</span> {topicsToDiscuss || 'General'}</li>
-                   {specificTopics && (
-                     <li><span className="text-gray-400">Specific Focus:</span> {specificTopics}</li>
-                   )}
-                   {topicsToAvoid && (
-                    <li><span className="text-gray-400">Avoid:</span> {topicsToAvoid}</li>
-                   )}
-                   <li><span className="text-gray-400">Tone:</span> {seriousnessLevel}% Ridiculous</li>
-                   {friendNames && (
-                     <li><span className="text-gray-400">Featuring:</span> {friendNames}</li>
-                   )}
-                </ul>
-              </div>
-              
-              {/* Card Preview */}
-              <div className="mb-6">
-                <h3 className="font-semibold mb-4">Card Preview</h3>
-                <div className="flex justify-between items-center mb-4">
-                  <div className="text-sm text-gray-400">
-                    Showing card {currentPreviewIndex + 1} of {generatedPhrases.length}
-                  </div>
-                  <div className="flex space-x-2">
-                    <button 
-                      onClick={() => setCurrentPreviewIndex(prev => Math.max(0, prev - 1))}
-                      disabled={currentPreviewIndex === 0}
-                      className={`px-3 py-1 rounded ${currentPreviewIndex === 0 ? 'bg-gray-700 text-gray-500' : 'bg-blue-600 text-white'}`}
-                    >
-                      Previous
-                    </button>
-                    <button 
-                      onClick={() => setCurrentPreviewIndex(prev => Math.min(generatedPhrases.length - 1, prev + 1))}
-                      disabled={currentPreviewIndex === generatedPhrases.length - 1}
-                      className={`px-3 py-1 rounded ${currentPreviewIndex === generatedPhrases.length - 1 ? 'bg-gray-700 text-gray-500' : 'bg-blue-600 text-white'}`}
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-                
-                {generatedPhrases.length > 0 ? (
-                  <CardEditor
-                    phrase={generatedPhrases[currentPreviewIndex]}
-                    onChange={handleUpdateCard}
-                    onRegenerate={handleRegenerateCard}
-                    index={currentPreviewIndex}
-                    level={thaiLevel}
-                    goals={[]}
-                    specificTopics={specificTopics}
-                    friendNames={friendNames.split(',').map(n=>n.trim()).filter(n=>n)}
-                    userName={session?.user?.name || 'You'}
-                    topicsToDiscuss={topicsToDiscuss}
-                    topicsToAvoid={topicsToAvoid}
-                    seriousnessLevel={seriousnessLevel}
-                  />
+              <div className="mb-4">
+                <p className="text-sm font-medium text-gray-300 mb-2">Choose a suggestion or write your own:</p>
+                {isGeneratingMnemonics ? (
+                  <div className="space-y-2">{/* Loading Skeletons */}</div>
                 ) : (
-                  <div className="text-center p-8 bg-gray-800 rounded">
-                    <p className="text-gray-400">No cards have been generated.</p>
+                  <div className="space-y-2">
+                    {mnemonicOptions.map((option, idx) => (
+                      <button key={idx} onClick={() => handleMnemonicSelection(currentPreviewIndex, option)} className={`... ${selectedMnemonics[currentPreviewIndex] === option ? '...' : '...'}`}>{option}</button>
+                    ))}
                   </div>
                 )}
               </div>
-              
-              {/* Create Set Button */}
-              <button 
-                onClick={handleCreateSet} 
-                disabled={generatedPhrases.length === 0 || !customSetName.trim() || isGenerating}
-                className={`w-full py-3 rounded-lg font-bold transition-colors ${
-                  generatedPhrases.length === 0 || !customSetName.trim() || isGenerating
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
-                    : 'bg-green-600 hover:bg-green-700 text-white'
-                }`}
-              >
-                {isGenerating ? 'Saving...' : 'Create My Custom Set'}
-              </button>
+              <div>
+                 <label className="block text-sm font-medium text-gray-300 mb-1">Or type your own:</label>
+                 <textarea placeholder="..." value={selectedMnemonics[currentPreviewIndex] || ''} onChange={(e) => setSelectedMnemonics(prev => ({ ...prev, [currentPreviewIndex]: e.target.value }))} onKeyDown={/*...*/} className="..." />
+                 {selectedMnemonics[currentPreviewIndex]?.trim() && !mnemonicOptions.includes(selectedMnemonics[currentPreviewIndex]) && (
+                     <button onClick={() => { const m = selectedMnemonics[currentPreviewIndex]?.trim(); if (m) { handleMnemonicSelection(currentPreviewIndex, m); } }} className="...">Use this & Next</button>
+                 )}
+              </div>
+              <div className="flex justify-between mt-6 border-t border-gray-700 pt-4">
+                <button onClick={() => handleMnemonicNavigate(currentPreviewIndex - 1)} disabled={currentPreviewIndex === 0 || isGeneratingMnemonics} className="...">← Previous</button>
+                <span className="...">Card {currentPreviewIndex + 1} / {generatedPhrases.length}</span>
+                <button onClick={() => handleMnemonicNavigate(currentPreviewIndex + 1)} disabled={currentPreviewIndex === generatedPhrases.length - 1 || isGeneratingMnemonics} className="...">Next →</button>
+              </div>
             </div>
+          )}
+          
+          {/* Step 6: Final Preview (adjusted props) */}
+          {currentStep === 6 && (
+            <div>
+               <h2 className="text-2xl font-bold mb-4 text-blue-400">Step 6: Review & Create Your Set</h2>
+               
+               {/* Error Summary - No empty comment */}
+                {errorSummary && errorSummary.totalErrors > 0 && (
+                  <div className="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded p-3 mb-4 text-sm">
+                    <p className="text-yellow-400 mb-1">
+                        Note: {errorSummary.userMessage || 'Some minor issues occurred during generation.'}
+                        {errorSummary.errorTypes.includes('VALIDATION') && ' Try simplifying your topics.'}
+                    </p>
+                  </div>
+                )}
+               
+               {/* Set Title Input - No empty comment */}
+               <div className="mb-6">
+                 <label className="block text-sm font-medium text-gray-300 mb-2">
+                   Set Title (Edit if desired)
+                 </label>
+                 <input
+                   type="text"
+                   value={customSetName}
+                   onChange={(e) => setCustomSetName(e.target.value)}
+                   className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white font-semibold text-lg"
+                 />
+                 {aiGeneratedTitle && customSetName === aiGeneratedTitle && (
+                     <p className="text-xs text-gray-400 mt-1 italic">AI suggested title</p>
+                 )}
+               </div>
+               
+               {/* Final Set Summary */}
+               <div className="bg-gray-800 p-4 rounded mb-6">
+                 <h3 className="font-semibold mb-2">Set Summary</h3>
+                 <ul className="space-y-1 text-gray-300 text-sm">
+                     <li><span className="text-gray-400">Cards:</span> {generatedPhrases.length}</li>
+                     <li><span className="text-gray-400">Level:</span> {thaiLevel.charAt(0).toUpperCase() + thaiLevel.slice(1)}</li>
+                     <li><span className="text-gray-400">Situations:</span> {topicsToDiscuss || 'General'}</li>
+                     {specificTopics && (
+                       <li><span className="text-gray-400">Specific Focus:</span> {specificTopics}</li>
+                     )}
+                     {topicsToAvoid && (
+                      <li><span className="text-gray-400">Avoid:</span> {topicsToAvoid}</li>
+                     )}
+                     <li><span className="text-gray-400">Tone:</span> {seriousnessLevel}% Ridiculous</li>
+                     {friendNames && (
+                       <li><span className="text-gray-400">Featuring:</span> {friendNames}</li>
+                     )}
+                 </ul>
+               </div>
+               
+               {/* Card Preview Area - No empty comment */}
+               <div className="mb-6">
+                 <h3 className="font-semibold mb-4">Card Preview</h3>
+                 {/* Preview Navigation - No empty comment */}
+                 <div className="flex justify-between items-center mb-4">
+                   <div className="text-sm text-gray-400">
+                     Showing card {currentPreviewIndex + 1} of {generatedPhrases.length}
+                   </div>
+                   <div className="flex space-x-2">
+                     {/* Prev/Next Buttons */} 
+                     <button onClick={() => setCurrentPreviewIndex(prev => Math.max(0, prev - 1))} disabled={currentPreviewIndex === 0} className={`...`}>Previous</button>
+                     <button onClick={() => setCurrentPreviewIndex(prev => Math.min(generatedPhrases.length - 1, prev + 1))} disabled={currentPreviewIndex === generatedPhrases.length - 1} className={`...`}>Next</button>
+                   </div>
+                 </div>
+                 {/* Card Editor - No empty comment */} 
+                 {generatedPhrases.length > 0 ? (
+                   <CardEditor
+                     key={currentPreviewIndex} 
+                     phrase={{...generatedPhrases[currentPreviewIndex], mnemonic: selectedMnemonics[currentPreviewIndex] || generatedPhrases[currentPreviewIndex]?.mnemonic }} 
+                     onChange={handleUpdateCard}
+                     onRegenerate={handleRegenerateCard}
+                     index={currentPreviewIndex}
+                     level={thaiLevel}
+                     goals={[]} 
+                     specificTopics={specificTopics} 
+                     friendNames={friendNames.split(',').map(n=>n.trim()).filter(n=>n)}
+                     userName={session?.user?.name || 'You'}
+                     topicsToAvoid={topicsToAvoid}
+                     seriousnessLevel={seriousnessLevel}
+                   />
+                 ) : ( 
+                   <div className="text-center p-8 bg-gray-800 rounded">
+                     <p className="text-gray-400">No cards were generated to preview.</p>
+                   </div>
+                  )}
+               </div>
+               
+               {/* Create Set Button - No empty comment */}
+               <button 
+                 onClick={handleCreateSet} 
+                 disabled={generatedPhrases.length === 0 || !customSetName.trim() || isGenerating}
+                 className={`w-full py-3 rounded-lg font-bold transition-colors ${ 
+                   generatedPhrases.length === 0 || !customSetName.trim() || isGenerating 
+                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
+                     : 'bg-green-600 hover:bg-green-700 text-white'
+                 }`}
+               >
+                 {isGenerating ? 'Saving...' : 'Create My Custom Set'}
+               </button>
+            </div> 
           )}
         </div>
         
         {/* Navigation Buttons */}
-        {currentStep !== 4 || isGenerating ? ( 
-          <div className="flex justify-between mt-8">
-            <button 
-              onClick={handleBack} 
-              disabled={currentStep === 1 || currentStep === 4} 
-              className={`neumorphic-button py-2 px-6 text-sm ${ 
-                (currentStep === 1 || currentStep === 4) ? 'text-gray-500 cursor-not-allowed' : 'text-blue-400 hover:text-blue-300'
-              }`}
-            >
-              Back
-            </button>
-            
-            {currentStep < totalSteps && currentStep !== 4 && (
-              <button
-                onClick={handleNext}
-                disabled={ 
-                  (currentStep === 2 && !thaiLevel) || 
-                  (currentStep === 3 && !topicsToDiscuss.trim())
-                }
-                className={`neumorphic-button py-2 px-6 text-sm font-semibold ${ 
-                  ((currentStep === 2 && !thaiLevel) || 
-                  (currentStep === 3 && !topicsToDiscuss.trim()))
-                    ? 'text-gray-500 cursor-not-allowed'
-                    : (currentStep === 3 ? 'text-green-400 hover:text-green-300' : 'text-blue-400 hover:text-blue-300')
-                }`}
-              >
-                {currentStep === 3 ? 'Generate Cards' : 'Next'}
-              </button>
-            )}
-          </div>
-        ) : null} 
+        {!isGenerating && [1, 2, 3, 6].includes(currentStep) && ( <div className="flex ...">... Back/Next/Generate ...</div> )} 
+        {currentStep === 5 && generatedPhrases.length > 0 && ( <div className="flex ...">... Back to Customize / Finish Mnemonics ...</div> )} 
       </div>
     </div>
   );

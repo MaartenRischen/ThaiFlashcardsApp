@@ -475,7 +475,7 @@ const SetWizardPage = () => {
     <div className="min-h-screen bg-[#1a1a1a] text-white p-8">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Thai Flashcards Set Wizard</h1>
+          <h1 className="text-3xl font-bold">DonkeyBridge Set Wizard</h1>
           {/* Home Link */}
           <a href="/" 
              className="text-sm text-blue-400 hover:text-blue-300 underline" 
@@ -523,27 +523,12 @@ const SetWizardPage = () => {
             </div>
           )}
           
-          {/* Step 3: Customization - UPDATED */}
+          {/* Step 3: Customization - REORDERED */}
           {currentStep === 3 && (
             <div>
               <h2 className="text-2xl font-bold mb-4 text-blue-400">Customize Your Set</h2>
               
-              {/* Friend Names Input */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Enter a few names of people you know (nicknames ok, comma-separated):
-                </label>
-                <input
-                  type="text"
-                  value={friendNames}
-                  onChange={(e) => setFriendNames(e.target.value)}
-                  placeholder="E.g., Somchai, Priya, Alex, Bo"
-                  className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
-                />
-                 <p className="text-xs text-gray-400 mt-1 italic">These names (and yours!) will be used in example sentences.</p>
-              </div>
-
-              {/* Situations Input (Replaces Topics to Discuss) */}
+              {/* Situations Input (First) */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   In what *situations* will you be speaking Thai? (Required)
@@ -559,7 +544,7 @@ const SetWizardPage = () => {
                  <p className="text-xs text-gray-400 mt-1 italic">This helps generate relevant and contextual sentences.</p>
               </div>
 
-              {/* Specific Topics (Optional Refinement) - Keep or remove? Keeping for now */}
+              {/* Specific Topics Input (Second) */}
                <div className="mb-6">
                  <label className="block text-sm font-medium text-gray-300 mb-2">
                    Any *very* specific focus within your topics? (Optional)
@@ -572,8 +557,23 @@ const SetWizardPage = () => {
                    rows={2}
                  />
                </div>
+               
+              {/* Friend Names Input (Moved to Third) */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Enter a few names of people you know (nicknames ok, comma-separated):
+                </label>
+                <input
+                  type="text"
+                  value={friendNames}
+                  onChange={(e) => setFriendNames(e.target.value)}
+                  placeholder="E.g., Somchai, Priya, Alex, Bo"
+                  className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
+                />
+                 <p className="text-xs text-gray-400 mt-1 italic">These names (and yours!) will be used in example sentences.</p>
+              </div>
 
-              {/* Seriousness Slider */}
+              {/* Seriousness Slider (Fourth) */}
               <div className="mb-6">
                  <label className="block text-sm font-medium text-gray-300 mb-2">
                    Tone: Serious vs. Ridiculous ({seriousnessLevel}%)
@@ -591,7 +591,7 @@ const SetWizardPage = () => {
                  <p className="text-xs text-gray-400 mt-1 italic">Controls the tone from textbook-dry (0%) to absurd humor (100%).</p>
               </div>
 
-              {/* Card Count */}
+              {/* Card Count (Fifth) */}
               <div className="mt-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   How many cards would you like in your set?

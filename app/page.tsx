@@ -943,14 +943,14 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v6 - Simplified with Menu */} 
-      <div className="relative p-4 bg-[#111] border-b border-[#333] flex items-center justify-between gap-4">
+      {/* Header v7 - Larger Logo, Text Menu Button */} 
+      <div className="relative px-4 py-2 bg-[#111] border-b border-[#333] flex items-center justify-between gap-4">
         {/* Logo */} 
         <a href="/" title="Go to Home" className="flex-shrink-0">
           <img 
             src="/images/donkey-bridge-logo.png" 
             alt="Donkey Bridge Logo" 
-            className="h-16 w-auto" // Larger logo size
+            className="h-24 w-auto" // Increased logo size
           /> 
         </a>
 
@@ -959,17 +959,14 @@ export default function ThaiFlashcards() {
           <SetSelector /> 
         </div>
 
-        {/* Menu Button - Right */} 
+        {/* Menu Button - Right (Now Text) */} 
         <div className="relative">
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)} 
-            className="neumorphic-icon-button p-2 text-gray-400 hover:text-white"
+            className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white"
             title="Menu"
           >
-            {/* Ellipsis Icon */} 
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-            </svg>
+            Menu
           </button>
 
           {/* Menu Dropdown */} 

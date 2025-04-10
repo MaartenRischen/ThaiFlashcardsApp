@@ -943,56 +943,78 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v12 - Logo h-20, Key Buttons Always Visible */} 
+      {/* Header v13 - Mobile First, Logo + Menu only on XS */} 
       <div className="relative px-4 py-3 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         {/* Logo */} 
         <a href="/" title="Go to Home" className="flex-shrink-0">
           <img 
             src="/images/donkey-bridge-logo.png" 
             alt="Donkey Bridge Logo" 
-            className="h-20 w-auto" // Adjusted logo size to h-20
+            className="h-16 md:h-20 w-auto" // h-16 base, h-20 md+
           /> 
         </a>
 
-        {/* Set Selector - Allows wrapping */} 
-        <div className="mx-auto md:mx-0 order-last md:order-none w-full md:w-auto md:flex-1 md:flex md:justify-center px-4">
+        {/* Set Selector - Visible md+, otherwise in menu */}
+        <div className="hidden md:flex md:flex-1 md:justify-center px-4"> {/* Hidden xs/sm */} 
           <SetSelector /> 
         </div>
 
         {/* Right Buttons Area */} 
         <div className="flex items-center gap-3 flex-shrink-0">
-          {/* Make Your Own Set Button - Always visible */} 
+          {/* Make Your Own Set Button - Visible md+ */} 
            <button 
               onClick={() => window.open('/set-wizard', '_blank')} 
-              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex" // Always inline-flex
+              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] hidden md:inline-flex" // Hidden xs/sm
             >
               Make Your Own Set!
             </button>
-            {/* How It Works Button - Always visible */} 
+            {/* How It Works Button - Visible md+ */} 
             <button 
               onClick={() => setShowHowItWorks(true)} 
-              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8" // Always inline-flex
+              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none items-center justify-center w-8 h-8 hidden md:inline-flex" // Hidden xs/sm
               title="How It Works"
             >
               ?
             </button>
-            {/* Menu Button - Always visible */} 
+            {/* Menu Button - Always visible, using icon */} 
             <div className="relative">
               <button 
                 onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white"
+                className="neumorphic-icon-button p-2 text-gray-400 hover:text-white" // Icon style
                 title="Menu"
               >
-                Menu
+                {/* Hamburger Icon */} 
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
               </button>
 
-              {/* Menu Dropdown - Conditional items removed */} 
+              {/* Menu Dropdown - Added items for mobile */} 
               {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
                   <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                    {/* Make Set - REMOVED */} 
-                    {/* How it Works (?) - REMOVED */}
-                    {/* Divider REMOVED */} 
+                    {/* Set Selector - Show only on xs/sm screen menu */}
+                    <div className="px-4 py-2 block md:hidden">
+                      <SetSelector /> 
+                    </div>
+                    {/* Make Set - Show only on xs/sm screen menu */}
+                    <button
+                      onClick={() => { window.open('/set-wizard', '_blank'); setIsMenuOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-gray-700 hover:text-white font-semibold md:hidden"
+                      role="menuitem"
+                    >
+                      Make Your Own Set!
+                    </button>
+                    {/* How it Works (?) - Show only on xs/sm screen menu */}
+                    <button
+                      onClick={() => { setShowHowItWorks(true); setIsMenuOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white md:hidden"
+                      role="menuitem"
+                    >
+                      How It Works (?)
+                    </button>
+                    {/* Divider only if items above are shown */} 
+                    <div className="border-t border-gray-700 my-1 md:hidden"></div>
                     
                     {/* Always visible menu items */} 
                     <button

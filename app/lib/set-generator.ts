@@ -101,7 +101,7 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
     thaiMasculine: string; // Polite male version ("ครับ").
     thaiFeminine: string; // Polite female version ("ค่ะ").
     pronunciation: string; // Simple phonetic guide (e.g., 'sa-wat-dee krap').
-    mnemonic?: string; // Optional, creative mnemonic reflecting the TONE.
+    mnemonic?: string; // IMPORTANT: ONLY provide a mnemonic if 'english' is a single word or very short phrase (2-3 words max). For longer sentences, this MUST be null or omitted. The mnemonic should reflect the TONE.
     examples?: ExampleSentence[]; // 1-2 example sentences reflecting the TONE and LEVEL.
   }
 

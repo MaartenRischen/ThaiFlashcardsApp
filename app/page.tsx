@@ -968,28 +968,25 @@ export default function ThaiFlashcards() {
             >
               Make Your Own Set!
             </button>
-            {/* How It Works Button - Visible md+ */} 
+            {/* How It Works Button - Always Visible */} 
             <button 
               onClick={() => setShowHowItWorks(true)} 
-              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none items-center justify-center w-8 h-8 hidden md:inline-flex" // Hidden xs/sm
+              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8" // Always inline-flex
               title="How It Works"
             >
               ?
             </button>
-            {/* Menu Button - Always visible, using icon */} 
+            {/* Menu Button - Always visible, now Text */} 
             <div className="relative">
               <button 
                 onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                className="neumorphic-icon-button p-2 text-gray-400 hover:text-white" // Icon style
-                title="Menu"
+                className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white" // Standard button style
+                title="Set Menu"
               >
-                {/* Hamburger Icon */} 
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+                Set
               </button>
 
-              {/* Menu Dropdown - Added items for mobile */} 
+              {/* Menu Dropdown - ? button removed */} 
               {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
                   <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
@@ -997,7 +994,7 @@ export default function ThaiFlashcards() {
                     <div className="px-4 py-2 block md:hidden">
                       <SetSelector /> 
                     </div>
-                    {/* Make Set - Show only on xs/sm screen menu */}
+                    {/* Make Set - Show only on xs/sm screen menu */} 
                     <button
                       onClick={() => { window.open('/set-wizard', '_blank'); setIsMenuOpen(false); }}
                       className="block w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-gray-700 hover:text-white font-semibold md:hidden"
@@ -1005,14 +1002,7 @@ export default function ThaiFlashcards() {
                     >
                       Make Your Own Set!
                     </button>
-                    {/* How it Works (?) - Show only on xs/sm screen menu */}
-                    <button
-                      onClick={() => { setShowHowItWorks(true); setIsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white md:hidden"
-                      role="menuitem"
-                    >
-                      How It Works (?)
-                    </button>
+                    {/* How it Works (?) - REMOVED from menu */}
                     {/* Divider only if items above are shown */} 
                     <div className="border-t border-gray-700 my-1 md:hidden"></div>
                     

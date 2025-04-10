@@ -361,6 +361,7 @@ export default function ThaiFlashcards() {
   const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for the new menu
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -942,70 +943,78 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v5 - Logo Full Height Left, Buttons Right */}
-      <div className="relative p-4 bg-[#111] border-b border-[#333] flex items-stretch justify-between gap-4">
-        {/* Logo - Fills height via parent padding + items-stretch */}
+      {/* Header v6 - Simplified with Menu */} 
+      <div className="relative p-4 bg-[#111] border-b border-[#333] flex items-center justify-between gap-4">
+        {/* Logo */} 
         <a href="/" title="Go to Home" className="flex-shrink-0">
           <img 
             src="/images/donkey-bridge-logo.png" 
             alt="Donkey Bridge Logo" 
-            className="h-full w-auto object-contain" 
-            style={{ maxHeight: '5rem' }} // Add max-height constraint if needed
+            className="h-16 w-auto" // Larger logo size
           /> 
         </a>
 
-        {/* Right Side Container (Selector + Buttons) */}
-        <div className="flex-1 flex flex-col items-center md:items-end gap-3">
-          {/* Set Selector */} 
+        {/* Set Selector - Centered */} 
+        <div className="flex-1 flex justify-center">
           <SetSelector /> 
+        </div>
 
-          {/* All Action Buttons Container */} 
-          <div className="flex flex-wrap items-center justify-center md:justify-end gap-x-4 gap-y-3 w-full">
-            {/* Group 1: ? + Set Actions */} 
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setShowHowItWorks(true)} 
-                className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none flex items-center justify-center w-8 h-8" 
-                title="How It Works"
-              >
-                ?
-              </button>
-              <div className="flex items-center gap-2 border border-gray-700 rounded-lg p-2">
-                <span className="text-xs text-gray-400 mr-1">Set:</span>
-                <button 
-                  onClick={() => setShowVocabulary(true)} 
-                  className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
-                  title="Vocabulary for current set"
+        {/* Menu Button - Right */} 
+        <div className="relative">
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)} 
+            className="neumorphic-icon-button p-2 text-gray-400 hover:text-white"
+            title="Menu"
+          >
+            {/* Ellipsis Icon */} 
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+            </svg>
+          </button>
+
+          {/* Menu Dropdown */} 
+          {isMenuOpen && (
+            <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
+              <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                <button
+                  onClick={() => { setShowVocabulary(true); setIsMenuOpen(false); }}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                  role="menuitem"
                 >
                   Vocabulary
                 </button>
-                <button 
-                  onClick={() => setShowMnemonicsModal(true)} 
-                  className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
-                  title="Mnemonics for current set"
+                <button
+                  onClick={() => { setShowMnemonicsModal(true); setIsMenuOpen(false); }}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                  role="menuitem"
                 >
                   Mnemonics
                 </button>
+                <button
+                  onClick={() => { setIsManagementModalOpen(true); setIsMenuOpen(false); }}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                  role="menuitem"
+                >
+                  Set Manager
+                </button>
+                <button
+                  onClick={() => { window.open('/set-wizard', '_blank'); setIsMenuOpen(false); }}
+                  className="block w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-gray-700 hover:text-white font-semibold"
+                  role="menuitem"
+                >
+                  Make Your Own Set!
+                </button>
+                <div className="border-t border-gray-700 my-1"></div>
+                <button
+                  onClick={() => { setShowHowItWorks(true); setIsMenuOpen(false); }}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white"
+                  role="menuitem"
+                >
+                  How It Works (?)
+                </button>
               </div>
             </div>
-            
-            {/* Group 2: Management + AI */} 
-            <div className="flex items-center gap-3">
-               <button 
-                 onClick={() => setIsManagementModalOpen(true)} 
-                 className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
-                 title="Set Manager"
-               >
-                 Set Manager
-               </button>
-               <button 
-                  onClick={() => window.open('/set-wizard', '_blank')} 
-                  className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981]"
-                >
-                  Make Your Own Set With AI!
-                </button>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

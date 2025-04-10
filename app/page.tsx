@@ -943,14 +943,14 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v8 - Larger Logo, Key Buttons Visible */} 
+      {/* Header v9 - Adjusted Logo Size */} 
       <div className="relative px-4 py-4 bg-[#111] border-b border-[#333] flex items-center justify-between gap-4">
         {/* Logo - Size determined by padding */} 
         <a href="/" title="Go to Home" className="flex-shrink-0">
           <img 
             src="/images/donkey-bridge-logo.png" 
             alt="Donkey Bridge Logo" 
-            className="h-auto w-auto max-h-full" // Removed fixed height, let padding control
+            className="h-20 w-auto" // Set fixed height h-20
           /> 
         </a>
 

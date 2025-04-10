@@ -20,7 +20,6 @@ const CardEditor = ({
   friendNames,
   userName,
   situations,
-  topicsToAvoid,
   seriousnessLevel
 }: { 
   phrase: Phrase, 
@@ -32,7 +31,6 @@ const CardEditor = ({
   friendNames?: string[],
   userName?: string,
   situations?: string,
-  topicsToAvoid?: string,
   seriousnessLevel?: number
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -192,7 +190,6 @@ const SetWizardPage = () => {
   const [specificTopics, setSpecificTopics] = useState<string>('');
   const [friendNames, setFriendNames] = useState<string>('');
   const [situations, setSituations] = useState<string>('');
-  const [topicsToAvoid, setTopicsToAvoid] = useState<string>('');
   const [seriousnessLevel, setSeriousnessLevel] = useState<number>(50);
   const [cardCount, setCardCount] = useState<number>(8);
   const [customSetName, setCustomSetName] = useState<string>('');
@@ -278,11 +275,9 @@ const SetWizardPage = () => {
         specificTopics,
         friendNames: friendNamesArray,
         situations,
-        topicsToAvoid,
         seriousnessLevel
       });
 
-      // Update to reflect the new approach
       const result = await generateCustomSet(
         {
           level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
@@ -290,7 +285,6 @@ const SetWizardPage = () => {
           friendNames: friendNamesArray,
           userName: userName,
           topicsToDiscuss: situations || undefined,
-          topicsToAvoid: topicsToAvoid || undefined,
           seriousnessLevel: seriousnessLevel,
         },
         cardCount,
@@ -350,7 +344,6 @@ const SetWizardPage = () => {
         friendNames: friendNamesArray,
         userName: userName,
         topicsToDiscuss: situations || undefined,
-        topicsToAvoid: topicsToAvoid || undefined,
         seriousnessLevel: seriousnessLevel,
       });
       
@@ -566,20 +559,6 @@ const SetWizardPage = () => {
                  <p className="text-xs text-gray-400 mt-1 italic">This helps generate relevant and contextual sentences.</p>
               </div>
 
-              {/* Topics to Avoid Input */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Any topics to strictly avoid? (Optional)
-                </label>
-                <textarea
-                  value={topicsToAvoid}
-                  onChange={(e) => setTopicsToAvoid(e.target.value)}
-                  placeholder="E.g., politics, specific sensitive subjects..."
-                  className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
-                  rows={2}
-                />
-              </div>
-              
               {/* Specific Topics (Optional Refinement) - Keep or remove? Keeping for now */}
                <div className="mb-6">
                  <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -656,14 +635,9 @@ const SetWizardPage = () => {
                      <span className="font-semibold text-gray-300">Specific Focus:</span> {specificTopics}
                    </p>
                  )}
-                  {topicsToAvoid && (
-                    <p className="text-gray-400">
-                      <span className="font-semibold text-gray-300">Avoid:</span> {topicsToAvoid}
-                    </p>
-                  )}
-                   <p className="text-gray-400">
-                      <span className="font-semibold text-gray-300">Tone:</span> {seriousnessLevel}% Ridiculous
-                    </p>
+                  <p className="text-gray-400">
+                     <span className="font-semibold text-gray-300">Tone:</span> {seriousnessLevel}% Ridiculous
+                   </p>
                     {friendNames && (
                       <p className="text-gray-400">
                         <span className="font-semibold text-gray-300">Featuring:</span> {friendNames}
@@ -751,7 +725,6 @@ const SetWizardPage = () => {
                  <div className="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded p-3 mb-4 text-sm">
                    <p className="text-yellow-400 mb-1">
                        Note: {errorSummary.userMessage || 'Some minor issues occurred during generation.'}
-                       {errorSummary.errorTypes.includes('VALIDATION') && ' Try simplifying your topics.'}
                    </p>
                  </div>
                )}
@@ -781,9 +754,6 @@ const SetWizardPage = () => {
                   <li><span className="text-gray-400">Situations:</span> {situations || 'General'}</li>
                    {specificTopics && (
                      <li><span className="text-gray-400">Specific Focus:</span> {specificTopics}</li>
-                   )}
-                   {topicsToAvoid && (
-                    <li><span className="text-gray-400">Avoid:</span> {topicsToAvoid}</li>
                    )}
                    <li><span className="text-gray-400">Tone:</span> {seriousnessLevel}% Ridiculous</li>
                    {friendNames && (
@@ -828,7 +798,6 @@ const SetWizardPage = () => {
                     friendNames={friendNames.split(',').map(n=>n.trim()).filter(n=>n)}
                     userName={session?.user?.name || 'You'}
                     situations={situations}
-                    topicsToAvoid={topicsToAvoid}
                     seriousnessLevel={seriousnessLevel}
                   />
                 ) : (

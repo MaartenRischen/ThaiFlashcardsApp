@@ -1025,14 +1025,16 @@ export default function ThaiFlashcards() {
 
       {/* Main Content - Centered Flashcard */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          {/* Card */}
-          <div className="neumorphic rounded-xl flex flex-col">
-            {/* Card Front */}
-            <div className="p-6 flex flex-col items-center"> {/* Ensure front content is centered */}
-              <div className="text-2xl font-bold mb-2 text-center">{phrases[index].english}</div>
-              
-              {!showAnswer && (
+        {/* Add perspective here */} 
+        <div className="w-full max-w-md [perspective:1000px]">
+          {/* Card Container: Add transform styles and conditional rotation */}
+          <div className={`neumorphic rounded-xl relative w-full min-h-[20rem] transform-style-3d transition-transform duration-700 ease-in-out ${showAnswer ? 'rotate-y-180' : ''}`}> 
+            {/* Card Front: Position absolute, hide backface */} 
+            <div className="absolute w-full h-full backface-hidden">
+              <div className="p-6 flex flex-col items-center justify-center h-full"> {/* Center content vertically too */} 
+                <div className="text-2xl font-bold mb-4 text-center">{phrases[index].english}</div>
+                
+                {/* Show Answer Button - Only visible on front */}
                 <div className="flex justify-center mt-4">
                   <button
                     onClick={() => setShowAnswer(true)}
@@ -1041,13 +1043,13 @@ export default function ThaiFlashcards() {
                     Show Answer
                   </button>
                 </div>
-              )}
+              </div>
             </div>
 
-            {/* Card Back */}
-            {showAnswer && (
-              <div className="border-t border-[#333] p-6">
-                {/* Main Phrase Section - Centered */}
+            {/* Card Back: Position absolute, hide backface, initially rotated */} 
+            <div className="absolute w-full h-full backface-hidden rotate-y-180">
+              <div className="border-t border-[#333] p-6 flex flex-col h-full overflow-y-auto"> {/* Allow scrolling if content overflows */} 
+                {/* Main Phrase Section - Centered */} 
                 <div className="flex flex-col items-center justify-center mb-4">
                   <div className="text-center">
                     {/* Thai word with pronunciation */}
@@ -1204,7 +1206,7 @@ export default function ThaiFlashcards() {
                 </div> {/* End Toggle Section */} 
 
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

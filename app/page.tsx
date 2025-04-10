@@ -1108,8 +1108,45 @@ export default function ThaiFlashcards() {
                     </div>
                   </div>
                 </div> 
+                
+                {/* === Gender Slider and Polite Mode Toggle Section - MOVED HERE === */} 
+                <div className="flex items-center justify-center space-x-4 mb-6">
+                  {/* Gender Toggle */} 
+                  <label htmlFor="gender-toggle" className="flex items-center cursor-pointer">
+                    <span className="mr-2 text-sm font-medium text-gray-400">Female (Ka)</span>
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        id="gender-toggle"
+                        className="sr-only"
+                        checked={isMale}
+                        onChange={() => setIsMale(!isMale)}
+                      />
+                      <div className="block bg-gray-600 w-10 h-6 rounded-full"></div>
+                      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isMale ? 'translate-x-full bg-blue-400' : 'bg-pink-400'}`}></div>
+                    </div>
+                    <span className="ml-2 text-sm font-medium text-gray-400">Male (Krap)</span>
+                  </label>
 
-                {/* Mnemonic Section */}
+                  {/* Polite Mode Toggle */} 
+                  <label htmlFor="polite-toggle" className="flex items-center cursor-pointer">
+                    <span className="mr-2 text-sm font-medium text-gray-400">Casual</span>
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        id="polite-toggle"
+                        className="sr-only"
+                        checked={isPoliteMode}
+                        onChange={() => setIsPoliteMode(!isPoliteMode)}
+                      />
+                      <div className="block bg-gray-600 w-10 h-6 rounded-full"></div>
+                      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isPoliteMode ? 'translate-x-full bg-green-400' : 'bg-gray-400'}`}></div>
+                    </div>
+                    <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
+                  </label>
+                </div> {/* End Toggle Section */} 
+
+                {/* Mnemonic Section */} 
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm text-gray-400">Mnemonic</label>
@@ -1177,44 +1214,7 @@ export default function ThaiFlashcards() {
                     </button>
                   </div>
                 </div> {/* End Context Section */} 
-
-                {/* === Gender Slider and Polite Mode Toggle Section === */} 
-                <div className="flex items-center justify-center space-x-4 mb-6">
-                  {/* Gender Toggle */} 
-                  <label htmlFor="gender-toggle" className="flex items-center cursor-pointer">
-                    <span className="mr-2 text-sm font-medium text-gray-400">Female (Ka)</span>
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        id="gender-toggle"
-                        className="sr-only"
-                        checked={isMale}
-                        onChange={() => setIsMale(!isMale)}
-                      />
-                      <div className="block bg-gray-600 w-10 h-6 rounded-full"></div>
-                      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isMale ? 'translate-x-full bg-blue-400' : 'bg-pink-400'}`}></div>
-                    </div>
-                    <span className="ml-2 text-sm font-medium text-gray-400">Male (Krap)</span>
-                  </label>
-
-                  {/* Polite Mode Toggle */} 
-                  <label htmlFor="polite-toggle" className="flex items-center cursor-pointer">
-                    <span className="mr-2 text-sm font-medium text-gray-400">Casual</span>
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        id="polite-toggle"
-                        className="sr-only"
-                        checked={isPoliteMode}
-                        onChange={() => setIsPoliteMode(!isPoliteMode)}
-                      />
-                      <div className="block bg-gray-600 w-10 h-6 rounded-full"></div>
-                      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isPoliteMode ? 'translate-x-full bg-green-400' : 'bg-gray-400'}`}></div>
-                    </div>
-                    <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
-                  </label>
-                </div> {/* End Toggle Section */} 
-
+                
               </div>
             )}
           </div>

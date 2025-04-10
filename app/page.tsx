@@ -943,14 +943,14 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v13 - Mobile First, Logo + Menu only on XS */} 
+      {/* Header v14 - Logo Increased, How it Works updated */} 
       <div className="relative px-4 py-3 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         {/* Logo */} 
         <a href="/" title="Go to Home" className="flex-shrink-0">
           <img 
             src="/images/donkey-bridge-logo.png" 
             alt="Donkey Bridge Logo" 
-            className="h-16 md:h-20 w-auto" // h-16 base, h-20 md+
+            className="h-20 md:h-24 w-auto" // Increased size
           /> 
         </a>
 
@@ -1327,27 +1327,44 @@ export default function ThaiFlashcards() {
         </div>
       )}
 
+      {/* How It Works Modal - Updated Content */} 
       {showHowItWorks && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-auto">
-          <div className="neumorphic max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-auto" onClick={() => setShowHowItWorks(false)}>
+          <div className="neumorphic max-w-lg w-full p-6 bg-[#1f1f1f]" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">How It Works</h2>
+              <h2 className="text-xl font-bold text-blue-400">How DonkeyBridge Works</h2>
               <button
                 onClick={() => setShowHowItWorks(false)}
-                className="text-gray-400 hover:text-white"
+                className="text-gray-400 hover:text-white text-2xl"
               >
                 ✕
               </button>
             </div>
 
-            <div className="space-y-4 text-gray-300">
-              <p><strong>Spaced Repetition:</strong> This app uses the SM-2 algorithm to optimize your learning. Cards you find difficult will appear more frequently.</p>
-              <p><strong>Gender Toggle:</strong> Switch between masculine (ครับ) and feminine (ค่ะ) endings.</p>
-              <p><strong>Mnemonics:</strong> Create memory aids to help remember words.</p>
-              <p><strong>Context Examples:</strong> See how words are used in sentences.</p>
-              <p><strong>Progress:</strong> Your progress is automatically saved in your browser.</p>
-              <p><strong>Audio:</strong> Hear the correct pronunciation with text-to-speech.</p>
-              <p><strong>Offline Use:</strong> This app works offline once loaded.</p>
+            <div className="space-y-4 text-gray-300 text-sm max-h-[70vh] overflow-y-auto pr-2">
+              <p><strong>Flashcard Learning:</strong> Review flashcards one by one. Click "Show Answer" to reveal the Thai translation, pronunciation, and other details.</p>
+              <p><strong>Spaced Repetition (SRS):</strong> Use the "Wrong", "Correct", and "Easy" buttons after revealing the answer. This tells the app how well you know the card. Cards marked "Wrong" will reappear soon, while "Easy" cards will be scheduled further out, optimizing your study time.</p>
+              <p><strong>Mnemonics:</strong> Create your own memory aids in the text box to help remember the phrase. Your mnemonics are saved automatically.</p>
+              <p><strong>Context Examples:</strong> See the phrase used in different example sentences. Use the ← and → buttons to cycle through examples. Click "Play Context" to hear the example sentence spoken.</p>
+              <p><strong>Audio Playback:</strong> Click "Play Word" or "Play Context" to hear the Thai audio. Ensure your device's sound is on.</p>
+              <p><strong>Gender & Politeness Toggles:</strong> 
+                <ul className="list-disc list-inside ml-4 mt-1">
+                  <li>Use the "Female (Ka) / Male (Krap)" toggle to switch the polite particle added to the end of phrases and pronunciations.</li>
+                  <li>Use the "Casual / Polite" toggle to control whether these polite particles (ครับ/ค่ะ) are added at all.</li>
+                </ul>
+              </p>
+              <p><strong>Set Management (Menu &gt; Set Manager):</strong> 
+                <ul className="list-disc list-inside ml-4 mt-1">
+                  <li>Switch between different flashcard sets.</li>
+                  <li>Rename your custom sets.</li>
+                  <li>Export sets to back them up or share them.</li>
+                  <li>Import sets shared by others or previously exported.</li>
+                  <li>Delete sets you no longer need.</li>
+                  <li>Reset progress for the current set.</li>
+                </ul>
+              </p>
+              <p><strong>Make Your Own Set! (AI Wizard):</strong> Click the green button in the header (or in the menu on smaller screens) to launch the AI Set Wizard. Answer a few questions, and the AI will generate a custom flashcard set tailored to your level and interests.</p>
+             
             </div>
           </div>
         </div>

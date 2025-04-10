@@ -3,12 +3,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Phrase } from '../lib/types'; // Import Phrase type
+import { generateCustomSet, createCustomSet, generateSingleFlashcard, BatchError, type Phrase } from '../lib/set-generator';
 import { SetMetaData } from '../lib/storage'; // Import SetMetaData type
 import { Slider } from "@/components/ui/slider"; // Import the slider component
 import { useSet } from '../context/SetContext'; // Import the useSet hook
 import * as storage from '../lib/storage'; // Import storage utilities
-import { generateCustomSet, createCustomSet, generateSingleFlashcard, BatchError } from '../lib/set-generator';
 
 // Card Editor component for previewing and editing generated cards
 const CardEditor = ({ 

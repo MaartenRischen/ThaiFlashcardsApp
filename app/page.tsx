@@ -943,36 +943,35 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v11 - Mobile-First Refinement */}
-      {/* Use flex-wrap, sensible padding/gap. Control visibility with responsive classes. */}
+      {/* Header v12 - Logo h-20, Key Buttons Always Visible */} 
       <div className="relative px-4 py-3 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         {/* Logo */} 
         <a href="/" title="Go to Home" className="flex-shrink-0">
           <img 
             src="/images/donkey-bridge-logo.png" 
             alt="Donkey Bridge Logo" 
-            className="h-16 w-auto" // Back to h-16 for better mobile baseline
+            className="h-20 w-auto" // Adjusted logo size to h-20
           /> 
         </a>
 
-        {/* Set Selector - Allows wrapping */}
-        <div className="mx-auto md:mx-0 order-last md:order-none w-full md:w-auto md:flex-1 md:flex md:justify-center px-4"> {/* Center on mobile wrap, take space on md+ */} 
+        {/* Set Selector - Allows wrapping */} 
+        <div className="mx-auto md:mx-0 order-last md:order-none w-full md:w-auto md:flex-1 md:flex md:justify-center px-4">
           <SetSelector /> 
         </div>
 
         {/* Right Buttons Area */} 
         <div className="flex items-center gap-3 flex-shrink-0">
-          {/* Make Your Own Set Button - Visible sm and up */}
+          {/* Make Your Own Set Button - Always visible */} 
            <button 
               onClick={() => window.open('/set-wizard', '_blank')} 
-              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] hidden sm:inline-flex" // hidden xs, inline-flex sm+
+              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex" // Always inline-flex
             >
               Make Your Own Set!
             </button>
-            {/* How It Works Button - Visible sm and up */} 
+            {/* How It Works Button - Always visible */} 
             <button 
               onClick={() => setShowHowItWorks(true)} 
-              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none items-center justify-center w-8 h-8 hidden sm:inline-flex" // hidden xs, inline-flex sm+
+              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8" // Always inline-flex
               title="How It Works"
             >
               ?
@@ -987,28 +986,13 @@ export default function ThaiFlashcards() {
                 Menu
               </button>
 
-              {/* Menu Dropdown - Conditional items added */} 
+              {/* Menu Dropdown - Conditional items removed */} 
               {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
                   <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                    {/* Make Set - Show only on xs screen menu */}
-                    <button
-                      onClick={() => { window.open('/set-wizard', '_blank'); setIsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-gray-700 hover:text-white font-semibold sm:hidden" // hidden sm+
-                      role="menuitem"
-                    >
-                      Make Your Own Set!
-                    </button>
-                    {/* How it Works (?) - Show only on xs screen menu */}
-                    <button
-                      onClick={() => { setShowHowItWorks(true); setIsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white sm:hidden" // hidden sm+
-                      role="menuitem"
-                    >
-                      How It Works (?)
-                    </button>
-                    {/* Divider only if items above are shown */} 
-                    <div className="border-t border-gray-700 my-1 sm:hidden"></div>
+                    {/* Make Set - REMOVED */} 
+                    {/* How it Works (?) - REMOVED */}
+                    {/* Divider REMOVED */} 
                     
                     {/* Always visible menu items */} 
                     <button

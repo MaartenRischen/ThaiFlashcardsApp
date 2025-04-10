@@ -1,4 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+// Add a custom plugin for 3D transforms
+const plugin = require('tailwindcss/plugin')
+
 module.exports = {
   darkMode: ["class"],
   content: [
@@ -84,8 +87,31 @@ module.exports = {
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out'
-  		}
+  		},
+  		// Add utilities for 3D transforms
+  		rotate: {
+  			'y-180': '180deg'
+  		},
   	}
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    // Add the custom plugin
+    plugin(function({ addUtilities }) {
+      addUtilities({
+        '.transform-style-3d': {
+          'transform-style': 'preserve-3d',
+        },
+        '.backface-hidden': {
+          'backface-visibility': 'hidden',
+        },
+        '[perspective\:1000px]': {
+          'perspective': '1000px',
+        },
+        '.rotate-y-180': {
+           transform: 'rotateY(180deg)',
+        }
+      })
+    })
+  ],
 }

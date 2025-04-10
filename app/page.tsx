@@ -942,63 +942,69 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v4 - Revised Layout */}
-      <div className="relative p-4 bg-[#111] border-b border-[#333] flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* Left Side: Logo + Set Selector */} 
-        <div className="flex items-center gap-4 flex-shrink-0">
-          <a href="/" title="Go to Home">
-            {/* Increased logo size */} 
-            <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-20 w-auto" /> 
-          </a>
-          <SetSelector /> 
-        </div>
+      {/* Header v5 - Logo Full Height Left, Buttons Right */}
+      <div className="relative p-4 bg-[#111] border-b border-[#333] flex items-stretch justify-between gap-4">
+        {/* Logo - Fills height via parent padding + items-stretch */}
+        <a href="/" title="Go to Home" className="flex-shrink-0">
+          <img 
+            src="/images/donkey-bridge-logo.png" 
+            alt="Donkey Bridge Logo" 
+            className="h-full w-auto object-contain" 
+            style={{ maxHeight: '5rem' }} // Add max-height constraint if needed
+          /> 
+        </a>
 
-        {/* Action Buttons - Revised grouping for alignment */} 
-        <div className="flex flex-wrap items-center justify-center md:justify-end gap-x-4 gap-y-3 flex-grow mt-4 md:mt-0 w-full md:w-auto">
-          
-          {/* Group 1: ? + Set Actions */} 
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setShowHowItWorks(true)} 
-              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none flex items-center justify-center w-8 h-8" 
-              title="How It Works"
-            >
-              ?
-            </button>
-            <div className="flex items-center gap-2 border border-gray-700 rounded-lg p-2">
-              <span className="text-xs text-gray-400 mr-1">Set:</span>
+        {/* Right Side Container (Selector + Buttons) */}
+        <div className="flex-1 flex flex-col items-center md:items-end gap-3">
+          {/* Set Selector */} 
+          <SetSelector /> 
+
+          {/* All Action Buttons Container */} 
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-x-4 gap-y-3 w-full">
+            {/* Group 1: ? + Set Actions */} 
+            <div className="flex items-center gap-2">
               <button 
-                onClick={() => setShowVocabulary(true)} 
-                className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
-                title="Vocabulary for current set"
+                onClick={() => setShowHowItWorks(true)} 
+                className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none flex items-center justify-center w-8 h-8" 
+                title="How It Works"
               >
-                Vocabulary
+                ?
               </button>
-              <button 
-                onClick={() => setShowMnemonicsModal(true)} 
-                className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
-                title="Mnemonics for current set"
-              >
-                Mnemonics
-              </button>
+              <div className="flex items-center gap-2 border border-gray-700 rounded-lg p-2">
+                <span className="text-xs text-gray-400 mr-1">Set:</span>
+                <button 
+                  onClick={() => setShowVocabulary(true)} 
+                  className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
+                  title="Vocabulary for current set"
+                >
+                  Vocabulary
+                </button>
+                <button 
+                  onClick={() => setShowMnemonicsModal(true)} 
+                  className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
+                  title="Mnemonics for current set"
+                >
+                  Mnemonics
+                </button>
+              </div>
             </div>
-          </div>
-          
-          {/* Group 2: Management + AI */} 
-          <div className="flex items-center gap-3">
-             <button 
-               onClick={() => setIsManagementModalOpen(true)} 
-               className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
-               title="Set Manager"
-             >
-               Set Manager
-             </button>
-             <button 
-                onClick={() => window.open('/set-wizard', '_blank')} 
-                className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981]"
-              >
-                Make Your Own Set With AI!
-              </button>
+            
+            {/* Group 2: Management + AI */} 
+            <div className="flex items-center gap-3">
+               <button 
+                 onClick={() => setIsManagementModalOpen(true)} 
+                 className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
+                 title="Set Manager"
+               >
+                 Set Manager
+               </button>
+               <button 
+                  onClick={() => window.open('/set-wizard', '_blank')} 
+                  className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981]"
+                >
+                  Make Your Own Set With AI!
+                </button>
+            </div>
           </div>
         </div>
       </div>

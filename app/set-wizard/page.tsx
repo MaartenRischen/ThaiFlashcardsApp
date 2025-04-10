@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { generateCustomSet, createCustomSet, Phrase, generateSingleFlashcard, BatchError } from '../lib/set-generator';
-import * as storage from '../lib/storage'; // Import storage functions
+import { Phrase } from '../lib/types'; // Import Phrase type
 import { SetMetaData } from '../lib/storage'; // Import SetMetaData type
 import { Slider } from "@/components/ui/slider"; // Import the slider component
+import { useSet } from '../context/SetContext'; // Import the useSet hook
+import * as storage from '../lib/storage'; // Import storage utilities
+import { generateCustomSet, createCustomSet, generateSingleFlashcard, BatchError } from '../lib/set-generator';
 
 // Card Editor component for previewing and editing generated cards
 const CardEditor = ({ 
@@ -15,11 +17,10 @@ const CardEditor = ({
   onRegenerate,
   index,
   level,
-  goals,
   specificTopics,
   friendNames,
   userName,
-  topicsToDiscuss,
+  situations,
   topicsToAvoid,
   seriousnessLevel
 }: { 
@@ -28,11 +29,10 @@ const CardEditor = ({
   onRegenerate: (index: number) => void,
   index: number,
   level: string,
-  goals: string[],
   specificTopics?: string,
   friendNames?: string[],
   userName?: string,
-  topicsToDiscuss?: string,
+  situations?: string,
   topicsToAvoid?: string,
   seriousnessLevel?: number
 }) => {
@@ -192,7 +192,7 @@ const SetWizardPage = () => {
   const [thaiLevel, setThaiLevel] = useState<string>('beginner');
   const [specificTopics, setSpecificTopics] = useState<string>('');
   const [friendNames, setFriendNames] = useState<string>('');
-  const [topicsToDiscuss, setTopicsToDiscuss] = useState<string>('');
+  const [situations, setSituations] = useState<string>('');
   const [topicsToAvoid, setTopicsToAvoid] = useState<string>('');
   const [seriousnessLevel, setSeriousnessLevel] = useState<number>(50);
   const [cardCount, setCardCount] = useState<number>(8);
@@ -211,6 +211,7 @@ const SetWizardPage = () => {
   const [totalSteps] = useState(5); // Total steps including generation and preview
   const [aiGeneratedTitle, setAiGeneratedTitle] = useState<string | undefined>(undefined);
   const [generatingDisplayPhrases, setGeneratingDisplayPhrases] = useState<Phrase[]>([]);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // Generate a unique set name when component mounts
   useEffect(() => {
@@ -280,7 +281,7 @@ const SetWizardPage = () => {
           specificTopics: specificTopics || undefined,
           friendNames: friendNamesArray,
           userName: userName,
-          topicsToDiscuss: topicsToDiscuss || undefined,
+          situations: situations || undefined,
           topicsToAvoid: topicsToAvoid || undefined,
           seriousnessLevel: seriousnessLevel,
         },
@@ -348,7 +349,7 @@ const SetWizardPage = () => {
         specificTopics: specificTopics || undefined,
         friendNames: friendNamesArray,
         userName: userName,
-        topicsToDiscuss: topicsToDiscuss || undefined,
+        situations: situations || undefined,
         topicsToAvoid: topicsToAvoid || undefined,
         seriousnessLevel: seriousnessLevel,
       });
@@ -378,13 +379,8 @@ const SetWizardPage = () => {
   };
 
   const handleCreateSet = async () => {
-    if (generatedPhrases.length === 0) {
-      alert("No cards have been generated. Please go back and generate cards first.");
-      return;
-    }
-
     try {
-      setIsGenerating(true); // Show loading state while saving
+      setIsSaving(true);
       
       // Create the data for the set
       const setData = {
@@ -399,7 +395,7 @@ const SetWizardPage = () => {
       // Log the first phrase to see its structure (for debugging)
       if (generatedPhrases.length > 0) {
         console.log("First phrase example:", JSON.stringify(generatedPhrases[0], null, 2));
-        
+         
         // Check if examples have the correct structure
         if (generatedPhrases[0].examples && generatedPhrases[0].examples.length > 0) {
           console.log("Example structure:", JSON.stringify(generatedPhrases[0].examples[0], null, 2));
@@ -409,7 +405,7 @@ const SetWizardPage = () => {
       if (status === 'authenticated') {
         // User is logged in, save to database via API
         console.log("Saving set to database for authenticated user");
-        
+         
         try {
           const response = await fetch('/api/flashcard-sets', {
             method: 'POST',
@@ -422,20 +418,20 @@ const SetWizardPage = () => {
           if (!response.ok) {
             const errorData = await response.json();
             console.error("Error response from API:", errorData);
-            
+             
             if (response.status === 401) {
               // Authentication error
               alert("Your session has expired. Please sign in again to save your set.");
               window.location.href = '/login'; // Redirect to login
               return;
             }
-            
+             
             throw new Error(errorData.error || errorData.message || 'Failed to create set');
           }
 
           const result = await response.json();
           console.log("Set saved successfully:", result);
-          
+           
           // Update success message
           alert(`Your set "${customSetName}" has been created and saved to your account!`);
         } catch (error) {
@@ -447,7 +443,7 @@ const SetWizardPage = () => {
         console.log("Saving set to localStorage for unauthenticated user");
         const newId = storage.generateUUID();
         const now = new Date().toISOString();
-        
+         
         const newMetaData: SetMetaData = {
           ...setData,
           id: newId,
@@ -457,15 +453,15 @@ const SetWizardPage = () => {
 
         // Save the set content and metadata
         storage.saveSetContent(newId, generatedPhrases);
-        
+         
         // Update available sets list
         const currentSets = storage.getAvailableSets();
         const updatedSets = [...currentSets, newMetaData];
         storage.saveAvailableSets(updatedSets);
-        
+         
         // Set this new set as active immediately
         storage.setActiveSetId(newId);
-        
+         
         // Update completion message
         alert(`Your set "${customSetName}" has been created and saved locally. Sign in to save it to your account!`);
       }
@@ -475,7 +471,7 @@ const SetWizardPage = () => {
     } finally {
       setIsGenerating(false);
     }
-    
+     
     // Offer to return to main app
     if (confirm('Would you like to return to the main app now?')) {
       window.location.href = '/'; // Force reload to ensure context update
@@ -554,19 +550,20 @@ const SetWizardPage = () => {
                  <p className="text-xs text-gray-400 mt-1 italic">These names (and yours!) will be used in example sentences.</p>
               </div>
 
-              {/* Topics to Discuss Input */}
+              {/* Situations Input (Replaces Topics to Discuss) */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  What do you want to be able to talk about? (Required)
+                  In what *situations* will you be speaking Thai? (Required)
                 </label>
                 <textarea
-                  value={topicsToDiscuss}
-                  onChange={(e) => setTopicsToDiscuss(e.target.value)}
-                  placeholder="Anything goes! E.g., ordering street food, quantum physics, conspiracy theories about pigeons, ancient history, your favorite movies..."
+                  value={situations}
+                  onChange={(e) => setSituations(e.target.value)}
+                  placeholder="Describe scenarios, e.g., ordering food at street stalls, talking with hotel staff, discussing hobbies with friends, surviving a zombie apocalypse in Bangkok..."
                   className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
                   rows={3}
                   required
                 />
+                 <p className="text-xs text-gray-400 mt-1 italic">This helps generate relevant and contextual sentences.</p>
               </div>
 
               {/* Topics to Avoid Input */}
@@ -652,7 +649,7 @@ const SetWizardPage = () => {
                    <span className="font-semibold text-gray-300">Level:</span> {thaiLevel.charAt(0).toUpperCase() + thaiLevel.slice(1)}
                  </p>
                  <p className="text-gray-400">
-                   <span className="font-semibold text-gray-300">Discuss:</span> {topicsToDiscuss || 'General'}
+                   <span className="font-semibold text-gray-300">Situations:</span> {situations || 'General'}
                  </p>
                  {specificTopics && (
                    <p className="text-gray-400">
@@ -781,7 +778,7 @@ const SetWizardPage = () => {
                 <ul className="space-y-1 text-gray-300 text-sm">
                   <li><span className="text-gray-400">Cards:</span> {generatedPhrases.length}</li>
                   <li><span className="text-gray-400">Level:</span> {thaiLevel.charAt(0).toUpperCase() + thaiLevel.slice(1)}</li>
-                  <li><span className="text-gray-400">Discuss:</span> {topicsToDiscuss || 'General'}</li>
+                  <li><span className="text-gray-400">Situations:</span> {situations || 'General'}</li>
                    {specificTopics && (
                      <li><span className="text-gray-400">Specific Focus:</span> {specificTopics}</li>
                    )}
@@ -827,11 +824,10 @@ const SetWizardPage = () => {
                     onRegenerate={handleRegenerateCard}
                     index={currentPreviewIndex}
                     level={thaiLevel}
-                    goals={[]}
                     specificTopics={specificTopics}
                     friendNames={friendNames.split(',').map(n=>n.trim()).filter(n=>n)}
                     userName={session?.user?.name || 'You'}
-                    topicsToDiscuss={topicsToDiscuss}
+                    situations={situations}
                     topicsToAvoid={topicsToAvoid}
                     seriousnessLevel={seriousnessLevel}
                   />
@@ -876,11 +872,11 @@ const SetWizardPage = () => {
                 onClick={handleNext}
                 disabled={ 
                   (currentStep === 2 && !thaiLevel) || 
-                  (currentStep === 3 && !topicsToDiscuss.trim())
+                  (currentStep === 3 && !situations.trim())
                 }
                 className={`neumorphic-button py-2 px-6 text-sm font-semibold ${ 
                   ((currentStep === 2 && !thaiLevel) || 
-                  (currentStep === 3 && !topicsToDiscuss.trim()))
+                  (currentStep === 3 && !situations.trim()))
                     ? 'text-gray-500 cursor-not-allowed'
                     : (currentStep === 3 ? 'text-green-400 hover:text-green-300' : 'text-blue-400 hover:text-blue-300')
                 }`}

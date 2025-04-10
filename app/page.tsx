@@ -170,13 +170,12 @@ interface SetWizardModalProps {
 }
 
 const SetWizardModal: React.FC<SetWizardModalProps> = ({ isOpen, onClose }) => {
-  // Add state for wizard steps and user input
   const [currentStep, setCurrentStep] = useState(1);
-  const [thaiLevel, setThaiLevel] = useState<string>(''); 
-  const [learningGoals, setLearningGoals] = useState<string[]>([]); 
-
-  const totalSteps = 3; // Example total steps (Welcome, Level, Goals)
-
+  const [thaiLevel, setThaiLevel] = useState<string>('');
+  const [learningGoals, setLearningGoals] = useState<string[]>([]);
+  
+  const totalSteps = 2; // Changed from 3 to 2 (Welcome, Level)
+  
   if (!isOpen) return null;
 
   // Navigation handlers
@@ -200,32 +199,28 @@ const SetWizardModal: React.FC<SetWizardModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" onClick={onClose}>
-      <div className="neumorphic max-w-xl w-full p-6 flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}> {/* Added flex-col, max-h */} 
-        <div className="flex justify-between items-center mb-4 flex-shrink-0"> {/* Prevent header shrinking */} 
-          <h2 className="text-xl font-bold text-gray-200">Create Your Custom Set (Step {currentStep}/{totalSteps})</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white text-2xl leading-none"
-            aria-label="Close modal"
-          >
+    <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+      <div className="neumorphic rounded-xl p-6 bg-gray-900 max-w-md w-full max-h-[90vh] overflow-auto flex flex-col"> {/* Added flex-col */}
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4 flex-shrink-0"> {/* Prevent header shrinking */}
+          <h2 className="text-xl font-semibold text-blue-400">Create Custom Set</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
             &times;
           </button>
         </div>
         
-        {/* Wizard Content Area (Scrollable) */}
-        <div className="text-gray-300 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"> 
+        {/* Content Scrollable Area */}
+        <div className="overflow-y-auto mb-4 flex-grow"> {/* Allow this to grow/scroll */}
           {currentStep === 1 && (
             <div>
               <p>Welcome to the Set Wizard!</p>
-              <p className="mt-4">This will guide you through creating a personalized vocabulary and mnemonic set.</p>
               <p className="mt-2">Let's start by understanding your current level and goals.</p>
             </div>
           )}
-
+          
           {currentStep === 2 && (
             <div>
-              <h3 className="text-lg font-semibold mb-3 text-blue-400">What is your current Thai level?</h3>
+              <h3 className="text-lg font-semibold mb-3 text-blue-400">What is your current level of Thai?</h3>
               <div className="space-y-2">
                 {['Beginner', 'Intermediate', 'Advanced'].map(level => (
                   <label key={level} className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-gray-700">
@@ -235,7 +230,7 @@ const SetWizardModal: React.FC<SetWizardModalProps> = ({ isOpen, onClose }) => {
                       value={level.toLowerCase()} 
                       checked={thaiLevel === level.toLowerCase()}
                       onChange={(e) => setThaiLevel(e.target.value)}
-                      className="accent-blue-400 h-4 w-4"
+                      className="accent-blue-400 h-4 w-4 rounded"
                     />
                     <span>{level}</span>
                   </label>
@@ -243,37 +238,8 @@ const SetWizardModal: React.FC<SetWizardModalProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
           )}
-
-          {currentStep === 3 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-3 text-blue-400">What are your learning goals? (Select all that apply)</h3>
-              <div className="space-y-2">
-                {['Travel Basics', 'Everyday Conversation', 'Reading/Writing', 'Business Thai', 'Specific Topics (Specify below)'].map(goal => {
-                  const goalValue = goal.toLowerCase().split(' ')[0].replace(/\/|\(/g, ''); // Simpler value
-                  return (
-                    <label key={goal} className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-gray-700">
-                      <input 
-                        type="checkbox" 
-                        value={goalValue} 
-                        checked={learningGoals.includes(goalValue)}
-                        onChange={() => toggleGoal(goalValue)}
-                        className="accent-green-400 h-4 w-4 rounded"
-                      />
-                      <span>{goal}</span>
-                    </label>
-                  );
-                })}
-                 {/* Text input for 'Specific Topics' */}
-                 {learningGoals.includes('specific') && (
-                    <textarea 
-                        placeholder="Specify topics (e.g., food ingredients, medical terms, IT vocabulary)... Separate by commas."
-                        className="neumorphic-input w-full mt-2 text-sm h-20 resize-none"
-                        // Add state and handler for this input if needed for generation
-                    />
-                 )}
-              </div>
-            </div>
-          )}
+          
+          {/* Step 3 (learning goals section) has been completely removed */}
           
           {/* Placeholder for future steps like phrase selection, mnemonic suggestions */}
         </div>
@@ -300,7 +266,7 @@ const SetWizardModal: React.FC<SetWizardModalProps> = ({ isOpen, onClose }) => {
              <button 
                onClick={() => {
                  // TODO: Add logic to generate the set based on selections
-                 alert(`Generating Set...\nLevel: ${thaiLevel}\nGoals: ${learningGoals.join(', ')}\n(Generation logic not implemented yet)`);
+                 alert(`Generating Set...\nLevel: ${thaiLevel}\n(Generation logic not implemented yet)`);
                  onClose(); // Close modal for now
                }} 
                className="neumorphic-button text-xs text-green-400"

@@ -943,24 +943,23 @@ export default function ThaiFlashcards() {
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       {/* Header v3 */}
-      <div className="relative p-4 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
-        {/* Left Side: Logo + App Name + Set Selector */} 
+      <div className="relative p-4 bg-[#111] border-b border-[#333] flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Left Side: Logo + Set Selector */} 
         <div className="flex items-center gap-4 flex-shrink-0">
           {/* Wrap Logo in Link */} 
           <a href="/" title="Go to Home">
-            <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-64 w-auto" /> 
+            {/* Adjusted logo size */}
+            <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-16 w-auto" /> 
           </a>
-          <div className="flex flex-col gap-2">
-             <span className="text-2xl font-bold text-white">Donkey Bridge</span> 
-             <SetSelector /> 
-          </div>
+          {/* Removed redundant Donkey Bridge text */}
+          <SetSelector /> 
         </div>
 
-        {/* Right Side: Action Buttons - Grouped */} 
-        <div className="flex flex-wrap items-center justify-end gap-3 flex-grow"> {/* Allow wrapping and justify end */} 
+        {/* Action Buttons - Grouped below on mobile, right on desktop */} 
+        <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 flex-grow mt-4 md:mt-0">
           {/* Set-Specific Actions */} 
           <div className="flex items-center gap-2 border border-gray-700 rounded-lg p-2">
-            <span className="text-xs text-gray-400 mr-2">Current Set:</span>
+            <span className="text-xs text-gray-400 mr-1">Set:</span>
             <button 
               onClick={() => setShowVocabulary(true)} 
               className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
@@ -994,7 +993,7 @@ export default function ThaiFlashcards() {
               </button>
              <button 
                onClick={() => setShowHowItWorks(true)} 
-               className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none flex items-center justify-center w-8 h-8" // Adjusted size/centering 
+               className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none flex items-center justify-center w-8 h-8" 
                title="How It Works"
              >
                ?
@@ -1003,40 +1002,41 @@ export default function ThaiFlashcards() {
         </div>
       </div>
 
+      {/* Main Content - Centered Flashcard */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-md">
           {/* Card */}
           <div className="neumorphic rounded-xl flex flex-col">
             {/* Card Front */}
-            <div className="p-6">
+            <div className="p-6 flex flex-col items-center"> {/* Ensure front content is centered */}
               <div className="text-2xl font-bold mb-2 text-center">{phrases[index].english}</div>
               
               {!showAnswer && (
                 <div className="flex justify-center mt-4">
-            <button
+                  <button
                     onClick={() => setShowAnswer(true)}
                     className="neumorphic-button text-blue-400 px-6 py-2"
                   >
                     Show Answer
-            </button>
-          </div>
+                  </button>
+                </div>
               )}
-          </div>
+            </div>
 
             {/* Card Back */}
             {showAnswer && (
               <div className="border-t border-[#333] p-6">
-                {/* Main Phrase Section */} 
-                <div className="flex items-center justify-center mb-4">
+                {/* Main Phrase Section - Centered */}
+                <div className="flex flex-col items-center justify-center mb-4">
                   <div className="text-center">
-                    {/* Thai word with pronunciation - Use restored helper */}
+                    {/* Thai word with pronunciation */}
                     <div className="text-4xl md:text-5xl font-bold mb-4 text-gray-700">
                       {getThaiWithGender(phrases[index], isMale, isPoliteMode)}
                     </div>
                     <div className="text-sm text-gray-400 italic mb-3">
                       ({getGenderedPronunciation(phrases[index], isMale, isPoliteMode)})
                     </div>
-                    {/* Play Word Button */} 
+                    {/* Play Word Button */}
                     <div className="flex justify-center mb-4">
                       <button
                         onClick={(event) => {
@@ -1052,7 +1052,7 @@ export default function ThaiFlashcards() {
                       </button>
                     </div>
 
-                    {/* Difficulty Buttons (Restored Here) */} 
+                    {/* Difficulty Buttons */}
                     <div className="flex justify-center space-x-2 mb-4">
                       <button
                         onClick={() => handleCardAction('hard')}
@@ -1073,11 +1073,10 @@ export default function ThaiFlashcards() {
                         Easy
                       </button>
                     </div>
-
                   </div>
-                </div> {/* <<< End Main Phrase Section div */} 
+                </div> 
 
-                {/* === Mnemonic Section (Restored Here) === */} 
+                {/* Mnemonic Section */}
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm text-gray-400">Mnemonic</label>

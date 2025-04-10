@@ -1047,16 +1047,14 @@ export default function ThaiFlashcards() {
 
       {/* Main Content - Centered Flashcard */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
-        {/* Add perspective here */} 
-        <div className="w-full max-w-md [perspective:1000px]">
-          {/* Card Container: Add transform styles and conditional rotation */}
-          <div className={`neumorphic rounded-xl relative w-full min-h-[20rem] transform-style-3d transition-transform duration-700 ease-in-out ${showAnswer ? 'rotate-y-180' : ''}`}> 
-            {/* Card Front: Position absolute, hide backface */} 
-            <div className="absolute w-full h-full backface-hidden">
-              <div className="p-6 flex flex-col items-center justify-center h-full"> {/* Center content vertically too */} 
+        {/* Remove perspective */} 
+        <div className="w-full max-w-md">
+          {/* Card Container: Reverted to simple structure */} 
+          <div className="neumorphic rounded-xl flex flex-col"> 
+            {/* Card Front: Displayed when showAnswer is false */} 
+            {!showAnswer && (
+              <div className="p-6 flex flex-col items-center justify-center min-h-[20rem]"> {/* Ensure min height */} 
                 <div className="text-2xl font-bold mb-4 text-center">{phrases[index].english}</div>
-                
-                {/* Show Answer Button - Only visible on front */}
                 <div className="flex justify-center mt-4">
                   <button
                     onClick={() => setShowAnswer(true)}
@@ -1066,11 +1064,11 @@ export default function ThaiFlashcards() {
                   </button>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Card Back: Position absolute, hide backface, initially rotated */} 
-            <div className="absolute w-full h-full backface-hidden rotate-y-180">
-              <div className="border-t border-[#333] p-6 flex flex-col h-full overflow-y-auto"> {/* Allow scrolling if content overflows */} 
+            {/* Card Back: Displayed when showAnswer is true */} 
+            {showAnswer && (
+              <div className="border-t border-[#333] p-6 flex flex-col min-h-[20rem] overflow-y-auto"> {/* Ensure min height */} 
                 {/* Main Phrase Section - Centered */} 
                 <div className="flex flex-col items-center justify-center mb-4">
                   <div className="text-center">
@@ -1228,7 +1226,7 @@ export default function ThaiFlashcards() {
                 </div> {/* End Toggle Section */} 
 
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

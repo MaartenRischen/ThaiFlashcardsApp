@@ -943,28 +943,28 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v9 - Adjusted Logo Size */} 
+      {/* Header v10 - Larger Logo, Make Set Button Visible */} 
       <div className="relative px-4 py-4 bg-[#111] border-b border-[#333] flex items-center justify-between gap-4">
-        {/* Logo - Size determined by padding */} 
+        {/* Logo */} 
         <a href="/" title="Go to Home" className="flex-shrink-0">
           <img 
             src="/images/donkey-bridge-logo.png" 
             alt="Donkey Bridge Logo" 
-            className="h-20 w-auto" // Set fixed height h-20
+            className="h-32 w-auto" // Increased logo size to h-32
           /> 
         </a>
 
         {/* Set Selector - Centered */} 
-        <div className="flex-1 flex justify-center px-4"> {/* Added padding */} 
+        <div className="flex-1 flex justify-center px-4"> 
           <SetSelector /> 
         </div>
 
         {/* Right Buttons Area */} 
         <div className="flex items-center gap-3 flex-shrink-0">
-          {/* Make Your Own Set Button */} 
+          {/* Make Your Own Set Button - Always visible */} 
            <button 
               onClick={() => window.open('/set-wizard', '_blank')} 
-              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] hidden md:block" // Hide on small screens initially if too crowded
+              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981]" // Removed hidden md:block
             >
               Make Your Own Set!
             </button>
@@ -986,19 +986,12 @@ export default function ThaiFlashcards() {
                 Menu
               </button>
 
-              {/* Menu Dropdown - Removed moved items */} 
+              {/* Menu Dropdown - Make Set button removed */} 
               {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
                   <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                    {/* Button to Make Set - visible on smaller screens via menu */}
-                    <button
-                      onClick={() => { window.open('/set-wizard', '_blank'); setIsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-gray-700 hover:text-white font-semibold md:hidden"
-                      role="menuitem"
-                    >
-                      Make Your Own Set!
-                    </button>
-                    <div className="border-t border-gray-700 my-1 md:hidden"></div> {/* Divider only if needed */} 
+                    {/* Button to Make Set REMOVED from menu */}
+                    {/* Divider REMOVED from menu */}
                     
                     <button
                       onClick={() => { setShowVocabulary(true); setIsMenuOpen(false); }}
@@ -1007,21 +1000,7 @@ export default function ThaiFlashcards() {
                     >
                       Vocabulary
                     </button>
-                    <button
-                      onClick={() => { setShowMnemonicsModal(true); setIsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                      role="menuitem"
-                    >
-                      Mnemonics
-                    </button>
-                    <button
-                      onClick={() => { setIsManagementModalOpen(true); setIsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                      role="menuitem"
-                    >
-                      Set Manager
-                    </button>
-                    {/* How It Works (?) removed from dropdown */}
+                    {/* ... other menu items ... */}
                   </div>
                 </div>
               )}

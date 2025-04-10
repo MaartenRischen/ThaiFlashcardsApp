@@ -942,41 +942,49 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v3 */}
+      {/* Header v4 - Revised Layout */}
       <div className="relative p-4 bg-[#111] border-b border-[#333] flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Left Side: Logo + Set Selector */} 
         <div className="flex items-center gap-4 flex-shrink-0">
-          {/* Wrap Logo in Link */} 
           <a href="/" title="Go to Home">
-            {/* Adjusted logo size */}
-            <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-16 w-auto" /> 
+            {/* Increased logo size */} 
+            <img src="/images/donkey-bridge-logo.png" alt="Donkey Bridge Logo" className="h-20 w-auto" /> 
           </a>
-          {/* Removed redundant Donkey Bridge text */}
           <SetSelector /> 
         </div>
 
-        {/* Action Buttons - Grouped below on mobile, right on desktop */} 
-        <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 flex-grow mt-4 md:mt-0">
-          {/* Set-Specific Actions */} 
-          <div className="flex items-center gap-2 border border-gray-700 rounded-lg p-2">
-            <span className="text-xs text-gray-400 mr-1">Set:</span>
+        {/* Action Buttons - Revised grouping for alignment */} 
+        <div className="flex flex-wrap items-center justify-center md:justify-end gap-x-4 gap-y-3 flex-grow mt-4 md:mt-0 w-full md:w-auto">
+          
+          {/* Group 1: ? + Set Actions */} 
+          <div className="flex items-center gap-2">
             <button 
-              onClick={() => setShowVocabulary(true)} 
-              className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
-              title="Vocabulary for current set"
+              onClick={() => setShowHowItWorks(true)} 
+              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none flex items-center justify-center w-8 h-8" 
+              title="How It Works"
             >
-              Vocabulary
+              ?
             </button>
-            <button 
-              onClick={() => setShowMnemonicsModal(true)} 
-              className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
-              title="Mnemonics for current set"
-            >
-              Mnemonics
-            </button>
+            <div className="flex items-center gap-2 border border-gray-700 rounded-lg p-2">
+              <span className="text-xs text-gray-400 mr-1">Set:</span>
+              <button 
+                onClick={() => setShowVocabulary(true)} 
+                className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
+                title="Vocabulary for current set"
+              >
+                Vocabulary
+              </button>
+              <button 
+                onClick={() => setShowMnemonicsModal(true)} 
+                className="neumorphic-button text-sm text-blue-400 px-3 py-1" 
+                title="Mnemonics for current set"
+              >
+                Mnemonics
+              </button>
+            </div>
           </div>
           
-          {/* General Actions */} 
+          {/* Group 2: Management + AI */} 
           <div className="flex items-center gap-3">
              <button 
                onClick={() => setIsManagementModalOpen(true)} 
@@ -991,13 +999,6 @@ export default function ThaiFlashcards() {
               >
                 Make Your Own Set With AI!
               </button>
-             <button 
-               onClick={() => setShowHowItWorks(true)} 
-               className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none flex items-center justify-center w-8 h-8" 
-               title="How It Works"
-             >
-               ?
-             </button>
           </div>
         </div>
       </div>
@@ -1396,7 +1397,7 @@ export default function ThaiFlashcards() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setIsManagementModalOpen(false)}>
           <div className="neumorphic max-2xl w-full p-6" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-200">Set Manager</h2> 
+              <h2 className="text-xl font-bold text-gray-200">Set Manager</h2>
               <button
                 onClick={() => setIsManagementModalOpen(false)}
                 className="text-gray-400 hover:text-white text-2xl"

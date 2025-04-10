@@ -260,6 +260,7 @@ const SetWizardPage = () => {
   };
 
   const startGeneration = async () => {
+    setCurrentStep(4); // Move to generation step immediately
     try {
       const friendNamesArray = friendNames ? friendNames.split(',').map(n => n.trim()).filter(n => n) : [];
       const userName = 'You'; // Could be personalized in future
@@ -317,16 +318,15 @@ const SetWizardPage = () => {
         setErrorSummary(result.errorSummary);
       }
       
-      // --- REMOVED: No longer auto-advance --- 
-      // setCurrentStep(5);
+      // REMOVED: No longer auto-advance to step 5 here
 
     } catch (error) {
       console.error("Failed to generate flashcard set:", error);
       alert("There was an error generating your flashcard set. Please try again.");
-      // Optionally, handle error by allowing user to go back
-      // setCurrentStep(3); 
+      // Optionally, handle error by allowing user to go back to input step
+      setCurrentStep(3); 
     } finally {
-      setIsGenerating(false); // Mark generation as complete
+      setIsGenerating(false); // Mark generation as complete regardless of success/failure
     }
   };
 

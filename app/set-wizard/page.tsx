@@ -302,7 +302,7 @@ const SetWizardPage = () => {
           });
           // CRITICAL: Update the display phrases in real-time
           if (progress.latestPhrases && progress.latestPhrases.length > 0) {
-            setGeneratingDisplayPhrases(prev => [...prev, ...progress.latestPhrases]);
+            setGeneratingDisplayPhrases(prev => [...prev, ...(progress.latestPhrases || [])]);
           }
         }
       );

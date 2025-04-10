@@ -263,44 +263,46 @@ const SetWizardPage = () => {
   };
 
   const startGeneration = async () => {
-    setIsGenerating(true);
-    setGenerationProgress({ completed: 0, total: cardCount });
-    setCurrentStep(4); 
-    setErrorSummary(null); 
-    setAiGeneratedTitle(undefined); 
-    setGeneratingDisplayPhrases([]);
-
-    const userName = session?.user?.name || 'You';
-    const friendNamesArray = friendNames.split(',').map(name => name.trim()).filter(name => name !== '');
-
     try {
+      const friendNamesArray = friendNames ? friendNames.split(',').map(n => n.trim()).filter(n => n) : [];
+      const userName = 'You'; // Could be personalized in future
+
+      setIsGenerating(true);
+      setGeneratedPhrases([]);
+      setGeneratingDisplayPhrases([]);
+      setErrorSummary(null);
+      setGenerationProgress({ completed: 0, total: cardCount });
+
+      console.log("Starting generation with inputs:", {
+        level: thaiLevel,
+        specificTopics,
+        friendNames: friendNamesArray,
+        situations,
+        topicsToAvoid,
+        seriousnessLevel
+      });
+
+      // Update to reflect the new approach
       const result = await generateCustomSet(
         {
           level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
           specificTopics: specificTopics || undefined,
           friendNames: friendNamesArray,
           userName: userName,
-          situations: situations || undefined,
+          topicsToDiscuss: situations || undefined,
           topicsToAvoid: topicsToAvoid || undefined,
           seriousnessLevel: seriousnessLevel,
         },
         cardCount,
         (progress) => {
-          console.log(`Wizard CB Received: Completed=${progress.completed}, Total=${progress.total}, Latest#=${progress.latestPhrases?.length || 0}`);
-          setGenerationProgress({ completed: progress.completed, total: progress.total });
-
+          console.log("Generation progress:", progress);
+          setGenerationProgress({
+            completed: progress.completed,
+            total: progress.total
+          });
+          // CRITICAL: Update the display phrases in real-time
           if (progress.latestPhrases && progress.latestPhrases.length > 0) {
-            setGeneratingDisplayPhrases(prev => {
-              const newPhrases = progress.latestPhrases || [];
-              console.log(`Wizard CB State Update: Prev#: ${prev.length}, New#: ${newPhrases.length}, Total#: ${prev.length + newPhrases.length}`);
-              const uniqueNewPhrases = newPhrases.filter(np => !prev.some(p => p.english === np.english));
-              if(uniqueNewPhrases.length !== newPhrases.length) {
-                  console.warn("Wizard CB: Filtered out duplicate phrases before adding to display list.");
-              }
-              return [...prev, ...uniqueNewPhrases]; 
-            });
-          } else {
-             console.log(`Wizard CB: No new latestPhrases to add to display.`);
+            setGeneratingDisplayPhrases(prev => [...prev, ...progress.latestPhrases]);
           }
         }
       );
@@ -335,20 +337,19 @@ const SetWizardPage = () => {
   };
 
   const handleRegenerateCard = async (index: number) => {
-    if (isRegenerating) return;
-    
-    setIsRegenerating(true);
-    
-    const userName = session?.user?.name || 'You';
-    const friendNamesArray = friendNames.split(',').map(name => name.trim()).filter(name => name !== '');
-    
     try {
+      setIsRegenerating(true);
+      const friendNamesArray = friendNames ? friendNames.split(',').map(n => n.trim()).filter(n => n) : [];
+      const userName = 'You'; // Personalized in future
+      
+      console.log(`Regenerating card at index ${index}`);
+      
       const result = await generateSingleFlashcard({
         level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
         specificTopics: specificTopics || undefined,
         friendNames: friendNamesArray,
         userName: userName,
-        situations: situations || undefined,
+        topicsToDiscuss: situations || undefined,
         topicsToAvoid: topicsToAvoid || undefined,
         seriousnessLevel: seriousnessLevel,
       });

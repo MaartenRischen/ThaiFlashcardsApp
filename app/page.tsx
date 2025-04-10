@@ -943,75 +943,89 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v7 - Larger Logo, Text Menu Button */} 
-      <div className="relative px-4 py-2 bg-[#111] border-b border-[#333] flex items-center justify-between gap-4">
-        {/* Logo */} 
+      {/* Header v8 - Larger Logo, Key Buttons Visible */} 
+      <div className="relative px-4 py-4 bg-[#111] border-b border-[#333] flex items-center justify-between gap-4">
+        {/* Logo - Size determined by padding */} 
         <a href="/" title="Go to Home" className="flex-shrink-0">
           <img 
             src="/images/donkey-bridge-logo.png" 
             alt="Donkey Bridge Logo" 
-            className="h-24 w-auto" // Increased logo size
+            className="h-auto w-auto max-h-full" // Removed fixed height, let padding control
           /> 
         </a>
 
         {/* Set Selector - Centered */} 
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1 flex justify-center px-4"> {/* Added padding */} 
           <SetSelector /> 
         </div>
 
-        {/* Menu Button - Right (Now Text) */} 
-        <div className="relative">
-          <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)} 
-            className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white"
-            title="Menu"
-          >
-            Menu
-          </button>
+        {/* Right Buttons Area */} 
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {/* Make Your Own Set Button */} 
+           <button 
+              onClick={() => window.open('/set-wizard', '_blank')} 
+              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] hidden md:block" // Hide on small screens initially if too crowded
+            >
+              Make Your Own Set!
+            </button>
+            {/* How It Works Button */} 
+            <button 
+              onClick={() => setShowHowItWorks(true)} 
+              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none flex items-center justify-center w-8 h-8" 
+              title="How It Works"
+            >
+              ?
+            </button>
+            {/* Menu Button */} 
+            <div className="relative">
+              <button 
+                onClick={() => setIsMenuOpen(!isMenuOpen)} 
+                className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white"
+                title="Menu"
+              >
+                Menu
+              </button>
 
-          {/* Menu Dropdown */} 
-          {isMenuOpen && (
-            <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
-              <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                <button
-                  onClick={() => { setShowVocabulary(true); setIsMenuOpen(false); }}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                  role="menuitem"
-                >
-                  Vocabulary
-                </button>
-                <button
-                  onClick={() => { setShowMnemonicsModal(true); setIsMenuOpen(false); }}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                  role="menuitem"
-                >
-                  Mnemonics
-                </button>
-                <button
-                  onClick={() => { setIsManagementModalOpen(true); setIsMenuOpen(false); }}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                  role="menuitem"
-                >
-                  Set Manager
-                </button>
-                <button
-                  onClick={() => { window.open('/set-wizard', '_blank'); setIsMenuOpen(false); }}
-                  className="block w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-gray-700 hover:text-white font-semibold"
-                  role="menuitem"
-                >
-                  Make Your Own Set!
-                </button>
-                <div className="border-t border-gray-700 my-1"></div>
-                <button
-                  onClick={() => { setShowHowItWorks(true); setIsMenuOpen(false); }}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white"
-                  role="menuitem"
-                >
-                  How It Works (?)
-                </button>
-              </div>
+              {/* Menu Dropdown - Removed moved items */} 
+              {isMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
+                  <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                    {/* Button to Make Set - visible on smaller screens via menu */}
+                    <button
+                      onClick={() => { window.open('/set-wizard', '_blank'); setIsMenuOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-gray-700 hover:text-white font-semibold md:hidden"
+                      role="menuitem"
+                    >
+                      Make Your Own Set!
+                    </button>
+                    <div className="border-t border-gray-700 my-1 md:hidden"></div> {/* Divider only if needed */} 
+                    
+                    <button
+                      onClick={() => { setShowVocabulary(true); setIsMenuOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                      role="menuitem"
+                    >
+                      Vocabulary
+                    </button>
+                    <button
+                      onClick={() => { setShowMnemonicsModal(true); setIsMenuOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                      role="menuitem"
+                    >
+                      Mnemonics
+                    </button>
+                    <button
+                      onClick={() => { setIsManagementModalOpen(true); setIsMenuOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                      role="menuitem"
+                    >
+                      Set Manager
+                    </button>
+                    {/* How It Works (?) removed from dropdown */}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
         </div>
       </div>
 

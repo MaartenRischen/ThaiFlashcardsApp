@@ -368,6 +368,7 @@ export default function ThaiFlashcards() {
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State for the new menu
   const [tutorialStep, setTutorialStep] = useState<number>(0); // 0 = inactive, 1+ = active step
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -984,6 +985,37 @@ export default function ThaiFlashcards() {
     }
   };
 
+  // Dark Mode Effect
+  useEffect(() => {
+    // Check localStorage first
+    const savedMode = localStorage.getItem('darkMode');
+    // Check system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Determine initial mode: saved preference > system preference > default (false)
+    const initialMode = savedMode ? savedMode === 'true' : prefersDark;
+    
+    setIsDarkMode(initialMode);
+
+    // Apply the class on initial load
+    if (initialMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    // No dependency array - run only once on mount to set initial state
+  }, []); 
+
+  // Handler to toggle dark mode and save preference
+  const toggleDarkMode = (checked: boolean) => {
+    setIsDarkMode(checked);
+    localStorage.setItem('darkMode', checked.toString());
+    if (checked) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       {/* Header v16 - Two Lines Right */} 
@@ -1021,20 +1053,38 @@ export default function ThaiFlashcards() {
             <div className="inline-flex items-center"> {/* Align selector center */}
               <SetSelector /> 
             </div>
-            {/* Set Options Menu Button */} 
+            {/* Set Options Menu Button - Renamed */} 
             <div className="relative">
               <button 
                 onClick={() => setIsMenuOpen(!isMenuOpen)} 
                 className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white inline-flex items-center justify-center"
-                title="Set Options Menu"
+                title="App Options Menu" // Updated title
               >
-                Set Options
+                App Options
               </button>
-              {/* Menu Dropdown */} 
+              {/* Menu Dropdown - Added App Options */} 
               {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
+                <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic"> {/* Increased width slightly */} 
                   <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                    {/* Items: Vocabulary, Mnemonics, Set Manager */} 
+                    {/* App Options Section */}
+                     <div className="px-4 pt-2 pb-1">
+                       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">App Settings</h3>
+                     </div>
+                     <div className="px-4 py-2 flex items-center justify-between">
+                       <span className="text-sm text-gray-300">Autoplay Audio</span>
+                       <Switch checked={autoplay} onCheckedChange={setAutoplay} />
+                     </div>
+                     <div className="px-4 py-2 flex items-center justify-between">
+                       <span className="text-sm text-gray-300">Dark Mode</span>
+                       <Switch checked={isDarkMode} onCheckedChange={toggleDarkMode} />
+                     </div>
+
+                    <div className="border-t border-gray-700 my-1"></div> {/* Divider */} 
+
+                    {/* Set Specific Items */}
+                    <div className="px-4 pt-2 pb-1">
+                       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Current Set</h3>
+                     </div>
                     <button
                       onClick={() => { setShowVocabulary(true); setIsMenuOpen(false); }}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
@@ -1291,12 +1341,12 @@ export default function ThaiFlashcards() {
           </button>
       </div>
 
-      {/* Settings Modal (controlled by showStats) */}
+      {/* Settings Modal (controlled by showStats) - Autoplay removed */} 
       {showStats && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowStats(false)}>
           <div className="neumorphic max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-200">Settings</h2>
+              <h2 className="text-xl font-bold text-gray-200">Statistics & Data</h2> {/* Renamed slightly */} 
               <button
                   onClick={() => setShowStats(false)}
                   className="text-gray-400 hover:text-white text-2xl"
@@ -1306,65 +1356,29 @@ export default function ThaiFlashcards() {
             </div>
             
             <div className="space-y-4">
-              {/* Set Management Section */}
+              {/* Statistics Section (Placeholder) */}
               <div className="py-2 border-b border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-200 mb-2">Set Management</h3>
-                <div className="text-sm text-gray-400 mb-3">
-                  Currently using: <span className="text-blue-400 font-medium">{currentSetName}</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button 
-                    onClick={exportCurrentSet} 
-                    className="neumorphic-button text-xs text-green-400"
-                  >
-                    Export Set
-                  </button>
-                  <button 
-                    onClick={importSet} 
-                    className="neumorphic-button text-xs text-blue-400"
-                  >
-                    Import Set
-                  </button>
-                  {currentSetName !== "Default Set" && (
-                    <button 
-                      onClick={() => {
-                        if (confirm(`Reset to Default Set? Your current set "${currentSetName}" will remain saved.`)) {
-                          // Use switchSet from context to switch to default set
-                          switchSet('default');
-                          // Reset UI state
-                          setIndex(0);
-                          setShowAnswer(false);
-                          setRandomSentence(null);
-                        }
-                      }} 
-                      className="neumorphic-button text-xs text-yellow-400"
-                    >
-                      Switch to Default Set
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Autoplay Toggle */}
-              <div className="flex items-center justify-between py-2 border-b border-gray-700">
-                <span className="text-gray-300">Auto-play audio on reveal</span>
-                <Switch checked={autoplay} onCheckedChange={setAutoplay} />
+                 <h3 className="text-lg font-semibold text-gray-200 mb-2">Progress Stats</h3>
+                 {/* TODO: Display actual stats calculated by calculateStats() ? */}
+                 <p className="text-sm text-gray-400">Total Due Today: {totalDueToday}</p>
+                 <p className="text-sm text-gray-400">Reviews Completed Today: {reviewsCompletedToday}</p>
               </div>
               
-              {/* Data Management Buttons - Added */}
+              {/* Data Management Buttons */}
               <div className="pt-4 space-y-3">
                 <h3 className="text-lg font-semibold text-blue-400 mb-2">Data Management</h3>
+                {/* Keep Export/Import/Reset here as they are more disruptive */}
                 <button 
                   onClick={exportPhraseData} 
                   className="neumorphic-button w-full text-blue-400"
                 >
-                  Export Set
+                  Export Base Phrase Data
                 </button>
                 <button 
                   onClick={importSet} 
                   className="neumorphic-button w-full text-blue-400"
                 >
-                  Import Set
+                  Import Set File (.json)
                 </button>
                 <button 
                   onClick={resetAllProgress} 

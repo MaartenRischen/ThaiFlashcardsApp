@@ -9,6 +9,11 @@ import { SetSelector } from './components/SetSelector';
 import { useSet } from './context/SetContext';
 import { Phrase as GeneratorPhrase } from './lib/set-generator';
 import { SetMetaData, SetProgress } from './lib/storage';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 // Define a simple CardStatus type locally for now
 type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';
@@ -362,6 +367,7 @@ export default function ThaiFlashcards() {
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State for the new menu
+  const [tutorialStep, setTutorialStep] = useState<number>(0); // 0 = inactive, 1+ = active step
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -941,6 +947,43 @@ export default function ThaiFlashcards() {
     setEditingTitle("");
   };
 
+  // Tutorial Setup Effect
+  useEffect(() => {
+    const hasSeen = localStorage.getItem('hasSeenTutorial_v1');
+    if (!hasSeen) {
+      console.log("Starting tutorial...");
+      setTutorialStep(1); // Start tutorial
+    }
+  }, []);
+
+  // Tutorial Handlers
+  const handleTutorialNext = () => {
+    console.log(`Tutorial: Advancing from step ${tutorialStep}`);
+    setTutorialStep(prev => prev + 1);
+  };
+
+  const handleTutorialSkip = () => {
+    console.log("Tutorial: Skipping");
+    localStorage.setItem('hasSeenTutorial_v1', 'true');
+    setTutorialStep(0); // End tutorial
+  };
+
+  const handleTutorialFinish = () => {
+    console.log("Tutorial: Finishing");
+    localStorage.setItem('hasSeenTutorial_v1', 'true');
+    setTutorialStep(0); // End tutorial
+  };
+
+  // Modified handleShowAnswer for tutorial trigger
+  const handleShowAnswer = () => {
+    setShowAnswer(true);
+    // Trigger next step specifically when moving from step 2 (Show Answer explanation)
+    if (tutorialStep === 2) { 
+      console.log("Tutorial: Triggering step 3 via Show Answer");
+      handleTutorialNext(); // Advance to the step explaining the back (e.g., difficulty buttons)
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       {/* Header v14 - Logo Increased, How it Works updated */} 
@@ -954,9 +997,33 @@ export default function ThaiFlashcards() {
           /> 
         </a>
 
-        {/* Set Selector - Visible md+, otherwise in menu */}
-        <div className="hidden md:flex md:flex-1 md:justify-center px-4"> {/* Hidden xs/sm */} 
-          <SetSelector /> 
+        {/* Set Selector - Wrapped in Popover (Step 1) */} 
+        <Popover open={tutorialStep === 1}>
+          <PopoverTrigger asChild>
+            <div className="hidden md:flex md:flex-1 md:justify-center px-4"> 
+              <SetSelector /> 
+            </div>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 bg-gray-800 text-white border-gray-700" side="bottom" align="center">
+            <div className="grid gap-4 p-4">
+              <div className="space-y-2">
+                <h4 className="font-medium leading-none text-blue-400">1. Choose Your Set</h4>
+                <p className="text-sm text-gray-300">
+                  Select your flashcard set here. Start with "Default Set" or create/import sets using the 'Set' menu.
+                </p>
+              </div>
+              <div className="flex justify-between items-center mt-2">
+                <button onClick={handleTutorialSkip} className="text-xs text-red-400 hover:underline">Skip Tutorial</button>
+                <button onClick={handleTutorialNext} className="text-sm neumorphic-button px-3 py-1">Next →</button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+        {/* Fallback for mobile view - SetSelector shown in Menu */} 
+        <div className="block md:hidden mx-auto order-last w-full px-4"> 
+           {/* Needs to be wrapped if tutorial step 1 should show on mobile */} 
+           {/* For now, tutorial step 1 only points to desktop view */} 
+           {/* <SetSelector /> */} 
         </div>
 
         {/* Right Buttons Area */} 
@@ -1045,14 +1112,33 @@ export default function ThaiFlashcards() {
             {!showAnswer && (
               <div className="p-6 flex flex-col items-center justify-center min-h-[20rem]"> {/* Ensure min height */} 
                 <div className="text-2xl font-bold mb-4 text-center">{phrases[index].english}</div>
-                <div className="flex justify-center mt-4">
-                  <button
-                    onClick={() => setShowAnswer(true)}
-                    className="neumorphic-button text-blue-400 px-6 py-2"
-                  >
-                    Show Answer
-                  </button>
-                </div>
+                {/* Show Answer Button - Wrapped in Popover (Step 2) */} 
+                <Popover open={tutorialStep === 2}>
+                  <PopoverTrigger asChild>
+                    <div className="flex justify-center mt-4">
+                      <button
+                        onClick={handleShowAnswer} // Use the modified handler
+                        className="neumorphic-button text-blue-400 px-6 py-2"
+                      >
+                        Show Answer
+                      </button>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 bg-gray-800 text-white border-gray-700" side="bottom">
+                    <div className="grid gap-4 p-4">
+                      <div className="space-y-2">
+                        <h4 className="font-medium leading-none text-blue-400">2. Reveal the Answer</h4>
+                        <p className="text-sm text-gray-300">
+                          Click here to flip the card and see the Thai translation, pronunciation, and examples.
+                        </p>
+                      </div>
+                      <div className="flex justify-between items-center mt-2">
+                        <button onClick={handleTutorialSkip} className="text-xs text-red-400 hover:underline">Skip Tutorial</button>
+                        {/* No 'Next' button here, progress happens on click */} 
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             )}
 
@@ -1085,27 +1171,30 @@ export default function ThaiFlashcards() {
                       </button>
                     </div>
 
-                    {/* Difficulty Buttons */}
-                    <div className="flex justify-center space-x-2 mb-4">
-                      <button
-                        onClick={() => handleCardAction('hard')}
-                        className="neumorphic-button text-red-400"
-                      >
-                        Wrong
-                      </button>
-                      <button
-                        onClick={() => handleCardAction('good')}
-                        className="neumorphic-button text-yellow-400"
-                      >
-                        Correct
-                      </button>
-                      <button
-                        onClick={() => handleCardAction('easy')}
-                        className="neumorphic-button text-green-400"
-                      >
-                        Easy
-                      </button>
-                    </div>
+                    {/* Difficulty Buttons - Wrapped in Popover (Step 3) */} 
+                    <Popover open={tutorialStep === 3}>
+                      <PopoverTrigger asChild>
+                        <div className="flex justify-center space-x-2 mb-4">
+                          <button onClick={() => handleCardAction('hard')} className="neumorphic-button text-red-400">Wrong</button>
+                          <button onClick={() => handleCardAction('good')} className="neumorphic-button text-yellow-400">Correct</button>
+                          <button onClick={() => handleCardAction('easy')} className="neumorphic-button text-green-400">Easy</button>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80 bg-gray-800 text-white border-gray-700" side="top" align="center">
+                        <div className="grid gap-4 p-4">
+                          <div className="space-y-2">
+                            <h4 className="font-medium leading-none text-blue-400">3. Rate Your Recall (SRS)</h4>
+                            <p className="text-sm text-gray-300">
+                              Use these buttons to tell the Spaced Repetition System how well you knew the answer. This schedules the card for future review.
+                            </p>
+                          </div>
+                          <div className="flex justify-between items-center mt-2">
+                            <button onClick={handleTutorialSkip} className="text-xs text-red-400 hover:underline">Skip Tutorial</button>
+                            <button onClick={handleTutorialNext} className="text-sm neumorphic-button px-3 py-1">Next →</button>
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div> 
                 

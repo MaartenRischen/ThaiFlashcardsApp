@@ -14,20 +14,20 @@ export function FlashcardHeader({
   setIsAppOptionsMenuOpen,
 }: FlashcardHeaderProps) {
   return (
-    // Outer container with dark background
-    <div className="bg-[#111] border-b border-[#333]">
-      {/* Top Row: Logo and Make Your Own Set button */}
-      <div className="px-4 py-2 flex items-center justify-between">
-        {/* Logo */}
-        <a href="/" title="Go to Home" className="flex-shrink-0 flex items-center">
+    <div className="bg-[#111] border-b border-[#333] relative">
+      {/* Start with a container for the logo that spans the full height */}
+      <div className="absolute left-4 top-0 bottom-0 flex items-center z-10">
+        <a href="/" title="Go to Home" className="flex-shrink-0">
           <img
             src="/images/donkey-bridge-logo.png"
             alt="Donkey Bridge Logo"
-            className="h-10 w-auto"
+            className="h-16 w-auto"
           />
         </a>
+      </div>
 
-        {/* Make Your Own Set Button - prominently placed in top row */}
+      {/* Top Row: Just the Make Your Own Set button, positioned to the right */}
+      <div className="px-4 py-2 flex justify-end">
         <button
           onClick={() => window.open('/set-wizard', '_blank')}
           className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center whitespace-nowrap"
@@ -37,14 +37,14 @@ export function FlashcardHeader({
       </div>
 
       {/* Bottom Row: Set Selector and Action Buttons */}
-      <div className="px-4 py-2 flex flex-wrap items-center gap-x-3 gap-y-2">
-        {/* Set Selector - given more width */}
-        <div className="flex-grow max-w-md">
+      <div className="px-4 py-2 flex justify-end flex-wrap items-center gap-x-3 gap-y-2 pl-24">
+        {/* Set Selector - with fixed/reasonable width */}
+        <div className="w-64">
           <SetSelector />
         </div>
 
-        {/* Action Buttons Group - consistently styled and right-aligned */}
-        <div className="flex items-center gap-x-2 ml-auto">
+        {/* Action Buttons Group */}
+        <div className="flex items-center gap-x-2">
           {/* How It Works Button (?) */}
           <button
             onClick={() => setShowHowItWorks(true)}

@@ -13,65 +13,66 @@ export function FlashcardHeader({
   setIsSetOptionsMenuOpen,
   setIsAppOptionsMenuOpen,
 }: FlashcardHeaderProps) {
-  // Removed console log as props are simpler now
-
   return (
-    // Header structure based on app/page.tsx approx line 1012+, with additions
-    // Added min-h-[4rem] to ensure minimum height and flex-wrap to the main div
-    <div className="relative px-4 py-3 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-x-4 gap-y-2 min-h-[4rem]">
-      {/* Logo */}
-      <a href="/" title="Go to Home" className="flex-shrink-0 self-stretch flex items-center mr-4"> {/* Added margin-right */}
-        <img
-          src="/images/donkey-bridge-logo.png"
-          alt="Donkey Bridge Logo"
-          className="h-10 sm:h-12 md:h-16 w-auto" // Responsive height
-        />
-      </a>
+    // Outer container with dark background
+    <div className="bg-[#111] border-b border-[#333]">
+      {/* Top Row: Logo and Make Your Own Set button */}
+      <div className="px-4 py-2 flex items-center justify-between">
+        {/* Logo */}
+        <a href="/" title="Go to Home" className="flex-shrink-0 flex items-center">
+          <img
+            src="/images/donkey-bridge-logo.png"
+            alt="Donkey Bridge Logo"
+            className="h-10 w-auto"
+          />
+        </a>
 
-      {/* Right-aligned Group - Allows Wrapping */}
-      {/* Added flex-grow to allow wrapping elements to take available space */}
-      <div className="flex items-center flex-wrap justify-end gap-x-3 gap-y-2 flex-grow">
-        {/* Set Selector Component - Rendered WITHOUT passing props */}
-        <div className="flex-shrink-0">
-          <SetSelector />
-        </div>
-
-        {/* Make Your Own Set Button */}
-        {/* Added flex-shrink-0 to prevent shrinking */}
+        {/* Make Your Own Set Button - prominently placed in top row */}
         <button
           onClick={() => window.open('/set-wizard', '_blank')}
-          className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center flex-shrink-0 whitespace-nowrap"
+          className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center whitespace-nowrap"
         >
           Make Your Own Set!
         </button>
+      </div>
 
-        {/* How It Works Button (?) */}
-        {/* Added flex-shrink-0 */}
-        <button
-          onClick={() => setShowHowItWorks(true)}
-          className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8 flex-shrink-0"
-          title="How It Works"
-        >
-          ?
-        </button>
+      {/* Bottom Row: Set Selector and Action Buttons */}
+      <div className="px-4 py-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+        {/* Set Selector - given more width */}
+        <div className="flex-grow max-w-md">
+          <SetSelector />
+        </div>
 
-        {/* Set Options Button - Added */}
-        {/* Added flex-shrink-0 */}
-        <button
-          onClick={() => setIsSetOptionsMenuOpen(true)}
-          className="neumorphic-button text-sm px-3 py-1.5 flex-shrink-0 whitespace-nowrap" // Basic styling + prevent wrap
-        >
-          Set Options
-        </button>
+        {/* Action Buttons Group - consistently styled and right-aligned */}
+        <div className="flex items-center gap-x-2 ml-auto">
+          {/* How It Works Button (?) */}
+          <button
+            onClick={() => setShowHowItWorks(true)}
+            className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8"
+            title="How It Works"
+            aria-label="How It Works"
+          >
+            ?
+          </button>
 
-        {/* App Options Button - Added */}
-        {/* Added flex-shrink-0 */}
-        <button
-          onClick={() => setIsAppOptionsMenuOpen(true)}
-          className="neumorphic-button text-sm px-3 py-1.5 flex-shrink-0 whitespace-nowrap" // Basic styling + prevent wrap
-        >
-          App Options
-        </button>
+          {/* Set Options Button */}
+          <button
+            onClick={() => setIsSetOptionsMenuOpen(true)}
+            className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"
+            aria-label="Set Options"
+          >
+            Set Options
+          </button>
+
+          {/* App Options Button */}
+          <button
+            onClick={() => setIsAppOptionsMenuOpen(true)}
+            className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"
+            aria-label="App Options"
+          >
+            App Options
+          </button>
+        </div>
       </div>
     </div>
   );

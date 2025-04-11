@@ -986,92 +986,56 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v14 - Logo Increased, How it Works updated */} 
+      {/* Header v15 - Revised Button Order */} 
       <div className="relative px-4 py-3 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         {/* Logo */} 
         <a href="/" title="Go to Home" className="flex-shrink-0">
           <img 
             src="/images/donkey-bridge-logo.png" 
             alt="Donkey Bridge Logo" 
-            className="h-20 md:h-24 w-auto" // Increased size
+            className="h-20 w-auto" // Logo size h-20
           /> 
         </a>
 
-        {/* Set Selector - Wrapped in Popover (Step 1) */} 
-        <Popover open={tutorialStep === 1}>
-          <PopoverTrigger asChild>
-            <div className="hidden md:flex md:flex-1 md:justify-center px-4"> 
-              <SetSelector /> 
-            </div>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 bg-gray-800 text-white border-gray-700" side="bottom" align="center">
-            <div className="grid gap-4 p-4">
-              <div className="space-y-2">
-                <h4 className="font-medium leading-none text-blue-400">1. Choose Your Set</h4>
-                <p className="text-sm text-gray-300">
-                  Select your flashcard set here. Start with "Default Set" or create/import sets using the 'Set' menu.
-                </p>
-              </div>
-              <div className="flex justify-between items-center mt-2">
-                <button onClick={handleTutorialSkip} className="text-xs text-red-400 hover:underline">Skip Tutorial</button>
-                <button onClick={handleTutorialNext} className="text-sm neumorphic-button px-3 py-1">Next →</button>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-        {/* Fallback for mobile view - SetSelector shown in Menu */} 
-        <div className="block md:hidden mx-auto order-last w-full px-4"> 
-           {/* Needs to be wrapped if tutorial step 1 should show on mobile */} 
-           {/* For now, tutorial step 1 only points to desktop view */} 
-           {/* <SetSelector /> */} 
-        </div>
-
-        {/* Right Buttons Area */} 
-        <div className="flex items-center gap-3 flex-shrink-0">
-          {/* Make Your Own Set Button - Visible md+ */} 
+        {/* Right-aligned Group: ?, Make Set, Selector, Menu */}
+        <div className="flex items-center flex-wrap gap-3 flex-shrink-0">
+           {/* How It Works Button (?) */} 
            <button 
-              onClick={() => window.open('/set-wizard', '_blank')} 
-              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] hidden md:inline-flex" // Hidden xs/sm
-            >
-              Make Your Own Set!
-            </button>
-            {/* How It Works Button - Always Visible */} 
-            <button 
               onClick={() => setShowHowItWorks(true)} 
-              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8" // Always inline-flex
+              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8" // Always visible
               title="How It Works"
             >
               ?
             </button>
-            {/* Menu Button - Always visible, now Text */} 
+            {/* Make Your Own Set Button */} 
+            <button 
+              onClick={() => window.open('/set-wizard', '_blank')} 
+              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex" // Always visible
+            >
+              Make Your Own Set!
+            </button>
+            {/* Set Selector */} 
+            <div className="inline-flex"> {/* Wrapper for consistent alignment */} 
+              <SetSelector /> 
+            </div>
+            {/* Set Menu Button */} 
             <div className="relative">
               <button 
                 onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white" // Standard button style
+                className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white"
                 title="Set Menu"
               >
                 Set
               </button>
 
-              {/* Menu Dropdown - ? button removed */} 
+              {/* Menu Dropdown - Cleaned up */} 
               {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
                   <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                    {/* Set Selector - Show only on xs/sm screen menu */}
-                    <div className="px-4 py-2 block md:hidden">
-                      <SetSelector /> 
-                    </div>
-                    {/* Make Set - Show only on xs/sm screen menu */} 
-                    <button
-                      onClick={() => { window.open('/set-wizard', '_blank'); setIsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-gray-700 hover:text-white font-semibold md:hidden"
-                      role="menuitem"
-                    >
-                      Make Your Own Set!
-                    </button>
-                    {/* How it Works (?) - REMOVED from menu */}
-                    {/* Divider only if items above are shown */} 
-                    <div className="border-t border-gray-700 my-1 md:hidden"></div>
+                    {/* SetSelector REMOVED */} 
+                    {/* Make Set REMOVED */} 
+                    {/* How it Works (?) REMOVED */}
+                    {/* Divider REMOVED */} 
                     
                     {/* Always visible menu items */} 
                     <button

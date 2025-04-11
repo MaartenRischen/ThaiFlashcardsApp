@@ -14,6 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { FlashcardHeader } from './components/flashcard-page/FlashcardHeader';
 
 // Define a simple CardStatus type locally for now
 type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';
@@ -318,7 +319,7 @@ export default function ThaiFlashcards() {
   // Derive current set name from context instead of using state
   const currentSetName = useMemo(() => {
     const activeSet = availableSets.find(set => set.id === activeSetId);
-    return activeSet?.name || "Default Set";
+    return activeSet?.cleverTitle || activeSet?.name || "Default Set";
   }, [availableSets, activeSetId]);
   
   const [index, setIndex] = useState<number>(0);
@@ -1011,111 +1012,12 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v17 - Split Menus */}
-      <div className="relative px-4 py-3 bg-[#111] border-b border-[#333] flex items-center justify-between gap-4">
-        {/* Logo */} 
-        <a href="/" title="Go to Home" className="flex-shrink-0 self-stretch flex items-center"> {/* Align self */} 
-          <img 
-            src="/images/donkey-bridge-logo.png" 
-            alt="Donkey Bridge Logo" 
-            className="h-20 w-auto" // Keep logo size reasonable
-          /> 
-        </a>
-
-        {/* Right-aligned Two-Line Group */} 
-        <div className="flex flex-col items-end gap-y-2 flex-1 pl-4"> {/* Takes remaining space, aligns right */} 
-          {/* Line 1: Make Set + ? */} 
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => window.open('/set-wizard', '_blank')} 
-              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-2 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center"
-            >
-              Make Your Own Set!
-            </button>
-            <button 
-              onClick={() => setShowHowItWorks(true)} 
-              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-10 h-10"
-              title="How It Works"
-            >
-              ?
-            </button>
-          </div>
-
-          {/* Line 2: Selector + Set Options Menu + App Options Menu */} 
-          <div className="flex items-center gap-3">
-            {/* Set Selector */} 
-            <div className="inline-flex items-center"> 
-              <SetSelector /> 
-            </div>
-            {/* Set Options Menu Button */} 
-            <div className="relative">
-              <button 
-                onClick={() => setIsSetOptionsMenuOpen(!isSetOptionsMenuOpen)} // Toggle Set Options menu
-                className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white inline-flex items-center justify-center"
-                title="Set Options Menu"
-              >
-                Set Options
-              </button>
-              {/* Set Options Menu Dropdown */} 
-              {isSetOptionsMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
-                  <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="set-options-menu">
-                    <button
-                      onClick={() => { setShowVocabulary(true); setIsSetOptionsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                      role="menuitem"
-                    >
-                      Vocabulary
-                    </button>
-                    <button
-                      onClick={() => { setShowMnemonicsModal(true); setIsSetOptionsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                      role="menuitem"
-                    >
-                      Mnemonics
-                    </button>
-                    <button
-                      onClick={() => { setIsManagementModalOpen(true); setIsSetOptionsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                      role="menuitem"
-                    >
-                      Set Manager
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            {/* App Options Menu Button */} 
-            <div className="relative">
-              <button 
-                onClick={() => setIsAppOptionsMenuOpen(!isAppOptionsMenuOpen)} // Toggle App Options menu
-                className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white inline-flex items-center justify-center"
-                title="App Options Menu"
-              >
-                App Options
-              </button>
-              {/* App Options Menu Dropdown */} 
-              {isAppOptionsMenuOpen && (
-                <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
-                  <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="app-options-menu">
-                     <div className="px-4 pt-2 pb-1">
-                       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">App Settings</h3>
-                     </div>
-                     <div className="px-4 py-2 flex items-center justify-between">
-                       <span className="text-sm text-gray-300">Autoplay Audio</span>
-                       <Switch checked={autoplay} onCheckedChange={setAutoplay} />
-                     </div>
-                     <div className="px-4 py-2 flex items-center justify-between">
-                       <span className="text-sm text-gray-300">Dark Mode</span>
-                       <Switch checked={isDarkMode} onCheckedChange={toggleDarkMode} />
-                     </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Render the new FlashcardHeader component - REMOVED props no longer needed */}
+      <FlashcardHeader
+        setShowHowItWorks={setShowHowItWorks}
+        setIsSetOptionsMenuOpen={setIsSetOptionsMenuOpen}
+        setIsAppOptionsMenuOpen={setIsAppOptionsMenuOpen}
+      />
 
       {/* Main Content - Centered Flashcard */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">

@@ -14,37 +14,39 @@ export function FlashcardHeader({
   setIsAppOptionsMenuOpen,
 }: FlashcardHeaderProps) {
   return (
-    <div className="bg-[#111] border-b border-[#333] relative">
-      {/* Start with a container for the logo that spans the full height */}
-      <div className="absolute left-4 top-0 bottom-0 flex items-center z-10">
+    <div className="bg-[#111] border-b border-[#333] grid grid-cols-[90px_1fr]">
+      {/* Logo column - fixed width */}
+      <div className="flex items-center justify-center py-3">
         <a href="/" title="Go to Home" className="flex-shrink-0">
           <img
             src="/images/donkey-bridge-logo.png"
             alt="Donkey Bridge Logo"
-            className="h-16 w-auto"
+            className="h-20 w-auto"
           />
         </a>
       </div>
 
-      {/* Top Row: Just the Make Your Own Set button, positioned to the right */}
-      <div className="px-4 py-2 flex justify-end">
-        <button
-          onClick={() => window.open('/set-wizard', '_blank')}
-          className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center whitespace-nowrap"
-        >
-          Make Your Own Set!
-        </button>
-      </div>
-
-      {/* Bottom Row: Set Selector and Action Buttons */}
-      <div className="px-4 py-2 flex justify-end flex-wrap items-center gap-x-3 gap-y-2 pl-24">
-        {/* Set Selector - with fixed/reasonable width */}
-        <div className="w-64">
-          <SetSelector />
+      {/* Content column - with all the buttons and dropdown */}
+      <div className="flex flex-col">
+        {/* Top Row: Make Your Own Set button */}
+        <div className="px-4 py-2 flex justify-end">
+          <button
+            onClick={() => window.open('/set-wizard', '_blank')}
+            className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center whitespace-nowrap"
+          >
+            Make Your Own Set!
+          </button>
         </div>
 
-        {/* Action Buttons Group */}
-        <div className="flex items-center gap-x-2">
+        {/* Middle Row: Set Selector */}
+        <div className="px-4 py-2 flex justify-end">
+          <div className="w-64">
+            <SetSelector />
+          </div>
+        </div>
+
+        {/* Bottom Row: Action Buttons */}
+        <div className="px-4 py-2 flex justify-end items-center gap-x-3">
           {/* How It Works Button (?) */}
           <button
             onClick={() => setShowHowItWorks(true)}

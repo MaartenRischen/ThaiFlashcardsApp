@@ -986,58 +986,55 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v15 - Revised Button Order */} 
-      <div className="relative px-4 py-3 bg-[#111] border-b border-[#333] flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+      {/* Header v16 - Two Lines Right */} 
+      <div className="relative px-4 py-3 bg-[#111] border-b border-[#333] flex items-center justify-between gap-4">
         {/* Logo */} 
-        <a href="/" title="Go to Home" className="flex-shrink-0">
+        <a href="/" title="Go to Home" className="flex-shrink-0 self-stretch flex items-center"> {/* Align self */} 
           <img 
             src="/images/donkey-bridge-logo.png" 
             alt="Donkey Bridge Logo" 
-            className="h-20 w-auto" // Logo size h-20
+            className="h-20 w-auto" // Keep logo size reasonable
           /> 
         </a>
 
-        {/* Right-aligned Group: ?, Make Set, Selector, Menu */}
-        <div className="flex items-center flex-wrap gap-3 flex-shrink-0">
-           {/* How It Works Button (?) */} 
-           <button 
+        {/* Right-aligned Two-Line Group */} 
+        <div className="flex flex-col items-end gap-y-2 flex-1 pl-4"> {/* Takes remaining space, aligns right */} 
+          {/* Line 1: Make Set + ? */} 
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => window.open('/set-wizard', '_blank')} 
+              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex"
+            >
+              Make Your Own Set!
+            </button>
+            <button 
               onClick={() => setShowHowItWorks(true)} 
-              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8" // Always visible
+              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8"
               title="How It Works"
             >
               ?
             </button>
-            {/* Make Your Own Set Button */} 
-            <button 
-              onClick={() => window.open('/set-wizard', '_blank')} 
-              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex" // Always visible
-            >
-              Make Your Own Set!
-            </button>
-            {/* Set Selector */} 
-            <div className="inline-flex"> {/* Wrapper for consistent alignment */} 
+          </div>
+
+          {/* Line 2: Selector + Set Options Menu */} 
+          <div className="flex items-center gap-3">
+            <div className="inline-flex"> 
               <SetSelector /> 
             </div>
-            {/* Set Menu Button */} 
+            {/* Set Options Menu Button */} 
             <div className="relative">
               <button 
                 onClick={() => setIsMenuOpen(!isMenuOpen)} 
                 className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white"
-                title="Set Menu"
+                title="Set Options Menu"
               >
-                Set
+                Set Options
               </button>
-
-              {/* Menu Dropdown - Cleaned up */} 
+              {/* Menu Dropdown */} 
               {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
                   <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                    {/* SetSelector REMOVED */} 
-                    {/* Make Set REMOVED */} 
-                    {/* How it Works (?) REMOVED */}
-                    {/* Divider REMOVED */} 
-                    
-                    {/* Always visible menu items */} 
+                    {/* Items: Vocabulary, Mnemonics, Set Manager */} 
                     <button
                       onClick={() => { setShowVocabulary(true); setIsMenuOpen(false); }}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
@@ -1063,6 +1060,7 @@ export default function ThaiFlashcards() {
                 </div>
               )}
             </div>
+          </div>
         </div>
       </div>
 

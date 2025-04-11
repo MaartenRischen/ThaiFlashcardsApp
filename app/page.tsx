@@ -1003,13 +1003,13 @@ export default function ThaiFlashcards() {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => window.open('/set-wizard', '_blank')} 
-              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex"
+              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-2 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center"
             >
               Make Your Own Set!
             </button>
             <button 
               onClick={() => setShowHowItWorks(true)} 
-              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8"
+              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-10 h-10"
               title="How It Works"
             >
               ?
@@ -1018,14 +1018,14 @@ export default function ThaiFlashcards() {
 
           {/* Line 2: Selector + Set Options Menu */} 
           <div className="flex items-center gap-3">
-            <div className="inline-flex"> 
+            <div className="inline-flex items-center"> {/* Align selector center */}
               <SetSelector /> 
             </div>
             {/* Set Options Menu Button */} 
             <div className="relative">
               <button 
                 onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white"
+                className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white inline-flex items-center justify-center"
                 title="Set Options Menu"
               >
                 Set Options

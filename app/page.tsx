@@ -366,9 +366,10 @@ export default function ThaiFlashcards() {
   const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for the new menu
-  const [tutorialStep, setTutorialStep] = useState<number>(0); // 0 = inactive, 1+ = active step
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isAppOptionsMenuOpen, setIsAppOptionsMenuOpen] = useState(false); // Renamed
+  const [isSetOptionsMenuOpen, setIsSetOptionsMenuOpen] = useState(false); // New state for Set Options
+  const [tutorialStep, setTutorialStep] = useState<number>(0); 
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // Default to true (dark)
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -985,40 +986,32 @@ export default function ThaiFlashcards() {
     }
   };
 
-  // Dark Mode Effect
+  // Dark Mode Effect - Adjusted for dark default
   useEffect(() => {
-    // Check localStorage first
     const savedMode = localStorage.getItem('darkMode');
-    // Check system preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    // Determine initial mode: saved preference > system preference > default (false)
-    const initialMode = savedMode ? savedMode === 'true' : prefersDark;
-    
+    const initialMode = savedMode ? savedMode === 'true' : true; // Default true if no setting
     setIsDarkMode(initialMode);
-
-    // Apply the class on initial load
     if (initialMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-    // No dependency array - run only once on mount to set initial state
   }, []); 
 
-  // Handler to toggle dark mode and save preference
+  // Handler to toggle dark mode and save preference - Adjusted logic
   const toggleDarkMode = (checked: boolean) => {
-    setIsDarkMode(checked);
+    setIsDarkMode(checked); 
     localStorage.setItem('darkMode', checked.toString());
-    if (checked) {
+    if (checked) { // isDarkMode is true, add dark class
       document.documentElement.classList.add('dark');
-    } else {
+    } else { // isDarkMode is false, remove dark class
       document.documentElement.classList.remove('dark');
     }
   };
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Header v16 - Two Lines Right */} 
+      {/* Header v17 - Split Menus */}
       <div className="relative px-4 py-3 bg-[#111] border-b border-[#333] flex items-center justify-between gap-4">
         {/* Logo */} 
         <a href="/" title="Go to Home" className="flex-shrink-0 self-stretch flex items-center"> {/* Align self */} 
@@ -1048,25 +1041,63 @@ export default function ThaiFlashcards() {
             </button>
           </div>
 
-          {/* Line 2: Selector + Set Options Menu */} 
+          {/* Line 2: Selector + Set Options Menu + App Options Menu */} 
           <div className="flex items-center gap-3">
-            <div className="inline-flex items-center"> {/* Align selector center */}
+            {/* Set Selector */} 
+            <div className="inline-flex items-center"> 
               <SetSelector /> 
             </div>
-            {/* Set Options Menu Button - Renamed */} 
+            {/* Set Options Menu Button */} 
             <div className="relative">
               <button 
-                onClick={() => setIsMenuOpen(!isMenuOpen)} 
+                onClick={() => setIsSetOptionsMenuOpen(!isSetOptionsMenuOpen)} // Toggle Set Options menu
                 className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white inline-flex items-center justify-center"
-                title="App Options Menu" // Updated title
+                title="Set Options Menu"
+              >
+                Set Options
+              </button>
+              {/* Set Options Menu Dropdown */} 
+              {isSetOptionsMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
+                  <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="set-options-menu">
+                    <button
+                      onClick={() => { setShowVocabulary(true); setIsSetOptionsMenuOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                      role="menuitem"
+                    >
+                      Vocabulary
+                    </button>
+                    <button
+                      onClick={() => { setShowMnemonicsModal(true); setIsSetOptionsMenuOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                      role="menuitem"
+                    >
+                      Mnemonics
+                    </button>
+                    <button
+                      onClick={() => { setIsManagementModalOpen(true); setIsSetOptionsMenuOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                      role="menuitem"
+                    >
+                      Set Manager
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* App Options Menu Button */} 
+            <div className="relative">
+              <button 
+                onClick={() => setIsAppOptionsMenuOpen(!isAppOptionsMenuOpen)} // Toggle App Options menu
+                className="neumorphic-button px-4 py-2 text-sm text-gray-300 hover:text-white inline-flex items-center justify-center"
+                title="App Options Menu"
               >
                 App Options
               </button>
-              {/* Menu Dropdown - Added App Options */} 
-              {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic"> {/* Increased width slightly */} 
-                  <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                    {/* App Options Section */}
+              {/* App Options Menu Dropdown */} 
+              {isAppOptionsMenuOpen && (
+                <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-[#2a2a2a] ring-1 ring-black ring-opacity-5 z-30 neumorphic">
+                  <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="app-options-menu">
                      <div className="px-4 pt-2 pb-1">
                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">App Settings</h3>
                      </div>
@@ -1078,34 +1109,6 @@ export default function ThaiFlashcards() {
                        <span className="text-sm text-gray-300">Dark Mode</span>
                        <Switch checked={isDarkMode} onCheckedChange={toggleDarkMode} />
                      </div>
-
-                    <div className="border-t border-gray-700 my-1"></div> {/* Divider */} 
-
-                    {/* Set Specific Items */}
-                    <div className="px-4 pt-2 pb-1">
-                       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Current Set</h3>
-                     </div>
-                    <button
-                      onClick={() => { setShowVocabulary(true); setIsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                      role="menuitem"
-                    >
-                      Vocabulary
-                    </button>
-                    <button
-                      onClick={() => { setShowMnemonicsModal(true); setIsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                      role="menuitem"
-                    >
-                      Mnemonics
-                    </button>
-                    <button
-                      onClick={() => { setIsManagementModalOpen(true); setIsMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                      role="menuitem"
-                    >
-                      Set Manager
-                    </button>
                   </div>
                 </div>
               )}

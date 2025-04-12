@@ -329,7 +329,7 @@ export default function ThaiFlashcards() {
   const [isPlayingContext, setIsPlayingContext] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
-  const [showVocabulary, setShowVocabulary] = useState(false);
+  const [showProgress, setShowProgress] = useState(false); // Renamed from showVocabulary
   const [autoplay, setAutoplay] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('autoplay');
@@ -1012,11 +1012,12 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Render the new FlashcardHeader component - REMOVED props no longer needed */}
+      {/* Render the new FlashcardHeader component - Pass setShowProgress */}
       <FlashcardHeader
         setShowHowItWorks={setShowHowItWorks}
         setIsSetOptionsMenuOpen={setIsSetOptionsMenuOpen}
         setIsAppOptionsMenuOpen={setIsAppOptionsMenuOpen}
+        setShowProgress={setShowProgress} // Added this prop
       />
 
       {/* Main Content - Centered Flashcard */}
@@ -1340,13 +1341,14 @@ export default function ThaiFlashcards() {
         </div>
       )}
 
-      {showVocabulary && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-auto">
-          <div className="neumorphic max-w-md w-full p-6 max-h-[80vh] overflow-auto">
+      {/* Renamed Vocabulary Modal to Progress Modal */}
+      {showProgress && ( // Use showProgress state
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-auto" onClick={() => setShowProgress(false)}> {/* Use setShowProgress */}
+          <div className="neumorphic max-w-md w-full p-6 max-h-[80vh] overflow-auto" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4 sticky top-0 bg-[#1a1a1a] py-2">
-              <h2 className="text-xl font-bold">Vocabulary List</h2>
+              <h2 className="text-xl font-bold">Set Progress</h2> {/* Updated Title */}
               <button
-                onClick={() => setShowVocabulary(false)}
+                onClick={() => setShowProgress(false)} // Use setShowProgress
                 className="text-gray-400 hover:text-white"
               >
                 ✕
@@ -1373,7 +1375,7 @@ export default function ThaiFlashcards() {
                       <button
                         onClick={() => {
                           setIndex(i);
-                          setShowVocabulary(false);
+                          setShowProgress(false); // Use setShowProgress
                           setShowAnswer(true);
                           setRandomSentence(null);
                         }}

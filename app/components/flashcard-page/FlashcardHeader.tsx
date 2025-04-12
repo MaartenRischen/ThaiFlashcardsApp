@@ -6,12 +6,14 @@ interface FlashcardHeaderProps {
   setShowHowItWorks: (show: boolean) => void;
   setIsSetOptionsMenuOpen: (open: boolean) => void;
   setIsAppOptionsMenuOpen: (open: boolean) => void;
+  setShowProgress: (show: boolean) => void;
 }
 
 export function FlashcardHeader({
   setShowHowItWorks,
   setIsSetOptionsMenuOpen,
   setIsAppOptionsMenuOpen,
+  setShowProgress,
 }: FlashcardHeaderProps) {
   return (
     <div className="bg-[#111] border-b border-[#333] grid grid-cols-[90px_1fr]">
@@ -55,6 +57,15 @@ export function FlashcardHeader({
             aria-label="How It Works"
           >
             ?
+          </button>
+
+          {/* Progress Button - NEW */}
+          <button
+            onClick={() => setShowProgress(true)}
+            className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"
+            aria-label="View Set Progress"
+          >
+            Progress
           </button>
 
           {/* Set Options Button */}

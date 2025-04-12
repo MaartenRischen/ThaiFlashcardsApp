@@ -1542,6 +1542,136 @@ export default function ThaiFlashcards() {
         </div>
       )}
 
+      {/* --- NEW: App Options Modal --- */}
+      {isAppOptionsMenuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setIsAppOptionsMenuOpen(false)}>
+          <div className="neumorphic max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-200">App Options</h2>
+              <button onClick={() => setIsAppOptionsMenuOpen(false)} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div className="space-y-6">
+              {/* Dark Mode Toggle */}
+              <div className="flex items-center justify-between">
+                <label htmlFor="darkModeToggleApp" className="text-gray-300">Dark Mode</label>
+                <Switch
+                  id="darkModeToggleApp"
+                  checked={isDarkMode}
+                  onCheckedChange={toggleDarkMode}
+                />
+              </div>
+              {/* Gender Toggle */}
+              <div className="flex items-center justify-between">
+                 <label htmlFor="genderToggleApp" className="text-gray-300">Voice Gender (Krap/Ka)</label>
+                 <div className="flex items-center">
+                   <span className="mr-2 text-sm font-medium text-gray-400">Female</span>
+                    <Switch
+                      id="genderToggleApp"
+                      checked={isMale}
+                      onCheckedChange={setIsMale} // Directly use the state setter
+                    />
+                   <span className="ml-2 text-sm font-medium text-gray-400">Male</span>
+                 </div>
+              </div>
+              {/* Polite Mode Toggle */}
+              <div className="flex items-center justify-between">
+                 <label htmlFor="politeToggleApp" className="text-gray-300">Polite Mode (Add ครับ/ค่ะ)</label>
+                 <div className="flex items-center">
+                    <span className="mr-2 text-sm font-medium text-gray-400">Casual</span>
+                     <Switch
+                       id="politeToggleApp"
+                       checked={isPoliteMode}
+                       onCheckedChange={setIsPoliteMode} // Directly use the state setter
+                     />
+                    <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
+                 </div>
+              </div>
+               {/* Autoplay Toggle */}
+              <div className="flex items-center justify-between">
+                <label htmlFor="autoplayToggleApp" className="text-gray-300">Autoplay Audio on Reveal</label>
+                <Switch
+                  id="autoplayToggleApp"
+                  checked={autoplay}
+                  onCheckedChange={setAutoplay}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- NEW: Set Options Modal --- */}
+      {isSetOptionsMenuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setIsSetOptionsMenuOpen(false)}>
+          <div className="neumorphic max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-200">Current Set Options</h2>
+              <button onClick={() => setIsSetOptionsMenuOpen(false)} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div className="space-y-4">
+               <div className="bg-gray-800 p-4 rounded-lg text-center">
+                 <p className="text-sm text-gray-400 mb-1">Current Set:</p>
+                 <p className="text-lg text-white font-semibold">
+                    {availableSets.find(set => set.id === activeSetId)?.cleverTitle || currentSetName}
+                 </p>
+               </div>
+               <button
+                 onClick={() => {
+                   setIsSetOptionsMenuOpen(false); // Close this modal
+                   setIsManagementModalOpen(true); // Open the Set Manager
+                 }}
+                 className="neumorphic-button w-full text-blue-400"
+               >
+                 Open Full Set Manager...
+               </button>
+               <button
+                 onClick={() => activeSetId && exportSet(activeSetId)}
+                 className="neumorphic-button w-full text-green-400"
+                 disabled={!activeSetId || isLoading || activeSetId === 'default'} // Disable for default set
+               >
+                 Export This Set
+               </button>
+               <button
+                 onClick={() => {
+                    if (activeSetId && activeSetId !== 'default') {
+                       if (confirm(`Are you sure you want to reset all progress for the set "${availableSets.find(set => set.id === activeSetId)?.cleverTitle || currentSetName}"? This cannot be undone.`)) {
+                          // TODO: Implement function to reset progress *only* for the active set
+                          console.warn("Reset progress for specific set not yet implemented.");
+                          // Placeholder: Currently resets ALL progress. Need refined logic.
+                          // resetCurrentSetProgress(); // This function needs to be created
+                          alert("Resetting progress for specific sets is not yet fully implemented. Use 'Reset All' in Stats/Data for now.");
+                       }
+                    } else {
+                       alert("Cannot reset progress for the default set.");
+                    }
+                 }}
+                 className="neumorphic-button w-full text-yellow-400"
+                 disabled={!activeSetId || isLoading || activeSetId === 'default'}
+               >
+                 Reset Progress for This Set
+               </button>
+                 <button
+                   onClick={() => {
+                      if (activeSetId && activeSetId !== 'default') {
+                         const setToDelete = availableSets.find(set => set.id === activeSetId);
+                         if (setToDelete && confirm(`Are you sure you want to delete the set "${setToDelete.cleverTitle || setToDelete.name}"? This cannot be undone.`)) {
+                            deleteSet(activeSetId);
+                            setIsSetOptionsMenuOpen(false); // Close modal after deletion
+                         }
+                      } else {
+                         alert("Cannot delete the default set.");
+                      }
+                   }}
+                   className="neumorphic-button w-full text-red-400"
+                   disabled={!activeSetId || isLoading || activeSetId === 'default'}
+                 >
+                   Delete This Set
+                 </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Version indicator at the bottom - shows changes and timestamp in Amsterdam timezone */}
       <div className="text-center p-2 text-xs text-gray-600">
         <span>v{VERSION_INFO.version} - {VERSION_INFO.changes}</span>

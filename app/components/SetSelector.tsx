@@ -26,9 +26,14 @@ export const SetSelector = () => {
             disabled={isLoading}
             className="neumorphic-button text-blue-400 font-medium py-1 px-2 text-sm w-full appearance-none cursor-pointer"
           >
+            {/* Add Default Set Option manually if needed or handle differently */}
+            {/* Example: Add a default option if activeSetId can be null initially */}
+            {/* <option value="default" disabled={activeSetId !== null}>Select a Set</option> */}
+            
             {availableSets.map(set => (
               <option key={set.id} value={set.id}>
-                {set.name}
+                {/* NEW: Prepend emoji if isFullyLearned is true */}
+                {set.isFullyLearned ? '🏆 ' : ''}{set.cleverTitle || set.name}
               </option>
             ))}
           </select>

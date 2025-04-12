@@ -246,7 +246,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     await loadSetData(setId);
   }, [activeSetId, activeSetProgress, loadSetData, status]);
 
-  const updateSetProgress = useCallback((newProgress: SetProgress) => {
+  const updateSetProgress = useCallback(async (newProgress: SetProgress) => {
     if (!activeSetId) return;
     console.log(`SetContext: updateSetProgress called for activeSetId=${activeSetId}`);
     console.log(`SetContext: Updating progress state with:`, JSON.stringify(newProgress));
@@ -274,7 +274,31 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       // Use localStorage for unauthenticated users
       storage.saveSetProgress(activeSetId, newProgress);
     }
-  }, [activeSetId, status]);
+
+    // Check if all cards in the current set are marked 'easy'
+    const currentSetContent = activeSetContent;
+    if (currentSetContent && currentSetContent.length > 0) {
+      const allEasy = currentSetContent.every((phrase, index) => {
+        const cardProgress = newProgress[index];
+        return cardProgress?.difficulty === 'easy';
+      });
+
+      // Get current metadata to check existing flag
+      const currentMeta = availableSets.find(set => set.id === activeSetId);
+      if (currentMeta) {
+        const needsUpdate = (currentMeta.isFullyLearned !== allEasy);
+
+        if (needsUpdate) {
+          console.log(`Set ${activeSetId}: Fully learned status changed to ${allEasy}. Updating metadata.`);
+          const updatedMeta: SetMetaData = { ...currentMeta, isFullyLearned: allEasy };
+          await switchSet(activeSetId);
+          setAvailableSets(prevSets => 
+            prevSets.map(set => set.id === activeSetId ? updatedMeta : set)
+          );
+        }
+      }
+    }
+  }, [activeSetId, activeSetProgress, loadSetData, status, switchSet, availableSets]);
 
   const addSet = useCallback(async (
     newSetData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount'>,

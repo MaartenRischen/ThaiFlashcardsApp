@@ -1,5 +1,6 @@
 import { Phrase } from '../lib/set-generator';
 import { v4 as uuidv4 } from 'uuid';
+import Dexie, { Table } from 'dexie';
 
 // Storage key prefixes
 const PREFIX = 'thaiFlashcards_';
@@ -15,10 +16,11 @@ export interface SetMetaData {
   cleverTitle?: string;
   createdAt: string;
   phraseCount: number;
-  level?: string;
+  level?: 'beginner' | 'intermediate' | 'advanced';
   goals?: string[];
   specificTopics?: string;
-  source: 'default' | 'wizard' | 'import';
+  source: 'default' | 'import' | 'generated';
+  isFullyLearned?: boolean;
 }
 
 export interface CardProgressData {
@@ -160,4 +162,52 @@ export function setActiveSetId(setId: string): boolean {
  */
 export function generateUUID(): string {
   return uuidv4();
+}
+
+// Dexie Database
+class DexieDatabase extends Dexie {
+  setMetaData: Table<SetMetaData>;
+
+  constructor() {
+    super('thaiFlashcards');
+    this.version(1).stores({
+      setMetaData: 'id',
+    });
+    this.setMetaData = this.table('setMetaData');
+  }
+
+  public async saveSetMetaData(metaData: SetMetaData): Promise<void> {
+    const dataToSave = {
+      ...metaData,
+      isFullyLearned: metaData.isFullyLearned ?? false
+    };
+    await this.setMetaData.put(dataToSave);
+  }
+
+  public async getSetMetaData(id: string): Promise<SetMetaData | undefined> {
+    const metaData = await this.setMetaData.get(id);
+    if (metaData) {
+      return { ...metaData, isFullyLearned: metaData.isFullyLearned ?? false };
+    }
+    return undefined;
+  }
+
+  public async getAllSetMetaData(): Promise<SetMetaData[]> {
+    const allMetaData = await this.setMetaData.toArray();
+    return allMetaData.map(meta => ({ ...meta, isFullyLearned: meta.isFullyLearned ?? false }));
+  }
+}
+
+const dexieDatabase = new DexieDatabase();
+
+export async function saveSetMetaData(metaData: SetMetaData): Promise<void> {
+  await dexieDatabase.saveSetMetaData(metaData);
+}
+
+export async function getSetMetaData(id: string): Promise<SetMetaData | undefined> {
+  return dexieDatabase.getSetMetaData(id);
+}
+
+export async function getAllSetMetaData(): Promise<SetMetaData[]> {
+  return dexieDatabase.getAllSetMetaData();
 } 

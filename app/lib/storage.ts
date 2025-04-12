@@ -1,101 +1,114 @@
 import { Phrase } from '../lib/set-generator';
 import { v4 as uuidv4 } from 'uuid';
-import Dexie, { Table } from 'dexie';
 
 // Storage key prefixes
 const PREFIX = 'thaiFlashcards_';
 const AVAILABLE_SETS_KEY = `${PREFIX}availableSets`;
-const ACTIVE_SET_ID_KEY = `${PREFIX}activeSetId`;
-const setContentKey = (id: string) => `${PREFIX}set_${id}`;
+const setContentKey = (id: string) => `${PREFIX}content_${id}`;
 const setProgressKey = (id: string) => `${PREFIX}progress_${id}`;
 
-// Type definitions
-export interface SetMetaData {
-  id: string;
-  name: string;
+// --- Type Definitions --- 
+export interface SetMetaData { 
+  id: string; 
+  name: string; 
   cleverTitle?: string;
-  createdAt: string;
+  createdAt: string; 
   phraseCount: number;
   level?: 'beginner' | 'intermediate' | 'advanced';
   goals?: string[];
   specificTopics?: string;
   source: 'default' | 'import' | 'generated';
-  isFullyLearned?: boolean;
+  isFullyLearned?: boolean; // Keep the flag here
 }
 
-export interface CardProgressData {
+export interface PhraseProgressData {
   srsLevel: number;
-  nextReviewDate: string;
+  nextReviewDate: string; 
   lastReviewedDate: string;
-  difficulty: 'new' | 'hard' | 'good' | 'easy';
+  difficulty: 'easy' | 'good' | 'hard';
   repetitions: number;
   easeFactor: number;
 }
 
-export interface SetProgress {
-  [cardIndex: number]: CardProgressData;
-}
+export type SetProgress = { [cardIndex: number]: PhraseProgressData };
 
-// Helper Functions
-
-/**
- * Safely get data from localStorage with error handling
- */
+// --- Helper Functions --- 
 function getFromStorage<T>(key: string, defaultValue: T): T {
+  if (typeof window === 'undefined') return defaultValue;
   try {
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : defaultValue;
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
   } catch (error) {
-    console.error(`Error retrieving ${key} from localStorage:`, error);
+    console.error(`Error reading localStorage key “${key}”:`, error);
     return defaultValue;
   }
 }
 
-/**
- * Safely set data to localStorage with error handling
- */
-function setToStorage(key: string, value: any): boolean {
+function setToStorage<T>(key: string, value: T): boolean {
+  if (typeof window === 'undefined') return false;
   try {
     localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch (error) {
-    console.error(`Error saving ${key} to localStorage:`, error);
+    console.error(`Error setting localStorage key “${key}”:`, error);
     return false;
   }
 }
 
-/**
- * Get all available sets
- */
-export function getAvailableSets(): SetMetaData[] {
-  return getFromStorage<SetMetaData[]>(AVAILABLE_SETS_KEY, []);
+// --- Set MetaData Management --- 
+
+export function getAllSetMetaData(): SetMetaData[] {
+  const allSets = getFromStorage<SetMetaData[]>(AVAILABLE_SETS_KEY, []);
+  // Ensure the default isFullyLearned value is present
+  return allSets.map(set => ({ ...set, isFullyLearned: set.isFullyLearned ?? false }));
 }
 
-/**
- * Save the list of available sets
- */
-export function saveAvailableSets(sets: SetMetaData[]): boolean {
-  return setToStorage(AVAILABLE_SETS_KEY, sets);
+export function saveAllSetMetaData(sets: SetMetaData[]): boolean {
+  // Ensure the flag is set before saving
+  const setsToSave = sets.map(set => ({ ...set, isFullyLearned: set.isFullyLearned ?? false }));
+  return setToStorage(AVAILABLE_SETS_KEY, setsToSave);
 }
 
-/**
- * Get content of a specific set
- */
+export function addSetMetaData(newSet: SetMetaData): boolean {
+  const sets = getAllSetMetaData();
+  // Ensure flag on new set
+  const setToAdd = { ...newSet, isFullyLearned: newSet.isFullyLearned ?? false };
+  sets.push(setToAdd);
+  return saveAllSetMetaData(sets);
+}
+
+export function updateSetMetaData(updatedSet: SetMetaData): boolean {
+  let sets = getAllSetMetaData();
+  const index = sets.findIndex(set => set.id === updatedSet.id);
+  if (index !== -1) {
+    // Ensure flag on updated set
+    sets[index] = { ...updatedSet, isFullyLearned: updatedSet.isFullyLearned ?? false };
+    return saveAllSetMetaData(sets);
+  } 
+  return false;
+}
+
+export function deleteSetMetaData(id: string): boolean {
+  let sets = getAllSetMetaData();
+  const filteredSets = sets.filter(set => set.id !== id);
+  // Also delete content and progress associated with the set
+  deleteSetContent(id);
+  deleteSetProgress(id);
+  return saveAllSetMetaData(filteredSets);
+}
+
+// --- Set Content Management --- 
+
 export function getSetContent(setId: string): Phrase[] | null {
   return getFromStorage<Phrase[] | null>(setContentKey(setId), null);
 }
 
-/**
- * Save content of a specific set
- */
 export function saveSetContent(setId: string, phrases: Phrase[]): boolean {
   return setToStorage(setContentKey(setId), phrases);
 }
 
-/**
- * Delete content of a specific set
- */
 export function deleteSetContent(setId: string): boolean {
+  if (typeof window === 'undefined') return false;
   try {
     localStorage.removeItem(setContentKey(setId));
     return true;
@@ -105,24 +118,18 @@ export function deleteSetContent(setId: string): boolean {
   }
 }
 
-/**
- * Get progress for a specific set
- */
+// --- Set Progress Management --- 
+
 export function getSetProgress(setId: string): SetProgress {
   return getFromStorage<SetProgress>(setProgressKey(setId), {});
 }
 
-/**
- * Save progress for a specific set
- */
 export function saveSetProgress(setId: string, progress: SetProgress): boolean {
   return setToStorage(setProgressKey(setId), progress);
 }
 
-/**
- * Delete progress for a specific set
- */
 export function deleteSetProgress(setId: string): boolean {
+  if (typeof window === 'undefined') return false;
   try {
     localStorage.removeItem(setProgressKey(setId));
     return true;
@@ -132,82 +139,8 @@ export function deleteSetProgress(setId: string): boolean {
   }
 }
 
-/**
- * Get ID of the active set
- */
-export function getActiveSetId(): string | null {
-  try {
-    return localStorage.getItem(ACTIVE_SET_ID_KEY);
-  } catch (error) {
-    console.error(`Error getting active set ID:`, error);
-    return null;
-  }
-}
+// --- Utility --- 
 
-/**
- * Set the active set ID
- */
-export function setActiveSetId(setId: string): boolean {
-  try {
-    localStorage.setItem(ACTIVE_SET_ID_KEY, setId);
-    return true;
-  } catch (error) {
-    console.error(`Error setting active set ID:`, error);
-    return false;
-  }
-}
-
-/**
- * Generate a UUID for new sets
- */
 export function generateUUID(): string {
   return uuidv4();
-}
-
-// Dexie Database
-class DexieDatabase extends Dexie {
-  setMetaData: Table<SetMetaData>;
-
-  constructor() {
-    super('thaiFlashcards');
-    this.version(1).stores({
-      setMetaData: 'id',
-    });
-    this.setMetaData = this.table('setMetaData');
-  }
-
-  public async saveSetMetaData(metaData: SetMetaData): Promise<void> {
-    const dataToSave = {
-      ...metaData,
-      isFullyLearned: metaData.isFullyLearned ?? false
-    };
-    await this.setMetaData.put(dataToSave);
-  }
-
-  public async getSetMetaData(id: string): Promise<SetMetaData | undefined> {
-    const metaData = await this.setMetaData.get(id);
-    if (metaData) {
-      return { ...metaData, isFullyLearned: metaData.isFullyLearned ?? false };
-    }
-    return undefined;
-  }
-
-  public async getAllSetMetaData(): Promise<SetMetaData[]> {
-    const allMetaData = await this.setMetaData.toArray();
-    return allMetaData.map(meta => ({ ...meta, isFullyLearned: meta.isFullyLearned ?? false }));
-  }
-}
-
-const dexieDatabase = new DexieDatabase();
-
-export async function saveSetMetaData(metaData: SetMetaData): Promise<void> {
-  await dexieDatabase.saveSetMetaData(metaData);
-}
-
-export async function getSetMetaData(id: string): Promise<SetMetaData | undefined> {
-  return dexieDatabase.getSetMetaData(id);
-}
-
-export async function getAllSetMetaData(): Promise<SetMetaData[]> {
-  return dexieDatabase.getAllSetMetaData();
 } 

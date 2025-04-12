@@ -41,8 +41,8 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.52",
-  changes: "Dynamically add krap/ka to pronunciation based on gender switch and phrase type"
+  version: "1.3.53", // Incremented version
+  changes: "Add show/hide mnemonic hint on card front."
 };
 
 interface Review {
@@ -1045,14 +1045,23 @@ export default function ThaiFlashcards() {
                 {/* NEW: Mnemonic Hint Section */}
                 <div className="text-center mb-4 w-full px-4">
                   <button 
-                    onClick={() => setShowMnemonicHint(!showMnemonicHint)}
+                    onClick={() => {
+                      console.log('Toggling showMnemonicHint from:', showMnemonicHint);
+                      setShowMnemonicHint(!showMnemonicHint);
+                    }}
                     className="text-xs text-blue-400 hover:text-blue-300 underline mb-2"
                   >
                     {showMnemonicHint ? 'Hide Hint' : 'Show Hint'}
                   </button>
                   {showMnemonicHint && (
                     <div className="text-sm text-gray-400 p-2 border border-gray-600 rounded bg-gray-800 max-h-24 overflow-y-auto">
-                      {mnemonics[index] ?? phrases[index]?.mnemonic ?? 'No hint available'}
+                      {((): React.ReactNode => { // Immediately invoked function expression (IIFE) to allow logging
+                        const userMnemonic = mnemonics[index];
+                        const defaultMnemonic = phrases[index]?.mnemonic;
+                        const hintToShow = userMnemonic ?? defaultMnemonic ?? 'No hint available';
+                        console.log(`Rendering hint: user='${userMnemonic}', default='${defaultMnemonic}', showing='${hintToShow}'`);
+                        return hintToShow;
+                      })()}
                     </div>
                   )}
                 </div>

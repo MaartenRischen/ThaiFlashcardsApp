@@ -371,6 +371,7 @@ export default function ThaiFlashcards() {
   const [isSetOptionsMenuOpen, setIsSetOptionsMenuOpen] = useState(false); // New state for Set Options
   const [tutorialStep, setTutorialStep] = useState<number>(0); 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // Default to true (dark)
+  const [showMnemonicHint, setShowMnemonicHint] = useState(false); // NEW: State for front hint
 
   // Add ref to track previous showAnswer state
   const prevShowAnswerRef = React.useRef(false);
@@ -750,6 +751,7 @@ export default function ThaiFlashcards() {
 
     setRandomSentence(null);
     setShowAnswer(false);
+    setShowMnemonicHint(false); // Hide hint
     if (activeCards.length > 0) {
       setIndex(activeCards[nextActiveIndex]);
     } else {
@@ -760,12 +762,18 @@ export default function ThaiFlashcards() {
   const prevCard = () => {
     if (index > 0) {
       setIndex(index - 1);
+      setShowAnswer(false); // Reset answer state
+      setRandomSentence(null); // Reset context sentence
+      setShowMnemonicHint(false); // Hide hint
     }
   };
 
   const nextCard = () => {
     if (index < phrases.length - 1) {
       setIndex(index + 1);
+      setShowAnswer(false); // Reset answer state
+      setRandomSentence(null); // Reset context sentence
+      setShowMnemonicHint(false); // Hide hint
     }
   };
 
@@ -805,6 +813,7 @@ export default function ThaiFlashcards() {
     // Reset the card
     setShowAnswer(false);
     setRandomSentence(null);
+    setShowMnemonicHint(false); // Hide hint
     
     // Update active cards and reset progress
     updateActiveCards();
@@ -872,6 +881,7 @@ export default function ThaiFlashcards() {
             setActiveCardsIndex(0);
             setShowAnswer(false);
             setRandomSentence(null);
+            setShowMnemonicHint(false); // Hide hint
             
             alert(`Successfully imported "${setData.name}" with ${importedData.phrases.length} phrases.`);
           } catch (error: any) {
@@ -922,6 +932,7 @@ export default function ThaiFlashcards() {
     setActiveCardsIndex(0);
     setShowAnswer(false);
     setRandomSentence(null);
+    setShowMnemonicHint(false); // Hide hint
     
     // Recalculate active cards for the new set
     // Note: updateActiveCards depends on activeSetProgress and phrases, 
@@ -1030,6 +1041,23 @@ export default function ThaiFlashcards() {
             {!showAnswer && (
               <div className="p-6 flex flex-col items-center justify-center min-h-[20rem]"> {/* Ensure min height */} 
                 <div className="text-2xl font-bold mb-4 text-center">{phrases[index].english}</div>
+                
+                {/* NEW: Mnemonic Hint Section */}
+                <div className="text-center mb-4 w-full px-4">
+                  <button 
+                    onClick={() => setShowMnemonicHint(!showMnemonicHint)}
+                    className="text-xs text-blue-400 hover:text-blue-300 underline mb-2"
+                  >
+                    {showMnemonicHint ? 'Hide Hint' : 'Show Hint'}
+                  </button>
+                  {showMnemonicHint && (
+                    <div className="text-sm text-gray-400 p-2 border border-gray-600 rounded bg-gray-800 max-h-24 overflow-y-auto">
+                      {mnemonics[index] ?? phrases[index]?.mnemonic ?? 'No hint available'}
+                    </div>
+                  )}
+                </div>
+                {/* END NEW: Mnemonic Hint Section */}
+
                 {/* Show Answer Button - Wrapped in Popover (Step 2) */} 
                 <Popover open={tutorialStep === 2}>
                   <PopoverTrigger asChild>
@@ -1176,7 +1204,7 @@ export default function ThaiFlashcards() {
                   />
                 </div>
 
-                {/* === Context section === */} 
+                {/* === Context section === */}
                 <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm text-blue-400 uppercase tracking-wider">In Context</h3>

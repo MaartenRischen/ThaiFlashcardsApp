@@ -292,21 +292,114 @@ export async function deleteSetMetaData(setId: string): Promise<boolean> {
 
 // --- Set Content Management --- 
 
-export function getSetContent(setId: string): Phrase[] | null {
-  return getFromStorage<Phrase[] | null>(setContentKey(setId), null);
-}
-
-export function saveSetContent(setId: string, phrases: Phrase[]): boolean {
-  return setToStorage(setContentKey(setId), phrases);
-}
-
-export function deleteSetContent(setId: string): boolean {
-  if (typeof window === 'undefined') return false;
+// REFACTOR: Fetch Phrases from Supabase
+export async function getSetContent(setId: string): Promise<Phrase[]> {
+  if (!setId) {
+    console.error("getSetContent called without setId.");
+    return [];
+  }
+  console.log(`Fetching Phrases from Supabase for setId: ${setId}`);
   try {
-    localStorage.removeItem(setContentKey(setId));
-    return true;
+    const { data, error } = await supabase
+      .from('Phrase')
+      .select('english, thai, thaiMasculine, thaiFeminine, pronunciation, mnemonic, examplesJson') // Select relevant columns
+      .eq('setId', setId);
+
+    if (error) {
+      console.error('Error fetching Phrases from Supabase:', error);
+      throw error; 
+    }
+    console.log(`Successfully fetched ${data?.length || 0} Phrases for setId: ${setId}`);
+    const phrasesData = data || [];
+
+    // Map Supabase record to Phrase interface (handle examplesJson)
+    return phrasesData.map((dbPhrase: any) => ({ // Add type later if needed
+      english: dbPhrase.english,
+      thai: dbPhrase.thai,
+      thaiMasculine: dbPhrase.thaiMasculine,
+      thaiFeminine: dbPhrase.thaiFeminine,
+      pronunciation: dbPhrase.pronunciation,
+      mnemonic: dbPhrase.mnemonic || undefined,
+      // Parse examplesJson if it exists, otherwise default to empty array
+      examples: dbPhrase.examplesJson ? JSON.parse(dbPhrase.examplesJson) : [] 
+    }));
+
   } catch (error) {
-    console.error(`Error deleting set content for ${setId}:`, error);
+    // Handle potential JSON parsing errors for examplesJson
+    if (error instanceof SyntaxError) {
+        console.error('Error parsing examplesJson from Supabase:', error);
+    } else {
+        console.error('Unexpected error in getSetContent:', error);
+    }
+    return []; 
+  }
+}
+
+// REFACTOR: Batch insert Phrases into Supabase
+export async function saveSetContent(setId: string, phrases: Phrase[]): Promise<boolean> {
+  if (!setId || !phrases || phrases.length === 0) {
+    console.error("saveSetContent called without setId or with empty phrases array.");
+    return false;
+  }
+
+  console.log(`Saving ${phrases.length} Phrases to Supabase for setId: ${setId}`);
+
+  // Prepare records for Supabase batch insert, ensuring setId is included
+  const recordsToInsert = phrases.map(phrase => ({
+    setId: setId,
+    english: phrase.english,
+    thai: phrase.thai,
+    thaiMasculine: phrase.thaiMasculine,
+    thaiFeminine: phrase.thaiFeminine,
+    pronunciation: phrase.pronunciation,
+    mnemonic: phrase.mnemonic || null, // Use null for empty/undefined
+    // Store examples as JSON string in the examplesJson column
+    examplesJson: phrase.examples && phrase.examples.length > 0 ? JSON.stringify(phrase.examples) : null 
+    // Assuming the Phrase table in Supabase has an auto-generated ID
+  }));
+
+  try {
+    const { error } = await supabase
+      .from('Phrase')
+      .insert(recordsToInsert);
+
+    if (error) {
+      console.error('Error batch inserting Phrases into Supabase:', error);
+      return false;
+    }
+
+    console.log(`Successfully saved ${phrases.length} Phrases for setId: ${setId}`);
+    return true;
+
+  } catch (error) {
+    console.error('Unexpected error in saveSetContent:', error);
+    return false;
+  }
+}
+
+// REFACTOR: Delete Phrases from Supabase
+export async function deleteSetContent(setId: string): Promise<boolean> {
+  if (!setId) {
+    console.error("deleteSetContent called without setId.");
+    return false;
+  }
+  console.log(`Deleting Phrases from Supabase for setId: ${setId}`);
+  try {
+    const { error } = await supabase
+      .from('Phrase')
+      .delete()
+      .eq('setId', setId);
+
+    if (error) {
+      console.error('Error deleting Phrases from Supabase:', error);
+      return false;
+    }
+    
+    console.log(`Successfully deleted Phrases for setId: ${setId}`);
+    return true;
+
+  } catch (error) {
+    console.error('Unexpected error in deleteSetContent:', error);
     return false;
   }
 }

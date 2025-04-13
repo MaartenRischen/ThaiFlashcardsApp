@@ -1040,7 +1040,7 @@ export default function ThaiFlashcards() {
             {/* Card Front: Displayed when showAnswer is false */} 
             {!showAnswer && (
               <div className="p-6 flex flex-col items-center justify-center min-h-[20rem]"> {/* Ensure min height */} 
-                <div className="text-2xl font-bold mb-4 text-center">{phrases[index].english}</div>
+                <div className="text-2xl font-bold mb-4 text-center">{phrases[index]?.english ?? ''}</div>
                 
                 {/* NEW: Mnemonic Hint Section */}
                 <div className="text-center mb-4 w-full px-4">
@@ -1403,7 +1403,7 @@ export default function ThaiFlashcards() {
                   <div key={i} className={`p-3 border-b border-[#333] flex justify-between ${index === i ? 'bg-opacity-20 bg-blue-900' : ''}`}>
                     <div>
                       <p className="text-white">{phrase.thai}</p>
-                      <p className="text-gray-400 text-sm">{phrase.english}</p>
+                      <p className="text-gray-400 text-sm">{phrase?.english}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`px-3 py-1 rounded text-xs font-medium ${color}`}>

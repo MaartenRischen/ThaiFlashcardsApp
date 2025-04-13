@@ -1,18 +1,16 @@
 import React from 'react';
 import { SetSelector } from '@/app/components/SetSelector'; // Assuming path
 
-// Define props required by the header (REMOVED props only needed for SetSelector)
+// Update props for combined settings modal
 interface FlashcardHeaderProps {
   setShowHowItWorks: (show: boolean) => void;
-  setIsSetOptionsMenuOpen: (open: boolean) => void;
-  setIsAppOptionsMenuOpen: (open: boolean) => void;
+  onOpenSettings: () => void;
   setShowProgress: (show: boolean) => void;
 }
 
 export function FlashcardHeader({
   setShowHowItWorks,
-  setIsSetOptionsMenuOpen,
-  setIsAppOptionsMenuOpen,
+  onOpenSettings,
   setShowProgress,
 }: FlashcardHeaderProps) {
   return (
@@ -69,22 +67,13 @@ export function FlashcardHeader({
             ?
           </button>
 
-          {/* Set Options Button */}
+          {/* Combined Settings Button (replaces Set Options & App Options) */}
           <button
-            onClick={() => setIsSetOptionsMenuOpen(true)}
+            onClick={onOpenSettings}
             className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"
-            aria-label="Set Options"
+            aria-label="Settings"
           >
-            Set Options
-          </button>
-
-          {/* App Options Button */}
-          <button
-            onClick={() => setIsAppOptionsMenuOpen(true)}
-            className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"
-            aria-label="App Options"
-          >
-            App Options
+            Settings
           </button>
         </div>
       </div>

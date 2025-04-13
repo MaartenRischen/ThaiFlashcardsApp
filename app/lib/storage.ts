@@ -425,26 +425,31 @@ export async function saveSetProgress(userId: string, setId: string, progress: S
     console.error("saveSetProgress called without userId or setId.");
     return false;
   }
-  if (progress === undefined || progress === null) { // Allow empty object {}
+  if (progress === undefined || progress === null) { 
     console.error("saveSetProgress called with invalid progress data.");
     return false;
   }
 
   console.log(`Saving/Updating UserSetProgress to Supabase for userId: ${userId}, setId: ${setId}`);
 
+  // Generate an ID, needed primarily for potential INSERT during upsert
+  const progressRecordId = uuidv4(); 
+
   const recordToUpsert = {
+    id: progressRecordId, // Add the generated ID
     userId: userId,
     setId: setId,
-    progressData: progress, // Supabase client handles JSON stringification for JSONB
+    progressData: progress, 
     lastAccessedAt: new Date().toISOString()
   };
 
   try {
-    // Upsert: Inserts if combo doesn't exist, updates if it does
+    // Upsert: Inserts if combo (userId, setId) doesn't exist, updates if it does
     const { error } = await supabase
       .from('UserSetProgress')
       .upsert(recordToUpsert, {
-        onConflict: 'userId, setId' // Specify conflict columns
+        onConflict: 'userId, setId', // Specify conflict target
+        // ignoreDuplicates: false // Default is false, ensures update happens on conflict
       });
       
     if (error) {

@@ -127,7 +127,6 @@ export default function ProfilePage() {
                 type="email"
                 value={session?.user?.email || ""}
                 disabled
-                className="bg-gray-50"
               />
               <p className="text-xs text-muted-foreground">
                 Your email cannot be changed

@@ -52,6 +52,7 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String? // To store the hashed password
+  supabaseAuthUserId String? @unique // Link to Supabase Auth User ID
   accounts      Account[]
   sessions      Session[]
 

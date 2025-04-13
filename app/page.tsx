@@ -998,26 +998,37 @@ export default function ThaiFlashcards() {
     }
   };
 
-  // Dark Mode Effect - Adjusted for dark default
+  // Dark Mode Effect - REVISED FOR FAKE DARK MODE
   useEffect(() => {
     const savedMode = localStorage.getItem('darkMode');
-    const initialMode = savedMode ? savedMode === 'true' : true; // Default true if no setting
-    setIsDarkMode(initialMode);
-    if (initialMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []); 
+    const initialModeIsFakeDark = savedMode === 'true'; // Check if saved preference is 'on'
+    
+    setIsDarkMode(initialModeIsFakeDark); // Set initial state
 
-  // Handler to toggle dark mode and save preference - Adjusted logic
-  const toggleDarkMode = (checked: boolean) => {
-    setIsDarkMode(checked); 
-    localStorage.setItem('darkMode', checked.toString());
-    if (checked) { // isDarkMode is true, add dark class
-      document.documentElement.classList.add('dark');
-    } else { // isDarkMode is false, remove dark class
+    if (initialModeIsFakeDark) {
+      document.documentElement.classList.add('fake-dark-mode-active');
       document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.remove('fake-dark-mode-active');
+      // Apply default theme (remove dark) if fake dark is off
+      document.documentElement.classList.remove('dark'); 
+    }
+    // We don't need to apply the 'dark' class here anymore
+
+  }, []);
+
+  // Handler to toggle dark mode and save preference - REVISED FOR FAKE DARK MODE
+  const toggleDarkMode = (checked: boolean) => {
+    setIsDarkMode(checked); // Still track the state
+    localStorage.setItem('darkMode', checked.toString()); // Still save preference
+    if (checked) {
+      document.documentElement.classList.add('fake-dark-mode-active');
+      document.documentElement.classList.remove('dark'); // Ensure regular dark mode is off
+    } else {
+      document.documentElement.classList.remove('fake-dark-mode-active');
+      // Optional: re-apply normal 'dark' class if needed based on other logic, 
+      // but for this joke, we can just assume non-fake is light.
+      document.documentElement.classList.remove('dark'); 
     }
   };
 
@@ -1583,20 +1594,21 @@ export default function ThaiFlashcards() {
 
       {/* --- NEW: App Options Modal --- */}
       {isAppOptionsMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setIsAppOptionsMenuOpen(false)}>
+        // ADD class app-options-modal-container
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 app-options-modal-container" onClick={() => setIsAppOptionsMenuOpen(false)}>
           <div className="neumorphic max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-gray-200">App Options</h2>
               <button onClick={() => setIsAppOptionsMenuOpen(false)} className="text-gray-400 hover:text-white text-2xl">&times;</button>
             </div>
             <div className="space-y-6">
-              {/* Dark Mode Toggle */}
-              <div className="flex items-center justify-between">
+              {/* Dark Mode Toggle - ADD ID to container */}
+              <div id="dark-mode-toggle-container" className="flex items-center justify-between">
                 <label htmlFor="darkModeToggleApp" className="text-gray-300">Dark Mode</label>
                 <Switch
                   id="darkModeToggleApp"
-                  checked={isDarkMode}
-                  onCheckedChange={toggleDarkMode}
+                  checked={isDarkMode} // State now represents fake dark mode active/inactive
+                  onCheckedChange={toggleDarkMode} // Use updated function
                 />
               </div>
               {/* Gender Toggle */}

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback, useMemo } from 'react';
+import { useSession } from 'next-auth/react'; // Import useSession
 import { INITIAL_PHRASES } from '@/app/data/phrases';
 import { Phrase } from '@/app/lib/set-generator';
 import * as storage from '@/app/lib/storage'; // Use renamed storage
@@ -16,7 +17,7 @@ interface SetContextProps {
   addSet: (
     setData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>, 
     phrases: Phrase[]
-  ) => Promise<string>;
+  ) => Promise<string | null>;
   updateSetProgress: (newProgress: SetProgress) => Promise<void>;
   deleteSet: (id: string) => Promise<void>;
   exportSet: (id: string) => Promise<void>;
@@ -37,19 +38,35 @@ const DEFAULT_SET_METADATA: SetMetaData = {
 };
 
 export const SetProvider = ({ children }: { children: ReactNode }) => {
+  const { data: session, status } = useSession(); // Get session
+  const [userId, setUserId] = useState<string | null>(null); // Store userId
+
   const [availableSets, setAvailableSets] = useState<SetMetaData[]>([DEFAULT_SET_METADATA]);
-  const [activeSetId, setActiveSetId] = useState<string | null>(null); // Initialize as null
-  const [activeSetContent, setActiveSetContent] = useState<Phrase[]>([]);
+  const [activeSetId, setActiveSetId] = useState<string | null>(DEFAULT_SET_ID);
+  const [activeSetContent, setActiveSetContent] = useState<Phrase[]>(INITIAL_PHRASES as unknown as Phrase[]);
   const [activeSetProgress, setActiveSetProgress] = useState<SetProgress>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Function to load content and progress for a specific set ID
   const loadSetData = useCallback(async (id: string | null) => {
-    console.log(`SetContext: loadSetData called for id=${id}`);
+    // This function now needs userId
+    if (!userId && id !== DEFAULT_SET_ID) {
+        console.warn(`SetContext: loadSetData called for non-default set ${id} but userId is not available.`);
+        setActiveSetId(DEFAULT_SET_ID);
+        setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
+        setActiveSetProgress({});
+        setIsLoading(false);
+        return;
+    }
+    
+    console.log(`SetContext: loadSetData called for id=${id}, userId=${userId}`);
     if (!id) { 
-      console.log("SetContext: No ID provided, cannot load data.");
+      console.log("SetContext: No ID provided, defaulting to default set.");
+      setActiveSetId(DEFAULT_SET_ID);
+      setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
+      setActiveSetProgress({});
       setIsLoading(false);
-      return; // Exit early if no valid ID determined
+      return;
     }
 
     setIsLoading(true);
@@ -59,93 +76,129 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
       if (id === DEFAULT_SET_ID) {
         content = INITIAL_PHRASES as unknown as Phrase[];
-        progress = storage.getSetProgress(id); // Load progress even for default
+        // Still try to load progress for default IF user is logged in
+        if (userId) {
+          progress = await storage.getSetProgress(userId, id); // Needs userId and await
+        } else {
+          progress = {}; // No progress for logged-out default set
+        }
         console.log(`SetContext: Loading DEFAULT set content (${content?.length} phrases) and progress`);
-      } else {
-        content = storage.getSetContent(id); // Use storage function
-        progress = storage.getSetProgress(id); // Use storage function
+      } else if (userId) { // Only load non-default if userId exists
+        // Fetch async from Supabase
+        content = await storage.getSetContent(id); // Needs await
+        progress = await storage.getSetProgress(userId, id); // Needs userId and await
         console.log(`SetContext: Loading content (${content?.length} phrases) and progress for set ${id}`);
+      } else {
+         throw new Error("Attempted to load user set without userId");
       }
       
-      if (content) {
-        setActiveSetContent(content);
-        setActiveSetProgress(progress || {});
-      } else {
-        console.warn(`SetContext: No content found for set ${id}. Falling back to default display.`);
-        // Don't change activeSetId here, just show default content/empty state
-        setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
-        setActiveSetProgress({});
-        // Optionally switch back to default ID if preferred:
-        // setActiveSetId(DEFAULT_SET_ID);
-      }
+      setActiveSetContent(content || (INITIAL_PHRASES as unknown as Phrase[])); 
+      setActiveSetProgress(progress || {});
+      setActiveSetId(id); 
       
     } catch (error) {
       console.error(`SetContext: Error loading data for set ${id}:`, error);
-      // Fallback to default display state on error
+      setAvailableSets(prev => prev.filter(s => s.id === DEFAULT_SET_ID)); 
+      setActiveSetId(DEFAULT_SET_ID); 
       setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
       setActiveSetProgress({});
-      setActiveSetId(DEFAULT_SET_ID); // Switch back to default ID on error
     } finally {
       setIsLoading(false);
     }
-  }, []); 
+  // Add userId to dependencies
+  }, [userId]); 
 
 
   // Function to save progress for the active set
   const updateSetProgress = useCallback(async (newProgress: SetProgress) => {
-    if (!activeSetId) return;
-    console.log(`SetContext: updateSetProgress called for activeSetId=${activeSetId}`);
-    setActiveSetProgress(newProgress);
-    // Use storage function
-    storage.saveSetProgress(activeSetId, newProgress);
+    if (!activeSetId || !userId || activeSetId === DEFAULT_SET_ID) { 
+      if(activeSetId === DEFAULT_SET_ID) console.log("SetContext: Not saving progress for default set.");
+      else console.warn(`SetContext: updateSetProgress called without activeSetId (${activeSetId}) or userId (${userId}).`);
+      if (activeSetId === DEFAULT_SET_ID) {
+          setActiveSetProgress(newProgress);
+      }
+      return;
+    }
+    console.log(`SetContext: updateSetProgress called for activeSetId=${activeSetId}, userId=${userId}`);
+    setActiveSetProgress(newProgress); // Update local state immediately
 
-    // Check if all cards in the current set are marked 'easy'
+    try {
+      // Save async to Supabase
+      const success = await storage.saveSetProgress(userId, activeSetId, newProgress); // Needs userId and await
+      if (success) {
+        console.log("SetContext: Successfully saved progress to Supabase.");
+      } else {
+        console.error("SetContext: Failed to save progress to Supabase.");
+      }
+    } catch (error) {
+        console.error("SetContext: Error saving progress:", error);
+    }
+
+    // Update isFullyLearned status
     const currentSetContent = activeSetContent;
-    if (currentSetContent && currentSetContent.length > 0 && activeSetId !== DEFAULT_SET_ID) { // Don't track for default
-      const allEasy = currentSetContent.every((phrase, index) => {
+    if (currentSetContent && currentSetContent.length > 0) {
+      const allEasy = currentSetContent.every((_, index) => {
         const cardProgress = newProgress[index];
         return cardProgress?.difficulty === 'easy';
       });
 
       const currentMeta = availableSets.find(set => set.id === activeSetId);
-      if (currentMeta) {
-        const needsUpdate = (currentMeta.isFullyLearned !== allEasy);
-
-        if (needsUpdate) {
+      if (currentMeta && currentMeta.isFullyLearned !== allEasy) {
           console.log(`Set ${activeSetId}: Fully learned status changed to ${allEasy}. Updating metadata.`);
           const updatedMeta: SetMetaData = { ...currentMeta, isFullyLearned: allEasy };
-          // Use storage function
-          storage.updateSetMetaData(updatedMeta); // Use the correct update function
-          // Update the availableSets state immediately for UI reactivity
-          setAvailableSets(prevSets => 
-            prevSets.map(set => set.id === activeSetId ? updatedMeta : set)
-          );
-        }
+          try {
+            // Use storage function (now async)
+            await storage.updateSetMetaData(updatedMeta); // Needs await
+            setAvailableSets(prevSets => 
+              prevSets.map(set => set.id === activeSetId ? updatedMeta : set)
+            );
+          } catch (error) {
+            console.error("SetContext: Failed to update isFullyLearned metadata:", error);
+          }
       }
     }
-  // Adjusted dependencies
-  }, [activeSetId, activeSetContent, availableSets]);
+  // Add userId to dependencies
+  }, [activeSetId, userId, activeSetContent, availableSets]);
 
-  // Function to load all sets and progress on mount
+  // --- Refactored Initial Data Loading --- 
   useEffect(() => {
     const loadInitialData = async () => {
-      console.log("SetContext: Initial load starting...");
-      setIsLoading(true);
-      // Load all metadata first
-      const allMeta = storage.getAllSetMetaData(); // Use storage function
-      setAvailableSets([DEFAULT_SET_METADATA, ...allMeta.filter(set => set.id !== DEFAULT_SET_ID)]);
-      console.log(`SetContext: Loaded ${allMeta.length} set metadata entries.`);
-      
-      // Determine initial active set ID (e.g., last used or default)
-      // Persisting last active ID is optional, default to DEFAULT_SET_ID for simplicity
-      const initialActiveId = DEFAULT_SET_ID;
-      setActiveSetId(initialActiveId); // Set state here, triggers the next useEffect
-      
-      setIsLoading(false); 
-      console.log("SetContext: Initial load finished, activeSetId set to:", initialActiveId);
+      if (status === 'authenticated' && session?.user?.id) {
+        const currentUserId = session.user.id;
+        setUserId(currentUserId); // Store the userId
+        console.log(`SetContext: User authenticated (userId: ${currentUserId}). Loading initial data...`);
+        setIsLoading(true);
+        try {
+          // Load user-specific sets from Supabase (now async)
+          const userSets = await storage.getAllSetMetaData(currentUserId);
+          setAvailableSets([DEFAULT_SET_METADATA, ...userSets.filter(set => set.id !== DEFAULT_SET_ID)]);
+          console.log(`SetContext: Loaded ${userSets.length} user-specific set metadata entries.`);
+          setActiveSetId(DEFAULT_SET_ID); // Keep default active initially
+
+        } catch (error) {
+           console.error("SetContext: Error loading initial user data:", error);
+           setAvailableSets([DEFAULT_SET_METADATA]);
+           setActiveSetId(DEFAULT_SET_ID);
+        } finally {
+          setIsLoading(false);
+          console.log("SetContext: Initial data load finished for authenticated user.");
+        }
+      } else if (status === 'unauthenticated') {
+        console.log("SetContext: User unauthenticated. Clearing user data and showing default set.");
+        setUserId(null);
+        setAvailableSets([DEFAULT_SET_METADATA]); 
+        setActiveSetId(DEFAULT_SET_ID);
+        setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]); 
+        setActiveSetProgress({});
+        setIsLoading(false);
+      } else {
+        console.log("SetContext: Auth status loading...");
+        setIsLoading(true); 
+      }
     };
+
     loadInitialData();
-  }, []); // Empty dependency array to run only once on mount
+  }, [status, session]); // Rerun when auth status or session changes
 
   // Effect to load data when activeSetId changes
   useEffect(() => {
@@ -163,75 +216,142 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   const addSet = useCallback(async (
     setData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>, 
     phrases: Phrase[]
-  ): Promise<string> => {
-    const newId = storage.generateUUID();
-    const now = new Date().toISOString();
-    const newMetaData: SetMetaData = {
-      ...setData,
-      id: newId,
-      createdAt: now,
-      phraseCount: phrases.length,
-      isFullyLearned: false // Default to false
-    };
+  ): Promise<string | null> => {
+    if (!userId) {
+      console.error("addSet: Cannot add set, user not authenticated.");
+      alert("You must be logged in to create and save sets.");
+      return null;
+    }
+    
+    console.log(`SetContext: Adding new set for userId: ${userId}`);
+    setIsLoading(true);
+    let newMetaId: string | null = null; // To track ID for potential cleanup
+    try {
+      // 1. Add metadata to DB (includes phraseCount now)
+      const metaDataToSave = { ...setData, phraseCount: phrases.length };
+      const newMetaData = await storage.addSetMetaData(userId, metaDataToSave); // Needs userId and await
+      
+      if (!newMetaData) {
+        throw new Error("Failed to save set metadata to database.");
+      }
+      newMetaId = newMetaData.id; // Store ID for cleanup
 
-    // Use storage functions
-    storage.addSetMetaData(newMetaData); // Use the correct add function
-    storage.saveSetContent(newId, phrases);
-    storage.saveSetProgress(newId, {}); // Save empty progress
+      // 2. Save content to DB
+      const contentSaved = await storage.saveSetContent(newMetaData.id, phrases); // Needs await
+      if (!contentSaved) {
+        console.error(`Failed to save content for new set ${newMetaData.id}. Attempting cleanup.`);
+        await storage.deleteSetMetaData(newMetaData.id); 
+        throw new Error("Failed to save set content to database.");
+      }
 
-    setAvailableSets(prev => [...prev, newMetaData]);
-    setActiveSetId(newId); // Switch to the new set (will trigger useEffect)
-    console.log(`SetContext: Added new set ${newId} with ${phrases.length} phrases.`);
-    return newId;
-  }, []); 
+      // 3. Save empty progress to DB
+      const progressSaved = await storage.saveSetProgress(userId, newMetaData.id, {}); // Needs userId and await
+      if (!progressSaved) {
+         console.error(`Failed to save initial progress for new set ${newMetaData.id}. Attempting cleanup.`);
+         await storage.deleteSetContent(newMetaData.id); // Attempt content cleanup
+         await storage.deleteSetMetaData(newMetaData.id); 
+         throw new Error("Failed to save initial set progress.");
+      }
 
+      // Update local state
+      setAvailableSets(prev => [...prev, newMetaData]);
+      setActiveSetId(newMetaData.id); 
+      console.log(`SetContext: Added new set ${newMetaData.id} with ${phrases.length} phrases.`);
+      return newMetaData.id;
+
+    } catch (error) {
+      console.error("SetContext: Error adding set:", error);
+      alert(`Failed to add set: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Ensure cleanup happens even if initial metadata save succeeded but later steps failed
+      if (newMetaId) {
+          console.log(`Error occurred during addSet for ${newMetaId}, ensuring cleanup.`);
+          // We might have already tried deleting in the catch blocks above,
+          // but call again just in case (delete is idempotent)
+          await storage.deleteSetMetaData(newMetaId); 
+      }
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  // Add userId dependency
+  }, [userId]); 
+
+  // --- Refactor deleteSet --- 
   const deleteSet = useCallback(async (id: string) => {
     if (id === DEFAULT_SET_ID) {
       console.warn("SetContext: Attempted to delete default set. Operation aborted.");
       return; 
     }
-    console.log(`SetContext: Deleting set ${id}`);
-    // Use storage function - it handles content/progress deletion now
-    storage.deleteSetMetaData(id);
-
-    setAvailableSets(prev => prev.filter(set => set.id !== id));
-    
-    // Switch back to default set if the active one was deleted
-    if (activeSetId === id) {
-      setActiveSetId(DEFAULT_SET_ID); // Triggers useEffect to load default
+    if (!userId) { 
+        console.error("deleteSet: Cannot delete set, user not authenticated.");
+        return;
     }
-  }, [activeSetId]);
 
+    console.log(`SetContext: Deleting set ${id} for userId ${userId}`);
+    setIsLoading(true);
+    try {
+      // Call async storage function (which handles related data deletion)
+      const success = await storage.deleteSetMetaData(id); 
+
+      if (!success) {
+        throw new Error("Failed to delete set from database.");
+      }
+
+      // Update local state
+      setAvailableSets(prev => prev.filter(set => set.id !== id));
+      // Switch back to default set if the active one was deleted
+      if (activeSetId === id) {
+        setActiveSetId(DEFAULT_SET_ID); // Triggers useEffect to load default
+      }
+      console.log(`SetContext: Set ${id} deleted successfully.`);
+
+    } catch (error) {
+       console.error("SetContext: Error deleting set:", error);
+       alert(`Failed to delete set: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+       setIsLoading(false);
+    }
+  // Add userId dependency
+  }, [activeSetId, userId]);
+
+  // --- switchSet (No backend call needed, just state update) --- 
   const switchSet = useCallback(async (id: string) => {
     if (id === activeSetId) {
       console.log(`SetContext: Set ${id} is already active.`);
       return; // No need to switch if already active
     }
     console.log(`SetContext: Switching to set ${id}`);
-    // No need to persist active ID separately if we just set the state
     setActiveSetId(id); // Triggers useEffect to load new set data
   }, [activeSetId]);
 
+  // --- Refactor exportSet --- 
   const exportSet = useCallback(async (id: string) => {
     console.log(`SetContext: Exporting set ${id}`);
     if (id === DEFAULT_SET_ID) {
         alert("Cannot export the default set.");
         return;
     }
+    // Need userId to get progress
+    if (!userId) {
+        alert("Cannot export set, user not logged in.");
+        return;
+    }
+    setIsLoading(true);
     try {
         const metaData = availableSets.find(set => set.id === id);
-        const content = storage.getSetContent(id); // Use storage
-        const progress = storage.getSetProgress(id); // Use storage
+        // Fetch async from Supabase
+        const content = await storage.getSetContent(id); // Needs await
+        const progress = await storage.getSetProgress(userId, id); // Needs userId and await
 
         if (!metaData || !content) {
             throw new Error('Set data could not be loaded for export.');
         }
 
         const exportData = {
-            version: "1.0", // Add a version number for future compatibility
+            version: "1.0",
             metaData: metaData,
             content: content,
-            progress: progress || {} // Include progress
+            progress: progress || {} 
         };
 
         const dataStr = JSON.stringify(exportData, null, 2);
@@ -246,32 +366,51 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
         console.error(`SetContext: Error exporting set ${id}:`, error);
         alert(`Failed to export set: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+       setIsLoading(false);
     }
-  }, [availableSets]);
+  // Add userId dependency
+  }, [availableSets, userId]);
 
+  // --- Refactor renameSet --- 
   const renameSet = useCallback(async (id: string, newName: string) => {
     console.log(`SetContext: Renaming set ${id} to \"${newName}\"`);
-    // Find the set in the current state first
+    if (id === DEFAULT_SET_ID || !userId) {
+        console.warn("Cannot rename default set or user not logged in.");
+        return;
+    }
+
     const setIndex = availableSets.findIndex(set => set.id === id);
     if (setIndex !== -1) {
       const currentSet = availableSets[setIndex];
-      // Update the specific set's name/cleverTitle
-      const updatedSetData = { ...currentSet, name: newName, cleverTitle: newName }; // Update both for consistency
-      // Use storage function to update persisted data
-      storage.updateSetMetaData(updatedSetData);
-      // Update the state
-      setAvailableSets(prevSets => 
-        prevSets.map(set => set.id === id ? updatedSetData : set)
-      );
-      console.log(`SetContext: Set ${id} renamed successfully.`);
+      const updatedSetData = { ...currentSet, name: newName, cleverTitle: newName }; 
+      
+      setIsLoading(true);
+      try {
+          // Use storage function (now async)
+          const success = await storage.updateSetMetaData(updatedSetData); // Needs await
+          if (!success) throw new Error("Failed to update set metadata in database.");
+          
+          // Update the state
+          setAvailableSets(prevSets => 
+            prevSets.map(set => set.id === id ? updatedSetData : set)
+          );
+          console.log(`SetContext: Set ${id} renamed successfully.`);
+      } catch(error) {
+          console.error("SetContext: Error renaming set:", error);
+          alert(`Failed to rename set: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      } finally {
+          setIsLoading(false);
+      }
     } else {
       console.error(`SetContext: Set ${id} not found for renaming.`);
     }
-  }, [availableSets]); // Depends on availableSets state
+  // Add userId dependency
+  }, [availableSets, userId]);
 
 
-  return (
-    <SetContext.Provider value={{
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
       availableSets,
       activeSetId,
       activeSetContent,
@@ -283,7 +422,11 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       deleteSet,
       exportSet,
       renameSet
-    }}>
+  // Update dependencies for useMemo - include all functions now
+  }), [availableSets, activeSetId, activeSetContent, activeSetProgress, isLoading, switchSet, addSet, updateSetProgress, deleteSet, exportSet, renameSet]);
+
+  return (
+    <SetContext.Provider value={contextValue}>
       {children}
     </SetContext.Provider>
   );

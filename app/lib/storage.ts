@@ -126,8 +126,8 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
   const newSetId = uuidv4();
   const createdAt = new Date().toISOString();
 
-  // Prepare record for Supabase, excluding phraseCount
-  const recordToInsert: Omit<FlashcardSetRecord, 'updatedAt' | 'phraseCount'> = {
+  // Prepare record for Supabase, excluding phraseCount, INCLUDING updatedAt
+  const recordToInsert: Omit<FlashcardSetRecord, 'phraseCount'> = { // Adjust Omit type
     id: newSetId,
     userId: userId,
     name: newSetData.name,
@@ -137,6 +137,7 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
     specificTopics: newSetData.specificTopics || null,
     source: newSetData.source,
     createdAt: createdAt,
+    updatedAt: createdAt // Set updatedAt same as createdAt on initial insert
   };
 
   console.log(`Inserting SetMetaData into Supabase for userId: ${userId}`, recordToInsert);
@@ -145,7 +146,7 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
     const { data, error } = await supabase
       .from('FlashcardSet')
       .insert(recordToInsert)
-      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt') // Don't select phraseCount
+      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt') // Select updatedAt too
       .single();
 
     if (error) {

@@ -62,11 +62,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           if (data?.user) {
             console.log(`Supabase sign-in successful for ${credentials.email}, user ID: ${data.user.id}`);
-            // Return the essential info needed by next-auth session/token callbacks
+            // Return essential info including name if available
             return {
-              id: data.user.id, // Use the Supabase user ID
+              id: data.user.id, 
               email: data.user.email,
-              // name: data.user.user_metadata?.name, // Optional
+              name: data.user.user_metadata?.name || null, // Get name from metadata
               // image: data.user.user_metadata?.avatar_url, // Optional
             };
           } else {
@@ -83,20 +83,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async session({ session, token }) {
-      if (session.user && token.id) {
-        // Assign the id from token to session.user
-        session.user.id = token.id;
-        
-        // Keep the name and email if they exist
-        if (token.name) session.user.name = token.name;
-        if (token.email) session.user.email = token.email;
+      // Copy id and name from token to session
+      if (session.user) {
+        if (token.id) {
+          session.user.id = token.id as string;
+        }
+        if (token.name) {
+          session.user.name = token.name as string;
+        } else {
+          // Keep email if name is missing, but clear potentially stale name
+          session.user.name = null; 
+        }
+        // Ensure email is also present
+        if (token.email) {
+            session.user.email = token.email;
+        }
       }
       return session;
     },
     async jwt({ token, user }) {
-      if (user && typeof user.id === 'string') {
-        // Ensure user.id is copied to token
-        token.id = user.id;
+      // On initial sign in (when user object is present), copy id and name to token
+      if (user) {
+        if (user.id) {
+          token.id = user.id;
+        }
+        if (user.name) {
+          token.name = user.name;
+        } 
       }
       return token;
     },

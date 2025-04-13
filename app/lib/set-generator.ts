@@ -1,4 +1,4 @@
-import { geminiPro } from './gemini'; // Import the Gemini instance
+import { geminiPro } from './gemini'; // Import the potentially null Gemini instance
 
 // Define types for the generator
 export interface Phrase {
@@ -235,9 +235,21 @@ async function generateFlashcardsBatch(
   prompt: string, 
   batchIndex: number
 ): Promise<{phrases: Phrase[], cleverTitle?: string, error?: BatchError}> {
-  // Use standard template literals for logging
-  console.log(`[Batch ${batchIndex}] Sending prompt to Gemini API (first 300 chars): 
-    ${prompt.substring(0, 300)}...`);
+  
+  // --- NEW: Check if geminiPro model is available ---
+  if (!geminiPro) {
+    console.error(`[Batch ${batchIndex}] Gemini Pro model not initialized. Cannot generate batch. Check API Key and server-side context.`);
+    return {
+      phrases: [],
+      error: createBatchError('API', 
+        'Gemini model failed to initialize. Check server logs for API key issues.',
+        { missingModel: 'geminiPro' }
+      )
+    };
+  }
+  // --- End Check ---
+
+  console.log(`[Batch ${batchIndex}] Sending prompt to Gemini API (first 300 chars): \n    ${prompt.substring(0, 300)}...`);
   
   try {
     let responseText: string;

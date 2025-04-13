@@ -9,6 +9,33 @@ import { Slider } from "@/components/ui/slider"; // Import the slider component
 import { useSet } from '../context/SetContext'; // Import the useSet hook
 import * as storage from '../lib/storage'; // Import storage utilities
 
+// --- Placeholder Data ---
+const seriousSituationsExamples = [
+  "Ordering food at street stalls, talking with hotel staff, discussing hobbies with friends",
+  "Asking for directions, making small talk with taxi drivers, shopping at a market",
+  "Booking a tour, checking into a flight, discussing weekend plans with colleagues",
+  "Visiting a temple (asking about rules), buying train tickets, talking about the weather"
+];
+
+const ridiculousFocusExamples = [
+  "Types of alien noodles found only in Chatuchak market on alternate Tuesdays",
+  "Names of Bangkok districts ruled by sentient cats",
+  "Specific movie titles starring heroic tuk-tuks that fight crime",
+  "The secret language of soi dogs",
+  "Advanced techniques for bargaining using only interpretive dance",
+  "Documenting the migration patterns of ghost spirits near temples"
+];
+
+const ridiculousNamesExamples = [
+  "Captain Sparklefingers, Professor Wobblebottom, Agent Meowser",
+  "Sir Reginald Fluffington III, Madame Zuzu, General Grumbles",
+  "Doctor Quackenstein, Princess Banana-Hammock, Baron von Wigglebutt",
+  "Empress Bubbles, Colonel Cuddlepants, Lord Fuzzington"
+];
+
+// Helper to get random element
+const getRandomElement = <T extends unknown>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
 // Card Editor component for previewing and editing generated cards
 const CardEditor = ({ 
   phrase, 
@@ -213,9 +240,18 @@ const SetWizardPage = () => {
   const [generatingDisplayPhrases, setGeneratingDisplayPhrases] = useState<Phrase[]>([]);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
+  // --- NEW: State for dynamic placeholders ---
+  const [situationPlaceholder, setSituationPlaceholder] = useState<string>(seriousSituationsExamples[0]);
+  const [focusPlaceholder, setFocusPlaceholder] = useState<string>(ridiculousFocusExamples[0]);
+  const [namesPlaceholder, setNamesPlaceholder] = useState<string>(ridiculousNamesExamples[0]);
+
   // Generate a unique set name when component mounts
   useEffect(() => {
     generateSetName();
+    // --- NEW: Set random placeholders on mount ---
+    setSituationPlaceholder(getRandomElement(seriousSituationsExamples));
+    setFocusPlaceholder(getRandomElement(ridiculousFocusExamples));
+    setNamesPlaceholder(getRandomElement(ridiculousNamesExamples));
   }, []);
 
   // Update set name when relevant inputs change
@@ -473,7 +509,7 @@ const SetWizardPage = () => {
                 <textarea
                   value={situations}
                   onChange={(e) => setSituations(e.target.value)}
-                  placeholder="Describe scenarios, e.g., ordering food at street stalls, talking with hotel staff, discussing hobbies with friends, surviving a zombie apocalypse in Bangkok..."
+                  placeholder={situationPlaceholder}
                   className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
                   rows={3}
                   required
@@ -489,7 +525,7 @@ const SetWizardPage = () => {
                  <textarea
                    value={specificTopics}
                    onChange={(e) => setSpecificTopics(e.target.value)}
-                   placeholder="E.g., types of noodles, names of Bangkok districts, specific movie titles..."
+                   placeholder={focusPlaceholder}
                    className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
                    rows={2}
                  />
@@ -504,7 +540,7 @@ const SetWizardPage = () => {
                   type="text"
                   value={friendNames}
                   onChange={(e) => setFriendNames(e.target.value)}
-                  placeholder="E.g., Somchai, Priya, Alex, Bo"
+                  placeholder={namesPlaceholder}
                   className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
                 />
                  <p className="text-xs text-gray-400 mt-1 italic">These names (and yours!) will be used in example sentences.</p>

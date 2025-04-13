@@ -1,8 +1,8 @@
 import { prisma } from "@/app/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcrypt";
 import { z } from "zod";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { Prisma } from "@prisma/client";
 
 const userSchema = z.object({
   name: z.string().optional(),
@@ -12,6 +12,8 @@ const userSchema = z.object({
 
 export async function POST(req: NextRequest) {
   let supabaseAuthUserId: string | null = null;
+  let userEmail: string | null = null;
+
   try {
     const body = await req.json();
     
@@ -25,6 +27,7 @@ export async function POST(req: NextRequest) {
     }
     
     const { name, email, password } = result.data;
+    userEmail = email;
     
     // --- Step 1: Create user in Supabase Auth --- 
     console.log(`Attempting to create user in Supabase Auth for email: ${email}`);
@@ -38,32 +41,25 @@ export async function POST(req: NextRequest) {
     });
 
     if (authError) {
-        console.error("Supabase Auth user creation failed:", authError);
-        if (authError.message.includes('User already registered')) {
+        console.error(`Supabase Auth user creation failed for ${email}:`, authError);
+        if (authError.message?.includes('already registered') || authError.message?.includes('email_exists')) {
              return NextResponse.json({ error: "User with this email already exists" }, { status: 409 });
         }
         throw new Error(`Supabase Auth error: ${authError.message}`);
     }
 
-    if (!authData || !authData.user) {
+    if (!authData?.user?.id) {
+        console.error(`Supabase Auth user created for ${email} but no user ID returned.`);
         throw new Error("Supabase Auth user created but no user data returned.");
     }
     supabaseAuthUserId = authData.user.id;
-    console.log(`Successfully created Supabase Auth user with ID: ${supabaseAuthUserId}`);
+    console.log(`Successfully created Supabase Auth user for ${email} with ID: ${supabaseAuthUserId}`);
 
-    // --- Step 2: Create user in Prisma Database (without password) --- 
+    // --- Step 2: Create user in Prisma Database ---
     
-    const existingPrismaUser = await prisma.user.findUnique({
-      where: { email },
-    });
-    if (existingPrismaUser) {
-       console.warn(`User ${email} already exists in Prisma DB but was just created in Supabase Auth (${supabaseAuthUserId}). Linking attempt or manual check needed.`);
-       return NextResponse.json({ error: "User inconsistency - exists in Prisma but not expected."}, { status: 500 });
-    }
-
+    console.log(`Attempting to create Prisma user for ${email}, linking Supabase ID: ${supabaseAuthUserId}`);
     const user = await prisma.user.create({
       data: {
-        id: undefined,
         supabaseAuthUserId: supabaseAuthUserId,
         name,
         email,
@@ -71,7 +67,7 @@ export async function POST(req: NextRequest) {
       select: { id: true, name: true, email: true, supabaseAuthUserId: true }
     });
     
-    console.log(`Successfully created Prisma user linked to Supabase Auth: ${user.id}`);
+    console.log(`Successfully created Prisma user ${user.id} linked to Supabase Auth: ${user.supabaseAuthUserId}`);
     return NextResponse.json(
       { 
         message: "User created successfully", 
@@ -81,26 +77,39 @@ export async function POST(req: NextRequest) {
     );
     
   } catch (error: any) {
-    console.error("Error creating user:", error);
+    console.error(`Error during registration process for email: ${userEmail ?? 'unknown'}:`, error);
     
     if (supabaseAuthUserId) {
-        console.warn(`Prisma user creation failed for ${supabaseAuthUserId}. Attempting to delete Supabase Auth user.`);
+        console.warn(`Prisma operation failed after Supabase user ${supabaseAuthUserId} was created. Attempting rollback.`);
         try {
             const supabaseAdmin = getSupabaseAdmin();
             const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(supabaseAuthUserId);
             if (deleteError) {
-                console.error("Failed to clean up orphaned Supabase Auth user:", deleteError);
+                console.error(`CRITICAL: Failed to clean up orphaned Supabase Auth user ${supabaseAuthUserId}:`, deleteError);
             } else {
-                console.log("Cleaned up orphaned Supabase Auth user.");
+                console.log(`Successfully rolled back (deleted) Supabase Auth user ${supabaseAuthUserId}.`);
             }
         } catch (cleanupError) {
-             console.error("Error during Supabase Auth user cleanup:", cleanupError);
+             console.error(`Error during Supabase Auth user ${supabaseAuthUserId} cleanup:`, cleanupError);
         }
     }
     
+    let status = 500;
+    let message = "Something went wrong during registration.";
+    let details = error.message;
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        status = 409;
+        message = "User registration conflict.";
+        details = `A user with the provided details (likely email: ${userEmail}) already exists or conflicts with existing data.`;
+        console.error(`Prisma unique constraint violation (P2002) for email: ${userEmail}. Rollback attempted.`);
+    } else if (error.message?.startsWith('Supabase Auth error:')) {
+         message = "An internal error occurred during authentication setup.";
+    }
+
     return NextResponse.json(
-      { error: "Something went wrong", details: error.message },
-      { status: 500 }
+      { error: message, details: details },
+      { status: status }
     );
   }
 } 

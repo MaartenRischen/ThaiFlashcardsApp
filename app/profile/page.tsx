@@ -91,6 +91,11 @@ export default function ProfilePage() {
     );
   }
 
+  // Add console log here to inspect session and formData
+  console.log("ProfilePage Render - Status:", status);
+  console.log("ProfilePage Render - Session:", session);
+  console.log("ProfilePage Render - FormData:", formData);
+
   return (
     <div className="container max-w-2xl py-12">
       <div className="space-y-6">

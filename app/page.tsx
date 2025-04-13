@@ -1636,7 +1636,7 @@ export default function ThaiFlashcards() {
                       onCheckedChange={toggleDarkMode} 
                     />
                   </div>
-                  {/* Gender Toggle */}
+                  {/* Gender Toggle - REMOVED
                   <div className="flex items-center justify-between">
                     <label htmlFor="genderToggleApp" className="text-gray-300">Voice Gender (Krap/Ka)</label>
                     <div className="flex items-center">
@@ -1649,7 +1649,8 @@ export default function ThaiFlashcards() {
                       <span className="ml-2 text-sm font-medium text-gray-400">Male</span>
                     </div>
                   </div>
-                  {/* Polite Mode Toggle */}
+                  */}
+                  {/* Polite Mode Toggle - REMOVED
                   <div className="flex items-center justify-between">
                     <label htmlFor="politeToggleApp" className="text-gray-300">Polite Mode (Add ครับ/ค่ะ)</label>
                     <div className="flex items-center">
@@ -1662,6 +1663,7 @@ export default function ThaiFlashcards() {
                         <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
                     </div>
                   </div>
+                  */}
                   {/* Autoplay Toggle */}
                   <div className="flex items-center justify-between">
                     <label htmlFor="autoplayToggleApp" className="text-gray-300">Autoplay Audio on Reveal</label>

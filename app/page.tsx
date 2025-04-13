@@ -367,8 +367,7 @@ export default function ThaiFlashcards() {
   const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
-  const [isAppOptionsMenuOpen, setIsAppOptionsMenuOpen] = useState(false); // Renamed
-  const [isSetOptionsMenuOpen, setIsSetOptionsMenuOpen] = useState(false); // New state for Set Options
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [tutorialStep, setTutorialStep] = useState<number>(0);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false); // Default to false (light)
   const [showMnemonicHint, setShowMnemonicHint] = useState(false); // NEW: State for front hint
@@ -1057,9 +1056,8 @@ export default function ThaiFlashcards() {
       {/* Render the new FlashcardHeader component - Pass setShowProgress */}
       <FlashcardHeader
         setShowHowItWorks={setShowHowItWorks}
-        setIsSetOptionsMenuOpen={setIsSetOptionsMenuOpen}
-        setIsAppOptionsMenuOpen={setIsAppOptionsMenuOpen}
-        setShowProgress={setShowProgress} // Added this prop
+        onOpenSettings={() => setIsSettingsModalOpen(true)}
+        setShowProgress={setShowProgress} 
       />
 
       {/* Main Content - Centered Flashcard */}
@@ -1612,136 +1610,137 @@ export default function ThaiFlashcards() {
         </div>
       )}
 
-      {/* --- NEW: App Options Modal --- */}
-      {isAppOptionsMenuOpen && (
-        // ADD class app-options-modal-container
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 app-options-modal-container" onClick={() => setIsAppOptionsMenuOpen(false)}>
-          <div className="neumorphic max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+      {/* +++ NEW Combined Settings Modal +++ */}
+      {isSettingsModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 app-options-modal-container" onClick={() => setIsSettingsModalOpen(false)}>
+          <div className="neumorphic max-w-lg w-full p-6" onClick={e => e.stopPropagation()}>
+            {/* Header */}
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-200">App Options</h2>
-              <button onClick={() => setIsAppOptionsMenuOpen(false)} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+              <h2 className="text-xl font-bold text-gray-200">Settings</h2>
+              <button onClick={() => setIsSettingsModalOpen(false)} className="text-gray-400 hover:text-white text-2xl">&times;</button>
             </div>
-            <div className="space-y-6">
-              {/* Dark Mode Toggle - ADD ID to container */}
-              <div id="dark-mode-toggle-container" className="flex items-center justify-between">
-                <label htmlFor="darkModeToggleApp" className="text-gray-300">Dark Mode</label>
-                <Switch
-                  id="darkModeToggleApp"
-                  checked={isDarkMode} // State now represents fake dark mode active/inactive
-                  onCheckedChange={toggleDarkMode} // Use updated function
-                />
-              </div>
-              {/* Gender Toggle */}
-              <div className="flex items-center justify-between">
-                 <label htmlFor="genderToggleApp" className="text-gray-300">Voice Gender (Krap/Ka)</label>
-                 <div className="flex items-center">
-                   <span className="mr-2 text-sm font-medium text-gray-400">Female</span>
+            
+            {/* Content - Use overflow for potentially long content */}
+            <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
+              
+              {/* === App Settings Section === */}
+              <div className="border-b border-gray-700 pb-4">
+                <h3 className="text-lg font-semibold text-blue-400 mb-4">App Settings</h3>
+                <div className="space-y-4">
+                  {/* Dark Mode Toggle */}
+                  <div id="dark-mode-toggle-container" className="flex items-center justify-between">
+                    <label htmlFor="darkModeToggleApp" className="text-gray-300">Dark Mode</label>
                     <Switch
-                      id="genderToggleApp"
-                      checked={isMale}
-                      onCheckedChange={setIsMale} // Directly use the state setter
+                      id="darkModeToggleApp"
+                      checked={isDarkMode} 
+                      onCheckedChange={toggleDarkMode} 
                     />
-                   <span className="ml-2 text-sm font-medium text-gray-400">Male</span>
-                 </div>
+                  </div>
+                  {/* Gender Toggle */}
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="genderToggleApp" className="text-gray-300">Voice Gender (Krap/Ka)</label>
+                    <div className="flex items-center">
+                      <span className="mr-2 text-sm font-medium text-gray-400">Female</span>
+                        <Switch
+                          id="genderToggleApp"
+                          checked={isMale}
+                          onCheckedChange={setIsMale} 
+                        />
+                      <span className="ml-2 text-sm font-medium text-gray-400">Male</span>
+                    </div>
+                  </div>
+                  {/* Polite Mode Toggle */}
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="politeToggleApp" className="text-gray-300">Polite Mode (Add ครับ/ค่ะ)</label>
+                    <div className="flex items-center">
+                        <span className="mr-2 text-sm font-medium text-gray-400">Casual</span>
+                        <Switch
+                          id="politeToggleApp"
+                          checked={isPoliteMode}
+                          onCheckedChange={setIsPoliteMode} 
+                        />
+                        <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
+                    </div>
+                  </div>
+                  {/* Autoplay Toggle */}
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="autoplayToggleApp" className="text-gray-300">Autoplay Audio on Reveal</label>
+                    <Switch
+                      id="autoplayToggleApp"
+                      checked={autoplay}
+                      onCheckedChange={setAutoplay}
+                    />
+                  </div>
+                </div>
               </div>
-              {/* Polite Mode Toggle */}
-              <div className="flex items-center justify-between">
-                 <label htmlFor="politeToggleApp" className="text-gray-300">Polite Mode (Add ครับ/ค่ะ)</label>
-                 <div className="flex items-center">
-                    <span className="mr-2 text-sm font-medium text-gray-400">Casual</span>
-                     <Switch
-                       id="politeToggleApp"
-                       checked={isPoliteMode}
-                       onCheckedChange={setIsPoliteMode} // Directly use the state setter
-                     />
-                    <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
-                 </div>
-              </div>
-               {/* Autoplay Toggle */}
-              <div className="flex items-center justify-between">
-                <label htmlFor="autoplayToggleApp" className="text-gray-300">Autoplay Audio on Reveal</label>
-                <Switch
-                  id="autoplayToggleApp"
-                  checked={autoplay}
-                  onCheckedChange={setAutoplay}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* --- NEW: Set Options Modal --- */}
-      {isSetOptionsMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setIsSetOptionsMenuOpen(false)}>
-          <div className="neumorphic max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-200">Current Set Options</h2>
-              <button onClick={() => setIsSetOptionsMenuOpen(false)} className="text-gray-400 hover:text-white text-2xl">&times;</button>
-            </div>
-            <div className="space-y-4">
-               <div className="bg-gray-800 p-4 rounded-lg text-center">
-                 <p className="text-sm text-gray-400 mb-1">Current Set:</p>
-                 <p className="text-lg text-white font-semibold">
-                    {availableSets.find(set => set.id === activeSetId)?.cleverTitle || currentSetName}
-                 </p>
-               </div>
-               <button
-                 onClick={() => {
-                   setIsSetOptionsMenuOpen(false); // Close this modal
-                   setIsManagementModalOpen(true); // Open the Set Manager
-                 }}
-                 className="neumorphic-button w-full text-blue-400"
-               >
-                 Open Full Set Manager...
-               </button>
-               <button
-                 onClick={() => activeSetId && exportSet(activeSetId)}
-                 className="neumorphic-button w-full text-green-400"
-                 disabled={!activeSetId || isLoading || activeSetId === 'default'} // Disable for default set
-               >
-                 Export This Set
-               </button>
-               <button
-                 onClick={() => {
-                    if (activeSetId && activeSetId !== 'default') {
-                       if (confirm(`Are you sure you want to reset all progress for the set "${availableSets.find(set => set.id === activeSetId)?.cleverTitle || currentSetName}"? This cannot be undone.`)) {
-                          // TODO: Implement function to reset progress *only* for the active set
-                          console.warn("Reset progress for specific set not yet implemented.");
-                          // Placeholder: Currently resets ALL progress. Need refined logic.
-                          // resetCurrentSetProgress(); // This function needs to be created
-                          alert("Resetting progress for specific sets is not yet fully implemented. Use 'Reset All' in Stats/Data for now.");
-                       }
-                    } else {
-                       alert("Cannot reset progress for the default set.");
-                    }
-                 }}
-                 className="neumorphic-button w-full text-yellow-400"
-                 disabled={!activeSetId || isLoading || activeSetId === 'default'}
-               >
-                 Reset Progress for This Set
-               </button>
-                 <button
-                   onClick={() => {
-                      if (activeSetId && activeSetId !== 'default') {
-                         const setToDelete = availableSets.find(set => set.id === activeSetId);
-                         if (setToDelete && confirm(`Are you sure you want to delete the set "${setToDelete.cleverTitle || setToDelete.name}"? This cannot be undone.`)) {
-                            deleteSet(activeSetId);
-                            setIsSetOptionsMenuOpen(false); // Close modal after deletion
-                         }
-                      } else {
-                         alert("Cannot delete the default set.");
-                      }
-                   }}
-                   className="neumorphic-button w-full text-red-400"
-                   disabled={!activeSetId || isLoading || activeSetId === 'default'}
-                 >
-                   Delete This Set
-                 </button>
+              {/* === Current Set Settings Section === */}
+              <div className="pt-4">
+                <h3 className="text-lg font-semibold text-blue-400 mb-4">Current Set Settings</h3>
+                <div className="space-y-4">
+                  <div className="bg-gray-800 p-4 rounded-lg text-center">
+                    <p className="text-sm text-gray-400 mb-1">Current Set:</p>
+                    <p className="text-lg text-white font-semibold">
+                        {availableSets.find(set => set.id === activeSetId)?.cleverTitle || currentSetName}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsSettingsModalOpen(false); // Close this modal
+                      setIsManagementModalOpen(true); // Open the Set Manager
+                    }}
+                    className="neumorphic-button w-full text-blue-400"
+                  >
+                    Open Full Set Manager...
+                  </button>
+                  <button
+                    onClick={() => activeSetId && exportSet(activeSetId)}
+                    className="neumorphic-button w-full text-green-400"
+                    disabled={!activeSetId || isLoading || activeSetId === 'default'} 
+                  >
+                    Export This Set
+                  </button>
+                  <button
+                    onClick={() => {
+                        if (activeSetId && activeSetId !== 'default') {
+                          if (confirm(`Are you sure you want to reset all progress for the set \"${availableSets.find(set => set.id === activeSetId)?.cleverTitle || currentSetName}\"? This cannot be undone.`)) {
+                              // TODO: Implement function to reset progress *only* for the active set
+                              console.warn("Reset progress for specific set not yet implemented.");
+                              alert("Resetting progress for specific sets is not yet fully implemented. Use 'Reset All' in Stats/Data for now.");
+                          }
+                        } else {
+                          alert("Cannot reset progress for the default set.");
+                        }
+                    }}
+                    className="neumorphic-button w-full text-yellow-400"
+                    disabled={!activeSetId || isLoading || activeSetId === 'default'}
+                  >
+                    Reset Progress for This Set
+                  </button>
+                    <button
+                      onClick={() => {
+                          if (activeSetId && activeSetId !== 'default') {
+                            const setToDelete = availableSets.find(set => set.id === activeSetId);
+                            if (setToDelete && confirm(`Are you sure you want to delete the set \"${setToDelete.cleverTitle || setToDelete.name}\"? This cannot be undone.`)) {
+                                deleteSet(activeSetId);
+                                setIsSettingsModalOpen(false); // Close modal after deletion
+                            }
+                          } else {
+                            alert("Cannot delete the default set.");
+                          }
+                      }}
+                      className="neumorphic-button w-full text-red-400"
+                      disabled={!activeSetId || isLoading || activeSetId === 'default'}
+                    >
+                      Delete This Set
+                    </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
+      {/* --- End of Combined Settings Modal --- */}
 
       {/* Version indicator at the bottom - shows changes and timestamp in Amsterdam timezone */}
       <div className="text-center p-2 text-xs text-gray-600">

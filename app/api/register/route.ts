@@ -44,8 +44,9 @@ export async function POST(req: NextRequest) {
         console.error(`Supabase Auth user creation failed for ${email}:`, authError);
         if (authError.message?.includes('already registered') || authError.message?.includes('email_exists')) {
              return NextResponse.json({ error: "User with this email already exists" }, { status: 409 });
+        } else {
+             throw new Error(`Supabase Auth error: ${authError.message}`);
         }
-        throw new Error(`Supabase Auth error: ${authError.message}`);
     }
 
     if (!authData?.user?.id) {

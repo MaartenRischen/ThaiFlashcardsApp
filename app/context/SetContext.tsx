@@ -225,55 +225,70 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     
     console.log(`SetContext: Adding new set for userId: ${userId}`);
     setIsLoading(true);
-    let newMetaId: string | null = null; // To track ID for potential cleanup
+    let newMetaId: string | null = null; 
     try {
-      // 1. Add metadata to DB (includes phraseCount now)
-      const metaDataToSave = { ...setData, phraseCount: phrases.length };
-      const newMetaData = await storage.addSetMetaData(userId, metaDataToSave); // Needs userId and await
+      // Prepare metadata for *storage* (excluding fields not in DB like phraseCount, isFullyLearned)
+      const metaDataForStorage: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
+          ...setData 
+          // phraseCount is omitted here
+      };
       
-      if (!newMetaData) {
+      // 1. Add metadata to DB 
+      const insertedRecord = await storage.addSetMetaData(userId, metaDataForStorage);
+      
+      if (!insertedRecord) {
         throw new Error("Failed to save set metadata to database.");
       }
-      newMetaId = newMetaData.id; // Store ID for cleanup
+      newMetaId = insertedRecord.id; // Store ID for cleanup and state update
 
       // 2. Save content to DB
-      const contentSaved = await storage.saveSetContent(newMetaData.id, phrases); // Needs await
+      const contentSaved = await storage.saveSetContent(newMetaId, phrases); 
       if (!contentSaved) {
-        console.error(`Failed to save content for new set ${newMetaData.id}. Attempting cleanup.`);
-        await storage.deleteSetMetaData(newMetaData.id); 
+        console.error(`Failed to save content for new set ${newMetaId}. Attempting cleanup.`);
+        await storage.deleteSetMetaData(newMetaId); 
         throw new Error("Failed to save set content to database.");
       }
 
       // 3. Save empty progress to DB
-      const progressSaved = await storage.saveSetProgress(userId, newMetaData.id, {}); // Needs userId and await
+      const progressSaved = await storage.saveSetProgress(userId, newMetaId, {}); 
       if (!progressSaved) {
-         console.error(`Failed to save initial progress for new set ${newMetaData.id}. Attempting cleanup.`);
-         await storage.deleteSetContent(newMetaData.id); // Attempt content cleanup
-         await storage.deleteSetMetaData(newMetaData.id); 
+         console.error(`Failed to save initial progress for new set ${newMetaId}. Attempting cleanup.`);
+         await storage.deleteSetContent(newMetaId);
+         await storage.deleteSetMetaData(newMetaId); 
          throw new Error("Failed to save initial set progress.");
       }
 
+      // Create the *complete* SetMetaData object for local state, including calculated phraseCount
+      const completeNewMetaData: SetMetaData = {
+          id: insertedRecord.id,
+          name: insertedRecord.name,
+          cleverTitle: insertedRecord.cleverTitle || undefined,
+          createdAt: insertedRecord.createdAt,
+          level: insertedRecord.level as SetMetaData['level'] || undefined,
+          goals: insertedRecord.goals || [],
+          specificTopics: insertedRecord.specificTopics || undefined,
+          source: insertedRecord.source as SetMetaData['source'] || 'generated',
+          phraseCount: phrases.length, // Calculate here for local state
+          isFullyLearned: false // Default
+      };
+
       // Update local state
-      setAvailableSets(prev => [...prev, newMetaData]);
-      setActiveSetId(newMetaData.id); 
-      console.log(`SetContext: Added new set ${newMetaData.id} with ${phrases.length} phrases.`);
-      return newMetaData.id;
+      setAvailableSets(prev => [...prev, completeNewMetaData]);
+      setActiveSetId(completeNewMetaData.id); 
+      console.log(`SetContext: Added new set ${completeNewMetaData.id} with ${phrases.length} phrases.`);
+      return completeNewMetaData.id;
 
     } catch (error) {
       console.error("SetContext: Error adding set:", error);
       alert(`Failed to add set: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      // Ensure cleanup happens even if initial metadata save succeeded but later steps failed
       if (newMetaId) {
           console.log(`Error occurred during addSet for ${newMetaId}, ensuring cleanup.`);
-          // We might have already tried deleting in the catch blocks above,
-          // but call again just in case (delete is idempotent)
           await storage.deleteSetMetaData(newMetaId); 
       }
       return null;
     } finally {
       setIsLoading(false);
     }
-  // Add userId dependency
   }, [userId]); 
 
   // --- Refactor deleteSet --- 

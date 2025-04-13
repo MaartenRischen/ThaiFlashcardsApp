@@ -22,7 +22,6 @@ interface FlashcardSetRecord {
   source: string;
   createdAt: string; // Timestamptz becomes string
   updatedAt?: string;
-  phraseCount?: number | null; // Added phraseCount, assuming it exists
 }
 
 export interface SetMetaData { 
@@ -82,10 +81,10 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
   }
   console.log(`Fetching SetMetaData from Supabase for userId: ${userId}`);
   try {
-    // Explicitly select columns matching FlashcardSetRecord
+    // Remove phraseCount from select
     const { data, error } = await supabase
       .from('FlashcardSet')
-      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, phraseCount')
+      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt')
       .eq('userId', userId);
 
     if (error) {
@@ -96,17 +95,18 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
     const sets = data || [];
 
     // Map Supabase record to SetMetaData interface
-    return sets.map((dbSet: FlashcardSetRecord) => ({ // Add type to dbSet
+    // Set phraseCount to 0 initially
+    return sets.map((dbSet: FlashcardSetRecord) => ({ 
       id: dbSet.id,
       name: dbSet.name,
       cleverTitle: dbSet.cleverTitle || undefined,
       createdAt: dbSet.createdAt, 
-      phraseCount: dbSet.phraseCount || 0, // Use fetched or default
-      level: dbSet.level as SetMetaData['level'] || undefined, // Cast level
+      phraseCount: 0, // Set default 0
+      level: dbSet.level as SetMetaData['level'] || undefined, 
       goals: dbSet.goals || [], 
       specificTopics: dbSet.specificTopics || undefined,
-      source: dbSet.source as SetMetaData['source'] || 'generated', // Cast source
-      isFullyLearned: false // Default to false
+      source: dbSet.source as SetMetaData['source'] || 'generated', 
+      isFullyLearned: false 
     }));
 
   } catch (error) {
@@ -115,32 +115,28 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
   }
 }
 
-// REFACTOR: Insert into Supabase instead of localStorage
-export async function addSetMetaData(userId: string, newSetMetaData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount'> & { phraseCount: number }): Promise<SetMetaData | null> {
-  if (!userId) {
-    console.error("addSetMetaData called without userId.");
-    return null;
-  }
-  if (!newSetMetaData) {
-    console.error("addSetMetaData called without newSetMetaData.");
-    return null;
+// REFACTOR: Insert into Supabase - Remove phraseCount
+// Adjusted input type to directly match expected DB record fields (minus auto-generated ones)
+export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>): Promise<Omit<FlashcardSetRecord, 'phraseCount'> | null> {
+  if (!userId || !newSetData) {
+      console.error("addSetMetaData called without userId or newSetData.");
+      return null;
   }
 
   const newSetId = uuidv4();
   const createdAt = new Date().toISOString();
 
-  // Prepare record for Supabase, matching FlashcardSetRecord structure
-  const recordToInsert: Omit<FlashcardSetRecord, 'updatedAt'> = {
+  // Prepare record for Supabase, excluding phraseCount
+  const recordToInsert: Omit<FlashcardSetRecord, 'updatedAt' | 'phraseCount'> = {
     id: newSetId,
     userId: userId,
-    name: newSetMetaData.name,
-    cleverTitle: newSetMetaData.cleverTitle || null,
-    level: newSetMetaData.level || null,
-    goals: newSetMetaData.goals || null,
-    specificTopics: newSetMetaData.specificTopics || null,
-    source: newSetMetaData.source,
+    name: newSetData.name,
+    cleverTitle: newSetData.cleverTitle || null,
+    level: newSetData.level || null,
+    goals: newSetData.goals || null,
+    specificTopics: newSetData.specificTopics || null,
+    source: newSetData.source,
     createdAt: createdAt,
-    phraseCount: newSetMetaData.phraseCount
   };
 
   console.log(`Inserting SetMetaData into Supabase for userId: ${userId}`, recordToInsert);
@@ -149,12 +145,12 @@ export async function addSetMetaData(userId: string, newSetMetaData: Omit<SetMet
     const { data, error } = await supabase
       .from('FlashcardSet')
       .insert(recordToInsert)
-      .select() // Select the newly inserted record
-      .single(); // Expect only one record back
+      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt') // Don't select phraseCount
+      .single();
 
     if (error) {
       console.error('Error inserting SetMetaData into Supabase:', error);
-      throw error; // Re-throw
+      throw error; 
     }
 
     if (!data) {
@@ -163,65 +159,46 @@ export async function addSetMetaData(userId: string, newSetMetaData: Omit<SetMet
     }
 
     console.log('Successfully inserted SetMetaData:', data);
-
-    // Convert the returned DB record back to SetMetaData format
-    const insertedRecord = data as FlashcardSetRecord;
-    const resultMetaData: SetMetaData = {
-      id: insertedRecord.id,
-      name: insertedRecord.name,
-      cleverTitle: insertedRecord.cleverTitle || undefined,
-      createdAt: insertedRecord.createdAt,
-      phraseCount: insertedRecord.phraseCount || 0,
-      level: insertedRecord.level as SetMetaData['level'] || undefined,
-      goals: insertedRecord.goals || [],
-      specificTopics: insertedRecord.specificTopics || undefined,
-      source: insertedRecord.source as SetMetaData['source'] || 'generated',
-      isFullyLearned: false // Default
-    };
-    return resultMetaData;
+    // Return the inserted DB record (without phraseCount)
+    return data as Omit<FlashcardSetRecord, 'phraseCount'>;
 
   } catch (error) {
     console.error('Unexpected error in addSetMetaData:', error);
-    return null; // Return null on unexpected errors
+    return null; 
   }
 }
 
-// REFACTOR: Update Supabase record
+// REFACTOR: Update Supabase record - Remove phraseCount
 export async function updateSetMetaData(updatedSet: SetMetaData): Promise<boolean> {
   if (!updatedSet || !updatedSet.id) {
-    console.error("updateSetMetaData called without valid updatedSet data or ID.");
-    return false;
+      console.error("updateSetMetaData called without valid updatedSet data or ID.");
+      return false;
   }
 
-  // Prepare record for Supabase update (only update relevant fields)
-  // Exclude fields not directly stored or managed differently (like isFullyLearned, userId)
-  const recordToUpdate: Partial<Omit<FlashcardSetRecord, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & { updatedAt: string }> = {
-    name: updatedSet.name,
-    cleverTitle: updatedSet.cleverTitle || null,
-    level: updatedSet.level || null,
-    goals: updatedSet.goals || null,
-    specificTopics: updatedSet.specificTopics || null,
-    source: updatedSet.source,
-    phraseCount: updatedSet.phraseCount,
-    updatedAt: new Date().toISOString() // Update the timestamp
+  // Prepare record for Supabase update, excluding phraseCount
+  const recordToUpdate: Partial<Omit<FlashcardSetRecord, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'phraseCount'> & { updatedAt: string }> = {
+      name: updatedSet.name,
+      cleverTitle: updatedSet.cleverTitle || null,
+      level: updatedSet.level || null,
+      goals: updatedSet.goals || null,
+      specificTopics: updatedSet.specificTopics || null,
+      source: updatedSet.source,
+      // Omit phraseCount from update
+      updatedAt: new Date().toISOString()
   };
-
+  
   console.log(`Updating SetMetaData in Supabase for id: ${updatedSet.id}`, recordToUpdate);
-
   try {
     const { error } = await supabase
       .from('FlashcardSet')
       .update(recordToUpdate)
       .eq('id', updatedSet.id);
-
     if (error) {
       console.error('Error updating SetMetaData in Supabase:', error);
       return false;
     }
-
     console.log(`Successfully updated SetMetaData for id: ${updatedSet.id}`);
     return true;
-
   } catch (error) {
     console.error('Unexpected error in updateSetMetaData:', error);
     return false;

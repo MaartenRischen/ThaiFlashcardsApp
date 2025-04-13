@@ -41,8 +41,8 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 // Update version info
 const VERSION_INFO = {
   lastUpdated: new Date().toISOString(),
-  version: "1.3.53", // Incremented version
-  changes: "Add show/hide mnemonic hint on card front."
+  version: "1.3.54", // Incremented version
+  changes: "Implement Supabase backend for persistent user sets & progress."
 };
 
 interface Review {

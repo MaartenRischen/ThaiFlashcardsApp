@@ -1292,7 +1292,7 @@ export default function ThaiFlashcards() {
                 
               </div> // This closing div might be the issue or misplaced
             )}
-          </div> // Closing div for neumorphic rounded-xl flex flex-col
+          </div>
         </div>
       </div>
 

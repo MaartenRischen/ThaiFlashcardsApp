@@ -406,21 +406,108 @@ export async function deleteSetContent(setId: string): Promise<boolean> {
 
 // --- Set Progress Management --- 
 
-export function getSetProgress(setId: string): SetProgress {
-  return getFromStorage<SetProgress>(setProgressKey(setId), {});
-}
-
-export function saveSetProgress(setId: string, progress: SetProgress): boolean {
-  return setToStorage(setProgressKey(setId), progress);
-}
-
-export function deleteSetProgress(setId: string): boolean {
-  if (typeof window === 'undefined') return false;
+// REFACTOR: Fetch progress from Supabase
+export async function getSetProgress(userId: string, setId: string): Promise<SetProgress> {
+  // Trivial change comment
+  if (!userId || !setId) {
+    console.error("getSetProgress called without userId or setId.");
+    return {};
+  }
+  console.log(`Fetching UserSetProgress from Supabase for userId: ${userId}, setId: ${setId}`);
   try {
-    localStorage.removeItem(setProgressKey(setId));
-    return true;
+    const { data, error } = await supabase
+      .from('UserSetProgress')
+      .select('progressData') // Select only the JSONB column
+      .eq('userId', userId)
+      .eq('setId', setId)
+      .maybeSingle(); // Expect 0 or 1 record
+
+    if (error) {
+      console.error('Error fetching UserSetProgress from Supabase:', error);
+      throw error;
+    }
+
+    if (data && data.progressData) {
+      console.log(`Successfully fetched UserSetProgress`);
+      // Parse the JSONB data
+      return data.progressData as SetProgress; // Assuming it's stored correctly
+    } else {
+      console.log(`No UserSetProgress found for userId: ${userId}, setId: ${setId}. Returning empty object.`);
+      return {}; // Return empty object if no progress found
+    }
+
   } catch (error) {
-    console.error(`Error deleting progress for ${setId}:`, error);
+    console.error('Unexpected error in getSetProgress:', error);
+    return {}; // Return empty object on error
+  }
+}
+
+// REFACTOR: Upsert progress into Supabase
+export async function saveSetProgress(userId: string, setId: string, progress: SetProgress): Promise<boolean> {
+  if (!userId || !setId) {
+    console.error("saveSetProgress called without userId or setId.");
+    return false;
+  }
+  if (progress === undefined || progress === null) { // Allow empty object {}
+    console.error("saveSetProgress called with invalid progress data.");
+    return false;
+  }
+
+  console.log(`Saving/Updating UserSetProgress to Supabase for userId: ${userId}, setId: ${setId}`);
+
+  const recordToUpsert = {
+    userId: userId,
+    setId: setId,
+    progressData: progress, // Supabase client handles JSON stringification for JSONB
+    lastAccessedAt: new Date().toISOString()
+  };
+
+  try {
+    // Upsert: Inserts if combo doesn't exist, updates if it does
+    const { error } = await supabase
+      .from('UserSetProgress')
+      .upsert(recordToUpsert, {
+        onConflict: 'userId, setId' // Specify conflict columns
+      });
+      
+    if (error) {
+      console.error('Error upserting UserSetProgress into Supabase:', error);
+      return false;
+    }
+
+    console.log(`Successfully saved UserSetProgress for userId: ${userId}, setId: ${setId}`);
+    return true;
+
+  } catch (error) {
+    console.error('Unexpected error in saveSetProgress:', error);
+    return false;
+  }
+}
+
+// REFACTOR: Delete progress from Supabase
+export async function deleteSetProgress(userId: string, setId: string): Promise<boolean> {
+  if (!userId || !setId) {
+    console.error("deleteSetProgress called without userId or setId.");
+    return false;
+  }
+  console.log(`Deleting UserSetProgress from Supabase for userId: ${userId}, setId: ${setId}`);
+  try {
+    const { error } = await supabase
+      .from('UserSetProgress')
+      .delete()
+      .eq('userId', userId)
+      .eq('setId', setId);
+
+    if (error) {
+      console.error('Error deleting UserSetProgress from Supabase:', error);
+      return false;
+    }
+
+    console.log(`Successfully deleted UserSetProgress for userId: ${userId}, setId: ${setId}`);
+    return true;
+
+  } catch (error) {
+    console.error('Unexpected error in deleteSetProgress:', error);
     return false;
   }
 }
@@ -429,4 +516,31 @@ export function deleteSetProgress(setId: string): boolean {
 
 export function generateUUID(): string {
   return uuidv4();
-} 
+}
+
+// --- Cleanup --- 
+// Remove old localStorage helpers if no longer needed anywhere else
+// Commenting out for now, can be deleted later after full verification.
+/*
+function getFromStorage<T>(key: string, defaultValue: T): T {
+  if (typeof window === 'undefined') return defaultValue;
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    console.error(`Error reading localStorage key “${key}”:`, error);
+    return defaultValue;
+  }
+}
+
+function setToStorage<T>(key: string, value: T): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (error) {
+    console.error(`Error setting localStorage key “${key}”:`, error);
+    return false;
+  }
+}
+*/ 

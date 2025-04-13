@@ -241,17 +241,17 @@ const SetWizardPage = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // --- NEW: State for dynamic placeholders ---
-  const [situationPlaceholder, setSituationPlaceholder] = useState<string>(seriousSituationsExamples[0]);
-  const [focusPlaceholder, setFocusPlaceholder] = useState<string>(ridiculousFocusExamples[0]);
-  const [namesPlaceholder, setNamesPlaceholder] = useState<string>(ridiculousNamesExamples[0]);
+  const [situationPlaceholder, setSituationPlaceholder] = useState<string>(`E.g., ${seriousSituationsExamples[0]}`);
+  const [focusPlaceholder, setFocusPlaceholder] = useState<string>(`E.g., ${ridiculousFocusExamples[0]}`);
+  const [namesPlaceholder, setNamesPlaceholder] = useState<string>(`E.g., ${ridiculousNamesExamples[0]}`);
 
   // Generate a unique set name when component mounts
   useEffect(() => {
     generateSetName();
     // --- NEW: Set random placeholders on mount ---
-    setSituationPlaceholder(getRandomElement(seriousSituationsExamples));
-    setFocusPlaceholder(getRandomElement(ridiculousFocusExamples));
-    setNamesPlaceholder(getRandomElement(ridiculousNamesExamples));
+    setSituationPlaceholder(`E.g., ${getRandomElement(seriousSituationsExamples)}`);
+    setFocusPlaceholder(`E.g., ${getRandomElement(ridiculousFocusExamples)}`);
+    setNamesPlaceholder(`E.g., ${getRandomElement(ridiculousNamesExamples)}`);
   }, []);
 
   // Update set name when relevant inputs change

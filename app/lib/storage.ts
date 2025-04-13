@@ -270,7 +270,7 @@ export async function deleteSetMetaData(setId: string): Promise<boolean> {
 
 // --- Set Content Management --- 
 
-// REFACTOR: Fetch Phrases from Supabase
+// REFACTOR: Fetch Phrases from Supabase, include ID
 export async function getSetContent(setId: string): Promise<Phrase[]> {
   if (!setId) {
     console.error("getSetContent called without setId.");
@@ -280,7 +280,7 @@ export async function getSetContent(setId: string): Promise<Phrase[]> {
   try {
     const { data, error } = await supabase
       .from('Phrase')
-      .select('english, thai, thaiMasculine, thaiFeminine, pronunciation, mnemonic, examplesJson') // Select relevant columns
+      .select('id, english, thai, thaiMasculine, thaiFeminine, pronunciation, mnemonic, examplesJson') // Select id
       .eq('setId', setId);
 
     if (error) {
@@ -291,14 +291,14 @@ export async function getSetContent(setId: string): Promise<Phrase[]> {
     const phrasesData = data || [];
 
     // Map Supabase record to Phrase interface (handle examplesJson)
-    return phrasesData.map((dbPhrase: any) => ({ // Add type later if needed
+    return phrasesData.map((dbPhrase: any) => ({ 
+      id: dbPhrase.id, // Include id
       english: dbPhrase.english,
       thai: dbPhrase.thai,
       thaiMasculine: dbPhrase.thaiMasculine,
       thaiFeminine: dbPhrase.thaiFeminine,
       pronunciation: dbPhrase.pronunciation,
       mnemonic: dbPhrase.mnemonic || undefined,
-      // Parse examplesJson if it exists, otherwise default to empty array
       examples: dbPhrase.examplesJson ? JSON.parse(dbPhrase.examplesJson) : [] 
     }));
 
@@ -313,7 +313,7 @@ export async function getSetContent(setId: string): Promise<Phrase[]> {
   }
 }
 
-// REFACTOR: Batch insert Phrases into Supabase
+// REFACTOR: Batch insert Phrases into Supabase, generate IDs
 export async function saveSetContent(setId: string, phrases: Phrase[]): Promise<boolean> {
   if (!setId || !phrases || phrases.length === 0) {
     console.error("saveSetContent called without setId or with empty phrases array.");
@@ -322,18 +322,17 @@ export async function saveSetContent(setId: string, phrases: Phrase[]): Promise<
 
   console.log(`Saving ${phrases.length} Phrases to Supabase for setId: ${setId}`);
 
-  // Prepare records for Supabase batch insert, ensuring setId is included
+  // Prepare records for Supabase batch insert, generating a unique ID for each phrase
   const recordsToInsert = phrases.map(phrase => ({
+    id: uuidv4(), // Generate unique ID for each phrase
     setId: setId,
     english: phrase.english,
     thai: phrase.thai,
     thaiMasculine: phrase.thaiMasculine,
     thaiFeminine: phrase.thaiFeminine,
     pronunciation: phrase.pronunciation,
-    mnemonic: phrase.mnemonic || null, // Use null for empty/undefined
-    // Store examples as JSON string in the examplesJson column
+    mnemonic: phrase.mnemonic || null, 
     examplesJson: phrase.examples && phrase.examples.length > 0 ? JSON.stringify(phrase.examples) : null 
-    // Assuming the Phrase table in Supabase has an auto-generated ID
   }));
 
   try {

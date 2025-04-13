@@ -2,6 +2,7 @@ import { geminiPro } from './gemini'; // Import the potentially null Gemini inst
 
 // Define types for the generator
 export interface Phrase {
+  id?: string; // Optional ID, populated from DB
   english: string;
   thai: string;
   thaiMasculine: string;

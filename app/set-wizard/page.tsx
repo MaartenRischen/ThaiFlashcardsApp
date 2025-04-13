@@ -182,16 +182,20 @@ const CardEditor = ({
   );
 };
 
+// Define the specific level type
+type ThaiLevel = 'beginner' | 'intermediate' | 'advanced';
+
 const SetWizardPage = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { addSet } = useSet(); // Get addSet from context
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [thaiLevel, setThaiLevel] = useState<string>('beginner');
-  const [specificTopics, setSpecificTopics] = useState<string>('');
-  const [friendNames, setFriendNames] = useState<string>('');
+  const [thaiLevel, setThaiLevel] = useState<ThaiLevel | ''>( ''); // Use specific type
   const [situations, setSituations] = useState<string>('');
+  const [specificTopics, setSpecificTopics] = useState<string>('');
+  const [cardCount, setCardCount] = useState<number>(8); // Default count
   const [seriousnessLevel, setSeriousnessLevel] = useState<number>(50);
-  const [cardCount, setCardCount] = useState<number>(8);
+  const [friendNames, setFriendNames] = useState<string>('');
   const [customSetName, setCustomSetName] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generationProgress, setGenerationProgress] = useState<{ completed: number, total: number }>({ completed: 0, total: 0 });
@@ -371,103 +375,36 @@ const SetWizardPage = () => {
     setGeneratedPhrases(updatedPhrases);
   };
 
-  const handleCreateSet = async () => {
-    try {
-      setIsSaving(true);
-      
-      // Create the data for the set
-      const setData = {
-        name: customSetName || `Generated Set ${new Date().toLocaleDateString()}`, 
-        cleverTitle: aiGeneratedTitle, 
-        level: thaiLevel,
-        specificTopics: specificTopics,
-        source: 'wizard' as const,
-        phrases: generatedPhrases
-      };
-
-      // Log the first phrase to see its structure (for debugging)
-      if (generatedPhrases.length > 0) {
-        console.log("First phrase example:", JSON.stringify(generatedPhrases[0], null, 2));
-         
-        // Check if examples have the correct structure
-        if (generatedPhrases[0].examples && generatedPhrases[0].examples.length > 0) {
-          console.log("Example structure:", JSON.stringify(generatedPhrases[0].examples[0], null, 2));
-        }
-      }
-
-      if (status === 'authenticated') {
-        // User is logged in, save to database via API
-        console.log("Saving set to database for authenticated user");
-         
-        try {
-          const response = await fetch('/api/flashcard-sets', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(setData),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Error response from API:", errorData);
-             
-            if (response.status === 401) {
-              // Authentication error
-              alert("Your session has expired. Please sign in again to save your set.");
-              window.location.href = '/login'; // Redirect to login
-              return;
-            }
-             
-            throw new Error(errorData.error || errorData.message || 'Failed to create set');
-          }
-
-          const result = await response.json();
-          console.log("Set saved successfully:", result);
-           
-          // Update success message
-          alert(`Your set "${customSetName}" has been created and saved to your account!`);
-        } catch (error) {
-          console.error("Fetch error:", error);
-          throw error; // Re-throw to be caught by outer try/catch
-        }
-      } else {
-        // User is not logged in, save to localStorage
-        console.log("Saving set to localStorage for unauthenticated user");
-        const newId = storage.generateUUID();
-        const now = new Date().toISOString();
-         
-        const newMetaData: SetMetaData = {
-          ...setData,
-          id: newId,
-          createdAt: now,
-          phraseCount: generatedPhrases.length,
-        };
-
-        // Save the set content and metadata
-        storage.saveSetContent(newId, generatedPhrases);
-         
-        // Update available sets list
-        const currentSets = storage.getAvailableSets();
-        const updatedSets = [...currentSets, newMetaData];
-        storage.saveAvailableSets(updatedSets);
-         
-        // Set this new set as active immediately
-        storage.setActiveSetId(newId);
-         
-        // Update completion message
-        alert(`Your set "${customSetName}" has been created and saved locally. Sign in to save it to your account!`);
-      }
-    } catch (error) {
-      console.error('Error saving set:', error);
-      alert(`Error saving set: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setIsGenerating(false);
+  const handleSaveSet = async () => {
+    if (!generatedPhrases || generatedPhrases.length === 0) {
+        alert("Cannot save: No phrases were generated.");
+        return;
     }
-     
-    // Offer to return to main app
-    if (confirm('Would you like to return to the main app now?')) {
-      window.location.href = '/'; // Force reload to ensure context update
+    if (!thaiLevel) { // Ensure thaiLevel is selected
+        alert("Cannot save: Thai level is missing.");
+        return;
+    }
+
+    // Prepare the metadata for the context addSet function
+    const setData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
+        name: `Generated Set - ${thaiLevel} - ${new Date().toLocaleDateString()}`,
+        cleverTitle: `AI Set: ${specificTopics || situations || thaiLevel}`,
+        level: thaiLevel, // Correct type assured by the check above
+        specificTopics: specificTopics || undefined,
+        source: 'generated', // Literal type
+        goals: situations ? [situations] : [],
+    };
+
+    try {
+        console.log("Calling addSet with:", setData, generatedPhrases);
+        // Use the addSet function from the context
+        const newSetId = await addSet(setData, generatedPhrases);
+        console.log("Set saved via context with ID:", newSetId);
+        alert('Set successfully generated and saved! Returning to main app.');
+        router.push('/'); // Navigate back to the main app
+    } catch (error) {
+        console.error("Error saving set via context:", error);
+        alert(`Failed to save the generated set: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -506,14 +443,14 @@ const SetWizardPage = () => {
             <div>
               <h2 className="text-2xl font-bold mb-4 text-blue-400">What is your current Thai level?</h2>
               <div className="space-y-3">
-                {['beginner', 'intermediate', 'advanced'].map(level => (
+                {(['beginner', 'intermediate', 'advanced'] as ThaiLevel[]).map(level => (
                   <label key={level} className="flex items-center space-x-2 cursor-pointer p-3 rounded hover:bg-gray-800">
                     <input 
                       type="radio" 
                       name="thaiLevel" 
                       value={level} 
                       checked={thaiLevel === level}
-                      onChange={(e) => setThaiLevel(e.target.value)}
+                      onChange={(e) => setThaiLevel(e.target.value as ThaiLevel)}
                       className="accent-blue-400 h-4 w-4"
                     />
                     <span className="capitalize">{level}</span>
@@ -625,7 +562,7 @@ const SetWizardPage = () => {
               {/* UPDATED Input Summary */} 
               <div className="w-full max-w-md text-left bg-gray-700 bg-opacity-40 rounded-lg p-3 mb-4 text-sm">
                  <p className="text-gray-400">
-                   <span className="font-semibold text-gray-300">Level:</span> {thaiLevel.charAt(0).toUpperCase() + thaiLevel.slice(1)}
+                   <span className="font-semibold text-gray-300">Level:</span> {thaiLevel?.charAt(0).toUpperCase() + thaiLevel?.slice(1) || 'Not selected'}
                  </p>
                  <p className="text-gray-400">
                    <span className="font-semibold text-gray-300">Situations:</span> {situations || 'General'}
@@ -750,7 +687,7 @@ const SetWizardPage = () => {
                 <h3 className="font-semibold mb-2">Set Summary</h3>
                 <ul className="space-y-1 text-gray-300 text-sm">
                   <li><span className="text-gray-400">Cards:</span> {generatedPhrases.length}</li>
-                  <li><span className="text-gray-400">Level:</span> {thaiLevel.charAt(0).toUpperCase() + thaiLevel.slice(1)}</li>
+                  <li><span className="text-gray-400">Level:</span> {thaiLevel?.charAt(0).toUpperCase() + thaiLevel?.slice(1) || 'Not selected'}</li>
                   <li><span className="text-gray-400">Situations:</span> {situations || 'General'}</li>
                    {specificTopics && (
                      <li><span className="text-gray-400">Specific Focus:</span> {specificTopics}</li>
@@ -793,7 +730,7 @@ const SetWizardPage = () => {
                     onChange={handleUpdateCard}
                     onRegenerate={handleRegenerateCard}
                     index={currentPreviewIndex}
-                    level={thaiLevel}
+                    level={thaiLevel as string}
                     specificTopics={specificTopics}
                     friendNames={friendNames.split(',').map(n=>n.trim()).filter(n=>n)}
                     userName={session?.user?.name || 'You'}
@@ -809,7 +746,7 @@ const SetWizardPage = () => {
               
               {/* Create Set Button */}
               <button 
-                onClick={handleCreateSet} 
+                onClick={handleSaveSet} 
                 disabled={generatedPhrases.length === 0 || !customSetName.trim() || isGenerating}
                 className={`w-full py-3 rounded-lg font-bold transition-colors ${
                   generatedPhrases.length === 0 || !customSetName.trim() || isGenerating

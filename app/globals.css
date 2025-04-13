@@ -174,23 +174,24 @@ html.fake-dark-mode-active body > .app-options-modal-container {
   display: flex !important; 
 }
 
-/* Hide everything *inside* the modal by default */
-html.fake-dark-mode-active .app-options-modal-container > div > div > * {
-   visibility: hidden; /* Use visibility to maintain layout */
+/* NEW Rule: Hide siblings of the dark mode toggle within its direct parent */
+/* Assumes the parent has the class 'space-y-6', adjust if needed */
+html.fake-dark-mode-active .space-y-6 > *:not(#dark-mode-toggle-container) {
+   visibility: hidden;
 }
 
-/* Keep the dark mode toggle container and its direct children visible */
-html.fake-dark-mode-active .app-options-modal-container > div > div > #dark-mode-toggle-container,
-html.fake-dark-mode-active .app-options-modal-container > div > div > #dark-mode-toggle-container > * {
-   visibility: visible;
-}
-
-/* Add some styling to make the toggle container stand out */
+/* Keep the styling to make the toggle container stand out */
 html.fake-dark-mode-active #dark-mode-toggle-container {
+  visibility: visible; /* Ensure the container itself is visible */
   background-color: #333; /* Dark grey background */
   padding: 1rem;
   border-radius: 0.5rem;
   border: 1px solid #555;
   margin-top: 1rem; /* Add some space */
   margin-bottom: 1rem;
+}
+
+/* NEW Rule: Ensure visibility cascades within the toggle container (safer) */
+html.fake-dark-mode-active #dark-mode-toggle-container * {
+  visibility: visible;
 } 

@@ -30,9 +30,12 @@ export function Navbar() {
                 <Link href="/my-sets" className="text-sm font-medium transition-colors hover:text-primary">
                   My Sets
                 </Link>
+                {/* Remove Profile Link */}
+                {/* 
                 <Link href="/profile" className="text-sm font-medium transition-colors hover:text-primary">
                   Profile
                 </Link>
+                */}
               </div>
               <Button 
                 variant="outline" 

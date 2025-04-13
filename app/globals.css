@@ -157,4 +157,40 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+}
+
+/* Fake Dark Mode Easter Egg */
+html.fake-dark-mode-active body {
+  background-color: black;
+}
+
+/* Hide everything by default when fake dark mode is active */
+html.fake-dark-mode-active body > *:not(.app-options-modal-container) {
+  display: none !important; /* Use important to override other display properties */
+}
+
+/* Keep the modal container visible */
+html.fake-dark-mode-active body > .app-options-modal-container {
+  display: flex !important; 
+}
+
+/* Hide everything *inside* the modal by default */
+html.fake-dark-mode-active .app-options-modal-container > div > div > * {
+   visibility: hidden; /* Use visibility to maintain layout */
+}
+
+/* Keep the dark mode toggle container and its direct children visible */
+html.fake-dark-mode-active .app-options-modal-container > div > div > #dark-mode-toggle-container,
+html.fake-dark-mode-active .app-options-modal-container > div > div > #dark-mode-toggle-container > * {
+   visibility: visible;
+}
+
+/* Add some styling to make the toggle container stand out */
+html.fake-dark-mode-active #dark-mode-toggle-container {
+  background-color: #333; /* Dark grey background */
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #555;
+  margin-top: 1rem; /* Add some space */
+  margin-bottom: 1rem;
 } 

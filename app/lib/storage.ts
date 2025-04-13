@@ -1,6 +1,6 @@
 import { Phrase } from '../lib/set-generator';
 import { v4 as uuidv4 } from 'uuid';
-import { supabase } from './supabaseClient'; // Correct path assuming it's in the same lib directory
+import { supabase } from '@/lib/supabaseClient'; // Use path alias
 
 // Storage key prefixes
 const PREFIX = 'thaiFlashcards_';
@@ -186,36 +186,108 @@ export async function addSetMetaData(userId: string, newSetMetaData: Omit<SetMet
   }
 }
 
-// KEEPING OLD FUNCTIONS TEMPORARILY - Need refactoring
-export function saveAllSetMetaData(sets: SetMetaData[]): boolean {
-  // This function is likely obsolete with DB storage, 
-  // unless batch updates are needed later.
-  console.warn('saveAllSetMetaData using localStorage - needs refactoring/removal for Supabase');
-  return false; // No longer directly applicable
+// REFACTOR: Update Supabase record
+export async function updateSetMetaData(updatedSet: SetMetaData): Promise<boolean> {
+  if (!updatedSet || !updatedSet.id) {
+    console.error("updateSetMetaData called without valid updatedSet data or ID.");
+    return false;
+  }
+
+  // Prepare record for Supabase update (only update relevant fields)
+  // Exclude fields not directly stored or managed differently (like isFullyLearned, userId)
+  const recordToUpdate: Partial<Omit<FlashcardSetRecord, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & { updatedAt: string }> = {
+    name: updatedSet.name,
+    cleverTitle: updatedSet.cleverTitle || null,
+    level: updatedSet.level || null,
+    goals: updatedSet.goals || null,
+    specificTopics: updatedSet.specificTopics || null,
+    source: updatedSet.source,
+    phraseCount: updatedSet.phraseCount,
+    updatedAt: new Date().toISOString() // Update the timestamp
+  };
+
+  console.log(`Updating SetMetaData in Supabase for id: ${updatedSet.id}`, recordToUpdate);
+
+  try {
+    const { error } = await supabase
+      .from('FlashcardSet')
+      .update(recordToUpdate)
+      .eq('id', updatedSet.id);
+
+    if (error) {
+      console.error('Error updating SetMetaData in Supabase:', error);
+      return false;
+    }
+
+    console.log(`Successfully updated SetMetaData for id: ${updatedSet.id}`);
+    return true;
+
+  } catch (error) {
+    console.error('Unexpected error in updateSetMetaData:', error);
+    return false;
+  }
 }
 
-export function updateSetMetaData(updatedSet: SetMetaData): boolean {
-  // TODO: Refactor this to update Supabase FlashcardSet table by id
-  console.warn('updateSetMetaData using localStorage - needs refactoring for Supabase');
-  // let sets = getAllSetMetaData(); // Needs userId, async
-  // const index = sets.findIndex(set => set.id === updatedSet.id);
-  // if (index !== -1) {
-  //   sets[index] = { ...updatedSet, isFullyLearned: updatedSet.isFullyLearned ?? false };
-  //   return saveAllSetMetaData(sets); // Needs refactoring
-  // } 
-  return false;
-}
+// REFACTOR: Delete from Supabase (including related data)
+export async function deleteSetMetaData(setId: string): Promise<boolean> {
+  if (!setId) {
+    console.error("deleteSetMetaData called without setId.");
+    return false;
+  }
 
-export function deleteSetMetaData(id: string): boolean {
-  // TODO: Refactor this to delete from Supabase FlashcardSet table by id
-  // TODO: Also needs to handle deletion of associated Phrases and UserSetProgress
-  console.warn('deleteSetMetaData using localStorage - needs refactoring for Supabase');
-  // let sets = getAllSetMetaData(); // Needs userId, async
-  // const filteredSets = sets.filter(set => set.id !== id);
-  // deleteSetContent(id);
-  // deleteSetProgress(id);
-  // return saveAllSetMetaData(filteredSets); // Needs refactoring
-  return false;
+  console.log(`Attempting to delete SetMetaData and related data for id: ${setId}`);
+
+  try {
+    // TODO: Consider using Supabase Edge Functions or DB Triggers for cascading deletes 
+    // for better atomicity and performance. Manual deletion order is important here.
+
+    // 1. Delete associated progress (important: use composite key or just setId if unique)
+    // Assuming UserSetProgress table has userId and setId columns
+    // We need userId here - this function signature might need changing or we assume 
+    // RLS handles the user context if called from a secure context.
+    // For now, let's assume we delete based on setId only, requiring RLS.
+    console.log(`Deleting UserSetProgress for setId: ${setId}`);
+    const { error: progressError } = await supabase
+        .from('UserSetProgress')
+        .delete()
+        .eq('setId', setId);
+    if (progressError) {
+        console.error('Error deleting associated UserSetProgress:', progressError);
+        // Decide if we should proceed or return false
+        // return false; 
+    }
+
+    // 2. Delete associated phrases
+    console.log(`Deleting Phrases for setId: ${setId}`);
+    const { error: phraseError } = await supabase
+        .from('Phrase')
+        .delete()
+        .eq('setId', setId);
+    if (phraseError) {
+        console.error('Error deleting associated Phrases:', phraseError);
+        // Decide if we should proceed or return false
+        // return false;
+    }
+
+    // 3. Delete the set metadata itself
+    console.log(`Deleting FlashcardSet record for id: ${setId}`);
+    const { error: setError } = await supabase
+      .from('FlashcardSet')
+      .delete()
+      .eq('id', setId);
+
+    if (setError) {
+      console.error('Error deleting SetMetaData from Supabase:', setError);
+      return false;
+    }
+
+    console.log(`Successfully deleted SetMetaData and potentially related data for id: ${setId}`);
+    return true;
+
+  } catch (error) {
+    console.error('Unexpected error in deleteSetMetaData:', error);
+    return false;
+  }
 }
 
 // --- Set Content Management --- 

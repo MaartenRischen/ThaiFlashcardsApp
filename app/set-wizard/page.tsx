@@ -301,72 +301,79 @@ const SetWizardPage = () => {
 
   const startGeneration = async () => {
     setCurrentStep(4); // Move to generation step immediately
+    setIsGenerating(true);
+    setGeneratedPhrases([]);
+    setGeneratingDisplayPhrases([]); // Clear display phrases
+    setErrorSummary(null);
+    setGenerationProgress({ completed: 0, total: cardCount });
+
+    const friendNamesArray = friendNames ? friendNames.split(',').map(n => n.trim()).filter(n => n) : [];
+    const userName = session?.user?.name || 'You'; // Get username from session
+
+    // Prepare the request body for the API route
+    const requestBody = {
+      level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
+      situations: situations || undefined,
+      specificTopics: specificTopics || undefined,
+      friendNames: friendNamesArray,
+      userName: userName,
+      seriousnessLevel: seriousnessLevel,
+      count: cardCount
+    };
+
+    console.log("SetWizard: Calling /api/generate-set with body:", requestBody);
+
     try {
-      const friendNamesArray = friendNames ? friendNames.split(',').map(n => n.trim()).filter(n => n) : [];
-      const userName = 'You'; // Could be personalized in future
-
-      setIsGenerating(true);
-      setGeneratedPhrases([]);
-      setGeneratingDisplayPhrases([]);
-      setErrorSummary(null);
-      setGenerationProgress({ completed: 0, total: cardCount });
-
-      console.log("Starting generation with inputs:", {
-        level: thaiLevel,
-        specificTopics,
-        friendNames: friendNamesArray,
-        situations,
-        seriousnessLevel
+      const response = await fetch('/api/generate-set', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
       });
 
-      const result = await generateCustomSet(
-        {
-          level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
-          specificTopics: specificTopics || undefined,
-          friendNames: friendNamesArray,
-          userName: userName,
-          topicsToDiscuss: situations || undefined,
-          seriousnessLevel: seriousnessLevel,
-        },
-        cardCount,
-        (progress) => {
-          console.log("Generation progress:", progress);
-          setGenerationProgress({
-            completed: progress.completed,
-            total: progress.total
-          });
-          // CRITICAL: Update the display phrases in real-time
-          if (progress.latestPhrases && progress.latestPhrases.length > 0) {
-            setGeneratingDisplayPhrases(prev => [...prev, ...(progress.latestPhrases || [])]);
-          }
+      console.log("SetWizard: API response status:", response.status);
+
+      if (!response.ok) {
+        // Attempt to parse error from API response body
+        let errorDetails = 'Unknown API error';
+        try {
+            const errorJson = await response.json();
+            errorDetails = errorJson.error || errorJson.details || JSON.stringify(errorJson);
+            console.error("SetWizard: API error response body:", errorJson);
+        } catch (parseError) {
+            errorDetails = `API responded with status ${response.status} but failed to parse error body.`;
+            console.error("SetWizard: Failed to parse error response body:", parseError);
         }
-      );
+        throw new Error(`API Error: ${errorDetails}`);
+      }
 
-      setGeneratedPhrases(result.phrases); // Store the final complete list
-      setGenerationErrors(result.aggregatedErrors);
-      
-      // Set final display list to the complete generated list
-      setGeneratingDisplayPhrases(result.phrases); 
+      // Parse the successful JSON response from the API route
+      const result = await response.json();
+      console.log("SetWizard: API response parsed successfully:", result);
 
+      // Update state based on the API response
+      setGeneratedPhrases(result.phrases || []); 
+      setGeneratingDisplayPhrases(result.phrases || []); // Show final list
+      setGenerationErrors(result.aggregatedErrors || []); // Assuming API returns this structure
       if (result.cleverTitle) {
         setAiGeneratedTitle(result.cleverTitle);
         setCustomSetName(result.cleverTitle); 
       }
-      
       if (result.errorSummary) {
-        console.log("Generation completed with errors:", result.errorSummary);
+        console.log("Generation completed with errors (from API):", result.errorSummary);
         setErrorSummary(result.errorSummary);
       }
       
-      // REMOVED: No longer auto-advance to step 5 here
+      // Manually update progress to 100% as we don't have streaming updates from API yet
+      setGenerationProgress({ completed: result.phrases?.length ?? 0, total: cardCount });
 
     } catch (error) {
-      console.error("Failed to generate flashcard set:", error);
-      alert("There was an error generating your flashcard set. Please try again.");
-      // Optionally, handle error by allowing user to go back to input step
-      setCurrentStep(3); 
+      console.error("SetWizard: Failed to generate flashcard set via API:", error);
+      alert(`There was an error generating your flashcard set. Please check the console or try again. Error: ${error instanceof Error ? error.message : String(error)}`);
+      setCurrentStep(3); // Go back to input step on fetch/parse error
     } finally {
-      setIsGenerating(false); // Mark generation as complete regardless of success/failure
+      setIsGenerating(false); 
     }
   };
 

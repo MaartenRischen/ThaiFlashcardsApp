@@ -102,7 +102,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     async jwt({ token, user }) {
-      // On initial sign in (when user object is present), copy id and name to token
+      // On initial sign in (when user object is present), copy id, name, and email to token
       if (user) {
         if (user.id) {
           token.id = user.id;
@@ -110,6 +110,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (user.name) {
           token.name = user.name;
         } 
+        // Add email to token
+        if (user.email) {
+          token.email = user.email;
+        }
       }
       return token;
     },

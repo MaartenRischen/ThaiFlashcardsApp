@@ -280,6 +280,10 @@ async function generateFlashcardsBatch(
     // Try to parse the JSON object response
     let parsedResponse: any;
     try {
+      // --- NEW: Log the text just before parsing ---
+      const logPrefix = batchIndex === -1 ? "[Single Card Attempt]" : `[Batch ${batchIndex}]`;
+      console.log(`${logPrefix} Attempting to parse cleaned text (length ${cleanedText.length}):`, cleanedText);
+      // --- End Log ---
       parsedResponse = JSON.parse(cleanedText);
       console.log(`[Batch ${batchIndex}] Successfully parsed JSON response object`);
     } catch (parseError: any) {

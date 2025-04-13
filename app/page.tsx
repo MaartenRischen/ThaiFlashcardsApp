@@ -1184,7 +1184,7 @@ export default function ThaiFlashcards() {
                   </div>
                 </div> 
                 
-                {/* === Gender Slider and Polite Mode Toggle Section - MOVED HERE === */ 
+                {/* === Gender Slider and Polite Mode Toggle Section - MOVED HERE === */}
                 <div className="flex items-center justify-center space-x-4 mb-6">
                   {/* Gender Toggle */} 
                   <label htmlFor="gender-toggle" className="flex items-center cursor-pointer">
@@ -1219,7 +1219,7 @@ export default function ThaiFlashcards() {
                     </div>
                     <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
                   </label>
-                </div> {/* End Toggle Section */} 
+                </div> 
 
                 {/* Mnemonic Section */} 
                 <div className="mt-4">

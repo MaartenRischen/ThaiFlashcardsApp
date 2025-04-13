@@ -30,8 +30,18 @@ export function FlashcardHeader({
 
       {/* Content column - with all the buttons and dropdown */}
       <div className="flex flex-col">
-        {/* Top Row: Make Your Own Set button */}
-        <div className="px-4 py-2 flex justify-end">
+        {/* Top Row: Progress & Make Your Own Set buttons */}
+        <div className="px-4 py-2 flex justify-end items-center gap-x-3">
+          {/* Progress Button - MOVED HERE */}
+          <button
+            onClick={() => setShowProgress(true)}
+            className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"
+            aria-label="View Set Progress"
+          >
+            Progress
+          </button>
+          
+          {/* Make Your Own Set button */}
           <button
             onClick={() => window.open('/set-wizard', '_blank')}
             className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center whitespace-nowrap"
@@ -57,15 +67,6 @@ export function FlashcardHeader({
             aria-label="How It Works"
           >
             ?
-          </button>
-
-          {/* Progress Button - NEW */}
-          <button
-            onClick={() => setShowProgress(true)}
-            className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"
-            aria-label="View Set Progress"
-          >
-            Progress
           </button>
 
           {/* Set Options Button */}

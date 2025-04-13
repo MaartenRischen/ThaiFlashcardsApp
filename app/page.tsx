@@ -369,11 +369,14 @@ export default function ThaiFlashcards() {
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [isAppOptionsMenuOpen, setIsAppOptionsMenuOpen] = useState(false); // Renamed
   const [isSetOptionsMenuOpen, setIsSetOptionsMenuOpen] = useState(false); // New state for Set Options
-  const [tutorialStep, setTutorialStep] = useState<number>(0); 
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // Default to true (dark)
+  const [tutorialStep, setTutorialStep] = useState<number>(0);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false); // Default to false (light)
   const [showMnemonicHint, setShowMnemonicHint] = useState(false); // NEW: State for front hint
 
-  // Add ref to track previous showAnswer state
+  // --- NEW: Ref for dark mode timeout ---
+  const darkModeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Add ref to track previous showAnswer state - RESTORED
   const prevShowAnswerRef = React.useRef(false);
 
   console.log("ThaiFlashcards: Component rendering/re-rendering. randomSentence:", randomSentence); // DEBUG
@@ -998,37 +1001,54 @@ export default function ThaiFlashcards() {
     }
   };
 
-  // Dark Mode Effect - REVISED FOR FAKE DARK MODE
+  // Dark Mode Effect - REVISED TO ALWAYS START IN NORMAL MODE
   useEffect(() => {
-    const savedMode = localStorage.getItem('darkMode');
-    const initialModeIsFakeDark = savedMode === 'true'; // Check if saved preference is 'on'
+    // // Remove reading from localStorage
+    // const savedMode = localStorage.getItem('darkMode');
+    // const initialModeIsFakeDark = savedMode === 'true';
     
-    setIsDarkMode(initialModeIsFakeDark); // Set initial state
+    // Always start with fake dark mode OFF
+    setIsDarkMode(false); 
 
-    if (initialModeIsFakeDark) {
-      document.documentElement.classList.add('fake-dark-mode-active');
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.remove('fake-dark-mode-active');
-      // Apply default theme (remove dark) if fake dark is off
-      document.documentElement.classList.remove('dark'); 
-    }
-    // We don't need to apply the 'dark' class here anymore
+    // Always remove fake dark mode class on load
+    document.documentElement.classList.remove('fake-dark-mode-active');
+    
+    // Ensure regular dark mode class is also removed on load
+    document.documentElement.classList.remove('dark'); 
 
-  }, []);
+  }, []); // Empty array ensures this runs only once on mount
 
-  // Handler to toggle dark mode and save preference - REVISED FOR FAKE DARK MODE
+  // Handler to toggle dark mode and save preference - REVISED FOR FAKE DARK MODE JOKE
   const toggleDarkMode = (checked: boolean) => {
-    setIsDarkMode(checked); // Still track the state
-    localStorage.setItem('darkMode', checked.toString()); // Still save preference
+    // Clear any existing timeout if the user toggles rapidly
+    if (darkModeTimeoutRef.current) {
+      clearTimeout(darkModeTimeoutRef.current);
+      darkModeTimeoutRef.current = null;
+    }
+
+    setIsDarkMode(checked); // Update state immediately for toggle visual
+
     if (checked) {
+      // Activate fake dark mode
       document.documentElement.classList.add('fake-dark-mode-active');
       document.documentElement.classList.remove('dark'); // Ensure regular dark mode is off
+      localStorage.setItem('darkMode', 'true'); // Save preference (even though it reverts)
+
+      // Set a timeout to revert after 1 second
+      darkModeTimeoutRef.current = setTimeout(() => {
+        console.log("Reverting fake dark mode automatically.");
+        setIsDarkMode(false); // Set state back to false
+        document.documentElement.classList.remove('fake-dark-mode-active');
+        localStorage.setItem('darkMode', 'false'); // Update storage
+        darkModeTimeoutRef.current = null; // Clear the ref
+      }, 1000); // 1000 milliseconds = 1 second
+
     } else {
+      // Deactivate fake dark mode (if manually turned off before timeout)
       document.documentElement.classList.remove('fake-dark-mode-active');
-      // Optional: re-apply normal 'dark' class if needed based on other logic, 
-      // but for this joke, we can just assume non-fake is light.
-      document.documentElement.classList.remove('dark'); 
+      localStorage.setItem('darkMode', 'false');
+      // Ensure regular dark mode class is also removed
+      document.documentElement.classList.remove('dark');
     }
   };
 
@@ -1164,7 +1184,7 @@ export default function ThaiFlashcards() {
                   </div>
                 </div> 
                 
-                {/* === Gender Slider and Polite Mode Toggle Section - MOVED HERE === */} 
+                {/* === Gender Slider and Polite Mode Toggle Section - MOVED HERE === */ 
                 <div className="flex items-center justify-center space-x-4 mb-6">
                   {/* Gender Toggle */} 
                   <label htmlFor="gender-toggle" className="flex items-center cursor-pointer">
@@ -1270,9 +1290,9 @@ export default function ThaiFlashcards() {
                   </div>
                 </div> {/* End Context Section */} 
                 
-              </div>
+              </div> // This closing div might be the issue or misplaced
             )}
-          </div>
+          </div> // Closing div for neumorphic rounded-xl flex flex-col
         </div>
       </div>
 

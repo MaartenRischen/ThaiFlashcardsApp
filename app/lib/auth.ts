@@ -2,8 +2,7 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/app/lib/prisma";
-import bcrypt from "bcrypt";
-import { PrismaClientInitializationError, PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { createClient } from "@supabase/supabase-js";
 
 // Ensure we have a secret
 const secret = process.env.NEXTAUTH_SECRET;
@@ -30,62 +29,53 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        // Ensure Supabase credentials are set before proceeding
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseAnonKey) {
+          console.error("Cannot authorize: Supabase URL or Anon Key missing from environment variables.");
+          return null;
+        }
         if (!credentials?.email || !credentials?.password) {
+          console.error("Authorize attempt with missing email or password.");
           return null;
         }
 
+        // Create a temporary Supabase client for auth check
+        const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+          auth: { persistSession: false }, // Don't persist session server-side for this check
+        });
+
         try {
-          // Test database connection first with a simple query
-          try {
-            await prisma.$queryRaw`SELECT 1`;
-            console.log("Database connection test successful");
-          } catch (error: any) {
-            console.error("Database connection test failed:", {
-              message: error?.message,
-              code: error?.code,
-              clientVersion: error?.clientVersion,
-              meta: error?.meta
-            });
-            throw error; // Re-throw to be caught by the outer try/catch
-          }
-          
-          const user = await prisma.user.findUnique({
-            where: {
-              email: credentials.email as string,
-            },
+          console.log(`Attempting Supabase sign-in for: ${credentials.email}`);
+          // Attempt to sign in with Supabase Auth
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: credentials.email as string,
+            password: credentials.password as string,
           });
 
-          if (!user || !user.password) {
+          if (error) {
+            console.error(`Supabase sign-in error for ${credentials.email}:`, error.message);
+            return null; // Indicates invalid credentials or other Supabase error
+          }
+
+          if (data?.user) {
+            console.log(`Supabase sign-in successful for ${credentials.email}, user ID: ${data.user.id}`);
+            // Return the essential info needed by next-auth session/token callbacks
+            return {
+              id: data.user.id, // Use the Supabase user ID
+              email: data.user.email,
+              // name: data.user.user_metadata?.name, // Optional
+              // image: data.user.user_metadata?.avatar_url, // Optional
+            };
+          } else {
+            console.error(`Supabase sign-in for ${credentials.email} reported success but returned no user data.`);
             return null;
           }
 
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password as string,
-            user.password
-          );
-
-          if (!isPasswordValid) {
-            return null;
-          }
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            image: user.image,
-          };
         } catch (error: any) {
-          console.error("Error in authorize:", error);
-          // Enhanced error logging with details
-          if (error?.name === 'PrismaClientInitializationError' || 
-              error?.name === 'PrismaClientKnownRequestError') {
-            console.error("Database connection error details:", {
-              message: error?.message,
-              code: error?.code,
-              clientVersion: error?.clientVersion,
-              meta: error?.meta
-            });
-          }
+          console.error(`Unexpected error during Supabase authorize for ${credentials.email}:`, error);
           return null;
         }
       },

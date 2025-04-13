@@ -40,7 +40,6 @@ const getRandomElement = <T extends unknown>(arr: T[]): T => arr[Math.floor(Math
 const CardEditor = ({ 
   phrase, 
   onChange,
-  onRegenerate,
   index,
   level,
   specificTopics,
@@ -51,7 +50,6 @@ const CardEditor = ({
 }: { 
   phrase: Phrase, 
   onChange: (index: number, updatedPhrase: Phrase) => void,
-  onRegenerate: (index: number) => void,
   index: number,
   level: string,
   specificTopics?: string,
@@ -160,12 +158,6 @@ const CardEditor = ({
               >
                 Edit
               </button>
-              <button 
-                onClick={() => onRegenerate(index)}
-                className="text-green-400 hover:text-green-300 text-sm"
-              >
-                Regenerate
-              </button>
             </div>
           </div>
           
@@ -229,7 +221,6 @@ const SetWizardPage = () => {
   const [generatedPhrases, setGeneratedPhrases] = useState<Phrase[]>([]);
   const [generationErrors, setGenerationErrors] = useState<(BatchError & { batchIndex: number })[]>([]);
   const [currentPreviewIndex, setCurrentPreviewIndex] = useState<number>(0);
-  const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
   const [errorSummary, setErrorSummary] = useState<{
     errorTypes: string[]; 
     totalErrors: number;
@@ -374,41 +365,6 @@ const SetWizardPage = () => {
       setCurrentStep(3); // Go back to input step on fetch/parse error
     } finally {
       setIsGenerating(false); 
-    }
-  };
-
-  const handleRegenerateCard = async (index: number) => {
-    try {
-      setIsRegenerating(true);
-      const friendNamesArray = friendNames ? friendNames.split(',').map(n => n.trim()).filter(n => n) : [];
-      const userName = 'You'; // Personalized in future
-      
-      console.log(`Regenerating card at index ${index}`);
-      
-      const result = await generateSingleFlashcard({
-        level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
-        specificTopics: specificTopics || undefined,
-        friendNames: friendNamesArray,
-        userName: userName,
-        topicsToDiscuss: situations || undefined,
-        seriousnessLevel: seriousnessLevel,
-      });
-      
-      if (result.phrase) {
-        const updatedPhrases = [...generatedPhrases];
-        updatedPhrases[index] = result.phrase;
-        setGeneratedPhrases(updatedPhrases);
-      } else if (result.error) {
-        console.error("Error regenerating card:", result.error);
-        alert(`Error regenerating this card: ${result.error.message}`);
-      } else {
-        alert("Could not regenerate the card. Please try again.");
-      }
-    } catch (error) {
-      console.error("Failed to regenerate card:", error);
-      alert("Error regenerating this card. Please try again.");
-    } finally {
-      setIsRegenerating(false);
     }
   };
 
@@ -771,7 +727,6 @@ const SetWizardPage = () => {
                   <CardEditor
                     phrase={generatedPhrases[currentPreviewIndex]}
                     onChange={handleUpdateCard}
-                    onRegenerate={handleRegenerateCard}
                     index={currentPreviewIndex}
                     level={thaiLevel as string}
                     specificTopics={specificTopics}

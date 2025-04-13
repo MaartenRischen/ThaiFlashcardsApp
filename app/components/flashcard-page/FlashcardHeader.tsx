@@ -48,7 +48,7 @@ export function FlashcardHeader({
         </div>
 
         {/* Bottom Row: Action Buttons */}
-        <div className="px-4 py-2 flex justify-end items-center gap-x-3">
+        <div className="px-4 py-2 flex justify-end items-center gap-x-3 flex-wrap gap-y-2">
           {/* How It Works Button (?) */}
           <button
             onClick={() => setShowHowItWorks(true)}

@@ -28,9 +28,16 @@ export function FlashcardHeader({
 
       {/* Content column - with all the buttons and dropdown */}
       <div className="flex flex-col">
-        {/* Top Row: Progress & Make Your Own Set buttons */}
+        {/* Top Row: Set Selector (MOVED) */}
+        <div className="px-4 py-2 flex justify-end">
+          <div className="w-64">
+            <SetSelector />
+          </div>
+        </div>
+
+        {/* Middle Row: Progress & Make Your Own Set buttons (MOVED) */}
         <div className="px-4 py-2 flex justify-end items-center gap-x-3">
-          {/* Progress Button - MOVED HERE */}
+          {/* Progress Button */}
           <button
             onClick={() => setShowProgress(true)}
             className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"
@@ -46,13 +53,6 @@ export function FlashcardHeader({
           >
             Make Your Own Set!
           </button>
-        </div>
-
-        {/* Middle Row: Set Selector */}
-        <div className="px-4 py-2 flex justify-end">
-          <div className="w-64">
-            <SetSelector />
-          </div>
         </div>
 
         {/* Bottom Row: Action Buttons */}

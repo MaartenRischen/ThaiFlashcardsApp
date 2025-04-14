@@ -18,8 +18,8 @@ export function FlashcardHeader({
   // Access the active set metadata to get the image URL
   const { availableSets, activeSetId } = useSet();
   
-  // Find the active set metadata
-  const activeSet = availableSets.find(set => set.id === activeSetId);
+  // Find the active set metadata and assert its type
+  const activeSet = availableSets.find(set => set.id === activeSetId) as SetMetaData | undefined;
   
   // Get the image URL (use default logo as fallback)
   const setImageUrl = activeSet?.imageUrl || '/images/default-set-logo.png';

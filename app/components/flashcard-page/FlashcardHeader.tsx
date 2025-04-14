@@ -1,5 +1,6 @@
 import React from 'react';
 import { SetSelector } from '@/app/components/SetSelector'; // Assuming path
+import { useSet } from '@/app/context/SetContext'; // Import useSet hook
 
 // Update props for combined settings modal
 interface FlashcardHeaderProps {
@@ -13,10 +14,19 @@ export function FlashcardHeader({
   onOpenSettings,
   setShowProgress,
 }: FlashcardHeaderProps) {
+  // Access the active set metadata to get the image URL
+  const { availableSets, activeSetId } = useSet();
+  
+  // Find the active set metadata
+  const activeSet = availableSets.find(set => set.id === activeSetId);
+  
+  // Get the image URL (use default logo as fallback)
+  const setImageUrl = activeSet?.imageUrl || '/images/default-set-logo.png';
+  
   return (
-    <div className="bg-[#111] border-b border-[#333] grid grid-cols-[90px_1fr]">
-      {/* Logo column - fixed width */}
-      <div className="flex items-center justify-center py-3">
+    <div className="bg-[#111] border-b border-[#333] grid grid-cols-[180px_1fr]">
+      {/* Logo column - increased width to accommodate both logos */}
+      <div className="flex items-center justify-start py-3 pl-2 gap-2">
         <a href="/" title="Go to Home" className="flex-shrink-0">
           <img
             src="/images/donkey-bridge-logo.png"
@@ -24,6 +34,21 @@ export function FlashcardHeader({
             className="h-20 w-auto"
           />
         </a>
+        
+        {/* Set image */}
+        <div className="h-16 w-16 rounded-lg overflow-hidden flex-shrink-0">
+          <img
+            src={setImageUrl}
+            alt={`${activeSet?.name || 'Set'} image`}
+            className="h-full w-full object-cover"
+            key={activeSetId} // Force re-render when set changes
+            onError={(e) => {
+              // Fallback to default logo if image fails to load
+              const target = e.target as HTMLImageElement;
+              target.src = '/images/default-set-logo.png';
+            }}
+          />
+        </div>
       </div>
 
       {/* Content column - with all the buttons and dropdown */}

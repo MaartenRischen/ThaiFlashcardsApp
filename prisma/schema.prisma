@@ -113,13 +113,14 @@ model Phrase {
 // Stores user-specific progress for a particular set
 model UserSetProgress {
   id             String   @id @default(cuid())
-  userId         String   // Foreign key to User
+  userId         String   // Foreign key referencing User.supabaseAuthUserId
   setId          String   // Foreign key to FlashcardSet
   // Store the progress map { cardIndex: CardProgressData } as JSON
   progressData   Json     @db.JsonB 
   lastAccessedAt DateTime @default(now()) @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Corrected Relation: References User.supabaseAuthUserId
+  user User @relation(fields: [userId], references: [supabaseAuthUserId], onDelete: Cascade)
   set  FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
 
   @@unique([userId, setId]) // Ensure only one progress record per user per set

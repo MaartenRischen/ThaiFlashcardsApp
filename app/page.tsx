@@ -1379,29 +1379,44 @@ export default function ThaiFlashcards() {
             </div>
 
             <div className="space-y-4 text-gray-300 text-sm max-h-[70vh] overflow-y-auto pr-2">
-              <p><strong>Flashcard Learning:</strong> Review flashcards one by one. Click "Show Answer" to reveal the Thai translation, pronunciation, and other details.</p>
-              <p><strong>Spaced Repetition (SRS):</strong> Use the "Wrong", "Correct", and "Easy" buttons after revealing the answer. This tells the app how well you know the card. Cards marked "Wrong" will reappear soon, while "Easy" cards will be scheduled further out, optimizing your study time.</p>
-              <p><strong>Mnemonics:</strong> Create your own memory aids in the text box to help remember the phrase. Your mnemonics are saved automatically.</p>
-              <p><strong>Context Examples:</strong> See the phrase used in different example sentences. Use the ← and → buttons to cycle through examples. Click "Play Context" to hear the example sentence spoken.</p>
-              <p><strong>Audio Playback:</strong> Click "Play Word" or "Play Context" to hear the Thai audio. Ensure your device's sound is on.</p>
-              <p><strong>Gender & Politeness Toggles:</strong> 
-                <ul className="list-disc list-inside ml-4 mt-1">
-                  <li>Use the "Female (Ka) / Male (Krap)" toggle to switch the polite particle added to the end of phrases and pronunciations.</li>
-                  <li>Use the "Casual / Polite" toggle to control whether these polite particles (ครับ/ค่ะ) are added at all.</li>
-                </ul>
-              </p>
-              <p><strong>Set Management (Menu &gt; Set Manager):</strong> 
-                <ul className="list-disc list-inside ml-4 mt-1">
-                  <li>Switch between different flashcard sets.</li>
-                  <li>Rename your custom sets.</li>
-                  <li>Export sets to back them up or share them.</li>
-                  <li>Import sets shared by others or previously exported.</li>
-                  <li>Delete sets you no longer need.</li>
-                  <li>Reset progress for the current set.</li>
-                </ul>
-              </p>
-              <p><strong>Make Your Own Set! (AI Wizard):</strong> Click the green button in the header (or in the menu on smaller screens) to launch the AI Set Wizard. Answer a few questions, and the AI will generate a custom flashcard set tailored to your level and interests.</p>
-             
+              <div>
+                <h3 className="text-lg font-semibold text-yellow-300 mb-2">🤔 Not Your Average Flashcards...</h3>
+                <p>Forget boring, plain flashcards! Donkey Bridge spices things up with AI smarts and memory tricks (mnemonics) to make learning Thai stick (and maybe even make you chuckle).</p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-yellow-300 mb-2">🤖 AI Set Wizard - Your Personal Thai Genie</h3>
+                <p>Hit "Make Your Own Set!" and tell our slightly-ridiculous AI what you want to learn (situations, topics, even a desired tone!). It whips up custom phrases and examples tailored to you. Want to learn how to discuss existential philosophy using only food analogies? Go for it!</p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-yellow-300 mb-2">🧠 Mnemonics - Weird is Wonderful</h3>
+                <p>For many phrases, especially in the AI-generated sets, you'll find a bizarre mnemonic. These weird mental pictures are designed to be memorable. Why a donkey on a bridge? Why anxious hamsters? Don't question it, just embrace the strange – it helps!</p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-yellow-300 mb-2">👂 Listen Up! (Text-to-Speech)</h3>
+                <p>Click the speaker icons to hear the Thai phrases spoken. Practice your pronunciation without awkwardly trying to repeat sounds from a textbook.</p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-yellow-300 mb-2">✅ SRS - The Smart Part (Spaced Repetition)</h3>
+                <p>Like Anki and other serious flashcard apps, we use Spaced Repetition (SRS). When you review a card, tell us how hard it was ("Hard", "Good", "Easy"). The app calculates the best time to show it to you again – just before you forget! Easy cards appear less often, hard cards more often. Trust the donkey, he knows the way.</p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-yellow-300 mb-2">⚙️ Settings - Tweak Your Experience</h3>
+                <p>Hit the "Settings" button to toggle politeness particles (khrap/ka), switch between male/female perspective (chan/phom), and other useful stuff.</p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-yellow-300 mb-2">📊 Progress - See How Awesome You Are</h3>
+                <p>The "Progress" button shows you how you're doing with the current set – which cards are new, which are due, and which you've totally mastered.</p>
+              </div>
+
+              <div className="pt-4 text-center">
+                <button onClick={() => setShowHowItWorks(false)} className="neumorphic-button py-2 px-8 text-blue-400">Got It!</button>
+              </div>
             </div>
           </div>
         </div>

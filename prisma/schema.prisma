@@ -82,6 +82,7 @@ model FlashcardSet {
   goals          String[] // Array of goal strings
   specificTopics String?
   source         String   // default, wizard, import
+  imageUrl       String?  // URL to AI-generated or default set image
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

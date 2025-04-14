@@ -6,6 +6,7 @@ import { INITIAL_PHRASES } from '@/app/data/phrases';
 import { Phrase } from '@/app/lib/set-generator';
 import * as storage from '@/app/lib/storage'; // Use renamed storage
 import { SetMetaData, SetProgress } from '@/app/lib/storage';
+import { generateImage } from '@/app/lib/ideogram-service'; // Import image generation service
 
 interface SetContextProps {
   availableSets: SetMetaData[];
@@ -226,11 +227,36 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     console.log(`SetContext: Adding new set for userId: ${userId}`);
     setIsLoading(true);
     let newMetaId: string | null = null; 
+    let generatedImageUrl: string | null = null;
+    
     try {
-      // Prepare metadata for *storage* (excluding fields not in DB like phraseCount, isFullyLearned)
+      // Generate an image for the set if not imported
+      if (setData.source !== 'import') {
+        const prompt = `Playful cartoon illustration for a Thai language flashcard set named "${setData.name}". Theme: ${setData.goals?.join(', ') || 'general Thai vocabulary'}. Style: simple, colorful, cute donkey mascot.`;
+        console.log(`SetContext: Generating image with prompt: ${prompt}`);
+        
+        try {
+          generatedImageUrl = await generateImage(prompt);
+          if (generatedImageUrl) {
+            console.log(`SetContext: Successfully generated image URL: ${generatedImageUrl}`);
+          } else {
+            console.warn("SetContext: Image generation failed or returned null, proceeding without image.");
+          }
+        } catch (imageError) {
+          console.error("SetContext: Error during image generation:", imageError);
+          // Continue without an image
+        }
+      }
+      
+      // For the default set (special case)
+      if (setData.source === 'default') {
+        generatedImageUrl = '/images/default-set-logo.png';
+      }
+      
+      // Prepare metadata for *storage* including the generated image URL
       const metaDataForStorage: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
-          ...setData 
-          // phraseCount is omitted here
+          ...setData,
+          imageUrl: generatedImageUrl || undefined
       };
       
       // 1. Add metadata to DB 
@@ -268,6 +294,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
           goals: insertedRecord.goals || [],
           specificTopics: insertedRecord.specificTopics || undefined,
           source: insertedRecord.source as SetMetaData['source'] || 'generated',
+          imageUrl: insertedRecord.imageUrl || undefined,
           phraseCount: phrases.length, // Calculate here for local state
           isFullyLearned: false // Default
       };

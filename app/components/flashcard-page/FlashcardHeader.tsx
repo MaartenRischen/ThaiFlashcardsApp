@@ -1,6 +1,7 @@
 import React from 'react';
 import { SetSelector } from '@/app/components/SetSelector'; // Assuming path
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
+import { SetMetaData } from '@/app/lib/storage'; // Import the SetMetaData type
 
 // Update props for combined settings modal
 interface FlashcardHeaderProps {

@@ -1642,15 +1642,6 @@ export default function ThaiFlashcards() {
               <div className="border-b border-gray-700 pb-4">
                 <h3 className="text-lg font-semibold text-blue-400 mb-4">App Settings</h3>
                 <div className="space-y-4">
-                  {/* Dark Mode Toggle */}
-                  <div id="dark-mode-toggle-container" className="flex items-center justify-between">
-                    <label htmlFor="darkModeToggleApp" className="text-gray-300">Dark Mode</label>
-                    <Switch
-                      id="darkModeToggleApp"
-                      checked={isDarkMode} 
-                      onCheckedChange={toggleDarkMode} 
-                    />
-                  </div>
                   {/* Gender Toggle - Uncommented and Labels Updated */}
                   <div className="flex items-center justify-between">
                     <label htmlFor="genderToggleApp" className="text-gray-300">Voice/Particle Gender</label> {/* Simplified label text */}
@@ -1659,12 +1650,11 @@ export default function ThaiFlashcards() {
                         <Switch
                           id="genderToggleApp"
                           checked={isMale}
-                          onCheckedChange={setIsMale} 
+                          onCheckedChange={setIsMale}
                         />
                       <span className="ml-2 text-sm font-medium text-gray-400">Male (Krap)</span>
                     </div>
                   </div>
-                  
                   {/* Polite Mode Toggle - Uncommented and Labels Updated */}
                   <div className="flex items-center justify-between">
                     <label htmlFor="politeToggleApp" className="text-gray-300">Politeness Particles</label> {/* Simplified label text */}
@@ -1673,19 +1663,27 @@ export default function ThaiFlashcards() {
                         <Switch
                           id="politeToggleApp"
                           checked={isPoliteMode}
-                          onCheckedChange={setIsPoliteMode} 
+                          onCheckedChange={setIsPoliteMode}
                         />
                         <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
                     </div>
                   </div>
-                  
                   {/* Autoplay Toggle */}
                   <div className="flex items-center justify-between">
-                    <label htmlFor="autoplayToggleApp" className="text-gray-300">Autoplay Audio on Reveal</label>
+                    <label htmlFor="autoplayToggleApp" className="text-gray-300">Autoplay Voice</label>
                     <Switch
                       id="autoplayToggleApp"
                       checked={autoplay}
                       onCheckedChange={setAutoplay}
+                    />
+                  </div>
+                  {/* Dark Mode Toggle */}
+                  <div id="dark-mode-toggle-container" className="flex items-center justify-between">
+                    <label htmlFor="darkModeToggleApp" className="text-gray-300">Dark Mode</label>
+                    <Switch
+                      id="darkModeToggleApp"
+                      checked={isDarkMode}
+                      onCheckedChange={toggleDarkMode}
                     />
                   </div>
                 </div>

@@ -327,7 +327,6 @@ export default function ThaiFlashcards() {
   const [localMnemonics, setLocalMnemonics] = useState<{[key: number]: string}>({});
   const [isPlayingWord, setIsPlayingWord] = useState(false);
   const [isPlayingContext, setIsPlayingContext] = useState(false);
-  const [showStats, setShowStats] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showProgress, setShowProgress] = useState(false); // Renamed from showVocabulary
   const [autoplay, setAutoplay] = useState<boolean>(() => {
@@ -1129,7 +1128,7 @@ export default function ThaiFlashcards() {
             {/* Card Back: Displayed when showAnswer is true */} 
             {showAnswer && (
               <div className="border-t border-[#333] p-6 flex flex-col min-h-[20rem] overflow-y-auto"> {/* Ensure min height */} 
-                {/* Main Phrase Section - Centered */} 
+                {/* Main Phrase Section - Centered */}
                 <div className="flex flex-col items-center justify-center mb-4">
                   <div className="text-center">
                     {/* Thai word with pronunciation */}
@@ -1295,67 +1294,8 @@ export default function ThaiFlashcards() {
       </div>
 
       {/* Settings Button, Modals, Admin Button, Version Indicator */}
-      <div className="fixed bottom-16 right-4 z-20">
-        <button
-          onClick={() => setShowStats(!showStats)}
-          className="settings-button"
-        >
-          ⚙️
-        </button>
-      </div>
-      
-      {/* Settings Modal (controlled by showStats) - Autoplay removed */} 
-      {showStats && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowStats(false)}>
-          <div className="neumorphic max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-200">Statistics & Data</h2> {/* Renamed slightly */} 
-              <button
-                  onClick={() => setShowStats(false)}
-                  className="text-gray-400 hover:text-white text-2xl"
-              >
-                  ✕
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              {/* Statistics Section (Placeholder) */}
-              <div className="py-2 border-b border-gray-700">
-                 <h3 className="text-lg font-semibold text-gray-200 mb-2">Progress Stats</h3>
-                 {/* TODO: Display actual stats calculated by calculateStats() ? */}
-                 <p className="text-sm text-gray-400">Total Due Today: {totalDueToday}</p>
-                 <p className="text-sm text-gray-400">Reviews Completed Today: {reviewsCompletedToday}</p>
-              </div>
-              
-              {/* Data Management Buttons */}
-              <div className="pt-4 space-y-3">
-                <h3 className="text-lg font-semibold text-blue-400 mb-2">Data Management</h3>
-                {/* Keep Export/Import/Reset here as they are more disruptive */}
-                <button 
-                  onClick={exportPhraseData} 
-                  className="neumorphic-button w-full text-blue-400"
-                >
-                  Export Base Phrase Data
-                </button>
-                <button 
-                  onClick={importSet} 
-                  className="neumorphic-button w-full text-blue-400"
-                >
-                  Import Set File (.json)
-                </button>
-                <button 
-                  onClick={resetAllProgress} 
-                  className="neumorphic-button w-full text-red-400"
-                >
-                  Reset All Progress & Mnemonics
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* How It Works Modal - Updated Content */} 
+      {/* How It Works Modal - Updated Content */}
       {showHowItWorks && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-auto" onClick={() => setShowHowItWorks(false)}>
           <div className="neumorphic max-w-lg w-full p-6 bg-[#1f1f1f]" onClick={e => e.stopPropagation()}>
@@ -1485,138 +1425,7 @@ export default function ThaiFlashcards() {
         onClose={() => setShowSetWizardModal(false)}
       />
 
-      {/* --- NEW: Moved Set Management Modal --- */}
-      {isManagementModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setIsManagementModalOpen(false)}>
-          <div className="neumorphic max-2xl w-full p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-200">Set Manager</h2>
-              <button
-                onClick={() => setIsManagementModalOpen(false)}
-                className="text-gray-400 hover:text-white text-2xl"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {/* Current Set Info */}
-              <div className="bg-gray-800 p-4 rounded-lg">
-                <h3 className="text-blue-400 font-medium mb-2">Current Set:</h3>
-                <div className="text-lg text-white font-bold">
-                  {/* Display cleverTitle if available, otherwise fall back to name */}
-                  {availableSets.find(set => set.id === activeSetId)?.cleverTitle || currentSetName}
-                </div>
-                <div className="text-sm text-gray-400 mt-1">
-                  {phrases.length} cards 
-                </div>
-                <div className="mt-3">
-                  <button
-                    onClick={() => activeSetId && exportSet(activeSetId)}
-                    className="neumorphic-button text-xs text-green-400 mr-2"
-                    disabled={!activeSetId || isLoading}
-                  >
-                    Export Current Set
-                  </button>
-                </div>
-              </div>
-
-              {/* Available Sets List */}
-              <div>
-                <h3 className="text-white font-medium mb-3">Available Sets:</h3>
-                
-                {availableSets.filter(set => set.id !== 'default').length === 0 ? (
-                  <div className="text-gray-400 text-center py-6">
-                    <p>No custom sets available.</p>
-                    <p className="text-sm mt-2">Create a set using the "Make Your Own Set!" button or import one below.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
-                    {availableSets.filter(set => set.id !== 'default').map(set => (
-                      <div key={set.id} className="flex items-center justify-between bg-gray-700 p-3 rounded-lg">
-                        {editingSetId === set.id ? (
-                          // --- Edit Mode --- 
-                          <div className="flex-1 flex items-center gap-2">
-                             <input 
-                               type="text"
-                               value={editingTitle}
-                               onChange={(e) => setEditingTitle(e.target.value)}
-                               className="flex-1 bg-gray-600 border border-gray-500 rounded px-2 py-1 text-white text-sm"
-                               autoFocus
-                               onKeyDown={(e) => { if (e.key === 'Enter') handleSaveRename(); if (e.key === 'Escape') handleCancelRename(); }}
-                             />
-                             <button onClick={handleSaveRename} className="neumorphic-button text-xs text-green-400">Save</button>
-                             <button onClick={handleCancelRename} className="neumorphic-button text-xs text-gray-400">Cancel</button>
-                          </div>
-                        ) : (
-                          // --- Display Mode --- 
-                          <div className="flex-1 flex items-center justify-between">
-                            <div>
-                              <div className="font-medium text-white">{set.cleverTitle || set.name}</div>
-                              <div className="text-xs text-gray-400">
-                                {set.phraseCount} cards • Created {new Date(set.createdAt).toLocaleDateString()}
-                              </div>
-                            </div>
-                            <div className="flex space-x-2 items-center">
-                              <button 
-                                onClick={() => handleStartRename(set)}
-                                className="text-blue-400 hover:text-blue-300 p-1" 
-                                title="Rename Set"
-                              >
-                                {/* Edit Icon (example using heroicons) */}
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                              </button>
-                              <button
-                                onClick={() => switchSet(set.id)}
-                                className="neumorphic-button text-xs text-blue-400"
-                                disabled={activeSetId === set.id || isLoading}
-                              >
-                                {activeSetId === set.id ? 'Active' : 'Switch'}
-                              </button>
-                              <button
-                                onClick={() => exportSet(set.id)}
-                                className="neumorphic-button text-xs text-green-400"
-                                disabled={isLoading}
-                              >
-                                Export
-                              </button>
-                              <button
-                                onClick={() => deleteSet(set.id)}
-                                className="neumorphic-button text-xs text-red-400"
-                                disabled={isLoading}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Import Set Section - Use the main importSet function */}
-              <div className="border-t border-gray-700 pt-4">
-                <h3 className="text-white font-medium mb-3">Import Set:</h3>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={importSet} // Use the importSet defined in this component
-                    className="neumorphic-button text-blue-400 text-sm"
-                    disabled={isLoading}
-                  >
-                    Import Set File (.json)
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* +++ NEW Combined Settings Modal +++ */}
+      {/* --- NEW Combined Settings Modal --- */}
       {isSettingsModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 app-options-modal-container" onClick={() => setIsSettingsModalOpen(false)}>
           <div className="neumorphic max-w-lg w-full p-6" onClick={e => e.stopPropagation()}>

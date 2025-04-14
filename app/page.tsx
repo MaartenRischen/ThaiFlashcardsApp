@@ -1651,23 +1651,23 @@ export default function ThaiFlashcards() {
                       onCheckedChange={toggleDarkMode} 
                     />
                   </div>
-                  {/* Gender Toggle - REMOVED
+                  {/* Gender Toggle - Uncommented and Labels Updated */}
                   <div className="flex items-center justify-between">
-                    <label htmlFor="genderToggleApp" className="text-gray-300">Voice Gender (Krap/Ka)</label>
+                    <label htmlFor="genderToggleApp" className="text-gray-300">Voice/Particle Gender</label> {/* Simplified label text */}
                     <div className="flex items-center">
-                      <span className="mr-2 text-sm font-medium text-gray-400">Female</span>
+                      <span className="mr-2 text-sm font-medium text-gray-400">Female (Ka)</span>
                         <Switch
                           id="genderToggleApp"
                           checked={isMale}
                           onCheckedChange={setIsMale} 
                         />
-                      <span className="ml-2 text-sm font-medium text-gray-400">Male</span>
+                      <span className="ml-2 text-sm font-medium text-gray-400">Male (Krap)</span>
                     </div>
                   </div>
-                  */}
-                  {/* Polite Mode Toggle - REMOVED
+                  
+                  {/* Polite Mode Toggle - Uncommented and Labels Updated */}
                   <div className="flex items-center justify-between">
-                    <label htmlFor="politeToggleApp" className="text-gray-300">Polite Mode (Add ครับ/ค่ะ)</label>
+                    <label htmlFor="politeToggleApp" className="text-gray-300">Politeness Particles</label> {/* Simplified label text */}
                     <div className="flex items-center">
                         <span className="mr-2 text-sm font-medium text-gray-400">Casual</span>
                         <Switch
@@ -1678,7 +1678,7 @@ export default function ThaiFlashcards() {
                         <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
                     </div>
                   </div>
-                  */}
+                  
                   {/* Autoplay Toggle */}
                   <div className="flex items-center justify-between">
                     <label htmlFor="autoplayToggleApp" className="text-gray-300">Autoplay Audio on Reveal</label>

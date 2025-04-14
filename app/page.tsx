@@ -1304,15 +1304,6 @@ export default function ThaiFlashcards() {
         </button>
       </div>
       
-      <div className="fixed bottom-4 right-4 z-20">
-          <button
-          onClick={() => setShowAdminSettings(true)}
-          className="text-xs text-gray-600 hover:text-gray-400"
-          >
-          Admin
-          </button>
-      </div>
-
       {/* Settings Modal (controlled by showStats) - Autoplay removed */} 
       {showStats && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowStats(false)}>

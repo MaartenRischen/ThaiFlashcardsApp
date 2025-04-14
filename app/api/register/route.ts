@@ -57,7 +57,6 @@ export async function POST(req: NextRequest) {
     console.log(`Successfully created Supabase Auth user for ${email} with ID: ${supabaseAuthUserId}`);
 
     // --- Step 2: Create user in Prisma Database ---
-    
     console.log(`Attempting to create Prisma user for ${email}, linking Supabase ID: ${supabaseAuthUserId}`);
     const user = await prisma.user.create({
       data: {
@@ -67,6 +66,7 @@ export async function POST(req: NextRequest) {
       },
       select: { id: true, name: true, email: true, supabaseAuthUserId: true }
     });
+    console.log(`Successfully created Prisma user ${user.id} linked to Supabase Auth: ${user.supabaseAuthUserId}`);
     
     console.log(`Successfully created Prisma user ${user.id} linked to Supabase Auth: ${user.supabaseAuthUserId}`);
     return NextResponse.json(
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     );
     
   } catch (error: any) {
-    console.error(`Error during registration process for email: ${userEmail ?? 'unknown'}:`, error);
+    console.error(`Error during registration process for email: ${userEmail ?? 'unknown'}. Supabase User Created: ${!!supabaseAuthUserId}`, error);
     
     if (supabaseAuthUserId) {
         console.warn(`Prisma operation failed after Supabase user ${supabaseAuthUserId} was created. Attempting rollback.`);
@@ -106,6 +106,10 @@ export async function POST(req: NextRequest) {
         console.error(`Prisma unique constraint violation (P2002) for email: ${userEmail}. Rollback attempted.`);
     } else if (error.message?.startsWith('Supabase Auth error:')) {
          message = "An internal error occurred during authentication setup.";
+    } else {
+        message = "Failed to save user details to database.";
+        details = `Error during Prisma operation: ${error.message}`;
+        console.error(`Registration failed during Prisma operation for email: ${userEmail}`);
     }
 
     return NextResponse.json(

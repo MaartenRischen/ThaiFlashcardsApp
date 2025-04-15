@@ -295,7 +295,7 @@ const SetWizardPage = () => {
 
   // Helper to build the image prompt
   const buildImagePrompt = () => {
-    return `Playful cartoon illustration for a Thai language flashcard set named "${customSetName || 'Custom Set'}". Theme: ${specificTopics || situations || 'general Thai vocabulary'}. Style: simple, colorful, cute donkey mascot. The words 'Donkey Bridge' must be clearly visible on a sign, banner, or similar in the illustration. Use a vertical poster (portrait) layout, with all important elements fully visible and centered, matching the aspect ratio of 832x1088.`;
+    return `Playful cartoon illustration depicting "${customSetName || 'Custom Set'}". Theme: ${specificTopics || situations || 'general Thai vocabulary'}. Style: simple, colorful, cute donkey mascot walking over a little bridge. The words 'DONKEY BRIDGE' (in English, all caps) must be clearly visible on a sign, banner, or similar in the illustration. Use a vertical poster (portrait) layout, with all important elements fully visible and centered, matching the aspect ratio of 832x1088.`;
   };
 
   // Function to generate the image
@@ -331,9 +331,6 @@ const SetWizardPage = () => {
     setGeneratingDisplayPhrases([]); // Clear display phrases
     setErrorSummary(null);
     setGenerationProgress({ completed: 0, total: cardCount });
-
-    // Start image generation in parallel
-    generateSetImage();
 
     const friendNamesArray = friendNames ? friendNames.split(',').map(n => n.trim()).filter(n => n) : [];
     const userName = session?.user?.name || 'You'; // Get username from session
@@ -392,7 +389,6 @@ const SetWizardPage = () => {
         console.log("Generation completed with errors (from API):", result.errorSummary);
         setErrorSummary(result.errorSummary);
       }
-      
       // Manually update progress to 100% as we don't have streaming updates from API yet
       setGenerationProgress({ completed: result.phrases?.length ?? 0, total: cardCount });
 
@@ -442,6 +438,21 @@ const SetWizardPage = () => {
     } catch (error) {
         console.error("Error saving set via context:", error);
         alert(`Failed to save the generated set: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  // New: When user clicks to review, generate image and only proceed when ready
+  const handleReviewClick = async () => {
+    setImageLoading(true);
+    setImageError(null);
+    setImageUrl(null);
+    try {
+      await generateSetImage();
+      setCurrentStep(5);
+    } catch (err: any) {
+      setImageError(err.message || 'Failed to generate image.');
+      // Optionally still proceed to review step, or block
+      setCurrentStep(5);
     }
   };
 
@@ -671,7 +682,7 @@ const SetWizardPage = () => {
               {/* Show "Review" button if generation is complete AND *at least one card* was generated */} 
               {!isGenerating && generatedPhrases.length > 0 && ( 
                 <button
-                  onClick={() => setCurrentStep(5)} 
+                  onClick={handleReviewClick} 
                   className="mt-6 neumorphic-button py-2 px-6 text-lg font-semibold text-green-400 hover:text-green-300"
                 >
                   Review Set & Mnemonics ({generatedPhrases.length} cards)

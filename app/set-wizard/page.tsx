@@ -295,10 +295,10 @@ const SetWizardPage = () => {
 
   // Helper to build the image prompt
   const buildImagePrompt = () => {
-    return `A highly original, playful cartoon illustration depicting ${customSetName || 'a custom set'}: ${specificTopics || situations || 'general language learning'}. The image must feature a donkey and a bridge. Style: simple, colorful, mascot-like. Use a landscape layout, matching the aspect ratio of 1088x832. All important elements must be fully visible and centered. Make the image unique and customized to the user's input.`;
+    return `A highly original, playful cartoon illustration depicting ${customSetName || 'a custom set'}: ${specificTopics || situations || 'general language learning'}. The image must feature a donkey and a bridge. Style: simple, colorful, mascot-like. Use a horizontal, landscape layout with a 2:1 aspect ratio, matching the dimensions 1408x704. All important elements must be fully visible and centered. Make the image unique and customized to the user's input.`;
   };
 
-  // Function to generate the image (used only in handleReviewClick and review step)
+  // Function to generate the image (used in background during card generation and on review step)
   const generateSetImage = useCallback(async () => {
     setImageLoading(true);
     setImageError(null);
@@ -307,7 +307,7 @@ const SetWizardPage = () => {
       const response = await fetch('/api/generate-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: buildImagePrompt() }),
+        body: JSON.stringify({ prompt: buildImagePrompt(), resolution: 'RESOLUTION_1408_704' }),
       });
       if (!response.ok) {
         const errorJson = await response.json();
@@ -323,6 +323,14 @@ const SetWizardPage = () => {
       setImageLoading(false);
     }
   }, [customSetName, specificTopics, situations]);
+
+  // Start image generation in background when entering the generation step
+  useEffect(() => {
+    if (currentStep === 4) {
+      generateSetImage();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep]);
 
   const startGeneration = async () => {
     setCurrentStep(4); // Move to generation step immediately
@@ -608,10 +616,10 @@ const SetWizardPage = () => {
               </h2>
               {/* IMAGE BLOCK - show at top */}
               <div className="mb-8 flex flex-col items-center">
-                {imageLoading && <div className="w-64 h-80 bg-gray-800 flex items-center justify-center animate-pulse rounded mb-2">Generating image...</div>}
+                {imageLoading && <div className="w-[35rem] h-[17.5rem] bg-gray-800 flex items-center justify-center animate-pulse rounded mb-2">Generating image...</div>}
                 {imageError && <div className="text-red-400 mb-2">{imageError}</div>}
                 {imageUrl && !imageLoading && (
-                  <img src={imageUrl} alt="Set Illustration" className="w-64 h-80 object-cover rounded mb-2 border border-gray-700" />
+                  <img src={imageUrl} alt="Set Illustration" className="w-[35rem] h-[17.5rem] object-cover rounded mb-2 border border-gray-700" />
                 )}
               </div>
               
@@ -713,10 +721,10 @@ const SetWizardPage = () => {
             <div>
               {/* IMAGE BLOCK - show at top with regenerate button */}
               <div className="mb-8 flex flex-col items-center">
-                {imageLoading && <div className="w-64 h-80 bg-gray-800 flex items-center justify-center animate-pulse rounded mb-2">Generating image...</div>}
+                {imageLoading && <div className="w-[35rem] h-[17.5rem] bg-gray-800 flex items-center justify-center animate-pulse rounded mb-2">Generating image...</div>}
                 {imageError && <div className="text-red-400 mb-2">{imageError}</div>}
                 {imageUrl && !imageLoading && (
-                  <img src={imageUrl} alt="Set Illustration" className="w-64 h-80 object-cover rounded mb-2 border border-gray-700" />
+                  <img src={imageUrl} alt="Set Illustration" className="w-[35rem] h-[17.5rem] object-cover rounded mb-2 border border-gray-700" />
                 )}
                 <button onClick={generateSetImage} disabled={imageLoading} className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-4 rounded text-sm mt-2">
                   {imageLoading ? 'Regenerating...' : 'Regenerate Image'}

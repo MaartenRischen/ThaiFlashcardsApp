@@ -13,19 +13,18 @@ const imageRequestSchema = z.object({
 // Placeholder for actual Ideogram API call structure
 // NOTE: Ideogram API likely involves asynchronous job submission and polling.
 // This is a simplified placeholder assuming a direct response or short wait.
-async function callIdeogramApi(prompt: string, apiKey: string, resolution?: string): Promise<string | null> {
+async function callIdeogramApi(prompt: string, apiKey: string, _resolution?: string): Promise<string | null> {
   console.log(`Calling Ideogram API with prompt: ${prompt.substring(0, 50)}...`);
   const IDEOGRAM_API_URL = "https://api.ideogram.ai/generate";
 
   try {
-    // Bulletproof: always force resolution to a string if present
-    let finalResolution: string | undefined = undefined;
-    if (resolution) {
-      finalResolution = String(Array.isArray(resolution) ? resolution[0] : resolution);
-    }
-    const imageRequest: any = { prompt };
-    if (finalResolution) imageRequest.resolution = finalResolution;
-    const payload = { image_request: imageRequest };
+    // Hardcode resolution to a string, ignore incoming value
+    const payload = {
+      image_request: {
+        prompt,
+        resolution: "1024x512"
+      }
+    };
     console.log('Outgoing payload to Ideogram:', payload);
 
     const response = await fetch(IDEOGRAM_API_URL, {

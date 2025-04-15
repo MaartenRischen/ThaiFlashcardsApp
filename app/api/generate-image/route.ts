@@ -18,11 +18,11 @@ async function callIdeogramApi(prompt: string, apiKey: string, _resolution?: str
   const IDEOGRAM_API_URL = "https://api.ideogram.ai/generate";
 
   try {
-    // Hardcode resolution to a string, ignore incoming value
+    // Use the correct resolution constant as required by the Ideogram API
     const payload = {
       image_request: {
         prompt,
-        resolution: "1024x512"
+        resolution: "RESOLUTION_832_1088"
       }
     };
     console.log('Outgoing payload to Ideogram:', payload);

@@ -717,7 +717,7 @@ const SetWizardPage = () => {
                 {imageLoading && <div className="w-[35rem] h-[17.5rem] bg-gray-800 flex items-center justify-center animate-pulse rounded mb-2">Generating image...</div>}
                 {imageError && <div className="text-red-400 mb-2">{imageError}</div>}
                 {imageUrl && !imageLoading && (
-                  <img src={imageUrl} alt="Set Illustration" className="w-[35rem] h-[17.5rem] object-cover rounded mb-2 border border-gray-700" />
+                  <img src={imageUrl} alt="Set Illustration" className="w-[35rem] h-[17.5rem] object-cover rounded mb-2 border border-gray-700 mx-auto block" style={{objectFit: 'cover', objectPosition: 'center', width: '35rem', height: '17.5rem', maxWidth: '100%', maxHeight: '100%'}} />
                 )}
                 <button onClick={generateSetImage} disabled={imageLoading} className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-4 rounded text-sm mt-2">
                   {imageLoading ? 'Regenerating...' : 'Regenerate Image'}

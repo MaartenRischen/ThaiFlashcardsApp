@@ -14,18 +14,18 @@ const imageRequestSchema = z.object({
 // NOTE: Ideogram API likely involves asynchronous job submission and polling.
 // This is a simplified placeholder assuming a direct response or short wait.
 async function callIdeogramApi(prompt: string, apiKey: string, _resolution?: string): Promise<string | null> {
-  console.log(`Calling Ideogram API with prompt: ${prompt.substring(0, 50)}...`);
-  const IDEOGRAM_API_URL = "https://api.ideogram.ai/generate";
+  console.log(`Calling Ideogram API (v3) with prompt: ${prompt.substring(0, 50)}...`);
+  const IDEOGRAM_API_URL = "https://api.ideogram.ai/v3/generate";
 
   try {
     // Use the correct resolution constant as required by the Ideogram API
     const payload = {
       image_request: {
         prompt,
-        resolution: "RESOLUTION_832_1088"
+        resolution: "RESOLUTION_1408_704"
       }
     };
-    console.log('Outgoing payload to Ideogram:', payload);
+    console.log('Outgoing payload to Ideogram v3:', payload);
 
     const response = await fetch(IDEOGRAM_API_URL, {
       method: "POST",

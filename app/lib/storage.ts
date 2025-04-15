@@ -22,6 +22,7 @@ interface FlashcardSetRecord {
   source: string;
   createdAt: string; // Timestamptz becomes string
   updatedAt?: string;
+  imageUrl?: string | null; // Add imageUrl to match DB
 }
 
 export interface SetMetaData { 
@@ -34,6 +35,7 @@ export interface SetMetaData {
   goals?: string[];
   specificTopics?: string;
   source: 'default' | 'import' | 'generated';
+  imageUrl?: string; // Add optional imageUrl here
   isFullyLearned?: boolean; // Keep the flag here (not in DB)
 }
 
@@ -81,10 +83,10 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
   }
   console.log(`Fetching SetMetaData from Supabase for userId: ${userId}`);
   try {
-    // Remove phraseCount from select
+    // Add imageUrl to select
     const { data, error } = await supabase
       .from('FlashcardSet')
-      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt')
+      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, imageUrl')
       .eq('userId', userId);
 
     if (error) {
@@ -94,8 +96,7 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
     console.log('Successfully fetched SetMetaData:', data);
     const sets = data || [];
 
-    // Map Supabase record to SetMetaData interface
-    // Set phraseCount to 0 initially
+    // Map Supabase record to SetMetaData interface, including imageUrl
     return sets.map((dbSet: FlashcardSetRecord) => ({ 
       id: dbSet.id,
       name: dbSet.name,
@@ -105,7 +106,8 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
       level: dbSet.level as SetMetaData['level'] || undefined, 
       goals: dbSet.goals || [], 
       specificTopics: dbSet.specificTopics || undefined,
-      source: dbSet.source as SetMetaData['source'] || 'generated', 
+      source: dbSet.source as SetMetaData['source'] || 'generated',
+      imageUrl: dbSet.imageUrl || undefined, // Map imageUrl
       isFullyLearned: false 
     }));
 
@@ -115,8 +117,8 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
   }
 }
 
-// REFACTOR: Insert into Supabase - Remove phraseCount
-// Adjusted input type to directly match expected DB record fields (minus auto-generated ones)
+// REFACTOR: Insert into Supabase - Add imageUrl
+// Adjust input type to include optional imageUrl
 export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>): Promise<Omit<FlashcardSetRecord, 'phraseCount'> | null> {
   if (!userId || !newSetData) {
       console.error("addSetMetaData called without userId or newSetData.");
@@ -126,8 +128,8 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
   const newSetId = uuidv4();
   const createdAt = new Date().toISOString();
 
-  // Prepare record for Supabase, excluding phraseCount, INCLUDING updatedAt
-  const recordToInsert: Omit<FlashcardSetRecord, 'phraseCount'> = { // Adjust Omit type
+  // Prepare record for Supabase, including imageUrl
+  const recordToInsert: Omit<FlashcardSetRecord, 'phraseCount'> = {
     id: newSetId,
     userId: userId,
     name: newSetData.name,
@@ -137,7 +139,8 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
     specificTopics: newSetData.specificTopics || null,
     source: newSetData.source,
     createdAt: createdAt,
-    updatedAt: createdAt // Set updatedAt same as createdAt on initial insert
+    updatedAt: createdAt, // Set updatedAt same as createdAt on initial insert
+    imageUrl: newSetData.imageUrl || null // Include imageUrl
   };
 
   console.log(`Inserting SetMetaData into Supabase for userId: ${userId}`, recordToInsert);
@@ -146,7 +149,7 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
     const { data, error } = await supabase
       .from('FlashcardSet')
       .insert(recordToInsert)
-      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt') // Select updatedAt too
+      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, imageUrl') // Select imageUrl too
       .single();
 
     if (error) {
@@ -160,7 +163,6 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
     }
 
     console.log('Successfully inserted SetMetaData:', data);
-    // Return the inserted DB record (without phraseCount)
     return data as Omit<FlashcardSetRecord, 'phraseCount'>;
 
   } catch (error) {
@@ -169,14 +171,14 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
   }
 }
 
-// REFACTOR: Update Supabase record - Remove phraseCount
+// REFACTOR: Update Supabase record - Add imageUrl
 export async function updateSetMetaData(updatedSet: SetMetaData): Promise<boolean> {
   if (!updatedSet || !updatedSet.id) {
       console.error("updateSetMetaData called without valid updatedSet data or ID.");
       return false;
   }
 
-  // Prepare record for Supabase update, excluding phraseCount
+  // Prepare record for Supabase update, including imageUrl
   const recordToUpdate: Partial<Omit<FlashcardSetRecord, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'phraseCount'> & { updatedAt: string }> = {
       name: updatedSet.name,
       cleverTitle: updatedSet.cleverTitle || null,
@@ -184,7 +186,7 @@ export async function updateSetMetaData(updatedSet: SetMetaData): Promise<boolea
       goals: updatedSet.goals || null,
       specificTopics: updatedSet.specificTopics || null,
       source: updatedSet.source,
-      // Omit phraseCount from update
+      imageUrl: updatedSet.imageUrl || null, // Update imageUrl
       updatedAt: new Date().toISOString()
   };
   

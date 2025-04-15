@@ -13,10 +13,8 @@ export async function generateImage(prompt: string): Promise<string | null> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        image_request: {
-          prompt,
-          resolution: '1024x512', // 2:1 aspect ratio
-        },
+        prompt,
+        resolution: '1024x512', // 2:1 aspect ratio
       }),
     });
 

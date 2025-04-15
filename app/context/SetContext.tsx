@@ -233,17 +233,18 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       // Generate an image for the set if not imported
       if (setData.source !== 'import') {
         const prompt = `Playful cartoon illustration for a Thai language flashcard set named "${setData.name}". Theme: ${setData.goals?.join(', ') || 'general Thai vocabulary'}. Style: simple, colorful, cute donkey mascot.`;
-        console.log(`SetContext: Generating image with prompt: ${prompt}`);
+        console.log(`[addSet] Generating image with prompt:`, prompt);
         
         try {
           generatedImageUrl = await generateImage(prompt);
+          console.log(`[addSet] Ideogram API returned imageUrl:`, generatedImageUrl);
           if (generatedImageUrl) {
-            console.log(`SetContext: Successfully generated image URL: ${generatedImageUrl}`);
+            console.log(`[addSet] Successfully generated image URL: ${generatedImageUrl}`);
           } else {
-            console.warn("SetContext: Image generation failed or returned null, proceeding without image.");
+            console.warn("[addSet] Image generation failed or returned null, proceeding without image.");
           }
         } catch (imageError) {
-          console.error("SetContext: Error during image generation:", imageError);
+          console.error("[addSet] Error during image generation:", imageError);
           // Continue without an image
         }
       }
@@ -258,9 +259,11 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
           ...setData,
           imageUrl: generatedImageUrl || undefined
       };
+      console.log(`[addSet] metaDataForStorage:`, metaDataForStorage);
       
       // 1. Add metadata to DB 
       const insertedRecord = await storage.addSetMetaData(userId, metaDataForStorage);
+      console.log(`[addSet] insertedRecord from DB:`, insertedRecord);
       
       if (!insertedRecord) {
         throw new Error("Failed to save set metadata to database.");
@@ -270,7 +273,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       // 2. Save content to DB
       const contentSaved = await storage.saveSetContent(newMetaId, phrases); 
       if (!contentSaved) {
-        console.error(`Failed to save content for new set ${newMetaId}. Attempting cleanup.`);
+        console.error(`[addSet] Failed to save content for new set ${newMetaId}. Attempting cleanup.`);
         await storage.deleteSetMetaData(newMetaId); 
         throw new Error("Failed to save set content to database.");
       }
@@ -278,7 +281,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       // 3. Save empty progress to DB
       const progressSaved = await storage.saveSetProgress(userId, newMetaId, {}); 
       if (!progressSaved) {
-         console.error(`Failed to save initial progress for new set ${newMetaId}. Attempting cleanup.`);
+         console.error(`[addSet] Failed to save initial progress for new set ${newMetaId}. Attempting cleanup.`);
          await storage.deleteSetContent(newMetaId);
          await storage.deleteSetMetaData(newMetaId); 
          throw new Error("Failed to save initial set progress.");
@@ -298,6 +301,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
           phraseCount: phrases.length, // Calculate here for local state
           isFullyLearned: false // Default
       };
+      console.log(`[addSet] completeNewMetaData for local state:`, completeNewMetaData);
 
       // Update local state
       setAvailableSets(prev => [...prev, completeNewMetaData]);

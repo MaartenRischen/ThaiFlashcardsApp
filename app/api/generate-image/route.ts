@@ -20,7 +20,11 @@ async function callIdeogramApi(prompt: string, apiKey: string): Promise<string |
         "Api-Key": apiKey,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({
+        image_request: {
+          prompt
+        }
+      }),
     });
 
     if (!response.ok) {

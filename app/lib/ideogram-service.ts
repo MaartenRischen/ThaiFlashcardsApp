@@ -11,21 +11,24 @@ export async function generateImage(prompt: string): Promise<string | null> {
   try {
     const response = await fetch('/api/generate-image', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        image_request: {
+          prompt,
+          resolution: '1024x512', // 2:1 aspect ratio
+        },
+      }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error(`Error from /api/generate-image (${response.status}):`, errorData.error);
-      throw new Error(errorData.error || 'Failed to generate image via backend');
+      const error = await response.json();
+      console.error('Error from /api/generate-image:', error);
+      return null;
     }
 
     const data = await response.json();
     console.log("Image generated successfully, URL:", data.imageUrl);
-    return data.imageUrl;
+    return data.imageUrl || null;
 
   } catch (error) {
     console.error('Error calling image generation service:', error);

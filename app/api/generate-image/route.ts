@@ -18,24 +18,36 @@ async function callIdeogramApi(prompt: string, apiKey: string, resolution?: stri
   const IDEOGRAM_API_URL = "https://api.ideogram.ai/generate";
 
   try {
+    // Always coerce resolution to a string if present
+    let safeResolution = undefined;
+    if (resolution) {
+      if (typeof resolution === 'string') {
+        safeResolution = resolution;
+      } else if (Array.isArray(resolution)) {
+        safeResolution = resolution[0];
+        console.warn('Resolution was an array, using first element:', safeResolution);
+      } else {
+        safeResolution = String(resolution);
+        console.warn('Resolution was not a string or array, coerced to string:', safeResolution);
+      }
+    }
+    const imageRequest: any = { prompt };
+    if (safeResolution) imageRequest.resolution = safeResolution;
+    const payload = { image_request: imageRequest };
+    console.log('Outgoing payload to Ideogram:', payload);
+
     const response = await fetch(IDEOGRAM_API_URL, {
       method: "POST",
       headers: {
         "Api-Key": apiKey,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        image_request: {
-          prompt,
-          ...(resolution ? { resolution } : {}),
-        }
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
       const errorBody = await response.text();
       console.error(`Ideogram API Error (${response.status}): ${errorBody}`);
-      // Pass the error body up so it can be returned to the client for debugging
       throw new Error(`Ideogram API request failed with status ${response.status}: ${errorBody}`);
     }
 

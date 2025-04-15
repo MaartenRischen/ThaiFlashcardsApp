@@ -1,7 +1,6 @@
 import React from 'react';
 import { SetSelector } from '@/app/components/SetSelector'; // Assuming path
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
-import { SetMetaData } from '@/app/lib/storage'; // Import the SetMetaData type
 
 // Update props for combined settings modal
 interface FlashcardHeaderProps {
@@ -18,8 +17,8 @@ export function FlashcardHeader({
   // Access the active set metadata to get the image URL
   const { availableSets, activeSetId } = useSet();
   
-  // Find the active set metadata and assert its type
-  const activeSet = availableSets.find(set => set.id === activeSetId) as SetMetaData | undefined;
+  // Find the active set metadata (removed type assertion)
+  const activeSet = availableSets.find(set => set.id === activeSetId);
   
   // Get the image URL (use default logo as fallback)
   const setImageUrl = activeSet?.imageUrl || '/images/default-set-logo.png';

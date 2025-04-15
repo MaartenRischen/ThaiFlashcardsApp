@@ -11,23 +11,16 @@ const imageRequestSchema = z.object({
 // This is a simplified placeholder assuming a direct response or short wait.
 async function callIdeogramApi(prompt: string, apiKey: string): Promise<string | null> {
   console.log(`Calling Ideogram API with prompt: ${prompt.substring(0, 50)}...`);
-  const IDEOGRAM_API_URL = "https://api.ideogram.ai/v1/images/generations"; // Replace with actual endpoint if different
+  const IDEOGRAM_API_URL = "https://api.ideogram.ai/generate";
 
   try {
-    // --- Simplified Request --- 
-    // This payload is a GUESS based on common patterns. 
-    // **You MUST consult the Ideogram API documentation for the correct payload structure.**
     const response = await fetch(IDEOGRAM_API_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        "Api-Key": apiKey,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        prompt: prompt,
-        // Add other required parameters like aspect_ratio, style_preset etc.
-        // e.g., aspect_ratio: "16:9", style_preset: "cinematic" 
-      }),
+      body: JSON.stringify({ prompt }),
     });
 
     if (!response.ok) {
@@ -39,18 +32,15 @@ async function callIdeogramApi(prompt: string, apiKey: string): Promise<string |
     const result = await response.json();
     console.log("Ideogram API Response:", result);
 
-    // --- Extract Image URL --- 
-    // This is also a GUESS. **Adjust based on the actual Ideogram API response structure.**
-    // It might be nested, it might be in an array, it might be a job ID requiring polling.
-    const imageUrl = result?.data?.[0]?.url || result?.url || null;
-    
+    // Extract the image URL from the first item in the data array
+    const imageUrl = result?.data?.[0]?.url || null;
+
     if (!imageUrl) {
-        console.error("Could not extract image URL from Ideogram response:", result);
-        throw new Error("Failed to get image URL from Ideogram.");
+      console.error("Could not extract image URL from Ideogram response:", result);
+      throw new Error("Failed to get image URL from Ideogram.");
     }
 
     return imageUrl;
-    
   } catch (error) {
     console.error("Error calling Ideogram API:", error);
     return null;

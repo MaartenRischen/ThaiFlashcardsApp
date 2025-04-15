@@ -4,7 +4,10 @@ import { z } from "zod";
 // Define the expected request body schema
 const imageRequestSchema = z.object({
   prompt: z.string().min(10).max(500), // Basic prompt validation
-  resolution: z.string().optional(),
+  resolution: z.preprocess(
+    (val) => Array.isArray(val) ? val[0] : val,
+    z.string().optional()
+  ),
 });
 
 // Placeholder for actual Ideogram API call structure
@@ -68,6 +71,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
+    console.log("Incoming request body:", body);
     const validation = imageRequestSchema.safeParse(body);
 
     if (!validation.success) {
@@ -78,13 +82,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let { prompt, resolution } = validation.data;
-    // Defensive: ensure resolution is a string
-    const safeResolution = Array.isArray(resolution) ? resolution[0] : resolution;
-    console.log(`Generating image for prompt: ${prompt} (resolution: ${safeResolution || 'default'})`);
+    const { prompt, resolution } = validation.data;
+    console.log(`Generating image for prompt: ${prompt} (resolution: ${resolution || 'default'})`);
 
     // Call the Ideogram API function
-    const imageUrl = await callIdeogramApi(prompt, apiKey, safeResolution);
+    const imageUrl = await callIdeogramApi(prompt, apiKey, resolution);
 
     if (!imageUrl) {
       return NextResponse.json(

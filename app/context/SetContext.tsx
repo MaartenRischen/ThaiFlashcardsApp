@@ -230,11 +230,10 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     let generatedImageUrl: string | null = null;
     
     try {
-      // Generate an image for the set if not imported
-      if (setData.source !== 'import') {
-        const prompt = `Playful cartoon illustration for a Thai language flashcard set named "${setData.name}". Theme: ${setData.goals?.join(', ') || 'general Thai vocabulary'}. Style: simple, colorful, cute donkey mascot.`;
+      // Only generate an image if imageUrl is missing
+      if (!setData.imageUrl && setData.source !== 'import') {
+        const prompt = `Playful cartoon illustration for a Thai language flashcard set named "${setData.name}". Theme: ${setData.goals?.join(', ') || 'general language learning'}. Style: simple, colorful, cute donkey mascot.`;
         console.log(`[addSet] Generating image with prompt:`, prompt);
-        
         try {
           generatedImageUrl = await generateImage(prompt);
           console.log(`[addSet] Ideogram API returned imageUrl:`, generatedImageUrl);
@@ -247,6 +246,8 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
           console.error("[addSet] Error during image generation:", imageError);
           // Continue without an image
         }
+      } else if (setData.imageUrl) {
+        generatedImageUrl = setData.imageUrl;
       }
       
       // For the default set (special case)
@@ -271,7 +272,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       newMetaId = insertedRecord.id; // Store ID for cleanup and state update
 
       // 2. Save content to DB
-      const contentSaved = await storage.saveSetContent(newMetaId, phrases); 
+      const contentSaved = await storage.saveSetContent(newMetaId, phrases);
       if (!contentSaved) {
         console.error(`[addSet] Failed to save content for new set ${newMetaId}. Attempting cleanup.`);
         await storage.deleteSetMetaData(newMetaId); 

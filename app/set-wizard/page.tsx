@@ -332,6 +332,9 @@ const SetWizardPage = () => {
     setErrorSummary(null);
     setGenerationProgress({ completed: 0, total: cardCount });
 
+    // Start image generation immediately
+    generateSetImage();
+
     const friendNamesArray = friendNames ? friendNames.split(',').map(n => n.trim()).filter(n => n) : [];
     const userName = session?.user?.name || 'You'; // Get username from session
 
@@ -606,6 +609,14 @@ const SetWizardPage = () => {
               <h2 className="text-2xl font-bold mb-6 text-blue-400">
                 {isGenerating ? 'Generating Your Custom Set' : 'Generation Complete!'} 
               </h2>
+              {/* IMAGE BLOCK - show at top */}
+              <div className="mb-8 flex flex-col items-center">
+                {imageLoading && <div className="w-64 h-80 bg-gray-800 flex items-center justify-center animate-pulse rounded mb-2">Generating image...</div>}
+                {imageError && <div className="text-red-400 mb-2">{imageError}</div>}
+                {imageUrl && !imageLoading && (
+                  <img src={imageUrl} alt="Set Illustration" className="w-64 h-80 object-cover rounded mb-2 border border-gray-700" />
+                )}
+              </div>
               
               {/* UPDATED Input Summary */} 
               <div className="w-full max-w-md text-left bg-gray-700 bg-opacity-40 rounded-lg p-3 mb-4 text-sm">
@@ -703,6 +714,17 @@ const SetWizardPage = () => {
           {/* Step 5: Preview & Save - Update Summary */}
           {currentStep === 5 && (
             <div>
+              {/* IMAGE BLOCK - show at top with regenerate button */}
+              <div className="mb-8 flex flex-col items-center">
+                {imageLoading && <div className="w-64 h-80 bg-gray-800 flex items-center justify-center animate-pulse rounded mb-2">Generating image...</div>}
+                {imageError && <div className="text-red-400 mb-2">{imageError}</div>}
+                {imageUrl && !imageLoading && (
+                  <img src={imageUrl} alt="Set Illustration" className="w-64 h-80 object-cover rounded mb-2 border border-gray-700" />
+                )}
+                <button onClick={generateSetImage} disabled={imageLoading} className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-4 rounded text-sm mt-2">
+                  {imageLoading ? 'Regenerating...' : 'Regenerate Image'}
+                </button>
+              </div>
               <h2 className="text-2xl font-bold mb-4 text-blue-400">Review & Create Your Set</h2>
               
                {/* Error Summary */}

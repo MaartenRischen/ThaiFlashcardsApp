@@ -78,11 +78,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { prompt, resolution } = validation.data;
-    console.log(`Generating image for prompt: ${prompt} (resolution: ${resolution || 'default'})`);
+    let { prompt, resolution } = validation.data;
+    // Defensive: ensure resolution is a string
+    const safeResolution = Array.isArray(resolution) ? resolution[0] : resolution;
+    console.log(`Generating image for prompt: ${prompt} (resolution: ${safeResolution || 'default'})`);
 
-    // Call the (simplified) Ideogram API function
-    const imageUrl = await callIdeogramApi(prompt, apiKey, resolution);
+    // Call the Ideogram API function
+    const imageUrl = await callIdeogramApi(prompt, apiKey, safeResolution);
 
     if (!imageUrl) {
       return NextResponse.json(

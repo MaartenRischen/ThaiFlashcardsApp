@@ -230,6 +230,9 @@ const SetWizardPage = () => {
   const [aiGeneratedTitle, setAiGeneratedTitle] = useState<string | undefined>(undefined);
   const [generatingDisplayPhrases, setGeneratingDisplayPhrases] = useState<Phrase[]>([]);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   // --- NEW: State for dynamic placeholders ---
   const [situationPlaceholder, setSituationPlaceholder] = useState<string>(`E.g., ${seriousSituationsExamples[0]}`);
@@ -290,6 +293,37 @@ const SetWizardPage = () => {
     }
   };
 
+  // Helper to build the image prompt
+  const buildImagePrompt = () => {
+    return `Playful cartoon illustration for a Thai language flashcard set named "${customSetName || 'Custom Set'}". Theme: ${specificTopics || situations || 'general Thai vocabulary'}. Style: simple, colorful, cute donkey mascot. The words 'Donkey Bridge' must be clearly visible on a sign, banner, or similar in the illustration. Use a vertical poster (portrait) layout, with all important elements fully visible and centered, matching the aspect ratio of 832x1088.`;
+  };
+
+  // Function to generate the image
+  const generateSetImage = useCallback(async () => {
+    setImageLoading(true);
+    setImageError(null);
+    setImageUrl(null);
+    try {
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: buildImagePrompt() }),
+      });
+      if (!response.ok) {
+        const errorJson = await response.json();
+        setImageError(errorJson.error || 'Failed to generate image.');
+        setImageLoading(false);
+        return;
+      }
+      const result = await response.json();
+      setImageUrl(result.imageUrl);
+      setImageLoading(false);
+    } catch (err: any) {
+      setImageError(err.message || 'Failed to generate image.');
+      setImageLoading(false);
+    }
+  }, [customSetName, specificTopics, situations]);
+
   const startGeneration = async () => {
     setCurrentStep(4); // Move to generation step immediately
     setIsGenerating(true);
@@ -297,6 +331,9 @@ const SetWizardPage = () => {
     setGeneratingDisplayPhrases([]); // Clear display phrases
     setErrorSummary(null);
     setGenerationProgress({ completed: 0, total: cardCount });
+
+    // Start image generation in parallel
+    generateSetImage();
 
     const friendNamesArray = friendNames ? friendNames.split(',').map(n => n.trim()).filter(n => n) : [];
     const userName = session?.user?.name || 'You'; // Get username from session
@@ -392,6 +429,7 @@ const SetWizardPage = () => {
         specificTopics: specificTopics || undefined,
         source: 'generated', // Literal type
         goals: situations ? [situations] : [],
+        imageUrl: imageUrl || undefined // Pass the generated image URL
     };
 
     try {

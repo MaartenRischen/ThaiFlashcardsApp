@@ -295,7 +295,7 @@ const SetWizardPage = () => {
 
   // Helper to build the image prompt
   const buildImagePrompt = () => {
-    return `Playful cartoon illustration depicting "${customSetName || 'Custom Set'}". Theme: ${specificTopics || situations || 'general Thai vocabulary'}. Style: simple, colorful, cute donkey mascot walking over a little bridge. The words 'DONKEY BRIDGE' (in English, all caps) must be clearly visible on a sign, banner, or similar in the illustration. Use a vertical poster (portrait) layout, with all important elements fully visible and centered, matching the aspect ratio of 832x1088.`;
+    return `A highly original, playful cartoon illustration depicting ${customSetName || 'a custom set'}: ${specificTopics || situations || 'general language learning'}. The image must feature a donkey and a bridge, and the words 'DONKEY BRIDGE' (in English, all caps) must be clearly visible on a sign, banner, or similar in the illustration. Style: simple, colorful, mascot-like. Use a landscape layout, matching the aspect ratio of 1088x832. All important elements must be fully visible and centered. Make the image unique and customized to the user's input.`;
   };
 
   // Function to generate the image

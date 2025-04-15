@@ -18,21 +18,13 @@ async function callIdeogramApi(prompt: string, apiKey: string, resolution?: stri
   const IDEOGRAM_API_URL = "https://api.ideogram.ai/generate";
 
   try {
-    // Always coerce resolution to a string if present
-    let safeResolution = undefined;
+    // Bulletproof: always force resolution to a string if present
+    let finalResolution: string | undefined = undefined;
     if (resolution) {
-      if (typeof resolution === 'string') {
-        safeResolution = resolution;
-      } else if (Array.isArray(resolution)) {
-        safeResolution = resolution[0];
-        console.warn('Resolution was an array, using first element:', safeResolution);
-      } else {
-        safeResolution = String(resolution);
-        console.warn('Resolution was not a string or array, coerced to string:', safeResolution);
-      }
+      finalResolution = String(Array.isArray(resolution) ? resolution[0] : resolution);
     }
     const imageRequest: any = { prompt };
-    if (safeResolution) imageRequest.resolution = safeResolution;
+    if (finalResolution) imageRequest.resolution = finalResolution;
     const payload = { image_request: imageRequest };
     console.log('Outgoing payload to Ideogram:', payload);
 

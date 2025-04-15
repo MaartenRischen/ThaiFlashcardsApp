@@ -295,10 +295,10 @@ const SetWizardPage = () => {
 
   // Helper to build the image prompt
   const buildImagePrompt = () => {
-    return `A highly original, playful cartoon illustration depicting ${customSetName || 'a custom set'}: ${specificTopics || situations || 'general language learning'}. The image must feature a donkey and a bridge, and the words 'DONKEY BRIDGE' (in English, all caps) must be clearly visible on a sign, banner, or similar in the illustration. Style: simple, colorful, mascot-like. Use a landscape layout, matching the aspect ratio of 1088x832. All important elements must be fully visible and centered. Make the image unique and customized to the user's input.`;
+    return `A highly original, playful cartoon illustration depicting ${customSetName || 'a custom set'}: ${specificTopics || situations || 'general language learning'}. The image must feature a donkey and a bridge. Style: simple, colorful, mascot-like. Use a landscape layout, matching the aspect ratio of 1088x832. All important elements must be fully visible and centered. Make the image unique and customized to the user's input.`;
   };
 
-  // Function to generate the image
+  // Function to generate the image (used only in handleReviewClick and review step)
   const generateSetImage = useCallback(async () => {
     setImageLoading(true);
     setImageError(null);
@@ -331,9 +331,6 @@ const SetWizardPage = () => {
     setGeneratingDisplayPhrases([]); // Clear display phrases
     setErrorSummary(null);
     setGenerationProgress({ completed: 0, total: cardCount });
-
-    // Start image generation immediately
-    generateSetImage();
 
     const friendNamesArray = friendNames ? friendNames.split(',').map(n => n.trim()).filter(n => n) : [];
     const userName = session?.user?.name || 'You'; // Get username from session

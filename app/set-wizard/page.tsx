@@ -451,16 +451,17 @@ const SetWizardPage = () => {
 
   // New: When user clicks to review, generate image and only proceed when ready
   const handleReviewClick = async () => {
+    console.log('[handleReviewClick] User clicked review. Transitioning to review step and starting image generation.');
+    setCurrentStep(5); // Show review step immediately
     setImageLoading(true);
     setImageError(null);
     setImageUrl(null);
     try {
       await generateSetImage();
-      setCurrentStep(5);
+      console.log('[handleReviewClick] Image generation completed.');
     } catch (err: any) {
       setImageError(err.message || 'Failed to generate image.');
-      // Optionally still proceed to review step, or block
-      setCurrentStep(5);
+      console.error('[handleReviewClick] Image generation failed:', err);
     }
   };
 

@@ -614,15 +614,7 @@ const SetWizardPage = () => {
               <h2 className="text-2xl font-bold mb-6 text-blue-400">
                 {isGenerating ? 'Generating Your Custom Set' : 'Generation Complete!'} 
               </h2>
-              {/* IMAGE BLOCK - show at top */}
-              <div className="mb-8 flex flex-col items-center">
-                {imageLoading && <div className="w-[35rem] h-[17.5rem] bg-gray-800 flex items-center justify-center animate-pulse rounded mb-2">Generating image...</div>}
-                {imageError && <div className="text-red-400 mb-2">{imageError}</div>}
-                {imageUrl && !imageLoading && (
-                  <img src={imageUrl} alt="Set Illustration" className="w-[35rem] h-[17.5rem] object-cover rounded mb-2 border border-gray-700" />
-                )}
-              </div>
-              
+              {/* IMAGE BLOCK REMOVED FROM THIS STEP - image is generated in background, not shown here */}
               {/* UPDATED Input Summary */} 
               <div className="w-full max-w-md text-left bg-gray-700 bg-opacity-40 rounded-lg p-3 mb-4 text-sm">
                  <p className="text-gray-400">

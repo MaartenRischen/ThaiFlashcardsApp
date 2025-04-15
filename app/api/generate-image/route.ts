@@ -26,7 +26,8 @@ async function callIdeogramApi(prompt: string, apiKey: string): Promise<string |
     if (!response.ok) {
       const errorBody = await response.text();
       console.error(`Ideogram API Error (${response.status}): ${errorBody}`);
-      throw new Error(`Ideogram API request failed with status ${response.status}`);
+      // Pass the error body up so it can be returned to the client for debugging
+      throw new Error(`Ideogram API request failed with status ${response.status}: ${errorBody}`);
     }
 
     const result = await response.json();
@@ -43,7 +44,7 @@ async function callIdeogramApi(prompt: string, apiKey: string): Promise<string |
     return imageUrl;
   } catch (error) {
     console.error("Error calling Ideogram API:", error);
-    return null;
+    throw error; // propagate error for detailed client message
   }
 }
 

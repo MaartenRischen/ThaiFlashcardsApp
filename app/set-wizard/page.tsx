@@ -444,19 +444,36 @@ const SetWizardPage = () => {
     }
   };
 
-  // New: When user clicks to review, generate image and only proceed when ready
+  // New: When user clicks to review, only generate image if not already available
   const handleReviewClick = async () => {
-    console.log('[handleReviewClick] User clicked review. Transitioning to review step and starting image generation.');
+    console.log('[handleReviewClick] User clicked review. Transitioning to review step.');
     setCurrentStep(5); // Show review step immediately
+    // Only generate image if not already available
+    if (!imageUrl) {
+      setImageLoading(true);
+      setImageError(null);
+      setImageUrl(null);
+      try {
+        await generateSetImage();
+        console.log('[handleReviewClick] Image generation completed.');
+      } catch (err: any) {
+        setImageError(err.message || 'Failed to generate image.');
+        console.error('[handleReviewClick] Image generation failed:', err);
+      }
+    }
+  };
+
+  // Regenerate button handler (explicit only)
+  const handleRegenerateImage = async () => {
     setImageLoading(true);
     setImageError(null);
     setImageUrl(null);
     try {
       await generateSetImage();
-      console.log('[handleReviewClick] Image generation completed.');
+      console.log('[handleRegenerateImage] Image regeneration completed.');
     } catch (err: any) {
       setImageError(err.message || 'Failed to generate image.');
-      console.error('[handleReviewClick] Image generation failed:', err);
+      console.error('[handleRegenerateImage] Image regeneration failed:', err);
     }
   };
 
@@ -701,7 +718,7 @@ const SetWizardPage = () => {
                     />
                   </div>
                 )}
-                <button onClick={generateSetImage} disabled={imageLoading} className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-4 rounded text-sm mt-2">
+                <button onClick={handleRegenerateImage} disabled={imageLoading} className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-4 rounded text-sm mt-2">
                   {imageLoading ? 'Regenerating...' : 'Regenerate Image'}
                 </button>
               </div>

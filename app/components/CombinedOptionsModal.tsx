@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { Switch } from "@/app/components/ui/switch"; // Assuming path for Switch
+import { useSet } from '@/app/context/SetContext';
+import { useState } from 'react';
 
 interface CombinedOptionsModalProps {
   isOpen: boolean;
@@ -231,40 +233,117 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
 }
 
 // --- SetManagerModal: Only Set Management ---
-export function SetManagerModal({ isOpen, onClose, currentSetName, activeSetId, onOpenSetManager, onExportSet, onResetSetProgress, onDeleteSet, isLoading }: {
+export function SetManagerModal({ isOpen, onClose }: {
   isOpen: boolean;
   onClose: () => void;
-  currentSetName: string;
-  activeSetId: string | null;
-  onOpenSetManager: () => void;
-  onExportSet: () => void;
-  onResetSetProgress: () => void;
-  onDeleteSet: () => void;
-  isLoading: boolean;
 }) {
+  const {
+    availableSets,
+    activeSetId,
+    deleteSet,
+    exportSet,
+    updateSetProgress,
+    // addSet, switchSet, etc. if needed
+  } = useSet();
+  const [selected, setSelected] = useState<string[]>([]);
+  const [editSetId, setEditSetId] = useState<string|null>(null);
+
   if (!isOpen) return null;
-  const isDefaultSet = activeSetId === 'default';
+
+  // Helper: get progress % for a set
+  const getProgress = (set: any) => {
+    if (!set.progress || !set.progress.total || set.progress.total === 0) return 0;
+    return Math.round((set.progress.learned / set.progress.total) * 100);
+  };
+
+  // Helper: get last reviewed date
+  const getLastReviewed = (set: any) => {
+    return set.lastReviewed ? new Date(set.lastReviewed).toLocaleDateString() : '-';
+  };
+
+  // Bulk actions
+  const handleBulkDelete = () => {
+    if (selected.length === 0) return;
+    alert('Bulk delete is not yet implemented.');
+    setSelected([]);
+  };
+  const handleBulkReset = () => {
+    if (selected.length === 0) return;
+    alert('Bulk reset progress is not yet implemented.');
+    setSelected([]);
+  };
+  const handleBulkExport = () => {
+    selected.forEach(id => exportSet(id));
+  };
+
+  // Table rows
+  const rows = availableSets.map(set => {
+    const isDefault = set.id === 'default';
+    const checked = selected.includes(set.id);
+    return (
+      <tr key={set.id} className="border-b border-gray-700 hover:bg-gray-800">
+        <td><input type="checkbox" disabled={isDefault} checked={checked} onChange={e => {
+          if (e.target.checked) setSelected(sel => [...sel, set.id]);
+          else setSelected(sel => sel.filter(x => x !== set.id));
+        }} /></td>
+        <td><img src={set.imageUrl || '/images/default-set-logo.png'} alt="set" className="w-10 h-10 rounded object-cover" /></td>
+        <td className="font-semibold text-white">{set.cleverTitle || set.name}</td>
+        <td className="text-gray-400">{set.specificTopics || '-'}</td>
+        <td className="text-gray-400">-</td>
+        <td className="text-gray-400">{set.phraseCount || '-'}</td>
+        <td className="text-gray-400">{set.createdAt ? new Date(set.createdAt).toLocaleDateString() : '-'}</td>
+        <td className="flex gap-1">
+          <button className="neumorphic-button text-xs px-2 py-1" onClick={() => setEditSetId(set.id)}>Edit</button>
+          <button className="neumorphic-button text-xs px-2 py-1 opacity-50 cursor-not-allowed" title="Coming soon!" disabled>Share</button>
+          <button className="neumorphic-button text-xs px-2 py-1 text-yellow-400" onClick={() => alert('Reset progress for this set is not yet implemented.')}>Reset</button>
+          <button className="neumorphic-button text-xs px-2 py-1 text-red-400" disabled={isDefault} onClick={() => { if (!isDefault && confirm('Delete this set?')) deleteSet(set.id); }}>Delete</button>
+          <button className="neumorphic-button text-xs px-2 py-1 text-green-400" onClick={() => exportSet(set.id)}>Export</button>
+        </td>
+      </tr>
+    );
+  });
+
+  // Summary
+  const totalSets = availableSets.length;
+  const totalCards = availableSets.reduce((sum, set) => sum + (set.phraseCount || 0), 0);
+  const totalLearned = 0; // Placeholder, not available
+  const dueToday = 0; // Placeholder, not available
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" onClick={onClose}>
-      <div className="neumorphic max-w-lg w-full p-6 bg-[#1f1f1f] max-h-[85vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
+      <div className="neumorphic max-w-5xl w-full p-6 bg-[#1f1f1f] max-h-[90vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6 flex-shrink-0">
           <h2 className="text-xl font-bold text-blue-400">Set Manager</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
         </div>
-        <div className="overflow-y-auto pr-2 flex-grow space-y-6">
-          <section>
-            <h3 className="text-lg font-semibold text-blue-400 mb-4">Current Set Settings</h3>
-            <div className="bg-gray-800 p-4 rounded-lg text-center mb-4">
-              <p className="text-sm text-gray-400 mb-1">Current Set:</p>
-              <p className="text-lg text-white font-semibold">{currentSetName}</p>
-            </div>
-            <div className="space-y-3">
-              <button onClick={onOpenSetManager} className="neumorphic-button w-full text-blue-400">Open Full Set Manager...</button>
-              <button onClick={onExportSet} className="neumorphic-button w-full text-green-400" disabled={isLoading || isDefaultSet}>Export This Set</button>
-              <button onClick={onResetSetProgress} className="neumorphic-button w-full text-yellow-400" disabled={isLoading || isDefaultSet}>Reset Progress for This Set</button>
-              <button onClick={onDeleteSet} className="neumorphic-button w-full text-red-400" disabled={isLoading || isDefaultSet}>Delete This Set</button>
-            </div>
-          </section>
+        <div className="flex gap-2 mb-4">
+          <button className="neumorphic-button text-sm px-4 py-2 text-green-400">Create New Set</button>
+          <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0} onClick={handleBulkDelete}>Bulk Delete</button>
+          <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0} onClick={handleBulkReset}>Bulk Reset Progress</button>
+          <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0} onClick={handleBulkExport}>Bulk Export</button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm text-left">
+            <thead className="bg-gray-900 text-gray-300">
+              <tr>
+                <th></th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Topics</th>
+                <th>Ridiculousness</th>
+                <th>#Cards</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>{rows}</tbody>
+          </table>
+        </div>
+        <div className="flex gap-4 mt-6 text-xs text-gray-400 justify-end">
+          <span>Total Sets: {totalSets}</span>
+          <span>Total Cards: {totalCards}</span>
+          <span>Learned: {totalLearned}</span>
+          <span>Due Today: {dueToday}</span>
         </div>
       </div>
     </div>

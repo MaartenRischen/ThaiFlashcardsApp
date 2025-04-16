@@ -25,8 +25,6 @@ export interface GeneratePromptOptions {
   specificTopics?: string;
   count: number;
   existingPhrases?: string[];
-  friendNames?: string[];
-  userName?: string;
   topicsToDiscuss?: string;
   topicsToAvoid?: string;
   seriousnessLevel?: number;
@@ -77,8 +75,6 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
     specificTopics, 
     count, 
     existingPhrases,
-    friendNames = [], 
-    userName = 'I', 
     topicsToDiscuss, 
     topicsToAvoid, 
     seriousnessLevel = 50 // Default to 50%
@@ -92,7 +88,7 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
   const schemaDescription = `
   **Output Format:**
   Generate a JSON object containing two keys: "cleverTitle" and "phrases".
-  - "cleverTitle": A short, witty title (under 50 chars) in English for this flashcard set, reflecting the level, topics, and SERIOUSNESS/RIDICULOUSNESS TONE (${Math.round(ridiculousness * 100)}% ridiculous).
+  - "cleverTitle": A short, witty title (max 6 words, under 50 chars) in English for this flashcard set, summarizing ONLY the situations and specific focus fields. Do NOT include any names, language, or country. Do NOT use more than 6 words.
   - "phrases": An array containing exactly ${count} unique flashcard objects. Each phrase object MUST conform to the following TypeScript interface:
 
   \`\`\`typescript
@@ -120,51 +116,43 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
 
   // Construct the detailed main prompt content using a standard template literal
   let prompt = `
-  You are an expert AI assistant specialized in creating Thai language learning flashcards for English speakers. Your task is to generate ${count} flashcards and a clever title, tailored precisely to the user's preferences, including a specific TONE.
+  You are an expert AI assistant specialized in creating language learning flashcards. Your task is to generate ${count} flashcards and a clever title, tailored precisely to the user's preferences, including a specific TONE.
 
   **User Preferences:**
-  - Proficiency Level: ${level}
   - Situations for Use: ${topicsToDiscuss || 'General conversation'}
-  ${specificTopics ? `- Specific Focus Within Topics/Situations: ${specificTopics}` : ''}
+  ${specificTopics ? `- Specific Focus: ${specificTopics}` : ''}
   - Topics to STRICTLY AVOID: ${topicsToAvoid || 'None specified'}
-  - User's Name: ${userName}
-  - User's Friends' Names: ${friendNames.length > 0 ? friendNames.join(', ') : 'None specified'}
   - **TONE CONTROL: ${seriousnessLevel}% Ridiculous / ${100 - seriousnessLevel}% Serious**
 
   **CRITICAL INSTRUCTIONS:**
 
-  1.  **Level-Specific Content:** (Ensure strict adherence)
+  1.  **Clever Title:** Generate a short, witty, and catchy title (max 6 words, under 50 chars) that summarizes ONLY the situations and specific focus fields. Do NOT include any names, language, or country. Do NOT use more than 6 words. Make it fun, memorable, and never generic.
+
+  2.  **Level-Specific Content:** (Ensure strict adherence)
       *   Beginner: Mostly essential words/short phrases. Simple S-V-O sentences rarely. Simple examples.
       *   Intermediate: Conversational sentences (5-10 words). Common grammar. Phrases ok. Typical examples.
       *   Advanced: ONLY complex sentences (10+ words). Nuanced vocabulary, varied grammar. NO simple phrases. Complex examples.
 
-  2.  **TONE Implementation (${seriousnessLevel}% Ridiculous / ${100 - seriousnessLevel}% Serious):** THIS IS PARAMOUNT. The tone MUST heavily influence ALL content. **For high ridiculousness (60%+), the TONE OVERRIDES the literal interpretation of the 'Situations'.** Use the situations as a *springboard* for absurdity, don't just generate serious content *about* the situation.
-      *   **Style Guide for Ridiculousness:** Think **absurdist humor** like **Monty Python**, **'I Think You Should Leave'**, or the surrealism of **Hans Teeuwen**. Unexpected juxtapositions, non-sequiturs, bizarre characters/events, and breaking logical expectations are highly encouraged.
+  3.  **TONE Implementation (${seriousnessLevel}% Ridiculous / ${100 - seriousnessLevel}% Serious):** THIS IS PARAMOUNT. The tone MUST heavily influence ALL content. For high ridiculousness (60%+), the TONE OVERRIDES the literal interpretation of the 'Situations'. Use the situations as a *springboard* for absurdity, don't just generate serious content *about* the situation.
+      *   **Style Guide for Ridiculousness:** Think absurdist humor, unexpected juxtapositions, non-sequiturs, bizarre characters/events, and breaking logical expectations are highly encouraged.
       *   **Phrases/Sentences:**
           *   0-10%: Standard, textbook, dry, factual.
           *   20-40%: Mostly serious; occasional mild quirks or unusual phrasing.
           *   50-70%: Noticeably quirky, surreal, or humorously unexpected. Use metaphors, wordplay, odd scenarios. Blend standard vocab with surprising twists.
           *   80-90%: Highly absurd, nonsensical, surreal sentences. Use hyperbole, impossible combinations, illogical situations. Prioritize humor/strangeness over literal meaning, while maintaining grammatical structure for the level.
-          *   91-100%: Maximum absurdity. Push boundaries. Generate grammatically plausible sentences that are almost *meaningless* due to extreme surrealism, non-sequiturs, bizarre tangents. Make it weird, funny, unpredictable. The phrase itself can be nonsensical.
+          *   91-100%: Maximum absurdity. Push boundaries. Generate grammatically plausible sentences that are almost meaningless due to extreme surrealism, non-sequiturs, bizarre tangents. Make it weird, funny, unpredictable. The phrase itself can be nonsensical.
       *   **Mnemonics:** MUST match the tone intensely. 0% = factual; 50% = quirky/punny; 100% = completely unhinged, bizarre, barely related memory aid.
       *   **Example Sentences:** MUST strongly reflect the tone. 
           *   Low Ridiculousness: Practical, standard examples.
           *   Medium Ridiculousness: Mildly amusing or odd situations.
-          *   High Ridiculousness (60%+): Create **SURREAL or NONSENSICAL scenarios** featuring ${userName} and friends (${friendNames.join(', ')}) *loosely inspired* by '${topicsToDiscuss || 'general situations'}'. **Do not just describe the situation seriously; make the *example situation itself* absurd, illogical, or hilarious.**
-      *   **Clever Title:** MUST reflect the chosen tone. 0% = Dry/Descriptive; 50% = Witty/Intriguing; 100% = Absurd/Nonsensical.
-
-  3.  **Personalization - NAME USAGE:** Integrate '${userName}' and friends (${friendNames.join(', ')}) into **AT LEAST ONE out of every THREE example sentences**. In high ridiculousness scenarios, place them in the absurd situations.
+          *   High Ridiculousness (60%+): Create SURREAL or NONSENSICAL scenarios.
 
   4.  **Topic/Situation Control:**
       *   Focus content *primarily* on the 'Situations for Use': ${topicsToDiscuss || 'General conversation'}. Use this as inspiration, especially for absurd examples.
       *   If 'Specific Focus' (${specificTopics || 'None'}) provided, try to incorporate it.
       *   ABSOLUTELY DO NOT generate content related to 'Topics to STRICTLY AVOID': ${topicsToAvoid || 'None specified'}.
 
-  5.  **Politeness & Pronunciation:** Correctly generate polite versions. Use clear, simple phonetic romanization.
-
-  6.  **Accuracy & Culture:** Ensure accuracy for the LEVEL and TONE. Maintain cultural sensitivity even when being absurd.
-
-  7.  **Avoid Duplicates:** Do not generate for these existing English phrases: ${existingPhrases && existingPhrases.length > 0 ? existingPhrases.join(', ') : 'None'}
+  5.  **Avoid Duplicates:** Do not generate for these existing English phrases: ${existingPhrases && existingPhrases.length > 0 ? existingPhrases.join(', ') : 'None'}
 
   ${schemaDescription}
   `;

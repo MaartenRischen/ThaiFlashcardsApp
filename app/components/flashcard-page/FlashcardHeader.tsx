@@ -20,8 +20,14 @@ export function FlashcardHeader({
   // Find the active set metadata (removed type assertion)
   const activeSet = availableSets.find(set => set.id === activeSetId);
   
-  // Get the image URL (use default logo as fallback)
-  const setImageUrl = activeSet?.imageUrl || '/images/default-set-logo.png';
+  // Get the image URL (use new monthly Thailand image for default set, fallback to old logo)
+  let setImageUrl = activeSet?.imageUrl;
+  if (!setImageUrl && activeSet?.id === 'default') {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    setImageUrl = `/images/defaults/default-thailand-${month}.png`;
+  }
+  setImageUrl = setImageUrl || '/images/default-set-logo.png';
   
   return (
     <div className="bg-[#111] border-b border-[#333] flex flex-col">

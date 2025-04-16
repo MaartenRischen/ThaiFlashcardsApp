@@ -247,6 +247,7 @@ export function SetManagerModal({ isOpen, onClose }: {
   } = useSet();
   const [selected, setSelected] = useState<string[]>([]);
   const [editSetId, setEditSetId] = useState<string|null>(null);
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   if (!isOpen) return null;
 
@@ -262,10 +263,24 @@ export function SetManagerModal({ isOpen, onClose }: {
   };
 
   // Bulk actions
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selected.length === 0) return;
-    alert('Bulk delete is not yet implemented.');
-    setSelected([]);
+    const setsToDelete = availableSets.filter(set => selected.includes(set.id) && set.id !== 'default');
+    if (setsToDelete.length === 0) return;
+    const names = setsToDelete.map(set => set.cleverTitle || set.name).join('\n');
+    if (!confirm(`Delete the following sets? This cannot be undone.\n\n${names}`)) return;
+    setBulkLoading(true);
+    try {
+      for (const set of setsToDelete) {
+        await deleteSet(set.id);
+      }
+      setSelected([]);
+      alert('Selected sets deleted successfully.');
+    } catch (err) {
+      alert('Error deleting sets. Please try again.');
+    } finally {
+      setBulkLoading(false);
+    }
   };
   const handleBulkReset = () => {
     if (selected.length === 0) return;
@@ -282,7 +297,7 @@ export function SetManagerModal({ isOpen, onClose }: {
     const checked = selected.includes(set.id);
     return (
       <tr key={set.id} className="border-b border-gray-700 hover:bg-gray-800">
-        <td><input type="checkbox" disabled={isDefault} checked={checked} onChange={e => {
+        <td><input type="checkbox" disabled={isDefault || bulkLoading} checked={checked} onChange={e => {
           if (e.target.checked) setSelected(sel => [...sel, set.id]);
           else setSelected(sel => sel.filter(x => x !== set.id));
         }} /></td>
@@ -296,7 +311,7 @@ export function SetManagerModal({ isOpen, onClose }: {
           <button className="neumorphic-button text-xs px-2 py-1" onClick={() => setEditSetId(set.id)}>Edit</button>
           <button className="neumorphic-button text-xs px-2 py-1 opacity-50 cursor-not-allowed" title="Coming soon!" disabled>Share</button>
           <button className="neumorphic-button text-xs px-2 py-1 text-yellow-400" onClick={() => alert('Reset progress for this set is not yet implemented.')}>Reset</button>
-          <button className="neumorphic-button text-xs px-2 py-1 text-red-400" disabled={isDefault} onClick={() => { if (!isDefault && confirm('Delete this set?')) deleteSet(set.id); }}>Delete</button>
+          <button className="neumorphic-button text-xs px-2 py-1 text-red-400" disabled={isDefault || bulkLoading} onClick={() => { if (!isDefault && confirm('Delete this set?')) deleteSet(set.id); }}>Delete</button>
           <button className="neumorphic-button text-xs px-2 py-1 text-green-400" onClick={() => exportSet(set.id)}>Export</button>
         </td>
       </tr>
@@ -317,10 +332,10 @@ export function SetManagerModal({ isOpen, onClose }: {
           <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
         </div>
         <div className="flex gap-2 mb-4">
-          <button className="neumorphic-button text-sm px-4 py-2 text-green-400">Create New Set</button>
-          <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0} onClick={handleBulkDelete}>Bulk Delete</button>
-          <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0} onClick={handleBulkReset}>Bulk Reset Progress</button>
-          <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0} onClick={handleBulkExport}>Bulk Export</button>
+          <button className="neumorphic-button text-sm px-4 py-2 text-green-400" disabled={bulkLoading}>Create New Set</button>
+          <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0 || bulkLoading} onClick={handleBulkDelete}>Bulk Delete</button>
+          <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0 || bulkLoading} onClick={handleBulkReset}>Bulk Reset Progress</button>
+          <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0 || bulkLoading} onClick={handleBulkExport}>Bulk Export</button>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm text-left">

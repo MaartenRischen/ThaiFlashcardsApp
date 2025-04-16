@@ -80,7 +80,14 @@ export function FlashcardHeader({
         {/* Line 2: All action buttons in a single row, horizontally scrollable if needed */}
         <div className="px-2 py-2 w-full overflow-x-auto">
           <div className="flex flex-row flex-nowrap gap-x-2 items-center w-max min-w-full">
-            {/* Progress button removed as per new design */}
+            {/* Cards button first */}
+            <button
+              onClick={onOpenCards}
+              className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-blue-300 border-blue-500 hover:bg-blue-800 hover:text-white"
+              aria-label="Cards"
+            >
+              Cards
+            </button>
             <button
               onClick={onOpenSetManager}
               className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-yellow-300 border-yellow-500 hover:bg-yellow-800 hover:text-white"
@@ -93,13 +100,6 @@ export function FlashcardHeader({
               className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center whitespace-nowrap"
             >
               Make Your Own Set!
-            </button>
-            <button
-              onClick={onOpenCards}
-              className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-blue-300 border-blue-500 hover:bg-blue-800 hover:text-white"
-              aria-label="Cards"
-            >
-              Cards
             </button>
             <button
               onClick={onOpenSettings}

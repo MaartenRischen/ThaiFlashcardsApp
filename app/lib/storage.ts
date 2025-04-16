@@ -23,6 +23,7 @@ interface FlashcardSetRecord {
   createdAt: string; // Timestamptz becomes string
   updatedAt?: string;
   imageUrl?: string | null; // Add imageUrl to match DB
+  seriousnessLevel?: number | null; // Add seriousnessLevel to match DB
 }
 
 export interface SetMetaData { 
@@ -37,6 +38,7 @@ export interface SetMetaData {
   source: 'default' | 'import' | 'generated';
   imageUrl?: string; // Add optional imageUrl here
   isFullyLearned?: boolean; // Keep the flag here (not in DB)
+  seriousnessLevel?: number; // Add seriousnessLevel for tone/ridiculousness
 }
 
 export interface PhraseProgressData {
@@ -86,7 +88,7 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
     // Add imageUrl to select
     const { data, error } = await supabase
       .from('FlashcardSet')
-      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, imageUrl')
+      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, imageUrl, seriousnessLevel')
       .eq('userId', userId);
 
     if (error) {
@@ -108,7 +110,8 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
       specificTopics: dbSet.specificTopics || undefined,
       source: dbSet.source as SetMetaData['source'] || 'generated',
       imageUrl: dbSet.imageUrl || undefined, // Map imageUrl
-      isFullyLearned: false 
+      isFullyLearned: false,
+      seriousnessLevel: dbSet.seriousnessLevel || undefined
     }));
 
   } catch (error) {
@@ -140,7 +143,8 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
     source: newSetData.source,
     createdAt: createdAt,
     updatedAt: createdAt, // Set updatedAt same as createdAt on initial insert
-    imageUrl: newSetData.imageUrl || null // Include imageUrl
+    imageUrl: newSetData.imageUrl || null, // Include imageUrl
+    seriousnessLevel: newSetData.seriousnessLevel || null // Include seriousnessLevel
   };
 
   console.log(`Inserting SetMetaData into Supabase for userId: ${userId}`, recordToInsert);
@@ -149,7 +153,7 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
     const { data, error } = await supabase
       .from('FlashcardSet')
       .insert(recordToInsert)
-      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, imageUrl') // Select imageUrl too
+      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, imageUrl, seriousnessLevel') // Select imageUrl too
       .single();
 
     if (error) {
@@ -187,6 +191,7 @@ export async function updateSetMetaData(updatedSet: SetMetaData): Promise<boolea
       specificTopics: updatedSet.specificTopics || null,
       source: updatedSet.source,
       imageUrl: updatedSet.imageUrl || null, // Update imageUrl
+      seriousnessLevel: updatedSet.seriousnessLevel || null, // Update seriousnessLevel
       updatedAt: new Date().toISOString()
   };
   

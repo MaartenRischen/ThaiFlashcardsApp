@@ -13,20 +13,21 @@ const imageRequestSchema = z.object({
 // Placeholder for actual Ideogram API call structure
 // NOTE: Ideogram API likely involves asynchronous job submission and polling.
 // This is a simplified placeholder assuming a direct response or short wait.
-async function callIdeogramApi(prompt: string, apiKey: string, _resolution?: string): Promise<string | null> {
-  console.log(`Calling Ideogram API (v3) with prompt: ${prompt.substring(0, 50)}...`);
-  const IDEOGRAM_API_URL = "https://api.ideogram.ai/v3/generate";
+async function callIdeogramApi(prompt: string, apiKey: string): Promise<string | null> {
+  console.log(`Calling Ideogram API (V_3) with prompt: ${prompt.substring(0, 50)}...`);
+  const IDEOGRAM_API_URL = "https://api.ideogram.ai/generate";
 
   try {
-    // Use the correct resolution constant as required by the Ideogram API
+    // Use the correct payload as required by the Ideogram API
     const payload = {
       image_request: {
         prompt,
-        resolution: "RESOLUTION_1408_704",
-        model: "V_3"
+        aspect_ratio: "ASPECT_2_1",
+        model: "V_3",
+        magic_prompt_option: "AUTO"
       }
     };
-    console.log('Outgoing payload to Ideogram v3:', payload);
+    console.log('Outgoing payload to Ideogram V_3:', payload);
 
     const response = await fetch(IDEOGRAM_API_URL, {
       method: "POST",
@@ -86,11 +87,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { prompt, resolution } = validation.data;
-    console.log(`Generating image for prompt: ${prompt} (resolution: ${resolution || 'default'})`);
+    const { prompt } = validation.data;
+    console.log(`Generating image for prompt: ${prompt}`);
 
     // Call the Ideogram API function
-    const imageUrl = await callIdeogramApi(prompt, apiKey, resolution);
+    const imageUrl = await callIdeogramApi(prompt, apiKey);
 
     if (!imageUrl) {
       return NextResponse.json(

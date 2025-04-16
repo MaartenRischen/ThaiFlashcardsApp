@@ -15,6 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { FlashcardHeader } from './components/flashcard-page/FlashcardHeader';
+import { CombinedOptionsModal } from './components/CombinedOptionsModal';
 
 // Define a simple CardStatus type locally for now
 type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';
@@ -1056,7 +1057,8 @@ export default function ThaiFlashcards() {
       <FlashcardHeader
         setShowHowItWorks={setShowHowItWorks}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
-        setShowProgress={setShowProgress} 
+        setShowProgress={setShowProgress}
+        onOpenSetManager={() => setIsManagementModalOpen(true)}
       />
 
       {/* Main Content - Centered Flashcard */}
@@ -1561,6 +1563,26 @@ export default function ThaiFlashcards() {
       <div className="text-center p-2 text-xs text-gray-600">
         <span>v{VERSION_INFO.version} - {VERSION_INFO.changes}</span>
       </div>
+
+      <CombinedOptionsModal
+        isOpen={isManagementModalOpen}
+        onClose={() => setIsManagementModalOpen(false)}
+        isDarkMode={isDarkMode}
+        toggleDarkMode={toggleDarkMode}
+        isMale={isMale}
+        setIsMale={setIsMale}
+        isPoliteMode={isPoliteMode}
+        setIsPoliteMode={setIsPoliteMode}
+        autoplay={autoplay}
+        setAutoplay={setAutoplay}
+        currentSetName={currentSetName}
+        activeSetId={activeSetId}
+        onOpenSetManager={() => {}}
+        onExportSet={exportCurrentSet}
+        onResetSetProgress={resetAllProgress}
+        onDeleteSet={() => { if (activeSetId) deleteSet(activeSetId); setIsManagementModalOpen(false); }}
+        isLoading={isLoading}
+      />
 
     </main>
   );

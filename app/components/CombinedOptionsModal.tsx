@@ -241,10 +241,11 @@ export function SetManagerModal({ isOpen, onClose }: {
     availableSets,
     activeSetId,
     activeSetProgress,
+    switchSet,
     deleteSet,
     exportSet,
     updateSetProgress,
-    // addSet, switchSet, etc. if needed
+    // addSet, etc.
   } = useSet();
   const [selected, setSelected] = useState<string[]>([]);
   const [editSetId, setEditSetId] = useState<string|null>(null);
@@ -305,13 +306,23 @@ export function SetManagerModal({ isOpen, onClose }: {
       }
       setImageUrl = setImageUrl || '/images/default-set-logo.png';
       return (
-        <div key={set.id} className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800">
+        <div
+          key={set.id}
+          className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800 cursor-pointer hover:ring-2 hover:ring-blue-400 transition"
+          onClick={async () => {
+            if (set.id !== activeSetId) {
+              await switchSet(set.id);
+            }
+            onClose();
+          }}
+        >
           {/* Checkbox for bulk actions */}
           <input
             type="checkbox"
-            className="absolute top-3 right-3 w-5 h-5 accent-blue-500"
+            className="absolute top-3 right-3 w-5 h-5 accent-blue-500 z-10"
             disabled={isDefault || bulkLoading}
             checked={checked}
+            onClick={e => e.stopPropagation()} // Prevent card click
             onChange={e => {
               if (e.target.checked) setSelected(sel => [...sel, set.id]);
               else setSelected(sel => sel.filter(x => x !== set.id));
@@ -408,13 +419,23 @@ export function SetManagerModal({ isOpen, onClose }: {
             }
             setImageUrl = setImageUrl || '/images/default-set-logo.png';
             return (
-              <div key={set.id} className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800">
+              <div
+                key={set.id}
+                className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800 cursor-pointer hover:ring-2 hover:ring-blue-400 transition"
+                onClick={async () => {
+                  if (set.id !== activeSetId) {
+                    await switchSet(set.id);
+                  }
+                  onClose();
+                }}
+              >
                 {/* Checkbox for bulk actions */}
                 <input
                   type="checkbox"
-                  className="absolute top-3 right-3 w-5 h-5 accent-blue-500"
+                  className="absolute top-3 right-3 w-5 h-5 accent-blue-500 z-10"
                   disabled={isDefault || bulkLoading}
                   checked={checked}
+                  onClick={e => e.stopPropagation()} // Prevent card click
                   onChange={e => {
                     if (e.target.checked) setSelected(sel => [...sel, set.id]);
                     else setSelected(sel => sel.filter(x => x !== set.id));

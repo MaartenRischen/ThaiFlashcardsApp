@@ -78,13 +78,7 @@ export function FlashcardHeader({
         {/* Line 2: All action buttons in a single row, horizontally scrollable if needed */}
         <div className="px-2 py-2 w-full overflow-x-auto">
           <div className="flex flex-row flex-nowrap gap-x-2 items-center w-max min-w-full">
-            <button
-              onClick={() => setShowProgress(true)}
-              className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"
-              aria-label="View Set Progress"
-            >
-              Progress
-            </button>
+            {/* Progress button removed as per new design */}
             <button
               onClick={onOpenSetManager}
               className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-yellow-300 border-yellow-500 hover:bg-yellow-800 hover:text-white"

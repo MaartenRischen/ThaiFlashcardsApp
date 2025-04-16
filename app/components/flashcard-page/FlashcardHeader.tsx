@@ -8,6 +8,7 @@ interface FlashcardHeaderProps {
   onOpenSettings: () => void;
   setShowProgress: (show: boolean) => void;
   onOpenSetManager: () => void;
+  onOpenCards: () => void;
 }
 
 export function FlashcardHeader({
@@ -15,6 +16,7 @@ export function FlashcardHeader({
   onOpenSettings,
   setShowProgress,
   onOpenSetManager,
+  onOpenCards,
 }: FlashcardHeaderProps) {
   // Access the active set metadata to get the image URL
   const { availableSets, activeSetId } = useSet();
@@ -91,6 +93,13 @@ export function FlashcardHeader({
               className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center whitespace-nowrap"
             >
               Make Your Own Set!
+            </button>
+            <button
+              onClick={onOpenCards}
+              className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-blue-300 border-blue-500 hover:bg-blue-800 hover:text-white"
+              aria-label="Cards"
+            >
+              Cards
             </button>
             <button
               onClick={onOpenSettings}

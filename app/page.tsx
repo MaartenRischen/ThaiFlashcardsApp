@@ -371,6 +371,7 @@ export default function ThaiFlashcards() {
   const [tutorialStep, setTutorialStep] = useState<number>(0);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false); // Default to false (light)
   const [showMnemonicHint, setShowMnemonicHint] = useState(false); // NEW: State for front hint
+  const [showCardsModal, setShowCardsModal] = useState(false);
 
   // --- NEW: Ref for dark mode timeout ---
   const darkModeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -1059,6 +1060,7 @@ export default function ThaiFlashcards() {
         onOpenSettings={() => setIsSettingsModalOpen(true)}
         setShowProgress={setShowProgress}
         onOpenSetManager={() => setIsManagementModalOpen(true)}
+        onOpenCards={() => setShowCardsModal(true)}
       />
 
       {/* Main Content - Centered Flashcard */}
@@ -1445,6 +1447,38 @@ export default function ThaiFlashcards() {
         onClose={() => setIsManagementModalOpen(false)}
       />
       {/* --- End of Combined Settings Modal --- */}
+
+      {/* Cards Modal */}
+      {showCardsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={() => setShowCardsModal(false)}>
+          <div className="bg-gray-900 rounded-xl p-4 max-w-md w-full max-h-[80vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
+            <button className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl" onClick={() => setShowCardsModal(false)}>&times;</button>
+            <h3 className="text-lg font-bold text-blue-300 mb-3">Cards in Set</h3>
+            <ul className="divide-y divide-gray-700">
+              {phrases.map((phrase, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-800 rounded px-2"
+                  onClick={() => { setIndex(idx); setShowCardsModal(false); }}
+                >
+                  <div className="flex-1">
+                    <div className="font-semibold text-white truncate">{phrase.english}</div>
+                    <div className="text-sm text-gray-400 truncate">{phrase.thai}</div>
+                  </div>
+                  <span className="ml-3 text-xs px-2 py-1 rounded-full font-bold"
+                    style={{
+                      backgroundColor: (getCardStatus(idx) as string) === 'Easy' ? '#22c55e' : (getCardStatus(idx) as string) === 'Correct' ? '#3b82f6' : (getCardStatus(idx) as string) === 'Wrong' ? '#ef4444' : '#6b7280',
+                      color: 'white',
+                    }}
+                  >
+                    {getCardStatus(idx)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* Version indicator at the bottom - shows changes and timestamp in Amsterdam timezone */}
       <div className="text-center p-2 text-xs text-gray-600">

@@ -4,6 +4,8 @@ import React from 'react';
 import { Switch } from "@/app/components/ui/switch"; // Assuming path for Switch
 import { useSet } from '@/app/context/SetContext';
 import { useState } from 'react';
+import { INITIAL_PHRASES } from '@/app/data/phrases';
+import * as storage from '@/app/lib/storage';
 
 interface CombinedOptionsModalProps {
   isOpen: boolean;
@@ -250,6 +252,10 @@ export function SetManagerModal({ isOpen, onClose }: {
   const [selected, setSelected] = useState<string[]>([]);
   const [editSetId, setEditSetId] = useState<string|null>(null);
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [cardsModalSetId, setCardsModalSetId] = useState<string | null>(null);
+  const [cardsModalPhrases, setCardsModalPhrases] = useState<any[]>([]);
+  const [cardsModalProgress, setCardsModalProgress] = useState<any>({});
+  const [cardsModalLoading, setCardsModalLoading] = useState(false);
 
   if (!isOpen) return null;
 
@@ -286,6 +292,52 @@ export function SetManagerModal({ isOpen, onClose }: {
   };
   const handleBulkExport = () => {
     selected.forEach(id => exportSet(id));
+  };
+
+  // Helper to open the cards modal for a set
+  const handleOpenCardsModal = async (set: any) => {
+    setCardsModalSetId(set.id);
+    setCardsModalLoading(true);
+    let phrases = [];
+    let progress = {};
+    if (set.id === 'default') {
+      phrases = INITIAL_PHRASES;
+      progress = activeSetId === 'default' ? activeSetProgress : {};
+    } else {
+      phrases = await storage.getSetContent(set.id);
+      // Try to get progress for this set (if user is logged in)
+      try {
+        const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
+        if (userId) {
+          progress = await storage.getSetProgress(userId, set.id);
+        }
+      } catch {}
+    }
+    setCardsModalPhrases(phrases);
+    setCardsModalProgress(progress || {});
+    setCardsModalLoading(false);
+  };
+
+  // Helper to get status for a card
+  const getCardStatus = (progress: any, idx: number) => {
+    const p = progress[idx];
+    if (!p || !p.difficulty) return 'Unseen';
+    if (p.difficulty === 'hard') return 'Wrong';
+    if (p.difficulty === 'good') return 'Correct';
+    if (p.difficulty === 'easy') return 'Easy';
+    return 'Unseen';
+  };
+
+  // Helper to handle clicking a phrase in the modal
+  const handlePhraseClick = async (setId: string, idx: number) => {
+    if (setId !== activeSetId) {
+      await switchSet(setId);
+    }
+    // Set the active card index in localStorage so main UI can pick it up
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('activeCardIndex', String(idx));
+    }
+    onClose();
   };
 
   // Card/Grid view for sets
@@ -472,7 +524,13 @@ export function SetManagerModal({ isOpen, onClose }: {
                   <span>#Cards: {set.phraseCount || '-'}</span>
                   <span>{set.createdAt ? new Date(set.createdAt).toLocaleDateString() : '-'}</span>
                 </div>
-                {/* Actions for single set (edit, export, delete, etc.) can be added here if needed */}
+                {/* Cards Button */}
+                <button
+                  className="neumorphic-button text-xs px-2 py-1 mb-2 w-fit self-end"
+                  onClick={e => { e.stopPropagation(); handleOpenCardsModal(set); }}
+                >
+                  Cards
+                </button>
               </div>
             );
           })}
@@ -483,6 +541,41 @@ export function SetManagerModal({ isOpen, onClose }: {
           <span>Learned: {totalLearned}</span>
           <span>Due Today: {dueToday}</span>
         </div>
+        {/* Cards Modal */}
+        {cardsModalSetId && (
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={() => setCardsModalSetId(null)}>
+            <div className="bg-gray-900 rounded-xl p-4 max-w-md w-full max-h-[80vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
+              <button className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl" onClick={() => setCardsModalSetId(null)}>&times;</button>
+              <h3 className="text-lg font-bold text-blue-300 mb-3">Cards in Set</h3>
+              {cardsModalLoading ? (
+                <div className="text-center text-gray-400">Loading...</div>
+              ) : (
+                <ul className="divide-y divide-gray-700">
+                  {cardsModalPhrases.map((phrase, idx) => (
+                    <li
+                      key={idx}
+                      className="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-800 rounded px-2"
+                      onClick={() => handlePhraseClick(cardsModalSetId, idx)}
+                    >
+                      <div className="flex-1">
+                        <div className="font-semibold text-white truncate">{phrase.english}</div>
+                        <div className="text-sm text-gray-400 truncate">{phrase.thai}</div>
+                      </div>
+                      <span className="ml-3 text-xs px-2 py-1 rounded-full font-bold"
+                        style={{
+                          backgroundColor: getCardStatus(cardsModalProgress, idx) === 'Easy' ? '#22c55e' : getCardStatus(cardsModalProgress, idx) === 'Correct' ? '#3b82f6' : getCardStatus(cardsModalProgress, idx) === 'Wrong' ? '#ef4444' : '#6b7280',
+                          color: 'white',
+                        }}
+                      >
+                        {getCardStatus(cardsModalProgress, idx)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

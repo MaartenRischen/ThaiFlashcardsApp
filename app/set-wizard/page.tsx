@@ -295,7 +295,8 @@ const SetWizardPage = () => {
 
   // Helper to build the image prompt
   const buildImagePrompt = () => {
-    return `A highly original, playful cartoon illustration depicting ${customSetName || 'a custom set'}: ${specificTopics || situations || 'general language learning'}. The image must feature a donkey and a bridge. Style: simple, colorful, mascot-like. Use a horizontal, landscape layout with a 2:1 aspect ratio, matching the dimensions 1408x704. All important elements must be fully visible and centered. Make the image unique and customized to the user's input.`;
+    // Compose a prompt that strictly forbids text and language/country references
+    return `Create a playful illustration with only: 1) a donkey, 2) a bridge, 3) a visual depiction of the situation(s): ${situations || 'general'}, 4) a visual depiction of the specific focus: ${specificTopics || 'none'}. Do NOT include any text, writing, language, or country references. No title, no words, no letters. Only the four required elements.`;
   };
 
   // Function to generate the image (used in background during card generation and on review step)

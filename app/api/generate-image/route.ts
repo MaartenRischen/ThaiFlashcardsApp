@@ -22,7 +22,8 @@ async function callIdeogramApi(prompt: string, apiKey: string, _resolution?: str
     const payload = {
       image_request: {
         prompt,
-        resolution: "RESOLUTION_1408_704"
+        resolution: "RESOLUTION_1408_704",
+        model: "V_3"
       }
     };
     console.log('Outgoing payload to Ideogram v3:', payload);

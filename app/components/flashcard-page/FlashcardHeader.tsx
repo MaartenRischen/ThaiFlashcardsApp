@@ -68,59 +68,57 @@ export function FlashcardHeader({
         </div>
       </div>
       {/* Content column - with all the buttons and dropdown */}
-      <div className="flex flex-col">
-        {/* Top Row: Set Selector (MOVED) */}
-        <div className="px-4 py-2 flex justify-end">
-          <div className="w-64">
+      <div className="flex flex-col w-full">
+        {/* Line 1: Set Selector (full width on mobile) */}
+        <div className="px-2 py-2 w-full">
+          <div className="w-full">
             <SetSelector />
           </div>
         </div>
-        {/* Middle Row: Progress & Make Your Own Set buttons (MOVED) */}
-        <div className="px-4 py-2 flex justify-end items-center gap-x-3">
-          <button
-            onClick={() => setShowProgress(true)}
-            className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"
-            aria-label="View Set Progress"
-          >
-            Progress
-          </button>
-          <button
-            onClick={() => window.open('/set-wizard', '_blank')}
-            className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center whitespace-nowrap"
-          >
-            Make Your Own Set!
-          </button>
-        </div>
-        {/* Bottom Row: Action Buttons */}
-        <div className="px-4 py-2 flex justify-end items-center gap-x-3 flex-wrap gap-y-2">
-          <button
-            onClick={() => setShowHowItWorks(true)}
-            className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8"
-            title="How It Works"
-            aria-label="How It Works"
-          >
-            ?
-          </button>
-          {/* Set Manager Button */}
-          <button
-            onClick={onOpenSetManager}
-            className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-yellow-300 border-yellow-500 hover:bg-yellow-800 hover:text-white"
-            aria-label="Set Manager"
-          >
-            Set Manager
-          </button>
-          <button
-            onClick={onOpenSettings}
-            className="neumorphic-icon-button text-xl font-bold text-gray-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8"
-            title="Settings"
-            aria-label="Settings"
-          >
-            {/* Cog wheel SVG icon */}
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.573-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
+        {/* Line 2: All action buttons in a single row, horizontally scrollable if needed */}
+        <div className="px-2 py-2 w-full overflow-x-auto">
+          <div className="flex flex-row flex-nowrap gap-x-2 items-center justify-between w-max min-w-full">
+            <button
+              onClick={() => setShowProgress(true)}
+              className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"
+              aria-label="View Set Progress"
+            >
+              Progress
+            </button>
+            <button
+              onClick={onOpenSetManager}
+              className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-yellow-300 border-yellow-500 hover:bg-yellow-800 hover:text-white"
+              aria-label="Set Manager"
+            >
+              Set Manager
+            </button>
+            <button
+              onClick={() => window.open('/set-wizard', '_blank')}
+              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center whitespace-nowrap"
+            >
+              Make Your Own Set!
+            </button>
+            <button
+              onClick={onOpenSettings}
+              className="neumorphic-icon-button text-xl font-bold text-gray-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8"
+              title="Settings"
+              aria-label="Settings"
+            >
+              {/* Cog wheel SVG icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.573-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setShowHowItWorks(true)}
+              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8"
+              title="How It Works"
+              aria-label="How It Works"
+            >
+              ?
+            </button>
+          </div>
         </div>
       </div>
     </div>

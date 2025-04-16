@@ -1443,13 +1443,6 @@ export default function ThaiFlashcards() {
       <SetManagerModal
         isOpen={isManagementModalOpen}
         onClose={() => setIsManagementModalOpen(false)}
-        currentSetName={currentSetName}
-        activeSetId={activeSetId}
-        onOpenSetManager={() => {}}
-        onExportSet={exportCurrentSet}
-        onResetSetProgress={resetAllProgress}
-        onDeleteSet={() => { if (activeSetId) deleteSet(activeSetId); setIsManagementModalOpen(false); }}
-        isLoading={isLoading}
       />
       {/* --- End of Combined Settings Modal --- */}
 

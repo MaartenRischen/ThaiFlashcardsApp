@@ -7,14 +7,12 @@ interface FlashcardHeaderProps {
   setShowHowItWorks: (show: boolean) => void;
   onOpenSettings: () => void;
   setShowProgress: (show: boolean) => void;
-  onOpenSetManager: () => void;
 }
 
 export function FlashcardHeader({
   setShowHowItWorks,
   onOpenSettings,
   setShowProgress,
-  onOpenSetManager,
 }: FlashcardHeaderProps) {
   // Access the active set metadata to get the image URL
   const { availableSets, activeSetId } = useSet();
@@ -100,14 +98,6 @@ export function FlashcardHeader({
             aria-label="How It Works"
           >
             ?
-          </button>
-          {/* Set Manager Button */}
-          <button
-            onClick={onOpenSetManager}
-            className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-yellow-300 border-yellow-500 hover:bg-yellow-800 hover:text-white"
-            aria-label="Set Manager"
-          >
-            Set Manager
           </button>
           <button
             onClick={onOpenSettings}

@@ -23,7 +23,7 @@ async function callIdeogramApi(prompt: string, apiKey: string): Promise<string |
       image_request: {
         prompt,
         aspect_ratio: "ASPECT_16_9",
-        model: "V_3",
+        model: "V_2_TURBO",
         magic_prompt_option: "AUTO"
       }
     };

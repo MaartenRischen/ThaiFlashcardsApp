@@ -240,6 +240,7 @@ export function SetManagerModal({ isOpen, onClose }: {
   const {
     availableSets,
     activeSetId,
+    activeSetProgress,
     deleteSet,
     exportSet,
     updateSetProgress,
@@ -251,16 +252,11 @@ export function SetManagerModal({ isOpen, onClose }: {
 
   if (!isOpen) return null;
 
-  // Helper: get progress % for a set
-  const getProgress = (set: any) => {
-    if (!set.progress || !set.progress.total || set.progress.total === 0) return 0;
-    return Math.round((set.progress.learned / set.progress.total) * 100);
-  };
-
-  // Helper: get last reviewed date
-  const getLastReviewed = (set: any) => {
-    return set.lastReviewed ? new Date(set.lastReviewed).toLocaleDateString() : '-';
-  };
+  // Find the active set
+  const activeSet = availableSets.find(set => set.id === activeSetId);
+  const learned = Object.keys(activeSetProgress || {}).length;
+  const total = activeSet?.phraseCount || 0;
+  const percent = total > 0 ? Math.round((learned / total) * 100) : 0;
 
   // Bulk actions
   const handleBulkDelete = async () => {
@@ -330,6 +326,24 @@ export function SetManagerModal({ isOpen, onClose }: {
         <div className="flex justify-between items-center mb-6 flex-shrink-0">
           <h2 className="text-xl font-bold text-blue-400">Set Manager</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        {/* Current Set Progress Section */}
+        <div className="mb-6 bg-gray-900 rounded-lg p-4">
+          <h3 className="text-lg font-semibold text-blue-300 mb-2">Current Set Progress</h3>
+          <div className="flex flex-col gap-2">
+            <span className="text-white font-bold">{activeSet?.cleverTitle || activeSet?.name || 'No Set Selected'}</span>
+            <div className="w-full bg-gray-700 rounded-full h-3">
+              <div
+                className="bg-green-500 h-3 rounded-full transition-all duration-300"
+                style={{ width: `${percent}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-xs text-gray-300 mt-1">
+              <span>{learned} learned</span>
+              <span>{total} total</span>
+              <span>{percent}%</span>
+            </div>
+          </div>
         </div>
         <div className="flex gap-2 mb-4">
           <button className="neumorphic-button text-sm px-4 py-2 text-green-400" disabled={bulkLoading}>Create New Set</button>

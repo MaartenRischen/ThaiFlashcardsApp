@@ -43,7 +43,6 @@ const CardEditor = ({
   index,
   level,
   specificTopics,
-  friendNames,
   userName,
   situations,
   seriousnessLevel
@@ -53,7 +52,6 @@ const CardEditor = ({
   index: number,
   level: string,
   specificTopics?: string,
-  friendNames?: string[],
   userName?: string,
   situations?: string,
   seriousnessLevel?: number
@@ -214,7 +212,6 @@ const SetWizardPage = () => {
   const [specificTopics, setSpecificTopics] = useState<string>('');
   const [cardCount, setCardCount] = useState<number>(8); // Default count
   const [seriousnessLevel, setSeriousnessLevel] = useState<number>(50);
-  const [friendNames, setFriendNames] = useState<string>('');
   const [customSetName, setCustomSetName] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generationProgress, setGenerationProgress] = useState<{ completed: number, total: number }>({ completed: 0, total: 0 });
@@ -237,7 +234,6 @@ const SetWizardPage = () => {
   // --- NEW: State for dynamic placeholders ---
   const [situationPlaceholder, setSituationPlaceholder] = useState<string>(`E.g., ${seriousSituationsExamples[0]}`);
   const [focusPlaceholder, setFocusPlaceholder] = useState<string>(`E.g., ${ridiculousFocusExamples[0]}`);
-  const [namesPlaceholder, setNamesPlaceholder] = useState<string>(`E.g., ${ridiculousNamesExamples[0]}`);
 
   // Generate a unique set name when component mounts
   useEffect(() => {
@@ -245,7 +241,6 @@ const SetWizardPage = () => {
     // --- NEW: Set random placeholders on mount ---
     setSituationPlaceholder(`E.g., ${getRandomElement(seriousSituationsExamples)}`);
     setFocusPlaceholder(`E.g., ${getRandomElement(ridiculousFocusExamples)}`);
-    setNamesPlaceholder(`E.g., ${getRandomElement(ridiculousNamesExamples)}`);
   }, []);
 
   // Update set name when relevant inputs change
@@ -341,7 +336,6 @@ const SetWizardPage = () => {
     setErrorSummary(null);
     setGenerationProgress({ completed: 0, total: cardCount });
 
-    const friendNamesArray = friendNames ? friendNames.split(',').map(n => n.trim()).filter(n => n) : [];
     const userName = session?.user?.name || 'You'; // Get username from session
 
     // Prepare the request body for the API route
@@ -349,7 +343,6 @@ const SetWizardPage = () => {
       level: thaiLevel as 'beginner' | 'intermediate' | 'advanced',
       situations: situations || undefined,
       specificTopics: specificTopics || undefined,
-      friendNames: friendNamesArray,
       userName: userName,
       seriousnessLevel: seriousnessLevel,
       count: cardCount
@@ -428,8 +421,8 @@ const SetWizardPage = () => {
 
     // Prepare the metadata for the context addSet function
     const setData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
-        name: `Generated Set - ${thaiLevel} - ${new Date().toLocaleDateString()}`,
-        cleverTitle: `AI Set: ${specificTopics || situations || thaiLevel}`,
+        name: customSetName, // Use the AI-generated or user-edited title as the set name
+        cleverTitle: customSetName, // Use the same for cleverTitle
         level: thaiLevel, // Correct type assured by the check above
         specificTopics: specificTopics || undefined,
         source: 'generated', // Literal type
@@ -553,21 +546,6 @@ const SetWizardPage = () => {
                    rows={2}
                  />
                </div>
-               
-              {/* Friend Names Input (Moved to Third) */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Enter a few names of people you know (nicknames ok, comma-separated):
-                </label>
-                <input
-                  type="text"
-                  value={friendNames}
-                  onChange={(e) => setFriendNames(e.target.value)}
-                  placeholder={namesPlaceholder}
-                  className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
-                />
-                 <p className="text-xs text-gray-400 mt-1 italic">These names (and yours!) will be used in example sentences.</p>
-              </div>
 
               {/* Seriousness Slider (Fourth) */}
               <div className="mb-6">
@@ -634,11 +612,6 @@ const SetWizardPage = () => {
                   <p className="text-gray-400">
                      <span className="font-semibold text-gray-300">Tone:</span> {seriousnessLevel}% Ridiculous
                    </p>
-                    {friendNames && (
-                      <p className="text-gray-400">
-                        <span className="font-semibold text-gray-300">Featuring:</span> {friendNames}
-                      </p>
-                    )}
               </div>
               
               {/* Display minor error summary if present, even on success */} 
@@ -770,9 +743,6 @@ const SetWizardPage = () => {
                      <li><span className="text-gray-400">Specific Focus:</span> {specificTopics}</li>
                    )}
                    <li><span className="text-gray-400">Tone:</span> {seriousnessLevel}% Ridiculous</li>
-                   {friendNames && (
-                     <li><span className="text-gray-400">Featuring:</span> {friendNames}</li>
-                   )}
                 </ul>
               </div>
               
@@ -808,7 +778,6 @@ const SetWizardPage = () => {
                     index={currentPreviewIndex}
                     level={thaiLevel as string}
                     specificTopics={specificTopics}
-                    friendNames={friendNames.split(',').map(n=>n.trim()).filter(n=>n)}
                     userName={session?.user?.name || 'You'}
                     situations={situations}
                     seriousnessLevel={seriousnessLevel}

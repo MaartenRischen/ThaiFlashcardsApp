@@ -35,19 +35,20 @@ export function FlashcardHeader({
   
   return (
     <div className="bg-[#111] border-b border-[#333] flex flex-col">
-      {/* Fixed Donkey Bridge overlay at the top, just under the navbar */}
+      {/* Subtle Donkey Bridge overlay at the top, just under the navbar */}
       <div
-        className="fixed left-1/2 transform -translate-x-1/2 z-50 w-full flex justify-center"
-        style={{ top: 56, pointerEvents: 'none' }} // Adjust 'top' if your navbar is taller/shorter
+        className="fixed left-0 right-0 z-40 w-full flex justify-center"
+        style={{ top: 56, pointerEvents: 'none' }}
       >
         <div
-          className="bg-black bg-opacity-50 rounded px-8 py-3 text-white text-4xl font-extrabold shadow-lg border-2 border-white mt-2"
+          className="bg-black bg-opacity-30 rounded-none px-0 py-1 text-white text-lg font-semibold shadow-none border-b border-white border-opacity-10 w-full max-w-2xl mx-auto text-center"
           style={{
-            textShadow: '0 2px 8px rgba(0,0,0,0.7)',
-            letterSpacing: '0.08em',
-            backdropFilter: 'blur(2px)',
-            maxWidth: '90%',
+            textShadow: '0 1px 4px rgba(0,0,0,0.3)',
+            letterSpacing: '0.04em',
+            backdropFilter: 'blur(1px)',
+            maxWidth: '100%',
             textAlign: 'center',
+            fontWeight: 600,
           }}
         >
           Donkey Bridge

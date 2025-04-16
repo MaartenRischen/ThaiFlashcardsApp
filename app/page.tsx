@@ -899,32 +899,13 @@ export default function ThaiFlashcards() {
   };
 
   // Helper function to get card status based on activeSetProgress
-  const getCardStatus = (cardIndex: number): CardStatus => {
-    // Use activeSetProgress directly
+  const getCardStatus = (cardIndex: number): string => {
     const progress = activeSetProgress[cardIndex];
-    console.log(`getCardStatus(${cardIndex}): Progress =`, JSON.stringify(progress)); // Log progress being read
-    
-    let status: CardStatus = 'unseen'; // Default status
-    if (!progress || !progress.lastReviewedDate || progress.lastReviewedDate === 'never') {
-      status = 'unseen';
-    } else if (progress.difficulty === 'hard') {
-      status = 'wrong'; 
-    } else {
-      try {
-        const nextReviewDate = new Date(progress.nextReviewDate);
-        if (nextReviewDate <= new Date()) {
-          status = 'due';
-        } else {
-          status = 'reviewed';
-        }
-      } catch (e) {
-        console.error(`Error parsing nextReviewDate for card ${cardIndex}:`, progress.nextReviewDate, e);
-        status = 'unseen'; // Fallback if date is invalid
-      }
-    }
-    
-    console.log(`getCardStatus(${cardIndex}): Returning Status =`, status); // Log calculated status
-    return status;
+    if (!progress || !progress.difficulty) return 'unseen';
+    if (progress.difficulty === 'hard') return 'wrong';
+    if (progress.difficulty === 'good') return 'correct';
+    if (progress.difficulty === 'easy') return 'easy';
+    return 'unseen';
   };
 
   // --- NEW: useEffect to reset state when the active set changes --- 
@@ -1059,8 +1040,8 @@ export default function ThaiFlashcards() {
         setShowHowItWorks={setShowHowItWorks}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
         setShowProgress={setShowProgress}
-        onOpenSetManager={() => setIsManagementModalOpen(true)}
         onOpenCards={() => setShowCardsModal(true)}
+        onOpenSetManager={() => setIsManagementModalOpen(true)}
       />
 
       {/* Main Content - Centered Flashcard */}
@@ -1376,7 +1357,7 @@ export default function ThaiFlashcards() {
                 console.log(`Vocabulary List: Rendering item ${i}`); // Log inside map
                 // Get the status of the card
                 const status = getCardStatus(i);
-                const { color, label } = getStatusInfo(status);
+                const { color, label } = getStatusInfo(status as CardStatus);
                 
                 return (
                   <div key={i} className={`p-3 border-b border-[#333] flex justify-between ${index === i ? 'bg-opacity-20 bg-blue-900' : ''}`}>
@@ -1455,26 +1436,32 @@ export default function ThaiFlashcards() {
             <button className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl" onClick={() => setShowCardsModal(false)}>&times;</button>
             <h3 className="text-lg font-bold text-blue-300 mb-3">Cards in Set</h3>
             <ul className="divide-y divide-gray-700">
-              {phrases.map((phrase, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-800 rounded px-2"
-                  onClick={() => { setIndex(idx); setShowCardsModal(false); }}
-                >
-                  <div className="flex-1">
-                    <div className="font-semibold text-white truncate">{phrase.english}</div>
-                    <div className="text-sm text-gray-400 truncate">{phrase.thai}</div>
-                  </div>
-                  <span className="ml-3 text-xs px-2 py-1 rounded-full font-bold"
-                    style={{
-                      backgroundColor: (getCardStatus(idx) as string) === 'Easy' ? '#22c55e' : (getCardStatus(idx) as string) === 'Correct' ? '#3b82f6' : (getCardStatus(idx) as string) === 'Wrong' ? '#ef4444' : '#6b7280',
-                      color: 'white',
-                    }}
+              {phrases.map((phrase, idx) => {
+                const status = getCardStatus(idx);
+                let color = '#6b7280';
+                let label = 'Unseen';
+                if (status === 'easy') { color = '#22c55e'; label = 'Easy'; }
+                else if (status === 'correct') { color = '#3b82f6'; label = 'Correct'; }
+                else if (status === 'wrong') { color = '#ef4444'; label = 'Wrong'; }
+                else if (status === 'unseen') { color = '#6b7280'; label = 'Unseen'; }
+                return (
+                  <li
+                    key={idx}
+                    className="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-800 rounded px-2"
+                    onClick={() => { setIndex(idx); setShowCardsModal(false); }}
                   >
-                    {getCardStatus(idx)}
-                  </span>
-                </li>
-              ))}
+                    <div className="flex-1">
+                      <div className="font-semibold text-white truncate">{phrase.english}</div>
+                      <div className="text-sm text-gray-400 truncate">{phrase.thai}</div>
+                    </div>
+                    <span className="ml-3 text-xs px-2 py-1 rounded-full font-bold"
+                      style={{ backgroundColor: color, color: 'white' }}
+                    >
+                      {label}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>

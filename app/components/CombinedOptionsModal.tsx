@@ -296,6 +296,14 @@ export function SetManagerModal({ isOpen, onClose }: {
       const learned = Object.keys(setProgress || {}).length;
       const total = set.phraseCount || 0;
       const percent = total > 0 ? Math.round((learned / total) * 100) : 0;
+      // Set Image logic (monthly-changing for default set)
+      let setImageUrl = set.imageUrl;
+      if (!setImageUrl && set.id === 'default') {
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        setImageUrl = `/images/defaults/default-thailand-${month}.png`;
+      }
+      setImageUrl = setImageUrl || '/images/default-set-logo.png';
       return (
         <div key={set.id} className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800">
           {/* Checkbox for bulk actions */}
@@ -312,7 +320,7 @@ export function SetManagerModal({ isOpen, onClose }: {
           {/* Set Image */}
           <div className="w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800 flex items-center justify-center">
             <img
-              src={set.imageUrl || '/images/default-set-logo.png'}
+              src={setImageUrl}
               alt={set.cleverTitle || set.name}
               className="w-full h-full object-contain"
             />
@@ -391,6 +399,14 @@ export function SetManagerModal({ isOpen, onClose }: {
             const learned = Object.keys(setProgress || {}).length;
             const total = set.phraseCount || 0;
             const percent = total > 0 ? Math.round((learned / total) * 100) : 0;
+            // Set Image logic (monthly-changing for default set)
+            let setImageUrl = set.imageUrl;
+            if (!setImageUrl && set.id === 'default') {
+              const now = new Date();
+              const month = String(now.getMonth() + 1).padStart(2, '0');
+              setImageUrl = `/images/defaults/default-thailand-${month}.png`;
+            }
+            setImageUrl = setImageUrl || '/images/default-set-logo.png';
             return (
               <div key={set.id} className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800">
                 {/* Checkbox for bulk actions */}
@@ -407,7 +423,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                 {/* Set Image */}
                 <div className="w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800 flex items-center justify-center">
                   <img
-                    src={set.imageUrl || '/images/default-set-logo.png'}
+                    src={setImageUrl}
                     alt={set.cleverTitle || set.name}
                     className="w-full h-full object-contain"
                   />

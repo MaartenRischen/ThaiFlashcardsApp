@@ -99,6 +99,14 @@ export function FlashcardHeader({
           >
             ?
           </button>
+          {/* Set Manager Button */}
+          <button
+            onClick={() => window.location.href = '/set-manager'}
+            className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-yellow-300 border-yellow-500 hover:bg-yellow-800 hover:text-white"
+            aria-label="Set Manager"
+          >
+            Set Manager
+          </button>
           <button
             onClick={onOpenSettings}
             className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"

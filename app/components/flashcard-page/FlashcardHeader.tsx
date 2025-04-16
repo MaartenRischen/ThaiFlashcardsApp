@@ -25,14 +25,15 @@ export function FlashcardHeader({
   
   return (
     <div className="bg-[#111] border-b border-[#333] flex flex-col">
-      {/* Full-width Ideogram set image (2:1 aspect ratio) */}
+      {/* Full-width Ideogram set image (16:9 aspect ratio) */}
       <div className="w-full flex items-center justify-center py-3">
-        <div className="w-full max-w-2xl aspect-[2/1] rounded-lg overflow-hidden">
+        <div className="w-full max-w-2xl aspect-[16/9] rounded-lg overflow-hidden">
           <img
             src={setImageUrl}
             alt={`${activeSet?.name || 'Set'} image`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             key={activeSetId}
+            style={{ objectFit: 'contain', objectPosition: 'center' }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/images/default-set-logo.png';

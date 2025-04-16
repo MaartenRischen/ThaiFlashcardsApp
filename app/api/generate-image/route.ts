@@ -22,12 +22,12 @@ async function callIdeogramApi(prompt: string, apiKey: string): Promise<string |
     const payload = {
       image_request: {
         prompt,
-        aspect_ratio: "ASPECT_2_1",
+        aspect_ratio: "ASPECT_16_9",
         model: "V_3",
         magic_prompt_option: "AUTO"
       }
     };
-    console.log('Outgoing payload to Ideogram V_3:', payload);
+    console.log('DEBUG: Using hardcoded ASPECT_16_9 in Ideogram payload', payload);
 
     const response = await fetch(IDEOGRAM_API_URL, {
       method: "POST",

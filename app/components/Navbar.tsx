@@ -16,41 +16,34 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur">
-      <div className="container flex items-center justify-between h-14 px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
+      <div className="container flex items-center justify-between h-9 px-2">
+        <Link href="/" className="flex items-center gap-1 font-medium text-xs text-gray-200">
           {status === "authenticated" && session?.user?.name ? 
             session.user.name : 
             "Guest"}
         </Link>
-        
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-2">
           {status === "authenticated" ? (
             <>
-              <div className="hidden md:flex items-center gap-6 mr-4">
-                <Link href="/my-sets" className="text-sm font-medium transition-colors hover:text-primary">
+              <div className="hidden md:flex items-center gap-3 mr-2">
+                <Link href="/my-sets" className="text-xs font-medium transition-colors hover:text-primary">
                   My Sets
                 </Link>
-                {/* Remove Profile Link */}
-                {/* 
-                <Link href="/profile" className="text-sm font-medium transition-colors hover:text-primary">
-                  Profile
-                </Link>
-                */}
               </div>
               <Button 
                 variant="outline" 
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="text-sm"
+                className="text-xs px-2 py-1 h-7 min-w-0"
               >
                 Sign Out
               </Button>
             </>
           ) : (
             <>
-              <Link href="/login" className="text-sm font-medium transition-colors hover:text-primary">
+              <Link href="/login" className="text-xs font-medium transition-colors hover:text-primary">
                 Sign In
               </Link>
-              <Button asChild>
+              <Button asChild className="text-xs px-2 py-1 h-7 min-w-0">
                 <Link href="/register">Get Started</Link>
               </Button>
             </>

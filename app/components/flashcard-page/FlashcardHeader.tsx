@@ -77,7 +77,7 @@ export function FlashcardHeader({
         </div>
         {/* Line 2: All action buttons in a single row, horizontally scrollable if needed */}
         <div className="px-2 py-2 w-full overflow-x-auto">
-          <div className="flex flex-row flex-nowrap gap-x-2 items-center justify-between w-max min-w-full">
+          <div className="flex flex-row flex-nowrap gap-x-2 items-center w-max min-w-full">
             <button
               onClick={() => setShowProgress(true)}
               className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap"

@@ -31,6 +31,24 @@ export function FlashcardHeader({
   
   return (
     <div className="bg-[#111] border-b border-[#333] flex flex-col">
+      {/* Fixed Donkey Bridge overlay at the top, just under the navbar */}
+      <div
+        className="fixed left-1/2 transform -translate-x-1/2 z-50 w-full flex justify-center"
+        style={{ top: 56, pointerEvents: 'none' }} // Adjust 'top' if your navbar is taller/shorter
+      >
+        <div
+          className="bg-black bg-opacity-50 rounded px-8 py-3 text-white text-4xl font-extrabold shadow-lg border-2 border-white mt-2"
+          style={{
+            textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+            letterSpacing: '0.08em',
+            backdropFilter: 'blur(2px)',
+            maxWidth: '90%',
+            textAlign: 'center',
+          }}
+        >
+          Donkey Bridge
+        </div>
+      </div>
       {/* Full-width Ideogram set image (16:9 aspect ratio) */}
       <div className="w-full flex items-center justify-center py-3 relative">
         <div className="w-full max-w-2xl aspect-[16/9] rounded-lg overflow-hidden relative">
@@ -45,24 +63,6 @@ export function FlashcardHeader({
               target.src = '/images/default-set-logo.png';
             }}
           />
-          {/* Overlay: Donkey Bridge app name, always visible and sticky */}
-          <div
-            className="absolute top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none z-20"
-            style={{ pointerEvents: 'none' }}
-          >
-            <div
-              className="bg-black bg-opacity-50 rounded px-8 py-3 text-white text-4xl font-extrabold shadow-lg border-2 border-white"
-              style={{
-                textShadow: '0 2px 8px rgba(0,0,0,0.7)',
-                letterSpacing: '0.08em',
-                backdropFilter: 'blur(2px)',
-                maxWidth: '90%',
-                textAlign: 'center',
-              }}
-            >
-              Donkey Bridge
-            </div>
-          </div>
         </div>
       </div>
       {/* Content column - with all the buttons and dropdown */}

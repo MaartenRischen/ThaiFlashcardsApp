@@ -433,7 +433,8 @@ const SetWizardPage = () => {
         specificTopics: specificTopics || undefined,
         source: 'generated', // Literal type
         goals: situations ? [situations] : [],
-        imageUrl: imageUrl || undefined // Pass the generated image URL
+        imageUrl: imageUrl || undefined, // Pass the generated image URL
+        seriousnessLevel // <-- Add this field
     };
 
     try {

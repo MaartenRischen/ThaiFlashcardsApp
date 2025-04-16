@@ -287,36 +287,64 @@ export function SetManagerModal({ isOpen, onClose }: {
     selected.forEach(id => exportSet(id));
   };
 
-  // Table rows
-  const rows = availableSets.map(set => {
-    const isDefault = set.id === 'default';
-    const checked = selected.includes(set.id);
-    return (
-      <tr key={set.id} className="border-b border-gray-700 hover:bg-gray-800">
-        <td><input type="checkbox" disabled={isDefault || bulkLoading} checked={checked} onChange={e => {
-          if (e.target.checked) setSelected(sel => [...sel, set.id]);
-          else setSelected(sel => sel.filter(x => x !== set.id));
-        }} /></td>
-        <td><img src={set.imageUrl || '/images/default-set-logo.png'} alt="set" className="w-10 h-10 rounded object-cover" /></td>
-        <td className="font-semibold text-white">{set.cleverTitle || set.name}</td>
-        <td className="text-gray-400">{set.specificTopics || '-'}</td>
-        <td className="text-gray-400">{
-          typeof set.seriousnessLevel === 'number'
-            ? `${100 - set.seriousnessLevel}%`
-            : '-'
-        }</td>
-        <td className="text-gray-400">{set.phraseCount || '-'}</td>
-        <td className="text-gray-400">{set.createdAt ? new Date(set.createdAt).toLocaleDateString() : '-'}</td>
-        <td className="flex gap-1">
-          <button className="neumorphic-button text-xs px-2 py-1" onClick={() => setEditSetId(set.id)}>Edit</button>
-          <button className="neumorphic-button text-xs px-2 py-1 opacity-50 cursor-not-allowed" title="Coming soon!" disabled>Share</button>
-          <button className="neumorphic-button text-xs px-2 py-1 text-yellow-400" onClick={() => alert('Reset progress for this set is not yet implemented.')}>Reset</button>
-          <button className="neumorphic-button text-xs px-2 py-1 text-red-400" disabled={isDefault || bulkLoading} onClick={() => { if (!isDefault && confirm('Delete this set?')) deleteSet(set.id); }}>Delete</button>
-          <button className="neumorphic-button text-xs px-2 py-1 text-green-400" onClick={() => exportSet(set.id)}>Export</button>
-        </td>
-      </tr>
-    );
-  });
+  // Card/Grid view for sets
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+    {availableSets.map(set => {
+      const isDefault = set.id === 'default';
+      const checked = selected.includes(set.id);
+      const setProgress = set.id === activeSetId ? activeSetProgress : {};
+      const learned = Object.keys(setProgress || {}).length;
+      const total = set.phraseCount || 0;
+      const percent = total > 0 ? Math.round((learned / total) * 100) : 0;
+      return (
+        <div key={set.id} className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800">
+          {/* Checkbox for bulk actions */}
+          <input
+            type="checkbox"
+            className="absolute top-3 right-3 w-5 h-5 accent-blue-500"
+            disabled={isDefault || bulkLoading}
+            checked={checked}
+            onChange={e => {
+              if (e.target.checked) setSelected(sel => [...sel, set.id]);
+              else setSelected(sel => sel.filter(x => x !== set.id));
+            }}
+          />
+          {/* Set Image */}
+          <div className="w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800 flex items-center justify-center">
+            <img
+              src={set.imageUrl || '/images/default-set-logo.png'}
+              alt={set.cleverTitle || set.name}
+              className="w-full h-full object-contain"
+            />
+          </div>
+          {/* Set Name */}
+          <div className="font-bold text-lg text-white mb-1 truncate">{set.cleverTitle || set.name}</div>
+          {/* Topics */}
+          <div className="text-sm text-gray-300 mb-1 truncate">{set.specificTopics || '-'}</div>
+          {/* Ridiculousness */}
+          <div className="text-xs text-gray-400 mb-2">Ridiculousness: {typeof set.seriousnessLevel === 'number' ? `${100 - set.seriousnessLevel}%` : '-'}</div>
+          {/* Progress Bar */}
+          <div className="w-full bg-gray-700 rounded-full h-2 mb-1">
+            <div
+              className="bg-green-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${percent}%` }}
+            ></div>
+          </div>
+          <div className="flex justify-between text-xs text-gray-400 mb-2">
+            <span>{learned} learned</span>
+            <span>{total} total</span>
+            <span>{percent}%</span>
+          </div>
+          {/* Meta info */}
+          <div className="flex justify-between text-xs text-gray-500 mt-auto pt-2 border-t border-gray-800">
+            <span>#Cards: {set.phraseCount || '-'}</span>
+            <span>{set.createdAt ? new Date(set.createdAt).toLocaleDateString() : '-'}</span>
+          </div>
+          {/* Actions for single set (edit, export, delete, etc.) can be added here if needed */}
+        </div>
+      );
+    })}
+  </div>
 
   // Summary
   const totalSets = availableSets.length;
@@ -355,22 +383,62 @@ export function SetManagerModal({ isOpen, onClose }: {
           <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0 || bulkLoading} onClick={handleBulkReset}>Bulk Reset Progress</button>
           <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0 || bulkLoading} onClick={handleBulkExport}>Bulk Export</button>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm text-left">
-            <thead className="bg-gray-900 text-gray-300">
-              <tr>
-                <th></th>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Topics</th>
-                <th>Ridiculousness</th>
-                <th>#Cards</th>
-                <th>Created</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>{rows}</tbody>
-          </table>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+          {availableSets.map(set => {
+            const isDefault = set.id === 'default';
+            const checked = selected.includes(set.id);
+            const setProgress = set.id === activeSetId ? activeSetProgress : {};
+            const learned = Object.keys(setProgress || {}).length;
+            const total = set.phraseCount || 0;
+            const percent = total > 0 ? Math.round((learned / total) * 100) : 0;
+            return (
+              <div key={set.id} className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800">
+                {/* Checkbox for bulk actions */}
+                <input
+                  type="checkbox"
+                  className="absolute top-3 right-3 w-5 h-5 accent-blue-500"
+                  disabled={isDefault || bulkLoading}
+                  checked={checked}
+                  onChange={e => {
+                    if (e.target.checked) setSelected(sel => [...sel, set.id]);
+                    else setSelected(sel => sel.filter(x => x !== set.id));
+                  }}
+                />
+                {/* Set Image */}
+                <div className="w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800 flex items-center justify-center">
+                  <img
+                    src={set.imageUrl || '/images/default-set-logo.png'}
+                    alt={set.cleverTitle || set.name}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                {/* Set Name */}
+                <div className="font-bold text-lg text-white mb-1 truncate">{set.cleverTitle || set.name}</div>
+                {/* Topics */}
+                <div className="text-sm text-gray-300 mb-1 truncate">{set.specificTopics || '-'}</div>
+                {/* Ridiculousness */}
+                <div className="text-xs text-gray-400 mb-2">Ridiculousness: {typeof set.seriousnessLevel === 'number' ? `${100 - set.seriousnessLevel}%` : '-'}</div>
+                {/* Progress Bar */}
+                <div className="w-full bg-gray-700 rounded-full h-2 mb-1">
+                  <div
+                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${percent}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between text-xs text-gray-400 mb-2">
+                  <span>{learned} learned</span>
+                  <span>{total} total</span>
+                  <span>{percent}%</span>
+                </div>
+                {/* Meta info */}
+                <div className="flex justify-between text-xs text-gray-500 mt-auto pt-2 border-t border-gray-800">
+                  <span>#Cards: {set.phraseCount || '-'}</span>
+                  <span>{set.createdAt ? new Date(set.createdAt).toLocaleDateString() : '-'}</span>
+                </div>
+                {/* Actions for single set (edit, export, delete, etc.) can be added here if needed */}
+              </div>
+            );
+          })}
         </div>
         <div className="flex gap-4 mt-6 text-xs text-gray-400 justify-end">
           <span>Total Sets: {totalSets}</span>

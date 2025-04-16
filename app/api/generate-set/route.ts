@@ -27,9 +27,8 @@ export async function POST(request: Request) {
     const generationOptions: Omit<GeneratePromptOptions, 'existingPhrases'> = {
         level: body.level,
         specificTopics: body.specificTopics || undefined,
-        friendNames: body.friendNames || [],
-        userName: body.userName || 'You',
         topicsToDiscuss: body.situations || undefined,
+        topicsToAvoid: undefined,
         seriousnessLevel: body.seriousnessLevel !== undefined ? body.seriousnessLevel : 50, // Default if missing
         count: body.count // Use count from body for the internal prompt building
     };

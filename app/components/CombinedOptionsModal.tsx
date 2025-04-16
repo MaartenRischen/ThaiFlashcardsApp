@@ -300,7 +300,11 @@ export function SetManagerModal({ isOpen, onClose }: {
         <td><img src={set.imageUrl || '/images/default-set-logo.png'} alt="set" className="w-10 h-10 rounded object-cover" /></td>
         <td className="font-semibold text-white">{set.cleverTitle || set.name}</td>
         <td className="text-gray-400">{set.specificTopics || '-'}</td>
-        <td className="text-gray-400">-</td>
+        <td className="text-gray-400">{
+          typeof set.seriousnessLevel === 'number'
+            ? `${100 - set.seriousnessLevel}%`
+            : '-'
+        }</td>
         <td className="text-gray-400">{set.phraseCount || '-'}</td>
         <td className="text-gray-400">{set.createdAt ? new Date(set.createdAt).toLocaleDateString() : '-'}</td>
         <td className="flex gap-1">

@@ -1441,7 +1441,7 @@ export default function ThaiFlashcards() {
                 let color = '#6b7280';
                 let label = 'Unseen';
                 if (status === 'easy') { color = '#22c55e'; label = 'Easy'; }
-                else if (status === 'correct') { color = '#3b82f6'; label = 'Correct'; }
+                else if (status === 'correct') { color = '#facc15'; label = 'Correct'; }
                 else if (status === 'wrong') { color = '#ef4444'; label = 'Wrong'; }
                 else if (status === 'unseen') { color = '#6b7280'; label = 'Unseen'; }
                 return (

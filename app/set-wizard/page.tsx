@@ -307,7 +307,7 @@ const SetWizardPage = () => {
       const response = await fetch('/api/generate-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: buildImagePrompt(), resolution: 'RESOLUTION_1408_704' }),
+        body: JSON.stringify({ prompt: buildImagePrompt() }),
       });
       if (!response.ok) {
         const errorJson = await response.json();

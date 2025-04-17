@@ -232,7 +232,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     try {
       // Only generate an image if imageUrl is missing
       if (!setData.imageUrl && setData.source !== 'import') {
-        const prompt = `Playful cartoon illustration for a Thai language flashcard set named "${setData.name}". Theme: ${setData.goals?.join(', ') || 'general language learning'}. Style: simple, colorful, cute donkey mascot.`;
+        const prompt = `Playful cartoon illustration for a Thai language flashcard set named "${setData.name}". Theme: ${setData.goals?.join(', ') || 'general language learning'}. Style: simple, colorful, cute donkey mascot. ABSOLUTELY NEVER include any words, text, writing, or letters in any language, under any circumstances. The image must not contain any text or writing at all.`;
         console.log(`[addSet] Generating image with prompt:`, prompt);
         try {
           generatedImageUrl = await generateImage(prompt);

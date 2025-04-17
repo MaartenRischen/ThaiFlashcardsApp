@@ -31,83 +31,72 @@ export function calculateNextReview(
 ): CardProgressData {
   const now = new Date();
   
-  // New card or card with no progress
+  /*
+   * Canonical SM‑2 expects a quality score 0‑5. We map three buttons to:
+   *   easy  -> 5
+   *   good  -> 4
+   *   hard  -> 3  (still considered a correct recall but tough)
+   * We don't implement qualities 0‑2 (total failure) because UI lacks "Again/Reset" button.
+   */
+  const qualityMap: Record<Difficulty, number> = { easy: 5, good: 4, hard: 3 };
+  const q = qualityMap[difficulty];
+
+  // Helper to update EF using SM‑2 formula
+  const updateEaseFactor = (ef: number, quality: number): number => {
+    const efPrime = ef + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+    return Math.max(MIN_EASE_FACTOR, efPrime);
+  };
+
+  // NEW CARD (no progress)
   if (!currentProgress) {
-    let daysToAdd = 1; // Default next review tomorrow
-    if (difficulty === 'easy') daysToAdd = 7;
-    if (difficulty === 'good') daysToAdd = 3;
-    if (difficulty === 'hard') daysToAdd = 0; // Review again soon
-    
-    const nextReviewDate = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
-    
+    const initialReps = q < 3 ? 0 : 1;
+    const initialInterval = 1; // always 1 day after first assessment
+    const nextReviewDate = new Date(now.getTime() + initialInterval * 24 * 60 * 60 * 1000);
+
     return {
-      srsLevel: difficulty !== 'hard' ? 1 : 0,
+      srsLevel: initialReps,
       nextReviewDate: nextReviewDate.toISOString(),
       lastReviewedDate: now.toISOString(),
       difficulty,
-      repetitions: 1,
-      easeFactor: INITIAL_EASE_FACTOR
+      repetitions: initialReps,
+      easeFactor: INITIAL_EASE_FACTOR,
     };
   }
-  
-  // Existing card with progress
-  let { easeFactor, repetitions, srsLevel } = currentProgress;
-  
-  // Update ease factor based on response
-  if (difficulty === 'easy') {
-    easeFactor += 0.15;
-  } else if (difficulty === 'hard') {
-    easeFactor -= 0.2;
-  }
-  
-  // Ensure ease factor doesn't go below minimum
-  easeFactor = Math.max(easeFactor, MIN_EASE_FACTOR);
-  
-  // Update repetitions
-  if (difficulty === 'hard') {
-    repetitions = 0; // Reset on wrong answer
-    srsLevel = Math.max(0, srsLevel - 1); // Decrease level
+
+  // EXISTING CARD
+  let { easeFactor, repetitions } = currentProgress;
+  easeFactor = updateEaseFactor(easeFactor, q);
+
+  let interval: number;
+
+  if (q < 3) {
+    // Considered a wrong answer – reset reps
+    repetitions = 0;
+    interval = 1;
   } else {
     repetitions += 1;
-    srsLevel += 1; // Increase level on correct answers
-  }
-  
-  // Calculate new interval
-  let interval = INITIAL_INTERVAL;
-  
-  if (repetitions === 1) {
-    interval = INITIAL_INTERVAL;
-  } else if (repetitions === 2) {
-    interval = 6; // 6 days for second successful review
-  } else {
-    // Calculate interval based on previous interval, ease factor, and difficulty
-    const prevInterval = calculatePreviousInterval(currentProgress);
-    
-    if (difficulty === 'easy') {
-      interval = prevInterval * easeFactor * EASY_INTERVAL_MULTIPLIER;
-    } else if (difficulty === 'good') {
-      interval = prevInterval * easeFactor;
-    } else if (difficulty === 'hard') {
-      interval = prevInterval * HARD_INTERVAL_MULTIPLIER;
+    if (repetitions === 1) {
+      interval = 1;
+    } else if (repetitions === 2) {
+      interval = 6;
+    } else {
+      const prevInterval = calculatePreviousInterval(currentProgress);
+      // quality 5 (easy) gets extra boost 1.3, q=4 normal, q=3 slight penalty 0.85
+      const easeMultiplier = q === 5 ? 1.3 : q === 4 ? 1.0 : 0.85;
+      interval = Math.round(prevInterval * easeFactor * easeMultiplier);
     }
-    
-    // Round to nearest day
-    interval = Math.round(interval);
   }
-  
-  // Ensure interval is within bounds
+
   interval = Math.max(MIN_INTERVAL, Math.min(MAX_INTERVAL, interval));
-  
-  // Calculate next review date
   const nextReviewDate = new Date(now.getTime() + interval * 24 * 60 * 60 * 1000);
-  
+
   return {
-    srsLevel,
+    srsLevel: repetitions,
     nextReviewDate: nextReviewDate.toISOString(),
     lastReviewedDate: now.toISOString(),
     difficulty,
     repetitions,
-    easeFactor
+    easeFactor,
   };
 }
 

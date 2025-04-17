@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/popover"
 import { FlashcardHeader } from './components/flashcard-page/FlashcardHeader';
 import { SettingsModal, SetManagerModal } from './components/CombinedOptionsModal';
+import { logger } from '@/app/lib/logger';
+import { calculateNextReview } from './lib/srs';
 
 // Define a simple CardStatus type locally for now
 type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';
@@ -717,34 +719,11 @@ export default function ThaiFlashcards() {
   // Function to handle card review actions (difficulty buttons)
   // --- Simplified version without external sm2 function --- 
   const handleCardAction = (difficulty: 'easy' | 'good' | 'hard') => {
-    const now = new Date();
-    const currentProgress = activeSetProgress[index];
-    
-    // Simplified SRS logic placeholder:
-    let daysToAdd = 1; // Default next review tomorrow
-    if (difficulty === 'easy') daysToAdd = 7;
-    if (difficulty === 'good') daysToAdd = 3;
-    if (difficulty === 'hard') daysToAdd = 0; // Review again soon
-
-    const nextReviewDate = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
-
-    const updatedCardProgressData: CardProgressData = {
-      srsLevel: (currentProgress?.srsLevel || 0) + (difficulty !== 'hard' ? 1 : 0),
-      nextReviewDate: nextReviewDate.toISOString(),
-      lastReviewedDate: now.toISOString(),
-      difficulty: difficulty,
-      // Placeholder values for missing SRS fields
-      repetitions: (currentProgress?.repetitions || 0) + 1,
-      easeFactor: currentProgress?.easeFactor || 2.5 
-    };
-
-    // Update the context progress state
-    const newProgressState = {
+    const updated = calculateNextReview(activeSetProgress[index], difficulty);
+    updateSetProgress({
       ...activeSetProgress,
-      [index]: updatedCardProgressData
-    };
-    console.log(`handleCardAction: Updating progress for index ${index} with:`, JSON.stringify(updatedCardProgressData)); // Log update data
-    updateSetProgress(newProgressState);
+      [index]: updated,
+    });
 
     // --- Rest of handleCardAction logic (moving to next card) remains the same --- 
     const newActiveCardsIndex = activeCardsIndex + 1;

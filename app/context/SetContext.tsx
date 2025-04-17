@@ -161,21 +161,33 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   // Add userId to dependencies
   }, [activeSetId, userId, activeSetContent, availableSets]);
 
+  // --- Persist activeSetId to localStorage on change ---
+  useEffect(() => {
+    if (activeSetId) {
+      localStorage.setItem('activeSetId', activeSetId);
+    }
+  }, [activeSetId]);
+
   // --- Refactored Initial Data Loading --- 
   useEffect(() => {
     const loadInitialData = async () => {
       if (status === 'authenticated' && session?.user?.id) {
         const currentUserId = session.user.id;
         setUserId(currentUserId); // Store the userId
-        console.log(`SetContext: User authenticated (userId: ${currentUserId}). Loading initial data...`);
         setIsLoading(true);
         try {
           // Load user-specific sets from Supabase (now async)
           const userSets = await storage.getAllSetMetaData(currentUserId);
           setAvailableSets([DEFAULT_SET_METADATA, ...userSets.filter(set => set.id !== DEFAULT_SET_ID)]);
           console.log(`SetContext: Loaded ${userSets.length} user-specific set metadata entries.`);
-          setActiveSetId(DEFAULT_SET_ID); // Keep default active initially
-
+          // --- Restore activeSetId from localStorage if valid ---
+          const savedSetId = localStorage.getItem('activeSetId');
+          const allSetIds = [DEFAULT_SET_ID, ...userSets.map(set => set.id)];
+          if (savedSetId && allSetIds.includes(savedSetId)) {
+            setActiveSetId(savedSetId);
+          } else {
+            setActiveSetId(DEFAULT_SET_ID); // Fallback to default
+          }
         } catch (error) {
            console.error("SetContext: Error loading initial user data:", error);
            setAvailableSets([DEFAULT_SET_METADATA]);

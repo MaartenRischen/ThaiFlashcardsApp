@@ -88,7 +88,18 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
   const schemaDescription = `
   **Output Format:**
   Generate a JSON object containing two keys: "cleverTitle" and "phrases".
-  - "cleverTitle": A clever and super funny title in English for this flashcard set, ALWAYS between 6 and 10 words long. The title must clearly and equally reference BOTH the situations and specific focus fields (if present), combining them in a creative, humorous, and memorable way. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
+  - "cleverTitle": The title must be formatted as follows, with EVERY word capitalized (Title Case, e.g., "Buying Gongs, Loving Life & Pipe Organs"):
+    - If both situations and specific focus are present: "[Situation 1], [Situation 2] & [Specific Focus]"
+    - If only one situation: "[Situation] & [Specific Focus]"
+    - If only situations: "[Situation 1], [Situation 2]"
+    - If only specific focus: "[Specific Focus]"
+    Use an ampersand (&) only if both parts are present. Do NOT add any extra words, sentence structure, or cleverness. Just list the situations (comma separated, with 'and' before the last if more than one), then an ampersand, then the specific focus. Capitalize EVERY word in the title, regardless of user input. Examples:
+      - Situations: "learning the guitar, walking to school", Specific Focus: "mustard" → "Learning The Guitar, Walking To School & Mustard"
+      - Situations: "talking to christians", Specific Focus: "cats" → "Talking To Christians & Cats"
+      - Situations: "talking to christians, looking up something in the dictionary", Specific Focus: "cats" → "Talking To Christians, Looking Up Something In The Dictionary & Cats"
+      - Situations: "talking to christians" (no specific focus) → "Talking To Christians"
+      - Specific Focus: "cats" (no situations) → "Cats"
+    Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
   - "phrases": An array containing exactly ${count} unique flashcard objects. Each phrase object MUST conform to the following TypeScript interface:
 
   \`\`\`typescript
@@ -98,7 +109,7 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
     thaiMasculine: string; // Polite male version ("ครับ").
     thaiFeminine: string; // Polite female version ("ค่ะ").
     pronunciation: string; // Simple phonetic guide (e.g., 'sa-wat-dee krap').
-    mnemonic?: string; // IMPORTANT: ONLY provide a mnemonic if 'english' is a single word or very short phrase (2-3 words max). For longer sentences, this MUST be null or omitted. The mnemonic should reflect the TONE.
+    mnemonic?: string; // IMPORTANT: The mnemonic must NOT reference the user input (situations or specific focus) at all. It should be the best possible mnemonic for remembering the word or phrase itself. For long sentences, only generate a mnemonic for the most important word or phrase, not the whole sentence.
     examples?: ExampleSentence[]; // 1-2 example sentences reflecting the TONE and LEVEL.
   }
 
@@ -116,7 +127,18 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
 
   // Construct the detailed main prompt content using a standard template literal
   let prompt = `
-  You are an expert AI assistant specialized in creating language learning flashcards. Your task is to generate ${count} flashcards and a clever, super funny, and memorable title, tailored precisely to the user's preferences, including a specific TONE.
+  You are an expert AI assistant specialized in creating language learning flashcards. Your task is to generate ${count} flashcards and a set title in the following format, with EVERY word capitalized (Title Case, e.g., "Buying Gongs, Loving Life & Pipe Organs"):
+    - If both situations and specific focus are present: "[Situation 1], [Situation 2] & [Specific Focus]"
+    - If only one situation: "[Situation] & [Specific Focus]"
+    - If only situations: "[Situation 1], [Situation 2]"
+    - If only specific focus: "[Specific Focus]"
+  Use an ampersand (&) only if both parts are present. Do NOT add any extra words, sentence structure, or cleverness. Just list the situations (comma separated, with 'and' before the last if more than one), then an ampersand, then the specific focus. Capitalize EVERY word in the title, regardless of user input. Examples:
+      - Situations: "learning the guitar, walking to school", Specific Focus: "mustard" → "Learning The Guitar, Walking To School & Mustard"
+      - Situations: "talking to christians", Specific Focus: "cats" → "Talking To Christians & Cats"
+      - Situations: "talking to christians, looking up something in the dictionary", Specific Focus: "cats" → "Talking To Christians, Looking Up Something In The Dictionary & Cats"
+      - Situations: "talking to christians" (no specific focus) → "Talking To Christians"
+      - Specific Focus: "cats" (no situations) → "Cats"
+  Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
 
   **User Preferences:**
   - Situations for Use: ${topicsToDiscuss || 'General conversation'}
@@ -126,7 +148,7 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
 
   **CRITICAL INSTRUCTIONS:**
 
-  1.  **Clever Title:** Generate a clever and super funny title in English for this flashcard set, ALWAYS between 6 and 10 words long. The title must clearly and equally reference BOTH the situations and specific focus fields (if present), combining them in a creative, humorous, and memorable way. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
+  1.  **Set Title:** Generate a single, clear, grammatically correct English sentence for this flashcard set title. If both a specific focus and situations are present, use the pattern: "[Specific Focus] while [Situation 1] and [Situation 2]" or "[Specific Focus] during [Situation 1] and [Situation 2]". If only situations are present, use: "[Situation 1] and [Situation 2]". Do NOT use awkward or redundant connectors (e.g., "and whilst", "and while"). Ensure the sentence is natural and correct. Example: Specific Focus: "mustard", Situations: "learning the guitar, walking to school" → Title: "Mustard while learning the guitar and walking to school". Do NOT try to be clever or funny. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
 
   2.  **Level-Specific Content:** (Ensure strict adherence)
       *   Beginner: Mostly essential words/short phrases. Simple S-V-O sentences rarely. Simple examples.
@@ -141,7 +163,7 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
           *   50-70%: Noticeably quirky, surreal, or humorously unexpected. Use metaphors, wordplay, odd scenarios. Blend standard vocab with surprising twists.
           *   80-90%: Highly absurd, nonsensical, surreal sentences. Use hyperbole, impossible combinations, illogical situations. Prioritize humor/strangeness over literal meaning, while maintaining grammatical structure for the level.
           *   91-100%: Maximum absurdity. Push boundaries. Generate grammatically plausible sentences that are almost meaningless due to extreme surrealism, non-sequiturs, bizarre tangents. Make it weird, funny, unpredictable. The phrase itself can be nonsensical.
-      *   **Mnemonics:** MUST match the tone intensely. 0% = factual; 50% = quirky/punny; 100% = completely unhinged, bizarre, barely related memory aid.
+      *   **Mnemonics:** The mnemonic must NOT reference the user input (situations or specific focus) at all. It should be the best possible mnemonic for remembering the word or phrase itself. For long sentences, only generate a mnemonic for the most important word or phrase, not the whole sentence.
       *   **Example Sentences:** MUST strongly reflect the tone. 
           *   Low Ridiculousness: Practical, standard examples.
           *   Medium Ridiculousness: Mildly amusing or odd situations.

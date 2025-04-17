@@ -38,12 +38,21 @@ const DEFAULT_SET_METADATA: SetMetaData = {
   isFullyLearned: false // Ensure default has the flag
 };
 
+// Helper to get initial active set ID from localStorage (client-side only)
+const getInitialActiveSetId = (): string => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('activeSetId');
+    return saved || DEFAULT_SET_ID;
+  }
+  return DEFAULT_SET_ID;
+};
+
 export const SetProvider = ({ children }: { children: ReactNode }) => {
   const { data: session, status } = useSession(); // Get session
   const [userId, setUserId] = useState<string | null>(null); // Store userId
 
   const [availableSets, setAvailableSets] = useState<SetMetaData[]>([DEFAULT_SET_METADATA]);
-  const [activeSetId, setActiveSetId] = useState<string | null>(DEFAULT_SET_ID);
+  const [activeSetId, setActiveSetId] = useState<string | null>(getInitialActiveSetId());
   const [activeSetContent, setActiveSetContent] = useState<Phrase[]>(INITIAL_PHRASES as unknown as Phrase[]);
   const [activeSetProgress, setActiveSetProgress] = useState<SetProgress>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -161,10 +170,15 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   // Add userId to dependencies
   }, [activeSetId, userId, activeSetContent, availableSets]);
 
-  // --- Persist activeSetId to localStorage on change ---
+  // Modify persistence effect to avoid writing during first render if value already in localStorage
+  const hasMountedRef = React.useRef(false);
   useEffect(() => {
-    if (activeSetId) {
-      localStorage.setItem('activeSetId', activeSetId);
+    if (hasMountedRef.current) {
+      if (activeSetId) {
+        localStorage.setItem('activeSetId', activeSetId);
+      }
+    } else {
+      hasMountedRef.current = true;
     }
   }, [activeSetId]);
 

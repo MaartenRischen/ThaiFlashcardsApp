@@ -109,7 +109,7 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
     thaiMasculine: string; // Polite male version ("ครับ").
     thaiFeminine: string; // Polite female version ("ค่ะ").
     pronunciation: string; // Simple phonetic guide (e.g., 'sa-wat-dee krap').
-    mnemonic?: string; // IMPORTANT: The mnemonic must NOT reference the user input (situations or specific focus) at all. It should be the best possible mnemonic for remembering the word or phrase itself. For long sentences, only generate a mnemonic for the most important word or phrase, not the whole sentence.
+    mnemonic?: string; // Provide a concise, intuitive mnemonic in *English* that helps remember the Thai word or short phrase by (1) using English words that sound phonetically similar to the Thai and (2) hinting at its meaning. NEVER reference the user‑provided situations or specific focus. If the Thai entry is longer than three words, pick the single most important word and give a mnemonic for *that* word only. Do not attempt humour or cleverness—prioritise recall effectiveness. Avoid nonsense syllables: only real English words or common sounds.
     examples?: ExampleSentence[]; // 1-2 example sentences reflecting the TONE and LEVEL.
   }
 
@@ -163,7 +163,12 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
           *   50-70%: Noticeably quirky, surreal, or humorously unexpected. Use metaphors, wordplay, odd scenarios. Blend standard vocab with surprising twists.
           *   80-90%: Highly absurd, nonsensical, surreal sentences. Use hyperbole, impossible combinations, illogical situations. Prioritize humor/strangeness over literal meaning, while maintaining grammatical structure for the level.
           *   91-100%: Maximum absurdity. Push boundaries. Generate grammatically plausible sentences that are almost meaningless due to extreme surrealism, non-sequiturs, bizarre tangents. Make it weird, funny, unpredictable. The phrase itself can be nonsensical.
-      *   **Mnemonics:** The mnemonic must NOT reference the user input (situations or specific focus) at all. It should be the best possible mnemonic for remembering the word or phrase itself. For long sentences, only generate a mnemonic for the most important word or phrase, not the whole sentence.
+      *   **Mnemonics:**
+        * Provide a concise, intuitive mnemonic in *English* that maps the Thai sound to an English word/phrase that sounds similar **and** hints at the meaning.
+        * NEVER reference the user‑provided situations or specific focus.
+        * If the Thai entry is longer than three words, choose the single most important word and give a mnemonic for *that* word only.
+        * Do **not** attempt to be funny or clever—prioritise memory effectiveness.
+        * Use only real English words or widely‑recognised sounds; avoid nonsense syllables.
       *   **Example Sentences:** MUST strongly reflect the tone. 
           *   Low Ridiculousness: Practical, standard examples.
           *   Medium Ridiculousness: Mildly amusing or odd situations.

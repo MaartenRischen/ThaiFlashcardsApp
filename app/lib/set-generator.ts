@@ -88,7 +88,7 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
   const schemaDescription = `
   **Output Format:**
   Generate a JSON object containing two keys: "cleverTitle" and "phrases".
-  - "cleverTitle": A long, descriptive, and memorable title in English for this flashcard set, summarizing BOTH the situations and specific focus fields (if present). Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Make the title as long as needed to clearly and engagingly describe the set's purpose and content, combining both the situations and specific focus. Never use names or the username in the title.
+  - "cleverTitle": A clever and super funny title in English for this flashcard set, ALWAYS between 6 and 10 words long. The title must clearly and equally reference BOTH the situations and specific focus fields (if present), combining them in a creative, humorous, and memorable way. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
   - "phrases": An array containing exactly ${count} unique flashcard objects. Each phrase object MUST conform to the following TypeScript interface:
 
   \`\`\`typescript
@@ -116,7 +116,7 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
 
   // Construct the detailed main prompt content using a standard template literal
   let prompt = `
-  You are an expert AI assistant specialized in creating language learning flashcards. Your task is to generate ${count} flashcards and a long, descriptive, and memorable title, tailored precisely to the user's preferences, including a specific TONE.
+  You are an expert AI assistant specialized in creating language learning flashcards. Your task is to generate ${count} flashcards and a clever, super funny, and memorable title, tailored precisely to the user's preferences, including a specific TONE.
 
   **User Preferences:**
   - Situations for Use: ${topicsToDiscuss || 'General conversation'}
@@ -126,7 +126,7 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
 
   **CRITICAL INSTRUCTIONS:**
 
-  1.  **Clever Title:** Generate a long, descriptive, and memorable title that clearly refers to BOTH the situations and specific focus fields (if present). Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Make the title as long as needed to clearly and engagingly describe the set's purpose and content, combining both the situations and specific focus. Never use names or the username in the title.
+  1.  **Clever Title:** Generate a clever and super funny title in English for this flashcard set, ALWAYS between 6 and 10 words long. The title must clearly and equally reference BOTH the situations and specific focus fields (if present), combining them in a creative, humorous, and memorable way. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
 
   2.  **Level-Specific Content:** (Ensure strict adherence)
       *   Beginner: Mostly essential words/short phrases. Simple S-V-O sentences rarely. Simple examples.

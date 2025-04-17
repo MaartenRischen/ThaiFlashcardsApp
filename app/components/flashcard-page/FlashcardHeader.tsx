@@ -72,16 +72,9 @@ export function FlashcardHeader({
       </div>
       {/* Content column - with all the buttons and dropdown */}
       <div className="flex flex-col w-full">
-        {/* Line 1: Set Selector (full width on mobile) */}
+        {/* Line 1: Cards button and Set Selector in a row */}
         <div className="px-2 py-2 w-full">
-          <div className="w-full">
-            <SetSelector />
-          </div>
-        </div>
-        {/* Line 2: All action buttons in a single row, horizontally scrollable if needed */}
-        <div className="px-2 py-2 w-full overflow-x-auto">
-          <div className="flex flex-row flex-nowrap gap-x-2 items-center w-max min-w-full">
-            {/* Cards button first */}
+          <div className="flex flex-row gap-x-2 items-center w-full">
             <button
               onClick={onOpenCards}
               className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-blue-300 border-blue-500 hover:bg-blue-800 hover:text-white"
@@ -89,6 +82,14 @@ export function FlashcardHeader({
             >
               Cards
             </button>
+            <div className="flex-1 min-w-[180px]">
+              <SetSelector />
+            </div>
+          </div>
+        </div>
+        {/* Line 2: All action buttons in a single row, horizontally scrollable if needed */}
+        <div className="px-2 py-2 w-full overflow-x-auto">
+          <div className="flex flex-row flex-nowrap gap-x-2 items-center w-max min-w-full">
             <button
               onClick={onOpenSetManager}
               className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-yellow-300 border-yellow-500 hover:bg-yellow-800 hover:text-white"
@@ -100,7 +101,7 @@ export function FlashcardHeader({
               onClick={() => window.open('/set-wizard', '_blank')}
               className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center whitespace-nowrap"
             >
-              Make Your Own Set!
+              Create Set!
             </button>
             <button
               onClick={onOpenSettings}

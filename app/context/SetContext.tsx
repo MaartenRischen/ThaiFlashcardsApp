@@ -172,26 +172,59 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   // Add userId to dependencies
   }, [activeSetId, userId, activeSetContent, availableSets]);
 
-  // After availableSets are loaded, restore from localStorage (bulletproof)
+  // Effect that loads user sets (you likely have this already)
   useEffect(() => {
-    if (availableSets.length > 0 && !restored) {
+    const fetchUserSets = async () => {
+      setIsLoading(true); // Start loading
+      try {
+        // ... your logic to fetch user sets ...
+        // For now, assume this is already implemented elsewhere in your code
+      } catch (error) {
+        console.error("Failed to load user sets:", error);
+        setAvailableSets([DEFAULT_SET_METADATA]);
+      } finally {
+        setIsLoading(false); // Finish loading
+      }
+    };
+    // Only call fetchUserSets if you don't already do so elsewhere
+    // fetchUserSets();
+  }, []); // Adjust dependencies as needed
+
+  // Restore from localStorage ONLY after sets have finished loading
+  useEffect(() => {
+    // Wait for isLoading to be false
+    if (!isLoading && availableSets.length > 0 && !restored) {
+      console.log("Attempting restoration. Sets loaded:", availableSets); // Debug log
       const savedId = typeof window !== 'undefined' ? localStorage.getItem('activeSetId') : null;
-      const validId = savedId && availableSets.some(set => set.id === savedId) ? savedId : availableSets[0].id;
+      console.log("Saved ID from localStorage:", savedId); // Debug log
+
+      // Validate against the (hopefully) complete list
+      const isValid = savedId && availableSets.some(set => set.id === savedId);
+      console.log("Is saved ID valid in loaded sets?", isValid); // Debug log
+
+      // More robust fallback logic: prefer default, then first
+      const validId = isValid
+        ? savedId
+        : availableSets.find(set => set.id === DEFAULT_SET_METADATA.id)?.id || availableSets[0].id;
+
+      console.log("Setting activeSetId to:", validId); // Debug log
       setActiveSetId(validId);
       setRestored(true);
     }
-  }, [availableSets, restored]);
+  }, [isLoading, availableSets, restored]); // Add isLoading dependency
 
-  // Only persist after restoration
+  // Persistence effect (no change needed, but add debug log)
   useEffect(() => {
     if (restored && activeSetId) {
+      console.log("Persisting activeSetId to localStorage:", activeSetId); // Debug log
       localStorage.setItem('activeSetId', activeSetId);
     }
   }, [activeSetId, restored]);
 
-  // Only load set data when both are ready and valid
+  // Data loading effect (no change needed, but add debug log)
   useEffect(() => {
     if (restored && activeSetId && availableSets.some(set => set.id === activeSetId)) {
+      console.log("Loading data for activeSetId:", activeSetId); // Debug log
       loadSetData(activeSetId);
     }
   }, [activeSetId, availableSets, restored, loadSetData]);

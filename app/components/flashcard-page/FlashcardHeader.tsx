@@ -54,7 +54,18 @@ export function FlashcardHeader({
                 fontWeight: 600,
               }}
             >
-              Donkey Bridge - Super Personalized Thai Language Learning App
+              Donkey Bridge
+              <span style={{
+                display: 'block',
+                fontSize: '0.95rem',
+                fontWeight: 400,
+                color: '#b3e5fc',
+                letterSpacing: '0.01em',
+                marginTop: '2px',
+                textShadow: '0 1px 4px rgba(0,0,0,0.2)'
+              }}>
+                Super Personalized Thai Language Learning App
+              </span>
             </div>
           </div>
           <img

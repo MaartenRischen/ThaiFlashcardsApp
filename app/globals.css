@@ -104,6 +104,7 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    font-family: 'Roboto', sans-serif;
   }
   :root {
     --background: 0 0% 100%;

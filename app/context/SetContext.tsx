@@ -312,7 +312,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       
       // For the default set (special case)
       if (setData.source === 'default') {
-        generatedImageUrl = '/images/default-set-logo.png';
+        generatedImageUrl = '/images/defaults/default-thailand-09.png';
       }
       
       // Prepare metadata for *storage* including the generated image URL

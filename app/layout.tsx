@@ -1,8 +1,11 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
+import { Inter } from 'next/font/google'
 import { SetProvider } from './context/SetContext'
 import { Providers } from './providers'
 import { Navbar } from './components/Navbar'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -41,7 +44,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#ffffff" />
       </head>
-      <body>
+      <body className={inter.className}>
         <Providers>
           <SetProvider>
             <Navbar />

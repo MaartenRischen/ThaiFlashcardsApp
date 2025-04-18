@@ -104,7 +104,6 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       
       setActiveSetContent(content || (INITIAL_PHRASES as unknown as Phrase[])); 
       setActiveSetProgress(progress || {});
-      setActiveSetId(id); 
       
     } catch (error) {
       console.error(`SetContext: Error loading data for set ${id}:`, error);
@@ -239,6 +238,13 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [activeSetId, loadSetData]); // Keep loadSetData dependency here
 
+  // Restore saved activeSetId when availableSets change (after they finish loading)
+  useEffect(() => {
+    const savedId = typeof window !== 'undefined' ? localStorage.getItem('activeSetId') : null;
+    if (savedId && availableSets.some(set => set.id === savedId) && activeSetId !== savedId) {
+      setActiveSetId(savedId);
+    }
+  }, [availableSets]);
 
   const addSet = useCallback(async (
     setData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>, 

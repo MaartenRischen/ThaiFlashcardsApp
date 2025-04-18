@@ -530,6 +530,12 @@ const SetWizardPage = () => {
           {/* Step 1: Welcome */}
           {currentStep === 1 && (
             <div>
+              {status !== 'loading' && !session && (
+                <div className="bg-yellow-900 border border-yellow-600 text-yellow-200 rounded p-3 mb-4 text-center font-semibold">
+                  You must be <span className="underline">logged in</span> to save a set. <br />
+                  <span className="text-yellow-300">Log in or create an account before starting if you want to keep your progress!</span>
+                </div>
+              )}
               <h2 className="text-2xl font-bold mb-4 text-blue-400">Welcome to the Set Wizard!</h2>
               <p className="mb-4">This tool will help you create a custom Thai flashcard set tailored to your learning goals.</p>
               <p className="mb-6">We'll ask you a few questions about your Thai level and what you want to learn, then use AI to generate a personalized set of flashcards for you.</p>

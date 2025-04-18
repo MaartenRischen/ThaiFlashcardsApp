@@ -45,11 +45,11 @@ export function FlashcardHeader({
             style={{ paddingTop: '8px' }}
           >
             <div
-              className="bg-black bg-opacity-40 rounded px-2 py-1 text-white text-lg font-semibold shadow-none border-b border-white border-opacity-10 w-full max-w-2xl mx-auto text-center"
+              className="bg-black bg-opacity-30 rounded-none px-0 py-1 text-white text-lg font-semibold shadow-none border-b border-white border-opacity-10 w-full max-w-2xl mx-auto text-center"
               style={{
-                textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
                 letterSpacing: '0.04em',
-                backdropFilter: 'blur(2px)',
+                backdropFilter: 'blur(1px)',
                 maxWidth: '100%',
                 textAlign: 'center',
                 fontWeight: 600,
@@ -67,11 +67,10 @@ export function FlashcardHeader({
                 marginTop: '2px',
                 opacity: 0.96,
                 lineHeight: 1.1,
-                textShadow: '0 2px 8px rgba(0,0,0,0.85)',
-                background: 'rgba(0,0,0,0.25)',
-                borderRadius: '0.25rem',
-                padding: '2px 8px',
-                backdropFilter: 'blur(2px)',
+                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                borderRadius: 0,
+                padding: 0,
+                backdropFilter: 'none',
               }}>
                 Super Personalized Thai Language Learning App
               </span>

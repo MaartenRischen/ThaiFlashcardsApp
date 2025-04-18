@@ -214,36 +214,32 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
         <div className="overflow-y-auto pr-2 flex-grow space-y-6">
           <section>
             <h3 className="text-lg font-semibold text-blue-400 mb-4">App Settings</h3>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="flex items-center justify-between">
-                <label htmlFor="genderToggleApp" className="text-gray-300">Voice/Particle Gender</label>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-400">Female (Ka)</span>
-                  <Switch id="genderToggleApp" checked={isMale} onCheckedChange={setIsMale} />
-                  <span className="text-sm font-medium text-gray-400">Male (Krap)</span>
-                </div>
+            <div className="grid grid-cols-[1fr_auto] gap-y-4 gap-x-6 items-center">
+              <label htmlFor="genderToggleApp" className="text-gray-300">Voice/Particle Gender</label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-400">Female (Ka)</span>
+                <Switch id="genderToggleApp" checked={isMale} onCheckedChange={setIsMale} />
+                <span className="text-sm font-medium text-gray-400">Male (Krap)</span>
               </div>
-              <div className="flex items-center justify-between">
-                <label htmlFor="politeToggleApp" className="text-gray-300">Politeness Particles</label>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-400">Casual</span>
-                  <Switch id="politeToggleApp" checked={isPoliteMode} onCheckedChange={setIsPoliteMode} />
-                  <span className="text-sm font-medium text-gray-400">Polite</span>
-                </div>
+              <label htmlFor="politeToggleApp" className="text-gray-300">Politeness Particles</label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-400">Casual</span>
+                <Switch id="politeToggleApp" checked={isPoliteMode} onCheckedChange={setIsPoliteMode} />
+                <span className="text-sm font-medium text-gray-400">Polite</span>
               </div>
-              <div className="flex items-center justify-between">
-                <label htmlFor="autoplayToggleApp" className="text-gray-300">Autoplay Voice</label>
-                <Switch id="autoplayToggleApp" checked={autoplay} onCheckedChange={setAutoplay} />
-              </div>
-              <div className="flex items-center justify-between">
-                <label htmlFor="darkModeToggleApp" className="text-gray-300">Dark Mode</label>
-                <Switch id="darkModeToggleApp" checked={isDarkMode} onCheckedChange={toggleDarkMode} />
-              </div>
+              <label htmlFor="autoplayToggleApp" className="text-gray-300">Autoplay Voice</label>
+              <Switch id="autoplayToggleApp" checked={autoplay} onCheckedChange={setAutoplay} />
+              <label htmlFor="darkModeToggleApp" className="text-gray-300">Dark Mode</label>
+              <Switch id="darkModeToggleApp" checked={isDarkMode} onCheckedChange={toggleDarkMode} />
             </div>
           </section>
-          <div className="mt-8 flex flex-col gap-3">
-            <button onClick={handleFactoryResetPreferences} className="neumorphic-button w-full text-yellow-400">Factory Reset (Preferences)</button>
-            <button onClick={handleFactoryResetFull} className="neumorphic-button w-full text-red-400">Factory Reset (Full App + Sets)</button>
+          <div className="mt-10 flex flex-col gap-2">
+            <button onClick={handleFactoryResetPreferences} className="w-full border border-yellow-400 text-yellow-400 rounded py-2 text-sm font-semibold hover:bg-yellow-400 hover:text-black transition flex items-center justify-center gap-2 bg-transparent">
+              <span aria-hidden="true">⚠️</span> Factory Reset (Preferences)
+            </button>
+            <button onClick={handleFactoryResetFull} className="w-full border border-red-400 text-red-400 rounded py-2 text-sm font-semibold hover:bg-red-400 hover:text-black transition flex items-center justify-center gap-2 bg-transparent">
+              <span aria-hidden="true">⚠️</span> Factory Reset (Full App + Sets)
+            </button>
           </div>
         </div>
       </div>

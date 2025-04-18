@@ -57,6 +57,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   const [activeSetContent, setActiveSetContent] = useState<Phrase[]>(INITIAL_PHRASES as unknown as Phrase[]);
   const [activeSetProgress, setActiveSetProgress] = useState<SetProgress>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [setsHaveLoaded, setSetsHaveLoaded] = useState(false);
 
   const restoredRef = React.useRef(false);
 
@@ -172,54 +173,78 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   // Add userId to dependencies
   }, [activeSetId, userId, activeSetContent, availableSets]);
 
-  // Effect that loads user sets (you likely have this already)
+  // --- Refactored Initial Data Loading --- (updated to manage setsHaveLoaded)
   useEffect(() => {
-    const fetchUserSets = async () => {
-      setIsLoading(true); // Start loading
-      try {
-        // ... your logic to fetch user sets ...
-        // For now, assume this is already implemented elsewhere in your code
-      } catch (error) {
-        console.error("Failed to load user sets:", error);
+    const loadInitialData = async () => {
+      // Always reset loading flags at start of each run
+      setSetsHaveLoaded(false);
+
+      if (status === 'authenticated' && session?.user?.id) {
+        const currentUserId = session.user.id;
+        setUserId(currentUserId);
+        setIsLoading(true);
+        try {
+          const userSets = await storage.getAllSetMetaData(currentUserId);
+          setAvailableSets([DEFAULT_SET_METADATA, ...userSets.filter(set => set.id !== DEFAULT_SET_ID)]);
+          console.log(`SetContext: Loaded ${userSets.length} user-specific set metadata entries.`);
+        } catch (error) {
+          console.error("SetContext: Error loading initial user data:", error);
+          setAvailableSets([DEFAULT_SET_METADATA]);
+        } finally {
+          setIsLoading(false);
+          setSetsHaveLoaded(true); // <-- Mark sets as loaded
+          console.log("SetContext: Initial data load finished for authenticated user.");
+        }
+      } else if (status === 'unauthenticated') {
+        console.log("SetContext: User unauthenticated. Clearing user data and showing default set.");
+        setUserId(null);
         setAvailableSets([DEFAULT_SET_METADATA]);
-      } finally {
-        setIsLoading(false); // Finish loading
+        setActiveSetId(DEFAULT_SET_ID);
+        setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
+        setActiveSetProgress({});
+        setIsLoading(false);
+        setSetsHaveLoaded(true); // <-- Mark sets as loaded even for guest
+      } else {
+        console.log("SetContext: Auth status loading...");
+        setIsLoading(true);
+        // setsHaveLoaded remains false until next run
       }
     };
-    // Only call fetchUserSets if you don't already do so elsewhere
-    // fetchUserSets();
-  }, []); // Adjust dependencies as needed
 
-  // Restore from localStorage ONLY after sets have finished loading
+    loadInitialData();
+  }, [status, session]);
+
+  // --- Restoration Effect (depends on setsHaveLoaded) ---
   useEffect(() => {
-    // Wait for isLoading to be false
-    if (!isLoading && availableSets.length > 0 && !restored) {
-      console.log("Attempting restoration. Sets loaded:", availableSets); // Debug log
+    if (setsHaveLoaded && availableSets.length > 0 && !restored) {
       const savedId = typeof window !== 'undefined' ? localStorage.getItem('activeSetId') : null;
-      console.log("Saved ID from localStorage:", savedId); // Debug log
-
-      // Validate against the (hopefully) complete list
       const isValid = savedId && availableSets.some(set => set.id === savedId);
-      console.log("Is saved ID valid in loaded sets?", isValid); // Debug log
-
-      // More robust fallback logic: prefer default, then first
       const validId = isValid
-        ? savedId
-        : availableSets.find(set => set.id === DEFAULT_SET_METADATA.id)?.id || availableSets[0].id;
+        ? savedId!
+        : availableSets.find(set => set.id === DEFAULT_SET_ID)?.id || availableSets[0].id;
 
-      console.log("Setting activeSetId to:", validId); // Debug log
       setActiveSetId(validId);
       setRestored(true);
-    }
-  }, [isLoading, availableSets, restored]); // Add isLoading dependency
 
-  // Persistence effect (no change needed, but add debug log)
-  useEffect(() => {
-    if (restored && activeSetId) {
-      console.log("Persisting activeSetId to localStorage:", activeSetId); // Debug log
-      localStorage.setItem('activeSetId', activeSetId);
+      // Debug logs
+      console.log("Restoration: setsHaveLoaded & availableSets ready");
+      console.log("Restoration: savedId", savedId, "isValid", isValid, "using", validId);
     }
-  }, [activeSetId, restored]);
+  }, [setsHaveLoaded, availableSets, restored]);
+
+  // --- Persistence Effect (waits for setsHaveLoaded & restored) ---
+  useEffect(() => {
+    if (restored && setsHaveLoaded && activeSetId) {
+      localStorage.setItem('activeSetId', activeSetId);
+      console.log("Persisted activeSetId to localStorage:", activeSetId);
+    }
+  }, [activeSetId, restored, setsHaveLoaded]);
+
+  // Reset flags on auth/session change so restoration can run again
+  useEffect(() => {
+    setRestored(false);
+    setSetsHaveLoaded(false);
+  }, [status, session]);
 
   // Data loading effect (no change needed, but add debug log)
   useEffect(() => {
@@ -228,51 +253,6 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       loadSetData(activeSetId);
     }
   }, [activeSetId, availableSets, restored, loadSetData]);
-
-  // --- Refactored Initial Data Loading --- 
-  useEffect(() => {
-    const loadInitialData = async () => {
-      if (status === 'authenticated' && session?.user?.id) {
-        const currentUserId = session.user.id;
-        setUserId(currentUserId); // Store the userId
-        setIsLoading(true);
-        try {
-          // Load user-specific sets from Supabase (now async)
-          const userSets = await storage.getAllSetMetaData(currentUserId);
-          setAvailableSets([DEFAULT_SET_METADATA, ...userSets.filter(set => set.id !== DEFAULT_SET_ID)]);
-          console.log(`SetContext: Loaded ${userSets.length} user-specific set metadata entries.`);
-          // --- Restore activeSetId from localStorage if valid ---
-          const savedSetId = localStorage.getItem('activeSetId');
-          const allSetIds = [DEFAULT_SET_ID, ...userSets.map(set => set.id)];
-          if (savedSetId && allSetIds.includes(savedSetId)) {
-            setActiveSetId(savedSetId);
-          } else {
-            setActiveSetId(DEFAULT_SET_ID); // Fallback to default
-          }
-        } catch (error) {
-           console.error("SetContext: Error loading initial user data:", error);
-           setAvailableSets([DEFAULT_SET_METADATA]);
-           setActiveSetId(DEFAULT_SET_ID);
-        } finally {
-          setIsLoading(false);
-          console.log("SetContext: Initial data load finished for authenticated user.");
-        }
-      } else if (status === 'unauthenticated') {
-        console.log("SetContext: User unauthenticated. Clearing user data and showing default set.");
-        setUserId(null);
-        setAvailableSets([DEFAULT_SET_METADATA]); 
-        setActiveSetId(DEFAULT_SET_ID);
-        setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]); 
-        setActiveSetProgress({});
-        setIsLoading(false);
-      } else {
-        console.log("SetContext: Auth status loading...");
-        setIsLoading(true); 
-      }
-    };
-
-    loadInitialData();
-  }, [status, session]); // Rerun when auth status or session changes
 
   // Effect to load data when activeSetId changes
   useEffect(() => {

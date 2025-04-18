@@ -36,10 +36,7 @@ export function FlashcardHeader({
   return (
     <div className="bg-[#111] border-b border-[#333] flex flex-col">
       {/* Subtle Donkey Bridge overlay at the top, just under the navbar */}
-      <div
-        className="fixed left-0 right-0 z-40 w-full flex justify-center"
-        style={{ top: 56, pointerEvents: 'none' }}
-      >
+      <div className="flex justify-center w-full">
         <div
           className="bg-black bg-opacity-30 rounded-none px-0 py-1 text-white text-lg font-semibold shadow-none border-b border-white border-opacity-10 w-full max-w-2xl mx-auto text-center"
           style={{

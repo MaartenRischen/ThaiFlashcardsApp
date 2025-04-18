@@ -335,16 +335,20 @@ export default function ThaiFlashcards() {
   const [autoplay, setAutoplay] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('autoplay');
-      return saved ? JSON.parse(saved) === true : false;
+      if (saved !== null) return JSON.parse(saved) === true;
+      localStorage.setItem('autoplay', 'true');
+      return true;
     } catch {
-      return false;
+      return true;
     }
   });
   const [isMale, setIsMale] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('isMale');
-      return saved ? JSON.parse(saved) === true : true;
-    } catch { return true; }
+      if (saved !== null) return JSON.parse(saved) === true;
+      localStorage.setItem('isMale', 'false');
+      return false;
+    } catch { return false; }
   });
   const [activeCards, setActiveCards] = useState<number[]>(() => {
     try {
@@ -358,7 +362,14 @@ export default function ThaiFlashcards() {
   const [voicesLoaded, setVoicesLoaded] = useState(false);
   const [showAdminSettings, setShowAdminSettings] = useState(false);
   const [mnemonics, setMnemonics] = useState<{[key: number]: string}>({});
-  const [isPoliteMode, setIsPoliteMode] = useState(true);
+  const [isPoliteMode, setIsPoliteMode] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('isPoliteMode');
+      if (saved !== null) return JSON.parse(saved) === true;
+      localStorage.setItem('isPoliteMode', 'false');
+      return false;
+    } catch { return false; }
+  });
   const [activeCardsIndex, setActiveCardsIndex] = useState<number>(0);
   const [showMnemonicsModal, setShowMnemonicsModal] = useState(false);
   const [reviewsCompletedToday, setReviewsCompletedToday] = useState<number>(0);
@@ -371,7 +382,14 @@ export default function ThaiFlashcards() {
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [tutorialStep, setTutorialStep] = useState<number>(0);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false); // Default to false (light)
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('darkMode');
+      if (saved !== null) return JSON.parse(saved) === true;
+      localStorage.setItem('darkMode', 'false');
+      return false;
+    } catch { return false; }
+  });
   const [showMnemonicHint, setShowMnemonicHint] = useState(false); // NEW: State for front hint
   const [showCardsModal, setShowCardsModal] = useState(false);
 
@@ -412,6 +430,14 @@ export default function ThaiFlashcards() {
   useEffect(() => {
     localStorage.setItem('isMale', JSON.stringify(isMale));
   }, [isMale]);
+
+  useEffect(() => {
+    localStorage.setItem('isPoliteMode', JSON.stringify(isPoliteMode));
+  }, [isPoliteMode]);
+
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
 
   useEffect(() => {
     localStorage.setItem('activeCards', JSON.stringify(activeCards));

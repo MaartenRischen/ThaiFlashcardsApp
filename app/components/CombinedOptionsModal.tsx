@@ -190,6 +190,19 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
   autoplay: boolean;
   setAutoplay: (checked: boolean) => void;
 }) {
+  const handleFactoryResetPreferences = () => {
+    if (window.confirm('Are you sure you want to reset all preferences? This cannot be undone.')) {
+      localStorage.clear();
+      window.location.reload();
+    }
+  };
+  const handleFactoryResetFull = () => {
+    if (window.confirm('Are you sure you want to reset the entire app, including all sets and progress? This cannot be undone.')) {
+      indexedDB.deleteDatabase('localforage'); // If using localforage or similar
+      localStorage.clear();
+      window.location.reload();
+    }
+  };
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" onClick={onClose}>
@@ -201,21 +214,21 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
         <div className="overflow-y-auto pr-2 flex-grow space-y-6">
           <section>
             <h3 className="text-lg font-semibold text-blue-400 mb-4">App Settings</h3>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
               <div className="flex items-center justify-between">
                 <label htmlFor="genderToggleApp" className="text-gray-300">Voice/Particle Gender</label>
-                <div className="flex items-center">
-                  <span className="mr-2 text-sm font-medium text-gray-400">Female (Ka)</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-400">Female (Ka)</span>
                   <Switch id="genderToggleApp" checked={isMale} onCheckedChange={setIsMale} />
-                  <span className="ml-2 text-sm font-medium text-gray-400">Male (Krap)</span>
+                  <span className="text-sm font-medium text-gray-400">Male (Krap)</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <label htmlFor="politeToggleApp" className="text-gray-300">Politeness Particles</label>
-                <div className="flex items-center">
-                  <span className="mr-2 text-sm font-medium text-gray-400">Casual</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-400">Casual</span>
                   <Switch id="politeToggleApp" checked={isPoliteMode} onCheckedChange={setIsPoliteMode} />
-                  <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
+                  <span className="text-sm font-medium text-gray-400">Polite</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
@@ -228,6 +241,10 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
               </div>
             </div>
           </section>
+          <div className="mt-8 flex flex-col gap-3">
+            <button onClick={handleFactoryResetPreferences} className="neumorphic-button w-full text-yellow-400">Factory Reset (Preferences)</button>
+            <button onClick={handleFactoryResetFull} className="neumorphic-button w-full text-red-400">Factory Reset (Full App + Sets)</button>
+          </div>
         </div>
       </div>
     </div>
@@ -432,9 +449,9 @@ export function SetManagerModal({ isOpen, onClose }: {
         </div>
         {/* Current Set Progress Section */}
         <div className="mb-6 bg-gray-900 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-blue-300 mb-2">Current Set Progress</h3>
+          <h3 className="text-lg font-semibold text-blue-300 mb-2 text-center">Current Set Progress</h3>
           <div className="flex flex-col gap-2">
-            <span className="text-white font-bold">{activeSet?.cleverTitle || activeSet?.name || 'No Set Selected'}</span>
+            <span className="text-white font-bold text-center">{activeSet?.cleverTitle || activeSet?.name || 'No Set Selected'}</span>
             <div className="w-full bg-gray-700 rounded-full h-3">
               <div
                 className="bg-green-500 h-3 rounded-full transition-all duration-300"

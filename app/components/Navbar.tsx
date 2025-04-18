@@ -32,7 +32,7 @@ export function Navbar() {
               </div>
               <Button 
                 variant="outline" 
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={() => signOut({ callbackUrl: "https://donkeybridge.world" })}
                 className="text-xs px-2 py-1 h-7 min-w-0"
               >
                 Sign Out

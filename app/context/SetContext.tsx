@@ -6,7 +6,6 @@ import { INITIAL_PHRASES } from '@/app/data/phrases';
 import { Phrase } from '@/app/lib/set-generator';
 import * as storage from '@/app/lib/storage'; // Use renamed storage
 import { SetMetaData, SetProgress } from '@/app/lib/storage';
-import { generateImage } from '@/app/lib/ideogram-service'; // Import image generation service
 
 interface SetContextProps {
   availableSets: SetMetaData[];
@@ -290,29 +289,20 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     let generatedImageUrl: string | null = null;
     
     try {
-      // Only generate an image if imageUrl is missing
-      if (!setData.imageUrl && setData.source !== 'import') {
-        const prompt = `Playful cartoon illustration for a Thai language flashcard set named "${setData.name}". Theme: ${setData.goals?.join(', ') || 'general language learning'}. Style: simple, colorful, cute donkey mascot. ABSOLUTELY NEVER include any words, text, writing, or letters in any language, under any circumstances. The image must not contain any text or writing at all.`;
-        console.log(`[addSet] Generating image with prompt:`, prompt);
-        try {
-          generatedImageUrl = await generateImage(prompt);
-          console.log(`[addSet] Ideogram API returned imageUrl:`, generatedImageUrl);
-          if (generatedImageUrl) {
-            console.log(`[addSet] Successfully generated image URL: ${generatedImageUrl}`);
-          } else {
-            console.warn("[addSet] Image generation failed or returned null, proceeding without image.");
-          }
-        } catch (imageError) {
-          console.error("[addSet] Error during image generation:", imageError);
-          // Continue without an image
-        }
-      } else if (setData.imageUrl) {
+      /*
+       * Image handling rules (simplified):
+       * 1. If the wizard (or caller) already supplied an imageUrl, always use that.
+       * 2. If this is the built‑in default set, fall back to our local default image.
+       * 3. Otherwise leave imageUrl undefined – DO NOT auto‑generate a new image here.
+       *    (Image generation should be a deliberate user‑visible action in the wizard.)
+       */
+
+      if (setData.imageUrl) {
         generatedImageUrl = setData.imageUrl;
-      }
-      
-      // For the default set (special case)
-      if (setData.source === 'default') {
+      } else if (setData.source === 'default') {
         generatedImageUrl = '/images/defaultnew.png';
+      } else {
+        generatedImageUrl = null; // remain blank; no surprise regeneration
       }
       
       // Prepare metadata for *storage* including the generated image URL

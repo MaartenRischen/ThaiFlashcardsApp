@@ -6,6 +6,7 @@ import { useSet } from '@/app/context/SetContext';
 import { useState } from 'react';
 import { INITIAL_PHRASES } from '@/app/data/phrases';
 import * as storage from '@/app/lib/storage';
+import Image from 'next/image';
 
 interface CombinedOptionsModalProps {
   isOpen: boolean;
@@ -453,10 +454,18 @@ export function SetManagerModal({ isOpen, onClose }: {
           />
           {/* Set Image */}
           <div className="w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800 flex items-center justify-center">
-            <img
+            <Image
               src={setImageUrl}
               alt={set.cleverTitle || set.name}
               className="w-full h-full object-contain"
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              onError={(e) => {
+                // fallback to default image if error
+                if (setImageUrl !== '/images/default-set-logo.png') {
+                  e.currentTarget.src = '/images/default-set-logo.png';
+                }
+              }}
             />
           </div>
           {/* Set Name */}
@@ -566,10 +575,18 @@ export function SetManagerModal({ isOpen, onClose }: {
                 />
                 {/* Set Image */}
                 <div className="w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800 flex items-center justify-center">
-                  <img
+                  <Image
                     src={setImageUrl}
                     alt={set.cleverTitle || set.name}
                     className="w-full h-full object-contain"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    onError={(e) => {
+                      // fallback to default image if error
+                      if (setImageUrl !== '/images/default-set-logo.png') {
+                        e.currentTarget.src = '/images/default-set-logo.png';
+                      }
+                    }}
                   />
                 </div>
                 {/* Set Name */}

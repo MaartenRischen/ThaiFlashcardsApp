@@ -421,14 +421,13 @@ export function SetManagerModal({ isOpen, onClose }: {
       const learned = Object.keys(setProgress || {}).length;
       const total = set.phraseCount || 0;
       const percent = total > 0 ? Math.round((learned / total) * 100) : 0;
-      // Set Image logic (monthly-changing for default set)
-      let setImageUrl = set.imageUrl;
-      if (!setImageUrl && set.id === 'default') {
-        const now = new Date();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        setImageUrl = `/images/defaults/default-thailand-${month}.png`;
+      // Set image logic
+      let imgUrl: string | undefined | null = set.imageUrl;
+      if (!imgUrl) {
+        imgUrl = set.id === 'default'
+          ? '/images/defaultnew.png' // single reliable default image
+          : '/images/default-set-logo.png';
       }
-      setImageUrl = setImageUrl || '/images/default-set-logo.png';
       return (
         <div
           key={set.id}
@@ -453,17 +452,17 @@ export function SetManagerModal({ isOpen, onClose }: {
             }}
           />
           {/* Set Image */}
-          <div className="w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800 flex items-center justify-center">
+          <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800">
             <Image
-              src={setImageUrl}
+              src={imgUrl}
               alt={set.cleverTitle || set.name}
-              className="w-full h-full object-contain"
+              className="object-cover"
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
-              onError={(e) => {
-                // fallback to default image if error
-                if (setImageUrl !== '/images/default-set-logo.png') {
-                  e.currentTarget.src = '/images/default-set-logo.png';
+              onError={ev => {
+                const target = ev.currentTarget as HTMLImageElement;
+                if (target.src !== '/images/default-set-logo.png') {
+                  target.src = '/images/default-set-logo.png';
                 }
               }}
             />
@@ -542,14 +541,13 @@ export function SetManagerModal({ isOpen, onClose }: {
             const learned = Object.keys(setProgress || {}).length;
             const total = set.phraseCount || 0;
             const percent = total > 0 ? Math.round((learned / total) * 100) : 0;
-            // Set Image logic (monthly-changing for default set)
-            let setImageUrl = set.imageUrl;
-            if (!setImageUrl && set.id === 'default') {
-              const now = new Date();
-              const month = String(now.getMonth() + 1).padStart(2, '0');
-              setImageUrl = `/images/defaults/default-thailand-${month}.png`;
+            // Set image logic
+            let imgUrl: string | undefined | null = set.imageUrl;
+            if (!imgUrl) {
+              imgUrl = set.id === 'default'
+                ? '/images/defaultnew.png' // single reliable default image
+                : '/images/default-set-logo.png';
             }
-            setImageUrl = setImageUrl || '/images/default-set-logo.png';
             return (
               <div
                 key={set.id}
@@ -574,17 +572,17 @@ export function SetManagerModal({ isOpen, onClose }: {
                   }}
                 />
                 {/* Set Image */}
-                <div className="w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800 flex items-center justify-center">
+                <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800">
                   <Image
-                    src={setImageUrl}
+                    src={imgUrl}
                     alt={set.cleverTitle || set.name}
-                    className="w-full h-full object-contain"
+                    className="object-cover"
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    onError={(e) => {
-                      // fallback to default image if error
-                      if (setImageUrl !== '/images/default-set-logo.png') {
-                        e.currentTarget.src = '/images/default-set-logo.png';
+                    onError={ev => {
+                      const target = ev.currentTarget as HTMLImageElement;
+                      if (target.src !== '/images/default-set-logo.png') {
+                        target.src = '/images/default-set-logo.png';
                       }
                     }}
                   />

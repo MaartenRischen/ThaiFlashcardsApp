@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    unoptimized: true
+    domains: ['images.unsplash.com'], // Add other domains as needed
   },
   // Remove GitHub Pages specific settings
   basePath: '',

@@ -29,9 +29,9 @@ export function FlashcardHeader({
   // Get the image URL (use new monthly Thailand image for default set, fallback to old logo)
   let setImageUrl = activeSet?.imageUrl;
   if (!setImageUrl && activeSet?.id === 'default') {
-    setImageUrl = '/images/defaults/default-thailand-09.png';
+    setImageUrl = '/images/defaultnew.png';
   }
-  setImageUrl = setImageUrl || '/images/default-set-logo.png';
+  setImageUrl = setImageUrl || '/images/defaultnew.png';
   
   const isDefaultSet = activeSet?.id === 'default';
   const [showShare, setShowShare] = useState(false);
@@ -114,7 +114,7 @@ export function FlashcardHeader({
             style={{ objectFit: 'contain', objectPosition: 'center' }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              target.src = '/images/default-set-logo.png';
+              target.src = '/images/defaultnew.png';
             }}
           />
         </div>

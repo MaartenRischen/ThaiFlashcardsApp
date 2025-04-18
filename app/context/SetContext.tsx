@@ -22,6 +22,7 @@ interface SetContextProps {
   deleteSet: (id: string) => Promise<void>;
   exportSet: (id: string) => Promise<void>;
   renameSet: (id: string, newName: string) => Promise<void>;
+  updateSetPublic: (id: string, isPublic: boolean) => Promise<void>;
 }
 
 const SetContext = createContext<SetContextProps | undefined>(undefined);
@@ -505,6 +506,26 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   // Add userId dependency
   }, [availableSets, userId]);
 
+  // Function to toggle public availability of a set
+  const updateSetPublic = useCallback(async (id: string, isPublic: boolean) => {
+    if (!id || !userId) return;
+    setIsLoading(true);
+    try {
+      // Find current metadata
+      const current = availableSets.find(s => s.id === id);
+      if (!current) throw new Error('Set not found');
+      const updated: SetMetaData = { ...current, isPublic };
+      // Persist to Supabase
+      await storage.updateSetMetaData(updated);
+      // Update local state
+      setAvailableSets(prev => prev.map(s => s.id === id ? updated : s));
+    } catch (error) {
+      console.error('SetContext: Failed to update public flag:', error);
+      alert(`Failed to ${isPublic ? 'publish' : 'unpublish'} set: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId, availableSets]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({
@@ -518,9 +539,9 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       updateSetProgress,
       deleteSet,
       exportSet,
-      renameSet
-  // Update dependencies for useMemo - include all functions now
-  }), [availableSets, activeSetId, activeSetContent, activeSetProgress, isLoading, switchSet, addSet, updateSetProgress, deleteSet, exportSet, renameSet]);
+      renameSet,
+      updateSetPublic,
+  }), [availableSets, activeSetId, activeSetContent, activeSetProgress, isLoading, switchSet, addSet, updateSetProgress, deleteSet, exportSet, renameSet, updateSetPublic]);
 
   return (
     <SetContext.Provider value={contextValue}>

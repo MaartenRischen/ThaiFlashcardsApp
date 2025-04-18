@@ -319,6 +319,7 @@ export function SetManagerModal({ isOpen, onClose }: {
     deleteSet,
     exportSet,
     updateSetProgress,
+    updateSetPublic,
     // addSet, etc.
   } = useSet();
   const [selected, setSelected] = useState<string[]>([]);
@@ -490,6 +491,16 @@ export function SetManagerModal({ isOpen, onClose }: {
             <span>#Cards: {set.phraseCount || '-'}</span>
             <span>{set.createdAt ? new Date(set.createdAt).toLocaleDateString() : '-'}</span>
           </div>
+          {/* Public toggle checkbox */}
+          <div className="absolute top-3 left-3 z-10 flex items-center space-x-1" onClick={e => e.stopPropagation()}>
+            <input
+              type="checkbox"
+              checked={set.isPublic}
+              onChange={() => updateSetPublic(set.id, !set.isPublic)}
+              className="h-4 w-4 accent-green-400"
+            />
+            <label className="text-xs text-gray-300 select-none">Public</label>
+          </div>
           {/* Actions for single set (edit, export, delete, etc.) can be added here if needed */}
         </div>
       );
@@ -609,6 +620,16 @@ export function SetManagerModal({ isOpen, onClose }: {
                 <div className="flex justify-between text-xs text-gray-500 mt-auto pt-2 border-t border-gray-800">
                   <span>#Cards: {set.phraseCount || '-'}</span>
                   <span>{set.createdAt ? new Date(set.createdAt).toLocaleDateString() : '-'}</span>
+                </div>
+                {/* Public toggle checkbox */}
+                <div className="absolute top-3 left-3 z-10 flex items-center space-x-1" onClick={e => e.stopPropagation()}>
+                  <input
+                    type="checkbox"
+                    checked={set.isPublic}
+                    onChange={() => updateSetPublic(set.id, !set.isPublic)}
+                    className="h-4 w-4 accent-green-400"
+                  />
+                  <label className="text-xs text-gray-300 select-none">Public</label>
                 </div>
                 {/* Cards Button */}
                 <button

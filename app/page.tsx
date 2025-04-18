@@ -1217,7 +1217,7 @@ export default function ThaiFlashcards() {
                   
                   {/* Pronunciation displayed above the mnemonic */}
                   {phrases[index]?.pronunciation && (
-                    <div className="mb-2 p-2 bg-gray-800 rounded text-gray-300 font-medium">
+                    <div className="mb-2 p-2 bg-gray-800 rounded text-gray-300 font-medium text-center">
                       <span className="text-blue-400">Pronunciation:</span> {phrases[index].pronunciation}
                     </div>
                   )}
@@ -1232,9 +1232,9 @@ export default function ThaiFlashcards() {
                 </div>
 
                 {/* === Context section === */}
-                <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic mb-4">
+                <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic mb-4 text-center">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm text-blue-400 uppercase tracking-wider">In Context</h3>
+                    <h3 className="text-sm text-blue-400 uppercase tracking-wider w-full text-center">In Context</h3>
                   </div>
                   <ClientOnly>
                     <p className="text-base text-white font-medium">

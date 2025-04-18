@@ -83,8 +83,10 @@ model FlashcardSet {
   specificTopics String?
   source         String   // default, wizard, import
   imageUrl       String?  // URL to AI-generated or default set image
+  seriousnessLevel Int?   // Optional numeric scale for humorous tone
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  shareId        String?  @unique // Unique, nullable shareable ID for public sharing
 
   // Corrected Relation: References User.supabaseAuthUserId
   user    User     @relation(fields: [userId], references: [supabaseAuthUserId], onDelete: Cascade)

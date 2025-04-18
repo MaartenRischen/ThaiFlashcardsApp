@@ -1,7 +1,8 @@
 import React from 'react';
 import { SetSelector } from '@/app/components/SetSelector'; // Assuming path
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
-import { Layers, Grid, Wand2, Plus, Settings, HelpCircle } from 'lucide-react';
+import { Layers, Grid, Wand2, Plus, Settings, HelpCircle, Share2 } from 'lucide-react';
+import { useState } from 'react';
 
 // Update props for combined settings modal
 interface FlashcardHeaderProps {
@@ -34,6 +35,37 @@ export function FlashcardHeader({
   }
   setImageUrl = setImageUrl || '/images/default-set-logo.png';
   
+  const isDefaultSet = activeSet?.id === 'default';
+  const [showShare, setShowShare] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+
+  const handleShare = async () => {
+    setShareLoading(true);
+    setShareError(null);
+    setShareUrl(null);
+    try {
+      const res = await fetch(`/api/flashcard-sets/${activeSetId}/share`, { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to get share link');
+      const data = await res.json();
+      if (!data.shareId) throw new Error('No shareId returned');
+      const url = `${window.location.origin}/share/${data.shareId}`;
+      setShareUrl(url);
+      setShowShare(true);
+    } catch (err: any) {
+      setShareError(err.message || 'Unknown error');
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
+  const handleCopy = () => {
+    if (shareUrl) {
+      navigator.clipboard.writeText(shareUrl);
+    }
+  };
+
   return (
     <div className="bg-[#111] border-b border-[#333] flex flex-col">
       {/* Full-width Ideogram set image (16:9 aspect ratio) */}
@@ -120,6 +152,16 @@ export function FlashcardHeader({
             >
               <Grid />
             </button>
+            {/* Share Set */}
+            <button
+              onClick={handleShare}
+              className="neumorphic-icon-button text-xl text-purple-400"
+              title="Share This Set"
+              aria-label="Share This Set"
+              disabled={isDefaultSet || shareLoading}
+            >
+              <Share2 />
+            </button>
             {/* Create Set! */}
             <button
               onClick={() => window.open('/set-wizard', '_blank')}
@@ -151,6 +193,26 @@ export function FlashcardHeader({
             </button>
           </div>
         </div>
+        {/* Share Dialog */}
+        {showShare && shareUrl && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60" onClick={() => setShowShare(false)}>
+            <div className="bg-gray-900 p-6 rounded-lg shadow-lg max-w-md w-full" onClick={e => e.stopPropagation()}>
+              <h3 className="text-lg font-bold mb-2 text-purple-300">Share This Set</h3>
+              <p className="text-gray-300 mb-2">Anyone with this link can view and import your set:</p>
+              <div className="flex items-center bg-gray-800 rounded px-2 py-1 mb-3">
+                <input
+                  type="text"
+                  value={shareUrl}
+                  readOnly
+                  className="flex-1 bg-transparent text-white outline-none text-sm"
+                  onFocus={e => e.target.select()}
+                />
+                <button onClick={handleCopy} className="ml-2 px-2 py-1 text-xs bg-purple-700 text-white rounded hover:bg-purple-600">Copy</button>
+              </div>
+              <button onClick={() => setShowShare(false)} className="mt-2 neumorphic-button text-sm text-gray-400">Close</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

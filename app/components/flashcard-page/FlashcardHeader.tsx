@@ -29,9 +29,7 @@ export function FlashcardHeader({
   // Get the image URL (use new monthly Thailand image for default set, fallback to old logo)
   let setImageUrl = activeSet?.imageUrl;
   if (!setImageUrl && activeSet?.id === 'default') {
-    const now = new Date();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    setImageUrl = `/images/defaults/default-thailand-${month}.png`;
+    setImageUrl = '/images/defaults/default-thailand-09.png';
   }
   setImageUrl = setImageUrl || '/images/default-set-logo.png';
   

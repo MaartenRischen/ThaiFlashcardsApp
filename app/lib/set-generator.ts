@@ -88,18 +88,12 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
   const schemaDescription = `
   **Output Format:**
   Generate a JSON object containing two keys: "cleverTitle" and "phrases".
-  - "cleverTitle": The title must be formatted as follows, with EVERY word capitalized (Title Case, e.g., "Buying Gongs, Loving Life & Pipe Organs"):
-    - If both situations and specific focus are present: "[Situation 1], [Situation 2] & [Specific Focus]"
-    - If only one situation: "[Situation] & [Specific Focus]"
-    - If only situations: "[Situation 1], [Situation 2]"
-    - If only specific focus: "[Specific Focus]"
-    Use an ampersand (&) only if both parts are present. Do NOT add any extra words, sentence structure, or cleverness. Just list the situations (comma separated, with 'and' before the last if more than one), then an ampersand, then the specific focus. Capitalize EVERY word in the title, regardless of user input. Examples:
-      - Situations: "learning the guitar, walking to school", Specific Focus: "mustard" → "Learning The Guitar, Walking To School & Mustard"
-      - Situations: "talking to christians", Specific Focus: "cats" → "Talking To Christians & Cats"
-      - Situations: "talking to christians, looking up something in the dictionary", Specific Focus: "cats" → "Talking To Christians, Looking Up Something In The Dictionary & Cats"
-      - Situations: "talking to christians" (no specific focus) → "Talking To Christians"
-      - Specific Focus: "cats" (no situations) → "Cats"
-    Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
+  - "cleverTitle": Write a single, natural, matter-of-fact, grammatically correct English sentence that describes the set. Use the user's situations and specific focus, but do NOT just list them. The title should sound like a native English speaker describing what the set is about. Do not use awkward connectors or forced structure. Do not use title case—use normal sentence case. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title. Examples:
+    - Situations: "learning the guitar, walking to school", Specific Focus: "mustard" → "Learning the guitar and walking to school while thinking about mustard."
+    - Situations: "talking to christians", Specific Focus: "cats" → "Talking to christians about cats."
+    - Situations: "talking to christians, looking up something in the dictionary", Specific Focus: "cats" → "Looking up something in the dictionary and talking to christians about cats."
+    - Situations: "talking to christians" (no specific focus) → "Talking to christians."
+    - Specific Focus: "cats" (no situations) → "All about cats."
   - "phrases": An array containing exactly ${count} unique flashcard objects. Each phrase object MUST conform to the following TypeScript interface:
 
   \`\`\`typescript
@@ -127,18 +121,15 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
 
   // Construct the detailed main prompt content using a standard template literal
   let prompt = `
-  You are an expert AI assistant specialized in creating language learning flashcards. Your task is to generate ${count} flashcards and a set title in the following format, with EVERY word capitalized (Title Case, e.g., "Buying Gongs, Loving Life & Pipe Organs"):
-    - If both situations and specific focus are present: "[Situation 1], [Situation 2] & [Specific Focus]"
-    - If only one situation: "[Situation] & [Specific Focus]"
-    - If only situations: "[Situation 1], [Situation 2]"
-    - If only specific focus: "[Specific Focus]"
-  Use an ampersand (&) only if both parts are present. Do NOT add any extra words, sentence structure, or cleverness. Just list the situations (comma separated, with 'and' before the last if more than one), then an ampersand, then the specific focus. Capitalize EVERY word in the title, regardless of user input. Examples:
-      - Situations: "learning the guitar, walking to school", Specific Focus: "mustard" → "Learning The Guitar, Walking To School & Mustard"
-      - Situations: "talking to christians", Specific Focus: "cats" → "Talking To Christians & Cats"
-      - Situations: "talking to christians, looking up something in the dictionary", Specific Focus: "cats" → "Talking To Christians, Looking Up Something In The Dictionary & Cats"
-      - Situations: "talking to christians" (no specific focus) → "Talking To Christians"
-      - Specific Focus: "cats" (no situations) → "Cats"
-  Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
+  You are an expert AI assistant specialized in creating language learning flashcards. Your task is to generate ${count} flashcards and a set title.
+
+  - For the set title ("cleverTitle"), write a single, natural, matter-of-fact, grammatically correct English sentence that describes the set. Use the user's situations and specific focus, but do NOT just list them. The title should sound like a native English speaker describing what the set is about. Do not use awkward connectors or forced structure. Do not use title case—use normal sentence case. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
+  - Examples:
+    - Situations: "learning the guitar, walking to school", Specific Focus: "mustard" → "Learning the guitar and walking to school while thinking about mustard."
+    - Situations: "talking to christians", Specific Focus: "cats" → "Talking to christians about cats."
+    - Situations: "talking to christians, looking up something in the dictionary", Specific Focus: "cats" → "Looking up something in the dictionary and talking to christians about cats."
+    - Situations: "talking to christians" (no specific focus) → "Talking to christians."
+    - Specific Focus: "cats" (no situations) → "All about cats."
 
   **User Preferences:**
   - Situations for Use: ${topicsToDiscuss || 'General conversation'}
@@ -148,7 +139,7 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
 
   **CRITICAL INSTRUCTIONS:**
 
-  1.  **Set Title:** Generate a single, clear, grammatically correct English sentence for this flashcard set title. If both a specific focus and situations are present, use the pattern: "[Specific Focus] while [Situation 1] and [Situation 2]" or "[Specific Focus] during [Situation 1] and [Situation 2]". If only situations are present, use: "[Situation 1] and [Situation 2]". Do NOT use awkward or redundant connectors (e.g., "and whilst", "and while"). Ensure the sentence is natural and correct. Example: Specific Focus: "mustard", Situations: "learning the guitar, walking to school" → Title: "Mustard while learning the guitar and walking to school". Do NOT try to be clever or funny. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
+  1.  **Set Title:** Follow the above instructions for the set title. Make sure it is a single, natural, grammatically correct English sentence. Do NOT try to be clever or funny. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
 
   2.  **Level-Specific Content:** (Ensure strict adherence)
       *   Beginner: Mostly essential words/short phrases. Simple S-V-O sentences rarely. Simple examples.

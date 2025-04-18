@@ -207,11 +207,32 @@ const SetWizardPage = () => {
   const { data: session, status } = useSession();
   const { addSet } = useSet(); // Get addSet from context
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [thaiLevel, setThaiLevel] = useState<ThaiLevel | ''>( ''); // Use specific type
+  const [thaiLevel, setThaiLevel] = useState<ThaiLevel | ''>(() => {
+    try {
+      const saved = localStorage.getItem('wizardLevel');
+      if (saved) return saved as ThaiLevel;
+      localStorage.setItem('wizardLevel', 'beginner');
+      return 'beginner';
+    } catch { return 'beginner'; }
+  });
   const [situations, setSituations] = useState<string>('');
   const [specificTopics, setSpecificTopics] = useState<string>('');
-  const [cardCount, setCardCount] = useState<number>(8); // Default count
-  const [seriousnessLevel, setSeriousnessLevel] = useState<number>(50);
+  const [cardCount, setCardCount] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('wizardCardCount');
+      if (saved !== null) return parseInt(saved);
+      localStorage.setItem('wizardCardCount', '8');
+      return 8;
+    } catch { return 8; }
+  });
+  const [seriousnessLevel, setSeriousnessLevel] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('wizardRidiculousness');
+      if (saved !== null) return parseInt(saved);
+      localStorage.setItem('wizardRidiculousness', '0');
+      return 0;
+    } catch { return 0; }
+  });
   const [customSetName, setCustomSetName] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generationProgress, setGenerationProgress] = useState<{ completed: number, total: number }>({ completed: 0, total: 0 });
@@ -254,6 +275,16 @@ const SetWizardPage = () => {
   useEffect(() => {
     console.log(`Effect: generatingDisplayPhrases updated. New length: ${generatingDisplayPhrases.length}`);
   }, [generatingDisplayPhrases]);
+
+  useEffect(() => {
+    localStorage.setItem('wizardLevel', thaiLevel);
+  }, [thaiLevel]);
+  useEffect(() => {
+    localStorage.setItem('wizardRidiculousness', seriousnessLevel.toString());
+  }, [seriousnessLevel]);
+  useEffect(() => {
+    localStorage.setItem('wizardCardCount', cardCount.toString());
+  }, [cardCount]);
 
   const generateSetName = () => {
     if (!customSetName && session?.user?.name) {
@@ -436,8 +467,7 @@ const SetWizardPage = () => {
         // Use the addSet function from the context
         const newSetId = await addSet(setData, generatedPhrases);
         console.log("Set saved via context with ID:", newSetId);
-        alert('Set successfully generated and saved! Returning to main app.');
-        router.push('/'); // Navigate back to the main app
+        router.push('/'); // Navigate back to the main app immediately
     } catch (error) {
         console.error("Error saving set via context:", error);
         alert(`Failed to save the generated set: ${error instanceof Error ? error.message : 'Unknown error'}`);

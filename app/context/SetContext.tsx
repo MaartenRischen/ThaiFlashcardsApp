@@ -57,6 +57,8 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   const [activeSetProgress, setActiveSetProgress] = useState<SetProgress>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const restoredRef = React.useRef(false);
+
   // Function to load content and progress for a specific set ID
   const loadSetData = useCallback(async (id: string | null) => {
     // This function now needs userId
@@ -175,11 +177,13 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       const savedId = typeof window !== 'undefined' ? localStorage.getItem('activeSetId') : null;
       const validId = savedId && availableSets.some(set => set.id === savedId) ? savedId : DEFAULT_SET_ID;
       setActiveSetId(validId);
+      restoredRef.current = true; // mark restored
     }
   }, [availableSets]);
 
-  // Persist activeSetId to localStorage only after it is set and valid
+  // Persist activeSetId only after restoration done
   useEffect(() => {
+    if (!restoredRef.current) return; // don't persist during first restoration cycle
     if (activeSetId && availableSets.some(set => set.id === activeSetId)) {
       localStorage.setItem('activeSetId', activeSetId);
     }

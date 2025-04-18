@@ -103,23 +103,23 @@ export function FlashcardHeader({
         </div>
         {/* Line 2: All action buttons in a single row, always full width */}
         <div className="px-2 py-2 w-full">
-          <div className="flex flex-row gap-x-2 items-center w-full">
+          <div className="flex flex-row items-center w-full justify-between gap-x-2">
             <button
               onClick={onOpenSetManager}
-              className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-yellow-300 border-yellow-500 hover:bg-yellow-800 hover:text-white flex-1"
+              className="neumorphic-button text-sm px-3 py-1.5 whitespace-nowrap font-semibold text-yellow-300 border-yellow-500 hover:bg-yellow-800 hover:text-white"
               aria-label="Set Manager"
             >
               Set Manager
             </button>
             <button
               onClick={() => window.open('/set-wizard', '_blank')}
-              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center whitespace-nowrap flex-1"
+              className="neumorphic-button text-sm font-semibold text-green-300 border-green-500 hover:bg-green-800 hover:text-white px-3 py-1.5 shadow-[0_0_10px_#10B981] inline-flex items-center justify-center whitespace-nowrap"
             >
               Create Set!
             </button>
             <button
               onClick={onOpenSettings}
-              className="neumorphic-icon-button text-xl font-bold text-gray-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8 flex-none"
+              className="neumorphic-icon-button text-xl font-bold text-gray-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8"
               title="Settings"
               aria-label="Settings"
             >
@@ -131,7 +131,7 @@ export function FlashcardHeader({
             </button>
             <button
               onClick={() => setShowHowItWorks(true)}
-              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8 flex-none"
+              className="neumorphic-icon-button text-xl font-bold text-blue-400 p-2 leading-none inline-flex items-center justify-center w-8 h-8"
               title="How It Works"
               aria-label="How It Works"
             >

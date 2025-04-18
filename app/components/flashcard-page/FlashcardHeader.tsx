@@ -35,25 +35,28 @@ export function FlashcardHeader({
   
   return (
     <div className="bg-[#111] border-b border-[#333] flex flex-col">
-      {/* Subtle Donkey Bridge overlay at the top, just under the navbar */}
-      <div className="flex justify-center w-full">
-        <div
-          className="bg-black bg-opacity-30 rounded-none px-0 py-1 text-white text-lg font-semibold shadow-none border-b border-white border-opacity-10 w-full max-w-2xl mx-auto text-center"
-          style={{
-            textShadow: '0 1px 4px rgba(0,0,0,0.3)',
-            letterSpacing: '0.04em',
-            backdropFilter: 'blur(1px)',
-            maxWidth: '100%',
-            textAlign: 'center',
-            fontWeight: 600,
-          }}
-        >
-          Donkey Bridge
-        </div>
-      </div>
       {/* Full-width Ideogram set image (16:9 aspect ratio) */}
       <div className="w-full flex items-center justify-center py-3 relative">
         <div className="w-full max-w-2xl aspect-[16/9] rounded-lg overflow-hidden relative">
+          {/* Overlay */}
+          <div
+            className="absolute top-0 left-0 right-0 z-20 flex justify-center pointer-events-none"
+            style={{ paddingTop: '8px' }}
+          >
+            <div
+              className="bg-black bg-opacity-30 rounded-none px-0 py-1 text-white text-lg font-semibold shadow-none border-b border-white border-opacity-10 w-full max-w-2xl mx-auto text-center"
+              style={{
+                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                letterSpacing: '0.04em',
+                backdropFilter: 'blur(1px)',
+                maxWidth: '100%',
+                textAlign: 'center',
+                fontWeight: 600,
+              }}
+            >
+              Donkey Bridge
+            </div>
+          </div>
           <img
             src={setImageUrl}
             alt={`${activeSet?.name || 'Set'} image`}

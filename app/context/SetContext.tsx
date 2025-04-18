@@ -52,7 +52,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState<string | null>(null); // Store userId
 
   const [availableSets, setAvailableSets] = useState<SetMetaData[]>([DEFAULT_SET_METADATA]);
-  const [activeSetId, setActiveSetId] = useState<string | null>(getInitialActiveSetId());
+  const [activeSetId, setActiveSetId] = useState<string | null>(null); // Start as null
   const [activeSetContent, setActiveSetContent] = useState<Phrase[]>(INITIAL_PHRASES as unknown as Phrase[]);
   const [activeSetProgress, setActiveSetProgress] = useState<SetProgress>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -169,17 +169,28 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   // Add userId to dependencies
   }, [activeSetId, userId, activeSetContent, availableSets]);
 
-  // Modify persistence effect to avoid writing during first render if value already in localStorage
-  const hasMountedRef = React.useRef(false);
+  // After availableSets are loaded, restore activeSetId from localStorage if needed
   useEffect(() => {
-    if (hasMountedRef.current) {
-      if (activeSetId) {
-        localStorage.setItem('activeSetId', activeSetId);
-      }
-    } else {
-      hasMountedRef.current = true;
+    if (!activeSetId && availableSets.length > 0) {
+      const savedId = typeof window !== 'undefined' ? localStorage.getItem('activeSetId') : null;
+      const validId = savedId && availableSets.some(set => set.id === savedId) ? savedId : DEFAULT_SET_ID;
+      setActiveSetId(validId);
     }
-  }, [activeSetId]);
+  }, [availableSets]);
+
+  // Persist activeSetId to localStorage only after it is set and valid
+  useEffect(() => {
+    if (activeSetId && availableSets.some(set => set.id === activeSetId)) {
+      localStorage.setItem('activeSetId', activeSetId);
+    }
+  }, [activeSetId, availableSets]);
+
+  // Only load set data when both availableSets and activeSetId are set and valid
+  useEffect(() => {
+    if (activeSetId && availableSets.some(set => set.id === activeSetId)) {
+      loadSetData(activeSetId);
+    }
+  }, [activeSetId, availableSets, loadSetData]);
 
   // --- Refactored Initial Data Loading --- 
   useEffect(() => {

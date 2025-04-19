@@ -8,6 +8,7 @@ import { SetMetaData } from '../lib/storage'; // Import SetMetaData type
 import { Slider } from "@/components/ui/slider"; // Import the slider component
 import { useSet } from '../context/SetContext'; // Import the useSet hook
 import * as storage from '../lib/storage'; // Import storage utilities
+import { LLMSettingsSelector, LLMSettings } from "@/app/components/LLMSettings";
 
 // --- Placeholder Data ---
 const seriousSituationsExamples = [
@@ -359,6 +360,12 @@ const SetWizardPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep]);
 
+  const [llmSettings, setLlmSettings] = useState<LLMSettings>(() => ({
+    brand: localStorage.getItem("llmBrand") || "google",
+    model: localStorage.getItem("llmModel") || "gemini-2.0-flash-lite",
+    apiKey: localStorage.getItem("llmApiKey") || undefined
+  }));
+
   const startGeneration = async () => {
     setCurrentStep(4); // Move to generation step immediately
     setIsGenerating(true);
@@ -376,7 +383,10 @@ const SetWizardPage = () => {
       specificTopics: specificTopics || undefined,
       userName: userName,
       seriousnessLevel: seriousnessLevel,
-      count: cardCount
+      count: cardCount,
+      llmBrand: llmSettings.brand,
+      llmModel: llmSettings.model,
+      llmApiKey: llmSettings.apiKey,
     };
 
     console.log("SetWizard: Calling /api/generate-set with body:", requestBody);

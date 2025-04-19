@@ -515,6 +515,26 @@ export function generateUUID(): string {
   return uuidv4();
 }
 
+// --- User ID Mapping Helper ---
+/**
+ * Given a Supabase Auth UUID, fetch the public User table's text ID.
+ * Returns null if not found or on error.
+ */
+export async function getPublicUserIdFromAuthUUID(authUUID: string): Promise<string | null> {
+  if (!authUUID) return null;
+  const { data, error } = await supabase
+    .from('User')
+    .select('id')
+    .eq('supabaseAuthUserId', authUUID)
+    .maybeSingle();
+  if (error) {
+    console.error('Error fetching public User.id from Auth UUID:', error);
+    return null;
+  }
+  if (!data) return null;
+  return data.id;
+}
+
 // --- Cleanup --- 
 // Remove old localStorage helpers if no longer needed anywhere else
 // Commenting out for now, can be deleted later after full verification.

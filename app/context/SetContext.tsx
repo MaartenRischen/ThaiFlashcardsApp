@@ -176,15 +176,26 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   // --- Refactored Initial Data Loading --- (updated to manage setsHaveLoaded)
   useEffect(() => {
     const loadInitialData = async () => {
-      // Always reset loading flags at start of each run
       setSetsHaveLoaded(false);
 
       if (status === 'authenticated' && session?.user?.id) {
-        const currentUserId = session.user.id;
-        setUserId(currentUserId);
+        // Fetch the public User.id (text) from the User table using the Supabase Auth UUID
+        const publicUserId = await storage.getPublicUserIdFromAuthUUID(session.user.id);
+        if (!publicUserId) {
+          console.error('Could not find public User.id for current session user. Blocking user-specific actions.');
+          setUserId(null);
+          setAvailableSets([DEFAULT_SET_METADATA]);
+          setActiveSetId(DEFAULT_SET_ID);
+          setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
+          setActiveSetProgress({});
+          setIsLoading(false);
+          setSetsHaveLoaded(true);
+          return;
+        }
+        setUserId(publicUserId);
         setIsLoading(true);
         try {
-          const userSets = await storage.getAllSetMetaData(currentUserId);
+          const userSets = await storage.getAllSetMetaData(publicUserId);
           setAvailableSets([DEFAULT_SET_METADATA, ...userSets.filter(set => set.id !== DEFAULT_SET_ID)]);
           console.log(`SetContext: Loaded ${userSets.length} user-specific set metadata entries.`);
         } catch (error) {
@@ -192,7 +203,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
           setAvailableSets([DEFAULT_SET_METADATA]);
         } finally {
           setIsLoading(false);
-          setSetsHaveLoaded(true); // <-- Mark sets as loaded
+          setSetsHaveLoaded(true);
           console.log("SetContext: Initial data load finished for authenticated user.");
         }
       } else if (status === 'unauthenticated') {
@@ -203,11 +214,10 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
         setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
         setActiveSetProgress({});
         setIsLoading(false);
-        setSetsHaveLoaded(true); // <-- Mark sets as loaded even for guest
+        setSetsHaveLoaded(true);
       } else {
         console.log("SetContext: Auth status loading...");
         setIsLoading(true);
-        // setsHaveLoaded remains false until next run
       }
     };
 

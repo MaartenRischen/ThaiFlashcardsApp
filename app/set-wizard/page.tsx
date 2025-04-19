@@ -619,45 +619,50 @@ const SetWizardPage = () => {
                  />
                </div>
 
-              {/* Seriousness Slider (Fourth) */}
-              <div className="mb-6">
-                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                   Tone: Serious vs. Ridiculous ({seriousnessLevel}%)
-                 </label>
-                 <div className="flex items-center space-x-4">
-                    <span className="text-xs text-gray-400">Serious</span>
-                    <Slider 
-                        defaultValue={[seriousnessLevel]} 
-                        min={0} max={100} step={1} 
-                        onValueChange={(value: number[]) => setSeriousnessLevel(value[0])}
-                        className="w-full"
-                    />
-                    <span className="text-xs text-gray-400">Ridiculous</span>
-                 </div>
-                 <p className="text-xs text-gray-400 mt-1 italic">Controls the tone from textbook-dry (0%) to absurd humor (100%).</p>
-              </div>
+               {/* AI Model Selection (LLMSettingsSelector) */}
+               <div className="mb-6">
+                 <LLMSettingsSelector onChange={setLlmSettings} />
+               </div>
 
-              {/* Card Count (Fifth) */}
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  How many cards would you like in your set?
-                </label>
-                <div className="flex items-center gap-4 bg-gray-800 rounded-lg p-3 border border-gray-700">
-                  {[8, 16, 24].map(countOption => (
-                    <label key={countOption} className="flex items-center space-x-2 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="cardCount" 
-                        value={countOption} 
-                        checked={cardCount === countOption}
-                        onChange={(e) => setCardCount(parseInt(e.target.value))}
-                        className="accent-blue-400 h-4 w-4"
-                      />
-                      <span className="font-medium text-blue-400">{countOption} cards</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+               {/* Seriousness Slider (Fourth) */}
+               <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Tone: Serious vs. Ridiculous ({seriousnessLevel}%)
+                  </label>
+                  <div className="flex items-center space-x-4">
+                     <span className="text-xs text-gray-400">Serious</span>
+                     <Slider 
+                         defaultValue={[seriousnessLevel]} 
+                         min={0} max={100} step={1} 
+                         onValueChange={(value: number[]) => setSeriousnessLevel(value[0])}
+                         className="w-full"
+                     />
+                     <span className="text-xs text-gray-400">Ridiculous</span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1 italic">Controls the tone from textbook-dry (0%) to absurd humor (100%).</p>
+               </div>
+
+               {/* Card Count (Fifth) */}
+               <div className="mt-6">
+                 <label className="block text-sm font-medium text-gray-300 mb-2">
+                   How many cards would you like in your set?
+                 </label>
+                 <div className="flex items-center gap-4 bg-gray-800 rounded-lg p-3 border border-gray-700">
+                   {[8, 16, 24].map(countOption => (
+                     <label key={countOption} className="flex items-center space-x-2 cursor-pointer">
+                       <input 
+                         type="radio" 
+                         name="cardCount" 
+                         value={countOption} 
+                         checked={cardCount === countOption}
+                         onChange={(e) => setCardCount(parseInt(e.target.value))}
+                         className="accent-blue-400 h-4 w-4"
+                       />
+                       <span className="font-medium text-blue-400">{countOption} cards</span>
+                     </label>
+                   ))}
+                 </div>
+               </div>
             </div>
           )}
           

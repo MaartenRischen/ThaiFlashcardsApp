@@ -360,11 +360,20 @@ const SetWizardPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep]);
 
-  const [llmSettings, setLlmSettings] = useState<LLMSettings>(() => ({
-    brand: localStorage.getItem("llmBrand") || "google",
-    model: localStorage.getItem("llmModel") || "gemini-2.0-flash-lite",
-    apiKey: localStorage.getItem("llmApiKey") || undefined
-  }));
+  const [llmSettings, setLlmSettings] = useState<LLMSettings>({
+    brand: "google",
+    model: "gemini-2.0-flash-lite",
+    apiKey: undefined,
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setLlmSettings({
+        brand: localStorage.getItem("llmBrand") || "google",
+        model: localStorage.getItem("llmModel") || "gemini-2.0-flash-lite",
+        apiKey: localStorage.getItem("llmApiKey") || undefined,
+      });
+    }
+  }, []);
 
   const startGeneration = async () => {
     setCurrentStep(4); // Move to generation step immediately

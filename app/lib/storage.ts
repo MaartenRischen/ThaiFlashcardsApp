@@ -395,21 +395,24 @@ export async function deleteSetContent(setId: string): Promise<boolean> {
 
 // --- Set Progress Management --- 
 
-// REFACTOR: Fetch progress from Supabase
+// Fetch progress from Supabase using public User.id and real set UUID only
 export async function getSetProgress(userId: string, setId: string): Promise<SetProgress> {
-  // Trivial change comment
   if (!userId || !setId) {
     console.error("getSetProgress called without userId or setId.");
     return {};
   }
-  console.log(`Fetching UserSetProgress from Supabase for userId: ${userId}, setId: ${setId}`);
+  if (setId === 'default') {
+    console.warn("getSetProgress called with setId 'default'. This is not allowed. Returning empty progress.");
+    return {};
+  }
+  console.log(`Fetching UserSetProgress from Supabase for userId (public text ID): ${userId}, setId: ${setId}`);
   try {
     const { data, error } = await supabase
       .from('UserSetProgress')
-      .select('progressData') // Select only the JSONB column
+      .select('progressData')
       .eq('userId', userId)
       .eq('setId', setId)
-      .maybeSingle(); // Expect 0 or 1 record
+      .maybeSingle();
 
     if (error) {
       console.error('Error fetching UserSetProgress from Supabase:', error);
@@ -418,23 +421,26 @@ export async function getSetProgress(userId: string, setId: string): Promise<Set
 
     if (data && data.progressData) {
       console.log(`Successfully fetched UserSetProgress`);
-      // Parse the JSONB data
-      return data.progressData as SetProgress; // Assuming it's stored correctly
+      return data.progressData as SetProgress;
     } else {
       console.log(`No UserSetProgress found for userId: ${userId}, setId: ${setId}. Returning empty object.`);
-      return {}; // Return empty object if no progress found
+      return {};
     }
 
   } catch (error) {
     console.error('Unexpected error in getSetProgress:', error);
-    return {}; // Return empty object on error
+    return {};
   }
 }
 
-// REFACTOR: Upsert progress into Supabase
+// Upsert progress into Supabase using public User.id and real set UUID only
 export async function saveSetProgress(userId: string, setId: string, progress: SetProgress): Promise<boolean> {
   if (!userId || !setId) {
     console.error("saveSetProgress called without userId or setId.");
+    return false;
+  }
+  if (setId === 'default') {
+    console.warn("saveSetProgress called with setId 'default'. This is not allowed. Skipping save.");
     return false;
   }
   if (progress === undefined || progress === null) { 
@@ -442,13 +448,12 @@ export async function saveSetProgress(userId: string, setId: string, progress: S
     return false;
   }
 
-  console.log(`Saving/Updating UserSetProgress to Supabase for userId: ${userId}, setId: ${setId}`);
+  console.log(`Saving/Updating UserSetProgress to Supabase for userId (public text ID): ${userId}, setId: ${setId}`);
 
-  // Generate an ID, needed primarily for potential INSERT during upsert
   const progressRecordId = uuidv4(); 
 
   const recordToUpsert = {
-    id: progressRecordId, // Add the generated ID
+    id: progressRecordId,
     userId: userId,
     setId: setId,
     progressData: progress, 
@@ -456,12 +461,10 @@ export async function saveSetProgress(userId: string, setId: string, progress: S
   };
 
   try {
-    // Upsert: Inserts if combo (userId, setId) doesn't exist, updates if it does
     const { error } = await supabase
       .from('UserSetProgress')
       .upsert(recordToUpsert, {
-        onConflict: 'userId, setId', // Specify conflict target
-        // ignoreDuplicates: false // Default is false, ensures update happens on conflict
+        onConflict: 'userId, setId',
       });
       
     if (error) {

@@ -1,9 +1,8 @@
 import React from 'react';
 import { SetSelector } from '@/app/components/SetSelector'; // Assuming path
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
-import { Layers, Grid, Wand2, Plus, Settings, HelpCircle, Share2 } from 'lucide-react';
+import { Layers, Grid, Plus, Settings, HelpCircle, Share2 } from 'lucide-react';
 import { useState } from 'react';
-import * as Tooltip from '@radix-ui/react-tooltip';
 
 // Update props for combined settings modal
 interface FlashcardHeaderProps {
@@ -120,122 +119,78 @@ export function FlashcardHeader({
         <div className="px-2 py-2 w-full">
           <div className="flex flex-row items-center w-full justify-between gap-x-2">
             {/* Cards */}
-            <Tooltip.Root delayDuration={200}>
-              <Tooltip.Trigger asChild>
-                <div className="flex flex-col items-center">
-                  <button
-                    onClick={onOpenCards}
-                    className="neumorphic-icon-button text-xl text-white"
-                    title="Cards"
-                    aria-label="Cards"
-                  >
-                    <Layers />
-                  </button>
-                  <span className="block text-xs text-gray-200 mt-1 md:hidden">Cards</span>
-                </div>
-              </Tooltip.Trigger>
-              <Tooltip.Content side="top" align="center" className="z-50 px-2 py-1 rounded bg-black bg-opacity-90 text-xs text-gray-100 shadow-lg">
-                Cards
-              </Tooltip.Content>
-            </Tooltip.Root>
+            <div className="flex flex-col items-center">
+              <button
+                onClick={onOpenCards}
+                className="neumorphic-icon-button text-xl text-white"
+                title="Cards"
+                aria-label="Cards"
+              >
+                <Layers />
+              </button>
+              <span className="block text-xs text-gray-200 mt-1 text-center">Cards</span>
+            </div>
             {/* Set Manager */}
-            <Tooltip.Root delayDuration={200}>
-              <Tooltip.Trigger asChild>
-                <div className="flex flex-col items-center">
-                  <button
-                    onClick={onOpenSetManager}
-                    className="neumorphic-icon-button text-xl text-white"
-                    title="Sets"
-                    aria-label="Sets"
-                  >
-                    <Grid />
-                  </button>
-                  <span className="block text-xs text-gray-200 mt-1 md:hidden">Sets</span>
-                </div>
-              </Tooltip.Trigger>
-              <Tooltip.Content side="top" align="center" className="z-50 px-2 py-1 rounded bg-black bg-opacity-90 text-xs text-gray-100 shadow-lg">
-                Sets
-              </Tooltip.Content>
-            </Tooltip.Root>
+            <div className="flex flex-col items-center">
+              <button
+                onClick={onOpenSetManager}
+                className="neumorphic-icon-button text-xl text-white"
+                title="Sets"
+                aria-label="Sets"
+              >
+                <Grid />
+              </button>
+              <span className="block text-xs text-gray-200 mt-1 text-center">Sets</span>
+            </div>
             {/* Share Set */}
-            <Tooltip.Root delayDuration={200}>
-              <Tooltip.Trigger asChild>
-                <div className="flex flex-col items-center">
-                  <button
-                    onClick={handleShare}
-                    className="neumorphic-icon-button text-xl text-purple-400"
-                    title="Share"
-                    aria-label="Share"
-                    disabled={isDefaultSet || shareLoading}
-                  >
-                    <Share2 />
-                  </button>
-                  <span className="block text-xs text-gray-200 mt-1 md:hidden">Share</span>
-                </div>
-              </Tooltip.Trigger>
-              <Tooltip.Content side="top" align="center" className="z-50 px-2 py-1 rounded bg-black bg-opacity-90 text-xs text-gray-100 shadow-lg">
-                Share
-              </Tooltip.Content>
-            </Tooltip.Root>
+            <div className="flex flex-col items-center">
+              <button
+                onClick={handleShare}
+                className="neumorphic-icon-button text-xl text-purple-400"
+                title="Share"
+                aria-label="Share"
+                disabled={isDefaultSet || shareLoading}
+              >
+                <Share2 />
+              </button>
+              <span className="block text-xs text-gray-200 mt-1 text-center">Share</span>
+            </div>
             {/* Create Set! */}
-            <Tooltip.Root delayDuration={200}>
-              <Tooltip.Trigger asChild>
-                <div className="flex flex-col items-center">
-                  <button
-                    onClick={() => window.open('/set-wizard', '_blank')}
-                    className="neumorphic-icon-button text-xl text-green-300 shadow-[0_0_10px_#10B981] relative"
-                    title="Create"
-                    aria-label="Create"
-                    style={{ position: 'relative' }}
-                  >
-                    <Wand2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" size={22} />
-                    <Plus className="absolute left-1/2 top-1/2 -translate-x-[70%] -translate-y-[70%] text-green-200" size={13} />
-                  </button>
-                  <span className="block text-xs text-gray-200 mt-1 md:hidden">Create</span>
-                </div>
-              </Tooltip.Trigger>
-              <Tooltip.Content side="top" align="center" className="z-50 px-2 py-1 rounded bg-black bg-opacity-90 text-xs text-gray-100 shadow-lg">
-                Create
-              </Tooltip.Content>
-            </Tooltip.Root>
+            <div className="flex flex-col items-center">
+              <button
+                onClick={() => window.open('/set-wizard', '_blank')}
+                className="neumorphic-icon-button text-xl text-green-300 shadow-[0_0_10px_#10B981]"
+                title="Create"
+                aria-label="Create"
+              >
+                <Plus size={28} />
+              </button>
+              <span className="block text-xs text-green-300 mt-1 text-center">Create</span>
+            </div>
             {/* Settings */}
-            <Tooltip.Root delayDuration={200}>
-              <Tooltip.Trigger asChild>
-                <div className="flex flex-col items-center">
-                  <button
-                    onClick={onOpenSettings}
-                    className="neumorphic-icon-button text-xl text-white"
-                    title="Settings"
-                    aria-label="Settings"
-                  >
-                    <Settings />
-                  </button>
-                  <span className="block text-xs text-gray-200 mt-1 md:hidden">Settings</span>
-                </div>
-              </Tooltip.Trigger>
-              <Tooltip.Content side="top" align="center" className="z-50 px-2 py-1 rounded bg-black bg-opacity-90 text-xs text-gray-100 shadow-lg">
-                Settings
-              </Tooltip.Content>
-            </Tooltip.Root>
+            <div className="flex flex-col items-center">
+              <button
+                onClick={onOpenSettings}
+                className="neumorphic-icon-button text-xl text-white"
+                title="Settings"
+                aria-label="Settings"
+              >
+                <Settings />
+              </button>
+              <span className="block text-xs text-gray-200 mt-1 text-center">Settings</span>
+            </div>
             {/* Help */}
-            <Tooltip.Root delayDuration={200}>
-              <Tooltip.Trigger asChild>
-                <div className="flex flex-col items-center">
-                  <button
-                    onClick={() => setShowHowItWorks(true)}
-                    className="neumorphic-icon-button text-xl text-white"
-                    title="Help"
-                    aria-label="Help"
-                  >
-                    <HelpCircle />
-                  </button>
-                  <span className="block text-xs text-gray-200 mt-1 md:hidden">Help</span>
-                </div>
-              </Tooltip.Trigger>
-              <Tooltip.Content side="top" align="center" className="z-50 px-2 py-1 rounded bg-black bg-opacity-90 text-xs text-gray-100 shadow-lg">
-                Help
-              </Tooltip.Content>
-            </Tooltip.Root>
+            <div className="flex flex-col items-center">
+              <button
+                onClick={() => setShowHowItWorks(true)}
+                className="neumorphic-icon-button text-xl text-white"
+                title="Help"
+                aria-label="Help"
+              >
+                <HelpCircle />
+              </button>
+              <span className="block text-xs text-gray-200 mt-1 text-center">Help</span>
+            </div>
           </div>
         </div>
         {/* Share Dialog */}

@@ -350,7 +350,9 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
           source: insertedRecord.source as SetMetaData['source'] || 'generated',
           imageUrl: insertedRecord.imageUrl || undefined,
           phraseCount: phrases.length, // Calculate here for local state
-          isFullyLearned: false // Default
+          isFullyLearned: false, // Default
+          llmBrand: insertedRecord.llmBrand || undefined, // NEW: propagate model info
+          llmModel: insertedRecord.llmModel || undefined  // NEW: propagate model info
       };
       console.log(`[addSet] completeNewMetaData for local state:`, completeNewMetaData);
 

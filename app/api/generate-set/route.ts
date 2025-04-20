@@ -50,35 +50,65 @@ export async function POST(request: Request) {
       count: body.count
     };
 
-    // Always use OpenRouter with mixtral-8x7b
-    const model = 'mixtral-8x7b';
-    const prompt = (await import('@/app/lib/set-generator')).buildGenerationPrompt(generationOptions);
-    const batchResult = await generateOpenRouterBatch(prompt, model, 0);
-    if (batchResult.error) {
-      return NextResponse.json({
-        phraseCount: 0,
-        cleverTitle: batchResult.cleverTitle || "AI is overloaded or unavailable. Please try again later.",
-        phrases: [],
-        errors: 1,
-        errorSummary: {
-          errorTypes: [batchResult.error.type],
-          totalErrors: 1,
-          userMessage: batchResult.error.message
-        },
-        fallback: false
-      }, { status: 503 });
+    // Premium model priority list (OpenRouter slugs, April 2025)
+    const premiumModels = [
+      'openai/gpt-4o',
+      'openai/gpt-4-turbo',
+      'openai/gpt-4',
+      'anthropic/claude-3.7-sonnet',
+      'google/gemini-2.5-pro-preview-03-25',
+      'meta-llama/llama-4-scout',
+      'mistralai/mixtral-8x7b', // last-resort fallback
+    ];
+
+    const { buildGenerationPrompt } = await import('@/app/lib/set-generator');
+    const prompt = buildGenerationPrompt(generationOptions);
+    let lastError = null;
+    for (const model of premiumModels) {
+      try {
+        const batchResult = await generateOpenRouterBatch(prompt, model, 0);
+        if (!batchResult.error && batchResult.phrases && batchResult.phrases.length > 0) {
+          return NextResponse.json({
+            phrases: batchResult.phrases,
+            cleverTitle: batchResult.cleverTitle,
+            aggregatedErrors: [],
+            errorSummary: undefined,
+            usedModel: model
+          });
+        } else {
+          lastError = batchResult.error;
+        }
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    // If all models failed
+    let errorMessage = 'All premium models failed.';
+    if (lastError) {
+      if (typeof lastError === 'object' && lastError !== null && 'message' in lastError) {
+        errorMessage = (lastError as any).message;
+      } else if (typeof lastError === 'string') {
+        errorMessage = lastError;
+      }
     }
     return NextResponse.json({
-      phrases: batchResult.phrases,
-      cleverTitle: batchResult.cleverTitle,
-      aggregatedErrors: [],
-      errorSummary: undefined
-    });
+      phraseCount: 0,
+      cleverTitle: "AI is overloaded or unavailable. Please try again later.",
+      phrases: [],
+      errors: 1,
+      errorSummary: {
+        errorTypes: [typeof lastError === 'object' && lastError !== null && 'type' in lastError ? (lastError as any).type : 'API'],
+        totalErrors: 1,
+        userMessage: errorMessage
+      },
+      fallback: true
+    }, { status: 503 });
   } catch (error) {
     console.error("API Route Error: Error in /api/generate-set:", error);
-    if (error instanceof SyntaxError) {
-      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    let details = 'Unknown error';
+    if (typeof error === 'object' && error !== null && 'message' in error) {
+      details = (error as any).message;
     }
-    return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error', details }, { status: 500 });
   }
 } 

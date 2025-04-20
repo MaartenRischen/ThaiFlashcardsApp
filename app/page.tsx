@@ -1047,6 +1047,7 @@ export default function ThaiFlashcards() {
         setShowProgress={setShowProgress}
         onOpenCards={() => setShowCardsModal(true)}
         onOpenSetManager={() => setIsManagementModalOpen(true)}
+        showAnswer={showAnswer}
       />
 
       {/* Main Content - Centered Flashcard */}

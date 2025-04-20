@@ -412,108 +412,206 @@ export function SetManagerModal({ isOpen, onClose }: {
     onClose();
   };
 
-  // Card/Grid view for sets
+  // Summary
+  const totalSets = availableSets.length;
+  const totalCards = availableSets.reduce((sum, set) => sum + (set.phraseCount || 0), 0);
+  const totalLearned = 0; // Placeholder, not available
+  const dueToday = 0; // Placeholder, not available
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-      {availableSets.map(set => {
-        const isDefault = set.id === 'default';
-        const checked = selected.includes(set.id);
-        const setProgress = set.id === activeSetId ? activeSetProgress : {};
-        const learned = Object.keys(setProgress || {}).length;
-        const total = set.phraseCount || 0;
-        const percent = total > 0 ? Math.round((learned / total) * 100) : 0;
-        // Set image logic
-        let imgUrl: string | undefined | null = set.imageUrl;
-        if (!imgUrl) {
-          imgUrl = set.id === 'default'
-            ? '/images/defaultnew.png' // single reliable default image
-            : '/images/default-set-logo.png';
-        }
-        return (
-          <div
-            key={set.id}
-            className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800 cursor-pointer hover:ring-2 hover:ring-blue-400 transition"
-            onClick={async () => {
-              if (set.id !== activeSetId) {
-                await switchSet(set.id);
-              }
-              onClose();
-            }}
-          >
-            {/* Checkbox for bulk actions */}
-            <input
-              type="checkbox"
-              className="absolute top-3 right-3 w-5 h-5 accent-blue-500 z-10"
-              disabled={isDefault || bulkLoading}
-              checked={checked}
-              onClick={e => e.stopPropagation()} // Prevent card click
-              onChange={e => {
-                if (e.target.checked) setSelected(sel => [...sel, set.id]);
-                else setSelected(sel => sel.filter(x => x !== set.id));
-              }}
-            />
-            {/* Set Image */}
-            <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800">
-              <Image
-                src={imgUrl}
-                alt={set.cleverTitle || set.name}
-                className="object-cover"
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                onError={ev => {
-                  const target = ev.currentTarget as HTMLImageElement;
-                  if (target.src !== '/images/default-set-logo.png') {
-                    target.src = '/images/default-set-logo.png';
-                  }
-                }}
-              />
-            </div>
-            {/* Set Name */}
-            <div className="font-bold text-lg text-white mb-1 truncate text-center">{set.cleverTitle || set.name}</div>
-            {/* Topics */}
-            <div className="text-sm text-gray-300 mb-1 truncate">{set.specificTopics || '-'}</div>
-            {/* Ridiculousness */}
-            <div className="text-xs text-gray-400 mb-2">Ridiculousness: {typeof set.seriousnessLevel === 'number' ? `${100 - set.seriousnessLevel}%` : '-'}</div>
-            {/* Progress Bar */}
-            <div className="w-full bg-gray-700 rounded-full h-2 mb-1">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="neumorphic max-w-5xl w-full p-6 bg-[#1f1f1f] max-h-[90vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-6 flex-shrink-0">
+          <h2 className="text-xl font-bold text-blue-400">Set Manager</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        {/* Current Set Progress Section */}
+        <div className="mb-6 bg-gray-900 rounded-lg p-4">
+          <h3 className="text-lg font-semibold text-blue-300 mb-2 text-center">Current Set Progress</h3>
+          <div className="flex flex-col gap-2">
+            <span className="text-white font-bold text-center">{activeSet?.cleverTitle || activeSet?.name || 'No Set Selected'}</span>
+            <div className="w-full bg-gray-700 rounded-full h-3">
               <div
-                className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                className="bg-green-500 h-3 rounded-full transition-all duration-300"
                 style={{ width: `${percent}%` }}
               ></div>
             </div>
-            <div className="flex justify-between text-xs text-gray-400 mb-2">
+            <div className="flex justify-between text-xs text-gray-300 mt-1">
               <span>{learned} learned</span>
               <span>{total} total</span>
               <span>{percent}%</span>
             </div>
-            {/* Meta info */}
-            <div className="flex justify-between text-xs text-gray-500 mt-auto pt-2 border-t border-gray-800">
-              <span>#Cards: {set.phraseCount || '-'}</span>
-              <span>{set.createdAt ? new Date(set.createdAt).toLocaleDateString() : '-'}</span>
-            </div>
-            {/* NEW: AI model/brand modest note */}
-            {(set.llmBrand || set.llmModel) && (
-              <div className="text-xs text-gray-500 italic mt-1 text-center">
-                Generated using {set.llmBrand ? set.llmBrand.charAt(0).toUpperCase() + set.llmBrand.slice(1) : ''}{set.llmBrand && set.llmModel ? ' ' : ''}{set.llmModel ? set.llmModel : ''} AI
-              </div>
-            )}
-            {/* NEW: Publish button */}
-            {!isDefault && (
-              <button
-                className="mt-3 w-full py-1 rounded bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold transition"
-                onClick={e => {
-                  e.stopPropagation();
-                  alert(`Publish set: ${set.cleverTitle || set.name} (ID: ${set.id})`);
-                  // TODO: Implement actual publish logic in next steps
+          </div>
+        </div>
+        <div className="flex gap-2 mb-4">
+          <button className="neumorphic-button text-sm px-4 py-2 text-green-400" disabled={bulkLoading}>Create New Set</button>
+          <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0 || bulkLoading} onClick={handleBulkDelete}>Bulk Delete</button>
+          <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0 || bulkLoading} onClick={handleBulkReset}>Bulk Reset Progress</button>
+          <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0 || bulkLoading} onClick={handleBulkExport}>Bulk Export</button>
+        </div>
+        {/* Set Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+          {availableSets.map(set => {
+            const isDefault = set.id === 'default';
+            const checked = selected.includes(set.id);
+            const setProgress = set.id === activeSetId ? activeSetProgress : {};
+            const learned = Object.keys(setProgress || {}).length;
+            const total = set.phraseCount || 0;
+            const percent = total > 0 ? Math.round((learned / total) * 100) : 0;
+            // Set image logic
+            let imgUrl: string | undefined | null = set.imageUrl;
+            if (!imgUrl) {
+              imgUrl = set.id === 'default'
+                ? '/images/defaultnew.png'
+                : '/images/default-set-logo.png';
+            }
+            return (
+              <div
+                key={set.id}
+                className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800 cursor-pointer hover:ring-2 hover:ring-blue-400 transition"
+                onClick={async () => {
+                  if (set.id !== activeSetId) {
+                    await switchSet(set.id);
+                  }
+                  onClose();
                 }}
               >
-                Publish!
-              </button>
-            )}
-            {/* Actions for single set (edit, export, delete, etc.) can be added here if needed */}
+                {/* Checkbox for bulk actions */}
+                <input
+                  type="checkbox"
+                  className="absolute top-3 right-3 w-5 h-5 accent-blue-500 z-10"
+                  disabled={isDefault || bulkLoading}
+                  checked={checked}
+                  onClick={e => e.stopPropagation()}
+                  onChange={e => {
+                    if (e.target.checked) setSelected(sel => [...sel, set.id]);
+                    else setSelected(sel => sel.filter(x => x !== set.id));
+                  }}
+                />
+                {/* Set Image */}
+                <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800">
+                  <Image
+                    src={imgUrl}
+                    alt={set.cleverTitle || set.name}
+                    className="object-cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    onError={ev => {
+                      const target = ev.currentTarget as HTMLImageElement;
+                      if (target.src !== '/images/default-set-logo.png') {
+                        target.src = '/images/default-set-logo.png';
+                      }
+                    }}
+                  />
+                </div>
+                {/* Set Name */}
+                <div className="font-bold text-lg text-white mb-1 truncate text-center">{set.cleverTitle || set.name}</div>
+                {/* Topics */}
+                <div className="text-sm text-gray-300 mb-1 truncate">{set.specificTopics || '-'}</div>
+                {/* Ridiculousness */}
+                <div className="text-xs text-gray-400 mb-2">Ridiculousness: {typeof set.seriousnessLevel === 'number' ? `${100 - set.seriousnessLevel}%` : '-'}</div>
+                {/* Progress Bar */}
+                <div className="w-full bg-gray-700 rounded-full h-2 mb-1">
+                  <div
+                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${percent}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between text-xs text-gray-400 mb-2">
+                  <span>{learned} learned</span>
+                  <span>{total} total</span>
+                  <span>{percent}%</span>
+                </div>
+                {/* Meta info */}
+                <div className="flex justify-between text-xs text-gray-500 mt-auto pt-2 border-t border-gray-800">
+                  <span>#Cards: {set.phraseCount || '-'}</span>
+                  <span>{set.createdAt ? new Date(set.createdAt).toLocaleDateString() : '-'}</span>
+                </div>
+                {/* NEW: AI model/brand modest note */}
+                {(set.llmBrand || set.llmModel) && (
+                  <div className="text-xs text-gray-500 italic mt-1 text-center">
+                    Generated using {set.llmBrand ? set.llmBrand.charAt(0).toUpperCase() + set.llmBrand.slice(1) : ''}{set.llmBrand && set.llmModel ? ' ' : ''}{set.llmModel ? set.llmModel : ''} AI
+                  </div>
+                )}
+                {/* Card Actions: Publish and Cards icon buttons side by side */}
+                <div className="flex gap-2 justify-end mt-2">
+                  {/* Publish icon button */}
+                  {!isDefault && (
+                    <button
+                      className="p-2 rounded-full bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold transition flex items-center justify-center"
+                      title="Publish to Gallery"
+                      onClick={e => {
+                        e.stopPropagation();
+                        alert(`Publish set: ${set.cleverTitle || set.name} (ID: ${set.id})`);
+                        // TODO: Implement actual publish logic in next steps
+                      }}
+                    >
+                      {/* Paper plane SVG icon */}
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21l16.5-9-16.5-9v7.5l13.5 1.5-13.5 1.5V21z" />
+                      </svg>
+                    </button>
+                  )}
+                  {/* Cards icon button */}
+                  <button
+                    className="p-2 rounded-full bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold transition flex items-center justify-center"
+                    title="View Cards"
+                    onClick={e => { e.stopPropagation(); handleOpenCardsModal(set); }}
+                  >
+                    {/* Layers/stack SVG icon */}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                      <path d="M3 7l9 5 9-5-9-5-9 5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                      <path d="M3 12l9 5 9-5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                      <path d="M3 17l9 5 9-5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex gap-4 mt-6 text-xs text-gray-400 justify-end">
+          <span>Total Sets: {totalSets}</span>
+          <span>Total Cards: {totalCards}</span>
+          <span>Learned: {totalLearned}</span>
+          <span>Due Today: {dueToday}</span>
+        </div>
+        {/* Cards Modal */}
+        {cardsModalSetId && (
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={() => setCardsModalSetId(null)}>
+            <div className="bg-gray-900 rounded-xl p-4 max-w-md w-full max-h-[80vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
+              <button className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl" onClick={() => setCardsModalSetId(null)}>&times;</button>
+              <h3 className="text-lg font-bold text-blue-300 mb-3">Cards in Set</h3>
+              {cardsModalLoading ? (
+                <div className="text-center text-gray-400">Loading...</div>
+              ) : (
+                <ul className="divide-y divide-gray-700">
+                  {cardsModalPhrases.map((phrase, idx) => (
+                    <li
+                      key={idx}
+                      className="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-800 rounded px-2"
+                      onClick={() => handlePhraseClick(cardsModalSetId, idx)}
+                    >
+                      <div className="flex-1">
+                        <div className="font-semibold text-white truncate">{phrase.english}</div>
+                        <div className="text-sm text-gray-400 truncate">{phrase.thai}</div>
+                      </div>
+                      <span className="ml-3 text-xs px-2 py-1 rounded-full font-bold"
+                        style={{
+                          backgroundColor: getCardStatus(cardsModalProgress, idx) === 'Easy' ? '#22c55e' : getCardStatus(cardsModalProgress, idx) === 'Correct' ? '#3b82f6' : getCardStatus(cardsModalProgress, idx) === 'Wrong' ? '#ef4444' : '#6b7280',
+                          color: 'white',
+                        }}
+                      >
+                        {getCardStatus(cardsModalProgress, idx)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-        );
-      })}
+        )}
+      </div>
     </div>
   );
 } 

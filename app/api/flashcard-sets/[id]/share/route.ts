@@ -14,12 +14,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     const setId = params.id;
 
-    // Ensure the set belongs to the user
+    // Fetch the set and ensure it belongs to the authenticated user
     const set = await prisma.flashcardSet.findUnique({
-      where: { id: setId, userId: session.user.id }
-    }) as any; // cast to allow shareId access until types regenerated
+      where: { id: setId },
+      select: {
+        shareId: true,
+        userId: true,
+      },
+    });
 
-    if (!set) {
+    if (!set || set.userId !== session.user.id) {
       return NextResponse.json({ error: 'Set not found or not owned by user' }, { status: 404 });
     }
 
@@ -33,7 +37,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     await prisma.flashcardSet.update({
       where: { id: setId },
-      data: { shareId: newShareId } as any
+      data: { shareId: newShareId },
     });
 
     return NextResponse.json({ shareId: newShareId });

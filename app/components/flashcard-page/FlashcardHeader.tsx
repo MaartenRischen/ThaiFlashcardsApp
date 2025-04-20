@@ -3,6 +3,7 @@ import { SetSelector } from '@/app/components/SetSelector'; // Assuming path
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
 import { Layers, Grid, Wand2, Plus, Settings, HelpCircle, Share2 } from 'lucide-react';
 import { useState } from 'react';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
 // Update props for combined settings modal
 interface FlashcardHeaderProps {
@@ -11,6 +12,7 @@ interface FlashcardHeaderProps {
   setShowProgress: (show: boolean) => void;
   onOpenSetManager: () => void;
   onOpenCards: () => void;
+  showAnswer: boolean;
 }
 
 export function FlashcardHeader({
@@ -19,6 +21,7 @@ export function FlashcardHeader({
   setShowProgress,
   onOpenSetManager,
   onOpenCards,
+  showAnswer,
 }: FlashcardHeaderProps) {
   // Access the active set metadata to get the image URL
   const { availableSets, activeSetId } = useSet();
@@ -67,7 +70,7 @@ export function FlashcardHeader({
   return (
     <div className="bg-[#111] border-b border-[#333] flex flex-col">
       {/* Full-width Ideogram set image (16:9 aspect ratio) */}
-      <div className="w-full flex items-center justify-center py-3 relative">
+      <div className="w-full flex items-center justify-center py-3 relative mt-6">
         <div className="w-full max-w-2xl aspect-[16/9] rounded-lg overflow-hidden relative">
           {/* Overlay */}
           <div
@@ -88,22 +91,6 @@ export function FlashcardHeader({
               }}
             >
               Donkey Bridge
-              <span style={{
-                display: 'block',
-                fontSize: '0.9rem',
-                fontWeight: 500,
-                color: '#fff',
-                letterSpacing: '0.01em',
-                marginTop: '2px',
-                opacity: 0.96,
-                lineHeight: 1.1,
-                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
-                borderRadius: 0,
-                padding: 0,
-                backdropFilter: 'none',
-              }}>
-                Super Personalized Thai Language Learning App
-              </span>
             </div>
           </div>
           <img
@@ -133,62 +120,104 @@ export function FlashcardHeader({
         <div className="px-2 py-2 w-full">
           <div className="flex flex-row items-center w-full justify-between gap-x-2">
             {/* Cards */}
-            <button
-              onClick={onOpenCards}
-              className="neumorphic-icon-button text-xl text-white"
-              title="Cards"
-              aria-label="Cards"
-            >
-              <Layers />
-            </button>
+            <Tooltip.Root delayDuration={200}>
+              <Tooltip.Trigger asChild>
+                <button
+                  onClick={onOpenCards}
+                  className="neumorphic-icon-button text-xl text-white"
+                  title="Cards"
+                  aria-label="Cards"
+                >
+                  <Layers />
+                </button>
+              </Tooltip.Trigger>
+              <Tooltip.Content side="top" align="center" className="z-50 px-2 py-1 rounded bg-black bg-opacity-90 text-xs text-gray-100 shadow-lg">
+                Cards
+              </Tooltip.Content>
+            </Tooltip.Root>
             {/* Set Manager */}
-            <button
-              onClick={onOpenSetManager}
-              className="neumorphic-icon-button text-xl text-white"
-              title="Set Manager"
-              aria-label="Set Manager"
-            >
-              <Grid />
-            </button>
+            <Tooltip.Root delayDuration={200}>
+              <Tooltip.Trigger asChild>
+                <button
+                  onClick={onOpenSetManager}
+                  className="neumorphic-icon-button text-xl text-white"
+                  title="Sets"
+                  aria-label="Sets"
+                >
+                  <Grid />
+                </button>
+              </Tooltip.Trigger>
+              <Tooltip.Content side="top" align="center" className="z-50 px-2 py-1 rounded bg-black bg-opacity-90 text-xs text-gray-100 shadow-lg">
+                Sets
+              </Tooltip.Content>
+            </Tooltip.Root>
             {/* Share Set */}
-            <button
-              onClick={handleShare}
-              className="neumorphic-icon-button text-xl text-purple-400"
-              title="Share This Set"
-              aria-label="Share This Set"
-              disabled={isDefaultSet || shareLoading}
-            >
-              <Share2 />
-            </button>
+            <Tooltip.Root delayDuration={200}>
+              <Tooltip.Trigger asChild>
+                <button
+                  onClick={handleShare}
+                  className="neumorphic-icon-button text-xl text-purple-400"
+                  title="Share"
+                  aria-label="Share"
+                  disabled={isDefaultSet || shareLoading}
+                >
+                  <Share2 />
+                </button>
+              </Tooltip.Trigger>
+              <Tooltip.Content side="top" align="center" className="z-50 px-2 py-1 rounded bg-black bg-opacity-90 text-xs text-gray-100 shadow-lg">
+                Share
+              </Tooltip.Content>
+            </Tooltip.Root>
             {/* Create Set! */}
-            <button
-              onClick={() => window.open('/set-wizard', '_blank')}
-              className="neumorphic-icon-button text-xl text-green-300 shadow-[0_0_10px_#10B981] relative"
-              title="Create Set!"
-              aria-label="Create Set!"
-              style={{ position: 'relative' }}
-            >
-              <Wand2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" size={22} />
-              <Plus className="absolute left-1/2 top-1/2 -translate-x-[70%] -translate-y-[70%] text-green-200" size={13} />
-            </button>
+            <Tooltip.Root delayDuration={200}>
+              <Tooltip.Trigger asChild>
+                <button
+                  onClick={() => window.open('/set-wizard', '_blank')}
+                  className="neumorphic-icon-button text-xl text-green-300 shadow-[0_0_10px_#10B981] relative"
+                  title="Create"
+                  aria-label="Create"
+                  style={{ position: 'relative' }}
+                >
+                  <Wand2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" size={22} />
+                  <Plus className="absolute left-1/2 top-1/2 -translate-x-[70%] -translate-y-[70%] text-green-200" size={13} />
+                </button>
+              </Tooltip.Trigger>
+              <Tooltip.Content side="top" align="center" className="z-50 px-2 py-1 rounded bg-black bg-opacity-90 text-xs text-gray-100 shadow-lg">
+                Create
+              </Tooltip.Content>
+            </Tooltip.Root>
             {/* Settings */}
-            <button
-              onClick={onOpenSettings}
-              className="neumorphic-icon-button text-xl text-white"
-              title="Settings"
-              aria-label="Settings"
-            >
-              <Settings />
-            </button>
+            <Tooltip.Root delayDuration={200}>
+              <Tooltip.Trigger asChild>
+                <button
+                  onClick={onOpenSettings}
+                  className="neumorphic-icon-button text-xl text-white"
+                  title="Settings"
+                  aria-label="Settings"
+                >
+                  <Settings />
+                </button>
+              </Tooltip.Trigger>
+              <Tooltip.Content side="top" align="center" className="z-50 px-2 py-1 rounded bg-black bg-opacity-90 text-xs text-gray-100 shadow-lg">
+                Settings
+              </Tooltip.Content>
+            </Tooltip.Root>
             {/* Help */}
-            <button
-              onClick={() => setShowHowItWorks(true)}
-              className="neumorphic-icon-button text-xl text-white"
-              title="How It Works"
-              aria-label="How It Works"
-            >
-              <HelpCircle />
-            </button>
+            <Tooltip.Root delayDuration={200}>
+              <Tooltip.Trigger asChild>
+                <button
+                  onClick={() => setShowHowItWorks(true)}
+                  className="neumorphic-icon-button text-xl text-white"
+                  title="Help"
+                  aria-label="Help"
+                >
+                  <HelpCircle />
+                </button>
+              </Tooltip.Trigger>
+              <Tooltip.Content side="top" align="center" className="z-50 px-2 py-1 rounded bg-black bg-opacity-90 text-xs text-gray-100 shadow-lg">
+                Help
+              </Tooltip.Content>
+            </Tooltip.Root>
           </div>
         </div>
         {/* Share Dialog */}

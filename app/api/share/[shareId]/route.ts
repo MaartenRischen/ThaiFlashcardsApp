@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/prisma';
 import { auth } from '@/app/lib/auth';
 import { randomUUID } from 'crypto';
+import { Prisma } from '@prisma/client';
 
 // GET /api/share/[shareId]
 // Returns the shared set (public, read‑only)
@@ -9,16 +10,16 @@ export async function GET(req: NextRequest, { params }: { params: { shareId: str
   try {
     const shareId = params.shareId;
     const set = await prisma.flashcardSet.findFirst({
-      where: { shareId } as any,
-      include: { phrases: true } as any
-    }) as any;
+      where: { shareId },
+      include: { phrases: true },
+    });
     if (!set) {
       return NextResponse.json({ error: 'Set not found' }, { status: 404 });
     }
 
     const transformed = {
       ...set,
-      phrases: set.phrases.map((p: any) => {
+      phrases: set.phrases.map((p) => {
         const { examplesJson, ...rest } = p;
         return { ...rest, examples: examplesJson || [] };
       })
@@ -41,9 +42,9 @@ export async function POST(req: NextRequest, { params }: { params: { shareId: st
 
     const shareId = params.shareId;
     const original = await prisma.flashcardSet.findFirst({
-      where: { shareId } as any,
-      include: { phrases: true } as any
-    }) as any;
+      where: { shareId },
+      include: { phrases: true },
+    });
     if (!original) {
       return NextResponse.json({ error: 'Set not found' }, { status: 404 });
     }
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest, { params }: { params: { shareId: st
 
     await prisma.$transaction([
       prisma.flashcardSet.create({
-        data: ({
+        data: {
           id: newSetId,
           userId: session.user.id,
           name: original.name,
@@ -63,10 +64,10 @@ export async function POST(req: NextRequest, { params }: { params: { shareId: st
           source: 'import',
           imageUrl: original.imageUrl,
           seriousnessLevel: original.seriousnessLevel,
-        } as any)
+        },
       }),
       prisma.phrase.createMany({
-        data: original.phrases.map((p: any) => ({
+        data: original.phrases.map((p) => ({
           id: randomUUID(),
           setId: newSetId,
           english: p.english,
@@ -75,8 +76,8 @@ export async function POST(req: NextRequest, { params }: { params: { shareId: st
           thaiFeminine: p.thaiFeminine,
           pronunciation: p.pronunciation,
           mnemonic: p.mnemonic,
-          examplesJson: p.examplesJson
-        })) as any
+          examplesJson: p.examplesJson as Prisma.InputJsonValue
+        })),
       })
     ]);
 

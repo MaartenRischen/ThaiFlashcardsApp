@@ -62,6 +62,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           if (data?.user) {
             console.log(`Supabase sign-in successful for ${credentials.email}, user ID: ${data.user.id}`);
+            // Ensure a matching Prisma User row exists (by Supabase Auth ID)
+            try {
+              await prisma.user.upsert({
+                where: { supabaseAuthUserId: data.user.id },
+                update: {
+                  name: data.user.user_metadata?.name || undefined,
+                  email: data.user.email || undefined,
+                },
+                create: {
+                  supabaseAuthUserId: data.user.id,
+                  name: data.user.user_metadata?.name || undefined,
+                  email: data.user.email || undefined,
+                },
+              });
+            } catch (err) {
+              console.error("Failed to upsert Prisma User for Supabase ID", data.user.id, err);
+            }
+
             // Return essential info including name if available
             return {
               id: data.user.id, 

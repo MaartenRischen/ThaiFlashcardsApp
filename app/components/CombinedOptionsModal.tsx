@@ -490,6 +490,25 @@ export function SetManagerModal({ isOpen, onClose }: {
             <span>#Cards: {set.phraseCount || '-'}</span>
             <span>{set.createdAt ? new Date(set.createdAt).toLocaleDateString() : '-'}</span>
           </div>
+          {/* NEW: AI model/brand modest note */}
+          {(set.llmBrand || set.llmModel) && (
+            <div className="text-xs text-gray-500 italic mt-1 text-center">
+              Generated using {set.llmBrand ? set.llmBrand.charAt(0).toUpperCase() + set.llmBrand.slice(1) : ''}{set.llmBrand && set.llmModel ? ' ' : ''}{set.llmModel ? set.llmModel : ''} AI
+            </div>
+          )}
+          {/* NEW: Publish button */}
+          {!isDefault && (
+            <button
+              className="mt-3 w-full py-1 rounded bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold transition"
+              onClick={e => {
+                e.stopPropagation();
+                alert(`Publish set: ${set.cleverTitle || set.name} (ID: ${set.id})`);
+                // TODO: Implement actual publish logic in next steps
+              }}
+            >
+              Publish!
+            </button>
+          )}
           {/* Actions for single set (edit, export, delete, etc.) can be added here if needed */}
         </div>
       );

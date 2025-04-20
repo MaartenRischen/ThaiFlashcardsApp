@@ -24,6 +24,8 @@ interface FlashcardSetRecord {
   updatedAt?: string;
   imageUrl?: string | null; // Add imageUrl to match DB
   seriousnessLevel?: number | null; // Add seriousnessLevel to match DB
+  llmBrand?: string | null; // NEW: LLM brand
+  llmModel?: string | null; // NEW: LLM model
 }
 
 export interface SetMetaData { 
@@ -39,6 +41,8 @@ export interface SetMetaData {
   imageUrl?: string; // Add optional imageUrl here
   isFullyLearned?: boolean; // Keep the flag here (not in DB)
   seriousnessLevel?: number; // Add seriousnessLevel for tone/ridiculousness
+  llmBrand?: string; // NEW: LLM brand
+  llmModel?: string; // NEW: LLM model
 }
 
 export interface PhraseProgressData {
@@ -88,7 +92,7 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
     // Add imageUrl to select
     const { data, error } = await supabase
       .from('FlashcardSet')
-      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, imageUrl, seriousnessLevel')
+      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, imageUrl, seriousnessLevel, llmBrand, llmModel')
       .eq('userId', userId);
 
     if (error) {
@@ -98,7 +102,7 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
     console.log('Successfully fetched SetMetaData:', data);
     const sets = data || [];
 
-    // Map Supabase record to SetMetaData interface, including imageUrl
+    // Map Supabase record to SetMetaData interface, including imageUrl and LLM info
     return sets.map((dbSet: FlashcardSetRecord) => ({ 
       id: dbSet.id,
       name: dbSet.name,
@@ -111,7 +115,9 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
       source: dbSet.source as SetMetaData['source'] || 'generated',
       imageUrl: dbSet.imageUrl || undefined, // Map imageUrl
       isFullyLearned: false,
-      seriousnessLevel: dbSet.seriousnessLevel || undefined
+      seriousnessLevel: dbSet.seriousnessLevel || undefined,
+      llmBrand: dbSet.llmBrand || undefined, // NEW
+      llmModel: dbSet.llmModel || undefined  // NEW
     }));
 
   } catch (error) {
@@ -131,7 +137,7 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
   const newSetId = uuidv4();
   const createdAt = new Date().toISOString();
 
-  // Prepare record for Supabase, including imageUrl
+  // Prepare record for Supabase, including imageUrl and LLM info
   const recordToInsert: Omit<FlashcardSetRecord, 'phraseCount'> = {
     id: newSetId,
     userId: userId,
@@ -142,9 +148,11 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
     specificTopics: newSetData.specificTopics || null,
     source: newSetData.source,
     createdAt: createdAt,
-    updatedAt: createdAt, // Set updatedAt same as createdAt on initial insert
-    imageUrl: newSetData.imageUrl || null, // Include imageUrl
-    seriousnessLevel: newSetData.seriousnessLevel || null // Include seriousnessLevel
+    updatedAt: createdAt,
+    imageUrl: newSetData.imageUrl || null,
+    seriousnessLevel: newSetData.seriousnessLevel || null,
+    llmBrand: newSetData.llmBrand || null, // NEW
+    llmModel: newSetData.llmModel || null  // NEW
   };
 
   console.log(`Inserting SetMetaData into Supabase for userId: ${userId}`, recordToInsert);
@@ -153,7 +161,7 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
     const { data, error } = await supabase
       .from('FlashcardSet')
       .insert(recordToInsert)
-      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, imageUrl, seriousnessLevel') // Select imageUrl too
+      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, imageUrl, seriousnessLevel, llmBrand, llmModel') // Select imageUrl too
       .single();
 
     if (error) {
@@ -182,7 +190,7 @@ export async function updateSetMetaData(updatedSet: SetMetaData): Promise<boolea
       return false;
   }
 
-  // Prepare record for Supabase update, including imageUrl
+  // Prepare record for Supabase update, including imageUrl and LLM info
   const recordToUpdate: Partial<Omit<FlashcardSetRecord, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'phraseCount'> & { updatedAt: string }> = {
       name: updatedSet.name,
       cleverTitle: updatedSet.cleverTitle || null,
@@ -190,8 +198,10 @@ export async function updateSetMetaData(updatedSet: SetMetaData): Promise<boolea
       goals: updatedSet.goals || null,
       specificTopics: updatedSet.specificTopics || null,
       source: updatedSet.source,
-      imageUrl: updatedSet.imageUrl || null, // Update imageUrl
-      seriousnessLevel: updatedSet.seriousnessLevel || null, // Update seriousnessLevel
+      imageUrl: updatedSet.imageUrl || null,
+      seriousnessLevel: updatedSet.seriousnessLevel || null,
+      llmBrand: updatedSet.llmBrand || null, // NEW
+      llmModel: updatedSet.llmModel || null, // NEW
       updatedAt: new Date().toISOString()
   };
   

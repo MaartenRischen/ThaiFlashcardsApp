@@ -256,6 +256,10 @@ const SetWizardPage = () => {
   const [situationPlaceholder, setSituationPlaceholder] = useState<string>(`E.g., ${seriousSituationsExamples[0]}`);
   const [focusPlaceholder, setFocusPlaceholder] = useState<string>(`E.g., ${ridiculousFocusExamples[0]}`);
 
+  // NEW: Add new states for model info
+  const [llmBrand, setLlmBrand] = useState<string | undefined>(undefined);
+  const [llmModel, setLlmModel] = useState<string | undefined>(undefined);
+
   // Generate a unique set name when component mounts
   useEffect(() => {
     generateSetName();
@@ -425,6 +429,17 @@ const SetWizardPage = () => {
       // Manually update progress to 100% as we don't have streaming updates from API yet
       setGenerationProgress({ completed: result.phrases?.length ?? 0, total: cardCount });
 
+      // NEW: Capture model info from API response
+      if (result.usedModel) {
+        // e.g., 'openai/gpt-4o' => brand: 'openai', model: 'gpt-4o'
+        const [brand, ...modelParts] = result.usedModel.split('/');
+        setLlmBrand(brand);
+        setLlmModel(modelParts.join('/'));
+      } else {
+        setLlmBrand(undefined);
+        setLlmModel(undefined);
+      }
+
     } catch (error) {
       console.error("SetWizard: Failed to generate flashcard set via API:", error);
       alert(`There was an error generating your flashcard set. Please check the console or try again. Error: ${error instanceof Error ? error.message : String(error)}`);
@@ -452,14 +467,16 @@ const SetWizardPage = () => {
 
     // Prepare the metadata for the context addSet function
     const setData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
-        name: customSetName, // Use the AI-generated or user-edited title as the set name
-        cleverTitle: customSetName, // Use the same for cleverTitle
-        level: thaiLevel, // Correct type assured by the check above
+        name: customSetName,
+        cleverTitle: customSetName,
+        level: thaiLevel,
         specificTopics: specificTopics || undefined,
-        source: 'generated', // Literal type
+        source: 'generated',
         goals: situations ? [situations] : [],
-        imageUrl: imageUrl || undefined, // Pass the generated image URL
-        seriousnessLevel // <-- Add this field
+        imageUrl: imageUrl || undefined,
+        seriousnessLevel,
+        llmBrand,
+        llmModel
     };
 
     try {
@@ -539,7 +556,7 @@ const SetWizardPage = () => {
               <h2 className="text-2xl font-bold mb-4 text-blue-400">Welcome to the Set Wizard!</h2>
               <p className="mb-4">This tool will help you create a custom Thai flashcard set tailored to your learning goals.</p>
               <p className="mb-6">We'll ask you a few questions about your Thai level and what you want to learn, then use AI to generate a personalized set of flashcards for you.</p>
-              <p className="text-yellow-400 mb-4">The flashcards will be generated using Gemini, which may take a few moments to complete.</p>
+              <p className="text-yellow-400 mb-4">The flashcards will be generated using the best available AI models (OpenRouter premium, e.g. GPT-4o, Claude 3, Gemini 2.5, Llama 4, etc.), which may take a few moments to complete.</p>
             </div>
           )}
           
@@ -691,7 +708,7 @@ const SetWizardPage = () => {
                     </div>
                   </div>
                   <div className="text-gray-300 animate-pulse mb-6">
-                    Please wait while Gemini creates your custom Thai flashcards...
+                    Please wait while our AI creates your custom Thai flashcards...
                   </div>
                 </>
               )}
@@ -797,6 +814,12 @@ const SetWizardPage = () => {
                    )}
                    <li><span className="text-gray-400">Tone:</span> {seriousnessLevel}% Ridiculous</li>
                 </ul>
+                {/* NEW: Modest AI model note */}
+                {(llmBrand || llmModel) && (
+                  <div className="text-xs text-gray-500 mt-2 italic">
+                    Generated using {llmBrand ? llmBrand.charAt(0).toUpperCase() + llmBrand.slice(1) : ''}{llmBrand && llmModel ? ' ' : ''}{llmModel ? llmModel : ''} AI
+                  </div>
+                )}
               </div>
               
               {/* Card Preview */}

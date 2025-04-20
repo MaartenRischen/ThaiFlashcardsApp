@@ -675,4 +675,113 @@ export async function generateSingleFlashcard(
       error: createBatchError('UNKNOWN', `Unexpected setup error in generateSingleFlashcard: ${error.message}`, { error })
     };
   }
-} 
+}
+
+// Add OpenRouter API call
+async function callOpenRouter(prompt: string, model: string): Promise<string> {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) throw new Error("Missing OPENROUTER_API_KEY env variable");
+
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: "user", content: prompt }],
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`OpenRouter API error: ${error}`);
+  }
+
+  const data = await response.json();
+  // Extract the text from the first choice
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error("No content returned from OpenRouter");
+  return text;
+}
+
+// Add OpenRouter batch generator
+async function generateOpenRouterBatch(
+  prompt: string,
+  model: string,
+  batchIndex: number
+): Promise<{phrases: Phrase[], cleverTitle?: string, error?: BatchError}> {
+  try {
+    const responseText = await callOpenRouter(prompt, model);
+    // Clean the response (remove markdown, etc.)
+    const cleanedText = responseText.replace(/^```json\s*|```$/g, '').trim();
+    let parsedResponse: any;
+    try {
+      parsedResponse = JSON.parse(cleanedText);
+    } catch (parseError: any) {
+      return {
+        phrases: [],
+        error: createBatchError('PARSE', `Failed to parse JSON response: ${parseError.message}`, { responseSnippet: cleanedText.substring(0, 1000) })
+      };
+    }
+    if (typeof parsedResponse !== 'object' || parsedResponse === null || !Array.isArray(parsedResponse.phrases)) {
+      return {
+        phrases: [],
+        error: createBatchError('VALIDATION', `API response is not in the expected object format { cleverTitle: string, phrases: [] }`, { receivedType: typeof parsedResponse, value: parsedResponse })
+      };
+    }
+    const phrasesArray = parsedResponse.phrases;
+    const cleverTitle = typeof parsedResponse.cleverTitle === 'string' ? parsedResponse.cleverTitle.trim() : undefined;
+    const validPhrases: Phrase[] = [];
+    const invalidItems: any[] = [];
+    for (const item of phrasesArray) {
+      if (validatePhrase(item)) {
+        item.english = item.english.trim();
+        item.thai = item.thai.trim();
+        item.thaiMasculine = item.thaiMasculine.trim();
+        item.thaiFeminine = item.thaiFeminine.trim();
+        item.pronunciation = item.pronunciation.trim();
+        if (item.mnemonic) item.mnemonic = item.mnemonic.trim();
+        if (item.examples) {
+          item.examples = item.examples.map((ex: ExampleSentence) => ({
+            ...ex,
+            thai: ex.thai.trim(),
+            thaiMasculine: ex.thaiMasculine.trim(),
+            thaiFeminine: ex.thaiFeminine.trim(),
+            pronunciation: ex.pronunciation.trim(),
+            translation: ex.translation.trim(),
+          }));
+        }
+        validPhrases.push(item as Phrase);
+      } else {
+        invalidItems.push(item);
+      }
+    }
+    if (validPhrases.length > 0 && invalidItems.length > 0) {
+      return {
+        phrases: validPhrases,
+        cleverTitle,
+        error: createBatchError('VALIDATION', `Some phrases (${invalidItems.length}) failed validation and were omitted`, { invalidItems: invalidItems.slice(0, 5) })
+      };
+    }
+    if (validPhrases.length === 0 && phrasesArray.length > 0) {
+      return {
+        phrases: [],
+        cleverTitle,
+        error: createBatchError('VALIDATION', `All ${phrasesArray.length} phrases failed validation checks`, { invalidItems: invalidItems.slice(0, 5) })
+      };
+    }
+    return {
+      phrases: validPhrases,
+      cleverTitle
+    };
+  } catch (unexpectedError: any) {
+    return {
+      phrases: [],
+      error: createBatchError('UNKNOWN', `Unexpected error in OpenRouter batch: ${unexpectedError.message}`, { originalError: unexpectedError })
+    };
+  }
+}
+
+export { generateOpenRouterBatch, buildGenerationPrompt }; 

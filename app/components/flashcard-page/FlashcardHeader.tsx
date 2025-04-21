@@ -1,8 +1,9 @@
 import React from 'react';
 import { SetSelector } from '@/app/components/SetSelector'; // Assuming path
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
-import { Layers, Grid, Plus, Settings, HelpCircle, Share2 } from 'lucide-react';
+import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 // Update props for combined settings modal
 interface FlashcardHeaderProps {
@@ -65,6 +66,8 @@ export function FlashcardHeader({
       navigator.clipboard.writeText(shareUrl);
     }
   };
+
+  const router = useRouter();
 
   return (
     <div className="bg-[#111] border-b border-[#333] flex flex-col">
@@ -142,18 +145,17 @@ export function FlashcardHeader({
               </button>
               <span className="block text-xs text-gray-200 mt-1 text-center">Sets</span>
             </div>
-            {/* Share Set */}
+            {/* Gallery */}
             <div className="flex flex-col items-center">
               <button
-                onClick={handleShare}
-                className="neumorphic-icon-button text-xl text-purple-400"
-                title="Share"
-                aria-label="Share"
-                disabled={isDefaultSet || shareLoading}
+                onClick={() => router.push('/gallery')}
+                className="neumorphic-icon-button text-xl text-blue-400"
+                title="Gallery"
+                aria-label="Gallery"
               >
-                <Share2 />
+                <GalleryHorizontal />
               </button>
-              <span className="block text-xs text-gray-200 mt-1 text-center">Share</span>
+              <span className="block text-xs text-blue-400 mt-1 text-center">Gallery</span>
             </div>
             {/* Create Set! */}
             <div className="flex flex-col items-center">

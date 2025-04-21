@@ -328,6 +328,7 @@ export function SetManagerModal({ isOpen, onClose }: {
   const [cardsModalPhrases, setCardsModalPhrases] = useState<any[]>([]);
   const [cardsModalProgress, setCardsModalProgress] = useState<any>({});
   const [cardsModalLoading, setCardsModalLoading] = useState(false);
+  const [publishingSetId, setPublishingSetId] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -538,12 +539,35 @@ export function SetManagerModal({ isOpen, onClose }: {
                   {/* Publish icon button */}
                   {!isDefault && (
                     <button
-                      className="p-2 rounded-full bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold transition flex items-center justify-center"
+                      className={`p-2 rounded-full bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold transition flex items-center justify-center${publishingSetId === set.id ? ' opacity-50 cursor-not-allowed' : ''}`}
                       title="Publish to Gallery"
-                      onClick={e => {
+                      disabled={publishingSetId === set.id}
+                      onClick={async e => {
                         e.stopPropagation();
-                        alert(`Publish set: ${set.cleverTitle || set.name} (ID: ${set.id})`);
-                        // TODO: Implement actual publish logic in next steps
+                        setPublishingSetId(set.id);
+                        try {
+                          const phrases = await storage.getSetContent(set.id);
+                          const res = await fetch('/api/gallery', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              title: set.cleverTitle || set.name,
+                              description: set.specificTopics || '',
+                              content: phrases || [],
+                              imageUrl: set.imageUrl || '',
+                              cardCount: set.phraseCount || 0,
+                              llmBrand: set.llmBrand || '',
+                              llmModel: set.llmModel || '',
+                              createdAt: set.createdAt || new Date().toISOString(),
+                            }),
+                          });
+                          if (!res.ok) throw new Error(await res.text());
+                          alert('Set published to gallery!');
+                        } catch (err: any) {
+                          alert('Failed to publish: ' + (err.message || err));
+                        } finally {
+                          setPublishingSetId(null);
+                        }
                       }}
                     >
                       {/* Paper plane SVG icon */}

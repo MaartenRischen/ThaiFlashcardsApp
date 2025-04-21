@@ -22,7 +22,7 @@ export function Navbar() {
           <User className="w-4 h-4" aria-label="User" />
         </div>
         {/* Subtitle: always fits, shrinks on xs screens */}
-        <span className="text-[0.6em] xs:text-[0.7em] md:text-[0.85em] text-gray-400 font-normal ml-2 truncate max-w-[120px] sm:max-w-[160px] md:hidden align-middle">
+        <span className="flex-1 min-w-0 text-[0.6em] xs:text-[0.7em] md:text-[0.85em] text-gray-400 font-normal ml-2 truncate md:hidden align-middle">
           Ultra-Personal Thai Learning
         </span>
         <span className="hidden md:inline text-[0.85em] text-gray-400 font-normal ml-2 truncate max-w-[200px] lg:max-w-xs align-middle">

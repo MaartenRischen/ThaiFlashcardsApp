@@ -543,3 +543,51 @@ function setToStorage<T>(key: string, value: T): boolean {
   }
 }
 */ 
+
+// --- Gallery (PublishedSet) Functions ---
+
+// Publish a set to the gallery
+export async function publishSetToGallery(publishedSet: {
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  cardCount: number;
+  author: string;
+  llmBrand?: string;
+  llmModel?: string;
+  seriousnessLevel?: number;
+  specificTopics?: string;
+  phrases: Phrase[];
+}) {
+  const { data, error } = await supabase
+    .from('PublishedSet')
+    .insert({
+      ...publishedSet,
+      phrases: publishedSet.phrases,
+      publishedAt: new Date().toISOString(),
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// Fetch all published sets (metadata only)
+export async function getAllPublishedSets() {
+  const { data, error } = await supabase
+    .from('PublishedSet')
+    .select('id, title, description, imageUrl, cardCount, author, llmBrand, llmModel, seriousnessLevel, specificTopics, publishedAt');
+  if (error) throw error;
+  return data || [];
+}
+
+// Fetch a single published set by ID (full data)
+export async function getPublishedSetById(id: string) {
+  const { data, error } = await supabase
+    .from('PublishedSet')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error) throw error;
+  return data;
+} 

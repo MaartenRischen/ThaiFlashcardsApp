@@ -23,10 +23,14 @@ export function Navbar() {
         </div>
         {/* Subtitle: always fits, shrinks on xs screens */}
         <span className="flex-1 min-w-0 text-[0.6em] xs:text-[0.7em] md:text-[0.85em] text-gray-400 font-normal ml-2 truncate md:hidden align-middle">
-          Ultra-Personal Thai Learning
+          {status === "authenticated" && session?.user?.name
+            ? `Ultra Personal Thai Language Experience For ${session.user.name}`
+            : "Ultra Personal Thai Language Experience"}
         </span>
         <span className="hidden md:inline text-[0.85em] text-gray-400 font-normal ml-2 truncate max-w-[200px] lg:max-w-xs align-middle">
-          Super Personalized Thai Language Learning App
+          {status === "authenticated" && session?.user?.name
+            ? `Ultra Personal Thai Language Experience For ${session.user.name}`
+            : "Super Personalized Thai Language Learning App"}
         </span>
         <nav className="flex items-center gap-2 ml-2 flex-shrink-0">
           {status === "authenticated" ? (

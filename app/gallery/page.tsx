@@ -1,10 +1,15 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { useSet } from '@/app/context/SetContext';
+import { Phrase } from '@/app/lib/set-generator';
 
 export default function GalleryPage() {
+  const { availableSets, addSet, isLoading: contextIsLoading } = useSet();
   const [sets, setSets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [importingSetId, setImportingSetId] = useState<string | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -23,6 +28,57 @@ export default function GalleryPage() {
         setLoading(false);
       });
   }, []);
+
+  const handleImport = async (setId: string) => {
+    setImportingSetId(setId);
+    setImportError(null);
+
+    if (availableSets.some(set => set.id === setId)) {
+      alert('This set has already been imported or exists in your collection.');
+      setImportingSetId(null);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/gallery/${setId}`);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to fetch set details');
+      }
+      const fullSetData = await res.json();
+
+      const { id, title, description, content, imageUrl, cardCount, llmBrand, llmModel, seriousnessLevel, specificTopics, timestamp, createdAt, ...rest } = fullSetData;
+      
+      const setData = {
+        name: title,
+        description: description,
+        specificTopics: specificTopics,
+        seriousnessLevel: seriousnessLevel,
+        imageUrl: imageUrl,
+        llmBrand: llmBrand,
+        llmModel: llmModel,
+        source: 'gallery_import',
+        ...rest
+      };
+
+      const phrases = content as Phrase[];
+
+      const newSetId = await addSet(setData, phrases);
+
+      if (newSetId) {
+        alert(`Set '${title}' imported successfully!`);
+      } else {
+        throw new Error('Failed to import set via context');
+      }
+
+    } catch (err: any) { 
+      console.error("Import error:", err);
+      setImportError(err.message || 'An unknown error occurred during import.');
+      alert(`Import failed: ${err.message || 'Unknown error'}`);
+    } finally {
+      setImportingSetId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#181818] py-8 px-4">
@@ -97,7 +153,13 @@ export default function GalleryPage() {
                   <div className="text-xs text-gray-500 italic mt-1 text-center">{aiInfo}</div>
                 )}
                 {/* Import button */}
-                <button className="neumorphic-button text-green-400 px-4 py-1 mt-4">Import</button>
+                <button 
+                  className={`neumorphic-button text-green-400 px-4 py-1 mt-4 ${importingSetId === set.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => handleImport(set.id)}
+                  disabled={importingSetId === set.id || contextIsLoading}
+                >
+                  {importingSetId === set.id ? 'Importing...' : 'Import'}
+                </button>
               </div>
             );
           })}

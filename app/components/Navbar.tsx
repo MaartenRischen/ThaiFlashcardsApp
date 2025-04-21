@@ -4,7 +4,7 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { LogOut, LogIn } from "lucide-react";
+import { LogOut, LogIn, User } from "lucide-react";
 
 export function Navbar() {
   const { data: session, status } = useSession();
@@ -16,18 +16,14 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur">
+    <header className="w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex flex-row items-center justify-between h-10 px-2 py-1 gap-2 overflow-x-auto whitespace-nowrap">
         <div className="flex items-center gap-1 font-medium text-xs text-gray-200 flex-shrink-0">
-          <Link href="/">
-          {status === "authenticated" && session?.user?.name ? 
-            session.user.name : 
-            "Guest"}
-        </Link>
+          <User className="w-4 h-4" aria-label="User" />
         </div>
-        {/* Subtitle: short on mobile, full on desktop */}
-        <span className="text-[0.7em] text-gray-400 font-normal ml-2 truncate max-w-[90px] sm:max-w-[120px] md:hidden align-middle">
-          Thai App
+        {/* Subtitle: always fits, shrinks on xs screens */}
+        <span className="text-[0.6em] xs:text-[0.7em] md:text-[0.85em] text-gray-400 font-normal ml-2 truncate max-w-[120px] sm:max-w-[160px] md:hidden align-middle">
+          Ultra-Personal Thai Learning
         </span>
         <span className="hidden md:inline text-[0.85em] text-gray-400 font-normal ml-2 truncate max-w-[200px] lg:max-w-xs align-middle">
           Super Personalized Thai Language Learning App

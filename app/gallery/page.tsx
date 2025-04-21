@@ -47,7 +47,7 @@ export default function GalleryPage() {
       }
       const fullSetData = await res.json();
 
-      const { id, title, description, content, imageUrl, cardCount, llmBrand, llmModel, seriousnessLevel, specificTopics, timestamp, createdAt, ...rest } = fullSetData;
+      const { id, title, description, phrases, imageUrl, cardCount, llmBrand, llmModel, seriousnessLevel, specificTopics, timestamp, createdAt, ...rest } = fullSetData;
       
       const setData = {
         name: title,
@@ -61,9 +61,9 @@ export default function GalleryPage() {
         ...rest
       };
 
-      const phrases = content as Phrase[];
+      const phrasesArr = phrases as Phrase[];
 
-      const newSetId = await addSet(setData, phrases);
+      const newSetId = await addSet(setData, phrasesArr);
 
       if (newSetId) {
         alert(`Set '${title}' imported successfully!`);

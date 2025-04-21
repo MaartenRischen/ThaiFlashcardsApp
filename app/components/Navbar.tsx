@@ -25,7 +25,11 @@ export function Navbar() {
             "Guest"}
         </Link>
         </div>
-        <span className="text-[0.7em] md:text-[0.85em] text-gray-400 font-normal text-center md:text-left ml-2 truncate max-w-[120px] sm:max-w-[200px] md:max-w-xs overflow-hidden align-middle">
+        {/* Subtitle: short on mobile, full on desktop */}
+        <span className="text-[0.7em] text-gray-400 font-normal ml-2 truncate max-w-[90px] sm:max-w-[120px] md:hidden align-middle">
+          Thai App
+        </span>
+        <span className="hidden md:inline text-[0.85em] text-gray-400 font-normal ml-2 truncate max-w-[200px] lg:max-w-xs align-middle">
           Super Personalized Thai Language Learning App
         </span>
         <nav className="flex items-center gap-2 ml-2 flex-shrink-0">

@@ -551,6 +551,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
+                              id: set.id,
                               title: set.cleverTitle || set.name,
                               description: set.specificTopics || '',
                               phrases: phrases || [],

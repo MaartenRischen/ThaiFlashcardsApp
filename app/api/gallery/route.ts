@@ -1,22 +1,21 @@
 import { NextResponse } from 'next/server';
-
-// In-memory store for published sets
-let publishedSets: any[] = [];
+import { getAllPublishedSets, publishSetToGallery } from '@/app/lib/storage';
 
 export async function GET() {
-  // Return all published sets (metadata only, not full content)
-  return NextResponse.json(publishedSets.map(({ content, ...meta }) => meta));
+  try {
+    const sets = await getAllPublishedSets();
+    return NextResponse.json(sets);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Failed to fetch published sets' }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
-  const data = await req.json();
-  const { title, description, content, author, imageUrl, cardCount } = data;
-  if (!title || !description || !content) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  try {
+    const data = await req.json();
+    const publishedSet = await publishSetToGallery(data);
+    return NextResponse.json({ success: true, id: publishedSet.id });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Failed to publish set' }, { status: 500 });
   }
-  const id = Math.random().toString(36).substr(2, 9);
-  const timestamp = new Date().toISOString();
-  const set = { id, title, description, content, author: author || 'Anonymous', imageUrl, cardCount, timestamp };
-  publishedSets.push(set);
-  return NextResponse.json({ success: true, id });
 } 

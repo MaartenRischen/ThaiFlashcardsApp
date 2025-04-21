@@ -553,12 +553,14 @@ export function SetManagerModal({ isOpen, onClose }: {
                             body: JSON.stringify({
                               title: set.cleverTitle || set.name,
                               description: set.specificTopics || '',
-                              content: phrases || [],
+                              phrases: phrases || [],
+                              author: 'Anonymous',
                               imageUrl: set.imageUrl || '',
                               cardCount: set.phraseCount || 0,
                               llmBrand: set.llmBrand || '',
                               llmModel: set.llmModel || '',
-                              createdAt: set.createdAt || new Date().toISOString(),
+                              seriousnessLevel: set.seriousnessLevel,
+                              specificTopics: set.specificTopics,
                             }),
                           });
                           if (!res.ok) throw new Error(await res.text());

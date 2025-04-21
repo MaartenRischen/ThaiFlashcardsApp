@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 // In-memory store for published sets
-export let publishedSets: any[] = [];
+let publishedSets: any[] = [];
 
 export async function GET() {
   // Return all published sets (metadata only, not full content)

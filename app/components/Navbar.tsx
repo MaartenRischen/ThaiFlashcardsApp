@@ -4,6 +4,7 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
+import { LogOut, LogIn } from "lucide-react";
 
 export function Navbar() {
   const { data: session, status } = useSession();
@@ -37,20 +38,29 @@ export function Navbar() {
                 </Link>
               </div>
               <Button 
-                variant="outline" 
+                variant="ghost"
+                size="icon"
                 onClick={() => signOut({ callbackUrl: "https://donkeybridge.world" })}
-                className="text-xs px-2 py-1 h-7 min-w-0"
+                className="p-1 h-7 w-7 md:h-8 md:w-8"
+                aria-label="Sign Out"
               >
-                Sign Out
+                <LogOut className="w-4 h-4" />
+                <span className="hidden md:inline ml-1">Sign Out</span>
               </Button>
             </>
           ) : (
             <>
-              <Link href="/login" className="text-xs font-medium transition-colors hover:text-primary">
-                Sign In
-              </Link>
-              <Button asChild className="text-xs px-2 py-1 h-7 min-w-0">
-                <Link href="/register">Get Started</Link>
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="p-1 h-7 w-7 md:h-8 md:w-8"
+                aria-label="Sign In or Register"
+              >
+                <Link href="/login">
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden md:inline ml-1">Sign In</span>
+                </Link>
               </Button>
             </>
           )}

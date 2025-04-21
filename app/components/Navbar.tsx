@@ -17,19 +17,18 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur">
-      <div className="container flex flex-col md:flex-row items-center justify-between h-auto md:h-9 px-2 py-1 md:py-0">
-        <div className="flex items-center gap-1 font-medium text-xs text-gray-200">
+      <div className="container flex flex-row items-center justify-between h-10 px-2 py-1 gap-2 overflow-x-auto whitespace-nowrap">
+        <div className="flex items-center gap-1 font-medium text-xs text-gray-200 flex-shrink-0">
           <Link href="/">
           {status === "authenticated" && session?.user?.name ? 
             session.user.name : 
             "Guest"}
         </Link>
         </div>
-        <div className="flex flex-col md:flex-row md:items-center md:gap-2 w-full md:w-auto">
-          <span className="block text-[0.7em] md:text-[0.85em] text-gray-400 font-normal text-center md:text-left md:ml-4 md:mb-0 mb-1 md:order-none order-2 leading-tight max-w-xs sm:max-w-md break-words whitespace-pre-line">
-            Super Personalized Thai Language Learning App
-          </span>
-          <nav className="flex items-center gap-2 md:ml-4 md:order-none order-3">
+        <span className="text-[0.7em] md:text-[0.85em] text-gray-400 font-normal text-center md:text-left ml-2 truncate max-w-[120px] sm:max-w-[200px] md:max-w-xs overflow-hidden align-middle">
+          Super Personalized Thai Language Learning App
+        </span>
+        <nav className="flex items-center gap-2 ml-2 flex-shrink-0">
           {status === "authenticated" ? (
             <>
               <div className="hidden md:flex items-center gap-3 mr-2">
@@ -65,7 +64,6 @@ export function Navbar() {
             </>
           )}
         </nav>
-        </div>
       </div>
     </header>
   );

@@ -64,21 +64,17 @@ interface CardProgress {
   };
 }
 
-// Correct getThaiWithGender to ONLY add particles based on isPoliteMode
+// Correct getThaiWithGender to use gendered fields if present
 const getThaiWithGender = (phrase: Phrase | ExampleSentence | null, isMale: boolean, isPoliteMode: boolean): string => {
   if (!phrase) return '';
-  // ALWAYS start with the absolute base Thai
-  const baseThai = phrase.thai; 
-
-  // Do NOT use thaiMasculine/thaiFeminine here, as they pre-include particles
-  /*
+  // Use gendered fields if present
+  let baseThai = phrase.thai;
   if (isMale && phrase.thaiMasculine) baseThai = phrase.thaiMasculine;
   else if (!isMale && phrase.thaiFeminine) baseThai = phrase.thaiFeminine;
-  */
 
-  // If Polite Mode is OFF, return the absolute base
+  // If Polite Mode is OFF, remove polite particles if present
   if (!isPoliteMode) {
-    return baseThai;
+    return baseThai.replace(/(ครับ|ค่ะ)$/g, '');
   }
 
   // Polite Mode is ON: Check endings and add particle if appropriate
@@ -88,37 +84,29 @@ const getThaiWithGender = (phrase: Phrase | ExampleSentence | null, isMale: bool
   if (!endsWithPoliteEnding) {
     return isMale ? `${baseThai}ครับ` : `${baseThai}ค่ะ`;
   }
-  
-  // If Polite Mode is ON but ending is unsuitable, return the base
-  return baseThai; 
+  return baseThai;
 };
 
-// Correct getGenderedPronunciation (logic was likely already okay, but ensure consistency)
+// Correct getGenderedPronunciation to robustly handle gendered pronouns and polite particles
 const getGenderedPronunciation = (phraseData: Phrase | ExampleSentence | null, isMale: boolean, isPoliteMode: boolean): string => {
   if (!phraseData) return '';
   let basePronunciation = phraseData.pronunciation;
-  const baseThaiForEndingCheck = phraseData.thai; // Check ending on BASE Thai
+  // Replace ambiguous pronouns with gendered ones
+  basePronunciation = basePronunciation.replace(/phom\/chan|chan\/phom|phom\/chan|chan\/phom/g, isMale ? 'phom' : 'chan');
 
-  // Step 1: Handle gendered pronouns in pronunciation
-  if (basePronunciation.includes('chan/phom')) basePronunciation = basePronunciation.replace('chan/phom', isMale ? 'phom' : 'chan');
-  else if (basePronunciation.includes('phom/chan')) basePronunciation = basePronunciation.replace('phom/chan', isMale ? 'phom' : 'chan');
-
-  // Step 2: Check Polite Mode for adding particles
+  // If Polite Mode is OFF, remove polite particles if present
   if (!isPoliteMode) {
-    return basePronunciation; // Return pronoun-adjusted if mode is off
+    return basePronunciation.replace(/( krap| ka)$/g, '');
   }
 
-  // Polite Mode ON: Check endings on BASE Thai and add particle if appropriate
-  const politeEndingsToAvoid = ['ไหม', 'อะไร', 'ไหน', 'เท่าไหร่', 'เหรอ', 'หรือ', 'ใช่ไหม', 'เมื่อไหร่', 'ทำไม', 'อย่างไร', 'ที่ไหน', 'ครับ', 'ค่ะ'];
-  const endsWithPoliteEnding = politeEndingsToAvoid.some(ending => baseThaiForEndingCheck.endsWith(ending));
+  // Polite Mode ON: Add polite particle if not present and not ending with one
+  const politeEndingsToAvoid = ['ไหม', 'อะไร', 'ไหน', 'เท่าไหร่', 'เหรอ', 'หรือ', 'ใช่ไหม', 'เมื่อไหร่', 'ทำไม', 'อย่างไร', 'ที่ไหน', 'krap', 'ka'];
+  const endsWithPoliteEnding = politeEndingsToAvoid.some(ending => basePronunciation.endsWith(ending));
 
   if (!endsWithPoliteEnding) {
-    const endsWithKrapKa = basePronunciation.endsWith(' krap') || basePronunciation.endsWith(' ka');
-    if (!endsWithKrapKa) return basePronunciation + (isMale ? " krap" : " ka");
+    return basePronunciation + (isMale ? ' krap' : ' ka');
   }
-  
-  // If Polite Mode is ON but ending is unsuitable, return pronoun-adjusted base
-  return basePronunciation; 
+  return basePronunciation;
 };
 
 // Anki SRS constants
@@ -1039,6 +1027,49 @@ export default function ThaiFlashcards() {
     }
   };
 
+  // Gendered name lists for context replacement
+  const maleNames = ["Peter", "Mark", "Thomas", "John", "David"];
+  const femaleNames = ["Anna", "Nida", "Sarah", "Lisa", "Emily"];
+
+  // Helper to pick a random name from a list
+  function getRandomName(names: string[]) {
+    return names[Math.floor(Math.random() * names.length)];
+  }
+
+  // State to store the current context name
+  const [contextName, setContextName] = useState<string>("");
+
+  // Effect to update contextName when randomSentence or gender changes
+  useEffect(() => {
+    if (!randomSentence) return;
+    // Find if the context sentence contains a known name
+    const allNames = [...maleNames, ...femaleNames];
+    let foundName = allNames.find(name =>
+      randomSentence.thai.includes(name) ||
+      (randomSentence.pronunciation && randomSentence.pronunciation.includes(name)) ||
+      (randomSentence.translation && randomSentence.translation.includes(name))
+    );
+    // If found, replace with a random gender-appropriate name
+    if (foundName) {
+      const newName = isMale ? getRandomName(maleNames) : getRandomName(femaleNames);
+      setContextName(newName);
+    } else {
+      setContextName("");
+    }
+  }, [randomSentence, isMale]);
+
+  // Helper to replace name in a string
+  function replaceName(str: string, name: string) {
+    if (!name) return str;
+    const allNames = [...maleNames, ...femaleNames];
+    let result = str;
+    allNames.forEach(n => {
+      // Replace with word boundaries to avoid partial matches
+      result = result.replace(new RegExp(`\\b${n}\\b`, 'g'), name);
+    });
+    return result;
+  }
+
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       {/* Render the new FlashcardHeader component - Pass setShowProgress */}
@@ -1124,7 +1155,7 @@ export default function ThaiFlashcards() {
                 <div className="flex flex-col items-center justify-center mb-4">
                   <div className="text-center">
                     {/* Thai word */}
-                    <div className="text-5xl md:text-7xl font-extrabold mb-4 text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
+                    <div className="text-2xl md:text-3xl font-extrabold mb-2 text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
                       {getThaiWithGender(phrases[index], isMale, isPoliteMode)}
                     </div>
                     {/* Pronunciation button */}
@@ -1139,7 +1170,7 @@ export default function ThaiFlashcards() {
                         className="neumorphic-button text-blue-400 flex items-center gap-2 px-4 py-2"
                       >
                         <Volume2 className="w-5 h-5" />
-                        {isPlayingWord ? 'Playing...' : `"${phrases[index]?.pronunciation || ''}"`}
+                        {isPlayingWord ? 'Playing...' : `"${getGenderedPronunciation(phrases[index], isMale, isPoliteMode) || ''}"`}
                       </button>
                     </div>
                     {/* English translation in blue, in parentheses */}
@@ -1222,12 +1253,16 @@ export default function ThaiFlashcards() {
                   {/* Pronunciation displayed above the mnemonic */}
                   {phrases[index]?.pronunciation && (
                     <div className="mb-2 p-2 bg-gray-800 rounded text-gray-300 font-medium text-center">
-                      <span className="text-blue-400">Pronunciation:</span> {phrases[index].pronunciation}
+                      <span className="text-blue-400">Pronunciation:</span> {getGenderedPronunciation(phrases[index], isMale, isPoliteMode)}
                     </div>
                   )}
                   
                   <textarea
-                    value={mnemonics[index] ?? phrases[index]?.mnemonic ?? ''}
+                    value={(() => {
+                      const rawMnemonic = mnemonics[index] ?? phrases[index]?.mnemonic ?? '';
+                      // Replace Phom/Chan or Chan/Phom with correct gendered pronoun
+                      return rawMnemonic.replace(/Phom\/Chan|Chan\/Phom/gi, isMale ? 'Phom' : 'Chan');
+                    })()}
                     onChange={handleMnemonicChange}
                     onBlur={() => updateMnemonics(index, mnemonics[index] ?? phrases[index]?.mnemonic ?? '')}
                     placeholder="Create a memory aid to help remember this word..."
@@ -1242,12 +1277,12 @@ export default function ThaiFlashcards() {
                   </div>
                   <ClientOnly>
                     <p className="text-base text-white font-medium">
-                      {randomSentence ? getThaiWithGender(randomSentence, isMale, isPoliteMode) : "(No example available)"}
+                      {randomSentence ? replaceName(getThaiWithGender(randomSentence, isMale, isPoliteMode), contextName) : "(No example available)"}
                     </p>
                     <p className="text-sm text-gray-300 italic">
-                      {randomSentence ? getGenderedPronunciation(randomSentence, isMale, isPoliteMode) : ""}
+                      {randomSentence ? replaceName(getGenderedPronunciation(randomSentence, isMale, isPoliteMode), contextName) : ""}
                     </p>
-                    <p className="text-sm text-gray-400 italic">{randomSentence?.translation || ""}</p>
+                    <p className="text-sm text-gray-400 italic">{randomSentence?.translation ? replaceName(randomSentence.translation, contextName) : ""}</p>
                   </ClientOnly>
                   <div className="flex items-center justify-between mt-2">
                     <button 

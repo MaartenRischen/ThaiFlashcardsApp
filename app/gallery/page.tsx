@@ -125,7 +125,7 @@ export default function GalleryPage() {
                   />
                 </div>
                 {/* Set Name */}
-                <div className="font-bold text-lg text-white mb-1 truncate text-center">{set.title}</div>
+                <div className="font-bold text-lg text-white mb-1 text-center line-clamp-3 break-words whitespace-pre-line">{set.title}</div>
                 {/* Made by: username and LLM model */}
                 <div className="text-xs text-gray-400 mb-1 text-center">
                   Made by: {set.author || 'Anonymous'}{set.llmModel ? ` and ${set.llmModel}` : ''}

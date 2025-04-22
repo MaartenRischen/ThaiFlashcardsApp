@@ -461,6 +461,13 @@ export default function ThaiFlashcards() {
     prevShowAnswerRef.current = showAnswer;
   }, [showAnswer, autoplay, phrases, index, isPlayingWord, isPlayingContext, voicesLoaded, isMale, isPoliteMode]);
 
+  // Trigger autoplay when gender or politeness is toggled (if card back is showing)
+  useEffect(() => {
+    if (showAnswer && voicesLoaded && !isPlayingWord && !isPlayingContext) {
+      speak(getThaiWithGender(phrases[index], isMale, isPoliteMode), true, isMale);
+    }
+  }, [isMale, isPoliteMode]);
+
   // Add a useEffect to initialize the random sentence when the answer is shown
   useEffect(() => {
     if (showAnswer && randomSentence === null) {
@@ -1028,8 +1035,8 @@ export default function ThaiFlashcards() {
   };
 
   // Gendered name lists for context replacement
-  const maleNames = ["Peter", "Mark", "Thomas", "John", "David"];
-  const femaleNames = ["Anna", "Nida", "Sarah", "Lisa", "Emily"];
+  const maleNames = ["Nattapong", "Somchai", "Anan", "Kittisak", "Chaiwat", "Prasert", "Somsak", "Wichai", "Sakda", "Manop"];
+  const femaleNames = ["Suda", "Nid", "Malee", "Somsri", "Pim", "Nok", "Kanya", "Sunee", "Wilai", "Amporn"];
 
   // Helper to pick a random name from a list
   function getRandomName(names: string[]) {

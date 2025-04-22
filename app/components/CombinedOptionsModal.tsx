@@ -506,7 +506,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                   />
                 </div>
                 {/* Set Name */}
-                <div className="font-bold text-lg text-white mb-1 truncate text-center">{set.cleverTitle || set.name}</div>
+                <div className="font-bold text-lg text-white mb-1 text-center line-clamp-3 break-words whitespace-pre-line">{set.cleverTitle || set.name}</div>
                 {/* Topics */}
                 <div className="text-sm text-gray-300 mb-1 truncate">{set.specificTopics || '-'}</div>
                 {/* Ridiculousness */}

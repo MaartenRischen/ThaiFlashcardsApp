@@ -74,7 +74,7 @@ export function FlashcardHeader({
       {/* Full-width Ideogram set image (16:9 aspect ratio) */}
       <div className="w-full flex items-center justify-center py-3 relative mt-6">
         <div className="w-full max-w-2xl aspect-[16/9] rounded-lg overflow-hidden relative">
-          {/* Overlay */}
+          {/* Overlay (Top) */}
           <div
             className="absolute top-0 left-0 right-0 z-20 flex flex-col items-center pointer-events-none"
             style={{ paddingTop: '8px' }}
@@ -106,18 +106,31 @@ export function FlashcardHeader({
               target.src = '/images/defaultnew.png';
             }}
           />
-        </div>
-      </div>
-      {/* Content column - with all the buttons and dropdown */}
-      <div className="flex flex-col w-full">
-        {/* Line 1: Cards button and Set Selector in a row */}
-        <div className="px-2 py-2 w-full">
-          <div className="flex flex-row gap-x-2 items-center w-full">
-            <div className="flex-1 min-w-[180px]">
-              <SetSelector />
+          {/* Set Title Overlay at Bottom (move outside top overlay) */}
+          <div
+            className="absolute bottom-0 left-0 right-0 z-30 flex flex-col items-center pointer-events-none"
+            style={{ paddingBottom: '8px' }}
+          >
+            <div
+              className="bg-black bg-opacity-40 px-2 py-1 text-white text-sm font-semibold shadow-none border-t border-white border-opacity-10 w-full max-w-2xl mx-auto text-center"
+              style={{
+                textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                letterSpacing: '0.02em',
+                backdropFilter: 'blur(1px)',
+                maxWidth: '100%',
+                textAlign: 'center',
+                fontWeight: 600,
+                lineHeight: 1.1,
+                paddingTop: 0,
+              }}
+            >
+              {activeSet?.cleverTitle || activeSet?.name || ''}
             </div>
           </div>
         </div>
+      </div>
+      {/* Content column - with all the buttons */}
+      <div className="flex flex-col w-full">
         {/* Line 2: All action buttons in a single row, always full width */}
         <div className="px-2 py-2 w-full">
           <div className="flex flex-row items-center w-full justify-between gap-x-2">
@@ -131,7 +144,7 @@ export function FlashcardHeader({
             >
               <Layers />
             </button>
-              <span className="block text-xs text-gray-200 mt-1 text-center">Cards</span>
+              <span className="block text-xs text-gray-200 mt-1 text-center">Progress</span>
             </div>
             {/* Set Manager */}
             <div className="flex flex-col items-center">

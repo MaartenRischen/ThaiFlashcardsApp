@@ -1015,7 +1015,7 @@ export default function ThaiFlashcards() {
         level: level,
         specificTopics: specificTopics,
         source: 'generated' as const,
-        imageUrl: setImageUrl || undefined, // Store the set cover image
+        imageUrl: setImageUrl || undefined, // Use the single set image URL
       };
 
       let newSetId = null;
@@ -1479,6 +1479,7 @@ export default function ThaiFlashcards() {
             console.log('SetWizardModal: generation result', result);
             // --- Handle possible generation failure ---
             let generatedPhrases = result.phrases;
+            let isFallback = false; // Flag to track if we used fallback
             if (result.errorSummary || !result.phrases.length) {
               console.warn('SetWizardModal: Generation failed or returned no phrases. Falling back to placeholder cards.');
               alert('The AI could not generate cards right now, so a placeholder set will be created instead.');
@@ -1498,38 +1499,41 @@ export default function ThaiFlashcards() {
                   translation: ex.translation,
                 })) || undefined, // Map examples or keep undefined
               }));
+              isFallback = true; // Set the flag
             }
+
             // --- LOG: After phrase generation ---
             console.log('SetWizardModal: Phrases ready for processing:', generatedPhrases);
+            
             let phrasesWithImages = generatedPhrases;
-            let imageUrls: (string | null)[] = [];
-            if (!SKIP_IMAGE_GEN) {
+            let setImageUrl: string | null = null;
+
+            // Skip image generation if using fallback OR if globally skipped
+            if (!isFallback && !SKIP_IMAGE_GEN) { 
               try {
-                for (let idx = 0; idx < generatedPhrases.length; idx++) {
-                  const phrase = generatedPhrases[idx];
-                  const prompt = phrase.mnemonic ? `${phrase.english}: ${phrase.mnemonic}` : phrase.english;
-                  console.log(`SetWizardModal: Generating image for phrase ${idx}:`, prompt);
-                  const imageUrl = await generateImage(prompt);
-                  imageUrls.push(imageUrl);
-                  console.log(`SetWizardModal: Image URL for phrase ${idx}:`, imageUrl);
-                }
-                phrasesWithImages = generatedPhrases.map((phrase, idx) => ({ ...phrase, imageUrl: imageUrls[idx] }));
+                // Generate a single image for the set using the cleverTitle or a summary prompt
+                const imagePrompt = result.cleverTitle || 'A creative cover for a Thai language flashcard set';
+                console.log(`SetWizardModal: Generating set cover image with prompt:`, imagePrompt);
+                setImageUrl = await generateImage(imagePrompt);
+                console.log(`SetWizardModal: Set cover image URL:`, setImageUrl);
               } catch (imgErr) {
-                console.error('SetWizardModal: Error during image generation:', imgErr);
-                alert('Error during image generation: ' + String(imgErr));
+                console.error('SetWizardModal: Error during set image generation:', imgErr);
+                alert('Error during set image generation, saving set without image: ' + String(imgErr));
+                setImageUrl = null; // Fallback to no image if generation fails
               }
             } else {
-              console.log('SetWizardModal: SKIPPING image generation (debug mode)');
+              console.log(`SetWizardModal: SKIPPING image generation (Fallback: ${isFallback}, Global Skip: ${SKIP_IMAGE_GEN})`);
+              setImageUrl = null;
             }
-            // --- LOG: After image generation ---
-            console.log('SetWizardModal: Phrases with images:', phrasesWithImages);
+            
+            // --- Call addSet --- 
             const setData = {
               name: result.cleverTitle || 'Custom Set',
               cleverTitle: result.cleverTitle,
               level: level,
               specificTopics: specificTopics,
               source: 'generated' as const,
-              images: imageUrls.length > 0 ? imageUrls : undefined,
+              imageUrl: setImageUrl || undefined, // Use the single set image URL
             };
             let newSetId = null;
             try {

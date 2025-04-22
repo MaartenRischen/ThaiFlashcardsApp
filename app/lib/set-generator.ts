@@ -432,9 +432,9 @@ export async function generateSingleFlashcard(
 
 // Add OpenRouter API call
 async function callOpenRouter(prompt: string, model: string): Promise<string> {
-  // const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   // TEMPORARILY HARDCODED - REMOVE LATER
-  const apiKey = "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";
+  // const apiKey = "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";
 
   // Log if the API key is missing *at the point of use*
   if (!apiKey) {
@@ -473,7 +473,7 @@ async function callOpenRouter(prompt: string, model: string): Promise<string> {
 }
 
 // Add OpenRouter batch generator
-async function generateOpenRouterBatch(
+export async function generateOpenRouterBatch(
   prompt: string,
   model: string,
   batchIndex: number

@@ -84,6 +84,8 @@ model FlashcardSet {
   source         String   // default, wizard, import
   imageUrl       String?  // URL to AI-generated or default set image
   seriousnessLevel Int?   // Optional numeric scale for humorous tone
+  llmBrand       String?  // Brand of the LLM used for generation
+  llmModel       String?  // Model of the LLM used for generation
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   shareId        String?  @unique // Unique, nullable shareable ID for public sharing
@@ -129,4 +131,29 @@ model UserSetProgress {
   @@unique([userId, setId]) // Ensure only one progress record per user per set
   @@index([userId])
   @@index([setId])
+}
+
+// -------------------------------------
+// Gallery Model
+// -------------------------------------
+
+model PublishedSet {
+  id             String   @id @default(cuid())
+  title          String   // Use title for public display
+  description    String?
+  imageUrl       String?
+  cardCount      Int
+  author         String   // Store author name (e.g., user's name or "Anonymous")
+  llmBrand       String?
+  llmModel       String?
+  seriousnessLevel Int?
+  specificTopics String?
+  phrases        Json     @db.JsonB // Store the Phrase[] array directly as JSONB
+  publishedAt    DateTime @default(now())
+
+  // Optional: Link back to the original set/user if needed for reference, but keep data separate
+  // originalSetId String?
+  // originalUserId String?
+
+  @@index([publishedAt])
 }

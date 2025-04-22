@@ -123,74 +123,74 @@ export function FlashcardHeader({
           <div className="flex flex-row items-center w-full justify-between gap-x-2">
             {/* Cards */}
             <div className="flex flex-col items-center">
-              <button
-                onClick={onOpenCards}
-                className="neumorphic-icon-button text-xl text-white"
-                title="Cards"
-                aria-label="Cards"
-              >
-                <Layers />
-              </button>
+            <button
+              onClick={onOpenCards}
+              className="neumorphic-icon-button text-xl text-white"
+              title="Cards"
+              aria-label="Cards"
+            >
+              <Layers />
+            </button>
               <span className="block text-xs text-gray-200 mt-1 text-center">Cards</span>
             </div>
             {/* Set Manager */}
             <div className="flex flex-col items-center">
-              <button
-                onClick={onOpenSetManager}
-                className="neumorphic-icon-button text-xl text-white"
-                title="Sets"
-                aria-label="Sets"
-              >
-                <Grid />
-              </button>
-              <span className="block text-xs text-gray-200 mt-1 text-center">Sets</span>
+            <button
+              onClick={onOpenSetManager}
+              className="neumorphic-icon-button text-xl text-white"
+                title="My Sets"
+                aria-label="My Sets"
+            >
+              <Grid />
+            </button>
+              <span className="block text-xs text-gray-200 mt-1 text-center">My Sets</span>
             </div>
             {/* Gallery */}
             <div className="flex flex-col items-center">
-              <button
+            <button
                 onClick={() => router.push('/gallery')}
-                className="neumorphic-icon-button text-xl text-blue-400"
-                title="Gallery"
-                aria-label="Gallery"
-              >
+                className="neumorphic-icon-button text-xl text-blue-400 shadow-[0_0_10px_2px_#3B82F6] border border-blue-400"
+                title="User Gallery"
+                aria-label="User Gallery"
+            >
                 <GalleryHorizontal />
-              </button>
-              <span className="block text-xs text-blue-400 mt-1 text-center">Gallery</span>
+            </button>
+              <span className="block text-xs text-blue-400 mt-1 text-center">User Gallery</span>
             </div>
             {/* Create Set! */}
             <div className="flex flex-col items-center">
-              <button
-                onClick={() => window.open('/set-wizard', '_blank')}
+            <button
+              onClick={() => window.open('/set-wizard', '_blank')}
                 className="neumorphic-icon-button text-xl text-green-300 shadow-[0_0_10px_#10B981]"
                 title="Create"
                 aria-label="Create"
-              >
+            >
                 <Plus size={28} />
-              </button>
+            </button>
               <span className="block text-xs text-green-300 mt-1 text-center">Create</span>
             </div>
             {/* Settings */}
             <div className="flex flex-col items-center">
-              <button
-                onClick={onOpenSettings}
-                className="neumorphic-icon-button text-xl text-white"
-                title="Settings"
-                aria-label="Settings"
-              >
-                <Settings />
-              </button>
+            <button
+              onClick={onOpenSettings}
+              className="neumorphic-icon-button text-xl text-white"
+              title="Settings"
+              aria-label="Settings"
+            >
+              <Settings />
+            </button>
               <span className="block text-xs text-gray-200 mt-1 text-center">Settings</span>
             </div>
             {/* Help */}
             <div className="flex flex-col items-center">
-              <button
-                onClick={() => setShowHowItWorks(true)}
-                className="neumorphic-icon-button text-xl text-white"
+            <button
+              onClick={() => setShowHowItWorks(true)}
+              className="neumorphic-icon-button text-xl text-white"
                 title="Help"
                 aria-label="Help"
-              >
-                <HelpCircle />
-              </button>
+            >
+              <HelpCircle />
+            </button>
               <span className="block text-xs text-gray-200 mt-1 text-center">Help</span>
             </div>
           </div>

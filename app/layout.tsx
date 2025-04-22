@@ -47,14 +47,14 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <Tooltip.Provider>
-          <Providers>
-            <SetProvider>
-              <Navbar />
-              <main>
-                {children}
-              </main>
-            </SetProvider>
-          </Providers>
+        <Providers>
+          <SetProvider>
+            <Navbar />
+            <main>
+              {children}
+            </main>
+          </SetProvider>
+        </Providers>
         </Tooltip.Provider>
       </body>
     </html>

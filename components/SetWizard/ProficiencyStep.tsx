@@ -64,11 +64,11 @@ export function ProficiencyStep({ value, onNext }: { value: { canDoSelections: s
   };
 
   return (
-    <div className="space-y-6 p-4">
-      <div className="text-lg font-semibold text-blue-700 mb-2">🗣️ Let's see what you can already do in Thai! Select all that apply.</div>
+    <div className="space-y-6 p-4 bg-[#23272f]">
+      <div className="text-lg font-semibold text-white mb-2">🗣️ Let's see what you can already do in Thai! Select all that apply.</div>
       {canDoGroups.map(group => (
         <div key={group.level} className="mb-4">
-          <div className="font-bold text-gray-700 mb-1">{group.level}</div>
+          <div className="font-bold text-white mb-1">{group.level}</div>
           <div className="flex flex-col gap-2">
             {group.statements.map(statement => (
               <label key={statement} className="flex items-center gap-2 cursor-pointer">

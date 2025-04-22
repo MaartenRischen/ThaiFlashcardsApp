@@ -33,9 +33,24 @@ const initialState: SetWizardState = {
   dailyGoal: undefined,
 };
 
+// Add a simple progress bar/stepper
+function ProgressStepper({ step, totalSteps }: { step: number, totalSteps: number }) {
+  return (
+    <div className="w-full flex items-center mb-6">
+      {Array.from({ length: totalSteps }).map((_, i) => (
+        <div
+          key={i}
+          className={`flex-1 h-2 mx-1 rounded-full transition-all duration-300 ${i <= step ? 'bg-blue-500' : 'bg-gray-700'}`}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: SetWizardState) => void, onClose: () => void }) {
   const [step, setStep] = useState(0);
   const [wizardState, setWizardState] = useState<SetWizardState>(initialState);
+  const totalSteps = 7;
 
   // Step handlers
   const handleProficiency = (data: any) => { setWizardState(ws => ({ ...ws, proficiency: data })); setStep(2); };
@@ -61,9 +76,9 @@ export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: Se
   ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full">
-        {/* Progress bar/stepper can go here */}
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+      <div className="bg-[#181c24] rounded-2xl shadow-2xl p-6 max-w-lg w-full neumorphic border border-gray-800 text-white">
+        <ProgressStepper step={step} totalSteps={totalSteps} />
         {steps[step]}
       </div>
     </div>

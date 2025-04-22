@@ -20,6 +20,7 @@ import { logger } from '@/app/lib/logger';
 import { calculateNextReview } from './lib/srs';
 import { Volume2 } from 'lucide-react';
 import { SetWizardModal, SetWizardState } from '../components/SetWizard/SetWizardModal';
+import { generateImage } from './lib/ideogram-service';
 
 // Define a simple CardStatus type locally for now
 type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';
@@ -171,6 +172,9 @@ const shuffleArray = <T extends any>(array: T[]): T[] => {
   }
   return shuffled;
 };
+
+// TEMP: Toggle to skip image generation for debugging
+const SKIP_IMAGE_GEN = false; // Re-enabled image generation
 
 export default function ThaiFlashcards() {
   // Replace phrases state with context
@@ -960,6 +964,79 @@ export default function ThaiFlashcards() {
     return result;
   }
 
+  // NEW: Test generation function and state
+  const [testGenResult, setTestGenResult] = useState<any>(null);
+
+  async function handleTestGeneration() {
+    const preferences = {
+      level: 'beginner' as 'beginner',
+      seriousnessLevel: 50,
+      topicsToDiscuss: undefined,
+      specificTopics: undefined,
+      topicsToAvoid: undefined,
+    };
+    const totalCount = 3;
+    console.log('Test generation: preferences', preferences, 'count', totalCount);
+    const result = await import('./lib/set-generator').then(m => m.generateCustomSet(preferences, totalCount));
+    console.log('Test generation result:', result);
+    setTestGenResult(result);
+    if (result.errorSummary) {
+      alert('Test generation error: ' + String(result.errorSummary.userMessage));
+    } else if (!result.phrases.length) {
+      alert('Test generation: No cards were generated.');
+    } else {
+      // --- Handle successful generation --- 
+      const level = preferences.level;
+      const specificTopics = preferences.specificTopics;
+      let phrasesToSave = result.phrases;
+      let setImageUrl: string | null = null;
+      
+      if (!SKIP_IMAGE_GEN) {
+        try {
+          // Generate a single image for the set using the cleverTitle or a summary prompt
+          const imagePrompt = result.cleverTitle || 'A creative cover for a Thai language flashcard set';
+          console.log(`SetWizardModal: Generating set cover image with prompt:`, imagePrompt);
+          setImageUrl = await generateImage(imagePrompt);
+          console.log(`SetWizardModal: Set cover image URL:`, setImageUrl);
+        } catch (imgErr) {
+          console.error('SetWizardModal: Error during set image generation:', imgErr);
+          alert('Error during set image generation, saving set without image: ' + String(imgErr));
+          setImageUrl = null; // Fallback to no image if generation fails
+        }
+      } else {
+        console.log('SetWizardModal: SKIPPING image generation (debug mode)');
+        setImageUrl = null;
+      }
+
+      // --- Call addSet OUTSIDE the image generation conditional ---
+      const setData = {
+        name: result.cleverTitle || 'Custom Set',
+        cleverTitle: result.cleverTitle,
+        level: level,
+        specificTopics: specificTopics,
+        source: 'generated' as const,
+        imageUrl: setImageUrl || undefined, // Store the set cover image
+      };
+
+      let newSetId = null;
+      try {
+        newSetId = await addSet(setData, phrasesToSave); 
+        console.log('handleTestGeneration: addSet returned newSetId:', newSetId);
+      } catch (addErr) {
+        console.error('handleTestGeneration: Error in addSet:', addErr);
+        alert('Error adding set: ' + String(addErr));
+        return; // Stop if addSet fails
+      }
+
+      if (newSetId) {
+        console.log('Successfully added set ' + newSetId + ' and context should switch to it.');
+        setTestGenResult(null);
+      } else {
+        alert('Set was generated but could not be saved.');
+      }
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
       {/* Render the new FlashcardHeader component - Pass setShowProgress */}
@@ -974,6 +1051,14 @@ export default function ThaiFlashcards() {
 
       {/* NEW: Create (Advanced) Button */}
       <div className="flex justify-center mt-4">
+        {/* TEMP: Test Generation Button */}
+        <button
+          className="neumorphic-button bg-gray-600 text-white font-bold px-4 py-2 rounded shadow hover:bg-gray-700 transition mr-2"
+          onClick={handleTestGeneration}
+        >
+          Test Generation
+        </button>
+        {/* Existing Create (Advanced) Button */}
         <button
           className="neumorphic-button bg-blue-600 text-white font-bold px-6 py-2 rounded shadow hover:bg-blue-700 transition"
           onClick={() => setShowSetWizardModal(true)}
@@ -981,6 +1066,21 @@ export default function ThaiFlashcards() {
           Create (Advanced)
         </button>
       </div>
+
+      {/* Show testGenResult for debugging */}
+      {testGenResult && (
+        <div className="max-w-2xl mx-auto bg-gray-900 text-gray-200 p-4 mt-4 rounded shadow overflow-x-auto text-xs">
+          <pre>{JSON.stringify(testGenResult, null, 2)}</pre>
+          {testGenResult.phrases && testGenResult.phrases.map((phrase: any, idx: number) => (
+            phrase.imageUrl && (
+              <div key={idx} className="my-2">
+                <div className="font-bold text-blue-300">{phrase.english}</div>
+                <img src={phrase.imageUrl} alt={phrase.english} className="w-full max-w-xs rounded shadow" />
+              </div>
+            )
+          ))}
+        </div>
+      )}
 
       {/* Main Content - Centered Flashcard */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
@@ -1352,24 +1452,21 @@ export default function ThaiFlashcards() {
         <SetWizardModal
           onClose={() => setShowSetWizardModal(false)}
           onComplete={async (wizardState: SetWizardState) => {
+            console.log('SetWizardModal onComplete fired', wizardState);
             setShowSetWizardModal(false);
             alert('Generating your custom set. This may take up to a minute...');
             // Map wizardState to GeneratePromptOptions
-            // Map levelEstimate to 'beginner' | 'intermediate' | 'advanced' (fallback to 'beginner' if unknown)
             let level: 'beginner' | 'intermediate' | 'advanced' = 'beginner';
             const estimate = wizardState.proficiency.levelEstimate.toLowerCase();
             if (estimate.includes('intermediate')) level = 'intermediate';
             else if (estimate.includes('advanced')) level = 'advanced';
-            // Compose topicsToDiscuss from scenarios and customGoal
             const scenarios = wizardState.goals.scenarios?.filter(Boolean) || [];
             const customGoal = wizardState.goals.customGoal?.trim();
             const topicsToDiscuss = [
               ...scenarios,
               ...(customGoal ? [customGoal] : [])
             ].join(', ') || undefined;
-            // Compose specificTopics from topics array
             const specificTopics = wizardState.topics.length > 0 ? wizardState.topics.join(', ') : undefined;
-            // Card count
             const totalCount = wizardState.dailyGoal?.type === 'cards' && wizardState.dailyGoal.value > 0 ? wizardState.dailyGoal.value : 12;
             const preferences = {
               level,
@@ -1377,27 +1474,77 @@ export default function ThaiFlashcards() {
               specificTopics,
               seriousnessLevel: wizardState.tone ?? 50,
             };
+            console.log('SetWizardModal: preferences', preferences, 'count', totalCount);
+            const result = await import('./lib/set-generator').then(m => m.generateCustomSet(preferences, totalCount));
+            console.log('SetWizardModal: generation result', result);
+            // --- Handle possible generation failure ---
+            let generatedPhrases = result.phrases;
+            if (result.errorSummary || !result.phrases.length) {
+              console.warn('SetWizardModal: Generation failed or returned no phrases. Falling back to placeholder cards.');
+              alert('The AI could not generate cards right now, so a placeholder set will be created instead.');
+              // Ensure fallback conforms to GeneratorPhrase type, including ExampleSentence
+              generatedPhrases = INITIAL_PHRASES.slice(0, totalCount).map(p => ({
+                english: p.english,
+                thai: p.thai,
+                thaiMasculine: p.thaiMasculine || '', // Provide default empty string
+                thaiFeminine: p.thaiFeminine || '',   // Provide default empty string
+                pronunciation: p.pronunciation,
+                mnemonic: p.mnemonic,
+                examples: p.examples?.map(ex => ({
+                  thai: ex.thai,
+                  thaiMasculine: ex.thaiMasculine || '', // Provide default empty string for examples
+                  thaiFeminine: ex.thaiFeminine || '',   // Provide default empty string for examples
+                  pronunciation: ex.pronunciation,
+                  translation: ex.translation,
+                })) || undefined, // Map examples or keep undefined
+              }));
+            }
+            // --- LOG: After phrase generation ---
+            console.log('SetWizardModal: Phrases ready for processing:', generatedPhrases);
+            let phrasesWithImages = generatedPhrases;
+            let imageUrls: (string | null)[] = [];
+            if (!SKIP_IMAGE_GEN) {
+              try {
+                for (let idx = 0; idx < generatedPhrases.length; idx++) {
+                  const phrase = generatedPhrases[idx];
+                  const prompt = phrase.mnemonic ? `${phrase.english}: ${phrase.mnemonic}` : phrase.english;
+                  console.log(`SetWizardModal: Generating image for phrase ${idx}:`, prompt);
+                  const imageUrl = await generateImage(prompt);
+                  imageUrls.push(imageUrl);
+                  console.log(`SetWizardModal: Image URL for phrase ${idx}:`, imageUrl);
+                }
+                phrasesWithImages = generatedPhrases.map((phrase, idx) => ({ ...phrase, imageUrl: imageUrls[idx] }));
+              } catch (imgErr) {
+                console.error('SetWizardModal: Error during image generation:', imgErr);
+                alert('Error during image generation: ' + String(imgErr));
+              }
+            } else {
+              console.log('SetWizardModal: SKIPPING image generation (debug mode)');
+            }
+            // --- LOG: After image generation ---
+            console.log('SetWizardModal: Phrases with images:', phrasesWithImages);
+            const setData = {
+              name: result.cleverTitle || 'Custom Set',
+              cleverTitle: result.cleverTitle,
+              level: level,
+              specificTopics: specificTopics,
+              source: 'generated' as const,
+              images: imageUrls.length > 0 ? imageUrls : undefined,
+            };
+            let newSetId = null;
             try {
-              const result = await import('./lib/set-generator').then(m => m.generateCustomSet(preferences, totalCount));
-              if (!result.phrases.length) {
-                alert('No cards were generated. Please try again or adjust your preferences.');
-                return;
-              }
-              const setData = {
-                name: result.cleverTitle || 'Custom Set',
-                cleverTitle: result.cleverTitle,
-                level,
-                specificTopics,
-                source: 'generated' as const,
-              };
-              const newSetId = await addSet(setData, result.phrases);
-              if (newSetId) {
-                await switchSet(newSetId);
-                alert('Your custom set has been created!');
-              }
-            } catch (err) {
-              alert('An error occurred while generating your set. Please try again.');
-              console.error(err);
+              newSetId = await addSet(setData, phrasesWithImages);
+              console.log('SetWizardModal: addSet returned newSetId:', newSetId);
+            } catch (addErr) {
+              console.error('SetWizardModal: Error in addSet:', addErr);
+              alert('Error adding set: ' + String(addErr));
+              return;
+            }
+            if (newSetId) {
+              console.log('Successfully added set ' + newSetId + ' and switched to it.');
+              // showToast('Successfully created and switched to set: ' + setData.name); // Re-enable later if needed
+            } else {
+              alert('Set was not created.');
             }
           }}
         />

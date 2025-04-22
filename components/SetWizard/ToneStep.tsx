@@ -26,10 +26,10 @@ export function ToneStep({ value, onNext }: { value: number, onNext: (tone: numb
       };
 
   return (
-    <div className="space-y-6 p-4">
-      <div className="text-lg font-semibold text-blue-700 mb-2">🎭 How serious or playful do you want your learning to be?</div>
+    <div className="space-y-6 p-4 bg-[#23272f]">
+      <div className="text-lg font-semibold text-white mb-2">🎭 How serious or playful do you want your learning to be?</div>
       <div className="flex items-center gap-4">
-        <span className="text-gray-500">Serious</span>
+        <span className="text-white">Serious</span>
         <input
           type="range"
           min={0}
@@ -38,12 +38,12 @@ export function ToneStep({ value, onNext }: { value: number, onNext: (tone: numb
           onChange={e => setTone(Number(e.target.value))}
           className="flex-1 accent-blue-600"
         />
-        <span className="text-gray-500">Ridiculous</span>
+        <span className="text-white">Ridiculous</span>
       </div>
-      <div className="mt-4 p-4 border rounded bg-gray-50">
-        <div className="font-bold text-blue-700 mb-1">{preview.label} Example</div>
+      <div className="mt-4 p-4 border rounded bg-gray-800">
+        <div className="font-bold text-white mb-1">{preview.label} Example</div>
         <div className="text-xl mb-1">{preview.thai}</div>
-        <div className="text-gray-700 mb-1">{preview.english}</div>
+        <div className="text-gray-500 mb-1">{preview.english}</div>
         <div className="text-sm text-gray-500">Mnemonic: {preview.mnemonic}</div>
       </div>
       <div className="flex gap-4 mt-6">

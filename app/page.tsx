@@ -19,6 +19,7 @@ import { SettingsModal, SetManagerModal } from './components/CombinedOptionsModa
 import { logger } from '@/app/lib/logger';
 import { calculateNextReview } from './lib/srs';
 import { Volume2 } from 'lucide-react';
+import { SetWizardModal, SetWizardState } from '../components/SetWizard/SetWizardModal';
 
 // Define a simple CardStatus type locally for now
 type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';
@@ -160,124 +161,6 @@ const MnemonicsListModal: React.FC<MnemonicsListModalProps> = ({
   );
 };
 // --- End of MnemonicsListModal Component Definition ---
-
-// --- Define SetWizardModal Component --- 
-interface SetWizardModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const SetWizardModal: React.FC<SetWizardModalProps> = ({ isOpen, onClose }) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [thaiLevel, setThaiLevel] = useState<string>('');
-  const [learningGoals, setLearningGoals] = useState<string[]>([]);
-  
-  const totalSteps = 2; // Changed from 3 to 2 (Welcome, Level)
-  
-  if (!isOpen) return null;
-
-  // Navigation handlers
-  const handleNext = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  // Handler for goal checkboxes
-  const toggleGoal = (goal: string) => {
-    setLearningGoals(prev => 
-      prev.includes(goal) ? prev.filter(g => g !== goal) : [...prev, goal]
-    );
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
-      <div className="neumorphic rounded-xl p-6 bg-gray-900 max-w-md w-full max-h-[90vh] overflow-auto flex flex-col"> {/* Added flex-col */}
-        {/* Header */}
-        <div className="flex justify-between items-center mb-4 flex-shrink-0"> {/* Prevent header shrinking */}
-          <h2 className="text-xl font-semibold text-blue-400">Create Custom Set</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
-            &times;
-          </button>
-        </div>
-        
-        {/* Content Scrollable Area */}
-        <div className="overflow-y-auto mb-4 flex-grow"> {/* Allow this to grow/scroll */}
-          {currentStep === 1 && (
-            <div>
-              <p>Welcome to the Set Wizard!</p>
-              <p className="mt-2">Let's start by understanding your current level and goals.</p>
-            </div>
-          )}
-          
-          {currentStep === 2 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-3 text-blue-400">What is your current level of Thai?</h3>
-              <div className="space-y-2">
-                {['Beginner', 'Intermediate', 'Advanced'].map(level => (
-                  <label key={level} className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-gray-700">
-                    <input 
-                      type="radio" 
-                      name="thaiLevel" 
-                      value={level.toLowerCase()} 
-                      checked={thaiLevel === level.toLowerCase()}
-                      onChange={(e) => setThaiLevel(e.target.value)}
-                      className="accent-blue-400 h-4 w-4 rounded"
-                    />
-                    <span>{level}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {/* Step 3 (learning goals section) has been completely removed */}
-          
-          {/* Placeholder for future steps like phrase selection, mnemonic suggestions */}
-        </div>
-
-        {/* Navigation Footer (Fixed position) */}
-        <div className="mt-6 pt-4 border-t border-gray-700 flex justify-between flex-shrink-0"> {/* Prevent footer shrinking */} 
-          <button 
-            onClick={handleBack} 
-            disabled={currentStep === 1} 
-            className="neumorphic-button text-xs text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Back
-          </button>
-          
-          {/* Show Next or Generate button */} 
-          {currentStep < totalSteps ? (
-             <button 
-               onClick={handleNext} 
-               className="neumorphic-button text-xs text-blue-400"
-             >
-               Next
-             </button>
-          ) : (
-             <button 
-               onClick={() => {
-                 // TODO: Add logic to generate the set based on selections
-                 alert(`Generating Set...\nLevel: ${thaiLevel}\n(Generation logic not implemented yet)`);
-                 onClose(); // Close modal for now
-               }} 
-               className="neumorphic-button text-xs text-green-400"
-             >
-               Generate Set
-             </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-// --- End of SetWizardModal Component Definition ---
 
 // Helper function to shuffle an array (Fisher-Yates algorithm)
 const shuffleArray = <T extends any>(array: T[]): T[] => {
@@ -1089,6 +972,16 @@ export default function ThaiFlashcards() {
         showAnswer={showAnswer}
       />
 
+      {/* NEW: Create (Advanced) Button */}
+      <div className="flex justify-center mt-4">
+        <button
+          className="neumorphic-button bg-blue-600 text-white font-bold px-6 py-2 rounded shadow hover:bg-blue-700 transition"
+          onClick={() => setShowSetWizardModal(true)}
+        >
+          Create (Advanced)
+        </button>
+      </div>
+
       {/* Main Content - Centered Flashcard */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         {/* Remove perspective */} 
@@ -1455,10 +1348,60 @@ export default function ThaiFlashcards() {
       />
 
       {/* Render the Set Wizard Modal */}
-      <SetWizardModal 
-        isOpen={showSetWizardModal}
-        onClose={() => setShowSetWizardModal(false)}
-      />
+      {showSetWizardModal && (
+        <SetWizardModal
+          onClose={() => setShowSetWizardModal(false)}
+          onComplete={async (wizardState: SetWizardState) => {
+            setShowSetWizardModal(false);
+            alert('Generating your custom set. This may take up to a minute...');
+            // Map wizardState to GeneratePromptOptions
+            // Map levelEstimate to 'beginner' | 'intermediate' | 'advanced' (fallback to 'beginner' if unknown)
+            let level: 'beginner' | 'intermediate' | 'advanced' = 'beginner';
+            const estimate = wizardState.proficiency.levelEstimate.toLowerCase();
+            if (estimate.includes('intermediate')) level = 'intermediate';
+            else if (estimate.includes('advanced')) level = 'advanced';
+            // Compose topicsToDiscuss from scenarios and customGoal
+            const scenarios = wizardState.goals.scenarios?.filter(Boolean) || [];
+            const customGoal = wizardState.goals.customGoal?.trim();
+            const topicsToDiscuss = [
+              ...scenarios,
+              ...(customGoal ? [customGoal] : [])
+            ].join(', ') || undefined;
+            // Compose specificTopics from topics array
+            const specificTopics = wizardState.topics.length > 0 ? wizardState.topics.join(', ') : undefined;
+            // Card count
+            const totalCount = wizardState.dailyGoal?.type === 'cards' && wizardState.dailyGoal.value > 0 ? wizardState.dailyGoal.value : 12;
+            const preferences = {
+              level,
+              topicsToDiscuss,
+              specificTopics,
+              seriousnessLevel: wizardState.tone ?? 50,
+            };
+            try {
+              const result = await import('./lib/set-generator').then(m => m.generateCustomSet(preferences, totalCount));
+              if (!result.phrases.length) {
+                alert('No cards were generated. Please try again or adjust your preferences.');
+                return;
+              }
+              const setData = {
+                name: result.cleverTitle || 'Custom Set',
+                cleverTitle: result.cleverTitle,
+                level,
+                specificTopics,
+                source: 'generated' as const,
+              };
+              const newSetId = await addSet(setData, result.phrases);
+              if (newSetId) {
+                await switchSet(newSetId);
+                alert('Your custom set has been created!');
+              }
+            } catch (err) {
+              alert('An error occurred while generating your set. Please try again.');
+              console.error(err);
+            }
+          }}
+        />
+      )}
 
       {/* --- NEW Combined Settings Modal --- */}
       <SettingsModal

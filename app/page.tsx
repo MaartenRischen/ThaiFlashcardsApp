@@ -18,6 +18,7 @@ import { FlashcardHeader } from './components/flashcard-page/FlashcardHeader';
 import { SettingsModal, SetManagerModal } from './components/CombinedOptionsModal';
 import { logger } from '@/app/lib/logger';
 import { calculateNextReview } from './lib/srs';
+import { Volume2 } from 'lucide-react';
 
 // Define a simple CardStatus type locally for now
 type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';
@@ -1122,33 +1123,35 @@ export default function ThaiFlashcards() {
                 {/* Main Phrase Section - Centered */}
                 <div className="flex flex-col items-center justify-center mb-4">
                   <div className="text-center">
-                    {/* Thai word with pronunciation */}
-                    <div className="text-4xl md:text-5xl font-bold mb-4 text-gray-700">
+                    {/* Thai word */}
+                    <div className="text-5xl md:text-7xl font-extrabold mb-4 text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
                       {getThaiWithGender(phrases[index], isMale, isPoliteMode)}
                     </div>
-                    <div className="text-sm text-gray-400 italic mb-3">
-                      ({getGenderedPronunciation(phrases[index], isMale, isPoliteMode)})
-                    </div>
-                    {/* Play Word Button */}
+                    {/* Pronunciation button */}
                     <div className="flex justify-center mb-4">
                       <button
                         onClick={(event) => {
                           event.stopPropagation();
                           const textToSpeak = getThaiWithGender(phrases[index], isMale, isPoliteMode);
-                          console.log("Play Word - Text to Speak:", textToSpeak);
                           speak(textToSpeak, true, isMale);
                         }}
                         disabled={isPlayingWord || isPlayingContext}
-                        className="neumorphic-button text-blue-400"
+                        className="neumorphic-button text-blue-400 flex items-center gap-2 px-4 py-2"
                       >
-                        {isPlayingWord ? 'Playing...' : 'Play Word'}
+                        <Volume2 className="w-5 h-5" />
+                        {isPlayingWord ? 'Playing...' : `"${phrases[index]?.pronunciation || ''}"`}
                       </button>
                     </div>
-
-                    {/* Difficulty Buttons - Wrapped in Popover (Step 3) */} 
+                    {/* English translation in blue, in parentheses */}
+                    {phrases[index]?.english && (
+                      <div className="text-base md:text-lg font-medium mb-2 text-blue-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
+                        ({phrases[index].english})
+                      </div>
+                    )}
+                    {/* Difficulty Buttons - Wrapped in Popover (Step 3) */}
                     <Popover open={tutorialStep === 3}>
                       <PopoverTrigger asChild>
-                        <div className="flex justify-center space-x-2 mb-4">
+                        <div className="flex justify-center space-x-2 mb-6">
                           <button onClick={() => handleCardAction('hard')} className="neumorphic-button text-red-400">Wrong</button>
                           <button onClick={() => handleCardAction('good')} className="neumorphic-button text-yellow-400">Correct</button>
                           <button onClick={() => handleCardAction('easy')} className="neumorphic-button text-green-400">Easy</button>
@@ -1277,7 +1280,6 @@ export default function ThaiFlashcards() {
                     </button>
                   </div>
                 </div> {/* End Context Section */} 
-                
               </div> // This closing div might be the issue or misplaced
             )}
           </div>

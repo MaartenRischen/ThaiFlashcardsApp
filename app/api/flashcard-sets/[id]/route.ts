@@ -2,9 +2,6 @@ import { prisma } from "@/app/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
-import * as storage from '@/app/lib/storage';
-import { SetMetaData } from '@/app/lib/storage';
-import { Phrase } from '@/app/lib/set-generator';
 
 function getErrorMessage(error: unknown): string {
   if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
@@ -232,13 +229,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 // POST handler for creating new sets
-export async function POST(_request: Request) {
+export async function POST() {
   // ... existing code ...
-  try {
-    // ... existing code ...
-  } catch (error: unknown) {
-    const message = getErrorMessage(error);
-    // ... existing code ...
-    return NextResponse.json({ error: `Set creation failed: ${message}` }, { status: 500 });
-  }
 } 

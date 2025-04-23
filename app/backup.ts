@@ -1,7 +1,7 @@
 // Utility function to export localStorage data
 export function exportLocalStorage() {
   const keys = ['cardProgress', 'mnemonicEdits', 'levelProgress', 'newCardsToday'];
-  const data: Record<string, any> = {};
+  const data: Record<string, unknown> = {};
 
   keys.forEach(key => {
     try {

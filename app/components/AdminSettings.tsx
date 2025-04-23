@@ -12,7 +12,6 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
   const [provider, setProvider] = useState('browser');
   const [testVoice, setTestVoice] = useState('');
   const [isMale, setIsMale] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   
   useEffect(() => {
@@ -65,9 +64,15 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
           setIsTesting(false);
         }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("TTS Test Error:", error);
-      alert(`TTS Test Error: ${error.message || error}`);
+      let message = 'Unknown error';
+      if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        message = (error as { message: string }).message;
+      } else {
+        message = String(error);
+      }
+      alert(`TTS Test Error: ${message}`);
       setIsTesting(false);
     }
   };

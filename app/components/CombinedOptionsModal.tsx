@@ -7,6 +7,9 @@ import { useState } from 'react';
 import { INITIAL_PHRASES } from '@/app/data/phrases';
 import * as storage from '@/app/lib/storage';
 import Image from 'next/image';
+import { Phrase } from '@/app/lib/set-generator';
+import type { PhraseProgressData } from '@/app/lib/storage';
+import type { FlashcardSet } from '@prisma/client';
 
 interface CombinedOptionsModalProps {
   isOpen: boolean;
@@ -67,8 +70,14 @@ export function CombinedOptionsModal({
       const url = `${window.location.origin}/share/${data.shareId}`;
       setShareUrl(url);
       setShowShare(true);
-    } catch (err: any) {
-      setShareError(err.message || 'Unknown error');
+    } catch (err: unknown) {
+      let message = 'Unknown error';
+      if (typeof err === 'object' && err && 'message' in err && typeof (err as { message?: unknown }).message === 'string') {
+        message = (err as { message: string }).message;
+      } else {
+        message = String(err);
+      }
+      setShareError(message);
     } finally {
       setShareLoading(false);
     }
@@ -322,11 +331,10 @@ export function SetManagerModal({ isOpen, onClose }: {
     // addSet, etc.
   } = useSet();
   const [selected, setSelected] = useState<string[]>([]);
-  const [editSetId, setEditSetId] = useState<string|null>(null);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [cardsModalSetId, setCardsModalSetId] = useState<string | null>(null);
-  const [cardsModalPhrases, setCardsModalPhrases] = useState<any[]>([]);
-  const [cardsModalProgress, setCardsModalProgress] = useState<any>({});
+  const [cardsModalPhrases, setCardsModalPhrases] = useState<Phrase[]>([]);
+  const [cardsModalProgress, setCardsModalProgress] = useState<Record<number, PhraseProgressData>>({});
   const [cardsModalLoading, setCardsModalLoading] = useState(false);
   const [publishingSetId, setPublishingSetId] = useState<string | null>(null);
 
@@ -368,7 +376,7 @@ export function SetManagerModal({ isOpen, onClose }: {
   };
 
   // Helper to open the cards modal for a set
-  const handleOpenCardsModal = async (set: any) => {
+  const handleOpenCardsModal = async (set: FlashcardSet) => {
     setCardsModalSetId(set.id);
     setCardsModalLoading(true);
     let phrases = [];
@@ -392,7 +400,7 @@ export function SetManagerModal({ isOpen, onClose }: {
   };
 
   // Helper to get status for a card
-  const getCardStatus = (progress: any, idx: number) => {
+  const getCardStatus = (progress: Record<number, PhraseProgressData>, idx: number) => {
     const p = progress[idx];
     if (!p || !p.difficulty) return 'Unseen';
     if (p.difficulty === 'hard') return 'Wrong';

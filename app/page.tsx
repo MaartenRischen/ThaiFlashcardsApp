@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import Image from 'next/image';
 import { Switch } from "@/app/components/ui/switch";
 import { ttsService } from './lib/tts-service';
 import AdminSettings from './components/AdminSettings';
@@ -164,7 +165,7 @@ const MnemonicsListModal: React.FC<MnemonicsListModalProps> = ({
 
 // Helper function to shuffle an array (Fisher-Yates algorithm)
 // Force rebuild trigger comment
-const shuffleArray = <T extends any>(array: T[]): T[] => {
+const shuffleArray = <T extends unknown>(array: T[]): T[] => {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -966,12 +967,12 @@ export default function ThaiFlashcards() {
   }
 
   // NEW: Test generation function and state
-  const [testGenResult, setTestGenResult] = useState<any>(null); // Keep for potential future debug display
+  const [testGenResult, setTestGenResult] = useState<unknown>(null); // Changed any to unknown
   
   // Use isLoading and switchSet from context
   // REMOVED: const { isLoading, switchSet } = useSet(); // This was redundant
 
-  async function handleTestGeneration() {
+  const handleTestGenerationCallback = React.useCallback(async () => {
     setTestGenResult(null); // Clear previous results
     alert("Starting test generation... this might take a minute."); // User feedback
 
@@ -1019,23 +1020,27 @@ export default function ThaiFlashcards() {
         throw new Error('API route did not return a newSetId.');
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      let errorMessage = 'An unknown error occurred';
+      if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string') {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
       console.error('handleTestGeneration: Error calling API route:', error);
-      setTestGenResult({ error: error.message }); // Display error if needed
-      alert(`Error generating test set: ${error.message}`);
+      setTestGenResult({ error: errorMessage }); // Display error if needed
+      alert(`Error generating test set: ${errorMessage}`);
     } 
-  }
+  }, [addSet, refreshSets, switchSet]); // Added addSet to dependencies
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      {/* Render the new FlashcardHeader component - Pass setShowProgress */}
+      {/* Render the new FlashcardHeader component - Removed setShowProgress & showAnswer */}
       <FlashcardHeader
         setShowHowItWorks={setShowHowItWorks}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
-        setShowProgress={setShowProgress}
         onOpenCards={() => setShowCardsModal(true)}
         onOpenSetManager={() => setIsManagementModalOpen(true)}
-        showAnswer={showAnswer}
       />
 
       {/* NEW: Create (Advanced) Button */}
@@ -1043,7 +1048,7 @@ export default function ThaiFlashcards() {
         {/* TEMP: Test Generation Button */}
         <button
           className="neumorphic-button bg-gray-600 text-white font-bold px-4 py-2 rounded shadow hover:bg-gray-700 transition mr-2"
-          onClick={handleTestGeneration}
+          onClick={handleTestGenerationCallback}
         >
           Test Generation
         </button>
@@ -1056,18 +1061,37 @@ export default function ThaiFlashcards() {
         </button>
       </div>
 
-      {/* Show testGenResult for debugging */}
-      {testGenResult && (
+      {/* Show testGenResult for debugging - Refined conditional and type guards */}
+      {typeof testGenResult === 'object' && testGenResult !== null && (
         <div className="max-w-2xl mx-auto bg-gray-900 text-gray-200 p-4 mt-4 rounded shadow overflow-x-auto text-xs">
           <pre>{JSON.stringify(testGenResult, null, 2)}</pre>
-          {testGenResult.phrases && testGenResult.phrases.map((phrase: any, idx: number) => (
-            phrase.imageUrl && (
-              <div key={idx} className="my-2">
-                <div className="font-bold text-blue-300">{phrase.english}</div>
-                <img src={phrase.imageUrl} alt={phrase.english} className="w-full max-w-xs rounded shadow" />
-              </div>
-            )
-          ))}
+          {/* Safely access phrases with type guards */}
+          {'phrases' in testGenResult && Array.isArray(testGenResult.phrases) &&
+            testGenResult.phrases.map((phrase: unknown, idx: number) => {
+              // Type guard for phrase structure needed for image rendering
+              if (typeof phrase === 'object' && phrase !== null && 'imageUrl' in phrase && typeof phrase.imageUrl === 'string' && 'english' in phrase) {
+                const imageUrl = phrase.imageUrl; // Extract to satisfy TS
+                const englishText = (phrase as { english?: unknown }).english;
+                const altText = typeof englishText === 'string' ? englishText : 'Generated image';
+
+                return (
+                  <div key={idx} className="my-2">
+                    <div className="font-bold text-blue-300">{typeof englishText === 'string' ? englishText : 'N/A'}</div>
+                    {/* Use Next/Image */}
+                    <div style={{ position: 'relative', width: '100%', maxWidth: '200px', height: '200px' }}> {/* Example wrapper */}
+                      <Image
+                        src={imageUrl} // Use extracted variable
+                        alt={altText} // Use calculated alt text
+                        fill // Use fill and let the container control size
+                        style={{ objectFit: 'contain' }} // Adjust objectFit as needed
+                        className="rounded shadow"
+                      />
+                    </div>
+                  </div>
+                );
+              }
+              return null; // Don't render if phrase structure is wrong
+            })}
         </div>
       )}
 
@@ -1492,15 +1516,23 @@ export default function ThaiFlashcards() {
                 console.log("Set generated by backend with ID:", result.newSetId);
                 await refreshSets(); // Tell context to fetch updated set list
                 await switchSet(result.newSetId); // Tell context to switch to the new set
-                alert('Custom set generated and loaded successfully!');
+                console.log('handleTestGeneration: Successfully switched to new set', result.newSetId);
+                alert('Test set generated and saved successfully!');
               } else {
-                throw new Error('API did not return the new set ID.');
+                throw new Error('API route did not return a newSetId.');
               }
               // --- END NEW LOGIC ---
 
-            } catch (err: any) {
-              console.error('SetWizardModal onComplete: Error during fetch or processing:', err);
-              alert(`Error generating set: ${err.message}`);
+            } catch (err: unknown) {
+              let errorMessage = 'An unknown error occurred';
+              if (typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string') {
+                errorMessage = err.message;
+              } else if (typeof err === 'string') {
+                errorMessage = err;
+              }
+              console.error('handleTestGeneration: Error calling API route:', err);
+              setTestGenResult({ error: errorMessage }); // Display error if needed
+              alert(`Error generating test set: ${errorMessage}`);
             }
           }}
         />

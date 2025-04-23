@@ -1,20 +1,28 @@
-import { Phrase, ExampleSentence } from '../lib/set-generator';
+import { Phrase } from '../lib/set-generator';
 import { v4 as uuidv4 } from 'uuid'; // Added back for potential use in other functions
 import { prisma } from "@/app/lib/prisma"; // Import prisma client
 import { Prisma, FlashcardSet, Phrase as PrismaPhrase } from '@prisma/client'; // Use specific type import
 
-// Storage key prefixes
-const PREFIX = 'thaiFlashcards_';
-const setContentKey = (id: string) => `${PREFIX}content_${id}`;
-const setProgressKey = (id: string) => `${PREFIX}progress_${id}`;
+// Helper function
+function getErrorMessage(error: unknown): string {
+    if (error instanceof Error) return error.message;
+    if (typeof error === 'string') return error;
+    if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string') return error.message;
+    return 'An unknown error occurred';
+}
 
-// --- Type Definitions --- 
+// Storage key prefixes (kept for reference, but not used in DB logic)
+// const PREFIX = 'thaiFlashcards_';
+// const setContentKey = (id: string) => `${PREFIX}content_${id}`;
+// const setProgressKey = (id: string) => `${PREFIX}progress_${id}`;
 
-export interface SetMetaData { 
-  id: string; 
-  name: string; 
+// --- Type Definitions ---
+
+export interface SetMetaData {
+  id: string;
+  name: string;
   cleverTitle?: string;
-  createdAt: string; 
+  createdAt: string;
   phraseCount: number;
   level?: 'beginner' | 'intermediate' | 'advanced';
   goals?: string[];
@@ -29,7 +37,7 @@ export interface SetMetaData {
 
 export interface PhraseProgressData {
   srsLevel: number;
-  nextReviewDate: string; 
+  nextReviewDate: string;
   lastReviewedDate: string;
   difficulty: 'easy' | 'good' | 'hard';
   repetitions: number;
@@ -48,37 +56,17 @@ interface PublishSetInput {
   llmModel?: string;
   seriousnessLevel?: number;
   specificTopics?: string;
-  phrases: any[];
+  phrases: Phrase[]; // Fixed from any[]
   level?: string;
   goals?: string[];
   source?: string;
   originalSetId?: string;
 }
 
-// --- Helper Functions (Local Storage - Keep temporarily) --- 
-function getFromStorage<T>(key: string, defaultValue: T): T {
-  if (typeof window === 'undefined') return defaultValue;
-  try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
-  } catch (error) {
-    console.error(`Error reading localStorage key “${key}”:`, error);
-    return defaultValue;
-  }
-}
+// --- Removed localStorage Helper Functions ---
+// getFromStorage and setToStorage functions removed.
 
-function setToStorage<T>(key: string, value: T): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-    return true;
-  } catch (error) {
-    console.error(`Error setting localStorage key “${key}”:`, error);
-    return false;
-  }
-}
-
-// --- Set MetaData Management --- 
+// --- Set MetaData Management ---
 
 // Fetches from Supabase
 export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> {
@@ -253,7 +241,7 @@ export async function deleteSetMetaData(setId: string): Promise<boolean> {
   }
 }
 
-// --- Set Content Management --- 
+// --- Set Content Management ---
 
 // REFACTOR: Fetch Phrases from Supabase, include ID
 export async function getSetContent(id: string): Promise<Phrase[]> {
@@ -274,20 +262,20 @@ export async function getSetContent(id: string): Promise<Phrase[]> {
 
     // Map Prisma record to Phrase interface
     return phrasesData.map((dbPhrase: PrismaPhrase): Phrase => {
-      let examples: ExampleSentence[] = [];
+      let examples: { [key: string]: any }[] = []; // Changed from ExampleSentence[] to generic object array
       try {
         if (dbPhrase.examplesJson && typeof dbPhrase.examplesJson === 'string') {
           const parsed = JSON.parse(dbPhrase.examplesJson);
           // Basic validation: check if it's an array
           if (Array.isArray(parsed)) {
             // TODO: Add deeper validation if needed to ensure items match ExampleSentence structure
-            examples = parsed as ExampleSentence[]; 
+            examples = parsed as { [key: string]: any }[]; // Cast to generic object array
           } else {
              console.warn(`Parsed examplesJson for phrase ${dbPhrase.id} is not an array:`, parsed);
           }
         } else if (Array.isArray(dbPhrase.examplesJson)) {
           // Handle cases where Prisma returns parsed JSON array; cast via unknown to satisfy lint
-          examples = (dbPhrase.examplesJson as unknown) as ExampleSentence[];
+          examples = (dbPhrase.examplesJson as unknown) as { [key: string]: any }[]; // Cast to generic object array
         }
       } catch (e) {
         console.error(`Failed to parse examplesJson for phrase ${dbPhrase.id}:`, dbPhrase.examplesJson, e);
@@ -308,8 +296,8 @@ export async function getSetContent(id: string): Promise<Phrase[]> {
     });
 
   } catch (error: unknown) {
-    console.error(`Unexpected error in getSetContent for setId ${id}:`, error);
-    return []; 
+    console.error(`Unexpected error in getSetContent for setId ${id}:`, getErrorMessage(error)); // Use helper
+    return [];
   }
 }
 
@@ -372,7 +360,7 @@ export async function deleteSetContent(setId: string): Promise<boolean> {
   }
 }
 
-// --- Set Progress Management --- 
+// --- Set Progress Management ---
 
 // REFACTOR: Fetch progress from Supabase
 export async function getSetProgress(userId: string, setId: string): Promise<SetProgress> {
@@ -401,14 +389,15 @@ export async function getSetProgress(userId: string, setId: string): Promise<Set
       !Array.isArray(progressRecord.progressData)
     ) {
       console.log(`Successfully fetched UserSetProgress`);
+      // Cast the JSON object to SetProgress after validation
       return progressRecord.progressData as unknown as SetProgress;
     } else {
       console.log(`No valid UserSetProgress found for userId: ${userId}, setId: ${setId}. Returning empty object.`);
       return {};
     }
 
-  } catch (error) {
-    console.error('Unexpected error in getSetProgress:', error);
+  } catch (error: unknown) { // Changed from any
+    console.error('Unexpected error in getSetProgress:', getErrorMessage(error)); // Use helper
     return {}; // Return empty object on error
   }
 }
@@ -494,38 +483,14 @@ export async function deleteSetProgress(userId: string, setId: string): Promise<
   }
 }
 
-// --- Utility --- 
+// --- Utility ---
 
 export function generateUUID(): string {
   return uuidv4();
 }
 
-// --- Cleanup --- 
-// Remove old localStorage helpers if no longer needed anywhere else
-// Commenting out for now, can be deleted later after full verification.
-/*
-function getFromStorage<T>(key: string, defaultValue: T): T {
-  if (typeof window === 'undefined') return defaultValue;
-  try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
-  } catch (error) {
-    console.error(`Error reading localStorage key “${key}”:`, error);
-    return defaultValue;
-  }
-}
-
-function setToStorage<T>(key: string, value: T): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-    return true;
-  } catch (error) {
-    console.error(`Error setting localStorage key “${key}”:`, error);
-    return false;
-  }
-}
-*/ 
+// --- Cleanup ---
+// Removed old localStorage helpers and related function declarations.
 
 // --- Gallery (PublishedSet) Functions ---
 
@@ -603,41 +568,3 @@ export async function getPublishedSetById(id: string) {
   });
   return publishedSet;
 }
-
-// FIX any usage in the potentially unused saveSetMetaData function
-export async function saveSetMetaData(userId: string, metaData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>, phrases: Phrase[]): Promise<string | null> {
-  try {
-    const newSet = await prisma.flashcardSet.create({
-      data: {
-        id: uuidv4(),
-        userId: userId, // Use passed userId
-        name: metaData.name,
-        cleverTitle: metaData.cleverTitle,
-        level: metaData.level,
-        goals: metaData.goals,
-        specificTopics: metaData.specificTopics,
-        source: metaData.source,
-        imageUrl: metaData.imageUrl,
-        seriousnessLevel: metaData.seriousnessLevel,
-        llmBrand: metaData.llmBrand,
-        llmModel: metaData.llmModel,
-        // phraseCount is not directly set here
-        phrases: {
-          create: phrases.map(phrase => {
-            // Destructure Phrase, exclude fields not in Prisma Phrase model
-            const { id, difficulty, examples, ...prismaPhraseData } = phrase;
-            return {
-              ...prismaPhraseData, // Spread fields like english, thai, etc.
-              examplesJson: examples ? JSON.stringify(examples) : JSON.stringify([])
-            };
-          }),
-        },
-      },
-    });
-    console.log("Set created successfully with ID:", newSet.id);
-    return newSet.id;
-  } catch (error: unknown) {
-    console.error("Error saving set metadata:", error);
-    return null;
-  }
-} 

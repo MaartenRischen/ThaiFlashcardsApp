@@ -18,82 +18,76 @@ datasource db {
 // NextAuth.js Models (Required for Prisma Adapter)
 // -------------------------------------
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+// model Account {
+//   id                String  @id @default(cuid())
+//   userId            String
+//   type              String
+//   provider          String
+//   providerAccountId String
+//   refresh_token     String? @db.Text
+//   access_token      String? @db.Text
+//   expires_at        Int?
+//   token_type        String?
+//   scope             String?
+//   id_token          String? @db.Text
+//   session_state     String?
+//
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+//
+//   @@unique([provider, providerAccountId])
+// }
+//
+// model Session {
+//   id           String   @id @default(cuid())
+//   sessionToken String   @unique
+//   userId       String
+//   expires      DateTime
+//   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+// }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id // Use Clerk ID as primary key (already String)
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  password      String? // To store the hashed password
-  supabaseAuthUserId String? @unique // Link to Supabase Auth User ID
-  accounts      Account[]
-  sessions      Session[]
+  // REMOVED: password      String? // Clerk handles passwords
+  // REMOVED: supabaseAuthUserId String? @unique // No longer needed if Clerk is primary
+  // REMOVED: accounts      Account[] // Assumes Clerk handles external accounts
+  // REMOVED: sessions      Session[] // Clerk handles sessions
 
   // Application-specific relations
   flashcardSets   FlashcardSet[]
   userSetProgress UserSetProgress[]
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
+// REMOVED: VerificationToken, Session, Account models (Assuming Clerk handles these)
 
 // -------------------------------------
 // Application-Specific Models
 // -------------------------------------
 
 model FlashcardSet {
-  id             String   @id @default(cuid())
-  userId         String   // Foreign key referencing User.supabaseAuthUserId
-  name           String   // User-defined or auto-generated name
-  cleverTitle    String?  // Optional AI-generated title
-  level          String?  // e.g., beginner, intermediate
-  goals          String[] // Array of goal strings
+  id             String   @id @default(cuid()) // Keep internal CUID for set ID
+  userId         String   // Foreign key referencing User.id (Clerk User ID)
+  name           String   
+  cleverTitle    String?  
+  level          String?  
+  goals          String[] 
   specificTopics String?
-  source         String   // default, wizard, import
-  imageUrl       String?  // URL to AI-generated or default set image
-  seriousnessLevel Int?   // Optional numeric scale for humorous tone
-  llmBrand       String?  // Brand of the LLM used for generation
-  llmModel       String?  // Model of the LLM used for generation
+  source         String   
+  imageUrl       String?  
+  seriousnessLevel Int?   
+  llmBrand       String?  
+  llmModel       String?  
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  shareId        String?  @unique // Unique, nullable shareable ID for public sharing
+  shareId        String?  @unique 
 
-  // Corrected Relation: References User.supabaseAuthUserId
-  user    User     @relation(fields: [userId], references: [supabaseAuthUserId], onDelete: Cascade)
-  phrases Phrase[] // Relation to Phrases belonging to this set
-  progress UserSetProgress[] // Relation to user progress for this set
+  // Corrected Relation: References User.id (Clerk User ID)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phrases Phrase[] 
+  progress UserSetProgress[] 
 
   @@index([userId])
 }
@@ -117,18 +111,17 @@ model Phrase {
 
 // Stores user-specific progress for a particular set
 model UserSetProgress {
-  id             String   @id @default(cuid())
-  userId         String   // Foreign key referencing User.supabaseAuthUserId
-  setId          String   // Foreign key to FlashcardSet
-  // Store the progress map { cardIndex: CardProgressData } as JSON
+  id             String   @id @default(cuid()) // Keep internal CUID for progress ID
+  userId         String   // Foreign key referencing User.id (Clerk User ID)
+  setId          String   
   progressData   Json     @db.JsonB 
   lastAccessedAt DateTime @default(now()) @updatedAt
 
-  // Corrected Relation: References User.supabaseAuthUserId
-  user User @relation(fields: [userId], references: [supabaseAuthUserId], onDelete: Cascade)
+  // Corrected Relation: References User.id (Clerk User ID)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   set  FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, setId]) // Ensure only one progress record per user per set
+  @@unique([userId, setId]) 
   @@index([userId])
   @@index([setId])
 }

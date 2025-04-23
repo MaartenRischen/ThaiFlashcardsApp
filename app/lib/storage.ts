@@ -2,6 +2,7 @@ import { Phrase } from '../lib/set-generator';
 import { v4 as uuidv4 } from 'uuid'; // Added back for potential use in other functions
 import { prisma } from "@/app/lib/prisma"; // Import prisma client
 import { Prisma, FlashcardSet, Phrase as PrismaPhrase } from '@prisma/client'; // Use specific type import
+import { ExampleSentence } from './set-generator';
 
 // Helper function
 function getErrorMessage(error: unknown): string {
@@ -262,32 +263,36 @@ export async function getSetContent(id: string): Promise<Phrase[]> {
 
     // Map Prisma record to Phrase interface
     return phrasesData.map((dbPhrase: PrismaPhrase): Phrase => {
-      let parsedExamples: { [key: string]: any }[] = []; // Keep generic type
+      let parsedExamples: ExampleSentence[] = [];
       try {
         if (dbPhrase.examplesJson && typeof dbPhrase.examplesJson === 'string') {
           const parsed = JSON.parse(dbPhrase.examplesJson);
           if (Array.isArray(parsed)) {
-            // Basic validation passed, keep as generic array
-            parsedExamples = parsed as { [key: string]: any }[];
+            // Validate each example
+            parsedExamples = parsed.filter((ex: any) =>
+              ex && typeof ex === 'object' &&
+              typeof ex.thai === 'string' &&
+              typeof ex.thaiMasculine === 'string' &&
+              typeof ex.thaiFeminine === 'string' &&
+              typeof ex.pronunciation === 'string' &&
+              typeof ex.translation === 'string'
+            ) as ExampleSentence[];
           } else {
              console.warn(`Parsed examplesJson for phrase ${dbPhrase.id} is not an array:`, parsed);
           }
         } else if (Array.isArray(dbPhrase.examplesJson)) {
-          // Handle cases where Prisma returns parsed JSON array
-          parsedExamples = (dbPhrase.examplesJson as unknown) as { [key: string]: any }[];
+          parsedExamples = (dbPhrase.examplesJson as any[]).filter((ex: any) =>
+            ex && typeof ex === 'object' &&
+            typeof ex.thai === 'string' &&
+            typeof ex.thaiMasculine === 'string' &&
+            typeof ex.thaiFeminine === 'string' &&
+            typeof ex.pronunciation === 'string' &&
+            typeof ex.translation === 'string'
+          ) as ExampleSentence[];
         }
       } catch (e) {
         console.error(`Failed to parse examplesJson for phrase ${dbPhrase.id}:`, dbPhrase.examplesJson, e);
       }
-
-      // Construct the Phrase object
-      // Assign the parsedExamples (generic array) to the examples field.
-      // The Phrase interface defines examples as ExampleSentence[]
-      // This assignment might still cause a type error depending on strictness settings.
-      // Option 1: Keep as is and rely on downstream checks.
-      // Option 2: Change Phrase interface examples to any[] or { [key: string]: any }[]
-      // Option 3: Perform deeper validation here to cast safely to ExampleSentence[]
-      // Choosing Option 1 for now, but noting the potential type mismatch.
       return {
         id: dbPhrase.id,
         english: dbPhrase.english,
@@ -296,8 +301,7 @@ export async function getSetContent(id: string): Promise<Phrase[]> {
         thaiFeminine: dbPhrase.thaiFeminine,
         pronunciation: dbPhrase.pronunciation,
         mnemonic: dbPhrase.mnemonic ?? undefined,
-        examples: parsedExamples, // Assign the generic array here
-        // difficulty is not stored/mapped
+        examples: parsedExamples,
       };
     });
 

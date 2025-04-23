@@ -20,26 +20,6 @@ const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
 const geminiPro = genAI ? genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" }) : null;
 const geminiProVision = genAI ? genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" }) : null;
 
-// Configure safety settings if needed
-const safetySettings = [
-  {
-    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
-];
-
 // Function to generate mnemonics for Thai words
 export async function generateMnemonic(thaiWord: string, englishMeaning: string): Promise<string> {
   if (!geminiPro) {

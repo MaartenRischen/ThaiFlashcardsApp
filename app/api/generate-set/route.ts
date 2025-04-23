@@ -135,8 +135,8 @@ export async function POST(request: Request) {
       specificTopics: preferences.specificTopics,
       source: isFallback ? 'generated' : 'generated', // Keep source as generated even for fallback
       imageUrl: setImageUrl || undefined,
-      llmBrand: (generationResult as any).llmBrand || undefined, 
-      llmModel: (generationResult as any).llmModel || undefined, 
+      llmBrand: generationResult.llmBrand || undefined, 
+      llmModel: generationResult.llmModel || undefined, 
     };
     console.log("API Route: Prepared metaDataForStorage:", metaDataForStorage);
 

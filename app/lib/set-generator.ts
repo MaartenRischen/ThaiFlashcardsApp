@@ -48,6 +48,8 @@ export interface GenerationResult {
     totalErrors: number;
     userMessage: string;
   };
+  llmBrand?: string;
+  llmModel?: string;
 }
 
 export interface CustomSet {

@@ -9,7 +9,7 @@ import {
 import * as storage from '@/app/lib/storage';
 import { SetMetaData } from '@/app/lib/storage'; // Import SetMetaData
 import { generateImage } from '@/app/lib/ideogram-service';
-import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases'; // Import INITIAL_PHRASES and the original Phrase type if needed for INITIAL_PHRASES structure
+import { INITIAL_PHRASES } from '@/app/data/phrases'; // Import INITIAL_PHRASES only
 import { prisma } from "@/app/lib/prisma"; // Import prisma client
 
 console.log('DEBUG: DATABASE_URL in generate-set route:', process.env.DATABASE_URL);
@@ -18,6 +18,13 @@ console.log('DEBUG: DATABASE_URL in generate-set route:', process.env.DATABASE_U
 interface GenerateSetRequestBody {
   preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>;
   totalCount: number;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+    return (error as { message: string }).message;
+  }
+  return 'Set generation failed.';
 }
 
 export async function POST(request: Request) {
@@ -160,17 +167,18 @@ export async function POST(request: Request) {
     console.log(`API Route: Successfully created set ${newMetaId}. Returning ID.`);
     return NextResponse.json({ newSetId: newMetaId }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API Route: Error during set creation process:", error);
-    if (error.message.includes("save set content") || error.message.includes("save initial set progress")) {
-      if(newMetaId) {
-          console.log(`API Route: Cleaning up metadata ${newMetaId} due to content/progress save error.`);
-          await storage.deleteSetMetaData(newMetaId); 
+    if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+      if ((error as { message: string }).message.includes("save set content") || (error as { message: string }).message.includes("save initial set progress")) {
+        if(newMetaId) {
+            console.log(`API Route: Cleaning up metadata ${newMetaId} due to content/progress save error.`);
+            await storage.deleteSetMetaData(newMetaId); 
+        }
+      } else if ((error as { message: string }).message.includes("save set metadata")) {
+          console.log("API Route: Metadata save failed, no cleanup needed.");
       }
-    } else if (error.message.includes("save set metadata")) {
-        console.log("API Route: Metadata save failed, no cleanup needed.");
     }
-    
-    return NextResponse.json({ error: `Set generation failed: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ error: `Set generation failed: ${getErrorMessage(error)}` }, { status: 500 });
   }
 } 

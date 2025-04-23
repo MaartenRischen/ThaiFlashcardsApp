@@ -7,7 +7,7 @@ export interface Phrase {
   thaiFeminine: string;
   pronunciation: string;
   mnemonic?: string;
-  examples?: ExampleSentence[];
+  examples?: { [key: string]: any }[];
   difficulty?: 'easy' | 'good' | 'hard';
 }
 
@@ -74,15 +74,17 @@ const DEFAULT_OPENROUTER_MODEL = 'openrouter/auto'; // Use Auto Router
 /**
  * Builds a significantly updated prompt for generating Thai flashcards based on detailed user preferences.
  */
-function buildGenerationPrompt(options: GeneratePromptOptions): string {
-  const { 
-    level, 
-    specificTopics, 
-    count, 
-    existingPhrases,
-    topicsToDiscuss, 
-    topicsToAvoid, 
-    seriousnessLevel = 50 // Default to 50%
+function buildGenerationPrompt(
+  _topic: string, // Renamed from topic
+  options: GeneratePromptOptions,
+  existingPhrases: string[] = []
+): string {
+  const {
+    specificTopics,
+    count,
+    topicsToDiscuss,
+    topicsToAvoid,
+    seriousnessLevel = 5 // Default to neutral
   } = options;
 
   // Define the output schema (remains the same)
@@ -263,11 +265,11 @@ export async function generateCustomSet(
   while (remainingCount > 0 && allGeneratedPhrases.length < totalCount) {
     const currentBatchSize = Math.min(remainingCount, BATCH_SIZE);
     const existingEnglish = allGeneratedPhrases.map(p => p.english);
-    const prompt = buildGenerationPrompt({
+    const prompt = buildGenerationPrompt(preferences.specificTopics || '', {
       ...preferences,
       count: currentBatchSize,
       existingPhrases: existingEnglish,
-    });
+    }, existingEnglish);
 
     let retries = 0;
     let success = false;
@@ -377,11 +379,11 @@ export async function generateSingleFlashcard(
       console.log(`Target English meaning for single card: ${targetEnglishMeaning}`);
     }
     
-    const prompt = buildGenerationPrompt({
+    const prompt = buildGenerationPrompt(preferences.specificTopics || '', {
       ...preferences,
       count: 1,
       existingPhrases: targetEnglishMeaning ? undefined : []
-    });
+    }, targetEnglishMeaning ? [targetEnglishMeaning] : []);
 
     let retries = 0;
     while (retries < MAX_RETRIES) {
@@ -430,11 +432,12 @@ export async function generateSingleFlashcard(
       error: createBatchError('UNKNOWN', 'Failed to generate single flashcard after multiple attempts (e.g., API consistently returned 0 phrases).', {})
     };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Unexpected error setting up generateSingleFlashcard:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return { 
       phrase: null, 
-      error: createBatchError('UNKNOWN', `Unexpected setup error in generateSingleFlashcard: ${error.message}`, { error })
+      error: createBatchError('UNKNOWN', `Unexpected setup error in generateSingleFlashcard: ${errorMessage}`, { error })
     };
   }
 }
@@ -475,11 +478,29 @@ async function callOpenRouter(prompt: string, model: string): Promise<string> {
     throw new Error(`OpenRouter API error: Status ${errorStatus} - ${errorText}`);
   }
 
-  const data = await response.json();
-  // Extract the text from the first choice
-  const text = data.choices?.[0]?.message?.content;
-  if (!text) throw new Error("No content returned from OpenRouter");
-  return text;
+  const data: unknown = await response.json(); // Use unknown
+  // Validate the structure of data
+  if (
+    typeof data === 'object' &&
+    data !== null &&
+    'choices' in data &&
+    Array.isArray(data.choices) &&
+    data.choices.length > 0 &&
+    typeof data.choices[0] === 'object' &&
+    data.choices[0] !== null &&
+    'message' in data.choices[0] &&
+    typeof data.choices[0].message === 'object' &&
+    data.choices[0].message !== null &&
+    'content' in data.choices[0].message &&
+    typeof data.choices[0].message.content === 'string'
+  ) {
+    const text = data.choices[0].message.content;
+    if (!text) throw new Error("Empty content returned from OpenRouter");
+    return text;
+  } else {
+    console.error("Unexpected OpenRouter response structure:", data);
+    throw new Error("Unexpected response structure from OpenRouter");
+  }
 }
 
 // Add OpenRouter batch generator
@@ -492,70 +513,88 @@ export async function generateOpenRouterBatch(
     const responseText = await callOpenRouter(prompt, model);
     // Clean the response (remove markdown, etc.)
     const cleanedText = responseText.replace(/^```json\s*|```$/g, '').trim();
-    let parsedResponse: any;
+    let parsedResponse: unknown;
     try {
       parsedResponse = JSON.parse(cleanedText);
-    } catch (parseError: any) {
+    } catch (parseError: unknown) {
+      const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
       return {
         phrases: [],
-        error: createBatchError('PARSE', `Failed to parse JSON response: ${parseError.message}`, { responseSnippet: cleanedText.substring(0, 1000) })
+        error: createBatchError('PARSE', `Failed to parse API response (Batch ${batchIndex}): ${errorMessage}`, { responseText: cleanedText, parseError: String(parseError) })
       };
     }
-    if (typeof parsedResponse !== 'object' || parsedResponse === null || !Array.isArray(parsedResponse.phrases)) {
+
+    // Validate the parsedResponse structure
+    if (typeof parsedResponse !== 'object' || parsedResponse === null || !('phrases' in parsedResponse) || !Array.isArray(parsedResponse.phrases)) {
+      console.error(`Invalid JSON structure received (Batch ${batchIndex}): Expected { phrases: [...] }, got:`, parsedResponse);
       return {
         phrases: [],
-        error: createBatchError('VALIDATION', `API response is not in the expected object format { cleverTitle: string, phrases: [] }`, { receivedType: typeof parsedResponse, value: parsedResponse })
+        error: createBatchError('VALIDATION', `Invalid JSON structure received (Batch ${batchIndex}). Expected object with 'phrases' array.`, { parsedResponse })
       };
     }
-    const phrasesArray = parsedResponse.phrases;
-    const cleverTitle = typeof parsedResponse.cleverTitle === 'string' ? parsedResponse.cleverTitle.trim() : undefined;
-    const validPhrases: Phrase[] = [];
-    const invalidItems: any[] = [];
-    for (const item of phrasesArray) {
-      if (validatePhrase(item)) {
-        item.english = item.english.trim();
-        item.thai = item.thai.trim();
-        item.thaiMasculine = item.thaiMasculine.trim();
-        item.thaiFeminine = item.thaiFeminine.trim();
-        item.pronunciation = item.pronunciation.trim();
-        if (item.mnemonic) item.mnemonic = item.mnemonic.trim();
-        if (item.examples) {
-          item.examples = item.examples.map((ex: ExampleSentence) => ({
-            ...ex,
-            thai: ex.thai.trim(),
-            thaiMasculine: ex.thaiMasculine.trim(),
-            thaiFeminine: ex.thaiFeminine.trim(),
-            pronunciation: ex.pronunciation.trim(),
-            translation: ex.translation.trim(),
-          }));
-        }
-        validPhrases.push(item as Phrase);
+
+    // Validate cleverTitle if present
+    const cleverTitle = ('cleverTitle' in parsedResponse && typeof parsedResponse.cleverTitle === 'string') ? parsedResponse.cleverTitle : undefined;
+    if ('cleverTitle' in parsedResponse && typeof parsedResponse.cleverTitle !== 'string') {
+       console.warn(`Invalid cleverTitle type received (Batch ${batchIndex}), expected string, got ${typeof parsedResponse.cleverTitle}. Ignoring title.`);
+    }
+
+    // Validate individual phrases
+    const validatedPhrases: Phrase[] = [];
+    const validationErrors: string[] = [];
+
+    for (const phraseData of parsedResponse.phrases) {
+      if (validatePhrase(phraseData)) {
+         // Ensure optional mnemonic is string or undefined, not null
+         const validatedPhrase = phraseData as Phrase;
+         if (validatedPhrase.mnemonic === null) {
+            validatedPhrase.mnemonic = undefined;
+         }
+         validatedPhrases.push(validatedPhrase);
       } else {
-        invalidItems.push(item);
+        validationErrors.push(`Invalid phrase structure: ${JSON.stringify(phraseData).substring(0, 100)}...`);
       }
     }
-    if (validPhrases.length > 0 && invalidItems.length > 0) {
-      return {
-        phrases: validPhrases,
-        cleverTitle,
-        error: createBatchError('VALIDATION', `Some phrases (${invalidItems.length}) failed validation and were omitted`, { invalidItems: invalidItems.slice(0, 5) })
-      };
+
+    if (validationErrors.length > 0) {
+       console.warn(`Validation errors in batch ${batchIndex}:`, validationErrors);
+      // Decide if we should return partial data or an error
+      if (validatedPhrases.length === 0) {
+        return {
+          phrases: [],
+          cleverTitle,
+          error: createBatchError('VALIDATION', `All ${parsedResponse.phrases.length} phrases failed validation (Batch ${batchIndex}).`, { errors: validationErrors })
+        };
+      } else {
+        // Optionally, return partial data with a warning/error logged elsewhere
+        console.warn(`Batch ${batchIndex} completed with ${validationErrors.length} validation errors out of ${parsedResponse.phrases.length} phrases. Returning ${validatedPhrases.length} valid phrases.`);
+      }
     }
-    if (validPhrases.length === 0 && phrasesArray.length > 0) {
-      return {
-        phrases: [],
-        cleverTitle,
-        error: createBatchError('VALIDATION', `All ${phrasesArray.length} phrases failed validation checks`, { invalidItems: invalidItems.slice(0, 5) })
-      };
+    
+    if (validatedPhrases.length === 0 && !cleverTitle) {
+        return {
+            phrases: [],
+            error: createBatchError('VALIDATION', `API returned empty or invalid phrases array and no title (Batch ${batchIndex})`, { parsedResponse })
+        };
     }
+
+    console.log(`Batch ${batchIndex} successful: Generated ${validatedPhrases.length} valid phrases.${cleverTitle ? ' Title: \"' + cleverTitle + '\"':''}`);
     return {
-      phrases: validPhrases,
+      phrases: validatedPhrases,
       cleverTitle
     };
-  } catch (unexpectedError: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`Error in generateOpenRouterBatch (Batch ${batchIndex}):`, error);
+    
+    // Determine error type based on message content (basic heuristic)
+    let errorType: BatchErrorType = 'UNKNOWN';
+    if (errorMessage.includes('API error')) errorType = 'API';
+    else if (errorMessage.includes('network') || errorMessage.includes('fetch')) errorType = 'NETWORK';
+    
     return {
       phrases: [],
-      error: createBatchError('UNKNOWN', `Unexpected error in OpenRouter batch: ${unexpectedError.message}`, { originalError: unexpectedError })
+      error: createBatchError(errorType, `General error processing batch ${batchIndex}: ${errorMessage}`, { error })
     };
   }
 } 

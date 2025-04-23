@@ -2,6 +2,16 @@ import { prisma } from "@/app/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
+import * as storage from '@/app/lib/storage';
+import { SetMetaData } from '@/app/lib/storage';
+import { Phrase } from '@/app/lib/set-generator';
+
+function getErrorMessage(error: unknown): string {
+  if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+    return (error as { message: string }).message;
+  }
+  return 'Unknown error';
+}
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -60,9 +70,21 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
     
     // Transform the phrases to match the expected format
+    type PrismaPhrase = {
+      id: string;
+      setId: string;
+      english: string;
+      thai: string;
+      thaiMasculine: string;
+      thaiFeminine: string;
+      pronunciation: string;
+      mnemonic?: string | null;
+      examplesJson?: unknown;
+      [key: string]: unknown;
+    };
     const transformedSet = {
       ...set,
-      phrases: set.phrases.map((phrase: any) => {
+      phrases: set.phrases.map((phrase: PrismaPhrase) => {
         const { examplesJson, ...rest } = phrase;
         return {
           ...rest,
@@ -74,9 +96,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ set: transformedSet });
     
   } catch (error) {
+    const message = getErrorMessage(error);
     console.error("Error fetching flashcard set:", error);
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: `Something went wrong: ${message}` },
       { status: 500 }
     );
   }
@@ -128,9 +151,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ message: "Set deleted successfully" });
     
   } catch (error) {
+    const message = getErrorMessage(error);
     console.error("Error deleting flashcard set:", error);
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: `Something went wrong: ${message}` },
       { status: 500 }
     );
   }
@@ -198,10 +222,23 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     });
     
   } catch (error) {
+    const message = getErrorMessage(error);
     console.error("Error updating flashcard set:", error);
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: `Something went wrong: ${message}` },
       { status: 500 }
     );
+  }
+}
+
+// POST handler for creating new sets
+export async function POST(_request: Request) {
+  // ... existing code ...
+  try {
+    // ... existing code ...
+  } catch (error: unknown) {
+    const message = getErrorMessage(error);
+    // ... existing code ...
+    return NextResponse.json({ error: `Set creation failed: ${message}` }, { status: 500 });
   }
 } 

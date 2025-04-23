@@ -1,8 +1,9 @@
 import { prisma } from "@/app/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 // GET /api/public-sets
-export async function GET(req: NextRequest) {
+export async function GET(_req: Request) {
+  console.log("API Route: /api/public-sets GET request received");
   try {
     // Fetch all sets with a shareId (publicly shared)
     const sets = await prisma.flashcardSet.findMany({

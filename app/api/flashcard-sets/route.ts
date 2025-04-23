@@ -12,7 +12,7 @@ interface AddSetRequestBody {
 }
 
 // GET handler for fetching all set metadata for the logged-in user
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   console.log("API Route: /api/flashcard-sets GET request received");
   const { userId } = await auth();
 
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 }
 
 // POST handler for creating new sets
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   console.log("API Route: /api/flashcard-sets POST request received");
   const { userId } = await auth(); // Use Clerk auth
 
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
   let requestBody: AddSetRequestBody;
   try {
-    requestBody = await request.json();
+    requestBody = await _request.json();
     console.log("API Route /api/flashcard-sets POST: Actual parsed body content:", JSON.stringify(requestBody, null, 2));
   } catch (e) {
     console.error("API Route /api/flashcard-sets POST: Invalid request body:", e);

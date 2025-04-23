@@ -7,7 +7,7 @@ interface GeminiGeneratorProps {
   thaiWord?: string;
   englishMeaning?: string;
   type: 'mnemonic' | 'example';
-  onResult: (result: any) => void;
+  onResult: (result: unknown) => void;
 }
 
 const GeminiGenerator: React.FC<GeminiGeneratorProps> = ({ 
@@ -39,8 +39,12 @@ const GeminiGenerator: React.FC<GeminiGeneratorProps> = ({
       }
       
       onResult(result);
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate content');
+    } catch (err: unknown) {
+      let message = 'Failed to generate content';
+      if (err && typeof err === 'object' && 'message' in err && typeof (err as { message?: unknown }).message === 'string') {
+        message = (err as { message: string }).message;
+      }
+      setError(message);
       console.error('Gemini generation error:', err);
     } finally {
       setLoading(false);

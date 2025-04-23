@@ -111,7 +111,7 @@ export default function MySetsPage() {
         <div className="bg-card rounded-lg border p-8 text-center">
           <h3 className="text-lg font-medium mb-2">No flashcard sets found</h3>
           <p className="text-gray-500 mb-6">
-            You haven't created any flashcard sets yet. Create your first set to start learning Thai!
+            You haven&apos;t created any flashcard sets yet. Create your first set to start learning Thai!
           </p>
           <Button asChild>
             <Link href="/set-wizard-start">Create Your First Set</Link>

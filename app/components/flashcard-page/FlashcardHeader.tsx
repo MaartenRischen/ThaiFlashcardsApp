@@ -1,9 +1,9 @@
 import React from 'react';
-import { SetSelector } from '@/app/components/SetSelector'; // Assuming path
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
 import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 // Update props for combined settings modal
 interface FlashcardHeaderProps {
@@ -36,36 +36,8 @@ export function FlashcardHeader({
   }
   setImageUrl = setImageUrl || '/images/defaultnew.png';
   
-  const isDefaultSet = activeSet?.id === 'default';
   const [showShare, setShowShare] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
-  const [shareLoading, setShareLoading] = useState(false);
-  const [shareError, setShareError] = useState<string | null>(null);
-
-  const handleShare = async () => {
-    setShareLoading(true);
-    setShareError(null);
-    setShareUrl(null);
-    try {
-      const res = await fetch(`/api/flashcard-sets/${activeSetId}/share`, { method: 'POST' });
-      if (!res.ok) throw new Error('Failed to get share link');
-      const data = await res.json();
-      if (!data.shareId) throw new Error('No shareId returned');
-      const url = `${window.location.origin}/share/${data.shareId}`;
-      setShareUrl(url);
-      setShowShare(true);
-    } catch (err: any) {
-      setShareError(err.message || 'Unknown error');
-    } finally {
-      setShareLoading(false);
-    }
-  };
-
-  const handleCopy = () => {
-    if (shareUrl) {
-      navigator.clipboard.writeText(shareUrl);
-    }
-  };
 
   const router = useRouter();
 
@@ -95,11 +67,13 @@ export function FlashcardHeader({
               Donkey Bridge
             </div>
           </div>
-          <img
+          <Image
             src={setImageUrl}
             alt={`${activeSet?.name || 'Set'} image`}
             className="w-full h-full object-contain"
             key={activeSetId}
+            width={640}
+            height={360}
             style={{ objectFit: 'contain', objectPosition: 'center' }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
@@ -222,7 +196,11 @@ export function FlashcardHeader({
                   className="flex-1 bg-transparent text-white outline-none text-sm"
                   onFocus={e => e.target.select()}
                 />
-                <button onClick={handleCopy} className="ml-2 px-2 py-1 text-xs bg-purple-700 text-white rounded hover:bg-purple-600">Copy</button>
+                <button onClick={() => {
+                  if (shareUrl) {
+                    navigator.clipboard.writeText(shareUrl);
+                  }
+                }} className="ml-2 px-2 py-1 text-xs bg-purple-700 text-white rounded hover:bg-purple-600">Copy</button>
               </div>
               <button onClick={() => setShowShare(false)} className="mt-2 neumorphic-button text-sm text-gray-400">Close</button>
             </div>

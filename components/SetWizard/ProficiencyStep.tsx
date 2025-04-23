@@ -65,7 +65,7 @@ export function ProficiencyStep({ value, onNext }: { value: { canDoSelections: s
 
   return (
     <div className="space-y-6 p-4 bg-[#23272f]">
-      <div className="text-lg font-semibold text-white mb-2">🗣️ Let's see what you can already do in Thai! Select all that apply.</div>
+      <div className="text-lg font-semibold text-white mb-2">🗣️ Let&apos;s see what you can already do in Thai! Select all that apply.</div>
       {canDoGroups.map(group => (
         <div key={group.level} className="mb-4">
           <div className="font-bold text-white mb-1">{group.level}</div>
@@ -96,7 +96,7 @@ export function ProficiencyStep({ value, onNext }: { value: { canDoSelections: s
           className="bg-gray-200 text-gray-700 px-6 py-2 rounded shadow hover:bg-gray-300"
           onClick={handleSkip}
         >
-          I'm not sure / Skip
+          I&apos;m not sure / Skip
         </button>
       </div>
     </div>

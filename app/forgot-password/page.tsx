@@ -40,9 +40,9 @@ export default function ForgotPasswordPage() {
       setMessage('If an account exists for this email, a password reset link has been sent.');
       setEmail(''); 
       
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Caught error during password reset:", err);
-        setError(err.message || 'An unexpected error occurred. Please try again.');
+        setError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.');
     } finally {
         setIsLoading(false);
     }

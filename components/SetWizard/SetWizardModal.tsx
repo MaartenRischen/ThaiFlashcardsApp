@@ -66,13 +66,13 @@ export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: Se
 
   // Step components
   const steps = [
-    <WelcomeStep onNext={() => setStep(1)} onSkip={onClose} />,
-    <ProficiencyStep value={wizardState.proficiency} onNext={handleProficiency} />,
-    <ScenarioStep value={wizardState.goals} onNext={handleGoals} />,
-    <TopicStep value={wizardState.topics} onNext={handleTopics} scenarios={wizardState.goals.scenarios} />,
-    <ToneStep value={wizardState.tone} onNext={handleTone} />,
-    <DailyGoalStep value={wizardState.dailyGoal} onNext={handleDailyGoal} />,
-    <ReviewStep state={wizardState} onConfirm={handleConfirm} onEdit={handleEdit} onBack={handleBack} />,
+    <WelcomeStep key="welcome" onNext={() => setStep(1)} onSkip={onClose} />,
+    <ProficiencyStep key="proficiency" value={wizardState.proficiency} onNext={handleProficiency} />,
+    <ScenarioStep key="scenario" value={wizardState.goals} onNext={handleGoals} />,
+    <TopicStep key="topic" value={wizardState.topics} onNext={handleTopics} scenarios={wizardState.goals.scenarios} />,
+    <ToneStep key="tone" value={wizardState.tone} onNext={handleTone} />,
+    <DailyGoalStep key="dailyGoal" value={wizardState.dailyGoal} onNext={handleDailyGoal} />,
+    <ReviewStep key="review" state={wizardState} onConfirm={handleConfirm} onEdit={handleEdit} onBack={handleBack} />,
   ];
 
   return (

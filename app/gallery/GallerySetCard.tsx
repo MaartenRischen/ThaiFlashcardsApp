@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 interface GallerySetCardProps {
   set: any;
@@ -23,10 +24,12 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
     <div className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800">
       {/* Set Image */}
       <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800">
-        <img
+        <Image
           src={imgUrl}
           alt={set.title}
           className="object-cover w-full h-full"
+          width={320}
+          height={180}
           onError={ev => {
             const target = ev.currentTarget;
             if (target.src !== '/images/default-set-logo.png') {

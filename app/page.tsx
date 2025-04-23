@@ -163,6 +163,7 @@ const MnemonicsListModal: React.FC<MnemonicsListModalProps> = ({
 // --- End of MnemonicsListModal Component Definition ---
 
 // Helper function to shuffle an array (Fisher-Yates algorithm)
+// Force rebuild trigger comment
 const shuffleArray = <T extends any>(array: T[]): T[] => {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {

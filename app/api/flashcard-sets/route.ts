@@ -5,6 +5,13 @@ import { SetMetaData } from '@/app/lib/storage'; // Keep if needed by SetMetaDat
 import { Phrase } from '@/app/lib/set-generator';
 import { prisma } from "@/app/lib/prisma";
 
+function getErrorMessage(error: unknown): string {
+  if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+    return (error as { message: string }).message;
+  }
+  return 'Unknown error';
+}
+
 // Interface definition for the request body
 interface AddSetRequestBody {
   setData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>;
@@ -27,10 +34,7 @@ export async function GET() {
     console.log(`API Route /api/flashcard-sets GET: Found ${sets.length} sets.`);
     return NextResponse.json({ sets: sets || [] }, { status: 200 });
   } catch (error: unknown) {
-    let message = 'Unknown error';
-    if (typeof error === 'object' && error && 'message' in error && typeof (error as any).message === 'string') {
-      message = (error as any).message;
-    }
+    const message = getErrorMessage(error);
     console.error("API Route /api/flashcard-sets GET: Error fetching sets:", error);
     return NextResponse.json({ error: 'Failed to fetch sets', details: message }, { status: 500 });
   }
@@ -125,10 +129,7 @@ export async function POST(_request: Request) {
     return NextResponse.json({ newSetMetaData: completeNewMetaData }, { status: 201 });
 
   } catch (error: unknown) {
-    let message = 'Unknown error';
-    if (typeof error === 'object' && error && 'message' in error && typeof (error as any).message === 'string') {
-      message = (error as any).message;
-    }
+    const message = getErrorMessage(error);
     console.error("API Route /api/flashcard-sets POST: Error creating set:", error);
     // Attempt cleanup if partially created
     if (newMetaId) {

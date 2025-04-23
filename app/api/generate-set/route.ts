@@ -20,11 +20,9 @@ interface GenerateSetRequestBody {
 export async function POST(request: Request) {
   console.log("API Route: /api/generate-set received POST request");
   
-  // Declare newMetaId outside try block for broader scope
   let newMetaId: string | null = null; 
   
-  const session = await auth(); // Get session server-side
-  const userId = session?.user?.id;
+  const { userId } = await auth();
 
   if (!userId) {
     console.error("API Route: Unauthorized access - No user ID found.");

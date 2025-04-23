@@ -186,10 +186,8 @@ export default function ThaiFlashcards() {
     availableSets,
     updateSetProgress,
     addSet,
-    isLoading,
     exportSet,
     switchSet,
-    deleteSet,
     renameSet,
     refreshSets
   } = useSet();
@@ -205,7 +203,6 @@ export default function ThaiFlashcards() {
   
   const [index, setIndex] = useState<number>(0);
   const [showAnswer, setShowAnswer] = useState(false);
-  const [localMnemonics, setLocalMnemonics] = useState<{[key: number]: string}>({});
   const [isPlayingWord, setIsPlayingWord] = useState(false);
   const [isPlayingContext, setIsPlayingContext] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
@@ -250,24 +247,6 @@ export default function ThaiFlashcards() {
   });
   const [activeCardsIndex, setActiveCardsIndex] = useState<number>(0);
   const [showMnemonicsModal, setShowMnemonicsModal] = useState(false);
-  const [reviewsCompletedToday, setReviewsCompletedToday] = useState<number>(0);
-  const [totalDueToday, setTotalDueToday] = useState<number>(0);
-  const [isTesting, setIsTesting] = useState(false);
-  const [showSetWizardModal, setShowSetWizardModal] = useState(false);
-  // --- NEW: State for Set Management Modal ---
-  const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
-  const [editingSetId, setEditingSetId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState<string>("");
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const [tutorialStep, setTutorialStep] = useState<number>(0);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem('darkMode');
-      if (saved !== null) return JSON.parse(saved) === true;
-      localStorage.setItem('darkMode', 'false');
-      return false;
-    } catch { return false; }
-  });
   const [showMnemonicHint, setShowMnemonicHint] = useState(false); // NEW: State for front hint
   const [showCardsModal, setShowCardsModal] = useState(false);
 
@@ -542,34 +521,6 @@ export default function ThaiFlashcards() {
     }
   };
 
-  // Function to calculate statistics based on activeSetProgress
-  const calculateStats = () => {
-    const learnedCards = Object.keys(activeSetProgress).length;
-    // Removed totalReviews calculation as 'reviews' history is not in SetProgress
-    // let totalReviews = 0;
-    // Object.values(activeSetProgress).forEach(card => {
-    //   totalReviews += card.reviews.length; // Cannot access reviews
-    // });
-
-    const today = new Date().toDateString();
-    let dueCards = 0;
-    Object.values(activeSetProgress).forEach(card => {
-      if (!card || !card.nextReviewDate) return; // Skip if no progress or next review date
-      const nextReviewDate = new Date(card.nextReviewDate).toDateString();
-      if (nextReviewDate <= today || card.difficulty === 'hard') { // Due if date is today/past OR marked hard
-        dueCards++;
-      }
-    });
-
-    const stats = {
-      totalCards: phrases.length,
-      learnedCards,
-      dueCards,
-      // totalReviews: totalReviews, // Removed
-    };
-    return stats;
-  };
-
   // Helper function to get status color and label
   const getStatusInfo = (status: CardStatus): { color: string, label: string } => {
     console.log(`getStatusInfo called with status: ${status}`); // Log input status
@@ -650,32 +601,6 @@ export default function ThaiFlashcards() {
     } else {
       setIndex(0); // Fallback if no active cards
     }
-  };
-
-  const prevCard = () => {
-    if (index > 0) {
-      setIndex(index - 1);
-      setShowAnswer(false); // Reset answer state
-      setRandomSentence(null); // Reset context sentence
-      setShowMnemonicHint(false); // Hide hint
-    }
-  };
-
-  const nextCard = () => {
-    if (index < phrases.length - 1) {
-      setIndex(index + 1);
-      setShowAnswer(false); // Reset answer state
-      setRandomSentence(null); // Reset context sentence
-      setShowMnemonicHint(false); // Hide hint
-    }
-  };
-
-  // Update handleStop function
-  const handleStop = () => {
-    console.log("Stop button clicked");
-    ttsService.stop();
-    setIsPlayingWord(false);
-    setIsPlayingContext(false);
   };
 
   // Load mnemonics from localStorage

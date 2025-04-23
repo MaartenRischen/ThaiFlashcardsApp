@@ -2,11 +2,9 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
-import { Switch } from "@/app/components/ui/switch";
 import { ttsService } from './lib/tts-service';
 import AdminSettings from './components/AdminSettings';
 import { INITIAL_PHRASES, type Phrase, type ExampleSentence } from './data/phrases';
-import { SetSelector } from './components/SetSelector';
 import { useSet } from './context/SetContext';
 import { Phrase as GeneratorPhrase } from './lib/set-generator';
 import { SetMetaData, SetProgress } from './lib/storage';
@@ -17,17 +15,12 @@ import {
 } from "@/components/ui/popover"
 import { FlashcardHeader } from './components/flashcard-page/FlashcardHeader';
 import { SettingsModal, SetManagerModal } from './components/CombinedOptionsModal';
-import { logger } from '@/app/lib/logger';
 import { calculateNextReview } from './lib/srs';
 import { Volume2 } from 'lucide-react';
 import { SetWizardModal, SetWizardState } from '../components/SetWizard/SetWizardModal';
 
 // Define a simple CardStatus type locally for now
 type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';
-
-// Type for card progress data used locally (can be removed later)
-// Define the CardProgressData type based on SetProgress
-type CardProgressData = SetProgress[number];
 
 // ClientOnly wrapper for client-side only rendering
 function ClientOnly({ children }: { children: React.ReactNode }) {
@@ -57,13 +50,6 @@ interface Review {
   interval: number;
   easeFactor: number;
   repetitions: number;
-}
-
-interface CardProgress {
-  [key: number]: {
-    reviews: Review[];
-    nextReviewDate: string;
-  };
 }
 
 // Correct getThaiWithGender to use gendered fields if present
@@ -249,6 +235,18 @@ export default function ThaiFlashcards() {
   const [showMnemonicsModal, setShowMnemonicsModal] = useState(false);
   const [showMnemonicHint, setShowMnemonicHint] = useState(false); // NEW: State for front hint
   const [showCardsModal, setShowCardsModal] = useState(false);
+
+  // === Reintroduced state variables to fix missing identifier errors ===
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [showSetWizardModal, setShowSetWizardModal] = useState<boolean>(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
+  const [isManagementModalOpen, setIsManagementModalOpen] = useState<boolean>(false);
+  const [tutorialStep, setTutorialStep] = useState<number>(0);
+  const [editingSetId, setEditingSetId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState<string>("");
+  const [totalDueToday, setTotalDueToday] = useState<number>(0);
+  const [reviewsCompletedToday, setReviewsCompletedToday] = useState<number>(0);
+  // === End reintroduced state variables ===
 
   // --- NEW: Ref for dark mode timeout ---
   const darkModeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -702,9 +700,10 @@ export default function ThaiFlashcards() {
             setShowMnemonicHint(false); // Hide hint
             
             alert(`Successfully imported "${setData.name}" with ${importedData.phrases.length} phrases.`);
-          } catch (error: any) {
-            alert(`Import failed: ${error.message}`);
-            console.error("Import error:", error);
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            alert(`Import failed: ${message}`);
+            console.error('Import error:', error);
           }
         };
         reader.readAsText(file);
@@ -865,7 +864,7 @@ export default function ThaiFlashcards() {
     if (!randomSentence) return;
     // Find if the context sentence contains a known name
     const allNames = [...maleNames, ...femaleNames];
-    let foundName = allNames.find(name =>
+    const foundName = allNames.find(name =>
       randomSentence.thai.includes(name) ||
       (randomSentence.pronunciation && randomSentence.pronunciation.includes(name)) ||
       (randomSentence.translation && randomSentence.translation.includes(name))

@@ -1,17 +1,17 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/app/lib/auth'; // Corrected import path
+import { auth } from '@clerk/nextjs/server'; // Use server import here
 import { 
   generateCustomSet, 
-  Phrase, 
   GeneratePromptOptions,
-  GenerationResult
+  GenerationResult,
+  Phrase as GeneratorPhrase // Import the correct Phrase type
 } from '@/app/lib/set-generator'; 
-import { generateImage } from '@/app/lib/ideogram-service'; 
 import * as storage from '@/app/lib/storage';
-import { SetMetaData } from '@/app/lib/storage';
-import { INITIAL_PHRASES } from '@/app/data/phrases'; // For fallback
+import { SetMetaData } from '@/app/lib/storage'; // Import SetMetaData
+import { generateImage } from '@/app/lib/ideogram-service';
+import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases'; // Import INITIAL_PHRASES and the original Phrase type if needed for INITIAL_PHRASES structure
 
-// Define expected request body structure
+// Define expected request body structure (can be shared or redefined here)
 interface GenerateSetRequestBody {
   preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>;
   totalCount: number;
@@ -19,6 +19,9 @@ interface GenerateSetRequestBody {
 
 export async function POST(request: Request) {
   console.log("API Route: /api/generate-set received POST request");
+  
+  // Declare newMetaId outside try block for broader scope
+  let newMetaId: string | null = null; 
   
   const session = await auth(); // Get session server-side
   const userId = session?.user?.id;
@@ -51,34 +54,36 @@ export async function POST(request: Request) {
     generationResult = await generateCustomSet(preferences, totalCount);
     console.log("API Route: generateCustomSet result:", generationResult);
 
-    let phrasesToSave: Phrase[] = generationResult.phrases;
+    // Explicitly type phrasesToSave as the stricter GeneratorPhrase[]
+    let phrasesToSave: GeneratorPhrase[] = generationResult.phrases; 
     let setImageUrl: string | null = null;
     let isFallback = false;
 
     // --- 2. Handle Fallback ---
     if (generationResult.errorSummary || !generationResult.phrases.length) {
       console.warn('API Route: Generation failed or returned no phrases. Using fallback.');
+      // Map INITIAL_PHRASES to GeneratorPhrase structure
       phrasesToSave = INITIAL_PHRASES.slice(0, totalCount).map(p => ({
         english: p.english,
         thai: p.thai,
-        thaiMasculine: p.thaiMasculine || '',
-        thaiFeminine: p.thaiFeminine || '',
+        thaiMasculine: p.thaiMasculine || '', // Ensure string
+        thaiFeminine: p.thaiFeminine || '',   // Ensure string
         pronunciation: p.pronunciation,
         mnemonic: p.mnemonic,
         examples: p.examples?.map(ex => ({
           thai: ex.thai,
-          thaiMasculine: ex.thaiMasculine || '',
-          thaiFeminine: ex.thaiFeminine || '',
+          thaiMasculine: ex.thaiMasculine || '', // Ensure string
+          thaiFeminine: ex.thaiFeminine || '',   // Ensure string
           pronunciation: ex.pronunciation,
           translation: ex.translation,
         })) || undefined,
-      }));
+      })); // No need to cast here as we mapped directly to the target structure
       isFallback = true;
     }
 
     // --- 3. Generate Set Image (if not fallback) ---
-    // TODO: Move SKIP_IMAGE_GEN check here if needed, maybe via env var? For now, assume generation if not fallback.
-    if (!isFallback) { 
+    const skipImageGenEnv = process.env.SKIP_IMAGE_GENERATION === 'true'; // Read from env
+    if (!isFallback && !skipImageGenEnv) { 
       try {
         const imagePrompt = generationResult.cleverTitle || 'A creative cover for a Thai language flashcard set';
         console.log(`API Route: Generating set cover image with prompt:`, imagePrompt);
@@ -86,11 +91,10 @@ export async function POST(request: Request) {
         console.log(`API Route: Set cover image URL:`, setImageUrl);
       } catch (imgErr) {
         console.error('API Route: Error during set image generation:', imgErr);
-        // Don't fail the whole request, just proceed without an image
         setImageUrl = null; 
       }
     } else {
-       console.log(`API Route: SKIPPING image generation (Fallback mode)`);
+       console.log(`API Route: SKIPPING image generation (Fallback: ${isFallback}, Env Skip: ${skipImageGenEnv})`);
        setImageUrl = null;
     }
 
@@ -100,23 +104,23 @@ export async function POST(request: Request) {
       cleverTitle: generationResult.cleverTitle,
       level: preferences.level,
       specificTopics: preferences.specificTopics,
-      source: isFallback ? 'generated' : 'generated',
+      source: isFallback ? 'generated' : 'generated', // Keep source as generated even for fallback
       imageUrl: setImageUrl || undefined,
-      // Note: llmBrand/llmModel might need to be passed from generationResult if available
+      llmBrand: (generationResult as any).llmBrand || undefined, 
+      llmModel: (generationResult as any).llmModel || undefined, 
     };
     console.log("API Route: Prepared metaDataForStorage:", metaDataForStorage);
 
-
     // --- 5. Save to Database ---
-    let newMetaId: string | null = null;
     const insertedRecord = await storage.addSetMetaData(userId, metaDataForStorage);
     if (!insertedRecord) {
       throw new Error("Failed to save set metadata to database.");
     }
-    newMetaId = insertedRecord.id;
+    newMetaId = insertedRecord.id; // Assign to pre-declared variable
     console.log(`API Route: Metadata saved with ID: ${newMetaId}`);
 
-    const contentSaved = await storage.saveSetContent(newMetaId, phrasesToSave);
+    // saveSetContent expects GeneratorPhrase[] which phrasesToSave now is
+    const contentSaved = await storage.saveSetContent(newMetaId, phrasesToSave); 
     if (!contentSaved) {
       await storage.deleteSetMetaData(newMetaId); // Attempt cleanup
       throw new Error("Failed to save set content to database.");
@@ -137,10 +141,16 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error("API Route: Error during set creation process:", error);
-    // Attempt cleanup if metadata ID was assigned before error
-    if (generationResult && (generationResult as any).newMetaIdOnError) { // Hypothetical check
-        await storage.deleteSetMetaData((generationResult as any).newMetaIdOnError);
+    // newMetaId is accessible here because it was declared outside the try block
+    if (error.message.includes("save set content") || error.message.includes("save initial set progress")) {
+      if(newMetaId) { // Check if newMetaId was assigned before error
+          console.log(`API Route: Cleaning up metadata ${newMetaId} due to content/progress save error.`);
+          await storage.deleteSetMetaData(newMetaId); 
+      }
+    } else if (error.message.includes("save set metadata")) {
+        console.log("API Route: Metadata save failed, no cleanup needed.");
     }
+    
     return NextResponse.json({ error: `Set generation failed: ${error.message}` }, { status: 500 });
   }
 } 

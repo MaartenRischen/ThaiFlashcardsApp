@@ -12,6 +12,8 @@ import { generateImage } from '@/app/lib/ideogram-service';
 import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases'; // Import INITIAL_PHRASES and the original Phrase type if needed for INITIAL_PHRASES structure
 import { prisma } from "@/app/lib/prisma"; // Import prisma client
 
+console.log('DEBUG: DATABASE_URL in generate-set route:', process.env.DATABASE_URL);
+
 // Define expected request body structure (can be shared or redefined here)
 interface GenerateSetRequestBody {
   preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>;
@@ -103,7 +105,9 @@ export async function POST(request: Request) {
     const skipImageGenEnv = process.env.SKIP_IMAGE_GENERATION === 'true'; // Read from env
     if (!isFallback && !skipImageGenEnv) { 
       try {
-        const imagePrompt = generationResult.cleverTitle || 'A creative cover for a Thai language flashcard set';
+        const topicDescription = generationResult.cleverTitle || 'Thai language learning'; // Use cleverTitle or a fallback
+        // FIX: Modify prompt to include required elements and style
+        const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}`;
         console.log(`API Route: Generating set cover image with prompt:`, imagePrompt);
         setImageUrl = await generateImage(imagePrompt);
         console.log(`API Route: Set cover image URL:`, setImageUrl);

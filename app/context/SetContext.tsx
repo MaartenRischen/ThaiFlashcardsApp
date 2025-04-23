@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback, useMemo } from 'react';
-import { useSession } from 'next-auth/react'; // Import useSession
+import { useAuth } from '@clerk/nextjs'; // <-- Import useAuth from Clerk
 import { INITIAL_PHRASES } from '@/app/data/phrases';
 import { Phrase } from '@/app/lib/set-generator';
 import * as storage from '@/app/lib/storage'; // Use renamed storage
@@ -22,6 +22,7 @@ interface SetContextProps {
   deleteSet: (id: string) => Promise<void>;
   exportSet: (id: string) => Promise<void>;
   renameSet: (id: string, newName: string) => Promise<void>;
+  refreshSets: () => Promise<void>;
 }
 
 const SetContext = createContext<SetContextProps | undefined>(undefined);
@@ -47,9 +48,7 @@ const getInitialActiveSetId = (): string => {
 };
 
 export const SetProvider = ({ children }: { children: ReactNode }) => {
-  const { data: session, status } = useSession(); // Get session
-  const [userId, setUserId] = useState<string | null>(null); // Store userId
-
+  const { userId, isLoaded } = useAuth(); // <-- Use Clerk's useAuth hook
   const [availableSets, setAvailableSets] = useState<SetMetaData[]>([DEFAULT_SET_METADATA]);
   const [activeSetId, setActiveSetId] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
@@ -60,9 +59,16 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
   const restoredRef = React.useRef(false);
 
+  // ADD LOGGING HERE TO SEE STATE ON RENDER
+  console.log('[SetProvider Render] availableSets:', availableSets);
+
   // Function to load content and progress for a specific set ID
   const loadSetData = useCallback(async (id: string | null) => {
-    // This function now needs userId
+    if (!isLoaded) {
+      console.log("SetContext: loadSetData - Clerk not loaded yet.");
+      setIsLoading(true);
+      return;
+    }
     if (!userId && id !== DEFAULT_SET_ID) {
         console.warn(`SetContext: loadSetData called for non-default set ${id} but userId is not available.`);
         setActiveSetId(DEFAULT_SET_ID);
@@ -73,56 +79,68 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     }
     
     console.log(`SetContext: loadSetData called for id=${id}, userId=${userId}`);
-    if (!id) { 
-      console.log("SetContext: No ID provided, defaulting to default set.");
-      setActiveSetId(DEFAULT_SET_ID);
-      setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
-      setActiveSetProgress({});
-      setIsLoading(false);
-      return;
-    }
-
     setIsLoading(true);
-    try {
-      let content: Phrase[] | null = null;
-      let progress: SetProgress = {};
+    setActiveSetContent([]); // Clear content while loading
+    setActiveSetProgress({}); // Clear progress while loading
 
-      if (id === DEFAULT_SET_ID) {
-        content = INITIAL_PHRASES as unknown as Phrase[];
-        // Still try to load progress for default IF user is logged in
-        if (userId) {
-          progress = await storage.getSetProgress(userId, id); // Needs userId and await
-        } else {
-          progress = {}; // No progress for logged-out default set
+    let fetchedContent: Phrase[] = [];
+    let fetchedProgress: SetProgress = {};
+
+    try {
+      // Fetch progress via API
+      console.log(`SetContext: Fetching progress via API for set ${id}, user ${userId}`);
+      const progressResponse = await fetch(`/api/flashcard-sets/${id}/progress`, { credentials: 'include' });
+      if (!progressResponse.ok) {
+        // Handle non-404 errors specifically if needed, otherwise just log
+        if (progressResponse.status !== 404) {
+           console.error(`SetContext: Error fetching progress API for set ${id}: ${progressResponse.statusText}`);
         }
-        console.log(`SetContext: Loading DEFAULT set content (${content?.length} phrases) and progress`);
-      } else if (userId) { // Only load non-default if userId exists
-        // Fetch async from Supabase
-        content = await storage.getSetContent(id); // Needs await
-        progress = await storage.getSetProgress(userId, id); // Needs userId and await
-        console.log(`SetContext: Loading content (${content?.length} phrases) and progress for set ${id}`);
+        // If 404 or other error, proceed with empty progress
+        fetchedProgress = {};
       } else {
-         throw new Error("Attempted to load user set without userId");
+        // FIX: Extract the inner progress object
+        const result = await progressResponse.json();
+        fetchedProgress = result.progress || {}; // Assign the inner object or empty if missing
       }
-      
-      setActiveSetContent(content || (INITIAL_PHRASES as unknown as Phrase[])); 
-      setActiveSetProgress(progress || {});
-      
+      console.log(`SetContext: Progress fetched via API for set ${id}:`, fetchedProgress);
+
+      // Fetch content
+      if (id === DEFAULT_SET_ID) {
+        // Load default content directly
+        console.log(`SetContext: Loading DEFAULT set content (${INITIAL_PHRASES.length} phrases)`);
+        fetchedContent = INITIAL_PHRASES;
+      } else {
+        // Fetch user-specific set content via API
+        console.log(`SetContext: Fetching content via API for set ${id}`);
+        const contentResponse = await fetch(`/api/flashcard-sets/${id}/content`, { credentials: 'include' });
+        if (!contentResponse.ok) {
+           console.error(`SetContext: Error fetching content API for set ${id}: ${contentResponse.statusText}`);
+           // Decide how to handle content fetch error - maybe load empty?
+           fetchedContent = [];
+        } else {
+           fetchedContent = await contentResponse.json();
+        }
+        console.log(`SetContext: Content fetched via API for set ${id} (${fetchedContent.length} phrases)`);
+      }
+
+      // Update state after both fetches are complete (or failed)
+      setActiveSetContent(fetchedContent);
+      setActiveSetProgress(fetchedProgress);
+
     } catch (error) {
-      console.error(`SetContext: Error loading data for set ${id}:`, error);
-      setAvailableSets(prev => prev.filter(s => s.id === DEFAULT_SET_ID)); 
-      setActiveSetId(DEFAULT_SET_ID); 
-      setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
+      console.error(`SetContext: Error in loadSetData for id=${id}:`, error);
+      // Set empty state on error
+      setActiveSetContent([]);
       setActiveSetProgress({});
     } finally {
       setIsLoading(false);
     }
-  // Add userId to dependencies
-  }, [userId]); 
+  }, [userId, isLoaded]); // Add isLoaded dependency
 
 
   // Function to save progress for the active set
   const updateSetProgress = useCallback(async (newProgress: SetProgress) => {
+    if (!isLoaded) return; // Don't run if Clerk isn't ready
     if (!activeSetId || !userId || activeSetId === DEFAULT_SET_ID) { 
       if(activeSetId === DEFAULT_SET_ID) console.log("SetContext: Not saving progress for default set.");
       else console.warn(`SetContext: updateSetProgress called without activeSetId (${activeSetId}) or userId (${userId}).`);
@@ -169,49 +187,75 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
           }
       }
     }
-  // Add userId to dependencies
-  }, [activeSetId, userId, activeSetContent, availableSets]);
+  }, [activeSetId, userId, isLoaded, activeSetContent, availableSets]);
 
-  // --- Refactored Initial Data Loading --- (updated to manage setsHaveLoaded)
+  // --- Refactored Initial Data Loading --- (updated to use useAuth and fetch)
   useEffect(() => {
     const loadInitialData = async () => {
-      // Always reset loading flags at start of each run
-      setSetsHaveLoaded(false);
-
-      if (status === 'authenticated' && session?.user?.id) {
-        const currentUserId = session.user.id;
-        setUserId(currentUserId);
+      if (!isLoaded) {
+        console.log("SetContext: Initial load - Clerk not loaded yet.");
         setIsLoading(true);
+        setSetsHaveLoaded(false);
+        return; // Wait for Clerk to load
+      }
+
+      setSetsHaveLoaded(false);
+      setIsLoading(true); // Set loading true while fetching
+
+      if (userId) { // Check if userId is available (user is authenticated)
         try {
-          const userSets = await storage.getAllSetMetaData(currentUserId);
-          setAvailableSets([DEFAULT_SET_METADATA, ...userSets.filter(set => set.id !== DEFAULT_SET_ID)]);
-          console.log(`SetContext: Loaded ${userSets.length} user-specific set metadata entries.`);
+          console.log(`SetContext: Fetching initial sets via API for userId: ${userId}`);
+          const response = await fetch('/api/flashcard-sets', { // <-- Fetch from API
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include' // <-- Include credentials
+          });
+
+          if (!response.ok) {
+            throw new Error(`API request failed with status ${response.status}`);
+          }
+
+          let userSetsResponse = await response.json(); // Expect { sets: [...] }
+          
+          // FIX: Extract sets array from the response object
+          if (!userSetsResponse || !Array.isArray(userSetsResponse.sets)) { 
+            console.warn('SetContext: Fetched initial sets API response was not the expected object { sets: [...] }:', userSetsResponse);
+            userSetsResponse = { sets: [] }; // Treat as empty
+          }
+
+          const userSets: SetMetaData[] = userSetsResponse.sets; // Extract the array
+          
+          // FIX: Combine default and user sets correctly
+          const combinedSets = [
+            DEFAULT_SET_METADATA,
+            ...userSets.filter(set => set.id !== DEFAULT_SET_ID)
+          ];
+          setAvailableSets(combinedSets); 
+          console.log(`SetContext: Loaded ${userSets.length} user-specific sets via API. Total available: ${combinedSets.length}`);
+
         } catch (error) {
-          console.error("SetContext: Error loading initial user data:", error);
-          setAvailableSets([DEFAULT_SET_METADATA]);
+          console.error("SetContext: Error loading initial user data via API:", error);
+          setAvailableSets([DEFAULT_SET_METADATA]); // Fallback to default only
         } finally {
           setIsLoading(false);
-          setSetsHaveLoaded(true); // <-- Mark sets as loaded
+          setSetsHaveLoaded(true);
           console.log("SetContext: Initial data load finished for authenticated user.");
         }
-      } else if (status === 'unauthenticated') {
-        console.log("SetContext: User unauthenticated. Clearing user data and showing default set.");
-        setUserId(null);
+      } else { // User is unauthenticated (userId is null)
+        console.log("SetContext: User unauthenticated (Clerk userId is null). Clearing user data and showing default set.");
         setAvailableSets([DEFAULT_SET_METADATA]);
         setActiveSetId(DEFAULT_SET_ID);
         setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
         setActiveSetProgress({});
         setIsLoading(false);
-        setSetsHaveLoaded(true); // <-- Mark sets as loaded even for guest
-      } else {
-        console.log("SetContext: Auth status loading...");
-        setIsLoading(true);
-        // setsHaveLoaded remains false until next run
+        setSetsHaveLoaded(true);
       }
     };
 
     loadInitialData();
-  }, [status, session]);
+  }, [isLoaded, userId]); // Depend on Clerk's isLoaded and userId
 
   // --- Restoration Effect (depends on setsHaveLoaded) ---
   useEffect(() => {
@@ -239,11 +283,15 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [activeSetId, restored, setsHaveLoaded]);
 
-  // Reset flags on auth/session change so restoration can run again
+  // Reset flags on auth change (now based on Clerk's userId)
   useEffect(() => {
     setRestored(false);
     setSetsHaveLoaded(false);
-  }, [status, session]);
+    // Also reset activeSetId if user logs out, maybe?
+    if (isLoaded && !userId) {
+      setActiveSetId(DEFAULT_SET_ID);
+    }
+  }, [isLoaded, userId]);
 
   // Data loading effect (no change needed, but add debug log)
   useEffect(() => {
@@ -269,107 +317,76 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     setData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>, 
     phrases: Phrase[]
   ): Promise<string | null> => {
-    console.log('addSet called with:', setData, phrases, 'userId:', userId);
-    if (!userId) {
-      console.error("addSet: Cannot add set, user not authenticated.");
+    console.log(`[addSet ENTRY] isLoaded: ${isLoaded}, current hook userId: ${userId}`);
+
+    if (!isLoaded) {
+      console.error("addSet: Cannot add set, Clerk not loaded yet.");
+      alert("Authentication is still loading. Please try again in a moment.");
+      return null;
+    }
+
+    const currentUserId = userId;
+    console.log(`[addSet CHECK] Captured userId: ${currentUserId}`);
+
+    if (!currentUserId) {
+      console.error("addSet: Cannot add set, user not authenticated (Clerk userId is null AFTER isLoaded check).");
       alert("You must be logged in to create and save sets.");
       return null;
     }
     
-    console.log(`SetContext: Adding new set for userId: ${userId}`);
+    console.log(`SetContext: Initiating add set via API for userId: ${currentUserId}`);
     setIsLoading(true);
-    let newMetaId: string | null = null; 
-    let generatedImageUrl: string | null = null;
     
     try {
-      /*
-       * Image handling rules (simplified):
-       * 1. If the wizard (or caller) already supplied an imageUrl, always use that.
-       * 2. If this is the built‑in default set, fall back to our local default image.
-       * 3. Otherwise leave imageUrl undefined – DO NOT auto‑generate a new image here.
-       *    (Image generation should be a deliberate user‑visible action in the wizard.)
-       */
-
-      if (setData.imageUrl) {
-        generatedImageUrl = setData.imageUrl;
-      } else if (setData.source === 'default') {
-        generatedImageUrl = '/images/defaultnew.png';
-      } else {
-        generatedImageUrl = null; // remain blank; no surprise regeneration
-      }
+      // Log objects just before stringifying
+      console.log("[addSet PRE-FETCH] setData:", JSON.stringify(setData, null, 2));
+      console.log("[addSet PRE-FETCH] phrases (first 2):", JSON.stringify(phrases?.slice(0, 2), null, 2)); // Log first 2 phrases for brevity
       
-      // Prepare metadata for *storage* including the generated image URL
-      const metaDataForStorage: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
-          ...setData,
-          imageUrl: generatedImageUrl || undefined
-      };
-      console.log(`[addSet] metaDataForStorage:`, metaDataForStorage);
-      
-      // 1. Add metadata to DB 
-      const insertedRecord = await storage.addSetMetaData(userId, metaDataForStorage);
-      console.log(`[addSet] insertedRecord from DB:`, insertedRecord);
-      
-      if (!insertedRecord) {
-        throw new Error("Failed to save set metadata to database.");
-      }
-      newMetaId = insertedRecord.id; // Store ID for cleanup and state update
+      // Call the new backend API route
+      const response = await fetch('/api/flashcard-sets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ setData, phrases }), // Stringify here
+        credentials: 'include' // Send Clerk session cookie
+      });
 
-      // 2. Save content to DB
-      const contentSaved = await storage.saveSetContent(newMetaId, phrases);
-      if (!contentSaved) {
-        console.error(`[addSet] Failed to save content for new set ${newMetaId}. Attempting cleanup.`);
-        await storage.deleteSetMetaData(newMetaId); 
-        throw new Error("Failed to save set content to database.");
+      const result = await response.json();
+
+      if (!response.ok) {
+        // Use the error message from the API response if available
+        throw new Error(result.error || `API request failed with status ${response.status}`);
       }
 
-      // 3. Save empty progress to DB
-      const progressSaved = await storage.saveSetProgress(userId, newMetaId, {}); 
-      if (!progressSaved) {
-         console.error(`[addSet] Failed to save initial progress for new set ${newMetaId}. Attempting cleanup.`);
-         await storage.deleteSetContent(newMetaId);
-         await storage.deleteSetMetaData(newMetaId); 
-         throw new Error("Failed to save initial set progress.");
+      // Get the complete metadata returned by the API
+      const completeNewMetaData: SetMetaData = result.newSetMetaData;
+
+      if (!completeNewMetaData || !completeNewMetaData.id) {
+          throw new Error("API did not return valid set metadata.");
       }
 
-      // Create the *complete* SetMetaData object for local state, including calculated phraseCount
-      const completeNewMetaData: SetMetaData = {
-          id: insertedRecord.id,
-          name: insertedRecord.name,
-          cleverTitle: insertedRecord.cleverTitle || undefined,
-          createdAt: insertedRecord.createdAt,
-          level: insertedRecord.level as SetMetaData['level'] || undefined,
-          goals: insertedRecord.goals || [],
-          specificTopics: insertedRecord.specificTopics || undefined,
-          source: insertedRecord.source as SetMetaData['source'] || 'generated',
-          imageUrl: insertedRecord.imageUrl || undefined,
-          phraseCount: phrases.length, // Calculate here for local state
-          isFullyLearned: false, // Default
-          llmBrand: insertedRecord.llmBrand || undefined, // NEW: propagate model info
-          llmModel: insertedRecord.llmModel || undefined  // NEW: propagate model info
-      };
-      console.log(`[addSet] completeNewMetaData for local state:`, completeNewMetaData);
+      console.log(`[addSet] Received completeNewMetaData from API:`, completeNewMetaData);
 
-      // Update local state
+      // Update local state with the data confirmed by the backend
       setAvailableSets(prev => [...prev, completeNewMetaData]);
-      setActiveSetId(completeNewMetaData.id); 
-      console.log(`SetContext: Added new set ${completeNewMetaData.id} with ${phrases.length} phrases.`);
+      setActiveSetId(completeNewMetaData.id); // Switch to the newly added set
+      console.log(`SetContext: Added new set ${completeNewMetaData.id} via API with ${phrases.length} phrases.`);
       return completeNewMetaData.id;
 
     } catch (error) {
-      console.error("SetContext: Error adding set:", error);
-      alert(`Failed to add set: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      if (newMetaId) {
-          console.log(`Error occurred during addSet for ${newMetaId}, ensuring cleanup.`);
-          await storage.deleteSetMetaData(newMetaId); 
-      }
+      console.error("SetContext: Error calling add set API:", error);
+      alert(`Failed to add set: ${error instanceof Error ? error.message : 'Unknown API error'}`);
+      // No need for manual cleanup here, the API route handles it
       return null;
     } finally {
       setIsLoading(false);
     }
-  }, [userId]); 
+  }, [userId, isLoaded]); // Dependencies remain the same
 
   // --- Refactor deleteSet --- 
   const deleteSet = useCallback(async (id: string) => {
+    if (!isLoaded) return;
     if (id === DEFAULT_SET_ID) {
       console.warn("SetContext: Attempted to delete default set. Operation aborted.");
       return; 
@@ -404,7 +421,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
        setIsLoading(false);
     }
   // Add userId dependency
-  }, [activeSetId, userId]);
+  }, [activeSetId, userId, isLoaded]);
 
   // --- switchSet (No backend call needed, just state update) --- 
   const switchSet = useCallback(async (id: string) => {
@@ -418,6 +435,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
   // --- Refactor exportSet --- 
   const exportSet = useCallback(async (id: string) => {
+    if (!isLoaded) return;
     console.log(`SetContext: Exporting set ${id}`);
     if (id === DEFAULT_SET_ID) {
         alert("Cannot export the default set.");
@@ -462,10 +480,11 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
        setIsLoading(false);
     }
   // Add userId dependency
-  }, [availableSets, userId]);
+  }, [availableSets, userId, isLoaded]);
 
   // --- Refactor renameSet --- 
   const renameSet = useCallback(async (id: string, newName: string) => {
+    if (!isLoaded) return;
     console.log(`SetContext: Renaming set ${id} to \"${newName}\"`);
     if (id === DEFAULT_SET_ID || !userId) {
         console.warn("Cannot rename default set or user not logged in.");
@@ -498,8 +517,54 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       console.error(`SetContext: Set ${id} not found for renaming.`);
     }
   // Add userId dependency
-  }, [availableSets, userId]);
+  }, [availableSets, userId, isLoaded]);
 
+  // Function to force refresh the list of available sets from the backend
+  const refreshSets = useCallback(async () => {
+    if (!userId || !isLoaded) {
+      console.warn('[refreshSets] User not loaded yet, cannot refresh.');
+      return;
+    }
+    setIsLoading(true);
+    console.log(`[refreshSets] Fetching sets for userId: ${userId}`);
+    try {
+      const response = await fetch('/api/flashcard-sets', { credentials: 'include' });
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      
+      let userSetsResponse = await response.json(); // Expect { sets: [...] }
+      
+      // FIX: Extract sets array from the response object
+      if (!userSetsResponse || !Array.isArray(userSetsResponse.sets)) {
+          console.warn('[refreshSets] API response was not the expected object { sets: [...] }:', userSetsResponse);
+          userSetsResponse = { sets: [] }; // Treat as empty
+      }
+
+      const userSets: SetMetaData[] = userSetsResponse.sets; // Extract the array
+
+      console.log(`[refreshSets] Sets returned from API: ${userSets?.length ?? 0}`);
+      
+      const combinedSets = [
+          DEFAULT_SET_METADATA,
+          ...userSets.filter(set => set.id !== DEFAULT_SET_ID)
+      ];
+      
+      // ADD LOGGING BEFORE/AFTER STATE UPDATE
+      console.log(`[refreshSets] Preparing to call setAvailableSets with ${combinedSets.length} sets:`, combinedSets);
+      setAvailableSets(combinedSets);
+      console.log(`[refreshSets] Called setAvailableSets. State *should* update.`);
+
+      setSetsHaveLoaded(true); // Mark as loaded after successful refresh
+      console.log(`[refreshSets] Combined sets updated. Total available: ${combinedSets.length}`);
+
+    } catch (error: any) {
+      console.error('[refreshSets] Error fetching sets:', error);
+      setSetsHaveLoaded(true); 
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId, isLoaded]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({
@@ -507,15 +572,29 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       activeSetId,
       activeSetContent,
       activeSetProgress,
-      isLoading,
+      isLoading: isLoading || !isLoaded, // <-- Combine loading states
       switchSet,
       addSet,
       updateSetProgress,
       deleteSet,
       exportSet,
-      renameSet
-  // Update dependencies for useMemo - include all functions now
-  }), [availableSets, activeSetId, activeSetContent, activeSetProgress, isLoading, switchSet, addSet, updateSetProgress, deleteSet, exportSet, renameSet]);
+      renameSet,
+      refreshSets
+  }), [
+    availableSets,
+    activeSetId,
+    activeSetContent,
+    activeSetProgress,
+    isLoading,
+    isLoaded, // <-- Add isLoaded to dependencies
+    switchSet,
+    addSet,
+    updateSetProgress,
+    deleteSet,
+    exportSet,
+    renameSet,
+    refreshSets
+  ]);
 
   return (
     <SetContext.Provider value={contextValue}>

@@ -1,13 +1,13 @@
 import { prisma } from "@/app/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/app/lib/auth";
+import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await auth();
+    const { userId } = await auth();
     
-    if (!session || !session.user) {
+    if (!userId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       // This should be created during initial setup or fetched from a constants file
       const defaultSet = await prisma.flashcardSet.findFirst({
         where: {
-          userId: session.user.id,
+          userId: userId,
           source: 'default'
         },
         include: {
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const set = await prisma.flashcardSet.findUnique({
       where: {
         id: setId,
-        userId: session.user.id // Ensure the set belongs to the user
+        userId: userId // Use userId here
       },
       include: {
         phrases: true
@@ -84,9 +84,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await auth();
+    const { userId } = await auth();
     
-    if (!session || !session.user) {
+    if (!userId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -107,7 +107,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const set = await prisma.flashcardSet.findUnique({
       where: {
         id: setId,
-        userId: session.user.id
+        userId: userId // Use userId here
       }
     });
     
@@ -147,9 +147,9 @@ const updateSetSchema = z.object({
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await auth();
+    const { userId } = await auth();
     
-    if (!session || !session.user) {
+    if (!userId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -162,7 +162,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const set = await prisma.flashcardSet.findUnique({
       where: {
         id: setId,
-        userId: session.user.id
+        userId: userId // Use userId here
       }
     });
     

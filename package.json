@@ -72,5 +72,4 @@
     "typescript": "^5",
     "vitest": "^3.1.1"
   }
-  // Cache busting comment
 }

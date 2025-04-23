@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+function getErrorMessage(error: unknown): string {
+  if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+    return (error as { message: string }).message;
+  }
+  return 'Something went wrong.';
+}
+
 // Define the expected request body schema
 const imageRequestSchema = z.object({
   prompt: z.string().min(10).max(500), // Basic prompt validation
@@ -103,10 +110,10 @@ export async function POST(req: NextRequest) {
     console.log(`Successfully generated image URL: ${imageUrl}`);
     return NextResponse.json({ imageUrl });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in /api/generate-image handler:", error);
     return NextResponse.json(
-      { error: error.message || "Something went wrong." },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }

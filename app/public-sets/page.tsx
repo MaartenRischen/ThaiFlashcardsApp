@@ -35,9 +35,9 @@ export default function PublicSetsPage() {
         const data = await res.json();
         setSets(data.sets || []);
       } catch (err: unknown) {
-        const message = (err instanceof Error) ? err.message : 
+        const message = (err instanceof Error) ? err.message :
                         (typeof err === 'string') ? err :
-                        (typeof err === 'object' && err !== null && 'message' in err && typeof (err as any).message === 'string') ? (err as any).message :
+                        (typeof err === 'object' && err !== null && 'message' in err && typeof (err as { message?: unknown }).message === 'string') ? (err as { message: string }).message :
                         'Failed to fetch public sets';
         setError(message);
         console.error("Error fetching public sets:", err);

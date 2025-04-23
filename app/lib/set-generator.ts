@@ -7,7 +7,7 @@ export interface Phrase {
   thaiFeminine: string;
   pronunciation: string;
   mnemonic?: string;
-  examples?: { [key: string]: any }[];
+  examples?: ExampleSentence[];
   difficulty?: 'easy' | 'good' | 'hard';
 }
 

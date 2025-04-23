@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { ExampleSentence } from '../../lib/set-generator';
 
 interface Phrase {
   id: string;
@@ -11,7 +12,7 @@ interface Phrase {
   thaiFeminine?: string;
   pronunciation?: string;
   mnemonic?: string | null;
-  examples?: any[];
+  examples?: ExampleSentence[];
 }
 
 interface SharedSet {

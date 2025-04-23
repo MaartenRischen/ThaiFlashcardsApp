@@ -1,23 +1,27 @@
 import { NextResponse } from 'next/server';
-import { auth } from "@clerk/nextjs/server";
+import { auth } from '@/app/lib/auth';
+import { prisma } from '@/app/lib/prisma';
+// import logger from '@/app/lib/logger';
+import { z } from 'zod';
 import * as storage from '@/app/lib/storage';
-import { logger } from '@/app/lib/logger'; // Keep logger if it exists and works, otherwise use console
 import { Phrase } from '@/app/data/phrases'; // Import Phrase type if needed
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const { userId } = await auth(); // Await auth()
+  const session = await auth();
   const setId = params.id;
 
   // Use console.log for safety if logger is uncertain
   console.log(`API Route: /api/flashcard-sets/${setId}/content GET request received`);
 
-  if (!userId) {
-    console.warn(`API Route /api/flashcard-sets/${setId}/content GET: Unauthorized - No userId`);
+  // Check for session and user.id existence
+  if (!session?.user?.id) {
+    console.warn(`API Route /api/flashcard-sets/${setId}/content GET: Unauthorized - No session or user ID`);
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const userId = session.user.id; // Access userId via session.user.id
 
   if (!setId) {
     console.warn(`API Route /api/flashcard-sets/${setId}/content GET: Bad Request - Missing setId`);

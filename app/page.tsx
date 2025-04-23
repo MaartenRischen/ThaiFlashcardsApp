@@ -20,7 +20,14 @@ import { logger } from '@/app/lib/logger';
 import { calculateNextReview } from './lib/srs';
 import { Volume2 } from 'lucide-react';
 import { SetWizardModal, SetWizardState } from '../components/SetWizard/SetWizardModal';
-import { generateImage } from './lib/ideogram-service';
+import { NextResponse } from 'next/server';
+import { 
+  generateCustomSet, 
+  GeneratePromptOptions,
+  GenerationResult
+} from '@/app/lib/set-generator'; 
+import * as storage from '@/app/lib/storage';
+import { generateImage } from '@/app/lib/ideogram-service';
 
 // Define a simple CardStatus type locally for now
 type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';
@@ -175,6 +182,151 @@ const shuffleArray = <T extends any>(array: T[]): T[] => {
 
 // TEMP: Toggle to skip image generation for debugging
 const SKIP_IMAGE_GEN = false; // Re-enabled image generation
+
+// Define expected request body structure
+interface GenerateSetRequestBody {
+  preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>;
+  totalCount: number;
+}
+
+export async function POST(request: Request) {
+  console.log("API Route: /api/generate-set received POST request");
+  
+  const session = await auth(); // Get session server-side
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    console.error("API Route: Unauthorized access - No user ID found.");
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  let requestBody: GenerateSetRequestBody;
+  try {
+    requestBody = await request.json();
+    console.log("API Route: Parsed request body:", requestBody);
+  } catch (e) {
+    console.error("API Route: Invalid request body:", e);
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+
+  const { preferences, totalCount } = requestBody;
+
+  if (!preferences || typeof totalCount !== 'number' || totalCount <= 0) {
+     console.error("API Route: Missing or invalid preferences/totalCount in request body.");
+     return NextResponse.json({ error: 'Missing preferences or invalid totalCount' }, { status: 400 });
+  }
+
+  console.log(`API Route: Starting generation for userId: ${userId}`);
+  let generationResult: GenerationResult | null = null;
+  try {
+    // --- 1. Generate Phrases ---
+    // Pass the API key directly if needed by the underlying function, 
+    // otherwise ensure generateCustomSet reads it from process.env
+    generationResult = await generateCustomSet(preferences, totalCount);
+    console.log("API Route: generateCustomSet result:", generationResult);
+
+    let phrasesToSave: Phrase[] = generationResult.phrases;
+    let setImageUrl: string | null = null;
+    let isFallback = false;
+
+    // --- 2. Handle Fallback ---
+    if (generationResult.errorSummary || !generationResult.phrases.length) {
+      console.warn('API Route: Generation failed or returned no phrases. Using fallback.');
+      phrasesToSave = INITIAL_PHRASES.slice(0, totalCount).map(p => ({
+        english: p.english,
+        thai: p.thai,
+        thaiMasculine: p.thaiMasculine || '',
+        thaiFeminine: p.thaiFeminine || '',
+        pronunciation: p.pronunciation,
+        mnemonic: p.mnemonic,
+        examples: p.examples?.map(ex => ({
+          thai: ex.thai,
+          thaiMasculine: ex.thaiMasculine || '',
+          thaiFeminine: ex.thaiFeminine || '',
+          pronunciation: ex.pronunciation,
+          translation: ex.translation,
+        })) || undefined,
+      }));
+      isFallback = true;
+    }
+
+    // --- 3. Generate Set Image (if not fallback) ---
+    const skipImageGenEnv = process.env.SKIP_IMAGE_GENERATION === 'true'; // Read from env
+    if (!isFallback && !skipImageGenEnv) { 
+      try {
+        const imagePrompt = generationResult.cleverTitle || 'A creative cover for a Thai language flashcard set';
+        console.log(`API Route: Generating set cover image with prompt:`, imagePrompt);
+        setImageUrl = await generateImage(imagePrompt);
+        console.log(`API Route: Set cover image URL:`, setImageUrl);
+      } catch (imgErr) {
+        console.error('API Route: Error during set image generation:', imgErr);
+        // Don't fail the whole request, just proceed without an image
+        setImageUrl = null; 
+      }
+    } else {
+       console.log(`API Route: SKIPPING image generation (Fallback: ${isFallback}, Env Skip: ${skipImageGenEnv})`);
+       setImageUrl = null;
+    }
+
+    // --- 4. Prepare Metadata for Storage ---
+    const metaDataForStorage: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
+      name: generationResult.cleverTitle || (isFallback ? 'Placeholder Set' : 'Custom Set'),
+      cleverTitle: generationResult.cleverTitle,
+      level: preferences.level,
+      specificTopics: preferences.specificTopics,
+      source: isFallback ? 'generated' : 'generated', // Keep source as generated even for fallback
+      imageUrl: setImageUrl || undefined,
+      llmBrand: (generationResult as any).llmBrand || undefined, // Pass LLM info if available
+      llmModel: (generationResult as any).llmModel || undefined, // Pass LLM info if available
+    };
+    console.log("API Route: Prepared metaDataForStorage:", metaDataForStorage);
+
+
+    // --- 5. Save to Database ---
+    let newMetaId: string | null = null;
+    const insertedRecord = await storage.addSetMetaData(userId, metaDataForStorage);
+    if (!insertedRecord) {
+      throw new Error("Failed to save set metadata to database.");
+    }
+    newMetaId = insertedRecord.id;
+    console.log(`API Route: Metadata saved with ID: ${newMetaId}`);
+
+    const contentSaved = await storage.saveSetContent(newMetaId, phrasesToSave);
+    if (!contentSaved) {
+      await storage.deleteSetMetaData(newMetaId); // Attempt cleanup
+      throw new Error("Failed to save set content to database.");
+    }
+    console.log(`API Route: Content saved for set ID: ${newMetaId}`);
+
+    const progressSaved = await storage.saveSetProgress(userId, newMetaId, {});
+    if (!progressSaved) {
+      await storage.deleteSetContent(newMetaId); // Attempt cleanup
+      await storage.deleteSetMetaData(newMetaId); // Attempt cleanup
+      throw new Error("Failed to save initial set progress.");
+    }
+    console.log(`API Route: Initial progress saved for set ID: ${newMetaId}`);
+
+    // --- 6. Return Success Response ---
+    console.log(`API Route: Successfully created set ${newMetaId}. Returning ID.`);
+    return NextResponse.json({ newSetId: newMetaId }, { status: 201 });
+
+  } catch (error: any) {
+    console.error("API Route: Error during set creation process:", error);
+    // Attempt cleanup if metadata ID was assigned before error
+    // Check if newMetaId was assigned before throwing error
+    if (error.message.includes("save set content") || error.message.includes("save initial set progress")) {
+      if(newMetaId) { 
+          console.log(`API Route: Cleaning up metadata ${newMetaId} due to content/progress save error.`);
+          await storage.deleteSetMetaData(newMetaId); 
+      }
+    } else if (error.message.includes("save set metadata")) {
+        // Nothing to clean up if metadata save failed initially
+        console.log("API Route: Metadata save failed, no cleanup needed.");
+    }
+    
+    return NextResponse.json({ error: `Set generation failed: ${error.message}` }, { status: 500 });
+  }
+}
 
 export default function ThaiFlashcards() {
   // Replace phrases state with context
@@ -965,9 +1117,15 @@ export default function ThaiFlashcards() {
   }
 
   // NEW: Test generation function and state
-  const [testGenResult, setTestGenResult] = useState<any>(null);
+  const [testGenResult, setTestGenResult] = useState<any>(null); // Keep for potential future debug display
+  
+  // Use isLoading and switchSet from context
+  const { isLoading, switchSet } = useSet(); 
 
   async function handleTestGeneration() {
+    setTestGenResult(null); // Clear previous results
+    alert("Starting test generation... this might take a minute."); // User feedback
+
     const preferences = {
       level: 'beginner' as 'beginner',
       seriousnessLevel: 50,
@@ -976,65 +1134,41 @@ export default function ThaiFlashcards() {
       topicsToAvoid: undefined,
     };
     const totalCount = 3;
-    console.log('Test generation: preferences', preferences, 'count', totalCount);
-    const result = await import('./lib/set-generator').then(m => m.generateCustomSet(preferences, totalCount));
-    console.log('Test generation result:', result);
-    setTestGenResult(result);
-    if (result.errorSummary) {
-      alert('Test generation error: ' + String(result.errorSummary.userMessage));
-    } else if (!result.phrases.length) {
-      alert('Test generation: No cards were generated.');
-    } else {
-      // --- Handle successful generation --- 
-      const level = preferences.level;
-      const specificTopics = preferences.specificTopics;
-      let phrasesToSave = result.phrases;
-      let setImageUrl: string | null = null;
-      
-      if (!SKIP_IMAGE_GEN) {
-        try {
-          // Generate a single image for the set using the cleverTitle or a summary prompt
-          const imagePrompt = result.cleverTitle || 'A creative cover for a Thai language flashcard set';
-          console.log(`SetWizardModal: Generating set cover image with prompt:`, imagePrompt);
-          setImageUrl = await generateImage(imagePrompt);
-          console.log(`SetWizardModal: Set cover image URL:`, setImageUrl);
-        } catch (imgErr) {
-          console.error('SetWizardModal: Error during set image generation:', imgErr);
-          alert('Error during set image generation, saving set without image: ' + String(imgErr));
-          setImageUrl = null; // Fallback to no image if generation fails
-        }
+    
+    console.log('handleTestGeneration: Calling API route /api/generate-set');
+
+    try {
+      const response = await fetch('/api/generate-set', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ preferences, totalCount }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // Log the detailed error from the API response
+        console.error("API Error Response:", result);
+        throw new Error(result.error || `API request failed with status ${response.status}`);
+      }
+
+      if (result.newSetId) {
+        console.log('handleTestGeneration: API route returned newSetId:', result.newSetId);
+        // Just switch the context to the new set ID. The SetProvider's useEffect will load the data.
+        await switchSet(result.newSetId);
+        console.log('handleTestGeneration: Successfully requested switch to new set', result.newSetId);
+        alert('Test set generated and saved successfully!'); 
       } else {
-        console.log('SetWizardModal: SKIPPING image generation (debug mode)');
-        setImageUrl = null;
+        throw new Error('API route did not return a newSetId.');
       }
 
-      // --- Call addSet OUTSIDE the image generation conditional ---
-      const setData = {
-        name: result.cleverTitle || 'Custom Set',
-        cleverTitle: result.cleverTitle,
-        level: level,
-        specificTopics: specificTopics,
-        source: 'generated' as const,
-        imageUrl: setImageUrl || undefined, // Use the single set image URL
-      };
-
-      let newSetId = null;
-      try {
-        newSetId = await addSet(setData, phrasesToSave); 
-        console.log('handleTestGeneration: addSet returned newSetId:', newSetId);
-      } catch (addErr) {
-        console.error('handleTestGeneration: Error in addSet:', addErr);
-        alert('Error adding set: ' + String(addErr));
-        return; // Stop if addSet fails
-      }
-
-      if (newSetId) {
-        console.log('Successfully added set ' + newSetId + ' and context should switch to it.');
-        setTestGenResult(null);
-      } else {
-        alert('Set was generated but could not be saved.');
-      }
-    }
+    } catch (error: any) {
+      console.error('handleTestGeneration: Error calling API route:', error);
+      setTestGenResult({ error: error.message }); // Display error if needed
+      alert(`Error generating test set: ${error.message}`);
+    } 
   }
 
   return (
@@ -1475,8 +1609,21 @@ export default function ThaiFlashcards() {
               seriousnessLevel: wizardState.tone ?? 50,
             };
             console.log('SetWizardModal: preferences', preferences, 'count', totalCount);
-            const result = await import('./lib/set-generator').then(m => m.generateCustomSet(preferences, totalCount));
-            console.log('SetWizardModal: generation result', result);
+            // --- FIX: Use API route instead of direct import ---
+            let result;
+            try {
+              const response = await fetch('/api/generate-set', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ preferences, totalCount })
+              });
+              if (!response.ok) throw new Error('Failed to generate set: ' + (await response.text()));
+              result = await response.json();
+            } catch (err) {
+              console.error('SetWizardModal: Error calling /api/generate-set:', err);
+              alert('Error generating set: ' + String(err));
+              return;
+            }
             // --- Handle possible generation failure ---
             let generatedPhrases = result.phrases;
             let isFallback = false; // Flag to track if we used fallback
@@ -1498,7 +1645,7 @@ export default function ThaiFlashcards() {
                   pronunciation: ex.pronunciation,
                   translation: ex.translation,
                 })) || undefined, // Map examples or keep undefined
-              }));
+              })) as import('./lib/set-generator').Phrase[];
               isFallback = true; // Set the flag
             }
 

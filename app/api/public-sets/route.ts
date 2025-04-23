@@ -2,7 +2,7 @@ import { prisma } from "@/app/lib/prisma";
 import { NextResponse } from "next/server";
 
 // GET /api/public-sets
-export async function GET(_req: Request) {
+export async function GET() {
   console.log("API Route: /api/public-sets GET request received");
   try {
     // Fetch all sets with a shareId (publicly shared)

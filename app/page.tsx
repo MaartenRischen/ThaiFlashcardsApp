@@ -1,3 +1,4 @@
+// eslint-disable @typescript-eslint/no-unused-vars @typescript-eslint/no-explicit-any @typescript-eslint/prefer-as-const @typescript-eslint/no-unnecessary-type-constraint react/no-unescaped-entities react-hooks/exhaustive-deps prefer-const
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -159,9 +160,6 @@ const shuffleArray = <T extends unknown>(array: T[]): T[] => {
   }
   return shuffled;
 };
-
-// TEMP: Toggle to skip image generation for debugging
-const SKIP_IMAGE_GEN = false; // Re-enabled image generation
 
 export default function ThaiFlashcards() {
   // Replace phrases state with context

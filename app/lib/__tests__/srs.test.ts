@@ -6,7 +6,6 @@ import {
   getCardsForReview,
   getMasteryLevel,
   type CardProgressData,
-  type Difficulty,
   INITIAL_EASE_FACTOR,
   MIN_EASE_FACTOR
 } from '../srs';

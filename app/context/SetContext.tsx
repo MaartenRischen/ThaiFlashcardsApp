@@ -39,13 +39,13 @@ const DEFAULT_SET_METADATA: SetMetaData = {
 };
 
 // Helper to get initial active set ID from localStorage (client-side only)
-const getInitialActiveSetId = (): string => {
-  if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('activeSetId');
-    return saved || DEFAULT_SET_ID;
-  }
-  return DEFAULT_SET_ID;
-};
+// const getInitialActiveSetId = (): string => {
+//   if (typeof window !== 'undefined') {
+//     const saved = localStorage.getItem('activeSetId');
+//     return saved || DEFAULT_SET_ID;
+//   }
+//   return DEFAULT_SET_ID;
+// };
 
 export const SetProvider = ({ children }: { children: ReactNode }) => {
   const { userId, isLoaded } = useAuth(); // <-- Use Clerk's useAuth hook
@@ -56,8 +56,6 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   const [activeSetProgress, setActiveSetProgress] = useState<SetProgress>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [setsHaveLoaded, setSetsHaveLoaded] = useState(false);
-
-  const restoredRef = React.useRef(false);
 
   // ADD LOGGING HERE TO SEE STATE ON RENDER
   console.log('[SetProvider Render] availableSets:', availableSets);
@@ -558,7 +556,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       setSetsHaveLoaded(true); // Mark as loaded after successful refresh
       console.log(`[refreshSets] Combined sets updated. Total available: ${combinedSets.length}`);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[refreshSets] Error fetching sets:', error);
       setSetsHaveLoaded(true); 
     } finally {

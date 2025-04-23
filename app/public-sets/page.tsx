@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from 'next/image';
 
 interface PublicSet {
   id: string;
@@ -54,11 +55,17 @@ export default function PublicSetsPage() {
         {sets.map(set => (
           <div key={set.id} className="bg-gray-900 rounded-xl shadow-lg p-5 flex flex-col items-center border border-gray-800">
             <div className="w-full h-40 mb-4 relative flex items-center justify-center bg-gray-800 rounded-lg overflow-hidden">
-              {set.imageUrl ? (
-                <img src={set.imageUrl} alt={set.name} className="object-cover w-full h-full" />
-              ) : (
-                <div className="text-gray-500">No image</div>
-              )}
+              <Image
+                src={set.imageUrl || '/images/default-set-logo.png'}
+                alt={set.cleverTitle || set.name}
+                width={640}
+                height={360}
+                className="object-cover w-full h-full"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/images/default-set-logo.png';
+                }}
+              />
             </div>
             <h2 className="text-xl font-semibold mb-1 text-center">{set.name}</h2>
             {set.cleverTitle && <div className="text-sm text-gray-400 mb-2 text-center">{set.cleverTitle}</div>}

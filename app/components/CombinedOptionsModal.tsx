@@ -327,7 +327,6 @@ export function SetManagerModal({ isOpen, onClose }: {
     switchSet,
     deleteSet,
     exportSet,
-    updateSetProgress,
     // addSet, etc.
   } = useSet();
   const [selected, setSelected] = useState<string[]>([]);
@@ -574,8 +573,8 @@ export function SetManagerModal({ isOpen, onClose }: {
                           });
                           if (!res.ok) throw new Error(await res.text());
                           alert('Set published to gallery!');
-                        } catch (err: any) {
-                          alert('Failed to publish: ' + (err.message || err));
+                        } catch (err: unknown) {
+                          alert('Failed to publish: ' + (err instanceof Error ? err.message : String(err)));
                         } finally {
                           setPublishingSetId(null);
                         }

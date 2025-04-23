@@ -6,11 +6,10 @@ import GallerySetCard from './GallerySetCard';
 
 export default function GalleryPage() {
   const { availableSets, addSet, isLoading: contextIsLoading } = useSet();
-  const [sets, setSets] = useState<any[]>([]);
+  const [sets, setSets] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [importingSetId, setImportingSetId] = useState<string | null>(null);
-  const [importError, setImportError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -32,7 +31,6 @@ export default function GalleryPage() {
 
   const handleImport = async (setId: string) => {
     setImportingSetId(setId);
-    setImportError(null);
 
     if (availableSets.some(set => set.id === setId)) {
       alert('This set has already been imported or exists in your collection.');
@@ -48,7 +46,7 @@ export default function GalleryPage() {
       }
       const fullSetData = await res.json();
 
-      const { id, title, description, phrases, imageUrl, cardCount, llmBrand, llmModel, seriousnessLevel, specificTopics, timestamp, createdAt, ...rest } = fullSetData;
+      const { title, description, phrases, imageUrl, llmBrand, llmModel, seriousnessLevel, specificTopics, ...rest } = fullSetData;
       
       const setData = {
         name: title,
@@ -74,7 +72,6 @@ export default function GalleryPage() {
 
     } catch (err: any) { 
       console.error("Import error:", err);
-      setImportError(err.message || 'An unknown error occurred during import.');
       alert(`Import failed: ${err.message || 'Unknown error'}`);
     } finally {
       setImportingSetId(null);
@@ -101,10 +98,10 @@ export default function GalleryPage() {
           <div className="text-gray-400 text-center mt-8">No sets found.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-6">
-            {sets.map(set => (
+            {sets.map((set) => (
               <GallerySetCard
-                key={set.id}
-                set={set}
+                key={(set as any).id}
+                set={set as any}
                 importingSetId={importingSetId}
                 contextIsLoading={contextIsLoading}
                 handleImport={handleImport}

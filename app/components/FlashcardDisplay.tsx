@@ -16,9 +16,6 @@ export interface Phrase extends ExampleSentence {
 export interface FlashcardDisplayProps {
   phrase: Phrase;
   showAnswer: boolean;
-  autoplay?: boolean;
-  isMale?: boolean;
-  isPoliteMode?: boolean;
   mnemonic?: string;
   onToggleAnswer?: () => void;
   onPlayAudio?: () => void;
@@ -29,9 +26,6 @@ export interface FlashcardDisplayProps {
 export function FlashcardDisplay({
   phrase,
   showAnswer,
-  autoplay = false,
-  isMale = true,
-  isPoliteMode = true,
   mnemonic = '',
   onToggleAnswer = () => {},
   onPlayAudio = () => {},

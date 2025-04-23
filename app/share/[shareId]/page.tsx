@@ -41,8 +41,9 @@ export default function ShareSetPage({ params }: { params: { shareId: string } }
         if (!res.ok) throw new Error('Set not found');
         const data = await res.json();
         setSetData(data.set as SharedSet);
-      } catch (err: any) {
-        setError(err.message || 'Unknown error');
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        setError(errorMessage || 'Unknown error');
       } finally {
         setLoading(false);
       }
@@ -60,8 +61,9 @@ export default function ShareSetPage({ params }: { params: { shareId: string } }
         throw new Error(d.error || 'Import failed');
       }
       setImported(true);
-    } catch (err: any) {
-      setError(err.message || 'Unknown error');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage || 'Unknown error');
     } finally {
       setImporting(false);
     }

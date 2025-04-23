@@ -5,6 +5,7 @@ import { SetProvider } from './context/SetContext'
 import { Providers } from './providers'
 import { Navbar } from './components/Navbar'
 import * as Tooltip from '@radix-ui/react-tooltip'
+import { ClerkProvider } from '@clerk/nextjs'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -36,27 +37,29 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Donkey Bridge" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content="#ffffff" />
-      </head>
-      <body className={inter.className}>
-        <Tooltip.Provider>
-        <Providers>
-          <SetProvider>
-            <Navbar />
-            <main>
-              {children}
-            </main>
-          </SetProvider>
-        </Providers>
-        </Tooltip.Provider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <head>
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+          <meta name="apple-mobile-web-app-title" content="Donkey Bridge" />
+          <meta name="format-detection" content="telephone=no" />
+          <meta name="mobile-web-app-capable" content="yes" />
+          <meta name="theme-color" content="#ffffff" />
+        </head>
+        <body className={inter.className}>
+          <Tooltip.Provider>
+          <Providers>
+            <SetProvider>
+              <Navbar />
+              <main>
+                {children}
+              </main>
+            </SetProvider>
+          </Providers>
+          </Tooltip.Provider>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 } 

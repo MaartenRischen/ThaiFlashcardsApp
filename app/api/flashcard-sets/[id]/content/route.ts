@@ -4,6 +4,13 @@ import { auth } from '@/app/lib/auth';
 import * as storage from '@/app/lib/storage';
 import { Phrase } from '@/app/data/phrases'; // Import Phrase type if needed
 
+function getErrorMessage(error: unknown): string {
+  if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+    return (error as { message: string }).message;
+  }
+  return 'Unknown error';
+}
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -41,10 +48,7 @@ export async function GET(
     return NextResponse.json(content, { status: 200 });
 
   } catch (error: unknown) {
-    let message = 'Unknown error';
-    if (typeof error === 'object' && error && 'message' in error && typeof (error as any).message === 'string') {
-      message = (error as any).message;
-    }
+    const message = getErrorMessage(error);
     console.error(`API Route /api/flashcard-sets/${setId}/content GET: Error fetching set content:`, error);
     return NextResponse.json(
       { error: "Failed to fetch set content", details: message },

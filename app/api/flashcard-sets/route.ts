@@ -1,193 +1,140 @@
+import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server'; // Use Clerk server auth
+import * as storage from '@/app/lib/storage';
+import { SetMetaData } from '@/app/lib/storage'; // Keep if needed by SetMetaData type def
+import { Phrase } from '@/app/lib/set-generator';
 import { prisma } from "@/app/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/app/lib/auth";
-import { z } from "zod";
 
-export async function GET(req: NextRequest) {
+// Interface definition for the request body
+interface AddSetRequestBody {
+  setData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>;
+  phrases: Phrase[];
+}
+
+// GET handler for fetching all set metadata for the logged-in user
+export async function GET(request: Request) {
+  console.log("API Route: /api/flashcard-sets GET request received");
+  const { userId } = await auth();
+
+  if (!userId) {
+    console.error("API Route /api/flashcard-sets GET: Unauthorized - No Clerk user ID.");
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    const session = await auth();
-    
-    if (!session || !session.user) {
-      console.log("GET /api/flashcard-sets: Unauthorized - No session found");
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    console.log(`GET /api/flashcard-sets: Authorized for user ${session.user.id}`);
-    
-    // Fetch the user's flashcard sets with count of phrases
-    const sets = await prisma.flashcardSet.findMany({
-      where: {
-        userId: session.user.id
-      },
-      orderBy: {
-        updatedAt: 'desc' // Most recently updated first
-      },
-      include: {
-        _count: {
-          select: {
-            phrases: true
-          }
-        }
-      }
-    });
-    
-    return NextResponse.json({ sets });
-    
+    console.log(`API Route /api/flashcard-sets GET: Fetching sets for user: ${userId}`);
+    const sets = await storage.getAllSetMetaData(userId);
+    console.log(`API Route /api/flashcard-sets GET: Found ${sets.length} sets.`);
+    return NextResponse.json({ sets: sets || [] }, { status: 200 });
   } catch (error) {
-    console.error("Error fetching flashcard sets:", error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    console.error("API Route /api/flashcard-sets GET: Error fetching sets:", error);
+    return NextResponse.json({ error: 'Failed to fetch sets' }, { status: 500 });
   }
 }
 
-// Define types for preprocessing
-interface ExampleSentence {
-  thai?: string;
-  thaiMasculine?: string;
-  thaiFeminine?: string;
-  pronunciation?: string;
-  translation?: string;
-  english?: string;
-  [key: string]: any; // Allow for any additional properties
-}
+// POST handler for creating new sets
+export async function POST(request: Request) {
+  console.log("API Route: /api/flashcard-sets POST request received");
+  const { userId } = await auth(); // Use Clerk auth
 
-interface PhraseData {
-  english: string;
-  thai: string;
-  thaiMasculine: string;
-  thaiFeminine: string;
-  pronunciation: string;
-  mnemonic?: string;
-  examples?: ExampleSentence[];
-  [key: string]: any; // Allow for any additional properties
-}
+  if (!userId) {
+    console.error("API Route /api/flashcard-sets POST: Unauthorized - No Clerk user ID.");
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-// Define a more flexible examples schema to handle different formats
-const exampleSentenceSchema = z.object({
-  thai: z.string(),
-  thaiMasculine: z.string().optional(), // Make optional with fallback
-  thaiFeminine: z.string().optional(),  // Make optional with fallback 
-  pronunciation: z.string().optional(), // Make optional with fallback
-  translation: z.string().optional(),    // Allow either translation or english
-  english: z.string().optional()        // Allow either translation or english
-}).refine(data => {
-  // Ensure at least one of translation or english is present
-  return data.translation !== undefined || data.english !== undefined;
-}, {
-  message: "Either translation or english must be provided"
-});
-
-// Schema for validating new flashcard sets
-const createSetSchema = z.object({
-  name: z.string().min(1, "Set name is required"),
-  cleverTitle: z.string().optional(),
-  level: z.string().optional(),
-  goals: z.array(z.string()).optional(),
-  specificTopics: z.string().optional(),
-  source: z.enum(["default", "wizard", "import"]),
-  phrases: z.array(z.object({
-    english: z.string(),
-    thai: z.string(),
-    thaiMasculine: z.string(),
-    thaiFeminine: z.string(),
-    pronunciation: z.string(),
-    mnemonic: z.string().optional(),
-    examples: z.array(exampleSentenceSchema).optional()
-  }))
-});
-
-export async function POST(req: NextRequest) {
+  // Ensure user exists in your DB
   try {
-    const session = await auth();
-    
-    if (!session || !session.user) {
-      console.log("POST /api/flashcard-sets: Unauthorized - No session found");
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    console.log(`POST /api/flashcard-sets: Authorized for user ${session.user.id}`);
-
-    // Log the raw request body for debugging
-    const rawBody = await req.json();
-    console.log("Raw request body (phrases[0] example):", {
-      ...rawBody,
-      phrases: rawBody.phrases && rawBody.phrases.length > 0 
-        ? [rawBody.phrases[0]] 
-        : []
+    await prisma.user.upsert({
+      where: { id: userId },
+      update: {},
+      create: { id: userId },
     });
-    
-    // Pre-process the data to normalize examples structure
-    if (rawBody.phrases && Array.isArray(rawBody.phrases)) {
-      rawBody.phrases = rawBody.phrases.map((phrase: PhraseData) => {
-        if (phrase.examples && Array.isArray(phrase.examples)) {
-          // Normalize examples to ensure they have all required fields
-          phrase.examples = phrase.examples.map((example: ExampleSentence) => {
-            return {
-              thai: example.thai || "",
-              thaiMasculine: example.thaiMasculine || example.thai || "",
-              thaiFeminine: example.thaiFeminine || example.thai || "",
-              pronunciation: example.pronunciation || "",
-              translation: example.translation || example.english || ""
-            };
-          });
-        }
-        return phrase;
+    console.log(`API Route /api/flashcard-sets POST: Ensured user exists: ${userId}`);
+  } catch (userError) {
+    console.error(`API Route /api/flashcard-sets POST: Failed to ensure user ${userId} exists:`, userError);
+    return NextResponse.json({ error: 'Failed to process user data' }, { status: 500 });
+  }
+
+  let requestBody: AddSetRequestBody;
+  try {
+    requestBody = await request.json();
+    console.log("API Route /api/flashcard-sets POST: Actual parsed body content:", JSON.stringify(requestBody, null, 2));
+  } catch (e) {
+    console.error("API Route /api/flashcard-sets POST: Invalid request body:", e);
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+
+  const { setData, phrases } = requestBody;
+
+  if (!setData || !phrases) {
+    console.error("API Route /api/flashcard-sets POST: Missing setData or phrases after destructuring.");
+    return NextResponse.json({ error: 'Missing setData or phrases' }, { status: 400 });
+  }
+
+  let newMetaId: string | null = null;
+  try {
+    // Prepare metadata (handle default image if needed)
+    let finalImageUrl: string | null = setData.imageUrl || null;
+     if (!finalImageUrl && setData.source === 'default') {
+        finalImageUrl = '/images/defaultnew.png'; // Define your default image path
+     }
+     const metaDataForStorage = {
+       ...setData,
+       imageUrl: finalImageUrl || undefined
+     };
+
+    // 1. Add metadata
+    const insertedRecord = await storage.addSetMetaData(userId, metaDataForStorage);
+    if (!insertedRecord) throw new Error("Failed to save metadata.");
+    newMetaId = insertedRecord.id;
+    console.log(`API Route /api/flashcard-sets POST: Metadata saved with ID: ${newMetaId}`);
+
+    // 2. Save content
+    const contentSaved = await storage.saveSetContent(newMetaId, phrases);
+    if (!contentSaved) throw new Error("Failed to save content.");
+    console.log(`API Route /api/flashcard-sets POST: Content saved for set ID: ${newMetaId}`);
+
+    // 3. Save progress
+    const progressSaved = await storage.saveSetProgress(userId, newMetaId, {});
+    if (!progressSaved) throw new Error("Failed to save progress.");
+    console.log(`API Route /api/flashcard-sets POST: Initial progress saved for set ID: ${newMetaId}`);
+
+    // Construct the complete metadata object to return
+    const completeNewMetaData: SetMetaData = {
+       id: insertedRecord.id,
+       name: insertedRecord.name,
+       cleverTitle: insertedRecord.cleverTitle || undefined,
+       createdAt: insertedRecord.createdAt.toISOString(),
+       level: insertedRecord.level as SetMetaData['level'] || undefined,
+       goals: insertedRecord.goals || [],
+       specificTopics: insertedRecord.specificTopics || undefined,
+       source: insertedRecord.source as SetMetaData['source'] || 'generated',
+       imageUrl: insertedRecord.imageUrl || undefined,
+       phraseCount: phrases.length,
+       isFullyLearned: false, // Default for new sets
+       llmBrand: insertedRecord.llmBrand || undefined,
+       llmModel: insertedRecord.llmModel || undefined
+    };
+
+    console.log(`API Route /api/flashcard-sets POST: Successfully created set ${newMetaId}.`);
+    // Return the complete metadata so the frontend context can use it directly
+    return NextResponse.json({ newSetMetaData: completeNewMetaData }, { status: 201 });
+
+  } catch (error: any) {
+    console.error("API Route /api/flashcard-sets POST: Error creating set:", error);
+    // Attempt cleanup if partially created
+    if (newMetaId) {
+      console.error(`API Route /api/flashcard-sets POST: Attempting cleanup for failed set creation ${newMetaId}`);
+      // Simplified cleanup
+      await storage.deleteSetMetaData(newMetaId).catch(cleanupError => {
+          console.error(`API Route /api/flashcard-sets POST: Cleanup failed for ${newMetaId}:`, cleanupError);
       });
     }
-    
-    // Validate input
-    const result = createSetSchema.safeParse(rawBody);
-    if (!result.success) {
-      console.log("POST /api/flashcard-sets: Invalid input", result.error.format());
-      return NextResponse.json(
-        { error: "Invalid input", details: result.error.format() },
-        { status: 400 }
-      );
-    }
-    
-    const { phrases, ...setData } = result.data;
-    
-    // Create the flashcard set with phrases
-    console.log(`POST /api/flashcard-sets: Creating set "${setData.name}" with ${phrases.length} phrases`);
-    const flashcardSet = await prisma.flashcardSet.create({
-      data: {
-        ...setData,
-        userId: session.user.id,
-        phrases: {
-          create: phrases.map(phrase => {
-            // Convert examples array to JSON if present
-            const { examples, ...rest } = phrase;
-            return {
-              ...rest,
-              examplesJson: examples ? examples : undefined
-            };
-          })
-        }
-      },
-      include: {
-        phrases: true
-      }
-    });
-    
-    console.log(`POST /api/flashcard-sets: Set created successfully with ID ${flashcardSet.id}`);
-    return NextResponse.json(
-      { message: "Flashcard set created successfully", set: flashcardSet },
-      { status: 201 }
-    );
-    
-  } catch (error) {
-    console.error("Error creating flashcard set:", error);
-    return NextResponse.json(
-      { error: "Something went wrong", message: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: `Set creation failed: ${error.message}` }, { status: 500 });
   }
-} 
+}
+
+// Placeholder for GET handler (implement if needed)
+// export async function GET(request: Request) {
+//   // ... logic to get sets ...
+// }

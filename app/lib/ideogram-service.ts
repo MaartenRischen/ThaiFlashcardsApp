@@ -9,7 +9,12 @@
 export async function generateImage(prompt: string): Promise<string | null> {
   console.log(`generateImage service called with prompt: ${prompt.substring(0,50)}...`);
   try {
-    const response = await fetch('/api/generate-image', {
+    // FIX: Construct absolute URL using environment variable
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'; // Fallback for safety
+    const apiUrl = `${baseUrl}/api/generate-image`;
+    console.log(`Calling image generation API at: ${apiUrl}`); // Log the constructed URL
+
+    const response = await fetch(apiUrl, { // Use the absolute URL
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

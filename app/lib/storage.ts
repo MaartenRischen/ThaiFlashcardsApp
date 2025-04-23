@@ -1,6 +1,7 @@
 import { Phrase } from '../lib/set-generator';
-import { v4 as uuidv4 } from 'uuid';
-import { supabase } from '@/lib/supabaseClient'; // Use path alias
+import { v4 as uuidv4 } from 'uuid'; // Added back for potential use in other functions
+import { prisma } from "@/app/lib/prisma"; // Import prisma client
+import { Prisma, FlashcardSet } from '@prisma/client'; // Use specific type import
 
 // Storage key prefixes
 const PREFIX = 'thaiFlashcards_';
@@ -9,24 +10,6 @@ const setContentKey = (id: string) => `${PREFIX}content_${id}`;
 const setProgressKey = (id: string) => `${PREFIX}progress_${id}`;
 
 // --- Type Definitions --- 
-
-// Interface matching the Supabase FlashcardSet table (based on schema visualizer)
-interface FlashcardSetRecord {
-  id: string;
-  userId: string;
-  name: string;
-  cleverTitle?: string | null;
-  level?: string | null;
-  goals?: string[] | null; // Assuming stored as text[] or similar in Supabase
-  specificTopics?: string | null;
-  source: string;
-  createdAt: string; // Timestamptz becomes string
-  updatedAt?: string;
-  imageUrl?: string | null; // Add imageUrl to match DB
-  seriousnessLevel?: number | null; // Add seriousnessLevel to match DB
-  llmBrand?: string | null; // NEW: LLM brand
-  llmModel?: string | null; // NEW: LLM model
-}
 
 export interface SetMetaData { 
   id: string; 
@@ -55,6 +38,23 @@ export interface PhraseProgressData {
 }
 
 export type SetProgress = { [cardIndex: number]: PhraseProgressData };
+
+interface PublishSetInput {
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  cardCount: number;
+  author: string;
+  llmBrand?: string;
+  llmModel?: string;
+  seriousnessLevel?: number;
+  specificTopics?: string;
+  phrases: any[];
+  level?: string;
+  goals?: string[];
+  source?: string;
+  originalSetId?: string;
+}
 
 // --- Helper Functions (Local Storage - Keep temporarily) --- 
 function getFromStorage<T>(key: string, defaultValue: T): T {
@@ -89,28 +89,25 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
   }
   console.log(`Fetching SetMetaData from Supabase for userId: ${userId}`);
   try {
-    // Add imageUrl to select
-    const { data, error } = await supabase
-      .from('FlashcardSet')
-      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, imageUrl, seriousnessLevel, llmBrand, llmModel')
-      .eq('userId', userId);
+    // Fetch sets directly using Prisma
+    const prismaSets = await prisma.flashcardSet.findMany({
+      where: {
+        userId: userId,
+      },
+    });
 
-    if (error) {
-      console.error('Error fetching SetMetaData from Supabase:', error);
-      throw error; 
-    }
-    console.log('Successfully fetched SetMetaData:', data);
-    const sets = data || [];
+    console.log('Successfully fetched SetMetaData:', prismaSets);
+    const sets = prismaSets || [];
 
     // Map Supabase record to SetMetaData interface, including imageUrl and LLM info
-    return sets.map((dbSet: FlashcardSetRecord) => ({ 
+    return sets.map((dbSet: FlashcardSet) => ({ 
       id: dbSet.id,
       name: dbSet.name,
       cleverTitle: dbSet.cleverTitle || undefined,
-      createdAt: dbSet.createdAt, 
+      createdAt: dbSet.createdAt.toISOString(),
       phraseCount: 0, // Set default 0
       level: dbSet.level as SetMetaData['level'] || undefined, 
-      goals: dbSet.goals || [], 
+      goals: dbSet.goals || [],
       specificTopics: dbSet.specificTopics || undefined,
       source: dbSet.source as SetMetaData['source'] || 'generated',
       imageUrl: dbSet.imageUrl || undefined, // Map imageUrl
@@ -128,57 +125,43 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
 
 // REFACTOR: Insert into Supabase - Add imageUrl
 // Adjust input type to include optional imageUrl
-export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>): Promise<Omit<FlashcardSetRecord, 'phraseCount'> | null> {
+export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>): Promise<FlashcardSet | null> {
   if (!userId || !newSetData) {
       console.error("addSetMetaData called without userId or newSetData.");
       return null;
   }
 
-  const newSetId = uuidv4();
-  const createdAt = new Date().toISOString();
-
-  // Prepare record for Supabase, including imageUrl and LLM info
-  const recordToInsert: Omit<FlashcardSetRecord, 'phraseCount'> = {
-    id: newSetId,
+  // Prepare data for Prisma, mapping SetMetaData to Prisma's FlashcardSetCreateInput
+  // Note: Prisma handles id, createdAt, updatedAt automatically
+  const dataToInsert: Omit<FlashcardSet, 'id' | 'createdAt' | 'updatedAt'> = {
     userId: userId,
     name: newSetData.name,
     cleverTitle: newSetData.cleverTitle || null,
     level: newSetData.level || null,
-    goals: newSetData.goals || null,
+    goals: newSetData.goals || [], // Use empty array as default for Prisma String[]
     specificTopics: newSetData.specificTopics || null,
     source: newSetData.source,
-    createdAt: createdAt,
-    updatedAt: createdAt,
     imageUrl: newSetData.imageUrl || null,
     seriousnessLevel: newSetData.seriousnessLevel || null,
-    llmBrand: newSetData.llmBrand || null, // NEW
-    llmModel: newSetData.llmModel || null  // NEW
+    llmBrand: newSetData.llmBrand || null,
+    llmModel: newSetData.llmModel || null,
+    shareId: null, // Assuming shareId is optional or generated elsewhere/later
   };
 
-  console.log(`Inserting SetMetaData into Supabase for userId: ${userId}`, recordToInsert);
+  console.log(`Inserting SetMetaData into DB via Prisma for userId: ${userId}`, dataToInsert);
 
   try {
-    const { data, error } = await supabase
-      .from('FlashcardSet')
-      .insert(recordToInsert)
-      .select('id, userId, name, cleverTitle, level, goals, specificTopics, source, createdAt, updatedAt, imageUrl, seriousnessLevel, llmBrand, llmModel') // Select imageUrl too
-      .single();
+    // Use Prisma client to create the record
+    const createdSet = await prisma.flashcardSet.create({
+      data: dataToInsert,
+    });
 
-    if (error) {
-      console.error('Error inserting SetMetaData into Supabase:', error);
-      throw error; 
-    }
-
-    if (!data) {
-        console.error('Supabase insert did not return the new record.');
-        return null;
-    }
-
-    console.log('Successfully inserted SetMetaData:', data);
-    return data as Omit<FlashcardSetRecord, 'phraseCount'>;
+    console.log('Successfully inserted SetMetaData via Prisma:', createdSet);
+    return createdSet; // Return the created Prisma record
 
   } catch (error) {
-    console.error('Unexpected error in addSetMetaData:', error);
+    console.error('Error inserting SetMetaData via Prisma:', error);
+    // Consider more specific error handling if needed
     return null; 
   }
 }
@@ -191,11 +174,11 @@ export async function updateSetMetaData(updatedSet: SetMetaData): Promise<boolea
   }
 
   // Prepare record for Supabase update, including imageUrl and LLM info
-  const recordToUpdate: Partial<Omit<FlashcardSetRecord, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'phraseCount'> & { updatedAt: string }> = {
+  const recordToUpdate: Partial<Omit<FlashcardSet, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'phraseCount'> & { updatedAt: string }> = {
       name: updatedSet.name,
       cleverTitle: updatedSet.cleverTitle || null,
       level: updatedSet.level || null,
-      goals: updatedSet.goals || null,
+      goals: updatedSet.goals || [],
       specificTopics: updatedSet.specificTopics || null,
       source: updatedSet.source,
       imageUrl: updatedSet.imageUrl || null,
@@ -207,14 +190,12 @@ export async function updateSetMetaData(updatedSet: SetMetaData): Promise<boolea
   
   console.log(`Updating SetMetaData in Supabase for id: ${updatedSet.id}`, recordToUpdate);
   try {
-    const { error } = await supabase
-      .from('FlashcardSet')
-      .update(recordToUpdate)
-      .eq('id', updatedSet.id);
-    if (error) {
-      console.error('Error updating SetMetaData in Supabase:', error);
-      return false;
-    }
+    await prisma.flashcardSet.update({
+      where: {
+        id: updatedSet.id,
+      },
+      data: recordToUpdate,
+    });
     console.log(`Successfully updated SetMetaData for id: ${updatedSet.id}`);
     return true;
   } catch (error) {
@@ -242,39 +223,27 @@ export async function deleteSetMetaData(setId: string): Promise<boolean> {
     // RLS handles the user context if called from a secure context.
     // For now, let's assume we delete based on setId only, requiring RLS.
     console.log(`Deleting UserSetProgress for setId: ${setId}`);
-    const { error: progressError } = await supabase
-        .from('UserSetProgress')
-        .delete()
-        .eq('setId', setId);
-    if (progressError) {
-        console.error('Error deleting associated UserSetProgress:', progressError);
-        // Decide if we should proceed or return false
-        // return false; 
-    }
+    await prisma.userSetProgress.deleteMany({
+      where: {
+        setId: setId,
+      },
+    });
 
     // 2. Delete associated phrases
     console.log(`Deleting Phrases for setId: ${setId}`);
-    const { error: phraseError } = await supabase
-        .from('Phrase')
-        .delete()
-        .eq('setId', setId);
-    if (phraseError) {
-        console.error('Error deleting associated Phrases:', phraseError);
-        // Decide if we should proceed or return false
-        // return false;
-    }
+    await prisma.phrase.deleteMany({
+      where: {
+        setId: setId,
+      },
+    });
 
     // 3. Delete the set metadata itself
     console.log(`Deleting FlashcardSet record for id: ${setId}`);
-    const { error: setError } = await supabase
-      .from('FlashcardSet')
-      .delete()
-      .eq('id', setId);
-
-    if (setError) {
-      console.error('Error deleting SetMetaData from Supabase:', setError);
-      return false;
-    }
+    await prisma.flashcardSet.delete({
+      where: {
+        id: setId,
+      },
+    });
 
     console.log(`Successfully deleted SetMetaData and potentially related data for id: ${setId}`);
     return true;
@@ -295,17 +264,13 @@ export async function getSetContent(setId: string): Promise<Phrase[]> {
   }
   console.log(`Fetching Phrases from Supabase for setId: ${setId}`);
   try {
-    const { data, error } = await supabase
-      .from('Phrase')
-      .select('id, english, thai, thaiMasculine, thaiFeminine, pronunciation, mnemonic, examplesJson') // Select id
-      .eq('setId', setId);
+    const phrasesData = await prisma.phrase.findMany({
+      where: {
+        setId: setId,
+      },
+    });
 
-    if (error) {
-      console.error('Error fetching Phrases from Supabase:', error);
-      throw error; 
-    }
-    console.log(`Successfully fetched ${data?.length || 0} Phrases for setId: ${setId}`);
-    const phrasesData = data || [];
+    console.log(`Successfully fetched ${phrasesData?.length || 0} Phrases for setId: ${setId}`);
 
     // Map Supabase record to Phrase interface (handle examplesJson)
     return phrasesData.map((dbPhrase: any) => ({ 
@@ -316,7 +281,7 @@ export async function getSetContent(setId: string): Promise<Phrase[]> {
       thaiFeminine: dbPhrase.thaiFeminine,
       pronunciation: dbPhrase.pronunciation,
       mnemonic: dbPhrase.mnemonic || undefined,
-      examples: dbPhrase.examplesJson ? JSON.parse(dbPhrase.examplesJson) : [] 
+      examples: Array.isArray(dbPhrase.examplesJson) ? dbPhrase.examplesJson : [],
     }));
 
   } catch (error) {
@@ -341,26 +306,21 @@ export async function saveSetContent(setId: string, phrases: Phrase[]): Promise<
 
   // Prepare records for Supabase batch insert, generating a unique ID for each phrase
   const recordsToInsert = phrases.map(phrase => ({
-    id: uuidv4(), // Generate unique ID for each phrase
+    // id: uuidv4(), // Let Prisma generate if needed
     setId: setId,
     english: phrase.english,
     thai: phrase.thai,
     thaiMasculine: phrase.thaiMasculine,
     thaiFeminine: phrase.thaiFeminine,
     pronunciation: phrase.pronunciation,
-    mnemonic: phrase.mnemonic || null, 
-    examplesJson: phrase.examples && phrase.examples.length > 0 ? JSON.stringify(phrase.examples) : null 
+    mnemonic: phrase.mnemonic ?? undefined,
+    examplesJson: (phrase.examples && phrase.examples.length > 0) ? (phrase.examples as unknown as Prisma.InputJsonValue) : Prisma.JsonNull
   }));
 
   try {
-    const { error } = await supabase
-      .from('Phrase')
-      .insert(recordsToInsert);
-
-    if (error) {
-      console.error('Error batch inserting Phrases into Supabase:', error);
-      return false;
-    }
+    await prisma.phrase.createMany({
+      data: recordsToInsert,
+    });
 
     console.log(`Successfully saved ${phrases.length} Phrases for setId: ${setId}`);
     return true;
@@ -379,16 +339,12 @@ export async function deleteSetContent(setId: string): Promise<boolean> {
   }
   console.log(`Deleting Phrases from Supabase for setId: ${setId}`);
   try {
-    const { error } = await supabase
-      .from('Phrase')
-      .delete()
-      .eq('setId', setId);
+    await prisma.phrase.deleteMany({
+      where: {
+        setId: setId,
+      },
+    });
 
-    if (error) {
-      console.error('Error deleting Phrases from Supabase:', error);
-      return false;
-    }
-    
     console.log(`Successfully deleted Phrases for setId: ${setId}`);
     return true;
 
@@ -402,32 +358,35 @@ export async function deleteSetContent(setId: string): Promise<boolean> {
 
 // REFACTOR: Fetch progress from Supabase
 export async function getSetProgress(userId: string, setId: string): Promise<SetProgress> {
-  // Trivial change comment
   if (!userId || !setId) {
     console.error("getSetProgress called without userId or setId.");
     return {};
   }
   console.log(`Fetching UserSetProgress from Supabase for userId: ${userId}, setId: ${setId}`);
   try {
-    const { data, error } = await supabase
-      .from('UserSetProgress')
-      .select('progressData') // Select only the JSONB column
-      .eq('userId', userId)
-      .eq('setId', setId)
-      .maybeSingle(); // Expect 0 or 1 record
+    const progressRecord = await prisma.userSetProgress.findUnique({
+      where: {
+        userId_setId: {
+          userId: userId,
+          setId: setId,
+        },
+      },
+      select: {
+        progressData: true,
+      },
+    });
 
-    if (error) {
-      console.error('Error fetching UserSetProgress from Supabase:', error);
-      throw error;
-    }
-
-    if (data && data.progressData) {
+    if (
+      progressRecord &&
+      progressRecord.progressData &&
+      typeof progressRecord.progressData === 'object' &&
+      !Array.isArray(progressRecord.progressData)
+    ) {
       console.log(`Successfully fetched UserSetProgress`);
-      // Parse the JSONB data
-      return data.progressData as SetProgress; // Assuming it's stored correctly
+      return progressRecord.progressData as unknown as SetProgress;
     } else {
-      console.log(`No UserSetProgress found for userId: ${userId}, setId: ${setId}. Returning empty object.`);
-      return {}; // Return empty object if no progress found
+      console.log(`No valid UserSetProgress found for userId: ${userId}, setId: ${setId}. Returning empty object.`);
+      return {};
     }
 
   } catch (error) {
@@ -456,24 +415,32 @@ export async function saveSetProgress(userId: string, setId: string, progress: S
     id: progressRecordId, // Add the generated ID
     userId: userId,
     setId: setId,
-    progressData: progress, 
+    progressData: progress as Prisma.InputJsonValue, 
     lastAccessedAt: new Date().toISOString()
   };
 
   try {
     // Upsert: Inserts if combo (userId, setId) doesn't exist, updates if it does
-    const { error } = await supabase
-      .from('UserSetProgress')
-      .upsert(recordToUpsert, {
-        onConflict: 'userId, setId', // Specify conflict target
-        // ignoreDuplicates: false // Default is false, ensures update happens on conflict
-      });
+    await prisma.userSetProgress.upsert({
+      where: {
+        userId_setId: {
+          userId: userId,
+          setId: setId,
+        },
+      },
+      update: {
+        progressData: recordToUpsert.progressData,
+        lastAccessedAt: recordToUpsert.lastAccessedAt,
+      },
+      create: {
+        id: recordToUpsert.id,
+        userId: recordToUpsert.userId,
+        setId: recordToUpsert.setId,
+        progressData: recordToUpsert.progressData,
+        lastAccessedAt: recordToUpsert.lastAccessedAt,
+      },
+    });
       
-    if (error) {
-      console.error('Error upserting UserSetProgress into Supabase:', error);
-      return false;
-    }
-
     console.log(`Successfully saved UserSetProgress for userId: ${userId}, setId: ${setId}`);
     return true;
 
@@ -491,16 +458,14 @@ export async function deleteSetProgress(userId: string, setId: string): Promise<
   }
   console.log(`Deleting UserSetProgress from Supabase for userId: ${userId}, setId: ${setId}`);
   try {
-    const { error } = await supabase
-      .from('UserSetProgress')
-      .delete()
-      .eq('userId', userId)
-      .eq('setId', setId);
-
-    if (error) {
-      console.error('Error deleting UserSetProgress from Supabase:', error);
-      return false;
-    }
+    await prisma.userSetProgress.delete({
+      where: {
+        userId_setId: {
+          userId: userId,
+          setId: setId,
+        },
+      },
+    });
 
     console.log(`Successfully deleted UserSetProgress for userId: ${userId}, setId: ${setId}`);
     return true;
@@ -559,35 +524,64 @@ export async function publishSetToGallery(publishedSet: {
   specificTopics?: string;
   phrases: Phrase[];
 }) {
-  const { data, error } = await supabase
-    .from('PublishedSet')
-    .insert({
-      ...publishedSet,
-      phrases: publishedSet.phrases,
+  const createdPublishedSet = await prisma.publishedSet.create({
+    data: {
+      title: publishedSet.title,
+      description: publishedSet.description,
+      imageUrl: publishedSet.imageUrl,
+      cardCount: publishedSet.cardCount,
+      author: publishedSet.author,
+      llmBrand: publishedSet.llmBrand,
+      llmModel: publishedSet.llmModel,
+      seriousnessLevel: publishedSet.seriousnessLevel,
+      specificTopics: publishedSet.specificTopics,
+      phrases: publishedSet.phrases as unknown as Prisma.InputJsonValue,
       publishedAt: new Date().toISOString(),
-    })
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+    }
+  });
+  return createdPublishedSet;
 }
 
 // Fetch all published sets (metadata only)
 export async function getAllPublishedSets() {
-  const { data, error } = await supabase
-    .from('PublishedSet')
-    .select('id, title, description, imageUrl, cardCount, author, llmBrand, llmModel, seriousnessLevel, specificTopics, publishedAt');
-  if (error) throw error;
-  return data || [];
+  const publishedSets = await prisma.publishedSet.findMany({
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      imageUrl: true,
+      cardCount: true,
+      author: true,
+      llmBrand: true,
+      llmModel: true,
+      seriousnessLevel: true,
+      specificTopics: true,
+      publishedAt: true,
+    },
+  });
+  return publishedSets || [];
 }
 
 // Fetch a single published set by ID (full data)
 export async function getPublishedSetById(id: string) {
-  const { data, error } = await supabase
-    .from('PublishedSet')
-    .select('*')
-    .eq('id', id)
-    .single();
-  if (error) throw error;
-  return data;
+  const publishedSet = await prisma.publishedSet.findUnique({
+    where: {
+      id: id,
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      imageUrl: true,
+      cardCount: true,
+      author: true,
+      llmBrand: true,
+      llmModel: true,
+      seriousnessLevel: true,
+      specificTopics: true,
+      publishedAt: true,
+      phrases: true,
+    },
+  });
+  return publishedSet;
 } 

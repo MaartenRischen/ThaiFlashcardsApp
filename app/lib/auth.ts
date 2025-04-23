@@ -64,14 +64,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             console.log(`Supabase sign-in successful for ${credentials.email}, user ID: ${data.user.id}`);
             // Ensure a matching Prisma User row exists (by Supabase Auth ID)
             try {
-              await prisma.user.upsert({
-                where: { supabaseAuthUserId: data.user.id },
+              const user = await prisma.user.upsert({
+                where: { id: data.user.id },
                 update: {
                   name: data.user.user_metadata?.name || undefined,
                   email: data.user.email || undefined,
                 },
                 create: {
-                  supabaseAuthUserId: data.user.id,
+                  id: data.user.id,
                   name: data.user.user_metadata?.name || undefined,
                   email: data.user.email || undefined,
                 },

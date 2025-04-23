@@ -1,7 +1,7 @@
 export interface ExampleSentence {
   thai: string;
-  thaiMasculine?: string;
-  thaiFeminine?: string;
+  thaiMasculine: string;
+  thaiFeminine: string;
   pronunciation: string;
   translation: string;
 }
@@ -9,8 +9,8 @@ export interface ExampleSentence {
 export interface Phrase {
   english: string;
   thai: string;
-  thaiMasculine?: string;
-  thaiFeminine?: string;
+  thaiMasculine: string;
+  thaiFeminine: string;
   pronunciation: string;
   mnemonic?: string;
   examples?: ExampleSentence[];

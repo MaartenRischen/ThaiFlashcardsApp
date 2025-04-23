@@ -12,7 +12,7 @@ interface AddSetRequestBody {
 }
 
 // GET handler for fetching all set metadata for the logged-in user
-export async function GET(_request: Request) {
+export async function GET() {
   console.log("API Route: /api/flashcard-sets GET request received");
   const { userId } = await auth();
 
@@ -26,9 +26,13 @@ export async function GET(_request: Request) {
     const sets = await storage.getAllSetMetaData(userId);
     console.log(`API Route /api/flashcard-sets GET: Found ${sets.length} sets.`);
     return NextResponse.json({ sets: sets || [] }, { status: 200 });
-  } catch (error) {
+  } catch (error: unknown) {
+    let message = 'Unknown error';
+    if (typeof error === 'object' && error && 'message' in error && typeof (error as any).message === 'string') {
+      message = (error as any).message;
+    }
     console.error("API Route /api/flashcard-sets GET: Error fetching sets:", error);
-    return NextResponse.json({ error: 'Failed to fetch sets' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch sets', details: message }, { status: 500 });
   }
 }
 
@@ -120,7 +124,11 @@ export async function POST(_request: Request) {
     // Return the complete metadata so the frontend context can use it directly
     return NextResponse.json({ newSetMetaData: completeNewMetaData }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    let message = 'Unknown error';
+    if (typeof error === 'object' && error && 'message' in error && typeof (error as any).message === 'string') {
+      message = (error as any).message;
+    }
     console.error("API Route /api/flashcard-sets POST: Error creating set:", error);
     // Attempt cleanup if partially created
     if (newMetaId) {
@@ -130,7 +138,7 @@ export async function POST(_request: Request) {
           console.error(`API Route /api/flashcard-sets POST: Cleanup failed for ${newMetaId}:`, cleanupError);
       });
     }
-    return NextResponse.json({ error: `Set creation failed: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ error: `Set creation failed: ${message}` }, { status: 500 });
   }
 }
 

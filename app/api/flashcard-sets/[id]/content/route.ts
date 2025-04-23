@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/app/lib/auth';
-import { prisma } from '@/app/lib/prisma';
 // import logger from '@/app/lib/logger';
-import { z } from 'zod';
 import * as storage from '@/app/lib/storage';
 import { Phrase } from '@/app/data/phrases'; // Import Phrase type if needed
 
@@ -42,10 +40,14 @@ export async function GET(
     // Return the phrases array directly
     return NextResponse.json(content, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    let message = 'Unknown error';
+    if (typeof error === 'object' && error && 'message' in error && typeof (error as any).message === 'string') {
+      message = (error as any).message;
+    }
     console.error(`API Route /api/flashcard-sets/${setId}/content GET: Error fetching set content:`, error);
     return NextResponse.json(
-      { error: "Failed to fetch set content", details: error.message },
+      { error: "Failed to fetch set content", details: message },
       { status: 500 }
     );
   }

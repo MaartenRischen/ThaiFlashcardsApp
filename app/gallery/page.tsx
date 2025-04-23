@@ -4,9 +4,21 @@ import { useSet } from '@/app/context/SetContext';
 import { Phrase } from '@/app/lib/set-generator';
 import GallerySetCard from './GallerySetCard';
 
+interface GallerySet {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  seriousnessLevel?: number;
+  createdAt?: string | Date;
+  timestamp?: string | Date;
+  author?: string;
+  cardCount?: number;
+}
+
 export default function GalleryPage() {
   const { availableSets, addSet, isLoading: contextIsLoading } = useSet();
-  const [sets, setSets] = useState<unknown[]>([]);
+  const [sets, setSets] = useState<GallerySet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [importingSetId, setImportingSetId] = useState<string | null>(null);
@@ -70,9 +82,10 @@ export default function GalleryPage() {
         throw new Error('Failed to import set via context');
       }
 
-    } catch (err: any) { 
+    } catch (err: unknown) {
       console.error("Import error:", err);
-      alert(`Import failed: ${err.message || 'Unknown error'}`);
+      const message = (err instanceof Error) ? err.message : 'Unknown error';
+      alert(`Import failed: ${message}`);
     } finally {
       setImportingSetId(null);
     }
@@ -100,8 +113,8 @@ export default function GalleryPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-6">
             {sets.map((set) => (
               <GallerySetCard
-                key={(set as any).id}
-                set={set as any}
+                key={set.id}
+                set={set}
                 importingSetId={importingSetId}
                 contextIsLoading={contextIsLoading}
                 handleImport={handleImport}

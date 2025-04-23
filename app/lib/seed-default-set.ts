@@ -1,5 +1,5 @@
 import { prisma } from './prisma';
-import { INITIAL_PHRASES } from '@/app/data/phrases';
+import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases';
 
 /**
  * Seeds the default flashcard set for all users who don't have one
@@ -34,10 +34,10 @@ export async function seedDefaultSetForAllUsers() {
             source: 'default',
             phrases: {
               create: INITIAL_PHRASES.map(phrase => {
-                const { examples, ...rest } = phrase as any;
+                const { examples, ...rest } = phrase as Phrase;
                 return {
                   ...rest,
-                  examplesJson: examples || []
+                  examplesJson: examples ? JSON.stringify(examples) : JSON.stringify([])
                 };
               })
             }

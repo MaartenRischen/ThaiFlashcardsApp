@@ -1,11 +1,10 @@
-import { Phrase } from '../lib/set-generator';
+import { Phrase, ExampleSentence } from '../lib/set-generator';
 import { v4 as uuidv4 } from 'uuid'; // Added back for potential use in other functions
 import { prisma } from "@/app/lib/prisma"; // Import prisma client
-import { Prisma, FlashcardSet } from '@prisma/client'; // Use specific type import
+import { Prisma, FlashcardSet, Phrase as PrismaPhrase } from '@prisma/client'; // Use specific type import
 
 // Storage key prefixes
 const PREFIX = 'thaiFlashcards_';
-const AVAILABLE_SETS_KEY = `${PREFIX}availableSets`;
 const setContentKey = (id: string) => `${PREFIX}content_${id}`;
 const setProgressKey = (id: string) => `${PREFIX}progress_${id}`;
 
@@ -257,40 +256,59 @@ export async function deleteSetMetaData(setId: string): Promise<boolean> {
 // --- Set Content Management --- 
 
 // REFACTOR: Fetch Phrases from Supabase, include ID
-export async function getSetContent(setId: string): Promise<Phrase[]> {
-  if (!setId) {
-    console.error("getSetContent called without setId.");
+export async function getSetContent(id: string): Promise<Phrase[]> {
+  if (!id) {
+    console.error("getSetContent called without id.");
     return [];
   }
-  console.log(`Fetching Phrases from Supabase for setId: ${setId}`);
+  console.log(`Fetching Phrases from Prisma for setId: ${id}`);
   try {
     const phrasesData = await prisma.phrase.findMany({
       where: {
-        setId: setId,
+        setId: id, // Use the actual foreign key field 'setId'
       },
+      orderBy: { id: 'asc' },
     });
 
-    console.log(`Successfully fetched ${phrasesData?.length || 0} Phrases for setId: ${setId}`);
+    console.log(`Successfully fetched ${phrasesData?.length || 0} Phrases for setId: ${id}`);
 
-    // Map Supabase record to Phrase interface (handle examplesJson)
-    return phrasesData.map((dbPhrase: any) => ({ 
-      id: dbPhrase.id, // Include id
-      english: dbPhrase.english,
-      thai: dbPhrase.thai,
-      thaiMasculine: dbPhrase.thaiMasculine,
-      thaiFeminine: dbPhrase.thaiFeminine,
-      pronunciation: dbPhrase.pronunciation,
-      mnemonic: dbPhrase.mnemonic || undefined,
-      examples: Array.isArray(dbPhrase.examplesJson) ? dbPhrase.examplesJson : [],
-    }));
+    // Map Prisma record to Phrase interface
+    return phrasesData.map((dbPhrase: PrismaPhrase): Phrase => {
+      let examples: ExampleSentence[] = [];
+      try {
+        if (dbPhrase.examplesJson && typeof dbPhrase.examplesJson === 'string') {
+          const parsed = JSON.parse(dbPhrase.examplesJson);
+          // Basic validation: check if it's an array
+          if (Array.isArray(parsed)) {
+            // TODO: Add deeper validation if needed to ensure items match ExampleSentence structure
+            examples = parsed as ExampleSentence[]; 
+          } else {
+             console.warn(`Parsed examplesJson for phrase ${dbPhrase.id} is not an array:`, parsed);
+          }
+        } else if (Array.isArray(dbPhrase.examplesJson)) {
+          // Handle cases where Prisma returns parsed JSON array; cast via unknown to satisfy lint
+          examples = (dbPhrase.examplesJson as unknown) as ExampleSentence[];
+        }
+      } catch (e) {
+        console.error(`Failed to parse examplesJson for phrase ${dbPhrase.id}:`, dbPhrase.examplesJson, e);
+        // examples remains []
+      }
 
-  } catch (error) {
-    // Handle potential JSON parsing errors for examplesJson
-    if (error instanceof SyntaxError) {
-        console.error('Error parsing examplesJson from Supabase:', error);
-    } else {
-        console.error('Unexpected error in getSetContent:', error);
-    }
+      return {
+        id: dbPhrase.id,
+        english: dbPhrase.english,
+        thai: dbPhrase.thai,
+        thaiMasculine: dbPhrase.thaiMasculine,
+        thaiFeminine: dbPhrase.thaiFeminine,
+        pronunciation: dbPhrase.pronunciation,
+        mnemonic: dbPhrase.mnemonic ?? undefined, // Map null to undefined
+        examples: examples,
+        // difficulty is not stored/mapped
+      };
+    });
+
+  } catch (error: unknown) {
+    console.error(`Unexpected error in getSetContent for setId ${id}:`, error);
     return []; 
   }
 }
@@ -584,4 +602,42 @@ export async function getPublishedSetById(id: string) {
     },
   });
   return publishedSet;
+}
+
+// FIX any usage in the potentially unused saveSetMetaData function
+export async function saveSetMetaData(userId: string, metaData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>, phrases: Phrase[]): Promise<string | null> {
+  try {
+    const newSet = await prisma.flashcardSet.create({
+      data: {
+        id: uuidv4(),
+        userId: userId, // Use passed userId
+        name: metaData.name,
+        cleverTitle: metaData.cleverTitle,
+        level: metaData.level,
+        goals: metaData.goals,
+        specificTopics: metaData.specificTopics,
+        source: metaData.source,
+        imageUrl: metaData.imageUrl,
+        seriousnessLevel: metaData.seriousnessLevel,
+        llmBrand: metaData.llmBrand,
+        llmModel: metaData.llmModel,
+        // phraseCount is not directly set here
+        phrases: {
+          create: phrases.map(phrase => {
+            // Destructure Phrase, exclude fields not in Prisma Phrase model
+            const { id, difficulty, examples, ...prismaPhraseData } = phrase;
+            return {
+              ...prismaPhraseData, // Spread fields like english, thai, etc.
+              examplesJson: examples ? JSON.stringify(examples) : JSON.stringify([])
+            };
+          }),
+        },
+      },
+    });
+    console.log("Set created successfully with ID:", newSet.id);
+    return newSet.id;
+  } catch (error: unknown) {
+    console.error("Error saving set metadata:", error);
+    return null;
+  }
 } 

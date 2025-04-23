@@ -1,5 +1,6 @@
 import { type Phrase } from './pronunciation';
-import { type CardProgressData, getMasteryLevel, getCardsForReview } from './srs';
+import { type CardProgressData, getMasteryLevel } from './srs';
+import { SetProgress, SetMetaData } from '@/app/lib/storage';
 
 export interface ProgressStats {
   totalCards: number;

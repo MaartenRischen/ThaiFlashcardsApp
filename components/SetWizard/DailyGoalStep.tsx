@@ -13,14 +13,14 @@ export function DailyGoalStep({ value, onNext }: { value?: { type: 'cards' | 'mi
         <div>
           <div className="font-bold mb-1">Cards per day</div>
           <div className="flex gap-2">
-            {cardOptions.map(opt => (
+            {cardOptions.map((count) => (
               <button
-                key={opt}
-                className={`px-4 py-2 rounded border transition ${goal?.type === 'cards' && goal.value === opt ? 'bg-blue-200 border-blue-500' : 'bg-white border-gray-300 hover:border-blue-400'}`}
-                onClick={() => setGoal({ type: 'cards', value: opt })}
+                key={count}
+                className={`px-4 py-2 rounded border transition ${goal?.type === 'cards' && goal.value === count ? 'bg-blue-200 border-blue-500' : 'bg-white border-gray-300 hover:border-blue-400'}`}
+                onClick={() => setGoal({ type: 'cards', value: count })}
                 type="button"
               >
-                {opt} cards
+                {count} cards
               </button>
             ))}
           </div>
@@ -28,14 +28,14 @@ export function DailyGoalStep({ value, onNext }: { value?: { type: 'cards' | 'mi
         <div>
           <div className="font-bold mb-1">Minutes per day</div>
           <div className="flex gap-2">
-            {minuteOptions.map(opt => (
+            {minuteOptions.map((option) => (
               <button
-                key={opt}
-                className={`px-4 py-2 rounded border transition ${goal?.type === 'minutes' && goal.value === opt ? 'bg-blue-200 border-blue-500' : 'bg-white border-gray-300 hover:border-blue-400'}`}
-                onClick={() => setGoal({ type: 'minutes', value: opt })}
+                key={option}
+                className={`px-4 py-2 rounded border transition ${goal?.type === 'minutes' && goal.value === option ? 'bg-blue-200 border-blue-500' : 'bg-white border-gray-300 hover:border-blue-400'}`}
+                onClick={() => setGoal({ type: 'minutes', value: option })}
                 type="button"
               >
-                {opt} min
+                {option} min
               </button>
             ))}
           </div>

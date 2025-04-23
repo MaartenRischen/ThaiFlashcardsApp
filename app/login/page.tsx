@@ -106,9 +106,9 @@ export default function LoginPage() {
         setIsRecoveryMode(false);
         router.replace("/login", undefined);
 
-    } catch (err: any) {
-        console.error("Caught error during password update:", err);
-        setError(err.message || "An unexpected error occurred while updating your password.");
+    } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        setError(errorMessage);
     } finally {
         setIsLoading(false);
     }

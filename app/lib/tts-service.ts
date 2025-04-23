@@ -7,7 +7,7 @@ interface SpeakParams {
   genderValue: boolean; // Use boolean for gender value: true for Male, false for Female
   onStart?: () => void;
   onEnd?: () => void;
-  onError?: (error: any) => void;
+  onError?: (error: unknown) => void;
 }
 
 // Remove AWS-related state variables

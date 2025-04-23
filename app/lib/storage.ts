@@ -47,23 +47,6 @@ export interface PhraseProgressData {
 
 export type SetProgress = { [cardIndex: number]: PhraseProgressData };
 
-interface PublishSetInput {
-  title: string;
-  description?: string;
-  imageUrl?: string;
-  cardCount: number;
-  author: string;
-  llmBrand?: string;
-  llmModel?: string;
-  seriousnessLevel?: number;
-  specificTopics?: string;
-  phrases: Phrase[]; // Fixed from any[]
-  level?: string;
-  goals?: string[];
-  source?: string;
-  originalSetId?: string;
-}
-
 // --- Removed localStorage Helper Functions ---
 // getFromStorage and setToStorage functions removed.
 
@@ -269,26 +252,32 @@ export async function getSetContent(id: string): Promise<Phrase[]> {
           const parsed = JSON.parse(dbPhrase.examplesJson);
           if (Array.isArray(parsed)) {
             // Validate each example
-            parsedExamples = parsed.filter((ex: any) =>
-              ex && typeof ex === 'object' &&
-              typeof ex.thai === 'string' &&
-              typeof ex.thaiMasculine === 'string' &&
-              typeof ex.thaiFeminine === 'string' &&
-              typeof ex.pronunciation === 'string' &&
-              typeof ex.translation === 'string'
-            ) as ExampleSentence[];
+            parsedExamples = parsed.filter((ex: unknown) => {
+              if (!ex || typeof ex !== 'object') return false;
+              const e = ex as Partial<ExampleSentence>;
+              return (
+                typeof e.thai === 'string' &&
+                typeof e.thaiMasculine === 'string' &&
+                typeof e.thaiFeminine === 'string' &&
+                typeof e.pronunciation === 'string' &&
+                typeof e.translation === 'string'
+              );
+            }) as ExampleSentence[];
           } else {
              console.warn(`Parsed examplesJson for phrase ${dbPhrase.id} is not an array:`, parsed);
           }
         } else if (Array.isArray(dbPhrase.examplesJson)) {
-          parsedExamples = (dbPhrase.examplesJson as any[]).filter((ex: any) =>
-            ex && typeof ex === 'object' &&
-            typeof ex.thai === 'string' &&
-            typeof ex.thaiMasculine === 'string' &&
-            typeof ex.thaiFeminine === 'string' &&
-            typeof ex.pronunciation === 'string' &&
-            typeof ex.translation === 'string'
-          ) as ExampleSentence[];
+          parsedExamples = (dbPhrase.examplesJson as unknown[]).filter((ex: unknown) => {
+            if (!ex || typeof ex !== 'object') return false;
+            const e = ex as Partial<ExampleSentence>;
+            return (
+              typeof e.thai === 'string' &&
+              typeof e.thaiMasculine === 'string' &&
+              typeof e.thaiFeminine === 'string' &&
+              typeof e.pronunciation === 'string' &&
+              typeof e.translation === 'string'
+            );
+          }) as ExampleSentence[];
         }
       } catch (e) {
         console.error(`Failed to parse examplesJson for phrase ${dbPhrase.id}:`, dbPhrase.examplesJson, e);

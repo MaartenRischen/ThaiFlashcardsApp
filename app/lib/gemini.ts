@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Access your API key from environment variables (should only be accessed server-side)
 const API_KEY = process.env.GEMINI_API_KEY;

@@ -53,11 +53,11 @@ export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: Se
   const totalSteps = 7;
 
   // Step handlers
-  const handleProficiency = (data: any) => { setWizardState(ws => ({ ...ws, proficiency: data })); setStep(2); };
-  const handleGoals = (data: any) => { setWizardState(ws => ({ ...ws, goals: data })); setStep(3); };
-  const handleTopics = (data: any) => { setWizardState(ws => ({ ...ws, topics: data })); setStep(4); };
-  const handleTone = (data: any) => { setWizardState(ws => ({ ...ws, tone: data })); setStep(5); };
-  const handleDailyGoal = (data: any) => { setWizardState(ws => ({ ...ws, dailyGoal: data })); setStep(6); };
+  const handleProficiency = (data: { canDoSelections: string[]; levelEstimate: string }) => { setWizardState(ws => ({ ...ws, proficiency: data })); setStep(2); };
+  const handleGoals = (data: { scenarios: string[]; customGoal?: string }) => { setWizardState(ws => ({ ...ws, goals: data })); setStep(3); };
+  const handleTopics = (data: string[]) => { setWizardState(ws => ({ ...ws, topics: data })); setStep(4); };
+  const handleTone = (data: number) => { setWizardState(ws => ({ ...ws, tone: data })); setStep(5); };
+  const handleDailyGoal = (data?: { type: 'cards' | 'minutes'; value: number }) => { setWizardState(ws => ({ ...ws, dailyGoal: data })); setStep(6); };
   const handleConfirm = () => { onComplete(wizardState); };
 
   // Editing from review step

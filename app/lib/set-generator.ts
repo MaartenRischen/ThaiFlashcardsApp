@@ -439,6 +439,7 @@ async function callOpenRouter(prompt: string, model: string): Promise<string> {
   // Log if the API key is missing *at the point of use*
   if (!apiKey) {
     console.error("callOpenRouter Error: Missing OPENROUTER_API_KEY env variable at runtime.");
+    console.error("DEBUG: process.env.OPENROUTER_API_KEY value:", process.env.OPENROUTER_API_KEY ? process.env.OPENROUTER_API_KEY.substring(0,8) + '...' : process.env.OPENROUTER_API_KEY);
     throw new Error("Missing OPENROUTER_API_KEY env variable");
   }
 

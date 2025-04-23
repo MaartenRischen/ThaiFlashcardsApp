@@ -262,26 +262,32 @@ export async function getSetContent(id: string): Promise<Phrase[]> {
 
     // Map Prisma record to Phrase interface
     return phrasesData.map((dbPhrase: PrismaPhrase): Phrase => {
-      let examples: { [key: string]: any }[] = []; // Changed from ExampleSentence[] to generic object array
+      let parsedExamples: { [key: string]: any }[] = []; // Keep generic type
       try {
         if (dbPhrase.examplesJson && typeof dbPhrase.examplesJson === 'string') {
           const parsed = JSON.parse(dbPhrase.examplesJson);
-          // Basic validation: check if it's an array
           if (Array.isArray(parsed)) {
-            // TODO: Add deeper validation if needed to ensure items match ExampleSentence structure
-            examples = parsed as { [key: string]: any }[]; // Cast to generic object array
+            // Basic validation passed, keep as generic array
+            parsedExamples = parsed as { [key: string]: any }[];
           } else {
              console.warn(`Parsed examplesJson for phrase ${dbPhrase.id} is not an array:`, parsed);
           }
         } else if (Array.isArray(dbPhrase.examplesJson)) {
-          // Handle cases where Prisma returns parsed JSON array; cast via unknown to satisfy lint
-          examples = (dbPhrase.examplesJson as unknown) as { [key: string]: any }[]; // Cast to generic object array
+          // Handle cases where Prisma returns parsed JSON array
+          parsedExamples = (dbPhrase.examplesJson as unknown) as { [key: string]: any }[];
         }
       } catch (e) {
         console.error(`Failed to parse examplesJson for phrase ${dbPhrase.id}:`, dbPhrase.examplesJson, e);
-        // examples remains []
       }
 
+      // Construct the Phrase object
+      // Assign the parsedExamples (generic array) to the examples field.
+      // The Phrase interface defines examples as ExampleSentence[]
+      // This assignment might still cause a type error depending on strictness settings.
+      // Option 1: Keep as is and rely on downstream checks.
+      // Option 2: Change Phrase interface examples to any[] or { [key: string]: any }[]
+      // Option 3: Perform deeper validation here to cast safely to ExampleSentence[]
+      // Choosing Option 1 for now, but noting the potential type mismatch.
       return {
         id: dbPhrase.id,
         english: dbPhrase.english,
@@ -289,8 +295,8 @@ export async function getSetContent(id: string): Promise<Phrase[]> {
         thaiMasculine: dbPhrase.thaiMasculine,
         thaiFeminine: dbPhrase.thaiFeminine,
         pronunciation: dbPhrase.pronunciation,
-        mnemonic: dbPhrase.mnemonic ?? undefined, // Map null to undefined
-        examples: examples,
+        mnemonic: dbPhrase.mnemonic ?? undefined,
+        examples: parsedExamples, // Assign the generic array here
         // difficulty is not stored/mapped
       };
     });

@@ -10,6 +10,7 @@ import * as storage from '@/app/lib/storage';
 import { SetMetaData } from '@/app/lib/storage'; // Import SetMetaData
 import { generateImage } from '@/app/lib/ideogram-service';
 import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases'; // Import INITIAL_PHRASES and the original Phrase type if needed for INITIAL_PHRASES structure
+import { prisma } from "@/app/lib/prisma"; // Import prisma client
 
 // Define expected request body structure (can be shared or redefined here)
 interface GenerateSetRequestBody {
@@ -28,6 +29,25 @@ export async function POST(request: Request) {
     console.error("API Route: Unauthorized access - No user ID found.");
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  // --- Check/Create User in DB ---
+  try {
+    await prisma.user.upsert({
+      where: { id: userId },
+      update: {}, // No fields to update if user exists
+      create: { 
+        id: userId, 
+        // Add other default fields for your User model if necessary
+        // email: clerkUser.emailAddresses?.[0]?.emailAddress, // Example: requires getting more clerk data
+        // name: clerkUser.firstName,
+      },
+    });
+    console.log(`Ensured user exists in DB: ${userId}`);
+  } catch (userError) {
+    console.error(`API Route: Failed to ensure user ${userId} exists in DB:`, userError);
+    return NextResponse.json({ error: 'Failed to process user data' }, { status: 500 });
+  }
+  // --- End User Check/Create ---
 
   let requestBody: GenerateSetRequestBody;
   try {
@@ -117,18 +137,17 @@ export async function POST(request: Request) {
     newMetaId = insertedRecord.id; // Assign to pre-declared variable
     console.log(`API Route: Metadata saved with ID: ${newMetaId}`);
 
-    // saveSetContent expects GeneratorPhrase[] which phrasesToSave now is
     const contentSaved = await storage.saveSetContent(newMetaId, phrasesToSave); 
     if (!contentSaved) {
-      await storage.deleteSetMetaData(newMetaId); // Attempt cleanup
+      await storage.deleteSetMetaData(newMetaId);
       throw new Error("Failed to save set content to database.");
     }
     console.log(`API Route: Content saved for set ID: ${newMetaId}`);
 
     const progressSaved = await storage.saveSetProgress(userId, newMetaId, {});
     if (!progressSaved) {
-      await storage.deleteSetContent(newMetaId); // Attempt cleanup
-      await storage.deleteSetMetaData(newMetaId); // Attempt cleanup
+      await storage.deleteSetContent(newMetaId);
+      await storage.deleteSetMetaData(newMetaId);
       throw new Error("Failed to save initial set progress.");
     }
     console.log(`API Route: Initial progress saved for set ID: ${newMetaId}`);
@@ -139,9 +158,8 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error("API Route: Error during set creation process:", error);
-    // newMetaId is accessible here because it was declared outside the try block
     if (error.message.includes("save set content") || error.message.includes("save initial set progress")) {
-      if(newMetaId) { // Check if newMetaId was assigned before error
+      if(newMetaId) {
           console.log(`API Route: Cleaning up metadata ${newMetaId} due to content/progress save error.`);
           await storage.deleteSetMetaData(newMetaId); 
       }

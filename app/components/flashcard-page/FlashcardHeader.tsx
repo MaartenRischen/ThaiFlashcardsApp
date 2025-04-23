@@ -9,19 +9,15 @@ import Image from 'next/image';
 interface FlashcardHeaderProps {
   setShowHowItWorks: (show: boolean) => void;
   onOpenSettings: () => void;
-  setShowProgress: (show: boolean) => void;
   onOpenSetManager: () => void;
   onOpenCards: () => void;
-  showAnswer: boolean;
 }
 
 export function FlashcardHeader({
   setShowHowItWorks,
   onOpenSettings,
-  setShowProgress,
   onOpenSetManager,
   onOpenCards,
-  showAnswer,
 }: FlashcardHeaderProps) {
   // Access the active set metadata to get the image URL
   const { availableSets, activeSetId } = useSet();
@@ -37,7 +33,6 @@ export function FlashcardHeader({
   setImageUrl = setImageUrl || '/images/defaultnew.png';
   
   const [showShare, setShowShare] = useState(false);
-  const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -183,7 +178,7 @@ export function FlashcardHeader({
           </div>
         </div>
         {/* Share Dialog */}
-        {showShare && shareUrl && (
+        {showShare && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60" onClick={() => setShowShare(false)}>
             <div className="bg-gray-900 p-6 rounded-lg shadow-lg max-w-md w-full" onClick={e => e.stopPropagation()}>
               <h3 className="text-lg font-bold mb-2 text-purple-300">Share This Set</h3>
@@ -191,15 +186,14 @@ export function FlashcardHeader({
               <div className="flex items-center bg-gray-800 rounded px-2 py-1 mb-3">
                 <input
                   type="text"
-                  value={shareUrl}
                   readOnly
                   className="flex-1 bg-transparent text-white outline-none text-sm"
                   onFocus={e => e.target.select()}
                 />
                 <button onClick={() => {
-                  if (shareUrl) {
-                    navigator.clipboard.writeText(shareUrl);
-                  }
+                  const urlToCopy = window.location.href; // Placeholder: copy current page URL?
+                  navigator.clipboard.writeText(urlToCopy);
+                  alert('URL copied! (Placeholder)');
                 }} className="ml-2 px-2 py-1 text-xs bg-purple-700 text-white rounded hover:bg-purple-600">Copy</button>
               </div>
               <button onClick={() => setShowShare(false)} className="mt-2 neumorphic-button text-sm text-gray-400">Close</button>

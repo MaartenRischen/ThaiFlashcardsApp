@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  ClerkProvider,
   SignedIn,
   SignedOut,
   SignInButton,

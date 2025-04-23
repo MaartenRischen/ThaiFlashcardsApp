@@ -92,8 +92,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return null;
           }
 
-        } catch (error: any) {
-          console.error(`Unexpected error during Supabase authorize for ${credentials.email}:`, error);
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            console.error(`Unexpected error during Supabase authorize for ${credentials.email}:`, error.message);
+          }
           return null;
         }
       },

@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerativeModel } from '@google/generative-ai';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 
 // Access your API key from environment variables (should only be accessed server-side)
 const API_KEY = process.env.GEMINI_API_KEY;
@@ -55,17 +55,17 @@ export async function generateMnemonic(thaiWord: string, englishMeaning: string)
     const response = result.response;
     const text = response.text();
     return text.trim();
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error generating mnemonic with Gemini:', error);
     return `Could not generate mnemonic: ${error}`;
   }
 }
 
 // Function to generate example sentences for vocabulary
-export async function generateExampleSentence(thaiWord: string, englishMeaning: string): Promise<any> {
+export async function generateExampleSentence(thaiWord: string, englishMeaning: string): Promise<string> {
   if (!geminiPro) {
       console.error("Gemini Pro model not initialized. Check API Key and server-side context.");
-      return { error: "Gemini model not available." };
+      return "Error: Gemini model not available.";
   }
   try {
     const prompt = `Create a simple example sentence in Thai using the word "${thaiWord}" which means "${englishMeaning}" in English.
@@ -85,15 +85,13 @@ export async function generateExampleSentence(thaiWord: string, englishMeaning: 
     // Extract the JSON part from the response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
+      return jsonMatch[0];
     }
     
     throw new Error("Could not parse JSON from Gemini response");
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error generating example sentence with Gemini:', error);
-    return {
-      error: `Could not generate example: ${error}`
-    };
+    return `Could not generate example: ${error}`;
   }
 }
 

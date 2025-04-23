@@ -1,8 +1,22 @@
 import React from 'react';
 import Image from 'next/image';
 
+// Define a more specific type for the set prop
+interface GallerySet {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  seriousnessLevel?: number;
+  createdAt?: string | Date;
+  timestamp?: string | Date; // Assuming timestamp might exist
+  author?: string;
+  cardCount?: number;
+  // Add any other expected properties based on usage
+}
+
 interface GallerySetCardProps {
-  set: any;
+  set: GallerySet;
   importingSetId: string | null;
   contextIsLoading: boolean;
   handleImport: (setId: string) => void;

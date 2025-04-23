@@ -8,6 +8,7 @@ export interface Phrase {
   pronunciation: string;
   mnemonic?: string;
   examples?: ExampleSentence[];
+  difficulty?: 'easy' | 'good' | 'hard';
 }
 
 export interface ExampleSentence {
@@ -34,7 +35,7 @@ export type BatchErrorType = 'API' | 'PARSE' | 'NETWORK' | 'VALIDATION' | 'UNKNO
 export interface BatchError {
   type: BatchErrorType;
   message: string;
-  details?: any; // e.g., status code for API, snippet of text for PARSE
+  details?: unknown; // Use unknown instead of any
   timestamp: string;
 }
 
@@ -84,9 +85,6 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
     seriousnessLevel = 50 // Default to 50%
   } = options;
 
-  const seriousness = seriousnessLevel / 100; // Convert to 0.0 - 1.0
-  const ridiculousness = 1.0 - seriousness;
-
   // Define the output schema (remains the same)
   // Use escaped backticks for the schema description
   const schemaDescription = `
@@ -124,7 +122,7 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
   `;
 
   // Construct the detailed main prompt content using a standard template literal
-  let prompt = `
+  const prompt = `
   You are an expert AI assistant specialized in creating language learning flashcards. Your task is to generate ${count} flashcards and a set title.
 
   - For the set title ("cleverTitle"), write a single, natural, matter-of-fact, grammatically correct English sentence that describes the set. Use the user's situations and specific focus, but do NOT just list them. The title should sound like a native English speaker describing what the set is about. Do not use awkward connectors or forced structure. Do not use title case—use normal sentence case. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
@@ -185,34 +183,41 @@ function buildGenerationPrompt(options: GeneratePromptOptions): string {
 /**
  * Validates a phrase object to ensure it follows the correct structure
  */
-function validatePhrase(data: any): data is Phrase {
+function validatePhrase(data: unknown): data is Phrase {
   if (!data || typeof data !== 'object') return false;
   
+  // Use type assertions carefully after checking existence
+  const phraseData = data as Partial<Phrase>;
+
   const hasRequiredFields =
-    typeof data.english === 'string' && data.english.trim() !== '' &&
-    typeof data.thai === 'string' && data.thai.trim() !== '' &&
-    typeof data.thaiMasculine === 'string' && data.thaiMasculine.trim() !== '' &&
-    typeof data.thaiFeminine === 'string' && data.thaiFeminine.trim() !== '' &&
-    typeof data.pronunciation === 'string' && data.pronunciation.trim() !== '';
+    typeof phraseData.english === 'string' && phraseData.english.trim() !== '' &&
+    typeof phraseData.thai === 'string' && phraseData.thai.trim() !== '' &&
+    typeof phraseData.thaiMasculine === 'string' && phraseData.thaiMasculine.trim() !== '' &&
+    typeof phraseData.thaiFeminine === 'string' && phraseData.thaiFeminine.trim() !== '' &&
+    typeof phraseData.pronunciation === 'string' && phraseData.pronunciation.trim() !== '';
 
   if (!hasRequiredFields) return false;
 
   // Optional fields validation
-  if (data.mnemonic !== undefined && data.mnemonic !== null && typeof data.mnemonic !== 'string') return false; // Allow null
-  if (data.mnemonic === '') data.mnemonic = undefined; // Treat empty string as undefined
+  if (phraseData.mnemonic !== undefined && phraseData.mnemonic !== null && typeof phraseData.mnemonic !== 'string') return false; // Allow null
+  if (phraseData.mnemonic === '') phraseData.mnemonic = undefined; // Treat empty string as undefined
   
-  if (data.examples !== undefined && data.examples !== null) { // Allow null
-    if (!Array.isArray(data.examples)) return false;
+  if (phraseData.examples !== undefined && phraseData.examples !== null) { // Allow null
+    if (!Array.isArray(phraseData.examples)) return false;
     
     // Validate each example sentence
-    for (const ex of data.examples) {
-      if (!ex || typeof ex !== 'object' ||
-          typeof ex.thai !== 'string' || ex.thai.trim() === '' ||
-          typeof ex.thaiMasculine !== 'string' || ex.thaiMasculine.trim() === '' ||
-          typeof ex.thaiFeminine !== 'string' || ex.thaiFeminine.trim() === '' ||
-          typeof ex.pronunciation !== 'string' || ex.pronunciation.trim() === '' ||
-          typeof ex.translation !== 'string' || ex.translation.trim() === '') {
-        console.warn("Invalid example structure:", ex); // Log invalid example
+    for (const ex of phraseData.examples) {
+      // Cast ex to unknown first for safety
+      const exampleData = ex as unknown;
+      if (!exampleData || typeof exampleData !== 'object') return false;
+      const example = exampleData as Partial<ExampleSentence>; // Cast to partial
+
+      if (typeof example.thai !== 'string' || example.thai.trim() === '' ||
+          typeof example.thaiMasculine !== 'string' || example.thaiMasculine.trim() === '' ||
+          typeof example.thaiFeminine !== 'string' || example.thaiFeminine.trim() === '' ||
+          typeof example.pronunciation !== 'string' || example.pronunciation.trim() === '' ||
+          typeof example.translation !== 'string' || example.translation.trim() === '') {
+        console.warn("Invalid example structure:", ex);
         return false; // Invalid example sentence structure
       }
     }
@@ -227,7 +232,7 @@ function validatePhrase(data: any): data is Phrase {
 function createBatchError(
   type: BatchErrorType, 
   message: string, 
-  details?: any
+  details?: unknown
 ): BatchError {
   return {
     type,
@@ -251,7 +256,7 @@ export async function generateCustomSet(
   let extractedCleverTitle: string | undefined = undefined;
   
   let remainingCount = totalCount;
-  let batchIndex = 0;
+  let currentBatchIndex = 0; // Rename to avoid conflict if batchIndex was used elsewhere
 
   console.log(`Starting card generation (OpenRouter): ${totalCount} total cards requested with preferences:`, JSON.stringify(preferences));
 
@@ -267,12 +272,12 @@ export async function generateCustomSet(
     let retries = 0;
     let success = false;
     let batchAttemptPhrases: Phrase[] = [];
-    let batchResult: any = null;
+    let batchResult: {phrases: Phrase[], cleverTitle?: string, error?: BatchError} | null = null; // Type the result
     while (retries < MAX_RETRIES && !success) {
       try {
-        batchResult = await generateOpenRouterBatch(prompt, DEFAULT_OPENROUTER_MODEL, batchIndex);
+        batchResult = await generateOpenRouterBatch(prompt, DEFAULT_OPENROUTER_MODEL, currentBatchIndex);
         if (batchResult.error) {
-          aggregatedErrors.push({ ...batchResult.error, batchIndex });
+          aggregatedErrors.push({ ...batchResult.error, batchIndex: currentBatchIndex });
           retries++;
           if (retries >= MAX_RETRIES) break;
           await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
@@ -288,19 +293,21 @@ export async function generateCustomSet(
           remainingCount -= newPhrases.length;
           batchAttemptPhrases = newPhrases;
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         retries++;
         aggregatedErrors.push({
-          type: 'UNKNOWN', message: `Uncaught error: ${error.message}`,
-          details: { error: error.toString(), stack: error.stack },
-          timestamp: new Date().toISOString(), batchIndex
+          type: 'UNKNOWN', 
+          message: `Uncaught error: ${error instanceof Error ? error.message : String(error)}`, 
+          details: { error: String(error), stack: error instanceof Error ? error.stack : undefined }, // Use String() for safety
+          timestamp: new Date().toISOString(), 
+          batchIndex: currentBatchIndex // Use renamed variable
         });
         if (retries >= MAX_RETRIES) break;
         await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
       }
     }
     if (!success) {
-      console.error(`Batch ${batchIndex} failed after ${MAX_RETRIES} retries. Aborting further generation.`);
+      console.error(`Batch ${currentBatchIndex} failed after ${MAX_RETRIES} retries. Aborting further generation.`);
       break;
     }
     if (onProgressUpdate) {
@@ -310,7 +317,7 @@ export async function generateCustomSet(
         latestPhrases: batchAttemptPhrases
       });
     }
-    batchIndex++;
+    currentBatchIndex++; // Use renamed variable
   }
 
   const errorTypes = aggregatedErrors.map(err => err.type).filter((value, index, self) => self.indexOf(value) === index);
@@ -345,7 +352,7 @@ export function createCustomSet(
   specificTopics: string | undefined, 
   phrases: Phrase[],
   seriousness?: number // Optional
-): Omit<CustomSet, 'mnemonics' | 'goals'> {
+): Omit<CustomSet, 'mnemonics' | 'goals'> { // goals likely doesn't belong here
   return {
     name,
     level,
@@ -404,13 +411,13 @@ export async function generateSingleFlashcard(
         if (retries >= MAX_RETRIES) break;
         await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         retries++;
         console.error(`Uncaught error in single card generation (attempt ${retries}):`, error);
         if (retries >= MAX_RETRIES) {
           return { 
             phrase: null, 
-            error: createBatchError('UNKNOWN', `Uncaught error generating single card: ${error.message}`, { error })
+            error: createBatchError('UNKNOWN', `Uncaught error generating single card: ${error instanceof Error ? error.message : String(error)}`, { error })
           };
         }
         await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));

@@ -58,9 +58,13 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
         text: testVoice || 'สวัสดีครับ ทดสอบเสียง', // Default Thai test phrase
         genderValue: isMale, // Use genderValue matching the isMale state
         onEnd: () => setIsTesting(false),
-        onError: (err) => {
+        onError: (err: unknown) => {
           console.error("TTS Test Error:", err);
-          alert(`TTS Test Error: ${err.message || err}`);
+          const message =
+            typeof err === "object" && err && "message" in err && typeof (err as { message?: unknown }).message === "string"
+              ? (err as { message: string }).message
+              : String(err);
+          alert(`TTS Test Error: ${message}`);
           setIsTesting(false);
         }
       });

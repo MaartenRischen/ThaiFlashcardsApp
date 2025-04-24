@@ -17,6 +17,9 @@ export interface FlashcardDisplayProps {
   phrase: Phrase;
   showAnswer: boolean;
   mnemonic?: string;
+  autoplay?: boolean;
+  isMale?: boolean;
+  isPoliteMode?: boolean;
   onToggleAnswer?: () => void;
   onPlayAudio?: () => void;
   onNextCard?: () => void;
@@ -27,6 +30,9 @@ export function FlashcardDisplay({
   phrase,
   showAnswer,
   mnemonic = '',
+  autoplay = false,
+  isMale = true,
+  isPoliteMode = true,
   onToggleAnswer = () => {},
   onPlayAudio = () => {},
   onNextCard = () => {},

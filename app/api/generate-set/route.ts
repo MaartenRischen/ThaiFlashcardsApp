@@ -109,8 +109,7 @@ export async function POST(request: Request) {
     }
 
     // --- 3. Generate Set Image (if not fallback) ---
-    const skipImageGenEnv = process.env.SKIP_IMAGE_GENERATION === 'true'; // Read from env
-    if (!isFallback && !skipImageGenEnv) { 
+    if (!isFallback) { 
       try {
         const topicDescription = generationResult.cleverTitle || 'Thai language learning'; // Use cleverTitle or a fallback
         // Restore the donkey and bridge elements while keeping the improved structure
@@ -134,7 +133,7 @@ export async function POST(request: Request) {
         }
       }
     } else {
-       console.log(`API Route: SKIPPING image generation (Fallback: ${isFallback}, Env Skip: ${skipImageGenEnv})`);
+       console.log(`API Route: SKIPPING image generation (Fallback: ${isFallback})`);
        setImageUrl = null;
     }
 

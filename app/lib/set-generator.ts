@@ -69,7 +69,7 @@ const BATCH_SIZE = 8;
 
 // Prioritized list of text models for set generation
 const TEXT_MODELS = [
-  'google/gemini-2.5-pro', // Gemini 2.5 Pro
+  'google/gemini-2.5-pro-preview-03-25', // Gemini 2.5 Pro Preview
   'openai/gpt-4',          // OpenAI GPT-4
   'openai/gpt-3.5-turbo',  // OpenAI GPT-3.5 Turbo
   'anthropic/claude-3-opus', // Anthropic Claude
@@ -461,6 +461,7 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
     console.error("callOpenRouterWithFallback Error: Missing OPENROUTER_API_KEY env variable at runtime.");
     throw new Error("Missing OPENROUTER_API_KEY env variable");
   }
+  let lastError: string | null = null;
   for (const model of models) {
     try {
       console.log(`Trying OpenRouter model: ${model} with temperature: ${temperature}`);
@@ -468,7 +469,9 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
         method: "POST",
         headers: {
           "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+          "X-Title": "Thai Flashcards App"
         },
         body: JSON.stringify({
           model,
@@ -480,6 +483,12 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
         const errorStatus = response.status;
         const errorText = await response.text();
         console.error(`OpenRouter API Error (model: ${model}): Status ${errorStatus}, Body: ${errorText}`);
+        try {
+          const errorJson = JSON.parse(errorText);
+          lastError = errorJson.error?.message || errorText;
+        } catch {
+          lastError = errorText;
+        }
         continue;
       }
       const data: unknown = await response.json();
@@ -503,14 +512,16 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
         return text;
       } else {
         console.error(`Unexpected OpenRouter response structure for model ${model}:`, data);
+        lastError = `Unexpected response structure from ${model}`;
         continue;
       }
     } catch (error) {
       console.error(`Error calling OpenRouter model ${model}:`, error);
+      lastError = error instanceof Error ? error.message : String(error);
       continue;
     }
   }
-  throw new Error("All OpenRouter models failed for set generation.");
+  throw new Error(lastError || "All OpenRouter models failed for set generation.");
 }
 
 // Update batch generator to use fallback logic and temperature

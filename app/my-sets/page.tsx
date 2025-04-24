@@ -27,14 +27,15 @@ export default function MySetsPage() {
     if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [status, router]);
+  }, [router]);
 
   // Fetch user's sets
   useEffect(() => {
     if (status === "authenticated") {
       fetchUserSets();
     }
-  }, [status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchUserSets = async () => {
     setIsLoading(true);

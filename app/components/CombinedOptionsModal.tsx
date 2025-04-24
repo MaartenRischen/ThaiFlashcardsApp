@@ -1,15 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Switch } from "@/app/components/ui/switch"; // Assuming path for Switch
 import { useSet } from '@/app/context/SetContext';
-import { useState } from 'react';
 import { INITIAL_PHRASES } from '@/app/data/phrases';
 import * as storage from '@/app/lib/storage';
 import Image from 'next/image';
 import { Phrase } from '@/app/lib/set-generator';
 import type { PhraseProgressData } from '@/app/lib/storage';
 import type { FlashcardSet } from '@prisma/client';
+import type { SetMetaData } from '@/app/lib/storage';
 
 interface CombinedOptionsModalProps {
   isOpen: boolean;
@@ -336,6 +336,13 @@ export function SetManagerModal({ isOpen, onClose }: {
   const [cardsModalProgress, setCardsModalProgress] = useState<Record<number, PhraseProgressData>>({});
   const [cardsModalLoading, setCardsModalLoading] = useState(false);
   const [publishingSetId, setPublishingSetId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUserId(localStorage.getItem('userId'));
+    }
+  }, []);
 
   if (!isOpen) return null;
 
@@ -375,27 +382,23 @@ export function SetManagerModal({ isOpen, onClose }: {
   };
 
   // Helper to open the cards modal for a set
-  const handleOpenCardsModal = async (set: FlashcardSet) => {
+  const handleOpenCardsModal = async (set: SetMetaData) => {
     setCardsModalSetId(set.id);
     setCardsModalLoading(true);
-    let phrases = [];
-    let progress = {};
-    if (set.id === 'default') {
-      phrases = INITIAL_PHRASES;
-      progress = activeSetId === 'default' ? activeSetProgress : {};
-    } else {
-      phrases = await storage.getSetContent(set.id);
-      // Try to get progress for this set (if user is logged in)
-      try {
-        const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
-        if (userId) {
-          progress = await storage.getSetProgress(userId, set.id);
-        }
-      } catch {}
+    try {
+      const phrases = await storage.getSetContent(set.id);
+      if (userId) {
+        const progress = await storage.getSetProgress(userId, set.id);
+        setCardsModalProgress(progress);
+      } else {
+        setCardsModalProgress({});
+      }
+      setCardsModalPhrases(phrases);
+    } catch (error: unknown) {
+      console.error('Error loading cards:', error instanceof Error ? error.message : String(error));
+    } finally {
+      setCardsModalLoading(false);
     }
-    setCardsModalPhrases(phrases);
-    setCardsModalProgress(progress || {});
-    setCardsModalLoading(false);
   };
 
   // Helper to get status for a card

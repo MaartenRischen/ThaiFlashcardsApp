@@ -31,10 +31,11 @@ async function callIdeogramApi(prompt: string, resolution: string | undefined): 
       body: JSON.stringify({
         image_request: {
           prompt: prompt,
-          model: "V_2",
-          aspect_ratio: resolution === "portrait" ? "ASPECT_9_16" : 
-                        resolution === "landscape" ? "ASPECT_16_9" : "ASPECT_1_1",
-          magic_prompt_option: "ON"
+          style_type: "DESIGN",
+          resolution: resolution === "portrait" ? "RESOLUTION_576_1536" : 
+                     resolution === "landscape" ? "RESOLUTION_1536_576" : 
+                     "RESOLUTION_1024_1024",
+          seed: Math.floor(Math.random() * 1000000)
         }
       })
     });

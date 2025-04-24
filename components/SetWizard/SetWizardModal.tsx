@@ -8,7 +8,6 @@ import { DailyGoalStep } from './DailyGoalStep';
 import { ReviewStep } from './ReviewStep';
 import { GenerationStep } from './GenerationStep';
 import { Progress } from '../ui/progress';
-import type { Phrase } from '@/app/lib/set-generator';
 
 // Wizard state interface
 export interface SetWizardState {

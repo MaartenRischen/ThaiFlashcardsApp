@@ -1,21 +1,42 @@
-FROM node:18-alpine
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Install production dependencies only
 COPY package.json package-lock.json ./
+RUN npm ci --only=production
 
-# Install dependencies
-RUN npm install
+# Copy only necessary files for build
+COPY prisma ./prisma/
+COPY public ./public/
+COPY app ./app/
+COPY components ./components/
+COPY styles ./styles/
+COPY next.config.js tsconfig.json ./
 
-# Copy application code
-COPY . .
+# Generate Prisma client
+RUN npx prisma generate
 
 # Build the application
+ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV production
 RUN npm run build
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Production image
+FROM node:18-alpine AS runner
+
+WORKDIR /app
+
+# Set environment variables
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
+# Copy necessary files from build stage
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/prisma ./prisma
 
 # Start the application
 CMD ["npm", "start"] 

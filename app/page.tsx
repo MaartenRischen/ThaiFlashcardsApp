@@ -1407,11 +1407,14 @@ export default function ThaiFlashcards() {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ 
-                    name: setName,
-                    level,
-                    specificTopics,
-                    phrases: generatedPhrases,
-                    seriousness: wizardState.tone ?? 50
+                    setData: {
+                      name: setName,
+                      level,
+                      specificTopics,
+                      source: 'generated',
+                      seriousness: wizardState.tone ?? 50
+                    },
+                    phrases: generatedPhrases 
                   }),
                   credentials: 'include',
                 });

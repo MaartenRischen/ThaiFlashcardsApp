@@ -11,6 +11,7 @@ interface FlashcardHeaderProps {
   onOpenSettings: () => void;
   onOpenSetManager: () => void;
   onOpenCards: () => void;
+  onOpenSetWizard: () => void;
 }
 
 export function FlashcardHeader({
@@ -18,6 +19,7 @@ export function FlashcardHeader({
   onOpenSettings,
   onOpenSetManager,
   onOpenCards,
+  onOpenSetWizard,
 }: FlashcardHeaderProps) {
   // Access the active set metadata to get the image URL
   const { availableSets, activeSetId } = useSet();
@@ -142,7 +144,7 @@ export function FlashcardHeader({
             {/* Create Set! */}
             <div className="flex flex-col items-center">
             <button
-              onClick={() => window.open('/set-wizard', '_blank')}
+              onClick={onOpenSetWizard}
                 className="neumorphic-icon-button text-xl text-green-300 shadow-[0_0_10px_#10B981]"
                 title="Create"
                 aria-label="Create"

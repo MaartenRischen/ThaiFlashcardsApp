@@ -963,25 +963,8 @@ export default function ThaiFlashcards() {
         onOpenSettings={() => setIsSettingsModalOpen(true)}
         onOpenCards={() => setShowCardsModal(true)}
         onOpenSetManager={() => setIsManagementModalOpen(true)}
+        onOpenSetWizard={() => setShowSetWizardModal(true)}
       />
-
-      {/* NEW: Create (Advanced) Button */}
-      <div className="flex justify-center mt-4">
-        {/* TEMP: Test Generation Button */}
-        <button
-          className="neumorphic-button bg-gray-600 text-white font-bold px-4 py-2 rounded shadow hover:bg-gray-700 transition mr-2"
-          onClick={handleTestGenerationCallback}
-        >
-          Test Generation
-        </button>
-        {/* Existing Create (Advanced) Button */}
-        <button
-          className="neumorphic-button bg-blue-600 text-white font-bold px-6 py-2 rounded shadow hover:bg-blue-700 transition"
-          onClick={() => setShowSetWizardModal(true)}
-        >
-          Create (Advanced)
-        </button>
-      </div>
 
       {/* Show testGenResult for debugging - Refined conditional and type guards */}
       {typeof testGenResult === 'object' && testGenResult !== null && (

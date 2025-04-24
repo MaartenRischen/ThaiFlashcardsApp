@@ -8,9 +8,10 @@ import { Loader2 } from 'lucide-react';
 interface GenerationStepProps {
   state: SetWizardState;
   onComplete: () => void;
+  onBack: () => void;
 }
 
-export function GenerationStep({ state, onComplete }: GenerationStepProps) {
+export function GenerationStep({ state, onComplete, onBack }: GenerationStepProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -100,9 +101,14 @@ export function GenerationStep({ state, onComplete }: GenerationStepProps) {
       )}
 
       {isComplete && !isGenerating && (
-        <Button onClick={onComplete}>
-          Complete Setup
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+          <Button onClick={onComplete}>
+            Complete Setup
+          </Button>
+        </div>
       )}
     </div>
   );

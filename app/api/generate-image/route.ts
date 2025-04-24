@@ -35,6 +35,7 @@ async function callIdeogramApi(prompt: string, apiKey: string): Promise<string |
       }
     };
     console.log('DEBUG: Using hardcoded ASPECT_16_9 in Ideogram payload', payload);
+    console.log('DEBUG: Using Ideogram API key:', apiKey.substring(0, 5) + '...');
 
     const response = await fetch(IDEOGRAM_API_URL, {
       method: "POST",
@@ -45,6 +46,15 @@ async function callIdeogramApi(prompt: string, apiKey: string): Promise<string |
       body: JSON.stringify(payload),
     });
 
+    console.log(`DEBUG: Ideogram API response status: ${response.status}`);
+    
+    // Log response headers for debugging
+    const headers: Record<string, string> = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    console.log('DEBUG: Ideogram API response headers:', headers);
+
     if (!response.ok) {
       const errorBody = await response.text();
       console.error(`Ideogram API Error (${response.status}): ${errorBody}`);
@@ -52,7 +62,7 @@ async function callIdeogramApi(prompt: string, apiKey: string): Promise<string |
     }
 
     const result = await response.json();
-    console.log("Ideogram API Response:", result);
+    console.log("Ideogram API Response:", JSON.stringify(result, null, 2));
 
     // Extract the image URL from the first item in the data array
     const imageUrl = result?.data?.[0]?.url || null;

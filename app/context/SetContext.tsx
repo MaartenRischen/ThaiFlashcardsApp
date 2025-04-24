@@ -4,7 +4,6 @@ import React, { createContext, useState, useContext, useEffect, ReactNode, useCa
 import { useAuth } from '@clerk/nextjs'; // <-- Import useAuth from Clerk
 import { INITIAL_PHRASES } from '@/app/data/phrases';
 import { Phrase } from '@/app/lib/set-generator';
-import * as storage from '@/app/lib/storage'; // Use renamed storage
 import { SetMetaData, SetProgress } from '@/app/lib/storage';
 
 interface SetContextProps {

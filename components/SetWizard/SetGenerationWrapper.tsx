@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GenerationStatusModal } from './GenerationStatusModal';
 import { generateCustomSet, type Phrase, type GenerationResult } from '@/app/lib/set-generator';
 import type { SetWizardState } from './SetWizardModal';
@@ -15,14 +15,31 @@ export function SetGenerationWrapper({
   onError,
 }: SetGenerationWrapperProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
   const [latestPhrases, setLatestPhrases] = useState<Phrase[]>([]);
   const [error, setError] = useState<string | undefined>();
+  const [generatedPhrases, setGeneratedPhrases] = useState<Phrase[]>([]);
 
-  React.useEffect(() => {
+  // Keep modal open for at least 3 seconds after completion
+  useEffect(() => {
+    if (progress.completed === progress.total && progress.total > 0) {
+      const timer = setTimeout(() => {
+        if (generatedPhrases.length > 0) {
+          setShowModal(false);
+          onComplete(generatedPhrases);
+        }
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [progress, generatedPhrases, onComplete]);
+
+  // Start generation when component mounts
+  useEffect(() => {
     const generate = async () => {
       try {
         setIsGenerating(true);
+        setShowModal(true);
         setError(undefined);
 
         // Map wizardState to the format expected by generateCustomSet
@@ -39,6 +56,8 @@ export function SetGenerationWrapper({
         const totalCards = wizardState.dailyGoal?.type === 'cards' 
           ? wizardState.dailyGoal.value 
           : 20; // Default to 20 cards if not specified
+
+        console.log(`Starting generation with preferences:`, preferences, `and totalCards:`, totalCards);
 
         const result: GenerationResult = await generateCustomSet(
           preferences, 
@@ -61,24 +80,44 @@ export function SetGenerationWrapper({
           }
         );
 
-        // Handle completion - pass the phrases array from the result
-        onComplete(result.phrases);
+        // Store generated phrases but don't complete yet (wait for timeout)
+        console.log(`Generation complete with ${result.phrases.length} phrases`);
+        setGeneratedPhrases(result.phrases);
+        
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+        console.error(`Generation error:`, errorMessage);
         setError(errorMessage);
         onError(errorMessage);
+        
+        // Even with an error, keep the modal visible for a moment
+        setTimeout(() => {
+          setShowModal(false);
+        }, 3000);
       } finally {
         setIsGenerating(false);
       }
     };
 
     generate();
-  }, [wizardState, onComplete, onError]);
+  }, [wizardState, onError]);
+
+  // Handle manual modal close
+  const handleModalClose = () => {
+    if (!isGenerating) {
+      setShowModal(false);
+      if (generatedPhrases.length > 0) {
+        onComplete(generatedPhrases);
+      } else if (error) {
+        onError(error);
+      }
+    }
+  };
 
   return (
     <GenerationStatusModal
-      isOpen={isGenerating}
-      onClose={() => {}} // Modal can't be closed during generation
+      isOpen={showModal}
+      onClose={handleModalClose}
       completed={progress.completed}
       total={progress.total}
       latestPhrases={latestPhrases}

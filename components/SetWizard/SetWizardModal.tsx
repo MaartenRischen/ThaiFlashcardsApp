@@ -149,7 +149,7 @@ export function SetWizardModal({ onComplete, onClose }: {
             )}
           </div>
           {showProgressStepper && <ProgressStepper step={step} totalSteps={totalSteps} />}
-          <div className={step === 7 ? "min-h-[500px]" : "min-h-[400px]"}>
+          <div className="max-h-[75vh] overflow-y-auto pr-2">
             {steps[step]}
           </div>
         </div>

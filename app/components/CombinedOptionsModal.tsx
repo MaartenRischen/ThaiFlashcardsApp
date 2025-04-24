@@ -3,13 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { Switch } from "@/app/components/ui/switch"; // Assuming path for Switch
 import { useSet } from '@/app/context/SetContext';
-import { INITIAL_PHRASES } from '@/app/data/phrases';
 import * as storage from '@/app/lib/storage';
 import Image from 'next/image';
 import { Phrase } from '@/app/lib/set-generator';
 import type { PhraseProgressData } from '@/app/lib/storage';
-import type { FlashcardSet } from '@prisma/client';
 import type { SetMetaData } from '@/app/lib/storage';
+import type { FlashcardSet } from '@prisma/client';
 
 interface CombinedOptionsModalProps {
   isOpen: boolean;

@@ -19,7 +19,7 @@ type FlashcardSet = {
 
 export default function MySetsPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [sets, setSets] = useState<FlashcardSet[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,7 @@ export default function MySetsPage() {
     if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [router]);
+  }, [router, status]);
 
   // Fetch user's sets
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function MySetsPage() {
       fetchUserSets();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [status]);
 
   const fetchUserSets = async () => {
     setIsLoading(true);

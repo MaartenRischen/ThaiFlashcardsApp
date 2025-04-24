@@ -22,6 +22,7 @@ interface SetContextProps {
   exportSet: (id: string) => Promise<void>;
   renameSet: (id: string, newName: string) => Promise<void>;
   refreshSets: () => Promise<void>;
+  setAvailableSets: React.Dispatch<React.SetStateAction<SetMetaData[]>>;
 }
 
 const SetContext = createContext<SetContextProps | undefined>(undefined);
@@ -643,7 +644,8 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       deleteSet,
       exportSet,
       renameSet,
-      refreshSets
+      refreshSets,
+      setAvailableSets
   }), [
     availableSets,
     activeSetId,

@@ -11,7 +11,11 @@ const scenarios = [
   'Custom Scenario',
 ];
 
-export function ScenarioStep({ value, onNext }: { value: { scenarios: string[]; customGoal?: string }, onNext: (data: { scenarios: string[], customGoal?: string }) => void }) {
+export function ScenarioStep({ value, onNext, onBack }: { 
+  value: { scenarios: string[]; customGoal?: string }, 
+  onNext: (data: { scenarios: string[]; customGoal?: string }) => void,
+  onBack: () => void
+}) {
   const [selected, setSelected] = useState<string[]>(value?.scenarios || []);
   const [custom, setCustom] = useState(value?.customGoal || "");
 
@@ -28,34 +32,55 @@ export function ScenarioStep({ value, onNext }: { value: { scenarios: string[]; 
   };
 
   return (
-    <div className="space-y-6 p-4">
-      <div className="text-lg font-semibold text-white mb-2">🎯 What do you want to be able to do in Thai? Choose one or more scenarios.</div>
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold text-white">
+          🎯 What do you want to be able to do in Thai?
+        </h3>
+        <p className="text-gray-400">Choose one or more scenarios that interest you.</p>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {scenarios.map(scenario => (
           <button
             key={scenario}
-            className={`border rounded-lg px-4 py-3 text-left shadow transition ${selected.includes(scenario) ? 'bg-blue-100 border-blue-500 text-gray-900' : 'bg-gray-800 border-gray-700 hover:border-blue-400 text-white'}`}
             onClick={() => handleToggle(scenario)}
-            type="button"
+            className={`
+              neumorphic-button text-left px-4 py-3 transition-all
+              ${selected.includes(scenario) 
+                ? 'bg-blue-600 text-white border-blue-500 shadow-blue-900/20' 
+                : 'bg-[#2a2a2a] text-gray-300 hover:text-white'}
+            `}
           >
             {scenario}
           </button>
         ))}
       </div>
+
       {selected.includes('Custom Scenario') && (
-        <input
-          type="text"
-          className="mt-3 w-full border rounded px-3 py-2 text-white bg-gray-800 border-gray-700"
-          placeholder="Describe your custom scenario"
-          value={custom}
-          onChange={e => setCustom(e.target.value)}
-        />
+        <div className="space-y-2">
+          <label className="text-sm text-gray-400">Describe your custom scenario:</label>
+          <input
+            type="text"
+            className="neumorphic-input w-full"
+            placeholder="E.g., Talking about hobbies..."
+            value={custom}
+            onChange={e => setCustom(e.target.value)}
+          />
+        </div>
       )}
-      <div className="flex gap-4 mt-6">
+
+      <div className="flex justify-between pt-4">
         <button
-          className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700 disabled:opacity-50"
-          disabled={selected.length === 0}
+          onClick={onBack}
+          className="neumorphic-button bg-[#2a2a2a] hover:bg-[#333333] text-white px-8 py-3"
+        >
+          Back
+        </button>
+        <button
+          className="neumorphic-button bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
           onClick={handleNext}
+          disabled={selected.length === 0}
         >
           Next
         </button>

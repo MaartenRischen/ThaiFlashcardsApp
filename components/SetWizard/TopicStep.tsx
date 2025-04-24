@@ -1,77 +1,164 @@
 import React, { useState } from 'react';
 
-const subtopicSuggestions: Record<string, string[]> = {
-  'Ordering Food & Drinks': ['vegetarian food', 'street food', 'ingredients', 'paying the bill'],
-  'Travel & Directions': ['public transport', 'taxi', 'asking for help'],
-  'Shopping': ['bargaining', 'clothing', 'souvenirs'],
-  'Making Small Talk': ['weather', 'hobbies', 'family'],
-  'Business Meetings': ['introductions', 'presentations', 'emails'],
-  'Daily Routines': ['morning', 'evening', 'weekends'],
-  'Emergencies': ['medical', 'police', 'lost items'],
+type ScenarioKey = 
+  | 'Ordering Food & Drinks'
+  | 'Travel & Directions'
+  | 'Shopping'
+  | 'Making Small Talk'
+  | 'Business Meetings'
+  | 'Daily Routines'
+  | 'Emergencies';
+
+const defaultTopics: Record<ScenarioKey, string[]> = {
+  'Ordering Food & Drinks': [
+    'Restaurant Basics',
+    'Drinks & Beverages',
+    'Thai Dishes',
+    'Dietary Preferences',
+    'Street Food'
+  ],
+  'Travel & Directions': [
+    'Transportation',
+    'Locations & Places',
+    'Asking for Directions',
+    'Tourist Attractions',
+    'Accommodation'
+  ],
+  'Shopping': [
+    'Numbers & Prices',
+    'Clothing & Sizes',
+    'Bargaining',
+    'Shopping Venues',
+    'Products & Items'
+  ],
+  'Making Small Talk': [
+    'Greetings & Farewells',
+    'Weather',
+    'Hobbies & Interests',
+    'Family',
+    'Work & Study'
+  ],
+  'Business Meetings': [
+    'Formal Greetings',
+    'Scheduling',
+    'Presentations',
+    'Business Terms',
+    'Office Environment'
+  ],
+  'Daily Routines': [
+    'Time & Schedule',
+    'Activities',
+    'Household',
+    'Health & Wellness',
+    'Social Life'
+  ],
+  'Emergencies': [
+    'Medical Terms',
+    'Emergency Services',
+    'Health Issues',
+    'Safety & Security',
+    'Asking for Help'
+  ]
 };
 
-function uniq(arr: string[]) {
-  return Array.from(new Set(arr));
-}
+export function TopicStep({ value, scenarios, onNext, onBack }: { 
+  value: string[], 
+  scenarios: string[],
+  onNext: (topics: string[]) => void,
+  onBack: () => void
+}) {
+  const [selectedTopics, setSelectedTopics] = useState<string[]>(value || []);
+  const [customTopic, setCustomTopic] = useState('');
 
-export function TopicStep({ value, onNext, scenarios }: { value: string[], onNext: (topics: string[]) => void, scenarios: string[] }) {
-  const [topics, setTopics] = useState<string[]>(value || []);
-  const [custom, setCustom] = useState('');
+  const relevantTopics = scenarios.reduce((acc, scenario) => {
+    if (scenario in defaultTopics) {
+      acc.push(...defaultTopics[scenario as ScenarioKey]);
+    }
+    return acc;
+  }, [] as string[]);
 
-  // Aggregate suggestions for selected scenarios
-  const suggestions = uniq(scenarios.flatMap(s => subtopicSuggestions[s] || []));
+  const uniqueTopics = Array.from(new Set(relevantTopics));
 
-  const handleChip = (topic: string) => {
-    setTopics(ts =>
-      ts.includes(topic)
-        ? ts.filter(t => t !== topic)
-        : [...ts, topic]
+  const toggleTopic = (topic: string) => {
+    setSelectedTopics(prev =>
+      prev.includes(topic)
+        ? prev.filter(t => t !== topic)
+        : [...prev, topic]
     );
   };
 
-  const handleAddCustom = () => {
-    if (custom.trim() && !topics.includes(custom.trim())) {
-      setTopics(ts => [...ts, custom.trim()]);
-      setCustom('');
+  const addCustomTopic = () => {
+    if (customTopic.trim() && !selectedTopics.includes(customTopic.trim())) {
+      setSelectedTopics(prev => [...prev, customTopic.trim()]);
+      setCustomTopic('');
     }
   };
 
+  const handleNext = () => {
+    onNext(selectedTopics);
+  };
+
   return (
-    <div className="space-y-6 p-4">
-      <div className="text-lg font-semibold text-blue-700 mb-2">🔎 Want to focus on something specific? (Optional)</div>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {suggestions.map(topic => (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold text-white">
+          Choose Your Learning Topics
+        </h3>
+        <p className="text-gray-400">
+          Select specific topics you'd like to focus on within your chosen scenarios.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {[...uniqueTopics, ...selectedTopics.filter(topic => !uniqueTopics.includes(topic))].map(topic => (
           <button
             key={topic}
-            className={`px-3 py-1 rounded-full border text-sm transition ${topics.includes(topic) ? 'bg-blue-200 border-blue-500 text-blue-900' : 'bg-white border-gray-300 hover:border-blue-400 text-gray-900'}`}
-            onClick={() => handleChip(topic)}
-            type="button"
+            onClick={() => toggleTopic(topic)}
+            className={`
+              neumorphic-button text-left px-4 py-3 transition-all
+              ${selectedTopics.includes(topic)
+                ? 'bg-blue-600 text-white border-blue-500 shadow-blue-900/20'
+                : 'bg-[#2a2a2a] text-gray-300 hover:text-white'}
+            `}
           >
             {topic}
           </button>
         ))}
       </div>
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          className="flex-1 border rounded px-3 py-2 text-gray-900 bg-white"
-          placeholder="Add a custom topic"
-          value={custom}
-          onChange={e => setCustom(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') handleAddCustom(); }}
-        />
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
-          onClick={handleAddCustom}
-          type="button"
-        >
-          Add
-        </button>
+
+      <div className="space-y-4">
+        <h4 className="text-lg font-semibold text-white">
+          Add Custom Topic
+        </h4>
+        <div className="flex gap-3">
+          <input
+            type="text"
+            value={customTopic}
+            onChange={(e) => setCustomTopic(e.target.value)}
+            placeholder="Enter a custom topic..."
+            className="neumorphic-input flex-1"
+          />
+          <button
+            onClick={addCustomTopic}
+            disabled={!customTopic.trim()}
+            className="neumorphic-button bg-blue-600 hover:bg-blue-700 text-white px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Add
+          </button>
+        </div>
       </div>
-      <div className="flex gap-4 mt-6">
+
+      <div className="flex justify-between pt-4">
         <button
-          className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700"
-          onClick={() => onNext(topics)}
+          onClick={onBack}
+          className="neumorphic-button bg-[#2a2a2a] hover:bg-[#333333] text-white px-8 py-3"
+        >
+          Back
+        </button>
+        <button
+          className="neumorphic-button bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
+          onClick={handleNext}
+          disabled={selectedTopics.length === 0}
         >
           Next
         </button>

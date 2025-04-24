@@ -11,7 +11,6 @@ COPY prisma ./prisma/
 COPY public ./public/
 COPY app ./app/
 COPY components ./components/
-COPY styles ./styles/
 COPY next.config.js tsconfig.json ./
 
 # Generate Prisma client

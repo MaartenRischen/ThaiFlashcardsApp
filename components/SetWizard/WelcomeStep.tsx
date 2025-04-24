@@ -12,7 +12,7 @@ export function WelcomeStep({ onNext, onSkip }: { onNext: () => void; onSkip: ()
           Welcome to Donkey Bridge
         </h2>
         <p className="text-gray-400 max-w-md text-lg">
-          Let's personalize your Thai learning journey! Answer a few quick questions to create your perfect flashcard set.
+          Let&apos;s personalize your Thai learning journey! Answer a few quick questions to create your perfect flashcard set.
         </p>
         <p className="text-sm text-gray-500">
           You can skip this and use the default set or import public sets anytime.

@@ -105,7 +105,7 @@ export function TopicStep({ value, scenarios, onNext, onBack }: {
           Choose Your Learning Topics
         </h3>
         <p className="text-gray-400">
-          Select specific topics you'd like to focus on within your chosen scenarios.
+          Select specific topics you&apos;d like to focus on within your chosen scenarios.
         </p>
       </div>
 

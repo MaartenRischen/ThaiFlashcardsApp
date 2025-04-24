@@ -14,7 +14,7 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
           🎉 Almost Ready!
         </h3>
         <p className="text-gray-400">
-          Review your choices and make any final adjustments.
+          Review your selections before we generate your custom set. You&apos;ve almost done!
         </p>
       </div>
 
@@ -23,7 +23,7 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-lg font-semibold text-white">Selected Scenarios</h4>
-              <div className="text-gray-400 text-sm mt-1">What you'll learn</div>
+              <div className="text-gray-400 text-sm mt-1">What you&apos;ll learn</div>
             </div>
             <button 
               onClick={() => onEdit(1)}
@@ -51,7 +51,7 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-lg font-semibold text-white">Learning Style</h4>
-              <div className="text-gray-400 text-sm mt-1">How you'll learn</div>
+              <div className="text-gray-400 text-sm mt-1">How you&apos;ll learn</div>
             </div>
             <button 
               onClick={() => onEdit(2)}

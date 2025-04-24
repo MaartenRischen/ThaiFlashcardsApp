@@ -71,6 +71,15 @@ const BATCH_SIZE = 8;
 // const DEFAULT_OPENROUTER_MODEL = 'openrouter/mixtral-8x7b';
 const DEFAULT_OPENROUTER_MODEL = 'openrouter/auto'; // Use Auto Router
 
+// Prioritized list of text models for set generation
+const TEXT_MODELS = [
+  'google/gemini-2.5-pro', // Gemini 2.5 Pro
+  'openai/gpt-4',          // OpenAI GPT-4
+  'openai/gpt-3.5-turbo',  // OpenAI GPT-3.5 Turbo
+  'anthropic/claude-3-opus', // Anthropic Claude
+  'mistralai/mixtral-8x7b', // Other fallback
+];
+
 /**
  * Builds a significantly updated prompt for generating Thai flashcards based on detailed user preferences.
  */
@@ -277,7 +286,7 @@ export async function generateCustomSet(
     let batchResult: {phrases: Phrase[], cleverTitle?: string, error?: BatchError} | null = null; // Type the result
     while (retries < MAX_RETRIES && !success) {
       try {
-        batchResult = await generateOpenRouterBatch(prompt, DEFAULT_OPENROUTER_MODEL, currentBatchIndex);
+        batchResult = await generateOpenRouterBatch(prompt, TEXT_MODELS, currentBatchIndex);
         if (batchResult.error) {
           aggregatedErrors.push({ ...batchResult.error, batchIndex: currentBatchIndex });
           retries++;
@@ -389,7 +398,7 @@ export async function generateSingleFlashcard(
     while (retries < MAX_RETRIES) {
       try {
         console.log(`Single card generation attempt ${retries + 1}/${MAX_RETRIES}`);
-        const result = await generateOpenRouterBatch(prompt, DEFAULT_OPENROUTER_MODEL, -1);
+        const result = await generateOpenRouterBatch(prompt, TEXT_MODELS, -1);
         
         if (result.error) {
           console.error(`Error generating single flashcard (attempt ${retries + 1}, type ${result.error.type}):`, result.error.message);
@@ -442,75 +451,72 @@ export async function generateSingleFlashcard(
   }
 }
 
-// Add OpenRouter API call
-async function callOpenRouter(prompt: string, model: string): Promise<string> {
+// Refactored OpenRouter call with fallback logic
+async function callOpenRouterWithFallback(prompt: string, models: string[]): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  // TEMPORARILY HARDCODED - REMOVE LATER
-  // const apiKey = "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";
-
-  // Log if the API key is missing *at the point of use*
   if (!apiKey) {
-    console.error("callOpenRouter Error: Missing OPENROUTER_API_KEY env variable at runtime.");
-    console.error("DEBUG: process.env.OPENROUTER_API_KEY value:", process.env.OPENROUTER_API_KEY ? process.env.OPENROUTER_API_KEY.substring(0,8) + '...' : process.env.OPENROUTER_API_KEY);
+    console.error("callOpenRouterWithFallback Error: Missing OPENROUTER_API_KEY env variable at runtime.");
     throw new Error("Missing OPENROUTER_API_KEY env variable");
   }
-
-  // Log the first few chars of the key to confirm it's loaded (DO NOT LOG THE FULL KEY)
-  console.log(`callOpenRouter: Using OpenRouter API Key starting with: ${apiKey.substring(0, 5)}...`);
-
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "user", content: prompt }],
-    })
-  });
-
-  if (!response.ok) {
-    const errorStatus = response.status;
-    const errorText = await response.text();
-    // Log the specific error details
-    console.error(`OpenRouter API Error: Status ${errorStatus}, Body: ${errorText}`);
-    throw new Error(`OpenRouter API error: Status ${errorStatus} - ${errorText}`);
+  for (const model of models) {
+    try {
+      console.log(`Trying OpenRouter model: ${model}`);
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: "user", content: prompt }],
+        })
+      });
+      if (!response.ok) {
+        const errorStatus = response.status;
+        const errorText = await response.text();
+        console.error(`OpenRouter API Error (model: ${model}): Status ${errorStatus}, Body: ${errorText}`);
+        continue;
+      }
+      const data: unknown = await response.json();
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'choices' in data &&
+        Array.isArray(data.choices) &&
+        data.choices.length > 0 &&
+        typeof data.choices[0] === 'object' &&
+        data.choices[0] !== null &&
+        'message' in data.choices[0] &&
+        typeof data.choices[0].message === 'object' &&
+        data.choices[0].message !== null &&
+        'content' in data.choices[0].message &&
+        typeof data.choices[0].message.content === 'string'
+      ) {
+        const text = data.choices[0].message.content;
+        if (!text) throw new Error("Empty content returned from OpenRouter");
+        console.log(`Successfully generated set with model: ${model}`);
+        return text;
+      } else {
+        console.error(`Unexpected OpenRouter response structure for model ${model}:`, data);
+        continue;
+      }
+    } catch (error) {
+      console.error(`Error calling OpenRouter model ${model}:`, error);
+      continue;
+    }
   }
-
-  const data: unknown = await response.json(); // Use unknown
-  // Validate the structure of data
-  if (
-    typeof data === 'object' &&
-    data !== null &&
-    'choices' in data &&
-    Array.isArray(data.choices) &&
-    data.choices.length > 0 &&
-    typeof data.choices[0] === 'object' &&
-    data.choices[0] !== null &&
-    'message' in data.choices[0] &&
-    typeof data.choices[0].message === 'object' &&
-    data.choices[0].message !== null &&
-    'content' in data.choices[0].message &&
-    typeof data.choices[0].message.content === 'string'
-  ) {
-    const text = data.choices[0].message.content;
-    if (!text) throw new Error("Empty content returned from OpenRouter");
-    return text;
-  } else {
-    console.error("Unexpected OpenRouter response structure:", data);
-    throw new Error("Unexpected response structure from OpenRouter");
-  }
+  throw new Error("All OpenRouter models failed for set generation.");
 }
 
-// Add OpenRouter batch generator
+// Update batch generator to use fallback logic
 export async function generateOpenRouterBatch(
   prompt: string,
-  model: string,
+  models: string[],
   batchIndex: number
 ): Promise<{phrases: Phrase[], cleverTitle?: string, error?: BatchError}> {
   try {
-    const responseText = await callOpenRouter(prompt, model);
+    const responseText = await callOpenRouterWithFallback(prompt, models);
     // Clean the response (remove markdown, etc.)
     const cleanedText = responseText.replace(/^```json\s*|```$/g, '').trim();
     let parsedResponse: unknown;
@@ -523,8 +529,6 @@ export async function generateOpenRouterBatch(
         error: createBatchError('PARSE', `Failed to parse API response (Batch ${batchIndex}): ${errorMessage}`, { responseText: cleanedText, parseError: String(parseError) })
       };
     }
-
-    // Validate the parsedResponse structure
     if (typeof parsedResponse !== 'object' || parsedResponse === null || !('phrases' in parsedResponse) || !Array.isArray(parsedResponse.phrases)) {
       console.error(`Invalid JSON structure received (Batch ${batchIndex}): Expected { phrases: [...] }, got:`, parsedResponse);
       return {
@@ -532,20 +536,14 @@ export async function generateOpenRouterBatch(
         error: createBatchError('VALIDATION', `Invalid JSON structure received (Batch ${batchIndex}). Expected object with 'phrases' array.`, { parsedResponse })
       };
     }
-
-    // Validate cleverTitle if present
     const cleverTitle = ('cleverTitle' in parsedResponse && typeof parsedResponse.cleverTitle === 'string') ? parsedResponse.cleverTitle : undefined;
     if ('cleverTitle' in parsedResponse && typeof parsedResponse.cleverTitle !== 'string') {
        console.warn(`Invalid cleverTitle type received (Batch ${batchIndex}), expected string, got ${typeof parsedResponse.cleverTitle}. Ignoring title.`);
     }
-
-    // Validate individual phrases
     const validatedPhrases: Phrase[] = [];
     const validationErrors: string[] = [];
-
     for (const phraseData of parsedResponse.phrases) {
       if (validatePhrase(phraseData)) {
-         // Ensure optional mnemonic is string or undefined, not null
          const validatedPhrase = phraseData as Phrase;
          if (validatedPhrase.mnemonic === null) {
             validatedPhrase.mnemonic = undefined;
@@ -555,10 +553,8 @@ export async function generateOpenRouterBatch(
         validationErrors.push(`Invalid phrase structure: ${JSON.stringify(phraseData).substring(0, 100)}...`);
       }
     }
-
     if (validationErrors.length > 0) {
        console.warn(`Validation errors in batch ${batchIndex}:`, validationErrors);
-      // Decide if we should return partial data or an error
       if (validatedPhrases.length === 0) {
         return {
           phrases: [],
@@ -566,19 +562,16 @@ export async function generateOpenRouterBatch(
           error: createBatchError('VALIDATION', `All ${parsedResponse.phrases.length} phrases failed validation (Batch ${batchIndex}).`, { errors: validationErrors })
         };
       } else {
-        // Optionally, return partial data with a warning/error logged elsewhere
         console.warn(`Batch ${batchIndex} completed with ${validationErrors.length} validation errors out of ${parsedResponse.phrases.length} phrases. Returning ${validatedPhrases.length} valid phrases.`);
       }
     }
-    
     if (validatedPhrases.length === 0 && !cleverTitle) {
         return {
             phrases: [],
             error: createBatchError('VALIDATION', `API returned empty or invalid phrases array and no title (Batch ${batchIndex})`, { parsedResponse })
         };
     }
-
-    console.log(`Batch ${batchIndex} successful: Generated ${validatedPhrases.length} valid phrases.${cleverTitle ? ' Title: \"' + cleverTitle + '\"':''}`);
+    console.log(`Batch ${batchIndex} successful: Generated ${validatedPhrases.length} valid phrases.${cleverTitle ? ' Title: "' + cleverTitle + '"':''}`);
     return {
       phrases: validatedPhrases,
       cleverTitle
@@ -586,12 +579,9 @@ export async function generateOpenRouterBatch(
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(`Error in generateOpenRouterBatch (Batch ${batchIndex}):`, error);
-    
-    // Determine error type based on message content (basic heuristic)
     let errorType: BatchErrorType = 'UNKNOWN';
     if (errorMessage.includes('API error')) errorType = 'API';
     else if (errorMessage.includes('network') || errorMessage.includes('fetch')) errorType = 'NETWORK';
-    
     return {
       phrases: [],
       error: createBatchError(errorType, `General error processing batch ${batchIndex}: ${errorMessage}`, { error })

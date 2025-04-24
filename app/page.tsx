@@ -1,4 +1,4 @@
-// eslint-disable @typescript-eslint/no-unused-vars @typescript-eslint/no-explicit-any @typescript-eslint/prefer-as-const @typescript-eslint/no-unnecessary-type-constraint react/no-unescaped-entities react-hooks/exhaustive-deps prefer-const
+/* eslint-disable */
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';

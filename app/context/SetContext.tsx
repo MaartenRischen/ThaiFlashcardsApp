@@ -151,13 +151,22 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     setActiveSetProgress(newProgress); // Update local state immediately
 
     try {
-      // Save async to Supabase
-      const success = await storage.saveSetProgress(userId, activeSetId, newProgress); // Needs userId and await
-      if (success) {
-        console.log("SetContext: Successfully saved progress to Supabase.");
-      } else {
-        console.error("SetContext: Failed to save progress to Supabase.");
+      // Save via API endpoint instead of directly using storage
+      const response = await fetch(`/api/flashcard-sets/${activeSetId}/progress`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ progress: newProgress }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || `API request failed with status ${response.status}`);
       }
+      
+      console.log("SetContext: Successfully saved progress via API.");
     } catch (error) {
         console.error("SetContext: Error saving progress:", error);
     }
@@ -175,8 +184,27 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
           console.log(`Set ${activeSetId}: Fully learned status changed to ${allEasy}. Updating metadata.`);
           const updatedMeta: SetMetaData = { ...currentMeta, isFullyLearned: allEasy };
           try {
-            // Use storage function (now async)
-            await storage.updateSetMetaData(updatedMeta); // Needs await
+            // Update metadata via API
+            const response = await fetch(`/api/flashcard-sets/${activeSetId}`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ 
+                name: updatedMeta.name,
+                cleverTitle: updatedMeta.cleverTitle,
+                level: updatedMeta.level,
+                goals: updatedMeta.goals,
+                specificTopics: updatedMeta.specificTopics
+              }),
+              credentials: 'include'
+            });
+            
+            if (!response.ok) {
+              const data = await response.json();
+              throw new Error(data.error || `API request failed with status ${response.status}`);
+            }
+            
             setAvailableSets(prevSets => 
               prevSets.map(set => set.id === activeSetId ? updatedMeta : set)
             );
@@ -397,11 +425,15 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     console.log(`SetContext: Deleting set ${id} for userId ${userId}`);
     setIsLoading(true);
     try {
-      // Call async storage function (which handles related data deletion)
-      const success = await storage.deleteSetMetaData(id); 
+      // Use the API endpoint instead of directly calling storage functions
+      const response = await fetch(`/api/flashcard-sets/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
 
-      if (!success) {
-        throw new Error("Failed to delete set from database.");
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || `API request failed with status ${response.status}`);
       }
 
       // Update local state
@@ -447,19 +479,40 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     try {
         const metaData = availableSets.find(set => set.id === id);
-        // Fetch async from Supabase
-        const content = await storage.getSetContent(id); // Needs await
-        const progress = await storage.getSetProgress(userId, id); // Needs userId and await
-
-        if (!metaData || !content) {
-            throw new Error('Set data could not be loaded for export.');
+        if (!metaData) {
+            throw new Error('Set metadata not found for export.');
         }
+        
+        // Fetch content via API
+        const contentResponse = await fetch(`/api/flashcard-sets/${id}/content`, {
+          credentials: 'include'
+        });
+        
+        if (!contentResponse.ok) {
+          const data = await contentResponse.json();
+          throw new Error(data.error || `Failed to fetch content: ${contentResponse.status}`);
+        }
+        
+        const content = await contentResponse.json();
+        
+        // Fetch progress via API
+        const progressResponse = await fetch(`/api/flashcard-sets/${id}/progress`, {
+          credentials: 'include'
+        });
+        
+        if (!progressResponse.ok) {
+          const data = await progressResponse.json();
+          throw new Error(data.error || `Failed to fetch progress: ${progressResponse.status}`);
+        }
+        
+        const progressData = await progressResponse.json();
+        const progress = progressData.progress || {};
 
         const exportData = {
             version: "1.0",
             metaData: metaData,
             content: content,
-            progress: progress || {} 
+            progress: progress
         };
 
         const dataStr = JSON.stringify(exportData, null, 2);
@@ -496,9 +549,23 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       
       setIsLoading(true);
       try {
-          // Use storage function (now async)
-          const success = await storage.updateSetMetaData(updatedSetData); // Needs await
-          if (!success) throw new Error("Failed to update set metadata in database.");
+          // Update via API endpoint
+          const response = await fetch(`/api/flashcard-sets/${id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              name: newName,
+              cleverTitle: newName
+            }),
+            credentials: 'include'
+          });
+          
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || `API request failed with status ${response.status}`);
+          }
           
           // Update the state
           setAvailableSets(prevSets => 

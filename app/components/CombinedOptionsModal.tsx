@@ -8,7 +8,6 @@ import Image from 'next/image';
 import { Phrase } from '@/app/lib/set-generator';
 import type { PhraseProgressData } from '@/app/lib/storage';
 import type { SetMetaData } from '@/app/lib/storage';
-import type { FlashcardSet } from '@prisma/client';
 
 interface CombinedOptionsModalProps {
   isOpen: boolean;

@@ -23,6 +23,7 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
       try {
         setIsGenerating(true);
         setError(null);
+        setGeneratedPhrases([]); // Reset phrases at start
 
         // Map SetWizardState to generateCustomSet parameters
         let level: 'beginner' | 'intermediate' | 'advanced' = 'beginner';
@@ -59,7 +60,7 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
         );
 
         if (result.phrases.length > 0) {
-          setGeneratedPhrases(result.phrases);
+          // Don't override the accumulated phrases, just mark as complete
           setIsComplete(true);
         } else {
           setError('Failed to generate phrases. Please try again.');
@@ -87,25 +88,36 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
         <div className="text-red-500">{error}</div>
       )}
 
-      {generatedPhrases.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="font-semibold">Generated Phrases:</h3>
-          <ul className="space-y-1">
-            {generatedPhrases.map((phrase, index) => (
-              <li key={index} className="text-sm">
-                {phrase.english} - {phrase.thai}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <div className="space-y-2">
+        <h3 className="font-semibold">Latest Generated Cards:</h3>
+        <ul className="space-y-1">
+          {generatedPhrases.map((phrase, index) => (
+            <li key={index} className="text-sm">
+              <div className="text-blue-400">{phrase.thai}</div>
+              <div className="text-gray-400">{phrase.english}</div>
+              {phrase.mnemonic && (
+                <div className="text-yellow-600 text-xs italic">
+                  Mnemonic: {phrase.mnemonic}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {isComplete && !isGenerating && (
         <div className="flex gap-2">
           <Button variant="outline" onClick={onBack}>
             Back
           </Button>
-          <Button onClick={onComplete}>
+          <Button onClick={() => {
+            // Only complete if we actually have phrases
+            if (generatedPhrases.length > 0) {
+              onComplete();
+            } else {
+              setError('No phrases were generated. Please try again.');
+            }
+          }}>
             Complete Setup
           </Button>
         </div>

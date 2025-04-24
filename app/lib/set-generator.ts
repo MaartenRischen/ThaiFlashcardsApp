@@ -286,7 +286,7 @@ export async function generateCustomSet(
     let batchResult: {phrases: Phrase[], cleverTitle?: string, error?: BatchError} | null = null; // Type the result
     while (retries < MAX_RETRIES && !success) {
       try {
-        batchResult = await generateOpenRouterBatch(prompt, TEXT_MODELS, currentBatchIndex);
+        batchResult = await generateOpenRouterBatch(prompt, TEXT_MODELS, currentBatchIndex, preferences.seriousnessLevel);
         if (batchResult.error) {
           aggregatedErrors.push({ ...batchResult.error, batchIndex: currentBatchIndex });
           retries++;
@@ -398,7 +398,7 @@ export async function generateSingleFlashcard(
     while (retries < MAX_RETRIES) {
       try {
         console.log(`Single card generation attempt ${retries + 1}/${MAX_RETRIES}`);
-        const result = await generateOpenRouterBatch(prompt, TEXT_MODELS, -1);
+        const result = await generateOpenRouterBatch(prompt, TEXT_MODELS, -1, preferences.seriousnessLevel);
         
         if (result.error) {
           console.error(`Error generating single flashcard (attempt ${retries + 1}, type ${result.error.type}):`, result.error.message);
@@ -451,8 +451,15 @@ export async function generateSingleFlashcard(
   }
 }
 
-// Refactored OpenRouter call with fallback logic
-async function callOpenRouterWithFallback(prompt: string, models: string[]): Promise<string> {
+// Utility to map seriousnessLevel (ridiculousness) to temperature
+function getTemperatureFromSeriousness(seriousnessLevel: number | undefined): number {
+  if (!seriousnessLevel || seriousnessLevel <= 0) return 0;
+  // Map 1-100 to 0.2-1.2 (linear)
+  return Math.round((0.2 + (seriousnessLevel / 100) * 1.0) * 100) / 100;
+}
+
+// Refactored OpenRouter call with fallback logic and temperature
+async function callOpenRouterWithFallback(prompt: string, models: string[], temperature: number): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     console.error("callOpenRouterWithFallback Error: Missing OPENROUTER_API_KEY env variable at runtime.");
@@ -460,7 +467,7 @@ async function callOpenRouterWithFallback(prompt: string, models: string[]): Pro
   }
   for (const model of models) {
     try {
-      console.log(`Trying OpenRouter model: ${model}`);
+      console.log(`Trying OpenRouter model: ${model} with temperature: ${temperature}`);
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -470,6 +477,7 @@ async function callOpenRouterWithFallback(prompt: string, models: string[]): Pro
         body: JSON.stringify({
           model,
           messages: [{ role: "user", content: prompt }],
+          temperature
         })
       });
       if (!response.ok) {
@@ -509,14 +517,16 @@ async function callOpenRouterWithFallback(prompt: string, models: string[]): Pro
   throw new Error("All OpenRouter models failed for set generation.");
 }
 
-// Update batch generator to use fallback logic
+// Update batch generator to use fallback logic and temperature
 export async function generateOpenRouterBatch(
   prompt: string,
   models: string[],
-  batchIndex: number
+  batchIndex: number,
+  seriousnessLevel?: number
 ): Promise<{phrases: Phrase[], cleverTitle?: string, error?: BatchError}> {
   try {
-    const responseText = await callOpenRouterWithFallback(prompt, models);
+    const temperature = getTemperatureFromSeriousness(seriousnessLevel);
+    const responseText = await callOpenRouterWithFallback(prompt, models, temperature);
     // Clean the response (remove markdown, etc.)
     const cleanedText = responseText.replace(/^```json\s*|```$/g, '').trim();
     let parsedResponse: unknown;

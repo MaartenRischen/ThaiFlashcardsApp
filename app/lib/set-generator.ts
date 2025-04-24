@@ -573,9 +573,16 @@ function getTemperatureFromSeriousness(seriousnessLevel: number | undefined): nu
 // Refactored OpenRouter call with fallback logic and temperature
 async function callOpenRouterWithFallback(prompt: string, models: string[], temperature: number): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY;
+  
+  // Enhanced logging for API key debugging
   if (!apiKey) {
-    // Log the error but don't throw immediately - this allows fallback mechanisms to take over faster
-    console.error("callOpenRouterWithFallback: Missing OPENROUTER_API_KEY environment variable. This is expected in local environments as we'll fallback to alternative sources.");
+    console.error("CRITICAL ERROR: Missing OPENROUTER_API_KEY environment variable.");
+    console.error("Environment context: NODE_ENV =", process.env.NODE_ENV);
+    console.error("API Keys available:", {
+      "OPENROUTER_API_KEY": process.env.OPENROUTER_API_KEY ? "Defined" : "Undefined",
+      "IDEOGRAM_API_KEY": process.env.IDEOGRAM_API_KEY ? "Defined" : "Undefined"
+    });
+    
     // Return empty JSON to trigger fallback mechanism
     return '{"phrases": [], "cleverTitle": "Sample Phrases"}';
   }

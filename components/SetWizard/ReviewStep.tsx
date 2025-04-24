@@ -29,38 +29,38 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
       <div className="space-y-3">
         <div className="bg-gray-50 p-3 rounded flex justify-between items-center">
           <div>
-            <div className="font-bold">Proficiency</div>
-            <div>{state.proficiency.canDoSelections.length > 0 ? state.proficiency.canDoSelections.join(', ') : 'Skipped'}</div>
+            <div className="font-bold text-gray-900">Proficiency</div>
+            <div className="text-gray-900">{state.proficiency.canDoSelections.length > 0 ? state.proficiency.canDoSelections.join(', ') : 'Skipped'}</div>
             <div className="text-sm text-gray-500">Level: {state.proficiency.levelEstimate || 'unknown'}</div>
           </div>
           <button className="text-blue-600 underline text-sm" onClick={() => onEdit(1)}>Edit</button>
         </div>
         <div className="bg-gray-50 p-3 rounded flex justify-between items-center">
           <div>
-            <div className="font-bold">Scenarios</div>
-            <div>{state.goals.scenarios.join(', ') || 'None'}</div>
+            <div className="font-bold text-gray-900">Scenarios</div>
+            <div className="text-gray-900">{state.goals.scenarios.join(', ') || 'None'}</div>
             {state.goals.customGoal && <div className="text-sm text-gray-500">Custom: {state.goals.customGoal}</div>}
           </div>
           <button className="text-blue-600 underline text-sm" onClick={() => onEdit(2)}>Edit</button>
         </div>
         <div className="bg-gray-50 p-3 rounded flex justify-between items-center">
           <div>
-            <div className="font-bold">Topics</div>
-            <div>{state.topics.length > 0 ? state.topics.join(', ') : 'None'}</div>
+            <div className="font-bold text-gray-900">Topics</div>
+            <div className="text-gray-900">{state.topics.length > 0 ? state.topics.join(', ') : 'None'}</div>
           </div>
           <button className="text-blue-600 underline text-sm" onClick={() => onEdit(3)}>Edit</button>
         </div>
         <div className="bg-gray-50 p-3 rounded flex justify-between items-center">
           <div>
-            <div className="font-bold">Tone</div>
-            <div>{state.tone <= 30 ? 'Serious/Practical' : state.tone >= 70 ? 'Ridiculous/Comedic' : 'Balanced'} ({state.tone})</div>
+            <div className="font-bold text-gray-900">Tone</div>
+            <div className="text-gray-900">{state.tone <= 30 ? 'Serious/Practical' : state.tone >= 70 ? 'Ridiculous/Comedic' : 'Balanced'} ({state.tone})</div>
           </div>
           <button className="text-blue-600 underline text-sm" onClick={() => onEdit(4)}>Edit</button>
         </div>
         <div className="bg-gray-50 p-3 rounded flex justify-between items-center">
           <div>
-            <div className="font-bold">Daily Goal</div>
-            <div>{state.dailyGoal ? `${state.dailyGoal.value} ${state.dailyGoal.type === 'cards' ? 'cards/day' : 'min/day'}` : 'None'}</div>
+            <div className="font-bold text-gray-900">Daily Goal</div>
+            <div className="text-gray-900">{state.dailyGoal ? `${state.dailyGoal.value} ${state.dailyGoal.type === 'cards' ? 'cards/day' : 'min/day'}` : 'None'}</div>
           </div>
           <button className="text-blue-600 underline text-sm" onClick={() => onEdit(5)}>Edit</button>
         </div>

@@ -23,7 +23,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Dialog } from '@/components/ui/dialog';
 import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle } from 'lucide-react';
-import { getMnemonicForCard } from '@/app/lib/storage';
 
 // Define a simple CardStatus type locally for now
 type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';

@@ -34,7 +34,7 @@ export function ScenarioStep({ value, onNext }: { value: { scenarios: string[]; 
         {scenarios.map(scenario => (
           <button
             key={scenario}
-            className={`border rounded-lg px-4 py-3 text-left shadow transition ${selected.includes(scenario) ? 'bg-blue-100 border-blue-500' : 'bg-gray-800 border-gray-700 hover:border-blue-400'}`}
+            className={`border rounded-lg px-4 py-3 text-left shadow transition ${selected.includes(scenario) ? 'bg-blue-100 border-blue-500 text-gray-900' : 'bg-gray-800 border-gray-700 hover:border-blue-400 text-white'}`}
             onClick={() => handleToggle(scenario)}
             type="button"
           >
@@ -45,7 +45,7 @@ export function ScenarioStep({ value, onNext }: { value: { scenarios: string[]; 
       {selected.includes('Custom Scenario') && (
         <input
           type="text"
-          className="mt-3 w-full border rounded px-3 py-2 text-white"
+          className="mt-3 w-full border rounded px-3 py-2 text-white bg-gray-800 border-gray-700"
           placeholder="Describe your custom scenario"
           value={custom}
           onChange={e => setCustom(e.target.value)}

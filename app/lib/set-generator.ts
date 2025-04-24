@@ -67,10 +67,6 @@ export interface CustomSet {
 const MAX_RETRIES = 3;
 const BATCH_SIZE = 8;
 
-// --- Replace Gemini with OpenRouter as default generator ---
-// const DEFAULT_OPENROUTER_MODEL = 'openrouter/mixtral-8x7b';
-const DEFAULT_OPENROUTER_MODEL = 'openrouter/auto'; // Use Auto Router
-
 // Prioritized list of text models for set generation
 const TEXT_MODELS = [
   'google/gemini-2.5-pro', // Gemini 2.5 Pro

@@ -12,11 +12,9 @@ interface GenerationStepProps {
 }
 
 export function GenerationStep({ state, onBack, onComplete }: GenerationStepProps) {
-  const [isGenerating, setIsGenerating] = useState(true);
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
   const [latestPhrases, setLatestPhrases] = useState<Phrase[]>([]);
   const [error, setError] = useState<string | undefined>();
-  const [generatedPhrases, setGeneratedPhrases] = useState<Phrase[]>([]);
 
   // Calculate progress percentage
   const progressPercentage = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;
@@ -26,7 +24,6 @@ export function GenerationStep({ state, onBack, onComplete }: GenerationStepProp
   useEffect(() => {
     const generate = async () => {
       try {
-        setIsGenerating(true);
         setError(undefined);
 
         // Map wizardState to the format expected by generateCustomSet
@@ -66,7 +63,6 @@ export function GenerationStep({ state, onBack, onComplete }: GenerationStepProp
 
         // Store generated phrases and complete the process
         console.log(`Generation complete with ${result.phrases.length} phrases`);
-        setGeneratedPhrases(result.phrases);
         
         // Complete after 2 seconds to show the full progress
         if (result.phrases.length > 0) {
@@ -82,8 +78,6 @@ export function GenerationStep({ state, onBack, onComplete }: GenerationStepProp
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
         console.error(`Generation error:`, errorMessage);
         setError(errorMessage);
-      } finally {
-        setIsGenerating(false);
       }
     };
 

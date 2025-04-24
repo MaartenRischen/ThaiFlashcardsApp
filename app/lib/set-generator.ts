@@ -276,7 +276,6 @@ export async function generateCustomSet(
     const aggregatedErrors: (BatchError & { batchIndex: number })[] = [];
     const allPhrases: Phrase[] = [];
     let cleverTitle: string | undefined;
-    let completedBatches = 0;
     
     // Prepare the fallback data early so it's ready if needed
     const fallbackPhrases = INITIAL_PHRASES.slice(0, totalCount);
@@ -369,7 +368,6 @@ export async function generateCustomSet(
         }
         
         // Update progress after batch completion
-        completedBatches++;
         if (onProgressUpdate) {
           // Calculate completion based on phrases successfully generated
           const progressPercentage = Math.min(

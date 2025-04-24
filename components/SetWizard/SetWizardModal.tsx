@@ -49,7 +49,6 @@ export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: Se
     topics: [],
     tone: 50,
   });
-  const [generatedPhrases, setGeneratedPhrases] = useState<Phrase[]>([]);
 
   const steps = [
     <WelcomeStep
@@ -114,7 +113,6 @@ export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: Se
       key="generation"
       state={state}
       onComplete={(phrases) => {
-        setGeneratedPhrases(phrases);
         onComplete(state, phrases);
       }}
       onBack={() => setStep(6)}

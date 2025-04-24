@@ -17,8 +17,8 @@ export function GenerationStep({ state, onBack, onComplete }: GenerationStepProp
       <div className="space-y-2">
         <h3 className="text-2xl font-semibold text-blue-400">Creating Your Set</h3>
         <p className="text-gray-300">
-          We're generating personalized flashcards based on your preferences. 
-          This may take a minute or two. You'll see cards appear below as they're created.
+          We&apos;re generating personalized flashcards based on your preferences. 
+          This may take a minute or two. You&apos;ll see cards appear below as they&apos;re created.
         </p>
         
         {error && (

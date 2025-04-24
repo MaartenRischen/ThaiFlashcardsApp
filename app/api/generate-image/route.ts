@@ -33,7 +33,7 @@ async function callIdeogramApi(prompt: string, resolution: string | undefined): 
           prompt: prompt,
           style_type: "DESIGN",
           resolution: resolution === "portrait" ? "RESOLUTION_576_1536" : 
-                     resolution === "landscape" ? "RESOLUTION_1536_576" : 
+                     resolution === "landscape" ? "RESOLUTION_1024_640" :
                      "RESOLUTION_1024_1024",
           seed: Math.floor(Math.random() * 1000000)
         }

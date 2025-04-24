@@ -186,8 +186,24 @@ export async function POST(request: Request) {
       console.log(`API Route: Initial progress saved for set ID: ${newMetaId}`);
 
       // --- 6. Return Success Response ---
-      console.log(`API Route: Successfully created set ${newMetaId}. Returning ID.`);
-      return NextResponse.json({ newSetId: newMetaId }, { status: 201 });
+      const completeNewMetaData: SetMetaData = {
+        id: insertedRecord.id,
+        name: insertedRecord.name,
+        cleverTitle: insertedRecord.cleverTitle || undefined,
+        createdAt: insertedRecord.createdAt.toISOString(),
+        phraseCount: phrasesToSave.length,
+        level: insertedRecord.level as SetMetaData['level'] || undefined,
+        goals: insertedRecord.goals || [],
+        specificTopics: insertedRecord.specificTopics || undefined,
+        source: insertedRecord.source as SetMetaData['source'] || 'generated',
+        imageUrl: insertedRecord.imageUrl || undefined,
+        isFullyLearned: false,
+        seriousnessLevel: insertedRecord.seriousnessLevel || undefined,
+        llmBrand: insertedRecord.llmBrand || undefined,
+        llmModel: insertedRecord.llmModel || undefined
+      };
+      console.log(`API Route: Successfully created set ${newMetaId}. Returning metadata.`);
+      return NextResponse.json({ newSetMetaData: completeNewMetaData }, { status: 201 });
 
     } catch (error: unknown) {
       console.error("API Route: Error during set creation process:", error);

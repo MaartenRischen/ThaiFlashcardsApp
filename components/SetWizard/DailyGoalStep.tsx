@@ -16,7 +16,7 @@ export function DailyGoalStep({ value, onNext }: { value?: { type: 'cards' | 'mi
             {cardOptions.map((count) => (
               <button
                 key={count}
-                className={`px-4 py-2 rounded border transition ${goal?.type === 'cards' && goal.value === count ? 'bg-blue-200 border-blue-500' : 'bg-white border-gray-300 hover:border-blue-400'}`}
+                className={`px-4 py-2 rounded border transition ${goal?.type === 'cards' && goal.value === count ? 'bg-blue-200 border-blue-500 text-blue-900' : 'bg-white border-gray-300 hover:border-blue-400 text-gray-900'}`}
                 onClick={() => setGoal({ type: 'cards', value: count })}
                 type="button"
               >
@@ -31,7 +31,7 @@ export function DailyGoalStep({ value, onNext }: { value?: { type: 'cards' | 'mi
             {minuteOptions.map((option) => (
               <button
                 key={option}
-                className={`px-4 py-2 rounded border transition ${goal?.type === 'minutes' && goal.value === option ? 'bg-blue-200 border-blue-500' : 'bg-white border-gray-300 hover:border-blue-400'}`}
+                className={`px-4 py-2 rounded border transition ${goal?.type === 'minutes' && goal.value === option ? 'bg-blue-200 border-blue-500 text-blue-900' : 'bg-white border-gray-300 hover:border-blue-400 text-gray-900'}`}
                 onClick={() => setGoal({ type: 'minutes', value: option })}
                 type="button"
               >

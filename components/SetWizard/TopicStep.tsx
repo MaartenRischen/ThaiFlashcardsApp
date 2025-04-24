@@ -43,7 +43,7 @@ export function TopicStep({ value, onNext, scenarios }: { value: string[], onNex
         {suggestions.map(topic => (
           <button
             key={topic}
-            className={`px-3 py-1 rounded-full border text-sm transition ${topics.includes(topic) ? 'bg-blue-200 border-blue-500' : 'bg-white border-gray-300 hover:border-blue-400'}`}
+            className={`px-3 py-1 rounded-full border text-sm transition ${topics.includes(topic) ? 'bg-blue-200 border-blue-500 text-blue-900' : 'bg-white border-gray-300 hover:border-blue-400 text-gray-900'}`}
             onClick={() => handleChip(topic)}
             type="button"
           >
@@ -54,7 +54,7 @@ export function TopicStep({ value, onNext, scenarios }: { value: string[], onNex
       <div className="flex gap-2 mb-4">
         <input
           type="text"
-          className="flex-1 border rounded px-3 py-2"
+          className="flex-1 border rounded px-3 py-2 text-gray-900 bg-white"
           placeholder="Add a custom topic"
           value={custom}
           onChange={e => setCustom(e.target.value)}

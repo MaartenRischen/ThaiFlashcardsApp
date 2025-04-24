@@ -113,11 +113,10 @@ export async function POST(request: Request) {
     if (!isFallback && !skipImageGenEnv) { 
       try {
         const topicDescription = generationResult.cleverTitle || 'Thai language learning'; // Use cleverTitle or a fallback
-        // Create a more varied and descriptive prompt based on the set's content
-        const imagePrompt = `Creative, colorful Thai-themed illustration for "${topicDescription}". 
-          Include visual elements representing Thailand culture like ${preferences.specificTopics || 'traditional symbols'}.
-          Use vibrant colors and a modern cartoon style that's friendly and engaging. 
-          Show a scene that represents learning Thai language.`;
+        // Restore the donkey and bridge elements while keeping the improved structure
+        const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}. 
+          Include Thai visual elements if possible. 
+          Use vibrant colors that are friendly and engaging.`;
         
         console.log(`API Route: Generating set cover image with prompt:`, imagePrompt);
         setImageUrl = await generateImage(imagePrompt);
@@ -126,7 +125,7 @@ export async function POST(request: Request) {
         console.error('API Route: Error during set image generation:', imgErr);
         // Try once more with a simpler prompt if the first attempt failed
         try {
-          const fallbackPrompt = `Simple cartoon illustration for Thai language learning, topic: ${preferences.specificTopics || "basic phrases"}`;
+          const fallbackPrompt = `Simple cartoon illustration of a donkey and a bridge, related to Thai language learning`;
           console.log(`API Route: Trying fallback image generation with prompt:`, fallbackPrompt);
           setImageUrl = await generateImage(fallbackPrompt);
         } catch (retryErr) {

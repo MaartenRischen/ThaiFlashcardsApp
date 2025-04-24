@@ -1374,13 +1374,11 @@ export default function ThaiFlashcards() {
       {showSetWizardModal && (
         <SetWizardModal 
           onClose={() => setShowSetWizardModal(false)}
-          onComplete={async (wizardState: SetWizardState, generatedPhrases: GeneratorPhrase[]) => {
+          onComplete={async (wizardState: SetWizardState) => {
             console.log('SetWizardModal onComplete fired', wizardState);
             setShowSetWizardModal(false);
             
-            // No need for an alert since the user already saw the generation happening
-            
-            // 1. Prepare data for the API call
+            // Prepare data for the API call
             let level: 'beginner' | 'intermediate' | 'advanced' = 'beginner';
             const estimate = wizardState.proficiency.levelEstimate.toLowerCase();
             if (estimate.includes('intermediate')) level = 'intermediate';
@@ -1394,107 +1392,54 @@ export default function ThaiFlashcards() {
             ].join(', ') || undefined;
             
             const specificTopics = wizardState.topics.length > 0 ? wizardState.topics.join(', ') : undefined;
+
+            // Always call the /api/generate-set endpoint which handles image generation
+            const totalCount = wizardState.dailyGoal?.type === 'cards' && wizardState.dailyGoal.value > 0 
+              ? wizardState.dailyGoal.value 
+              : 12;
             
-            // If we already have the phrases from the wizard, we can use them directly
-            if (generatedPhrases && generatedPhrases.length > 0) {
-              try {
-                // Create a set name from the topics
-                const setName = specificTopics 
-                  ? `${specificTopics.substring(0, 30)}${specificTopics.length > 30 ? '...' : ''}`
-                  : `Custom Set ${new Date().toLocaleDateString()}`;
-                
-                // Use the phrases to create a set directly
-                const response = await fetch('/api/flashcard-sets', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ 
-                    setData: {
-                      name: setName,
-                      level,
-                      specificTopics,
-                      source: 'generated',
-                      seriousness: wizardState.tone ?? 50
-                    },
-                    phrases: generatedPhrases 
-                  }),
-                  credentials: 'include',
-                });
-                
-                const result = await response.json();
-                console.log("[page.tsx onComplete] Result from set creation:", result);
+            const preferences = {
+              level,
+              topicsToDiscuss,
+              specificTopics,
+              seriousnessLevel: wizardState.tone ?? 50,
+            };
+            
+            console.log('SetWizard Completion: Calling /api/generate-set with preferences:', preferences, 'count:', totalCount);
 
-                if (!response.ok) {
-                  throw new Error(result.error || `API request failed with status ${response.status}`);
-                }
-
-                if (result.newSetMetaData && result.newSetMetaData.id) {
-                  console.log("Set created with ID:", result.newSetMetaData.id);
-                  // Add the new set to the availableSets and switch to it immediately
-                  setAvailableSets(prev => [...prev, result.newSetMetaData]);
-                  await switchSet(result.newSetMetaData.id);
-                  console.log('Successfully switched to new set', result.newSetMetaData.id);
-                } else {
-                  throw new Error('API route did not return a set ID.');
-                }
-              } catch (err: unknown) {
-                let errorMessage = 'An unknown error occurred';
-                if (typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string') {
-                  errorMessage = err.message;
-                } else if (typeof err === 'string') {
-                  errorMessage = err;
-                }
-                console.error('Error saving generated set:', err);
-                alert(`Error saving your custom set: ${errorMessage}`);
-              }
-            } else {
-              // Fall back to the existing API route if needed
-              const totalCount = wizardState.dailyGoal?.type === 'cards' && wizardState.dailyGoal.value > 0 
-                ? wizardState.dailyGoal.value 
-                : 12;
+            try {
+              const response = await fetch('/api/generate-set', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ preferences, totalCount }),
+                credentials: 'include',
+              });
+              const result = await response.json();
               
-              const preferences = {
-                level,
-                topicsToDiscuss,
-                specificTopics,
-                seriousnessLevel: wizardState.tone ?? 50,
-              };
-              
-              console.log('Fallback: Calling API with preferences:', preferences, 'count:', totalCount);
+              console.log("[page.tsx onComplete] Full result from /api/generate-set:", JSON.stringify(result, null, 2));
 
-              try {
-                const response = await fetch('/api/generate-set', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ preferences, totalCount }),
-                  credentials: 'include',
-                });
-                const result = await response.json();
-                
-                console.log("[page.tsx onComplete] Full result from /api/generate-set:", JSON.stringify(result, null, 2));
-
-                if (!response.ok) {
-                  throw new Error(result.error || `API request failed with status ${response.status}`);
-                }
-
-                if (result.newSetMetaData && result.newSetMetaData.id) {
-                  console.log("Set generated by backend with ID:", result.newSetMetaData.id);
-                  // Add the new set to the availableSets and switch to it immediately
-                  setAvailableSets(prev => [...prev, result.newSetMetaData]);
-                  await switchSet(result.newSetMetaData.id);
-                  console.log('Successfully switched to new set', result.newSetMetaData.id);
-                } else {
-                  throw new Error('API route did not return a set ID in newSetMetaData.');
-                }
-              } catch (err: unknown) {
-                let errorMessage = 'An unknown error occurred';
-                if (typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string') {
-                  errorMessage = err.message;
-                } else if (typeof err === 'string') {
-                  errorMessage = err;
-                }
-                console.error('Error calling API route:', err);
-                alert(`Error generating your custom set: ${errorMessage}`);
+              if (!response.ok) {
+                throw new Error(result.error || `API request failed with status ${response.status}`);
               }
+
+              if (result.newSetMetaData && result.newSetMetaData.id) {
+                console.log("Set generated by backend with ID:", result.newSetMetaData.id);
+                // Add the new set to the availableSets and switch to it immediately
+                setAvailableSets(prev => [...prev, result.newSetMetaData]);
+                await switchSet(result.newSetMetaData.id);
+                console.log('Successfully switched to new set', result.newSetMetaData.id);
+              } else {
+                throw new Error('API route did not return a set ID in newSetMetaData.');
+              }
+            } catch (err: unknown) {
+              let errorMessage = 'An unknown error occurred';
+              if (typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string') {
+                errorMessage = err.message;
+              } else if (typeof err === 'string') {
+                errorMessage = err;
+              }
+              console.error('Error calling API route /api/generate-set:', err);
+              alert(`Error generating your custom set: ${errorMessage}`);
             }
           }}
         />

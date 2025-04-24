@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 interface GenerationStepProps {
   state: SetWizardState;
   onBack: () => void;
-  onComplete: (phrases: Phrase[]) => void;
+  onComplete: () => void;
 }
 
 export function GenerationStep({ state, onBack, onComplete }: GenerationStepProps) {
@@ -67,7 +67,7 @@ export function GenerationStep({ state, onBack, onComplete }: GenerationStepProp
         // Complete after 2 seconds to show the full progress
         if (result.phrases.length > 0) {
           setTimeout(() => {
-            onComplete(result.phrases);
+            onComplete();
           }, 2000);
         } else {
           // Handle case with no phrases

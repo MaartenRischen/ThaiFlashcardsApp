@@ -25,7 +25,7 @@ export async function generateImage(prompt: string): Promise<string | null> {
         image_request: {
           prompt,
           style_type: "DESIGN",
-          resolution: "RESOLUTION_1024_1024",
+          resolution: "640x360",
           seed: Math.floor(Math.random() * 1000000)
         }
       })

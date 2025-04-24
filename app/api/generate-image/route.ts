@@ -16,61 +16,56 @@ const imageRequestSchema = z.object({
   ),
 });
 
-// List of models in fallback order
-const IMAGE_MODELS = [
-  'google/gemini-2.5-pro', // Gemini 2.5 Pro (if available for images)
-  'openai/dall-e-3',       // OpenAI DALL·E 3
-  'openai/dall-e-2',       // OpenAI DALL·E 2
-  'anthropic/claude-3-opus', // Anthropic (if image capable)
-  'stability-ai/stable-diffusion-v1-5', // Stable Diffusion
-  'mistralai/mixtral-8x7b', // Other fallback
-];
+async function callIdeogramApi(prompt: string, resolution: string | undefined): Promise<string | null> {
+  const apiKey = process.env.IDEOGRAM_API_KEY;
+  if (!apiKey) throw new Error("Missing IDEOGRAM_API_KEY env variable");
 
-async function callOpenRouterImageApi(prompt: string, resolution: string | undefined, models: string[]): Promise<string | null> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) throw new Error("Missing OPENROUTER_API_KEY env variable");
+  try {
+    console.log(`Calling Ideogram API with prompt: ${prompt}`);
+    const response = await fetch("https://api.ideogram.ai/generate", {
+      method: "POST",
+      headers: {
+        "Api-Key": apiKey,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        image_request: {
+          prompt: prompt,
+          model: "V_2",
+          aspect_ratio: resolution === "portrait" ? "ASPECT_9_16" : 
+                        resolution === "landscape" ? "ASPECT_16_9" : "ASPECT_1_1",
+          magic_prompt_option: "ON"
+        }
+      })
+    });
 
-  for (const model of models) {
-    try {
-      const response = await fetch("https://openrouter.ai/api/v1/images/generations", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model,
-          prompt,
-          n: 1,
-          size: resolution || "1024x1024"
-        })
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`OpenRouter Image API Error (model: ${model}): Status ${response.status}, Body: ${errorText}`);
-        continue;
-      }
-      const data = await response.json();
-      // Try to extract the image URL from the response
-      const imageUrl = data?.data?.[0]?.url || data?.images?.[0]?.url || null;
-      if (imageUrl) {
-        console.log(`Image generated successfully with model ${model}: ${imageUrl}`);
-        return imageUrl;
-      } else {
-        console.error(`No image URL found in OpenRouter response for model ${model}:`, data);
-      }
-    } catch (error) {
-      console.error(`Error calling OpenRouter image model ${model}:`, error);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Ideogram API Error: Status ${response.status}, Body: ${errorText}`);
+      return null;
     }
+
+    const data = await response.json();
+    const imageUrl = data?.data?.[0]?.url;
+    
+    if (imageUrl) {
+      console.log(`Image generated successfully with Ideogram: ${imageUrl}`);
+      return imageUrl;
+    } else {
+      console.error(`No image URL found in Ideogram response:`, data);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error calling Ideogram API:`, error);
+    return null;
   }
-  return null;
 }
 
 export async function POST(req: NextRequest) {
   console.log("Received request at /api/generate-image");
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.IDEOGRAM_API_KEY;
   if (!apiKey) {
-    console.error("OPENROUTER_API_KEY environment variable not set.");
+    console.error("IDEOGRAM_API_KEY environment variable not set.");
     return NextResponse.json(
       { error: "API key not configured on server." },
       { status: 500 }
@@ -90,11 +85,12 @@ export async function POST(req: NextRequest) {
     }
     const { prompt, resolution } = validation.data;
     console.log(`Generating image for prompt: ${prompt}`);
-    // Call the OpenRouter Image API with fallback logic
-    const imageUrl = await callOpenRouterImageApi(prompt, resolution, IMAGE_MODELS);
+    
+    // Call the Ideogram API
+    const imageUrl = await callIdeogramApi(prompt, resolution);
     if (!imageUrl) {
       return NextResponse.json(
-        { error: "Failed to generate image with any available model." },
+        { error: "Failed to generate image with Ideogram." },
         { status: 500 }
       );
     }

@@ -38,7 +38,10 @@ function ProgressStepper({ step, totalSteps }: { step: number; totalSteps: numbe
   );
 }
 
-export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: SetWizardState, phrases: Phrase[]) => void, onClose: () => void }) {
+export function SetWizardModal({ onComplete, onClose }: { 
+  onComplete: (state: SetWizardState) => void, 
+  onClose: () => void 
+}) {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<SetWizardState>({
     proficiency: {
@@ -121,8 +124,8 @@ export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: Se
     <GenerationStep
       key="generation"
       state={state}
-      onComplete={(phrases) => {
-        onComplete(state, phrases);
+      onComplete={() => {
+        onComplete(state);
       }}
       onBack={() => setStep(6)}
     />

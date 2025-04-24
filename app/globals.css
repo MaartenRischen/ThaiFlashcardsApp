@@ -91,6 +91,47 @@
       5px 5px 10px var(--shadow-color),
       -5px -5px 10px var(--highlight-color);
   }
+  
+  .neumorphic-card {
+    @apply bg-[#222222] rounded-xl;
+    box-shadow: 
+      4px 4px 8px var(--shadow-color),
+      -4px -4px 8px var(--highlight-color);
+    transition: all 0.3s ease;
+  }
+  
+  .neumorphic-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      6px 6px 12px var(--shadow-color),
+      -6px -6px 12px var(--highlight-color);
+  }
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation classes */
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease forwards;
 }
 
 @layer base {

@@ -6,7 +6,9 @@ import { TopicStep } from './TopicStep';
 import { ToneStep } from './ToneStep';
 import { DailyGoalStep } from './DailyGoalStep';
 import { ReviewStep } from './ReviewStep';
+import { GenerationStep } from './GenerationStep';
 import { Progress } from '../ui/progress';
+import type { Phrase } from '@/app/lib/set-generator';
 
 // Wizard state interface
 export interface SetWizardState {
@@ -36,7 +38,7 @@ function ProgressStepper({ step, totalSteps }: { step: number; totalSteps: numbe
   );
 }
 
-export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: SetWizardState) => void, onClose: () => void }) {
+export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: SetWizardState, phrases: Phrase[]) => void, onClose: () => void }) {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<SetWizardState>({
     proficiency: {
@@ -47,6 +49,7 @@ export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: Se
     topics: [],
     tone: 50,
   });
+  const [generatedPhrases, setGeneratedPhrases] = useState<Phrase[]>([]);
 
   const steps = [
     <WelcomeStep
@@ -103,13 +106,22 @@ export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: Se
     <ReviewStep
       key="review"
       state={state}
-      onConfirm={() => onComplete(state)}
+      onConfirm={() => setStep(7)}
       onEdit={setStep}
       onBack={() => setStep(5)}
+    />,
+    <GenerationStep
+      key="generation"
+      state={state}
+      onComplete={(phrases) => {
+        setGeneratedPhrases(phrases);
+        onComplete(state, phrases);
+      }}
+      onBack={() => setStep(6)}
     />
   ];
 
-  const totalSteps = steps.length;
+  const totalSteps = steps.length - 1;
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -117,15 +129,17 @@ export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: Se
         <div className="p-6 space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-blue-400">Set Wizard</h2>
-            <button 
-              onClick={onClose}
-              className="neumorphic-circle hover:opacity-80 transition-opacity"
-              aria-label="Close"
-            >
-              <span className="text-gray-400">&times;</span>
-            </button>
+            {step < 7 && (
+              <button 
+                onClick={onClose}
+                className="neumorphic-circle hover:opacity-80 transition-opacity"
+                aria-label="Close"
+              >
+                <span className="text-gray-400">&times;</span>
+              </button>
+            )}
           </div>
-          <ProgressStepper step={step} totalSteps={totalSteps} />
+          {step < 7 && <ProgressStepper step={step} totalSteps={totalSteps} />}
           <div className="min-h-[400px]">
             {steps[step]}
           </div>

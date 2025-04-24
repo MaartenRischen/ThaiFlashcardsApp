@@ -16,7 +16,7 @@ const imageRequestSchema = z.object({
   ),
 });
 
-async function callIdeogramApi(prompt: string, resolution: string | undefined): Promise<string | null> {
+async function callIdeogramApi(prompt: string): Promise<string | null> {
   const apiKey = process.env.IDEOGRAM_API_KEY;
   if (!apiKey) throw new Error("Missing IDEOGRAM_API_KEY env variable");
 
@@ -82,11 +82,11 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const { prompt, resolution } = validation.data;
+    const { prompt } = validation.data;
     console.log(`Generating image for prompt: ${prompt}`);
     
     // Call the Ideogram API
-    const imageUrl = await callIdeogramApi(prompt, resolution);
+    const imageUrl = await callIdeogramApi(prompt);
     if (!imageUrl) {
       return NextResponse.json(
         { error: "Failed to generate image with Ideogram." },

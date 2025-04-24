@@ -6,6 +6,7 @@ import { TopicStep } from './TopicStep';
 import { ToneStep } from './ToneStep';
 import { DailyGoalStep } from './DailyGoalStep';
 import { ReviewStep } from './ReviewStep';
+import { Progress } from '../ui/progress';
 
 // Wizard state interface
 export interface SetWizardState {
@@ -13,73 +14,122 @@ export interface SetWizardState {
     canDoSelections: string[];
     levelEstimate: string;
   };
-  goals: {
-    scenarios: string[];
-    customGoal?: string;
-  };
+  scenarios: string[];
+  customGoal?: string;
   topics: string[];
   tone: number;
   dailyGoal?: {
-    type: 'cards' | 'minutes';
     value: number;
+    type: 'cards' | 'minutes';
   };
 }
 
-const initialState: SetWizardState = {
-  proficiency: { canDoSelections: [], levelEstimate: '' },
-  goals: { scenarios: [], customGoal: '' },
-  topics: [],
-  tone: 50,
-  dailyGoal: undefined,
-};
-
-// Add a simple progress bar/stepper
-function ProgressStepper({ step, totalSteps }: { step: number, totalSteps: number }) {
+function ProgressStepper({ step, totalSteps }: { step: number; totalSteps: number }) {
   return (
-    <div className="w-full flex items-center mb-6">
-      {Array.from({ length: totalSteps }).map((_, i) => (
-        <div
-          key={i}
-          className={`flex-1 h-2 mx-1 rounded-full transition-all duration-300 ${i <= step ? 'bg-blue-500' : 'bg-gray-700'}`}
-        />
-      ))}
+    <div className="mb-6">
+      <Progress value={(step / (totalSteps - 1)) * 100} className="h-2" />
+      <div className="flex justify-between mt-2 text-sm text-gray-400">
+        <span>Start</span>
+        <span>Review</span>
+      </div>
     </div>
   );
 }
 
 export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: SetWizardState) => void, onClose: () => void }) {
   const [step, setStep] = useState(0);
-  const [wizardState, setWizardState] = useState<SetWizardState>(initialState);
-  const totalSteps = 7;
+  const [state, setState] = useState<SetWizardState>({
+    proficiency: {
+      canDoSelections: [],
+      levelEstimate: '',
+    },
+    scenarios: [],
+    topics: [],
+    tone: 50,
+  });
 
-  // Step handlers
-  const handleProficiency = (data: { canDoSelections: string[]; levelEstimate: string }) => { setWizardState(ws => ({ ...ws, proficiency: data })); setStep(2); };
-  const handleGoals = (data: { scenarios: string[]; customGoal?: string }) => { setWizardState(ws => ({ ...ws, goals: data })); setStep(3); };
-  const handleTopics = (data: string[]) => { setWizardState(ws => ({ ...ws, topics: data })); setStep(4); };
-  const handleTone = (data: number) => { setWizardState(ws => ({ ...ws, tone: data })); setStep(5); };
-  const handleDailyGoal = (data?: { type: 'cards' | 'minutes'; value: number }) => { setWizardState(ws => ({ ...ws, dailyGoal: data })); setStep(6); };
-  const handleConfirm = () => { onComplete(wizardState); };
-
-  // Editing from review step
-  const handleEdit = (editStep: number) => setStep(editStep);
-  const handleBack = () => setStep(step - 1);
-
-  // Step components
   const steps = [
-    <WelcomeStep key="welcome" onNext={() => setStep(1)} onSkip={onClose} />,
-    <ProficiencyStep key="proficiency" value={wizardState.proficiency} onNext={handleProficiency} />,
-    <ScenarioStep key="scenario" value={wizardState.goals} onNext={handleGoals} />,
-    <TopicStep key="topic" value={wizardState.topics} onNext={handleTopics} scenarios={wizardState.goals.scenarios} />,
-    <ToneStep key="tone" value={wizardState.tone} onNext={handleTone} />,
-    <DailyGoalStep key="dailyGoal" value={wizardState.dailyGoal} onNext={handleDailyGoal} />,
-    <ReviewStep key="review" state={wizardState} onConfirm={handleConfirm} onEdit={handleEdit} onBack={handleBack} />,
+    <WelcomeStep
+      key="welcome"
+      onNext={() => setStep(1)}
+      onSkip={onClose}
+    />,
+    <ProficiencyStep
+      key="proficiency"
+      value={state.proficiency}
+      onNext={(proficiency) => {
+        setState(prev => ({ ...prev, proficiency }));
+        setStep(2);
+      }}
+      onBack={() => setStep(0)}
+    />,
+    <ScenarioStep
+      key="scenario"
+      value={{ scenarios: state.scenarios, customGoal: state.customGoal }}
+      onNext={(data) => {
+        setState(prev => ({ ...prev, ...data }));
+        setStep(3);
+      }}
+      onBack={() => setStep(1)}
+    />,
+    <TopicStep
+      key="topic"
+      value={state.topics}
+      scenarios={state.scenarios}
+      onNext={(topics) => {
+        setState(prev => ({ ...prev, topics }));
+        setStep(4);
+      }}
+      onBack={() => setStep(2)}
+    />,
+    <ToneStep
+      key="tone"
+      value={state.tone}
+      onNext={(tone) => {
+        setState(prev => ({ ...prev, tone }));
+        setStep(5);
+      }}
+      onBack={() => setStep(3)}
+    />,
+    <DailyGoalStep
+      key="dailyGoal"
+      value={state.dailyGoal}
+      onNext={(dailyGoal) => {
+        setState(prev => ({ ...prev, dailyGoal }));
+        setStep(6);
+      }}
+      onBack={() => setStep(4)}
+    />,
+    <ReviewStep
+      key="review"
+      state={state}
+      onConfirm={() => onComplete(state)}
+      onEdit={setStep}
+      onBack={() => setStep(5)}
+    />
   ];
 
+  const totalSteps = steps.length;
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-      <div className="bg-[#181c24] rounded-2xl shadow-2xl p-6 max-w-lg w-full neumorphic border border-gray-800 text-white">
-        <ProgressStepper step={step} totalSteps={totalSteps} />
-        {steps[step]}
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="neumorphic max-w-2xl w-full bg-[#1a1a1a] rounded-2xl overflow-hidden">
+        <div className="p-6 space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-blue-400">Set Wizard</h2>
+            <button 
+              onClick={onClose}
+              className="neumorphic-circle hover:opacity-80 transition-opacity"
+              aria-label="Close"
+            >
+              <span className="text-gray-400">&times;</span>
+            </button>
+          </div>
+          <ProgressStepper step={step} totalSteps={totalSteps} />
+          <div className="min-h-[400px]">
+            {steps[step]}
+          </div>
+        </div>
       </div>
     </div>
   );

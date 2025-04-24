@@ -1380,8 +1380,8 @@ export default function ThaiFlashcards() {
             if (estimate.includes('intermediate')) level = 'intermediate';
             else if (estimate.includes('advanced')) level = 'advanced';
             
-            const scenarios = wizardState.goals.scenarios?.filter(Boolean) || [];
-            const customGoal = wizardState.goals.customGoal?.trim();
+            const scenarios = wizardState.scenarios?.filter(Boolean) || [];
+            const customGoal = wizardState.customGoal?.trim();
             const topicsToDiscuss = [
               ...scenarios,
               ...(customGoal ? [customGoal] : [])

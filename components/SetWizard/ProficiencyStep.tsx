@@ -1,102 +1,114 @@
 import React, { useState } from 'react';
 
-const canDoGroups = [
-  {
-    level: 'Novice Low',
-    statements: [
-      'I can say hello and goodbye.',
-      'I can introduce myself.',
-    ],
-  },
-  {
-    level: 'Novice Mid',
-    statements: [
-      'I can order food and drinks.',
-      'I can ask for directions.',
-    ],
-  },
-  {
-    level: 'Novice High',
-    statements: [
-      'I can describe my daily routine.',
-      'I can ask and answer simple questions about familiar topics.',
-    ],
-  },
-  {
-    level: 'Intermediate Low',
-    statements: [
-      'I can participate in simple conversations on familiar topics.',
-      'I can understand the main idea of short announcements or messages.',
-    ],
-  },
+const canDoOptions = [
+  'Read Thai script',
+  'Basic greetings',
+  'Simple conversations',
+  'Order food',
+  'Give directions',
+  'Discuss daily activities',
+  'Watch Thai media',
+  'Read Thai news'
 ];
 
-function estimateLevel(selected: string[]): string {
-  for (let i = canDoGroups.length - 1; i >= 0; i--) {
-    if (canDoGroups[i].statements.some(s => selected.includes(s))) {
-      return canDoGroups[i].level;
-    }
-  }
-  return 'unknown';
+const levelOptions = [
+  'Complete Beginner',
+  'Basic Understanding',
+  'Intermediate',
+  'Advanced',
+  'Native/Fluent'
+];
+
+interface ProficiencyValue {
+  canDoSelections: string[];
+  levelEstimate: string;
 }
 
-export function ProficiencyStep({ value, onNext }: { value: { canDoSelections: string[]; levelEstimate: string }, onNext: (data: { canDoSelections: string[], levelEstimate: string }) => void }) {
-  const [selected, setSelected] = useState<string[]>(value?.canDoSelections || []);
-  const [skipped, setSkipped] = useState(false);
+export function ProficiencyStep({ value, onNext, onBack }: { 
+  value: ProficiencyValue, 
+  onNext: (value: ProficiencyValue) => void,
+  onBack: () => void
+}) {
+  const [selections, setSelections] = useState<string[]>(value?.canDoSelections || []);
+  const [level, setLevel] = useState(value?.levelEstimate || '');
 
-  const handleToggle = (statement: string) => {
-    setSelected(sel =>
-      sel.includes(statement)
-        ? sel.filter(s => s !== statement)
-        : [...sel, statement]
+  const toggleSelection = (option: string) => {
+    setSelections(prev =>
+      prev.includes(option)
+        ? prev.filter(s => s !== option)
+        : [...prev, option]
     );
-    setSkipped(false);
-  };
-
-  const handleSkip = () => {
-    setSkipped(true);
-    setSelected([]);
-    onNext({ canDoSelections: [], levelEstimate: 'unknown' });
   };
 
   const handleNext = () => {
-    onNext({ canDoSelections: selected, levelEstimate: estimateLevel(selected) });
+    onNext({
+      canDoSelections: selections,
+      levelEstimate: level || 'Complete Beginner'
+    });
   };
 
   return (
-    <div className="space-y-6 p-4 bg-[#23272f]">
-      <div className="text-lg font-semibold text-white mb-2">🗣️ Let&apos;s see what you can already do in Thai! Select all that apply.</div>
-      {canDoGroups.map(group => (
-        <div key={group.level} className="mb-4">
-          <div className="font-bold text-white mb-1">{group.level}</div>
-          <div className="flex flex-col gap-2">
-            {group.statements.map(statement => (
-              <label key={statement} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(statement)}
-                  onChange={() => handleToggle(statement)}
-                  className="accent-blue-600"
-                />
-                <span>{statement}</span>
-              </label>
-            ))}
-          </div>
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold text-white">
+          What can you already do in Thai?
+        </h3>
+        <p className="text-gray-400">
+          Select all that apply to help us personalize your learning experience.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {canDoOptions.map(option => (
+          <button
+            key={option}
+            onClick={() => toggleSelection(option)}
+            className={`
+              neumorphic-button text-left px-4 py-3 transition-all
+              ${selections.includes(option)
+                ? 'bg-blue-600 text-white border-blue-500 shadow-blue-900/20'
+                : 'bg-[#2a2a2a] text-gray-300 hover:text-white'}
+            `}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-4">
+        <h4 className="text-lg font-semibold text-white">
+          Overall Thai Level
+        </h4>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {levelOptions.map(option => (
+            <button
+              key={option}
+              onClick={() => setLevel(option)}
+              className={`
+                neumorphic-button px-4 py-3 transition-all text-center
+                ${level === option
+                  ? 'bg-blue-600 text-white border-blue-500 shadow-blue-900/20'
+                  : 'bg-[#2a2a2a] text-gray-300 hover:text-white'}
+              `}
+            >
+              {option}
+            </button>
+          ))}
         </div>
-      ))}
-      <div className="flex gap-4 mt-6">
+      </div>
+
+      <div className="flex justify-between pt-4">
         <button
-          className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700 disabled:opacity-50"
-          disabled={selected.length === 0 && !skipped}
+          onClick={onBack}
+          className="neumorphic-button bg-[#2a2a2a] hover:bg-[#333333] text-white px-8 py-3"
+        >
+          Back
+        </button>
+        <button
+          className="neumorphic-button bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
           onClick={handleNext}
         >
           Next
-        </button>
-        <button
-          className="bg-gray-200 text-gray-700 px-6 py-2 rounded shadow hover:bg-gray-300"
-          onClick={handleSkip}
-        >
-          I&apos;m not sure / Skip
         </button>
       </div>
     </div>

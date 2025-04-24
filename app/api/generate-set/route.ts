@@ -12,6 +12,14 @@ import { generateImage } from '@/app/lib/ideogram-service';
 import { INITIAL_PHRASES } from '@/app/data/phrases'; // Import INITIAL_PHRASES only
 import { prisma } from "@/app/lib/prisma"; // Import prisma client
 
+// Debug environment variables - this will help diagnose Railway issues
+console.log('API Route Environment Variables:');
+console.log('- DATABASE_URL:', process.env.DATABASE_URL ? 'Defined' : 'Undefined');
+console.log('- OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? 'Defined' : 'Undefined');
+console.log('- IDEOGRAM_API_KEY:', process.env.IDEOGRAM_API_KEY ? 'Defined' : 'Undefined');
+console.log('- NODE_ENV:', process.env.NODE_ENV);
+console.log('- NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL);
+
 console.log('DEBUG: DATABASE_URL in generate-set route:', process.env.DATABASE_URL);
 
 // Define expected request body structure (can be shared or redefined here)

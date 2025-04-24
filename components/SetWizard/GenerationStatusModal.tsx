@@ -1,8 +1,9 @@
 import React from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import type { Phrase } from '@/app/lib/set-generator';
 import { Card } from '@/components/ui/card';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface GenerationStatusModalProps {
   isOpen: boolean;
@@ -30,6 +31,9 @@ export function GenerationStatusModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="neumorphic bg-[#1a1a1a] border-none shadow-xl max-w-xl w-full">
+        <DialogTitle className="sr-only">
+          {isComplete ? "Set Created Successfully" : "Generating Your Flashcards"}
+        </DialogTitle>
         <div className="grid gap-6">
           <div className="space-y-2">
             <h2 className="text-2xl font-bold tracking-tight text-blue-400">
@@ -54,10 +58,13 @@ export function GenerationStatusModal({
               <h3 className="text-lg font-semibold text-gray-200">Latest Generated Cards</h3>
               <div className="grid gap-3">
                 {latestPhrases.slice(-3).map((phrase, index) => (
-                  <div
+                  <motion.div
                     key={phrase.thai + index}
                     className="animate-slideUp"
                     style={{ animationDelay: `${index * 100}ms` }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
                   >
                     <Card className="neumorphic-card p-4 bg-[#222222] border-none">
                       <div className="space-y-3">
@@ -73,7 +80,7 @@ export function GenerationStatusModal({
                         )}
                       </div>
                     </Card>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 

@@ -107,13 +107,7 @@
       -6px -6px 12px var(--highlight-color);
   }
 
-  .neumorphic-button.selected {
-    background-color: #2563eb !important; /* blue-600 */
-    color: #fff !important;
-    border-color: #3b82f6 !important; /* blue-500 */
-    box-shadow: 5px 5px 10px var(--shadow-color), -5px -5px 10px var(--highlight-color), 0 0 0 2px #1e40af33;
-  }
-
+  .neumorphic-button.selected,
   .neumorphic-button.selected:hover,
   .neumorphic-button.selected:active {
     background-color: #2563eb !important; /* blue-600 */

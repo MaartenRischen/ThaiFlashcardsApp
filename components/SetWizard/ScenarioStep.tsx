@@ -76,7 +76,7 @@ export function ScenarioStep({ value, onNext, onBack }: {
           Back
         </button>
         <button
-          className="neumorphic-button bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
+          className="neumorphic-button text-white px-8 py-3"
           onClick={handleNext}
           disabled={selected.length === 0}
         >

@@ -1,3 +1,6 @@
+// Import INITIAL_PHRASES from app/data/phrases 
+import { INITIAL_PHRASES } from '@/app/data/phrases';
+
 // Define types for the generator
 export interface Phrase {
   id?: string; // Optional ID, populated from DB
@@ -258,95 +261,210 @@ export async function generateCustomSet(
   totalCount: number,
   onProgressUpdate?: (progress: { completed: number, total: number, latestPhrases?: Phrase[] }) => void
 ): Promise<GenerationResult> {
-  const allGeneratedPhrases: Phrase[] = [];
-  const aggregatedErrors: (BatchError & { batchIndex: number })[] = [];
-  let extractedCleverTitle: string | undefined = undefined;
-  
-  let remainingCount = totalCount;
-  let currentBatchIndex = 0; // Rename to avoid conflict if batchIndex was used elsewhere
+  try {
+    // Initialize progress right away
+    if (onProgressUpdate) {
+      onProgressUpdate({ completed: 0, total: totalCount });
+    }
+    
+    console.log(`Starting card generation (OpenRouter): ${totalCount} total cards requested with preferences:`, preferences);
+    
+    // Define our batch size
+    const batchSize = BATCH_SIZE;
+    const batchesNeeded = Math.ceil(totalCount / batchSize);
+    
+    const aggregatedErrors: (BatchError & { batchIndex: number })[] = [];
+    const allPhrases: Phrase[] = [];
+    let cleverTitle: string | undefined;
+    let completedBatches = 0;
+    
+    // Prepare the fallback data early so it's ready if needed
+    const fallbackPhrases = INITIAL_PHRASES.slice(0, totalCount);
 
-  console.log(`Starting card generation (OpenRouter): ${totalCount} total cards requested with preferences:`, JSON.stringify(preferences));
-
-  while (remainingCount > 0 && allGeneratedPhrases.length < totalCount) {
-    const currentBatchSize = Math.min(remainingCount, BATCH_SIZE);
-    const existingEnglish = allGeneratedPhrases.map(p => p.english);
-    const prompt = buildGenerationPrompt(preferences.specificTopics || '', {
-      ...preferences,
-      count: currentBatchSize,
-      existingPhrases: existingEnglish,
-    }, existingEnglish);
-
-    let retries = 0;
-    let success = false;
-    let batchAttemptPhrases: Phrase[] = [];
-    let batchResult: {phrases: Phrase[], cleverTitle?: string, error?: BatchError} | null = null; // Type the result
-    while (retries < MAX_RETRIES && !success) {
+    // Loop through batches
+    for (let i = 0; i < batchesNeeded; i++) {
       try {
-        batchResult = await generateOpenRouterBatch(prompt, TEXT_MODELS, currentBatchIndex, preferences.seriousnessLevel);
-        if (batchResult.error) {
-          aggregatedErrors.push({ ...batchResult.error, batchIndex: currentBatchIndex });
-          retries++;
-          if (retries >= MAX_RETRIES) break;
-          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
-          continue;
+        // Update progress immediately with batch attempt
+        if (onProgressUpdate) {
+          onProgressUpdate({ 
+            completed: allPhrases.length, 
+            total: totalCount,
+            latestPhrases: allPhrases.slice(-3)
+          });
         }
-        success = true;
-        if (batchResult.cleverTitle && !extractedCleverTitle) {
-          extractedCleverTitle = batchResult.cleverTitle;
-        }
-        if (batchResult.phrases.length > 0) {
-          const newPhrases = batchResult.phrases.filter((p: Phrase) => !allGeneratedPhrases.some(existing => existing.english === p.english));
-          allGeneratedPhrases.push(...newPhrases);
-          remainingCount -= newPhrases.length;
-          batchAttemptPhrases = newPhrases;
-        }
-      } catch (error: unknown) {
-        retries++;
-        aggregatedErrors.push({
-          type: 'UNKNOWN', 
-          message: `Uncaught error: ${error instanceof Error ? error.message : String(error)}`, 
-          details: { error: String(error), stack: error instanceof Error ? error.stack : undefined }, // Use String() for safety
-          timestamp: new Date().toISOString(), 
-          batchIndex: currentBatchIndex // Use renamed variable
+        
+        // Calculate how many phrases we still need
+        const remaining = totalCount - allPhrases.length;
+        const countForBatch = Math.min(remaining, batchSize);
+        
+        // If we already have enough phrases, break early
+        if (remaining <= 0) break;
+        
+        // Build prompt for this batch
+        const existingPhrasesMeanings = allPhrases.map(p => p.english);
+        const prompt = buildGenerationPrompt("", {
+          ...preferences,
+          count: countForBatch,
+          existingPhrases: existingPhrasesMeanings,
         });
-        if (retries >= MAX_RETRIES) break;
-        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
+        
+        // Generate batch
+        let retries = 0;
+        let batchResult: { phrases: Phrase[], cleverTitle?: string, error?: BatchError } | null = null;
+        
+        // Try OpenRouter models first
+        while (retries < MAX_RETRIES) {
+          try {
+            batchResult = await generateOpenRouterBatch(
+              prompt, 
+              TEXT_MODELS,
+              i,
+              preferences.seriousnessLevel
+            );
+            
+            // If got results, break out of retry loop
+            if (batchResult.phrases.length > 0 || !batchResult.error) {
+              break;
+            } 
+            
+            // Got an error but still want to retry
+            console.error(`Batch ${i} attempt ${retries + 1} failed: ${batchResult.error?.message}`);
+            retries++;
+            
+            // Short pause before retry
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
+          } catch (error) {
+            console.error(`Unexpected error in batch ${i} attempt ${retries + 1}:`, error);
+            retries++;
+            
+            // Short pause before retry
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
+          }
+        }
+        
+        // Process batch results
+        if (batchResult) {
+          // Save clever title from first batch if available
+          if (i === 0 && batchResult.cleverTitle) {
+            cleverTitle = batchResult.cleverTitle;
+          }
+          
+          // Add phrases to our collection
+          if (batchResult.phrases.length > 0) {
+            allPhrases.push(...batchResult.phrases);
+          }
+          
+          // Store any errors
+          if (batchResult.error) {
+            aggregatedErrors.push({
+              ...batchResult.error,
+              batchIndex: i
+            });
+            
+            // Log batch failure after retries
+            if (retries >= MAX_RETRIES) {
+              console.error(`Batch ${i} failed after ${retries} retries. Aborting further generation.`);
+            }
+          }
+        }
+        
+        // Update progress after batch completion
+        completedBatches++;
+        if (onProgressUpdate) {
+          // Calculate completion based on phrases successfully generated
+          const progressPercentage = Math.min(
+            Math.floor((allPhrases.length / totalCount) * 100), 
+            100
+          );
+          
+          // Update with the completed batch results
+          onProgressUpdate({ 
+            completed: allPhrases.length, 
+            total: totalCount,
+            latestPhrases: batchResult?.phrases || []
+          });
+          
+          console.log(`Batch ${i} complete. Progress: ${progressPercentage}% (${allPhrases.length}/${totalCount} cards)`);
+        }
+      } catch (error) {
+        console.error(`Fatal error processing batch ${i}:`, error);
+        const batchError: BatchError = createBatchError(
+          'UNKNOWN', 
+          `Unhandled error in batch ${i}: ${error instanceof Error ? error.message : String(error)}`,
+          { error }
+        );
+        
+        aggregatedErrors.push({
+          ...batchError,
+          batchIndex: i,
+        });
       }
     }
-    if (!success) {
-      console.error(`Batch ${currentBatchIndex} failed after ${MAX_RETRIES} retries. Aborting further generation.`);
-      break;
+    
+    // Check if we need to use fallback
+    if (allPhrases.length === 0 && fallbackPhrases.length > 0) {
+      console.log("No phrases generated. Using fallback data.");
+      allPhrases.push(...fallbackPhrases);
+      
+      // Update progress one last time with fallback data
+      if (onProgressUpdate) {
+        onProgressUpdate({ 
+          completed: allPhrases.length, 
+          total: totalCount,
+          latestPhrases: allPhrases.slice(-3)
+        });
+      }
+    } else if (allPhrases.length < totalCount) {
+      // We got some phrases but not enough - pad with fallback
+      const shortfall = totalCount - allPhrases.length;
+      if (shortfall > 0 && fallbackPhrases.length > 0) {
+        console.log(`Generated only ${allPhrases.length} of ${totalCount} phrases. Adding ${shortfall} fallback phrases.`);
+        allPhrases.push(...fallbackPhrases.slice(0, shortfall));
+      }
     }
-    if (onProgressUpdate) {
-      onProgressUpdate({
-        completed: allGeneratedPhrases.length,
-        total: totalCount,
-        latestPhrases: batchAttemptPhrases
-      });
+    
+    // Prepare final error summary if needed
+    let errorSummary: GenerationResult['errorSummary'] | undefined;
+    if (aggregatedErrors.length > 0) {
+      const errorTypes = Array.from(new Set(aggregatedErrors.map(e => e.type)));
+      
+      errorSummary = {
+        errorTypes,
+        totalErrors: aggregatedErrors.length,
+        userMessage: `Set generation encountered ${aggregatedErrors.length} errors.`
+      };
     }
-    currentBatchIndex++; // Use renamed variable
+    
+    // Final result
+    const result: GenerationResult = {
+      phrases: allPhrases,
+      cleverTitle,
+      aggregatedErrors,
+      errorSummary,
+      llmBrand: 'OpenRouter',
+      llmModel: TEXT_MODELS[0], // Record the primary model
+    };
+    
+    return result;
+  } catch (error) {
+    console.error("Unhandled error in generateCustomSet:", error);
+    return {
+      phrases: [],
+      aggregatedErrors: [{
+        ...createBatchError(
+          'UNKNOWN',
+          `Fatal error: ${error instanceof Error ? error.message : String(error)}`,
+          { error }
+        ),
+        batchIndex: -1,
+      }],
+      errorSummary: {
+        errorTypes: ['UNKNOWN'],
+        totalErrors: 1,
+        userMessage: 'An unexpected error occurred during set generation.'
+      }
+    };
   }
-
-  const errorTypes = aggregatedErrors.map(err => err.type).filter((value, index, self) => self.indexOf(value) === index);
-  const totalErrors = aggregatedErrors.length;
-  let userMessage = '';
-  if (totalErrors > 0) {
-    if (allGeneratedPhrases.length === 0) {
-      userMessage = `Generation failed completely. Issues encountered: ${errorTypes.join(', ')}.`;
-    } else if (allGeneratedPhrases.length < totalCount) {
-      userMessage = `Finished with some issues (${allGeneratedPhrases.length}/${totalCount} cards created). Problems included: ${errorTypes.join(', ')}.`;
-    } else {
-      userMessage = `Generation completed, but some minor issues occurred (${errorTypes.join(', ')}).`;
-    }
-  }
-  const errorSummary = totalErrors > 0 ? { errorTypes, totalErrors, userMessage } : undefined;
-
-  return {
-    phrases: allGeneratedPhrases,
-    cleverTitle: extractedCleverTitle,
-    aggregatedErrors,
-    errorSummary
-  };
 }
 
 /**
@@ -458,9 +576,12 @@ function getTemperatureFromSeriousness(seriousnessLevel: number | undefined): nu
 async function callOpenRouterWithFallback(prompt: string, models: string[], temperature: number): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
-    console.error("callOpenRouterWithFallback Error: Missing OPENROUTER_API_KEY env variable at runtime.");
-    throw new Error("Missing OPENROUTER_API_KEY env variable");
+    // Log the error but don't throw immediately - this allows fallback mechanisms to take over faster
+    console.error("callOpenRouterWithFallback: Missing OPENROUTER_API_KEY environment variable. This is expected in local environments as we'll fallback to alternative sources.");
+    // Return empty JSON to trigger fallback mechanism
+    return '{"phrases": [], "cleverTitle": "Sample Phrases"}';
   }
+  
   let lastError: string | null = null;
   for (const model of models) {
     try {

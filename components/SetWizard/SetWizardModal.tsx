@@ -50,6 +50,15 @@ export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: Se
     tone: 50,
   });
 
+  // Show close button for all steps except generation (7)
+  const showCloseButton = step < 7;
+  
+  // Show progress stepper for all steps except generation (7)
+  const showProgressStepper = step < 7;
+  
+  // Set modal width based on step
+  const modalWidth = step === 7 ? "max-w-3xl" : "max-w-2xl";
+
   const steps = [
     <WelcomeStep
       key="welcome"
@@ -123,11 +132,11 @@ export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: Se
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="neumorphic max-w-2xl w-full bg-[#1a1a1a] rounded-2xl overflow-hidden">
+      <div className={`neumorphic ${modalWidth} w-full bg-[#1a1a1a] rounded-2xl overflow-hidden`}>
         <div className="p-6 space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-blue-400">Set Wizard</h2>
-            {step < 7 && (
+            {showCloseButton && (
               <button 
                 onClick={onClose}
                 className="neumorphic-circle hover:opacity-80 transition-opacity"
@@ -137,8 +146,8 @@ export function SetWizardModal({ onComplete, onClose }: { onComplete: (state: Se
               </button>
             )}
           </div>
-          {step < 7 && <ProgressStepper step={step} totalSteps={totalSteps} />}
-          <div className="min-h-[400px]">
+          {showProgressStepper && <ProgressStepper step={step} totalSteps={totalSteps} />}
+          <div className={step === 7 ? "min-h-[500px]" : "min-h-[400px]"}>
             {steps[step]}
           </div>
         </div>

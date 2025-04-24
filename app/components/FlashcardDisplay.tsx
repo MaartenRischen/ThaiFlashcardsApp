@@ -38,8 +38,22 @@ export function FlashcardDisplay({
   onNextCard = () => {},
   onPrevCard = () => {},
 }: FlashcardDisplayProps) {
-  // This is a simplified version of the flashcard component from page.tsx
-  // In a real implementation, we would extract the exact functionality
+  // Play audio automatically when answer is shown if autoplay is enabled
+  React.useEffect(() => {
+    if (showAnswer && autoplay) {
+      onPlayAudio();
+    }
+  }, [showAnswer, autoplay, onPlayAudio]);
+
+  // Get the appropriate Thai text based on gender and politeness
+  const thaiText = React.useMemo(() => {
+    let text = phrase.thai;
+    // Add polite particle if needed
+    if (isPoliteMode) {
+      text += ' ' + (isMale ? 'ครับ' : 'ค่ะ');
+    }
+    return text;
+  }, [phrase.thai, isMale, isPoliteMode]);
   
   return (
     <div 
@@ -49,7 +63,7 @@ export function FlashcardDisplay({
     >
       {/* Front side - always visible */}
       <div className="card-front" data-testid="front">
-        <h2 className="thai-text">{phrase.thai}</h2>
+        <h2 className="thai-text">{thaiText}</h2>
       </div>
       
       {/* Back side - visible when showAnswer is true */}

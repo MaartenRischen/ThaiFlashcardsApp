@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useSession } from 'next-auth/react';
 
 type FlashcardSet = {
   id: string;
@@ -18,6 +19,7 @@ type FlashcardSet = {
 
 export default function MySetsPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [sets, setSets] = useState<FlashcardSet[]>([]);
   const [error, setError] = useState<string | null>(null);

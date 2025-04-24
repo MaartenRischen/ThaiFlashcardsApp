@@ -47,9 +47,7 @@ export function ScenarioStep({ value, onNext, onBack }: {
             onClick={() => handleToggle(scenario)}
             className={`
               neumorphic-button text-left px-4 py-3 transition-all
-              ${selected.includes(scenario) 
-                ? 'bg-blue-600 text-white border-blue-500 shadow-blue-900/20' 
-                : 'bg-[#2a2a2a] text-gray-300 hover:text-white'}
+              ${selected.includes(scenario) ? 'selected' : ''}
             `}
           >
             {scenario}

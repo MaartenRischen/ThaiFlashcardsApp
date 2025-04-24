@@ -384,13 +384,33 @@ export function SetManagerModal({ isOpen, onClose }: {
     setCardsModalSetId(set.id);
     setCardsModalLoading(true);
     try {
-      const phrases = await storage.getSetContent(set.id);
+      // Fetch content via API
+      const contentResponse = await fetch(`/api/flashcard-sets/${set.id}/content`, {
+        credentials: 'include'
+      });
+      
+      if (!contentResponse.ok) {
+        throw new Error(`Failed to fetch content: ${contentResponse.status}`);
+      }
+      
+      const phrases = await contentResponse.json();
+      
+      // Fetch progress via API if user is logged in
       if (userId) {
-        const progress = await storage.getSetProgress(userId, set.id);
-        setCardsModalProgress(progress);
+        const progressResponse = await fetch(`/api/flashcard-sets/${set.id}/progress`, {
+          credentials: 'include'
+        });
+        
+        if (!progressResponse.ok) {
+          throw new Error(`Failed to fetch progress: ${progressResponse.status}`);
+        }
+        
+        const progressData = await progressResponse.json();
+        setCardsModalProgress(progressData.progress || {});
       } else {
         setCardsModalProgress({});
       }
+      
       setCardsModalPhrases(phrases);
     } catch (error: unknown) {
       console.error('Error loading cards:', error instanceof Error ? error.message : String(error));
@@ -554,7 +574,17 @@ export function SetManagerModal({ isOpen, onClose }: {
                         e.stopPropagation();
                         setPublishingSetId(set.id);
                         try {
-                          const phrases = await storage.getSetContent(set.id);
+                          // Fetch content via API
+                          const contentResponse = await fetch(`/api/flashcard-sets/${set.id}/content`, {
+                            credentials: 'include'
+                          });
+                          
+                          if (!contentResponse.ok) {
+                            throw new Error(`Failed to fetch content: ${contentResponse.statusText}`);
+                          }
+                          
+                          const phrases = await contentResponse.json();
+                          
                           const res = await fetch('/api/gallery', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },

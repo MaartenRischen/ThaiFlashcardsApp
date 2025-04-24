@@ -1,7 +1,7 @@
 /* eslint-disable */
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { ttsService } from './lib/tts-service';
 import AdminSettings from './components/AdminSettings';
@@ -19,6 +19,11 @@ import { SettingsModal, SetManagerModal } from './components/CombinedOptionsModa
 import { calculateNextReview } from './lib/srs';
 import { Volume2 } from 'lucide-react';
 import { SetWizardModal, SetWizardState } from '../components/SetWizard/SetWizardModal';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Dialog } from '@/components/ui/dialog';
+import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle } from 'lucide-react';
+import { getMnemonicForCard } from '@/app/lib/storage';
 
 // Define a simple CardStatus type locally for now
 type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';
@@ -1369,10 +1374,11 @@ export default function ThaiFlashcards() {
       {showSetWizardModal && (
         <SetWizardModal 
           onClose={() => setShowSetWizardModal(false)}
-          onComplete={async (wizardState: SetWizardState) => {
+          onComplete={async (wizardState: SetWizardState, generatedPhrases: GeneratorPhrase[]) => {
             console.log('SetWizardModal onComplete fired', wizardState);
             setShowSetWizardModal(false);
-            alert('Generating your custom set. This may take up to a minute...');
+            
+            // No need for an alert since the user already saw the generation happening
             
             // 1. Prepare data for the API call
             let level: 'beginner' | 'intermediate' | 'advanced' = 'beginner';
@@ -1388,56 +1394,102 @@ export default function ThaiFlashcards() {
             ].join(', ') || undefined;
             
             const specificTopics = wizardState.topics.length > 0 ? wizardState.topics.join(', ') : undefined;
-            const totalCount = wizardState.dailyGoal?.type === 'cards' && wizardState.dailyGoal.value > 0 ? wizardState.dailyGoal.value : 12;
             
-            const preferences = {
-              level,
-              topicsToDiscuss,
-              specificTopics,
-              seriousnessLevel: wizardState.tone ?? 50,
-            };
-            
-            console.log('SetWizardModal onComplete: Calling API with preferences:', preferences, 'count:', totalCount);
+            // If we already have the phrases from the wizard, we can use them directly
+            if (generatedPhrases && generatedPhrases.length > 0) {
+              try {
+                // Create a set name from the topics
+                const setName = specificTopics 
+                  ? `${specificTopics.substring(0, 30)}${specificTopics.length > 30 ? '...' : ''}`
+                  : `Custom Set ${new Date().toLocaleDateString()}`;
+                
+                // Use the phrases to create a set directly
+                const response = await fetch('/api/flashcard-sets', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ 
+                    name: setName,
+                    level,
+                    specificTopics,
+                    phrases: generatedPhrases,
+                    seriousness: wizardState.tone ?? 50
+                  }),
+                  credentials: 'include',
+                });
+                
+                const result = await response.json();
+                console.log("[page.tsx onComplete] Result from set creation:", result);
 
-            // 2. Call the API route to generate phrases, but use addSet to save
-            try {
-              const response = await fetch('/api/generate-set', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ preferences, totalCount }),
-                credentials: 'include',
-              });
-              const result = await response.json();
-              // Log the actual result from the API
-              console.log("[page.tsx onComplete] Full result from /api/generate-set:", JSON.stringify(result, null, 2));
+                if (!response.ok) {
+                  throw new Error(result.error || `API request failed with status ${response.status}`);
+                }
 
-              if (!response.ok) {
-                throw new Error(result.error || `API request failed with status ${response.status}`);
+                if (result.id) {
+                  console.log("Set created with ID:", result.id);
+                  await refreshSets(); // Tell context to fetch updated set list
+                  await switchSet(result.id); // Tell context to switch to the new set
+                  console.log('Successfully switched to new set', result.id);
+                } else {
+                  throw new Error('API route did not return a set ID.');
+                }
+              } catch (err: unknown) {
+                let errorMessage = 'An unknown error occurred';
+                if (typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string') {
+                  errorMessage = err.message;
+                } else if (typeof err === 'string') {
+                  errorMessage = err;
+                }
+                console.error('Error saving generated set:', err);
+                alert(`Error saving your custom set: ${errorMessage}`);
               }
+            } else {
+              // Fall back to the existing API route if needed
+              const totalCount = wizardState.dailyGoal?.type === 'cards' && wizardState.dailyGoal.value > 0 
+                ? wizardState.dailyGoal.value 
+                : 12;
+              
+              const preferences = {
+                level,
+                topicsToDiscuss,
+                specificTopics,
+                seriousnessLevel: wizardState.tone ?? 50,
+              };
+              
+              console.log('Fallback: Calling API with preferences:', preferences, 'count:', totalCount);
 
-              // --- NEW LOGIC --- 
-              // Backend now creates the set, just need to refresh and switch
-              if (result.newSetId) {
-                console.log("Set generated by backend with ID:", result.newSetId);
-                await refreshSets(); // Tell context to fetch updated set list
-                await switchSet(result.newSetId); // Tell context to switch to the new set
-                console.log('handleTestGeneration: Successfully switched to new set', result.newSetId);
-                alert('Test set generated and saved successfully!');
-              } else {
-                throw new Error('API route did not return a newSetId.');
-              }
-              // --- END NEW LOGIC ---
+              try {
+                const response = await fetch('/api/generate-set', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ preferences, totalCount }),
+                  credentials: 'include',
+                });
+                const result = await response.json();
+                
+                console.log("[page.tsx onComplete] Full result from /api/generate-set:", JSON.stringify(result, null, 2));
 
-            } catch (err: unknown) {
-              let errorMessage = 'An unknown error occurred';
-              if (typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string') {
-                errorMessage = err.message;
-              } else if (typeof err === 'string') {
-                errorMessage = err;
+                if (!response.ok) {
+                  throw new Error(result.error || `API request failed with status ${response.status}`);
+                }
+
+                if (result.newSetId) {
+                  console.log("Set generated by backend with ID:", result.newSetId);
+                  await refreshSets(); // Tell context to fetch updated set list
+                  await switchSet(result.newSetId); // Tell context to switch to the new set
+                  console.log('Successfully switched to new set', result.newSetId);
+                } else {
+                  throw new Error('API route did not return a newSetId.');
+                }
+              } catch (err: unknown) {
+                let errorMessage = 'An unknown error occurred';
+                if (typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string') {
+                  errorMessage = err.message;
+                } else if (typeof err === 'string') {
+                  errorMessage = err;
+                }
+                console.error('Error calling API route:', err);
+                alert(`Error generating your custom set: ${errorMessage}`);
               }
-              console.error('handleTestGeneration: Error calling API route:', err);
-              setTestGenResult({ error: errorMessage }); // Display error if needed
-              alert(`Error generating test set: ${errorMessage}`);
             }
           }}
         />

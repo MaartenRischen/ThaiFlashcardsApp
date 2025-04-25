@@ -217,6 +217,18 @@ html.fake-dark-mode-active body {
   background-color: black;
 }
 
+/* Custom styles for card back container to improve mobile experience */
+.card-back-container {
+  scroll-margin-top: 20px; /* Add scroll margin for better positioning when scrollIntoView is called */
+}
+
+@media (max-width: 768px) {
+  .card-back-container {
+    scroll-margin-top: 60px; /* Larger scroll margin on mobile */
+    padding-bottom: 40px; /* Extra padding at bottom for mobile */
+  }
+}
+
 /* Hide everything by default when fake dark mode is active */
 html.fake-dark-mode-active body > *:not(.app-options-modal-container) {
   display: none !important; /* Use important to override other display properties */

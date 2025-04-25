@@ -7,7 +7,6 @@ import { ToneStep } from './ToneStep';
 import { DailyGoalStep } from './DailyGoalStep';
 import { ReviewStep } from './ReviewStep';
 import { GenerationStep } from './GenerationStep';
-import { Progress } from '../ui/progress';
 
 // Wizard state interface
 export interface SetWizardState {
@@ -27,11 +26,16 @@ export interface SetWizardState {
 
 function ProgressStepper({ step, totalSteps }: { step: number; totalSteps: number }) {
   return (
-    <div className="mb-6">
-      <Progress value={(step / (totalSteps - 1)) * 100} className="h-2" />
-      <div className="flex justify-between mt-2 text-sm text-gray-400">
-        <span>Start</span>
-        <span>Review</span>
+    <div className="mb-4">
+      <div className="relative h-0.5 bg-gray-800 rounded-full overflow-hidden">
+        <div 
+          className="absolute h-full bg-blue-600/90 rounded-full transition-all duration-300"
+          style={{ width: `${(step / (totalSteps - 1)) * 100}%` }}
+        />
+      </div>
+      <div className="flex justify-between mt-1.5 text-xs">
+        <span className="text-gray-500">Start</span>
+        <span className="text-gray-500">Review</span>
       </div>
     </div>
   );
@@ -134,22 +138,22 @@ export function SetWizardModal({ onComplete, onClose }: {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className={`neumorphic ${modalWidth} w-full bg-[#1a1a1a] rounded-2xl overflow-hidden`}>
-        <div className="p-6 space-y-6">
+      <div className={`${modalWidth} w-full bg-[#1a1a1a] rounded-lg overflow-hidden shadow-xl border border-gray-800/30`}>
+        <div className="p-5 space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-blue-400">Set Wizard</h2>
+            <h2 className="text-lg font-medium text-blue-400">Set Wizard</h2>
             {showCloseButton && (
               <button 
                 onClick={onClose}
-                className="neumorphic-circle hover:opacity-80 transition-opacity"
+                className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition-colors text-gray-400"
                 aria-label="Close"
               >
-                <span className="text-gray-400">&times;</span>
+                <span className="text-sm">&times;</span>
               </button>
             )}
           </div>
           {showProgressStepper && <ProgressStepper step={step} totalSteps={totalSteps} />}
-          <div className="max-h-[75vh] overflow-y-auto pr-2">
+          <div className="max-h-[75vh] overflow-y-auto pr-1">
             {steps[step]}
           </div>
         </div>

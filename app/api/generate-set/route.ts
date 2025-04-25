@@ -31,15 +31,24 @@ interface GenerateSetRequestBody {
   totalCount: number;
 }
 
-// Fallback image URLs in case everything else fails
-const FALLBACK_IMAGES = [
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=donkeybridge&backgroundColor=b6e3f4",
-  "https://api.dicebear.com/7.x/shapes/svg?seed=donkeybridge&backgroundColor=b6e3f4",
-  "https://api.dicebear.com/7.x/initials/svg?seed=DB&backgroundColor=b6e3f4",
+// Placeholder Thailand images (use existing project images)
+const PLACEHOLDER_IMAGES = [
+  '/images/defaults-backup/default-thailand-01.png',
+  '/images/defaults-backup/default-thailand-02.png',
+  '/images/defaults-backup/default-thailand-03.png',
+  '/images/defaults-backup/default-thailand-04.png',
+  '/images/defaults-backup/default-thailand-05.png',
+  '/images/defaults-backup/default-thailand-06.png',
+  '/images/defaults-backup/default-thailand-07.png',
+  '/images/defaults-backup/default-thailand-08.png',
+  '/images/defaults-backup/default-thailand-09.png',
+  '/images/defaults-backup/default-thailand-10.png',
+  '/images/defaults-backup/default-thailand-11.png',
+  '/images/defaults-backup/default-thailand-12.png',
 ];
 
-function getRandomFallbackImage(): string {
-  return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+function getRandomPlaceholderImage(): string {
+  return PLACEHOLDER_IMAGES[Math.floor(Math.random() * PLACEHOLDER_IMAGES.length)];
 }
 
 function getErrorMessage(error: unknown): string {
@@ -252,10 +261,10 @@ export async function POST(request: Request) {
               }
             }
           } else {
-            console.warn('API Route: Generated image URL is null or invalid, using fallback image');
-            // Use fallback image
-            const fallbackImageUrl = getRandomFallbackImage();
-            setImageUrl = fallbackImageUrl;
+            console.warn('API Route: Generated image URL is null or invalid, using placeholder image');
+            // Use placeholder image
+            const placeholderImageUrl = getRandomPlaceholderImage();
+            setImageUrl = placeholderImageUrl;
             
             try {
               await storage.updateSetMetaData({
@@ -263,18 +272,18 @@ export async function POST(request: Request) {
                 id: newMetaId,
                 createdAt: insertedRecord.createdAt.toISOString(),
                 phraseCount: phrasesToSave.length,
-                imageUrl: fallbackImageUrl
+                imageUrl: placeholderImageUrl
               });
-              console.log('Image processing: Updated metadata with fallback image URL');
+              console.log('Image processing: Updated metadata with placeholder image URL');
             } catch (err) {
-              console.error('Failed to update metadata with fallback URL:', err);
+              console.error('Failed to update metadata with placeholder URL:', err);
             }
           }
         } catch (imgErr) {
           console.error('API Route: Error during set image generation:', imgErr);
-          // Use fallback image
-          const fallbackImageUrl = getRandomFallbackImage();
-          setImageUrl = fallbackImageUrl;
+          // Use placeholder image
+          const placeholderImageUrl = getRandomPlaceholderImage();
+          setImageUrl = placeholderImageUrl;
           
           try {
             await storage.updateSetMetaData({
@@ -282,11 +291,11 @@ export async function POST(request: Request) {
               id: newMetaId,
               createdAt: insertedRecord.createdAt.toISOString(),
               phraseCount: phrasesToSave.length,
-              imageUrl: fallbackImageUrl
+              imageUrl: placeholderImageUrl
             });
-            console.log('Image processing: Updated metadata with fallback image URL after error');
+            console.log('Image processing: Updated metadata with placeholder image URL after error');
           } catch (err) {
-            console.error('Failed to update metadata with fallback URL after error:', err);
+            console.error('Failed to update metadata with placeholder URL after error:', err);
           }
         }
       }

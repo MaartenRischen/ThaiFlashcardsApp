@@ -25,6 +25,14 @@ import { Dialog } from '@/components/ui/dialog';
 import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Utility function to detect mobile devices
+const isMobileDevice = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  ) || (window.innerWidth <= 768);
+};
+
 // Define a simple CardStatus type locally for now
 type CardStatus = 'unseen' | 'wrong' | 'due' | 'reviewed';
 
@@ -257,6 +265,8 @@ export default function ThaiFlashcards() {
 
   // Add ref to track previous showAnswer state - RESTORED
   const prevShowAnswerRef = React.useRef(false);
+  // Add a ref for the card back
+  const cardBackRef = useRef<HTMLDivElement>(null);
 
   console.log("ThaiFlashcards: Component rendering/re-rendering. randomSentence:", randomSentence); // DEBUG
 
@@ -330,6 +340,31 @@ export default function ThaiFlashcards() {
     }
     prevShowAnswerRef.current = showAnswer;
   }, [showAnswer, autoplay, phrases, index, isPlayingWord, isPlayingContext, voicesLoaded, isMale, isPoliteMode]);
+
+  // Mobile optimization: Add resize event listener to handle proper card positioning
+  useEffect(() => {
+    const handleResize = () => {
+      if (showAnswer && cardBackRef.current && isMobileDevice()) {
+        setTimeout(() => {
+          cardBackRef.current?.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start'
+          });
+        }, 150);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    
+    // Call once on initial render if showing answer
+    if (showAnswer) {
+      handleResize();
+    }
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [showAnswer]);
 
   // Trigger autoplay when gender or politeness is toggled (if card back is showing)
   useEffect(() => {
@@ -793,6 +828,43 @@ export default function ThaiFlashcards() {
   // Modified handleShowAnswer for tutorial trigger
   const handleShowAnswer = () => {
     setShowAnswer(true);
+    
+    // Scroll the card back into view after a small delay to allow rendering
+    setTimeout(() => {
+      if (cardBackRef.current) {
+        const isMobile = isMobileDevice();
+        
+        // First try to use scrollIntoView with different behavior for mobile
+        cardBackRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: isMobile ? 'start' : 'nearest'
+        });
+        
+        // For mobile devices, add an additional window scroll
+        if (isMobile) {
+          const rect = cardBackRef.current.getBoundingClientRect();
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          // On mobile, position the element a bit higher from the top for better visibility
+          const targetPosition = scrollTop + rect.top - 20; // 20px offset from top
+          
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          });
+          
+          // For iOS specifically, sometimes need an extra nudge
+          if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+            setTimeout(() => {
+              window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
+              });
+            }, 100);
+          }
+        }
+      }
+    }, 150); // Ensure DOM has updated
+    
     // Trigger next step specifically when moving from step 2 (Show Answer explanation)
     if (tutorialStep === 2) { 
       console.log("Tutorial: Triggering step 3 via Show Answer");
@@ -1074,7 +1146,10 @@ export default function ThaiFlashcards() {
 
             {/* Card Back: Displayed when showAnswer is true */} 
             {showAnswer && (
-              <div className="border-t border-[#333] p-6 flex flex-col min-h-[20rem] overflow-y-auto"> {/* Ensure min height */} 
+              <div 
+                ref={cardBackRef} 
+                className="border-t border-[#333] p-6 flex flex-col min-h-[20rem] overflow-y-auto card-back-container"
+              > 
                 {/* Main Phrase Section - Centered */}
                 <div className="flex flex-col items-center justify-center mb-4">
                   <div className="text-center">

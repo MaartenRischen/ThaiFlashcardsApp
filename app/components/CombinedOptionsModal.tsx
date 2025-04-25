@@ -175,7 +175,7 @@ export function CombinedOptionsModal({
                   onClick={() => { onClose(); onOpenSetManager(); }}
                   className="neumorphic-button w-full text-blue-400"
                 >
-                  Open Full Set Manager...
+                  Open My Sets...
                 </button>
                 <button
                   onClick={onExportSet}
@@ -435,7 +435,7 @@ export function SetManagerModal({ isOpen, onClose }: {
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="neumorphic max-w-5xl w-full p-6 bg-[#1f1f1f] max-h-[90vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6 flex-shrink-0">
-          <h2 className="text-xl font-bold text-blue-400">Set Manager</h2>
+          <h2 className="text-xl font-bold text-blue-400">My Sets</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
         </div>
         <div className="flex justify-end gap-2 mb-4">
@@ -504,35 +504,14 @@ export function SetManagerModal({ isOpen, onClose }: {
                 </div>
                 {/* Set Name */}
                 <div className="font-bold text-lg text-white mb-1 text-center line-clamp-3 break-words whitespace-pre-line">{set.cleverTitle || set.name}</div>
-                {/* Topics */}
-                <div className="text-sm text-gray-300 mb-1 truncate">{set.specificTopics || '-'}</div>
-                {/* Ridiculousness */}
-                <div className="text-xs text-gray-400 mb-2">Ridiculousness: {typeof set.seriousnessLevel === 'number' ? `${100 - set.seriousnessLevel}%` : '-'}</div>
-                {/* Progress Bar */}
-                <div className="w-full bg-gray-700 rounded-full h-2 mb-1">
-                  <div
-                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${set.phraseCount ? (Object.keys(setProgress).length / set.phraseCount * 100) : 0}%` }}
-                  ></div>
+                
+                {/* Author label */}
+                <div className="text-blue-400 text-sm font-medium mb-3 text-center">
+                  {isDefault ? "System Set" : "My Set"}
                 </div>
-                <div className="flex justify-between text-xs text-gray-400 mb-2">
-                  <span>{Object.keys(setProgress).length} learned</span>
-                  <span>{set.phraseCount || '-'} total</span>
-                  <span>{set.phraseCount ? Math.round((Object.keys(setProgress).length / set.phraseCount) * 100) : 0}%</span>
-                </div>
-                {/* Meta info */}
-                <div className="flex justify-between text-xs text-gray-500 mt-auto pt-2 border-t border-gray-800">
-                  <span>#Cards: {set.phraseCount || '-'}</span>
-                  <span>{set.createdAt ? new Date(set.createdAt).toLocaleDateString() : '-'}</span>
-                </div>
-                {/* NEW: AI model/brand modest note */}
-                {(set.llmBrand || set.llmModel) && (
-                  <div className="text-xs text-gray-500 italic mt-1 text-center">
-                    Generated using {set.llmBrand ? set.llmBrand.charAt(0).toUpperCase() + set.llmBrand.slice(1) : ''}{set.llmBrand && set.llmModel ? ' ' : ''}{set.llmModel ? set.llmModel : ''} AI
-                  </div>
-                )}
+                
                 {/* Card Actions: Publish and Cards icon buttons side by side */}
-                <div className="flex gap-2 justify-end mt-2">
+                <div className="flex gap-2 justify-end mt-auto">
                   {/* Publish icon button */}
                   {!isDefault && (
                     <button

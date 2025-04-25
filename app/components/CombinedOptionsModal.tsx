@@ -332,10 +332,16 @@ export function SetManagerModal({ isOpen, onClose }: {
   const [cardsModalLoading, setCardsModalLoading] = useState(false);
   const [publishingSetId, setPublishingSetId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('Anonymous');
   
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setUserId(localStorage.getItem('userId'));
+      // Try to get username from localStorage
+      const storedName = localStorage.getItem('userName') || localStorage.getItem('name');
+      if (storedName) {
+        setUserName(storedName);
+      }
     }
   }, []);
 
@@ -539,7 +545,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                               title: set.cleverTitle || set.name,
                               description: set.specificTopics || '',
                               phrases: phrases || [],
-                              author: 'Anonymous',
+                              author: userName,
                               imageUrl: set.imageUrl || '',
                               cardCount: set.phraseCount || 0,
                               llmBrand: set.llmBrand || '',

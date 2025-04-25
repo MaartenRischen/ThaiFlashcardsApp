@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useSet } from '@/app/context/SetContext';
 import { Phrase } from '@/app/lib/set-generator';
 import GallerySetCard from './GallerySetCard';
+import { GalleryHorizontal, Loader2 } from 'lucide-react';
 
 interface GallerySet {
   id: string;
@@ -32,6 +33,11 @@ export default function GalleryPage() {
         return res.json();
       })
       .then(data => {
+        console.log('Gallery sets data:', data);
+        // Log each set's author to debug
+        data.forEach((set: GallerySet, index: number) => {
+          console.log(`Set ${index} - Title: ${set.title}, Author: '${set.author}'`);
+        });
         setSets(data);
         setLoading(false);
       })
@@ -92,37 +98,51 @@ export default function GalleryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#181818] py-8 px-4">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-center text-white mb-6">User Gallery</h1>
-        <p className="text-center text-gray-400 mb-8">
-          Browse and import sets created by the Donkey Bridge community!
-        </p>
-        {loading && (
-          <div className="text-center text-gray-400 py-12">Loading sets...</div>
-        )}
-        {error && (
-          <div className="text-center text-red-400 py-12">{error}</div>
-        )}
-        {!loading && !error && sets.length === 0 && (
-          <div className="text-center text-gray-500 py-12">No sets have been published yet. Be the first to publish a set!</div>
-        )}
-        {sets.length === 0 ? (
-          <div className="text-gray-400 text-center mt-8">No sets found.</div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-6">
-            {sets.map((set) => (
-              <GallerySetCard
-                key={set.id}
-                set={set}
-                importingSetId={importingSetId}
-                contextIsLoading={contextIsLoading}
-                handleImport={handleImport}
-              />
-            ))}
-          </div>
-        )}
+    <div className="container max-w-5xl py-8 bg-indigo-950/20 rounded-lg my-4">
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-2">
+          <GalleryHorizontal className="h-5 w-5 text-indigo-400" />
+          <h1 className="text-xl font-medium text-indigo-400">User Gallery</h1>
+        </div>
       </div>
+      
+      <p className="text-sm text-indigo-200 mb-6 -mt-4">
+        Browse and import sets created by the Donkey Bridge community
+      </p>
+      
+      {error && (
+        <div className="p-3 bg-red-900/20 border border-red-700/30 rounded-md text-red-400 text-sm mb-4">
+          {error}
+        </div>
+      )}
+      
+      {loading ? (
+        <div className="flex justify-center py-10">
+          <Loader2 className="h-6 w-6 animate-spin text-indigo-600/90" />
+        </div>
+      ) : sets.length === 0 ? (
+        <div className="bg-indigo-900/30 rounded-lg border border-indigo-800/30 p-6 text-center">
+          <div className="flex justify-center mb-4">
+            <GalleryHorizontal className="h-12 w-12 text-indigo-400/70" />
+          </div>
+          <h3 className="text-base font-medium mb-2 text-indigo-400">No gallery sets found</h3>
+          <p className="text-sm text-indigo-300 mb-5">
+            No sets have been published to the gallery yet. You can publish your own sets from the My Sets page!
+          </p>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sets.map((set) => (
+            <GallerySetCard
+              key={set.id}
+              set={set}
+              importingSetId={importingSetId}
+              contextIsLoading={contextIsLoading}
+              handleImport={handleImport}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 } 

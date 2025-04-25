@@ -49,7 +49,7 @@ export default function RootLayout({
           <meta name="theme-color" content="#ffffff" />
         </head>
         <body className={inter.className}>
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="top-left" />
           <Tooltip.Provider>
           <Providers>
             <SetProvider>

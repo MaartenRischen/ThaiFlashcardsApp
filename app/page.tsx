@@ -1380,7 +1380,7 @@ export default function ThaiFlashcards() {
             setShowSetWizardModal(false);
             
             // Show initial toast
-            toast.loading('Creating your custom set...', {
+            toast.loading('Creating your custom set... (About 2 minutes)', {
               duration: Infinity,
               id: 'set-generation',
             });

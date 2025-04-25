@@ -11,7 +11,7 @@ import { SetMetaData } from '@/app/lib/storage'; // Import SetMetaData
 import { generateImage } from '@/app/lib/ideogram-service';
 import { INITIAL_PHRASES } from '@/app/data/phrases'; // Import INITIAL_PHRASES only
 import { prisma } from "@/app/lib/prisma"; // Import prisma client
-import { uploadImageFromUrl } from '@/app/lib/imageStorage';
+import { uploadImageFromUrl } from '../../lib/imageStorage'; // Use relative path
 
 // Debug environment variables - this will help diagnose Railway issues
 console.log('API Route Environment Variables:');
@@ -22,11 +22,24 @@ console.log('- NODE_ENV:', process.env.NODE_ENV);
 console.log('- NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL);
 
 console.log('DEBUG: DATABASE_URL in generate-set route:', process.env.DATABASE_URL);
+// Add more detailed debug logging for Ideogram key
+console.log('DEBUG: IDEOGRAM_API_KEY first 10 chars:', process.env.IDEOGRAM_API_KEY ? process.env.IDEOGRAM_API_KEY.substring(0, 10) + '...' : 'undefined');
 
 // Define expected request body structure (can be shared or redefined here)
 interface GenerateSetRequestBody {
   preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>;
   totalCount: number;
+}
+
+// Fallback image URLs in case everything else fails
+const FALLBACK_IMAGES = [
+  "https://api.dicebear.com/7.x/thumbs/svg?seed=donkeybridge&backgroundColor=b6e3f4",
+  "https://api.dicebear.com/7.x/shapes/svg?seed=donkeybridge&backgroundColor=b6e3f4",
+  "https://api.dicebear.com/7.x/initials/svg?seed=DB&backgroundColor=b6e3f4",
+];
+
+function getRandomFallbackImage(): string {
+  return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
 }
 
 function getErrorMessage(error: unknown): string {
@@ -145,13 +158,15 @@ export async function POST(request: Request) {
 
       // --- 6. Handle Image Storage ---
       let setImageUrl: string | null = generationResult.imageUrl || null;
-      console.log('Image processing: Starting with imageUrl:', !!setImageUrl);
+      console.log('Image processing: Starting with imageUrl:', !!setImageUrl, 'Ideogram API Key:', !!process.env.IDEOGRAM_API_KEY);
       
       if (typeof setImageUrl === 'string') {
         // Upload the image to Supabase Storage
         console.log('Image processing: Using generationResult.imageUrl');
         try {
           const storedImageUrl = await uploadImageFromUrl(setImageUrl, newMetaId);
+          console.log('Image processing: uploadImageFromUrl result:', !!storedImageUrl);
+          
           if (storedImageUrl) {
             setImageUrl = storedImageUrl;
             console.log('API Route: Successfully stored image in Supabase:', storedImageUrl);
@@ -164,6 +179,7 @@ export async function POST(request: Request) {
               phraseCount: phrasesToSave.length,
               imageUrl: storedImageUrl
             });
+            console.log('Image processing: Metadata updated with image URL');
           }
         } catch (uploadError) {
           console.error('Error uploading existing image to Supabase:', uploadError);
@@ -179,38 +195,99 @@ export async function POST(request: Request) {
           const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}. Use vibrant colors that are friendly and engaging.`;
           
           console.log(`API Route: Generating set cover image with prompt:`, imagePrompt);
+          console.log('Image processing: About to call generateImage');
+          
           const tempImageUrl = await generateImage(imagePrompt);
-          console.log('Image generation result:', !!tempImageUrl);
+          console.log('Image generation result:', !!tempImageUrl, tempImageUrl ? tempImageUrl.substring(0, 30) + '...' : 'null');
           
           if (typeof tempImageUrl === 'string') {
             try {
+              console.log('Image processing: Got image URL, uploading to Supabase');
               const storedImageUrl = await uploadImageFromUrl(tempImageUrl, newMetaId);
+              console.log('Image processing: Upload result:', !!storedImageUrl);
+              
               if (storedImageUrl) {
                 setImageUrl = storedImageUrl;
                 console.log('API Route: Successfully generated and stored image:', storedImageUrl);
                 
                 // Update the metadata with the new image URL
-                await storage.updateSetMetaData({
+                const updateResult = await storage.updateSetMetaData({
                   ...metaDataForStorage,
                   id: newMetaId,
                   createdAt: insertedRecord.createdAt.toISOString(),
                   phraseCount: phrasesToSave.length,
                   imageUrl: storedImageUrl
                 });
+                console.log('Image processing: Metadata update result:', !!updateResult);
               } else {
                 console.warn('API Route: Failed to upload generated image to storage');
                 setImageUrl = tempImageUrl; // Fallback to temporary URL
+                
+                // Still try to update metadata with temporary URL
+                await storage.updateSetMetaData({
+                  ...metaDataForStorage,
+                  id: newMetaId,
+                  createdAt: insertedRecord.createdAt.toISOString(),
+                  phraseCount: phrasesToSave.length,
+                  imageUrl: tempImageUrl
+                });
+                console.log('Image processing: Updated metadata with temporary URL');
               }
             } catch (uploadError) {
               console.error('Error uploading generated image to Supabase:', uploadError);
               setImageUrl = tempImageUrl; // Fallback to temporary URL
+              
+              // Still try to update metadata with temporary URL
+              try {
+                await storage.updateSetMetaData({
+                  ...metaDataForStorage,
+                  id: newMetaId,
+                  createdAt: insertedRecord.createdAt.toISOString(),
+                  phraseCount: phrasesToSave.length,
+                  imageUrl: tempImageUrl
+                });
+                console.log('Image processing: Updated metadata with temporary URL after upload error');
+              } catch (err) {
+                console.error('Failed to update metadata with temporary URL:', err);
+              }
             }
           } else {
-            console.warn('API Route: Generated image URL is null or invalid');
+            console.warn('API Route: Generated image URL is null or invalid, using fallback image');
+            // Use fallback image
+            const fallbackImageUrl = getRandomFallbackImage();
+            setImageUrl = fallbackImageUrl;
+            
+            try {
+              await storage.updateSetMetaData({
+                ...metaDataForStorage,
+                id: newMetaId,
+                createdAt: insertedRecord.createdAt.toISOString(),
+                phraseCount: phrasesToSave.length,
+                imageUrl: fallbackImageUrl
+              });
+              console.log('Image processing: Updated metadata with fallback image URL');
+            } catch (err) {
+              console.error('Failed to update metadata with fallback URL:', err);
+            }
           }
         } catch (imgErr) {
           console.error('API Route: Error during set image generation:', imgErr);
-          setImageUrl = null;
+          // Use fallback image
+          const fallbackImageUrl = getRandomFallbackImage();
+          setImageUrl = fallbackImageUrl;
+          
+          try {
+            await storage.updateSetMetaData({
+              ...metaDataForStorage,
+              id: newMetaId,
+              createdAt: insertedRecord.createdAt.toISOString(),
+              phraseCount: phrasesToSave.length,
+              imageUrl: fallbackImageUrl
+            });
+            console.log('Image processing: Updated metadata with fallback image URL after error');
+          } catch (err) {
+            console.error('Failed to update metadata with fallback URL after error:', err);
+          }
         }
       }
 
@@ -231,23 +308,34 @@ export async function POST(request: Request) {
       console.log(`API Route: Initial progress saved for set ID: ${newMetaId}`);
 
       // --- 8. Return Success Response ---
+      // Get the latest metadata through a query
+      let updatedMetadata = null;
+      try {
+        // Try to get the latest metadata
+        const sets = await storage.getAllSetMetaData(userId);
+        updatedMetadata = sets.find(set => set.id === newMetaId);
+        console.log('Found updated metadata via getAllSetMetaData:', !!updatedMetadata);
+      } catch (err) {
+        console.error('Error fetching updated metadata:', err);
+      }
+      
       const completeNewMetaData: SetMetaData = {
-        id: insertedRecord.id,
-        name: insertedRecord.name,
-        cleverTitle: insertedRecord.cleverTitle || undefined,
-        createdAt: insertedRecord.createdAt.toISOString(),
+        id: updatedMetadata?.id || insertedRecord.id,
+        name: updatedMetadata?.name || insertedRecord.name,
+        cleverTitle: updatedMetadata?.cleverTitle || insertedRecord.cleverTitle || undefined,
+        createdAt: updatedMetadata?.createdAt || insertedRecord.createdAt.toISOString(),
         phraseCount: phrasesToSave.length,
-        level: insertedRecord.level as SetMetaData['level'] || undefined,
-        goals: insertedRecord.goals || [],
-        specificTopics: insertedRecord.specificTopics || undefined,
-        source: insertedRecord.source as SetMetaData['source'] || 'generated',
-        imageUrl: insertedRecord.imageUrl || undefined,
+        level: updatedMetadata?.level || insertedRecord.level as SetMetaData['level'] || undefined,
+        goals: updatedMetadata?.goals || insertedRecord.goals || [],
+        specificTopics: updatedMetadata?.specificTopics || insertedRecord.specificTopics || undefined,
+        source: updatedMetadata?.source || insertedRecord.source as SetMetaData['source'] || 'generated',
+        imageUrl: updatedMetadata?.imageUrl || setImageUrl || undefined,
         isFullyLearned: false,
-        seriousnessLevel: insertedRecord.seriousnessLevel || undefined,
-        llmBrand: insertedRecord.llmBrand || undefined,
-        llmModel: insertedRecord.llmModel || undefined
+        seriousnessLevel: updatedMetadata?.seriousnessLevel || insertedRecord.seriousnessLevel || undefined,
+        llmBrand: updatedMetadata?.llmBrand || insertedRecord.llmBrand || undefined,
+        llmModel: updatedMetadata?.llmModel || insertedRecord.llmModel || undefined
       };
-      console.log(`API Route: Successfully created set ${newMetaId}. Returning metadata.`);
+      console.log(`API Route: Successfully created set ${newMetaId}. Returning metadata with imageUrl:`, completeNewMetaData.imageUrl ? 'set' : 'not set');
       return NextResponse.json({ newSetMetaData: completeNewMetaData }, { status: 201 });
 
     } catch (error: unknown) {

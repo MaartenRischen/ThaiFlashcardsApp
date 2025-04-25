@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 
-export function WelcomeStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
+export function WelcomeStep({ onNext }: { onNext: () => void }) {
   return (
     <div className="flex flex-col items-center text-center space-y-6">
       {/* Image with decorative background */}
@@ -41,7 +41,7 @@ export function WelcomeStep({ onNext, onSkip }: { onNext: () => void; onSkip: ()
           onClick={onNext}
           className="neumorphic-button text-blue-400 px-8"
         >
-          Let's Go!
+          Let&apos;s Go!
         </button>
       </div>
     </div>

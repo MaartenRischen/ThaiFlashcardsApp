@@ -145,50 +145,68 @@ export async function POST(request: Request) {
 
       // --- 6. Handle Image Storage ---
       let setImageUrl: string | null = generationResult.imageUrl || null;
+      console.log('Image processing: Starting with imageUrl:', !!setImageUrl);
+      
       if (typeof setImageUrl === 'string') {
         // Upload the image to Supabase Storage
-        const storedImageUrl = await uploadImageFromUrl(setImageUrl, newMetaId);
-        if (storedImageUrl) {
-          setImageUrl = storedImageUrl;
-          console.log('API Route: Successfully stored image in Supabase:', storedImageUrl);
-          
-          // Update the metadata with the new image URL
-          await storage.updateSetMetaData({
-            ...metaDataForStorage,
-            id: newMetaId,
-            createdAt: insertedRecord.createdAt.toISOString(),
-            phraseCount: phrasesToSave.length,
-            imageUrl: storedImageUrl
-          });
-        } else {
-          console.warn('API Route: Failed to upload image to storage, falling back to temporary URL');
-        }
-      } else if (!isFallback) {
+        console.log('Image processing: Using generationResult.imageUrl');
         try {
+          const storedImageUrl = await uploadImageFromUrl(setImageUrl, newMetaId);
+          if (storedImageUrl) {
+            setImageUrl = storedImageUrl;
+            console.log('API Route: Successfully stored image in Supabase:', storedImageUrl);
+            
+            // Update the metadata with the new image URL
+            await storage.updateSetMetaData({
+              ...metaDataForStorage,
+              id: newMetaId,
+              createdAt: insertedRecord.createdAt.toISOString(),
+              phraseCount: phrasesToSave.length,
+              imageUrl: storedImageUrl
+            });
+          }
+        } catch (uploadError) {
+          console.error('Error uploading existing image to Supabase:', uploadError);
+          setImageUrl = null; // Reset so we try generating our own image
+        }
+      } 
+      
+      // If no image URL yet, generate one (for both regular and fallback paths)
+      if (!setImageUrl) {
+        try {
+          console.log('Image processing: Generating our own image');
           const topicDescription = generationResult.cleverTitle || 'language learning';
           const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}. Use vibrant colors that are friendly and engaging.`;
           
           console.log(`API Route: Generating set cover image with prompt:`, imagePrompt);
           const tempImageUrl = await generateImage(imagePrompt);
+          console.log('Image generation result:', !!tempImageUrl);
           
           if (typeof tempImageUrl === 'string') {
-            const storedImageUrl = await uploadImageFromUrl(tempImageUrl, newMetaId);
-            if (storedImageUrl) {
-              setImageUrl = storedImageUrl;
-              console.log('API Route: Successfully generated and stored image:', storedImageUrl);
-              
-              // Update the metadata with the new image URL
-              await storage.updateSetMetaData({
-                ...metaDataForStorage,
-                id: newMetaId,
-                createdAt: insertedRecord.createdAt.toISOString(),
-                phraseCount: phrasesToSave.length,
-                imageUrl: storedImageUrl
-              });
-            } else {
-              console.warn('API Route: Failed to upload generated image to storage');
+            try {
+              const storedImageUrl = await uploadImageFromUrl(tempImageUrl, newMetaId);
+              if (storedImageUrl) {
+                setImageUrl = storedImageUrl;
+                console.log('API Route: Successfully generated and stored image:', storedImageUrl);
+                
+                // Update the metadata with the new image URL
+                await storage.updateSetMetaData({
+                  ...metaDataForStorage,
+                  id: newMetaId,
+                  createdAt: insertedRecord.createdAt.toISOString(),
+                  phraseCount: phrasesToSave.length,
+                  imageUrl: storedImageUrl
+                });
+              } else {
+                console.warn('API Route: Failed to upload generated image to storage');
+                setImageUrl = tempImageUrl; // Fallback to temporary URL
+              }
+            } catch (uploadError) {
+              console.error('Error uploading generated image to Supabase:', uploadError);
               setImageUrl = tempImageUrl; // Fallback to temporary URL
             }
+          } else {
+            console.warn('API Route: Generated image URL is null or invalid');
           }
         } catch (imgErr) {
           console.error('API Route: Error during set image generation:', imgErr);

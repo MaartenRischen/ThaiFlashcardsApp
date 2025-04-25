@@ -3,8 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useSession } from 'next-auth/react';
+import { Loader2, Plus, BookOpen } from "lucide-react";
 
 type FlashcardSet = {
   id: string;
@@ -12,6 +14,7 @@ type FlashcardSet = {
   level?: string;
   createdAt: string;
   source: string;
+  imageUrl?: string;
   _count?: {
     phrases: number;
   };
@@ -66,7 +69,7 @@ export default function MySetsPage() {
   if (status === "loading") {
     return (
       <div className="container flex items-center justify-center min-h-screen">
-        <p>Loading...</p>
+        <Loader2 className="h-6 w-6 animate-spin text-blue-600/90" />
       </div>
     );
   }
@@ -75,6 +78,8 @@ export default function MySetsPage() {
     switch (source) {
       case "default":
         return "Default";
+      case "generated":
+        return "AI Generated";
       case "wizard":
         return "AI Generated";
       case "import":
@@ -84,62 +89,132 @@ export default function MySetsPage() {
     }
   };
 
+  const getBadgeColor = (source: string) => {
+    switch (source) {
+      case "default":
+        return "bg-gray-500/20 text-gray-300";
+      case "generated":
+      case "wizard":
+        return "bg-blue-600/20 text-blue-400";
+      case "import":
+        return "bg-green-600/20 text-green-400";
+      default:
+        return "bg-gray-500/20 text-gray-300";
+    }
+  };
+
+  const getLevelColor = (level?: string) => {
+    switch (level?.toLowerCase()) {
+      case "beginner":
+        return "text-green-400";
+      case "intermediate":
+        return "text-yellow-400";
+      case "advanced":
+        return "text-red-400";
+      default:
+        return "text-gray-400";
+    }
+  };
+
   return (
-    <div className="container max-w-5xl py-12">
-      <div className="flex justify-between items-center mb-8">
+    <div className="container max-w-5xl py-8">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">My Flashcard Sets</h1>
-          <p className="text-gray-500 mt-2">
+          <h1 className="text-2xl font-medium text-blue-400">My Flashcard Sets</h1>
+          <p className="text-sm text-gray-400 mt-1">
             Manage and practice with your saved flashcard sets
           </p>
         </div>
-        <Button asChild>
-          <Link href="/set-wizard-start">Create New Set</Link>
+        <Button 
+          asChild
+          className="bg-blue-600/90 hover:bg-blue-700/90 text-white rounded-full px-4 py-2 text-sm flex items-center gap-1"
+        >
+          <Link href="/set-wizard-start">
+            <Plus className="h-4 w-4" />
+            <span>Create New Set</span>
+          </Link>
         </Button>
       </div>
       
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-md text-red-600 mb-6">
+        <div className="p-3 bg-red-900/20 border border-red-700/30 rounded-md text-red-400 text-sm mb-4">
           {error}
         </div>
       )}
       
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <p>Loading your flashcard sets...</p>
+        <div className="flex justify-center py-10">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600/90" />
         </div>
       ) : sets.length === 0 ? (
-        <div className="bg-card rounded-lg border p-8 text-center">
-          <h3 className="text-lg font-medium mb-2">No flashcard sets found</h3>
-          <p className="text-gray-500 mb-6">
+        <div className="bg-[#1a1a1a] rounded-lg border border-gray-800/30 p-6 text-center">
+          <div className="flex justify-center mb-4">
+            <BookOpen className="h-12 w-12 text-blue-400/70" />
+          </div>
+          <h3 className="text-base font-medium mb-2 text-blue-400">No flashcard sets found</h3>
+          <p className="text-sm text-gray-400 mb-5">
             You haven&apos;t created any flashcard sets yet. Create your first set to start learning Thai!
           </p>
-          <Button asChild>
+          <Button 
+            asChild
+            className="bg-blue-600/90 hover:bg-blue-700/90 text-white rounded-full px-4 py-2 text-sm"
+          >
             <Link href="/set-wizard-start">Create Your First Set</Link>
           </Button>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sets.map((set) => (
             <Link
               key={set.id}
               href={`/?setId=${set.id}`}
-              className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow"
+              className="bg-[#1a1a1a] border border-gray-800/30 rounded-lg overflow-hidden hover:border-blue-700/30 transition-all group"
             >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-medium text-lg mb-1">{set.name}</h3>
-                  <p className="text-sm text-gray-500">
-                    {set._count?.phrases || 0} cards • {set.level || "Not specified"}
+              <div className="relative w-full aspect-[16/9] bg-[#111] overflow-hidden">
+                {set.imageUrl ? (
+                  <Image
+                    src={set.imageUrl}
+                    alt={set.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/images/default-set-logo.png';
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <BookOpen className="h-10 w-10 text-gray-700" />
+                  </div>
+                )}
+                <div className="absolute top-2 right-2">
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${getBadgeColor(set.source)}`}>
+                    {getSourceLabel(set.source)}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="p-3">
+                <h3 className="font-medium text-sm mb-1 text-white line-clamp-2 group-hover:text-blue-400 transition-colors">
+                  {set.name}
+                </h3>
+                
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs">
+                    <span className="text-gray-400">{set._count?.phrases || 0} cards</span>
+                    {set.level && (
+                      <>
+                        <span className="mx-1 text-gray-600">•</span>
+                        <span className={getLevelColor(set.level)}>{set.level}</span>
+                      </>
+                    )}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(set.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                   </p>
                 </div>
-                <span className="text-xs bg-secondary px-2 py-1 rounded">
-                  {getSourceLabel(set.source)}
-                </span>
               </div>
-              <p className="text-xs text-gray-400 mt-4">
-                Created on {new Date(set.createdAt).toLocaleDateString()}
-              </p>
             </Link>
           ))}
         </div>

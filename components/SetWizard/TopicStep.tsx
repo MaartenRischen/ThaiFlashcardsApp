@@ -99,26 +99,32 @@ export function TopicStep({ value, scenarios, onNext, onBack }: {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <h3 className="text-xl font-semibold text-white">
+    <div className="space-y-5 px-2">
+      <div className="space-y-2.5">
+        <h3 className="text-base font-medium text-white">
           Choose Your Learning Topics
         </h3>
-        <p className="text-gray-400">
+        <p className="text-xs text-gray-400">
           Select specific topics you&apos;d like to focus on within your chosen scenarios.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {[...uniqueTopics, ...selectedTopics.filter(topic => !uniqueTopics.includes(topic))].map(topic => (
           <button
             key={topic}
             onClick={() => toggleTopic(topic)}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              toggleTopic(topic);
+            }}
             className={`
-              neumorphic-button text-left px-4 py-3 transition-all
+              text-left px-3 py-2 rounded-full text-xs transition-all
               ${selectedTopics.includes(topic)
-                ? 'bg-blue-600 text-white border-blue-500 shadow-blue-900/20'
-                : 'bg-[#2a2a2a] text-gray-300 hover:text-white'}
+                ? 'bg-blue-600/90 text-white shadow-sm'
+                : 'bg-[#1e1e1e] text-gray-300 hover:bg-[#2a2a2a]'}
+              active:bg-blue-600/90 active:text-white
+              touch-none select-none
             `}
           >
             {topic}
@@ -126,37 +132,37 @@ export function TopicStep({ value, scenarios, onNext, onBack }: {
         ))}
       </div>
 
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-white">
+      <div className="space-y-2.5">
+        <h4 className="text-sm font-medium text-white">
           Add Custom Topic
         </h4>
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <input
             type="text"
             value={customTopic}
             onChange={(e) => setCustomTopic(e.target.value)}
             placeholder="Enter a custom topic..."
-            className="neumorphic-input flex-1"
+            className="flex-1 bg-[#1e1e1e] border border-gray-800 rounded-full px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
           <button
             onClick={addCustomTopic}
             disabled={!customTopic.trim()}
-            className="neumorphic-button bg-blue-600 hover:bg-blue-700 text-white px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`rounded-full ${!customTopic.trim() ? 'bg-blue-600/50 cursor-not-allowed' : 'bg-blue-600/90 hover:bg-blue-600'} text-white px-3 py-1.5 text-xs`}
           >
             Add
           </button>
         </div>
       </div>
 
-      <div className="flex justify-between pt-4">
+      <div className="flex justify-between pt-3">
         <button
           onClick={onBack}
-          className="neumorphic-button bg-[#2a2a2a] hover:bg-[#333333] text-white px-8 py-3"
+          className="rounded-full bg-[#1e1e1e] hover:bg-[#2a2a2a] text-gray-400 px-4 py-1.5 text-xs"
         >
           Back
         </button>
         <button
-          className="neumorphic-button bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
+          className={`rounded-full ${selectedTopics.length === 0 ? 'bg-blue-600/50 cursor-not-allowed' : 'bg-blue-600/90 hover:bg-blue-600'} text-white px-4 py-1.5 text-xs`}
           onClick={handleNext}
           disabled={selectedTopics.length === 0}
         >

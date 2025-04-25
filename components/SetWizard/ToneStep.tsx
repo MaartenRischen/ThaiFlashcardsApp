@@ -26,19 +26,19 @@ export function ToneStep({ value, onNext, onBack }: {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <h3 className="text-xl font-semibold text-white">
-          🎭 How would you like to learn?
+    <div className="space-y-5 px-2">
+      <div className="space-y-2.5">
+        <h3 className="text-base font-medium text-white">
+          How would you like to learn?
         </h3>
-        <p className="text-gray-400">
+        <p className="text-xs text-gray-400">
           Choose between serious, practical mnemonics or fun, memorable ones.
         </p>
       </div>
 
-      <div className="space-y-6">
-        <div className="flex items-center gap-6">
-          <span className="text-gray-400 text-sm w-20">Serious & Practical</span>
+      <div className="space-y-5">
+        <div className="flex items-center gap-4">
+          <span className="text-gray-400 text-xs w-20">Serious & Practical</span>
           <Slider
             value={[tone]}
             onValueChange={([newTone]) => setTone(newTone)}
@@ -46,38 +46,33 @@ export function ToneStep({ value, onNext, onBack }: {
             step={1}
             className="flex-1"
           />
-          <span className="text-gray-400 text-sm w-20 text-right">Fun & Memorable</span>
+          <span className="text-gray-400 text-xs w-20 text-right">Fun & Memorable</span>
         </div>
 
-        <div className="neumorphic p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">
-              {tone <= 30 ? '🎯' : tone >= 70 ? '🎪' : '🎭'}
-            </span>
-            <h4 className="text-lg font-semibold text-white">
-              {preview.label} Style Example
-            </h4>
-          </div>
+        <div className="bg-[#1e1e1e] rounded-lg p-4 space-y-3">
+          <h4 className="text-sm font-medium text-white">
+            {preview.label} Style Example
+          </h4>
           
-          <div className="space-y-3">
-            <p className="text-2xl text-blue-400">{preview.thai}</p>
-            <p className="text-lg text-gray-300">{preview.english}</p>
-            <div className="text-sm text-gray-500">
+          <div className="space-y-2">
+            <p className="text-blue-400 text-base">{preview.thai}</p>
+            <p className="text-gray-300 text-sm">{preview.english}</p>
+            <div className="text-xs text-gray-500">
               <span className="text-gray-400">Mnemonic:</span> {preview.mnemonic}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-between pt-4">
+      <div className="flex justify-between pt-3">
         <button
           onClick={onBack}
-          className="neumorphic-button bg-[#2a2a2a] hover:bg-[#333333] text-white px-8 py-3"
+          className="rounded-full bg-[#1e1e1e] hover:bg-[#2a2a2a] text-gray-400 px-4 py-1.5 text-xs"
         >
           Back
         </button>
         <button
-          className="neumorphic-button bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
+          className="rounded-full bg-blue-600/90 hover:bg-blue-600 text-white px-4 py-1.5 text-xs"
           onClick={() => onNext(tone)}
         >
           Next

@@ -638,13 +638,13 @@ export function SetManagerModal({ isOpen, onClose }: {
                       <div className="w-full bg-gray-700 rounded-full h-3">
                         <div
                           className="bg-green-500 h-3 rounded-full transition-all duration-300"
-                          style={{ width: `${percent}%` }}
+                          style={{ width: `${Object.keys(cardsModalProgress).length / cardsModalPhrases.length * 100}%` }}
                         ></div>
                       </div>
                       <div className="flex justify-between text-xs text-gray-300 mt-1">
-                        <span>{learned} learned</span>
-                        <span>{total} total</span>
-                        <span>{percent}%</span>
+                        <span>{Object.keys(cardsModalProgress).length} learned</span>
+                        <span>{cardsModalPhrases.length} total</span>
+                        <span>{Math.round(Object.keys(cardsModalProgress).length / cardsModalPhrases.length * 100)}%</span>
                       </div>
                     </div>
                   </div>

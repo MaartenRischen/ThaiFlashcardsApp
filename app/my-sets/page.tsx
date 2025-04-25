@@ -121,7 +121,7 @@ export default function SetManagerPage() {
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-2">
           <Settings className="h-5 w-5 text-blue-400" />
-          <h1 className="text-xl font-medium text-blue-400">Set Manager</h1>
+          <h1 className="text-xl font-medium text-blue-400">My Sets</h1>
         </div>
         <Button 
           asChild
@@ -170,7 +170,7 @@ export default function SetManagerPage() {
             <Link
               key={set.id}
               href={`/?setId=${set.id}`}
-              className="group bg-[#1a1a1a] border border-gray-800/30 rounded-lg overflow-hidden hover:border-blue-600/50 hover:shadow-md hover:shadow-blue-900/10 transition-all"
+              className="group bg-[#1a1a1a] border border-gray-800/30 rounded-lg overflow-hidden hover:border-blue-600/50 hover:shadow-md hover:shadow-blue-900/10 transition-all flex flex-col"
             >
               <div className="relative w-full aspect-[16/9] bg-[#111] overflow-hidden">
                 {set.imageUrl ? (
@@ -197,24 +197,15 @@ export default function SetManagerPage() {
                 </div>
               </div>
               
-              <div className="p-4">
-                <h3 className="font-medium text-sm mb-2 text-white line-clamp-2 group-hover:text-blue-400 transition-colors">
+              <div className="p-4 flex-grow flex flex-col">
+                {/* Set Name */}
+                <h3 className="font-medium text-sm text-white mb-1 line-clamp-2 group-hover:text-blue-400 transition-colors text-center">
                   {set.name}
                 </h3>
                 
-                <div className="flex items-center justify-between mt-3">
-                  <p className="text-xs">
-                    <span className="text-gray-400">{set._count?.phrases || 0} cards</span>
-                    {set.level && (
-                      <>
-                        <span className="mx-1 text-gray-600">•</span>
-                        <span className={getLevelColor(set.level)}>{set.level}</span>
-                      </>
-                    )}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(set.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                  </p>
+                {/* Author label */}
+                <div className="text-blue-400 text-sm font-medium mb-2 text-center">
+                  {set.source === "default" ? "System Set" : "My Set"}
                 </div>
               </div>
             </Link>

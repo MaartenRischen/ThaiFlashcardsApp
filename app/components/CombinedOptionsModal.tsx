@@ -363,14 +363,6 @@ export function SetManagerModal({ isOpen, onClose }: {
       setBulkLoading(false);
     }
   };
-  const handleBulkReset = () => {
-    if (selected.length === 0) return;
-    alert('Bulk reset progress is not yet implemented.');
-    setSelected([]);
-  };
-  const handleBulkExport = () => {
-    selected.forEach(id => exportSet(id));
-  };
 
   // Helper to open the cards modal for a set
   const handleOpenCardsModal = async (set: SetMetaData) => {

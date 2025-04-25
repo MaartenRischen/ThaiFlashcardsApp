@@ -343,9 +343,6 @@ export function SetManagerModal({ isOpen, onClose }: {
 
   if (!isOpen) return null;
 
-  // Find the active set
-  const activeSet = availableSets.find(set => set.id === activeSetId);
-
   // Bulk actions
   const handleBulkDelete = async () => {
     if (selected.length === 0) return;

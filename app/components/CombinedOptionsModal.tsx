@@ -453,24 +453,6 @@ export function SetManagerModal({ isOpen, onClose }: {
           <h2 className="text-xl font-bold text-blue-400">Set Manager</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
         </div>
-        {/* Current Set Progress Section */}
-        <div className="mb-6 bg-gray-900 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-blue-300 mb-2 text-center">Current Set Progress</h3>
-          <div className="flex flex-col gap-2">
-            <span className="text-white font-bold text-center">{activeSet?.cleverTitle || activeSet?.name || 'No Set Selected'}</span>
-            <div className="w-full bg-gray-700 rounded-full h-3">
-              <div
-                className="bg-green-500 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${percent}%` }}
-              ></div>
-            </div>
-            <div className="flex justify-between text-xs text-gray-300 mt-1">
-              <span>{learned} learned</span>
-              <span>{total} total</span>
-              <span>{percent}%</span>
-            </div>
-          </div>
-        </div>
         <div className="flex gap-2 mb-4">
           <button className="neumorphic-button text-sm px-4 py-2 text-green-400" disabled={bulkLoading}>Create New Set</button>
           <button className="neumorphic-button text-sm px-4 py-2" disabled={selected.length === 0 || bulkLoading} onClick={handleBulkDelete}>Bulk Delete</button>
@@ -649,28 +631,47 @@ export function SetManagerModal({ isOpen, onClose }: {
               {cardsModalLoading ? (
                 <div className="text-center text-gray-400">Loading...</div>
               ) : (
-                <ul className="divide-y divide-gray-700">
-                  {cardsModalPhrases.map((phrase, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-800 rounded px-2"
-                      onClick={() => handlePhraseClick(cardsModalSetId, idx)}
-                    >
-                      <div className="flex-1">
-                        <div className="font-semibold text-white truncate">{phrase.english}</div>
-                        <div className="text-sm text-gray-400 truncate">{phrase.thai}</div>
+                <>
+                  {/* Progress Section */}
+                  <div className="mb-6 bg-gray-800 rounded-lg p-4">
+                    <div className="flex flex-col gap-2">
+                      <div className="w-full bg-gray-700 rounded-full h-3">
+                        <div
+                          className="bg-green-500 h-3 rounded-full transition-all duration-300"
+                          style={{ width: `${percent}%` }}
+                        ></div>
                       </div>
-                      <span className="ml-3 text-xs px-2 py-1 rounded-full font-bold"
-                        style={{
-                          backgroundColor: getCardStatus(cardsModalProgress, idx) === 'Easy' ? '#22c55e' : getCardStatus(cardsModalProgress, idx) === 'Correct' ? '#3b82f6' : getCardStatus(cardsModalProgress, idx) === 'Wrong' ? '#ef4444' : '#6b7280',
-                          color: 'white',
-                        }}
+                      <div className="flex justify-between text-xs text-gray-300 mt-1">
+                        <span>{learned} learned</span>
+                        <span>{total} total</span>
+                        <span>{percent}%</span>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Cards List */}
+                  <ul className="divide-y divide-gray-700">
+                    {cardsModalPhrases.map((phrase, idx) => (
+                      <li
+                        key={idx}
+                        className="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-800 rounded px-2"
+                        onClick={() => handlePhraseClick(cardsModalSetId, idx)}
                       >
-                        {getCardStatus(cardsModalProgress, idx)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                        <div className="flex-1">
+                          <div className="font-semibold text-white truncate">{phrase.english}</div>
+                          <div className="text-sm text-gray-400 truncate">{phrase.thai}</div>
+                        </div>
+                        <span className="ml-3 text-xs px-2 py-1 rounded-full font-bold"
+                          style={{
+                            backgroundColor: getCardStatus(cardsModalProgress, idx) === 'Easy' ? '#22c55e' : getCardStatus(cardsModalProgress, idx) === 'Correct' ? '#3b82f6' : getCardStatus(cardsModalProgress, idx) === 'Wrong' ? '#ef4444' : '#6b7280',
+                            color: 'white',
+                          }}
+                        >
+                          {getCardStatus(cardsModalProgress, idx)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
               )}
             </div>
           </div>

@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useSession } from 'next-auth/react';
-import { Loader2, Plus, BookOpen } from "lucide-react";
+import { Loader2, Plus, BookOpen, Settings } from "lucide-react";
 
 type FlashcardSet = {
   id: string;
@@ -20,7 +20,7 @@ type FlashcardSet = {
   };
 };
 
-export default function MySetsPage() {
+export default function SetManagerPage() {
   const router = useRouter();
   const { status } = useSession();
   const [isLoading, setIsLoading] = useState(true);
@@ -118,16 +118,14 @@ export default function MySetsPage() {
 
   return (
     <div className="container max-w-5xl py-8">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-medium text-blue-400">My Flashcard Sets</h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Manage and practice with your saved flashcard sets
-          </p>
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-2">
+          <Settings className="h-5 w-5 text-blue-400" />
+          <h1 className="text-xl font-medium text-blue-400">Set Manager</h1>
         </div>
         <Button 
           asChild
-          className="bg-blue-600/90 hover:bg-blue-700/90 text-white rounded-full px-4 py-2 text-sm flex items-center gap-1"
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-4 py-2 text-sm flex items-center gap-1"
         >
           <Link href="/set-wizard-start">
             <Plus className="h-4 w-4" />
@@ -135,6 +133,10 @@ export default function MySetsPage() {
           </Link>
         </Button>
       </div>
+      
+      <p className="text-sm text-gray-300 mb-6 -mt-4">
+        Manage your flashcard sets and track your learning progress
+      </p>
       
       {error && (
         <div className="p-3 bg-red-900/20 border border-red-700/30 rounded-md text-red-400 text-sm mb-4">
@@ -157,7 +159,7 @@ export default function MySetsPage() {
           </p>
           <Button 
             asChild
-            className="bg-blue-600/90 hover:bg-blue-700/90 text-white rounded-full px-4 py-2 text-sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-4 py-2 text-sm"
           >
             <Link href="/set-wizard-start">Create Your First Set</Link>
           </Button>
@@ -168,7 +170,7 @@ export default function MySetsPage() {
             <Link
               key={set.id}
               href={`/?setId=${set.id}`}
-              className="bg-[#1a1a1a] border border-gray-800/30 rounded-lg overflow-hidden hover:border-blue-700/30 transition-all group"
+              className="group bg-[#1a1a1a] border border-gray-800/30 rounded-lg overflow-hidden hover:border-blue-600/50 hover:shadow-md hover:shadow-blue-900/10 transition-all"
             >
               <div className="relative w-full aspect-[16/9] bg-[#111] overflow-hidden">
                 {set.imageUrl ? (
@@ -177,7 +179,7 @@ export default function MySetsPage() {
                     alt={set.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 100vw, 33vw"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src = '/images/default-set-logo.png';
@@ -195,12 +197,12 @@ export default function MySetsPage() {
                 </div>
               </div>
               
-              <div className="p-3">
-                <h3 className="font-medium text-sm mb-1 text-white line-clamp-2 group-hover:text-blue-400 transition-colors">
+              <div className="p-4">
+                <h3 className="font-medium text-sm mb-2 text-white line-clamp-2 group-hover:text-blue-400 transition-colors">
                   {set.name}
                 </h3>
                 
-                <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center justify-between mt-3">
                   <p className="text-xs">
                     <span className="text-gray-400">{set._count?.phrases || 0} cards</span>
                     {set.level && (

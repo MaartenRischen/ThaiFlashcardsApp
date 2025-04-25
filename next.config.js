@@ -16,6 +16,12 @@ const nextConfig = {
   webpack: (config) => {
     return config;
   },
+  // Enable standalone output
+  output: 'standalone',
+  experimental: {
+    // Enable SWC minification
+    swcMinify: true,
+  },
 }
 
 module.exports = nextConfig 

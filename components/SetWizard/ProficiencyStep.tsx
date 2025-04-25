@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 // Define proficiency levels with matching capabilities
 const proficiencyLevels = [
@@ -107,6 +108,19 @@ export function ProficiencyStep({ value, onNext, onBack }: {
         </p>
       </div>
 
+      {/* Proficiency Level Image */}
+      <div className="flex justify-center">
+        <div className="relative w-[340px] h-[220px] rounded-lg overflow-hidden border border-blue-900/30">
+          <Image
+            src={`/images/level/${activeLevelIndex + 1}.png`}
+            alt={`${proficiencyLevels[activeLevelIndex].level} level illustration`}
+            width={340}
+            height={220}
+            className="object-cover"
+          />
+        </div>
+      </div>
+
       {/* Slider */}
       <div className="space-y-5">
         <input
@@ -141,12 +155,12 @@ export function ProficiencyStep({ value, onNext, onBack }: {
       <div className="flex justify-between pt-3">
         <button
           onClick={onBack}
-          className="rounded-full bg-[#1e1e1e] hover:bg-[#2a2a2a] text-gray-400 px-4 py-1.5 text-xs"
+          className="neumorphic-button text-blue-400"
         >
           Back
         </button>
         <button
-          className="rounded-full bg-blue-600/90 hover:bg-blue-600 text-white px-4 py-1.5 text-xs"
+          className="neumorphic-button text-blue-400"
           onClick={handleNext}
         >
           Next

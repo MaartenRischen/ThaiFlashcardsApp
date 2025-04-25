@@ -104,7 +104,7 @@ export function ScenarioStep({ value, onNext, onBack }: {
 
   return (
     <div className="space-y-5 px-2">
-      <div className="space-y-2.5">
+      <div className="space-y-2.5 text-center">
         <h3 className="text-base font-medium text-white">
           What do you want to be able to do in Thai?
         </h3>
@@ -131,8 +131,8 @@ export function ScenarioStep({ value, onNext, onBack }: {
           <span className="absolute top-0 right-0 bg-blue-500 text-[10px] px-2 py-0.5 rounded-bl-md font-medium">
             RECOMMENDED
           </span>
-          <div className="mt-1">{CUSTOM_SCENARIO}</div>
-          <div className="text-[10px] mt-1 opacity-80">
+          <div className="mt-1 text-center">{CUSTOM_SCENARIO}</div>
+          <div className="text-[10px] mt-1 opacity-80 text-center">
             Get a personalized set tailored exactly to your needs
           </div>
         </button>
@@ -163,7 +163,7 @@ export function ScenarioStep({ value, onNext, onBack }: {
         {/* Display custom tags first */}
         {customTags.length > 0 && (
           <div className="col-span-2 mb-3">
-            <div className="opacity-80 text-xs text-gray-400 pb-2">Your custom scenarios:</div>
+            <div className="opacity-80 text-xs text-gray-400 pb-2 text-center">Your custom scenarios:</div>
             {customTags.map((tag, index) => (
               <div 
                 key={`custom-${index}`}
@@ -197,7 +197,7 @@ export function ScenarioStep({ value, onNext, onBack }: {
         )}
 
         {/* Divider */}
-        <div className="col-span-2 opacity-80 text-xs text-gray-400 pt-1 pb-2">
+        <div className="col-span-2 opacity-80 text-xs text-gray-400 pt-1 pb-2 text-center">
           {customTags.length > 0 ? 'Or choose from our pre-made scenarios:' : 'Choose from our pre-made scenarios:'}
         </div>
 

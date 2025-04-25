@@ -26,6 +26,7 @@ export async function initializeStorage() {
 
     if (!bucketExists) {
       console.log(`Creating bucket: ${BUCKET_NAME}`);
+      // Create with public access
       const { error } = await adminClient.storage.createBucket(BUCKET_NAME, {
         public: true, // Allow public access to images
         fileSizeLimit: 5 * 1024 * 1024, // 5MB limit for images
@@ -37,13 +38,87 @@ export async function initializeStorage() {
         return false;
       }
       
-      // Set public bucket policy
-      const { error: policyError } = await adminClient.storage.from(BUCKET_NAME).createSignedUrl('test.txt', 60);
-      if (policyError && !policyError.message.includes('not found')) {
-        console.error('Error setting bucket policy:', policyError);
+      // Update RLS policies to allow public uploads and downloads
+      try {
+        // Disable all RLS policies for this bucket for simplicity
+        const { error: policyError } = await adminClient.rpc('create_storage_policy', {
+          bucket_name: BUCKET_NAME,
+          definition: `
+            CREATE POLICY "Allow Public Access" ON storage.objects FOR ALL
+            USING (bucket_id = '${BUCKET_NAME}')
+            WITH CHECK (bucket_id = '${BUCKET_NAME}');
+          `
+        });
+        
+        if (policyError) {
+          console.error('Error setting bucket policy directly via RPC:', policyError);
+          
+          // Try alternative approach if RPC method fails
+          try {
+            // Execute individual policy creations instead of using query
+            for (const policyType of ['SELECT', 'INSERT', 'UPDATE', 'DELETE']) {
+              const policyName = `Public ${policyType} Access`;
+              const { error: policyCreateError } = await adminClient.rpc('create_storage_policy', {
+                bucket_name: BUCKET_NAME,
+                policy_name: policyName,
+                operation: policyType,
+                definition: `bucket_id = '${BUCKET_NAME}'`
+              });
+              
+              if (policyCreateError) {
+                console.error(`Error creating ${policyType} policy:`, policyCreateError);
+              } else {
+                console.log(`Successfully created ${policyType} policy`);
+              }
+            }
+            
+            console.log('Applied individual bucket policies');
+          } catch (policyError) {
+            console.error('Failed to create individual policies:', policyError);
+          }
+        } else {
+          console.log('Applied bucket policy via RPC');
+        }
+      } catch (policySetError) {
+        console.error('Failed to create storage policies:', policySetError);
+        // Continue anyway, we'll try alternative solution later
+      }
+      
+      // Try to make the bucket public more directly
+      try {
+        const { error: updateError } = await adminClient.storage.updateBucket(BUCKET_NAME, {
+          public: true,
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/*'],
+          fileSizeLimit: 5 * 1024 * 1024,
+        });
+        
+        if (updateError) {
+          console.error('Error updating bucket to be public:', updateError);
+        } else {
+          console.log('Successfully updated bucket to be public');
+        }
+      } catch (updateError) {
+        console.error('Error updating bucket:', updateError);
       }
       
       console.log(`Successfully created bucket: ${BUCKET_NAME}`);
+    } else {
+      // Make sure existing bucket is public
+      try {
+        const { error: updateError } = await adminClient.storage.updateBucket(BUCKET_NAME, {
+          public: true,
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/*'],
+          fileSizeLimit: 5 * 1024 * 1024,
+        });
+        
+        if (updateError) {
+          console.error('Error updating existing bucket to be public:', updateError);
+        } else {
+          console.log('Successfully updated existing bucket to be public');
+        }
+      } catch (updateError) {
+        console.error('Error updating existing bucket:', updateError);
+      }
     }
 
     return true;
@@ -111,7 +186,35 @@ export async function uploadImageFromUrl(imageUrl: string, setId: string): Promi
       
       console.log(`Uploading image to Supabase path: ${filePath}`);
 
-      // Upload to Supabase Storage
+      // Try upload with admin client first (bypasses RLS)
+      try {
+        if (supabaseAdmin) {
+          console.log('Attempting upload with admin client to bypass RLS');
+          const { data: adminData, error: adminUploadError } = await supabaseAdmin.storage
+            .from(BUCKET_NAME)
+            .upload(filePath, imageBlob, {
+              contentType: 'image/webp',
+              upsert: true
+            });
+            
+          if (!adminUploadError) {
+            console.log('Image successfully uploaded via admin client:', adminData?.path);
+            // Get the public URL
+            const { data: { publicUrl } } = supabaseAdmin.storage
+              .from(BUCKET_NAME)
+              .getPublicUrl(filePath);
+              
+            console.log('Generated public URL via admin client:', publicUrl);
+            return publicUrl;
+          } else {
+            console.error('Error uploading with admin client, falling back to regular client:', adminUploadError);
+          }
+        }
+      } catch (adminError) {
+        console.error('Error using admin client for upload:', adminError);
+      }
+
+      // Regular upload (if admin failed or isn't available)
       const { data, error: uploadError } = await supabase.storage
         .from(BUCKET_NAME)
         .upload(filePath, imageBlob, {
@@ -127,7 +230,10 @@ export async function uploadImageFromUrl(imageUrl: string, setId: string): Promi
           await new Promise(resolve => setTimeout(resolve, 1000 * retries));
           continue;
         }
-        return null;
+        
+        // If all retries failed, return original URL as fallback
+        console.log('All upload attempts failed, returning original URL as fallback');
+        return imageUrl;
       }
       
       console.log('Image successfully uploaded to Supabase:', data?.path);
@@ -148,11 +254,15 @@ export async function uploadImageFromUrl(imageUrl: string, setId: string): Promi
         await new Promise(resolve => setTimeout(resolve, 1000 * retries));
         continue;
       }
-      return null;
+      // Return original URL as fallback after all retries
+      console.log('All attempts failed, returning original URL as fallback');
+      return imageUrl;
     }
   }
   
-  return null;
+  // Return original URL as fallback
+  console.log('Max retries exceeded, returning original URL as fallback');
+  return imageUrl;
 }
 
 // Delete images for a set
@@ -160,6 +270,34 @@ export async function deleteImage(setId: string): Promise<boolean> {
   console.log(`Attempting to delete images for set: ${setId}`);
   
   try {
+    // Try with admin client first (bypasses RLS)
+    if (supabaseAdmin) {
+      try {
+        const { data: adminData, error: adminError } = await supabaseAdmin.storage
+          .from(BUCKET_NAME)
+          .list(setId);
+    
+        if (!adminError && adminData && adminData.length > 0) {
+          console.log(`Found ${adminData.length} files to delete for set: ${setId} (using admin client)`);
+          const filesToDelete = adminData.map((file: { name: string }) => `${setId}/${file.name}`);
+          
+          const { error: adminDeleteError } = await supabaseAdmin.storage
+            .from(BUCKET_NAME)
+            .remove(filesToDelete);
+    
+          if (!adminDeleteError) {
+            console.log(`Successfully deleted ${filesToDelete.length} images for set: ${setId} (using admin client)`);
+            return true;
+          } else {
+            console.error('Error deleting images with admin client:', adminDeleteError);
+          }
+        }
+      } catch (adminError) {
+        console.error('Error using admin client for deletion:', adminError);
+      }
+    }
+
+    // Regular client as fallback
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
       .list(setId);

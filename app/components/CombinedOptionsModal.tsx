@@ -455,7 +455,6 @@ export function SetManagerModal({ isOpen, onClose }: {
           {availableSets.map(set => {
             const isDefault = set.id === 'default';
             const checked = selected.includes(set.id);
-            const setProgress = set.id === activeSetId ? activeSetProgress : {};
             // Set image logic
             let imgUrl: string | undefined | null = set.imageUrl;
             if (!imgUrl) {

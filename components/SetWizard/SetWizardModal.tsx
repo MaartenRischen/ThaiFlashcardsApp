@@ -87,7 +87,6 @@ export function SetWizardModal({ onComplete, onClose }: {
     <WelcomeStep
       key="welcome"
       onNext={() => setStep(1)}
-      onSkip={onClose}
     />,
     <ProficiencyStep
       key="proficiency"

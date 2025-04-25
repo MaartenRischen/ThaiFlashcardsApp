@@ -320,7 +320,6 @@ export function SetManagerModal({ isOpen, onClose }: {
   const {
     availableSets,
     activeSetId,
-    activeSetProgress,
     switchSet,
     deleteSet,
     // addSet, etc.

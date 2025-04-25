@@ -49,6 +49,9 @@ ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=$NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
 # Python and build tools for native dependencies
 RUN apk add --no-cache python3 make g++
 
+# Install sharp explicitly for production image processing
+RUN npm install sharp
+
 RUN npm run build
 
 # Production image, copy all the files and run next
@@ -68,6 +71,9 @@ COPY --from=builder /app/public ./public
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Install sharp in the runner stage as well
+RUN npm install sharp
 
 USER nextjs
 

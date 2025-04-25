@@ -11,6 +11,7 @@ import { SetMetaData } from '@/app/lib/storage'; // Import SetMetaData
 import { generateImage } from '@/app/lib/ideogram-service';
 import { INITIAL_PHRASES } from '@/app/data/phrases'; // Import INITIAL_PHRASES only
 import { prisma } from "@/app/lib/prisma"; // Import prisma client
+import { uploadImageFromUrl } from '@/app/lib/imageStorage';
 
 // Debug environment variables - this will help diagnose Railway issues
 console.log('API Route Environment Variables:');
@@ -97,7 +98,6 @@ export async function POST(request: Request) {
 
       // Explicitly type phrasesToSave as the stricter GeneratorPhrase[]
       let phrasesToSave: GeneratorPhrase[] = generationResult.phrases; 
-      let setImageUrl: string | null = null;
       let isFallback = false;
 
       // --- 2. Handle Fallback ---
@@ -122,33 +122,6 @@ export async function POST(request: Request) {
         isFallback = true;
       }
 
-      // --- 3. Generate Set Image (if not fallback) ---
-      if (!isFallback) { 
-        try {
-          const topicDescription = generationResult.cleverTitle || 'language learning'; // Use cleverTitle or a fallback
-          const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}. 
-            Use vibrant colors that are friendly and engaging.`;
-          
-          console.log(`API Route: Generating set cover image with prompt:`, imagePrompt);
-          setImageUrl = await generateImage(imagePrompt);
-          console.log(`API Route: Set cover image URL:`, setImageUrl);
-        } catch (imgErr) {
-          console.error('API Route: Error during set image generation:', imgErr);
-          // Try once more with a simpler prompt if the first attempt failed
-          try {
-            const fallbackPrompt = `Simple cartoon illustration of a donkey and a bridge`;
-            console.log(`API Route: Trying fallback image generation with prompt:`, fallbackPrompt);
-            setImageUrl = await generateImage(fallbackPrompt);
-          } catch (retryErr) {
-            console.error('API Route: Fallback image generation also failed:', retryErr);
-            setImageUrl = null;
-          }
-        }
-      } else {
-         console.log(`API Route: SKIPPING image generation (Fallback: ${isFallback})`);
-         setImageUrl = null;
-      }
-
       // --- 4. Prepare Metadata for Storage ---
       const metaDataForStorage: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
         name: generationResult.cleverTitle || (isFallback ? 'Placeholder Set' : 'Custom Set'),
@@ -156,7 +129,7 @@ export async function POST(request: Request) {
         level: preferences.level,
         specificTopics: preferences.specificTopics,
         source: isFallback ? 'generated' : 'generated', // Keep source as generated even for fallback
-        imageUrl: setImageUrl || undefined,
+        imageUrl: undefined, // Initialize as undefined, will be updated after storage
         llmBrand: generationResult.llmBrand || undefined, 
         llmModel: generationResult.llmModel || undefined, 
       };
@@ -170,6 +143,60 @@ export async function POST(request: Request) {
       newMetaId = insertedRecord.id; // Assign to pre-declared variable
       console.log(`API Route: Metadata saved with ID: ${newMetaId}`);
 
+      // --- 6. Handle Image Storage ---
+      let setImageUrl: string | null = generationResult.imageUrl || null;
+      if (typeof setImageUrl === 'string') {
+        // Upload the image to Supabase Storage
+        const storedImageUrl = await uploadImageFromUrl(setImageUrl, newMetaId);
+        if (storedImageUrl) {
+          setImageUrl = storedImageUrl;
+          console.log('API Route: Successfully stored image in Supabase:', storedImageUrl);
+          
+          // Update the metadata with the new image URL
+          await storage.updateSetMetaData({
+            ...metaDataForStorage,
+            id: newMetaId,
+            createdAt: insertedRecord.createdAt.toISOString(),
+            phraseCount: phrasesToSave.length,
+            imageUrl: storedImageUrl
+          });
+        } else {
+          console.warn('API Route: Failed to upload image to storage, falling back to temporary URL');
+        }
+      } else if (!isFallback) {
+        try {
+          const topicDescription = generationResult.cleverTitle || 'language learning';
+          const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}. Use vibrant colors that are friendly and engaging.`;
+          
+          console.log(`API Route: Generating set cover image with prompt:`, imagePrompt);
+          const tempImageUrl = await generateImage(imagePrompt);
+          
+          if (typeof tempImageUrl === 'string') {
+            const storedImageUrl = await uploadImageFromUrl(tempImageUrl, newMetaId);
+            if (storedImageUrl) {
+              setImageUrl = storedImageUrl;
+              console.log('API Route: Successfully generated and stored image:', storedImageUrl);
+              
+              // Update the metadata with the new image URL
+              await storage.updateSetMetaData({
+                ...metaDataForStorage,
+                id: newMetaId,
+                createdAt: insertedRecord.createdAt.toISOString(),
+                phraseCount: phrasesToSave.length,
+                imageUrl: storedImageUrl
+              });
+            } else {
+              console.warn('API Route: Failed to upload generated image to storage');
+              setImageUrl = tempImageUrl; // Fallback to temporary URL
+            }
+          }
+        } catch (imgErr) {
+          console.error('API Route: Error during set image generation:', imgErr);
+          setImageUrl = null;
+        }
+      }
+
+      // --- 7. Save Content and Progress ---
       const contentSaved = await storage.saveSetContent(newMetaId, phrasesToSave); 
       if (!contentSaved) {
         await storage.deleteSetMetaData(newMetaId);
@@ -185,7 +212,7 @@ export async function POST(request: Request) {
       }
       console.log(`API Route: Initial progress saved for set ID: ${newMetaId}`);
 
-      // --- 6. Return Success Response ---
+      // --- 8. Return Success Response ---
       const completeNewMetaData: SetMetaData = {
         id: insertedRecord.id,
         name: insertedRecord.name,

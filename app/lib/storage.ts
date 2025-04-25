@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'; // Added back for potential use in other fu
 import { prisma } from "@/app/lib/prisma"; // Import prisma client
 import { Prisma, FlashcardSet, Phrase as PrismaPhrase } from '@prisma/client'; // Use specific type import
 import { ExampleSentence } from './set-generator';
+import { deleteImage } from './imageStorage';
 
 // Helper function
 function getErrorMessage(error: unknown): string {
@@ -185,14 +186,12 @@ export async function deleteSetMetaData(setId: string): Promise<boolean> {
   console.log(`Attempting to delete SetMetaData and related data for id: ${setId}`);
 
   try {
-    // TODO: Consider using Supabase Edge Functions or DB Triggers for cascading deletes 
-    // for better atomicity and performance. Manual deletion order is important here.
+    // 1. Delete the stored image if it exists
+    await deleteImage(setId).catch(error => {
+      console.warn(`Failed to delete stored image for set ${setId}:`, error);
+    });
 
-    // 1. Delete associated progress (important: use composite key or just setId if unique)
-    // Assuming UserSetProgress table has userId and setId columns
-    // We need userId here - this function signature might need changing or we assume 
-    // RLS handles the user context if called from a secure context.
-    // For now, let's assume we delete based on setId only, requiring RLS.
+    // 2. Delete associated progress
     console.log(`Deleting UserSetProgress for setId: ${setId}`);
     await prisma.userSetProgress.deleteMany({
       where: {
@@ -200,7 +199,7 @@ export async function deleteSetMetaData(setId: string): Promise<boolean> {
       },
     });
 
-    // 2. Delete associated phrases
+    // 3. Delete associated phrases
     console.log(`Deleting Phrases for setId: ${setId}`);
     await prisma.phrase.deleteMany({
       where: {
@@ -208,7 +207,7 @@ export async function deleteSetMetaData(setId: string): Promise<boolean> {
       },
     });
 
-    // 3. Delete the set metadata itself
+    // 4. Delete the set metadata itself
     console.log(`Deleting FlashcardSet record for id: ${setId}`);
     await prisma.flashcardSet.delete({
       where: {
@@ -216,7 +215,7 @@ export async function deleteSetMetaData(setId: string): Promise<boolean> {
       },
     });
 
-    console.log(`Successfully deleted SetMetaData and potentially related data for id: ${setId}`);
+    console.log(`Successfully deleted SetMetaData and related data for id: ${setId}`);
     return true;
 
   } catch (error) {

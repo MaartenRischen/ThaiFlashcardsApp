@@ -54,6 +54,7 @@ export interface GenerationResult {
   };
   llmBrand?: string;
   llmModel?: string;
+  imageUrl?: string;
 }
 
 export interface CustomSet {

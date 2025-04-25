@@ -1,13 +1,17 @@
 import React from 'react';
+import Image from 'next/image';
 
 export function WelcomeStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
   return (
     <div className="flex flex-col items-center text-center space-y-6">
-      <div className="w-20 h-20 flex items-center justify-center bg-[#1a1a1a] rounded-full shadow-inner">
-        <svg className="w-10 h-10 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 5L5 19M5 5L19 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-        </svg>
+      <div className="w-24 h-24 relative">
+        <Image
+          src="/images/donkey-bridge-logo.png"
+          alt="Donkey Bridge Logo"
+          width={96}
+          height={96}
+          className="object-contain"
+        />
       </div>
       
       <div className="space-y-3">

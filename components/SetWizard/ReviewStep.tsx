@@ -26,7 +26,7 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
               <span className="text-xs text-gray-500">What you&apos;ll learn</span>
             </div>
             <button 
-              onClick={() => onEdit(1)}
+              onClick={() => onEdit(2)}
               className="text-blue-400 hover:text-blue-300 text-xs hover:underline"
             >
               Edit
@@ -54,7 +54,7 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
               <span className="text-xs text-gray-500">How you&apos;ll learn</span>
             </div>
             <button 
-              onClick={() => onEdit(2)}
+              onClick={() => onEdit(3)}
               className="text-blue-400 hover:text-blue-300 text-xs hover:underline"
             >
               Edit
@@ -80,7 +80,7 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
               <span className="text-xs text-gray-500">Your commitment</span>
             </div>
             <button 
-              onClick={() => onEdit(3)}
+              onClick={() => onEdit(4)}
               className="text-blue-400 hover:text-blue-300 text-xs hover:underline"
             >
               Edit

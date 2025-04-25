@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { WelcomeStep } from './WelcomeStep';
 import { ProficiencyStep } from './ProficiencyStep';
 import { ScenarioStep } from './ScenarioStep';
-import { TopicStep } from './TopicStep';
 import { ToneStep } from './ToneStep';
 import { DailyGoalStep } from './DailyGoalStep';
 import { ReviewStep } from './ReviewStep';
@@ -56,14 +55,33 @@ export function SetWizardModal({ onComplete, onClose }: {
     tone: 50,
   });
 
-  // Show close button for all steps except generation (7)
-  const showCloseButton = step < 7;
+  // Show close button for all steps except generation (6)
+  const showCloseButton = step < 6;
   
-  // Show progress stepper for all steps except generation (7)
-  const showProgressStepper = step < 7;
+  // Show progress stepper for all steps except generation (6)
+  const showProgressStepper = step < 6;
   
   // Set modal width based on step
-  const modalWidth = step === 7 ? "max-w-3xl" : "max-w-2xl";
+  const modalWidth = step === 6 ? "max-w-3xl" : "max-w-2xl";
+
+  // Use custom scenarios as topics if they exist
+  const deriveTopicsFromScenarios = (scenarios: string[], customGoal?: string) => {
+    // Extract custom scenarios
+    const customScenarios: string[] = [];
+    
+    if (customGoal) {
+      // Check if customGoal contains "Selected topics:" section
+      const topicsMatch = customGoal.match(/Selected topics: (.*?)($|\.)/);
+      if (topicsMatch && topicsMatch[1]) {
+        // Split by comma and trim
+        const extractedTopics = topicsMatch[1].split(',').map(t => t.trim());
+        customScenarios.push(...extractedTopics);
+      }
+    }
+    
+    // Return custom scenarios as topics
+    return customScenarios;
+  };
 
   const steps = [
     <WelcomeStep
@@ -84,45 +102,45 @@ export function SetWizardModal({ onComplete, onClose }: {
       key="scenario"
       value={{ scenarios: state.scenarios, customGoal: state.customGoal }}
       onNext={(data) => {
-        setState(prev => ({ ...prev, ...data }));
+        // Automatically derive topics from custom scenarios
+        const derivedTopics = deriveTopicsFromScenarios(data.scenarios, data.customGoal);
+        
+        setState(prev => ({ 
+          ...prev, 
+          ...data,
+          // Use derived topics from custom scenarios
+          topics: derivedTopics
+        }));
+        
+        // Skip the topic step and go directly to tone
         setStep(3);
       }}
       onBack={() => setStep(1)}
-    />,
-    <TopicStep
-      key="topic"
-      value={state.topics}
-      scenarios={state.scenarios}
-      onNext={(topics) => {
-        setState(prev => ({ ...prev, topics }));
-        setStep(4);
-      }}
-      onBack={() => setStep(2)}
     />,
     <ToneStep
       key="tone"
       value={state.tone}
       onNext={(tone) => {
         setState(prev => ({ ...prev, tone }));
-        setStep(5);
+        setStep(4);
       }}
-      onBack={() => setStep(3)}
+      onBack={() => setStep(2)}
     />,
     <DailyGoalStep
       key="dailyGoal"
       value={state.dailyGoal}
       onNext={(dailyGoal) => {
         setState(prev => ({ ...prev, dailyGoal }));
-        setStep(6);
+        setStep(5);
       }}
-      onBack={() => setStep(4)}
+      onBack={() => setStep(3)}
     />,
     <ReviewStep
       key="review"
       state={state}
-      onConfirm={() => setStep(7)}
+      onConfirm={() => setStep(6)}
       onEdit={setStep}
-      onBack={() => setStep(5)}
+      onBack={() => setStep(4)}
     />,
     <GenerationStep
       key="generation"
@@ -130,7 +148,7 @@ export function SetWizardModal({ onComplete, onClose }: {
       onComplete={() => {
         onComplete(state);
       }}
-      onBack={() => setStep(6)}
+      onBack={() => setStep(5)}
     />
   ];
 

@@ -6,7 +6,7 @@ export function WelcomeStep({ onNext, onSkip }: { onNext: () => void; onSkip: ()
     <div className="flex flex-col items-center text-center space-y-6">
       <div className="w-24 h-24 relative">
         <Image
-          src="/images/dblogo.svg"
+          src="/images/donkey2face.png"
           alt="Donkey Bridge Logo"
           width={120}
           height={120}

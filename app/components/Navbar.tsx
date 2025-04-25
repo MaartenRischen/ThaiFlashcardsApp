@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
-import Image from "next/image";
+import { Home } from "lucide-react";
 import {
   SignedIn,
   SignedOut,
@@ -22,14 +22,14 @@ export function Navbar() {
   return (
     <header className="w-full border-b bg-background/95 backdrop-blur sticky top-0 z-40">
       <div className="container flex flex-row items-center justify-between h-10 px-2 py-1 gap-2 overflow-x-auto whitespace-nowrap">
-        {/* Donkey Home Icon */}
+        {/* Home Icon */}
         <button
           onClick={() => router.push("/")}
           className="flex items-center justify-center p-0 mr-2 hover:scale-105 transition-transform"
           aria-label="Home"
           style={{ minWidth: 32 }}
         >
-          <Image src="/images/dblogo.svg" alt="Home" width={32} height={32} priority />
+          <Home className="h-5 w-5 text-white" />
         </button>
         {/* Title: single responsive span, no duplicate */}
         <span className="flex-1 min-w-0 text-[0.6em] xs:text-[0.7em] md:text-[0.85em] text-gray-400 font-normal ml-2 align-middle">

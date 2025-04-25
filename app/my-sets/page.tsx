@@ -103,19 +103,6 @@ export default function SetManagerPage() {
     }
   };
 
-  const getLevelColor = (level?: string) => {
-    switch (level?.toLowerCase()) {
-      case "beginner":
-        return "text-green-400";
-      case "intermediate":
-        return "text-yellow-400";
-      case "advanced":
-        return "text-red-400";
-      default:
-        return "text-gray-400";
-    }
-  };
-
   return (
     <div className="container max-w-5xl py-8">
       <div className="flex justify-between items-center mb-8">

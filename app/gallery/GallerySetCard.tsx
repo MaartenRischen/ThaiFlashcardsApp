@@ -23,72 +23,50 @@ interface GallerySetCardProps {
 }
 
 const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, contextIsLoading, handleImport }) => {
-  // Ridiculousness calculation (0-100)
-  const ridiculousness = typeof set.seriousnessLevel === 'number' ? 100 - set.seriousnessLevel : null;
-  // Date
-  const date = set.createdAt ? new Date(set.createdAt).toLocaleDateString() : (set.timestamp ? new Date(set.timestamp).toLocaleDateString() : '-');
   // Image fallback
   const imgUrl = set.imageUrl || '/images/default-set-logo.png';
-  // Username only
-  const username = set.author || 'Anonymous';
-  // Card count
-  const cardCount = set.cardCount || 0;
+  // Get username with proper fallback
+  const username = set.author && set.author.trim() !== '' ? set.author : 'Anonymous';
 
   return (
-    <div className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800">
+    <div className="bg-indigo-950/30 border border-indigo-800/30 rounded-lg overflow-hidden hover:border-indigo-600/50 hover:shadow-md hover:shadow-indigo-900/20 transition-all flex flex-col">
       {/* Set Image */}
-      <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800">
+      <div className="relative w-full aspect-[16/9] bg-indigo-950/50 overflow-hidden">
         <Image
           src={imgUrl}
           alt={set.title}
-          className="object-cover w-full h-full"
-          width={320}
-          height={180}
-          onError={ev => {
-            const target = ev.currentTarget;
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          onError={(e) => {
+            const target = e.currentTarget as HTMLImageElement;
             if (target.src !== '/images/default-set-logo.png') {
               target.src = '/images/default-set-logo.png';
             }
           }}
         />
       </div>
-      {/* Set Name */}
-      <div className="font-bold text-lg text-white mb-1 text-center line-clamp-3 break-words whitespace-pre-line">{set.title}</div>
-      {/* Made by: username only */}
-      <div className="text-xs text-gray-400 mb-1 text-center">
-        Made by: {username}
-      </div>
-      {/* Description */}
-      <div className="text-sm text-gray-300 mb-3 text-center break-words whitespace-pre-line">{set.description || '-'}</div>
-      {/* Ridiculousness Gas Meter */}
-      <div className="flex items-center justify-center mb-3">
-        <span className="text-xs text-gray-400 mr-2">Ridiculousness</span>
-        <div className="relative w-32 h-4 bg-gray-700 rounded-full overflow-hidden flex items-center">
-          <div
-            className="h-4 rounded-full transition-all duration-300"
-            style={{
-              width: `${ridiculousness !== null ? ridiculousness : 0}%`,
-              background: `linear-gradient(90deg, #facc15 0%, #ef4444 100%)`,
-              minWidth: '8px',
-            }}
-          ></div>
+      
+      <div className="p-4 flex-grow flex flex-col">
+        {/* Set Name */}
+        <h3 className="font-medium text-sm text-indigo-200 mb-1 line-clamp-2 hover:text-indigo-300 transition-colors text-center">
+          {set.title}
+        </h3>
+        
+        {/* Author label */}
+        <div className="text-indigo-400 text-sm font-medium mb-2 text-center">
+          User Set by: {username}
         </div>
-        <span className="text-xs text-gray-400 ml-2">{ridiculousness !== null ? `${ridiculousness}%` : '-'}</span>
+        
+        {/* Import button */}
+        <button 
+          className={`neumorphic-button text-indigo-300 hover:text-indigo-200 px-4 py-1 mt-auto ${importingSetId === set.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+          onClick={() => handleImport(set.id)}
+          disabled={importingSetId === set.id || contextIsLoading}
+        >
+          {importingSetId === set.id ? 'Importing...' : 'Import'}
+        </button>
       </div>
-      {/* Card count */}
-      <div className="text-xs text-gray-400 mb-2 text-center">{cardCount} cards</div>
-      {/* Meta info */}
-      <div className="flex justify-between text-xs text-gray-500 mt-auto pt-2 border-t border-gray-800">
-        <span>{date}</span>
-      </div>
-      {/* Import button */}
-      <button 
-        className={`neumorphic-button text-green-400 px-4 py-1 mt-4 ${importingSetId === set.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-        onClick={() => handleImport(set.id)}
-        disabled={importingSetId === set.id || contextIsLoading}
-      >
-        {importingSetId === set.id ? 'Importing...' : 'Import'}
-      </button>
     </div>
   );
 };

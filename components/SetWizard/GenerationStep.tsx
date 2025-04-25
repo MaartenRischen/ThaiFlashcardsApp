@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
 import { generateCustomSet, Phrase } from '@/app/lib/set-generator';
@@ -17,7 +17,7 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
   const [generatedPhrases, setGeneratedPhrases] = useState<Phrase[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const generatePhrases = async () => {
+  const generatePhrases = useCallback(async () => {
     try {
       setIsGenerating(true);
       setError(null);
@@ -51,7 +51,7 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
         totalCount,
         (progress) => {
           setProgress((progress.completed / progress.total) * 100);
-          if (progress.latestPhrases) {
+          if (progress.latestPhrases && progress.latestPhrases.length > 0) {
             setGeneratedPhrases(prev => [...prev, ...(progress.latestPhrases as Phrase[])]);
           }
         }
@@ -68,11 +68,11 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [state, onComplete]);
 
   useEffect(() => {
     generatePhrases();
-  }, [state, generatePhrases]);
+  }, [generatePhrases]);
 
   return (
     <div className="space-y-4">

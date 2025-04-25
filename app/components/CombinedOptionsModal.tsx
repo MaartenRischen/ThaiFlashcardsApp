@@ -347,7 +347,6 @@ export function SetManagerModal({ isOpen, onClose }: {
   const activeSet = availableSets.find(set => set.id === activeSetId);
   const learned = Object.keys(activeSetProgress || {}).length;
   const total = activeSet?.phraseCount || 0;
-  const percent = total > 0 ? Math.round((learned / total) * 100) : 0;
 
   // Bulk actions
   const handleBulkDelete = async () => {
@@ -467,7 +466,6 @@ export function SetManagerModal({ isOpen, onClose }: {
             const setProgress = set.id === activeSetId ? activeSetProgress : {};
             const learned = Object.keys(setProgress || {}).length;
             const total = set.phraseCount || 0;
-            const percent = total > 0 ? Math.round((learned / total) * 100) : 0;
             // Set image logic
             let imgUrl: string | undefined | null = set.imageUrl;
             if (!imgUrl) {
@@ -524,13 +522,13 @@ export function SetManagerModal({ isOpen, onClose }: {
                 <div className="w-full bg-gray-700 rounded-full h-2 mb-1">
                   <div
                     className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${percent}%` }}
+                    style={{ width: `${total > 0 ? (learned / total * 100) : 0}%` }}
                   ></div>
                 </div>
                 <div className="flex justify-between text-xs text-gray-400 mb-2">
                   <span>{learned} learned</span>
                   <span>{total} total</span>
-                  <span>{percent}%</span>
+                  <span>{total > 0 ? Math.round(learned / total * 100) : 0}%</span>
                 </div>
                 {/* Meta info */}
                 <div className="flex justify-between text-xs text-gray-500 mt-auto pt-2 border-t border-gray-800">
@@ -638,13 +636,13 @@ export function SetManagerModal({ isOpen, onClose }: {
                       <div className="w-full bg-gray-700 rounded-full h-3">
                         <div
                           className="bg-green-500 h-3 rounded-full transition-all duration-300"
-                          style={{ width: `${Object.keys(cardsModalProgress).length / cardsModalPhrases.length * 100}%` }}
+                          style={{ width: `${cardsModalPhrases.length > 0 ? (Object.keys(cardsModalProgress).length / cardsModalPhrases.length * 100) : 0}%` }}
                         ></div>
                       </div>
                       <div className="flex justify-between text-xs text-gray-300 mt-1">
                         <span>{Object.keys(cardsModalProgress).length} learned</span>
                         <span>{cardsModalPhrases.length} total</span>
-                        <span>{Math.round(Object.keys(cardsModalProgress).length / cardsModalPhrases.length * 100)}%</span>
+                        <span>{cardsModalPhrases.length > 0 ? Math.round(Object.keys(cardsModalProgress).length / cardsModalPhrases.length * 100) : 0}%</span>
                       </div>
                     </div>
                   </div>

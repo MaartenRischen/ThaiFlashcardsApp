@@ -323,7 +323,6 @@ export function SetManagerModal({ isOpen, onClose }: {
     activeSetProgress,
     switchSet,
     deleteSet,
-    exportSet,
     // addSet, etc.
   } = useSet();
   const [selected, setSelected] = useState<string[]>([]);

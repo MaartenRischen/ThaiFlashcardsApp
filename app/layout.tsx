@@ -6,6 +6,7 @@ import { Providers } from './providers'
 import { Navbar } from './components/Navbar'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { ClerkProvider } from '@clerk/nextjs'
+import { Toaster } from "sonner"
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -48,6 +49,7 @@ export default function RootLayout({
           <meta name="theme-color" content="#ffffff" />
         </head>
         <body className={inter.className}>
+          <Toaster richColors position="top-right" />
           <Tooltip.Provider>
           <Providers>
             <SetProvider>

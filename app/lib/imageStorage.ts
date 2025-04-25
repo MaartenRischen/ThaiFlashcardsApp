@@ -12,7 +12,7 @@ export async function initializeStorage() {
   }
 
   const { data: buckets } = await adminClient.storage.listBuckets();
-  const bucketExists = buckets?.some(bucket => bucket.name === BUCKET_NAME);
+  const bucketExists = buckets?.some((bucket: { name: string }) => bucket.name === BUCKET_NAME);
 
   if (!bucketExists) {
     const { error } = await adminClient.storage.createBucket(BUCKET_NAME, {
@@ -44,7 +44,7 @@ export async function uploadImageFromUrl(imageUrl: string, setId: string): Promi
     const filePath = `${setId}/${filename}`;
 
     // Upload to Supabase Storage
-    const { error: uploadError, data } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(filePath, imageBlob, {
         contentType: 'image/webp',
@@ -81,7 +81,7 @@ export async function deleteImage(setId: string): Promise<boolean> {
     }
 
     if (data && data.length > 0) {
-      const filesToDelete = data.map(file => `${setId}/${file.name}`);
+      const filesToDelete = data.map((file: { name: string }) => `${setId}/${file.name}`);
       const { error: deleteError } = await supabase.storage
         .from(BUCKET_NAME)
         .remove(filesToDelete);

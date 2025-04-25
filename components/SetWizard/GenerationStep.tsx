@@ -72,7 +72,7 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
 
   useEffect(() => {
     generatePhrases();
-  }, [state]);
+  }, [state, generatePhrases]);
 
   return (
     <div className="space-y-4">

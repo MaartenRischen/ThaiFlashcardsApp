@@ -329,20 +329,15 @@ export function SetManagerModal({ isOpen, onClose }: {
   const [cardsModalLoading, setCardsModalLoading] = useState(false);
   const [publishingSetId, setPublishingSetId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string>('Anonymous');
   
   // --- State for Publish Confirmation Modal ---
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [setBeingPublished, setSetBeingPublished] = useState<SetMetaData | null>(null);
 
   useEffect(() => {
+    // Keep useEffect for userId if still needed elsewhere, otherwise remove
     if (typeof window !== 'undefined') {
       setUserId(localStorage.getItem('userId'));
-      // Try to get username from localStorage
-      const storedName = localStorage.getItem('userName') || localStorage.getItem('name');
-      if (storedName) {
-        setUserName(storedName);
-      }
     }
   }, []);
 

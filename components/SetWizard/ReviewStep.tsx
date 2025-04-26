@@ -149,10 +149,7 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
             </button>
           </div>
           <div className="text-gray-300 text-sm text-center">
-            {state.dailyGoal 
-              ? `${state.dailyGoal.value} ${state.dailyGoal.type}/day`
-              : 'No daily goal set'
-            }
+            10 cards/day
           </div>
         </div>
       </div>

@@ -39,11 +39,11 @@ const styles = [
 ];
 
 export function ToneStep({ value, onNext, onBack }: { 
-  value: number, 
-  onNext: (tone: number) => void,
+  value: number,
+  onNext: (tone: 'serious' | 'balanced' | 'absolutely ridiculous') => void,
   onBack: () => void
 }) {
-  // Map value to style index
+  // Map initial numeric value to style index
   const initialIndex = value <= 30 ? 0 : value >= 70 ? 2 : 1;
   const [selected, setSelected] = useState<number | null>(initialIndex);
 
@@ -138,7 +138,12 @@ export function ToneStep({ value, onNext, onBack }: {
         </button>
         <button
           className="neumorphic-button text-blue-400"
-          onClick={() => selected !== null && onNext(selected === 0 ? 0 : selected === 2 ? 100 : 50)}
+          onClick={() => {
+            if (selected !== null) {
+              const toneValue = selected === 0 ? 'serious' : selected === 2 ? 'absolutely ridiculous' : 'balanced';
+              onNext(toneValue);
+            }
+          }}
           disabled={selected === null}
         >
           Next

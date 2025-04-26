@@ -502,6 +502,7 @@ export async function publishSetToGallery(publishedSet: {
   llmBrand?: string;
   llmModel?: string;
   seriousnessLevel?: number;
+  proficiencyLevel?: string;
   specificTopics?: string;
   phrases: Phrase[];
 }) {
@@ -515,6 +516,7 @@ export async function publishSetToGallery(publishedSet: {
       llmBrand: publishedSet.llmBrand,
       llmModel: publishedSet.llmModel,
       seriousnessLevel: publishedSet.seriousnessLevel,
+      proficiencyLevel: publishedSet.proficiencyLevel,
       specificTopics: publishedSet.specificTopics,
       phrases: publishedSet.phrases as unknown as Prisma.InputJsonValue,
       publishedAt: new Date().toISOString(),

@@ -140,6 +140,7 @@ model PublishedSet {
   llmBrand       String?
   llmModel       String?
   seriousnessLevel Int?
+  proficiencyLevel String?
   specificTopics String?
   phrases        Json     @db.JsonB // Store the Phrase[] array directly as JSONB
   publishedAt    DateTime @default(now())

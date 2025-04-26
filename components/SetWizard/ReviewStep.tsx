@@ -8,16 +8,17 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
   onEdit: (step: number) => void,
   onBack: () => void,
 }) {
-  // Get the proficiency level index (0-4) for image selection
+  // Get the proficiency level index (0-5) for image selection, including God Mode
   const getProficiencyIndex = () => {
     const levelMap = {
       'Complete Beginner': 0,
       'Basic Understanding': 1,
       'Intermediate': 2,
       'Advanced': 3,
-      'Native/Fluent': 4
+      'Native/Fluent': 4,
+      'God Mode': 5,
     };
-    return levelMap[state.proficiency.levelEstimate as keyof typeof levelMap] || 0;
+    return levelMap[state.proficiency.levelEstimate as keyof typeof levelMap] ?? 0;
   };
 
   // Get the learning style image based on tone value
@@ -61,12 +62,12 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
             </button>
           </div>
           <div className="flex flex-col items-center">
-            <div className="relative w-[240px] h-[160px] rounded-lg overflow-hidden border border-blue-900/30 mb-3">
+            <div className="relative w-[320px] h-[180px] rounded-lg overflow-hidden border border-blue-900/30 mb-3">
               <Image
-                src={`/images/level/${getProficiencyIndex() + 1}.png`}
-                alt={`${state.proficiency.levelEstimate} level illustration`}
-                width={240}
-                height={160}
+                src={`/images/proficiency/${getProficiencyIndex() + 1}.png`}
+                alt={`${state.proficiency.levelEstimate} proficiency illustration`}
+                width={320}
+                height={180}
                 className="object-cover"
               />
             </div>

@@ -31,7 +31,9 @@ export async function DELETE(
 ) {
   try {
     const { sessionClaims } = await auth();
+    console.log('API sessionClaims:', sessionClaims);
     const email = sessionClaims?.email as string | undefined;
+    console.log('API email for admin check:', email);
     if (email !== 'rischenme@gmail.com') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }

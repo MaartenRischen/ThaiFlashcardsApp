@@ -64,7 +64,7 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
           <div className="flex flex-col items-center">
             <div className="relative w-[320px] h-[180px] rounded-lg overflow-hidden border border-blue-900/30 mb-3">
               <Image
-                src={`/images/proficiency/${getProficiencyIndex() + 1}.png`}
+                src={`/images/level/${getProficiencyIndex() + 1}.png`}
                 alt={`${state.proficiency.levelEstimate} proficiency illustration`}
                 width={320}
                 height={180}

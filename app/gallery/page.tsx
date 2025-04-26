@@ -4,6 +4,8 @@ import { useSet } from '@/app/context/SetContext';
 import { Phrase } from '@/app/lib/set-generator';
 import GallerySetCard from './GallerySetCard';
 import { GalleryHorizontal, Loader2 } from 'lucide-react';
+// Import a modal component (we'll create this next)
+import CardViewerModal from './CardViewerModal';
 
 interface GallerySet {
   id: string;
@@ -18,6 +20,14 @@ interface GallerySet {
   specificTopics?: string;
 }
 
+// Define a type for the full set data including phrases
+interface FullGallerySet extends GallerySet {
+  phrases: Phrase[];
+  // Include other fields fetched from the API if needed
+  llmBrand?: string;
+  llmModel?: string;
+}
+
 export default function GalleryPage() {
   const { availableSets, addSet, isLoading: contextIsLoading } = useSet();
   const [sets, setSets] = useState<GallerySet[]>([]);
@@ -25,25 +35,19 @@ export default function GalleryPage() {
   const [error, setError] = useState<string | null>(null);
   const [importingSetId, setImportingSetId] = useState<string | null>(null);
 
+  // --- State for Card Viewer --- 
+  const [viewingSet, setViewingSet] = useState<FullGallerySet | null>(null); // Store the full set data
+  const [isCardViewerOpen, setIsCardViewerOpen] = useState(false);
+  const [cardViewLoading, setCardViewLoading] = useState(false);
+  const [cardViewError, setCardViewError] = useState<string | null>(null);
+
   // --- Search/Filter State ---
   const [search, setSearch] = useState('');
-  const [selectedProficiency, setSelectedProficiency] = useState<string | null>(null);
-  const [selectedRidiculousness, setSelectedRidiculousness] = useState<string | null>(null);
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<'Newest' | 'Oldest'>('Newest');
 
-  // --- Extract unique topics from sets ---
-  const allTopics = useMemo(() => {
-    const topics = new Set<string>();
-    sets.forEach(set => {
-      if (set.specificTopics) {
-        set.specificTopics.split(',').map((t: string) => t.trim()).forEach((t: string) => topics.add(t));
-      }
-    });
-    return Array.from(topics).filter(Boolean);
-  }, [sets]);
-
   // --- Filtering Logic ---
+  const sortOptions = ['Newest', 'Oldest'];
+
   const filteredSets = useMemo(() => {
     let filtered = sets;
     if (search.trim()) {
@@ -51,29 +55,6 @@ export default function GalleryPage() {
       filtered = filtered.filter(set =>
         set.title?.toLowerCase().includes(s) ||
         set.description?.toLowerCase().includes(s)
-      );
-    }
-    if (selectedProficiency) {
-      filtered = filtered.filter(set =>
-        set.seriousnessLevel !== undefined &&
-        (set.seriousnessLevel === null || set.seriousnessLevel === undefined ||
-         set.seriousnessLevel.toString().toLowerCase() === selectedProficiency.toLowerCase() ||
-         (set.title && set.title.toLowerCase().includes(selectedProficiency.toLowerCase()))
-        )
-      );
-    }
-    if (selectedRidiculousness) {
-      filtered = filtered.filter(set =>
-        set.seriousnessLevel !== undefined &&
-        (set.seriousnessLevel === null || set.seriousnessLevel === undefined ||
-         set.seriousnessLevel.toString().toLowerCase() === selectedRidiculousness.toLowerCase() ||
-         (set.title && set.title.toLowerCase().includes(selectedRidiculousness.toLowerCase()))
-        )
-      );
-    }
-    if (selectedTopics.length > 0) {
-      filtered = filtered.filter(set =>
-        set.specificTopics && selectedTopics.every(topic => set.specificTopics?.includes(topic))
       );
     }
     if (sortOrder === 'Newest') {
@@ -90,12 +71,7 @@ export default function GalleryPage() {
       });
     }
     return filtered;
-  }, [sets, search, selectedProficiency, selectedRidiculousness, selectedTopics, sortOrder]);
-
-  // --- Proficiency, Ridiculousness, and Sort Options ---
-  const proficiencyOptions = ['Beginner', 'Intermediate', 'Advanced', 'Fluent', 'God Mode'];
-  const ridiculousnessOptions = ['Serious', 'Balanced', 'Ridiculous'];
-  const sortOptions = ['Newest', 'Oldest'];
+  }, [sets, search, sortOrder]);
 
   useEffect(() => {
     setLoading(true);
@@ -170,6 +146,32 @@ export default function GalleryPage() {
     }
   };
 
+  // --- Function to handle viewing cards ---
+  const handleViewCards = async (setId: string) => {
+    setCardViewLoading(true);
+    setCardViewError(null);
+    setViewingSet(null); // Clear previous set
+    setIsCardViewerOpen(true);
+
+    try {
+      const res = await fetch(`/api/gallery/${setId}`);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to fetch set details for viewing');
+      }
+      const fullSetData: FullGallerySet = await res.json();
+      setViewingSet(fullSetData); // Store the full set data
+    } catch (err: unknown) {
+      console.error("View Cards error:", err);
+      const message = (err instanceof Error) ? err.message : 'Unknown error fetching cards';
+      setCardViewError(message);
+      // Keep modal open to show error maybe? Or close it?
+      // setIsCardViewerOpen(false); 
+    } finally {
+      setCardViewLoading(false);
+    }
+  };
+
   const handleDelete = async (setId: string) => {
     try {
       const res = await fetch(`/api/gallery/${setId}`, { method: 'DELETE' });
@@ -183,6 +185,13 @@ export default function GalleryPage() {
       const message = err instanceof Error ? err.message : 'Unknown error';
       alert('Delete failed: ' + message);
     }
+  };
+
+  // --- Function to close the modal ---
+  const handleCloseCardViewer = () => {
+    setIsCardViewerOpen(false);
+    setViewingSet(null); // Clear set data when closing
+    setCardViewError(null);
   };
 
   return (
@@ -203,42 +212,6 @@ export default function GalleryPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-indigo-300 text-xs font-medium">Proficiency:</span>
-            {proficiencyOptions.map(opt => (
-              <button
-                key={opt}
-                className={`px-3 py-1 rounded-full text-xs border transition-all ${selectedProficiency === opt ? 'bg-blue-600/90 text-white border-blue-500' : 'bg-transparent text-indigo-200 border-indigo-700/40 hover:bg-blue-900/30'}`}
-                onClick={() => setSelectedProficiency(selectedProficiency === opt ? null : opt)}
-              >
-                {opt}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-indigo-300 text-xs font-medium">Ridiculousness:</span>
-          {ridiculousnessOptions.map(opt => (
-            <button
-              key={opt}
-              className={`px-3 py-1 rounded-full text-xs border transition-all ${selectedRidiculousness === opt ? 'bg-blue-600/90 text-white border-blue-500' : 'bg-transparent text-indigo-200 border-indigo-700/40 hover:bg-blue-900/30'}`}
-              onClick={() => setSelectedRidiculousness(selectedRidiculousness === opt ? null : opt)}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-indigo-300 text-xs font-medium">Topics:</span>
-          {allTopics.map(topic => (
-            <button
-              key={topic}
-              className={`px-3 py-1 rounded-full text-xs border transition-all ${selectedTopics.includes(topic) ? 'bg-blue-600/90 text-white border-blue-500' : 'bg-transparent text-indigo-200 border-indigo-700/40 hover:bg-blue-900/30'}`}
-              onClick={() => setSelectedTopics(selectedTopics.includes(topic) ? selectedTopics.filter(t => t !== topic) : [...selectedTopics, topic])}
-            >
-              {topic}
-            </button>
-          ))}
         </div>
         <div className="flex items-center gap-2">
           <span className="text-indigo-300 text-xs font-medium">Sort:</span>
@@ -284,10 +257,21 @@ export default function GalleryPage() {
               importingSetId={importingSetId}
               contextIsLoading={contextIsLoading}
               handleImport={handleImport}
+              handleViewCards={handleViewCards}
               onDelete={handleDelete}
             />
           ))}
         </div>
+      )}
+
+      {/* --- Render Card Viewer Modal --- */}
+      {isCardViewerOpen && (
+        <CardViewerModal 
+          set={viewingSet} 
+          isLoading={cardViewLoading} 
+          error={cardViewError} 
+          onClose={handleCloseCardViewer} 
+        />
       )}
     </div>
   );

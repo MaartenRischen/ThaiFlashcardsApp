@@ -242,7 +242,7 @@ export function ScenarioStep({ value, onNext, onBack }: {
       {/* Selected tags/chips */}
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-2 justify-center mb-2">
-          {selected.filter(s => s !== CUSTOM_SCENARIO && ![...scenarios, ...weirdScenarios].includes(s)).map((tag, i) => (
+          {selected.filter(s => s !== CUSTOM_SCENARIO && ![...scenarios, ...weirdScenarios].includes(s)).map((tag) => (
             <span key={tag} className="flex items-center bg-green-700/80 text-white text-xs rounded-full px-3 py-1">
               {tag}
               <button
@@ -254,7 +254,7 @@ export function ScenarioStep({ value, onNext, onBack }: {
               </button>
             </span>
           ))}
-          {selected.filter(s => [...scenarios, ...weirdScenarios].includes(s)).map((tag, i) => (
+          {selected.filter(s => [...scenarios, ...weirdScenarios].includes(s)).map((tag) => (
             <span key={tag} className="flex items-center bg-blue-700/80 text-white text-xs rounded-full px-3 py-1">
               {tag}
               <button

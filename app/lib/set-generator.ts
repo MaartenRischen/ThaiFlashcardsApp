@@ -23,13 +23,12 @@ export interface ExampleSentence {
 }
 
 export interface GeneratePromptOptions {
-  level: 'beginner' | 'intermediate' | 'advanced';
+  level: 'complete beginner' | 'basic understanding' | 'intermediate' | 'advanced' | 'native/fluent' | 'god mode';
   specificTopics?: string;
   count: number;
   existingPhrases?: string[];
   topicsToDiscuss?: string;
-  topicsToAvoid?: string;
-  seriousnessLevel?: number;
+  tone?: 'serious' | 'balanced' | 'absolutely ridiculous';
 }
 
 // Define structured error types for better error handling
@@ -92,8 +91,7 @@ function buildGenerationPrompt(
     specificTopics,
     count,
     topicsToDiscuss,
-    topicsToAvoid,
-    seriousnessLevel = 5 // Default to neutral
+    tone = 'balanced', // Default to balanced
   } = options;
 
   // Define the output schema (remains the same)
@@ -147,26 +145,24 @@ function buildGenerationPrompt(
   **User Preferences:**
   - Situations for Use: ${topicsToDiscuss || 'General conversation'}
   ${specificTopics ? `- Specific Focus: ${specificTopics}` : ''}
-  - Topics to STRICTLY AVOID: ${topicsToAvoid || 'None specified'}
-  - **TONE CONTROL: ${seriousnessLevel}% Ridiculous / ${100 - seriousnessLevel}% Serious**
+  - **TONE: ${tone.toUpperCase()}**
 
   **CRITICAL INSTRUCTIONS:**
 
   1.  **Set Title:** Follow the above instructions for the set title. Make sure it is a single, natural, grammatically correct English sentence. Do NOT try to be clever or funny. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
 
   2.  **Level-Specific Content:** (Ensure strict adherence)
-      *   Beginner: Mostly essential words/short phrases. Simple S-V-O sentences rarely. Simple examples.
-      *   Intermediate: Conversational sentences (5-10 words). Common grammar. Phrases ok. Typical examples.
-      *   Advanced: ONLY complex sentences (10+ words). Nuanced vocabulary, varied grammar. NO simple phrases. Complex examples.
+      *   Complete Beginner: Use only the most essential, high-frequency words and very short phrases (1-3 words). Avoid sentences except for the simplest S-V-O (subject-verb-object) forms. Examples should be extremely simple and practical, suitable for someone with zero prior knowledge.
+      *   Basic Understanding: Use short, practical phrases and very simple sentences (up to 5 words). Introduce basic grammar and common expressions. Examples should be easy to follow and directly useful in daily life.
+      *   Intermediate: Use conversational sentences (5-10 words), common grammar structures, and typical phrases. Examples should reflect everyday conversation and introduce some variety in structure and vocabulary.
+      *   Advanced: Use only complex sentences (10+ words), nuanced vocabulary, and varied grammar. Do NOT use simple phrases. Examples should be sophisticated and demonstrate advanced language use.
+      *   Native/Fluent: Use idiomatic, natural, and authentic language as used by educated native speakers. Include slang, cultural references, and subtle nuances. Examples should sound like real, fluent Thai in diverse contexts.
+      *   God Mode: Use extremely elaborate, idiomatic, and sophisticated language. Phrases and examples should be more complex than those for native speakers, featuring rare vocabulary, advanced grammar, and highly nuanced, academic, or literary expressions. Push the boundaries of complexity and naturalness, as if the user is a superhuman Thai speaker.
 
-  3.  **TONE Implementation (${seriousnessLevel}% Ridiculous / ${100 - seriousnessLevel}% Serious):** THIS IS PARAMOUNT. The tone MUST heavily influence ALL content. For high ridiculousness (60%+), the TONE OVERRIDES the literal interpretation of the 'Situations'. Use the situations as a *springboard* for absurdity, don't just generate serious content *about* the situation.
-      *   **Style Guide for Ridiculousness:** Think absurdist humor, unexpected juxtapositions, non-sequiturs, bizarre characters/events, and breaking logical expectations are highly encouraged.
-      *   **Phrases/Sentences:**
-          *   0-10%: Standard, textbook, dry, factual.
-          *   20-40%: Mostly serious; occasional mild quirks or unusual phrasing.
-          *   50-70%: Noticeably quirky, surreal, or humorously unexpected. Use metaphors, wordplay, odd scenarios. Blend standard vocab with surprising twists.
-          *   80-90%: Highly absurd, nonsensical, surreal sentences. Use hyperbole, impossible combinations, illogical situations. Prioritize humor/strangeness over literal meaning, while maintaining grammatical structure for the level.
-          *   91-100%: Maximum absurdity. Push boundaries. Generate grammatically plausible sentences that are almost meaningless due to extreme surrealism, non-sequiturs, bizarre tangents. Make it weird, funny, unpredictable. The phrase itself can be nonsensical.
+  3.  **TONE Implementation (${tone.toUpperCase()}):** THIS IS PARAMOUNT. The tone MUST heavily influence ALL content. Use the following style guide based on the selected tone:
+      *   **Serious:** All content should be practical, standard, and factual. Avoid humor, absurdity, or surrealism. Example sentences should be realistic and directly applicable to everyday situations.
+      *   **Balanced:** Content should be mostly practical and realistic, but may include occasional quirks, mild humor, or unusual phrasing. Example sentences can blend standard usage with some creative or amusing twists.
+      *   **Absolutely Ridiculous:** Content should be highly absurd, surreal, and humorous. Use non-sequiturs, bizarre scenarios, and unexpected juxtapositions. Example sentences should prioritize humor, strangeness, and unpredictability, even at the expense of realism.
       *   **Mnemonics:**
         * Provide a concise, intuitive mnemonic in *English* that maps the Thai sound to an English word/phrase that sounds similar **and** hints at the meaning.
         * NEVER reference the user‑provided situations or specific focus.
@@ -174,14 +170,13 @@ function buildGenerationPrompt(
         * Do **not** attempt to be funny or clever—prioritise memory effectiveness.
         * Use only real English words or widely‑recognised sounds; avoid nonsense syllables.
       *   **Example Sentences:** MUST strongly reflect the tone. 
-          *   Low Ridiculousness: Practical, standard examples.
-          *   Medium Ridiculousness: Mildly amusing or odd situations.
-          *   High Ridiculousness (60%+): Create SURREAL or NONSENSICAL scenarios.
+          *   Serious: Practical, standard examples.
+          *   Balanced: Mildly amusing or odd situations.
+          *   Absolutely Ridiculous: SURREAL or NONSENSICAL scenarios.
 
   4.  **Topic/Situation Control:**
       *   Focus content *primarily* on the 'Situations for Use': ${topicsToDiscuss || 'General conversation'}. Use this as inspiration, especially for absurd examples.
       *   If 'Specific Focus' (${specificTopics || 'None'}) provided, try to incorporate it.
-      *   ABSOLUTELY DO NOT generate content related to 'Topics to STRICTLY AVOID': ${topicsToAvoid || 'None specified'}.
 
   5.  **Avoid Duplicates:** Do not generate for these existing English phrases: ${existingPhrases && existingPhrases.length > 0 ? existingPhrases.join(', ') : 'None'}
 
@@ -318,8 +313,7 @@ export async function generateCustomSet(
             batchResult = await generateOpenRouterBatch(
               prompt, 
               TEXT_MODELS,
-              i,
-              preferences.seriousnessLevel
+              i
             );
             
             // If got results, break out of retry loop
@@ -511,7 +505,7 @@ export async function generateSingleFlashcard(
     while (retries < MAX_RETRIES) {
       try {
         console.log(`Single card generation attempt ${retries + 1}/${MAX_RETRIES}`);
-        const result = await generateOpenRouterBatch(prompt, TEXT_MODELS, -1, preferences.seriousnessLevel);
+        const result = await generateOpenRouterBatch(prompt, TEXT_MODELS, -1);
         
         if (result.error) {
           console.error(`Error generating single flashcard (attempt ${retries + 1}, type ${result.error.type}):`, result.error.message);
@@ -655,11 +649,10 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
 export async function generateOpenRouterBatch(
   prompt: string,
   models: string[],
-  batchIndex: number,
-  seriousnessLevel?: number
+  batchIndex: number
 ): Promise<{phrases: Phrase[], cleverTitle?: string, error?: BatchError}> {
   try {
-    const temperature = getTemperatureFromSeriousness(seriousnessLevel);
+    const temperature = getTemperatureFromSeriousness(undefined);
     const responseText = await callOpenRouterWithFallback(prompt, models, temperature);
     // Clean the response (remove markdown, etc.)
     const cleanedText = responseText.replace(/^```json\s*|```$/g, '').trim();

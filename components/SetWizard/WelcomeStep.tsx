@@ -23,7 +23,7 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
           />
         </div>
       </div>
-      
+
       <div className="space-y-3 max-w-md">
         <div className="bg-gray-900/60 border border-blue-900/30 rounded-lg p-3 mb-3">
           <p className="text-blue-100 text-sm leading-relaxed">
@@ -37,7 +37,7 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
       </div>
 
       <div className="flex justify-center pt-3 w-full">
-        <button 
+        <button
           onClick={onNext}
           className="neumorphic-button text-blue-400 px-8"
         >

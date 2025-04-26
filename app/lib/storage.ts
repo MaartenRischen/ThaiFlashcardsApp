@@ -26,7 +26,7 @@ export interface SetMetaData {
   cleverTitle?: string;
   createdAt: string;
   phraseCount: number;
-  level?: 'beginner' | 'intermediate' | 'advanced';
+  level?: 'complete beginner' | 'basic understanding' | 'intermediate' | 'advanced' | 'native/fluent' | 'god mode';
   goals?: string[];
   specificTopics?: string;
   source: 'default' | 'import' | 'generated';

@@ -143,7 +143,9 @@ model PublishedSet {
   specificTopics String?
   phrases        Json     @db.JsonB // Store the Phrase[] array directly as JSONB
   publishedAt    DateTime @default(now())
-
+  proficiencyLevel String? // NEW: Proficiency level (Beginner, Intermediate, etc.)
+  topics          String[] // NEW: Topics (array of strings)
+  ridiculousness  String?  // NEW: Ridiculousness (Serious, Balanced, Ridiculous)
   // Optional: Link back to the original set/user if needed for reference, but keep data separate
   // originalSetId String?
   // originalUserId String?

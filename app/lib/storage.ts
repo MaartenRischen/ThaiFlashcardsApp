@@ -538,6 +538,9 @@ export async function getAllPublishedSets() {
       seriousnessLevel: true,
       specificTopics: true,
       publishedAt: true,
+      proficiencyLevel: true,
+      topics: true,
+      ridiculousness: true,
     },
   });
   return publishedSets || [];

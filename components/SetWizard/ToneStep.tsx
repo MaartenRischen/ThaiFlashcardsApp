@@ -71,12 +71,12 @@ export function ToneStep({ value, onNext, onBack }: {
             </PopoverTrigger>
             <PopoverContent className="w-80 bg-gray-800 text-white border-gray-700" side="top" align="center">
               <div className="p-2">
-                <h4 className="font-semibold text-blue-400 mb-1">What's a mnemonic?</h4>
+                <h4 className="font-semibold text-blue-400 mb-1">What&apos;s a mnemonic?</h4>
                 <p className="text-sm text-gray-200 mb-2">
                   A mnemonic is a memory aid—a trick or story that helps you remember something more easily.
                 </p>
                 <p className="text-xs text-gray-400">
-                  The app's name, <span className="font-semibold text-yellow-300">Donkey Bridge</span>, is a literal translation of the Dutch word <span className="italic">"ezelsbruggetje"</span>, which means mnemonic!
+                  The app&apos;s name, <span className="font-semibold text-yellow-300">Donkey Bridge</span>, is a literal translation of the Dutch word <span className="italic">&quot;ezelsbruggetje&quot;</span>, which means mnemonic!
                 </p>
               </div>
             </PopoverContent>

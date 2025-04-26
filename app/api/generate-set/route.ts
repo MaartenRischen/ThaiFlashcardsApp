@@ -145,13 +145,23 @@ export async function POST(request: Request) {
       }
 
       // --- 4. Prepare Metadata for Storage ---
+      // Map tone preference to seriousnessLevel (adjust mapping if needed)
+      let seriousnessLevelValue: number | undefined;
+      switch (preferences.tone) {
+        case 'serious': seriousnessLevelValue = 1; break;
+        case 'balanced': seriousnessLevelValue = 5; break;
+        case 'absolutely ridiculous': seriousnessLevelValue = 10; break;
+        default: seriousnessLevelValue = undefined; // Or a default like 5?
+      }
+
       const metaDataForStorage: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
         name: generationResult.cleverTitle || (isFallback ? 'Placeholder Set' : 'Custom Set'),
         cleverTitle: generationResult.cleverTitle,
         level: preferences.level,
         specificTopics: preferences.specificTopics,
-        source: isFallback ? 'generated' : 'generated', // Keep source as generated even for fallback
-        imageUrl: undefined, // Initialize as undefined, will be updated after storage
+        source: isFallback ? 'generated' : 'generated',
+        imageUrl: undefined,
+        seriousnessLevel: seriousnessLevelValue,
         llmBrand: generationResult.llmBrand || undefined, 
         llmModel: generationResult.llmModel || undefined, 
       };
@@ -201,7 +211,7 @@ export async function POST(request: Request) {
         try {
           console.log('Image processing: Generating our own image');
           const topicDescription = generationResult.cleverTitle || 'language learning';
-          const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}. Use vibrant colors that are friendly and engaging.`;
+          const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}. Use vibrant colors that are friendly and engaging. IMPORTANT: Absolutely NO text, words, or letters should appear anywhere in the image.`;
           
           console.log(`API Route: Generating set cover image with prompt:`, imagePrompt);
           console.log('Image processing: About to call generateImage');

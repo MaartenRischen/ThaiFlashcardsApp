@@ -106,8 +106,9 @@ export default function GalleryPage() {
       }
       setSets(prev => prev.filter(set => set.id !== setId));
       alert('Set deleted successfully.');
-    } catch (err: any) {
-      alert('Delete failed: ' + (err?.message || 'Unknown error'));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      alert('Delete failed: ' + message);
     }
   };
 

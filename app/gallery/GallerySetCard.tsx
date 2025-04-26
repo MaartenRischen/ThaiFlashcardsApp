@@ -31,11 +31,11 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
   // Get username with proper fallback
   const username = set.author && set.author.trim() !== '' ? set.author : 'Anonymous';
   const { user } = useUser();
-  // Debug: log user object and email
+  // Debug: log user object and id
   console.log('GallerySetCard user:', user);
-  const email = user?.primaryEmailAddress?.emailAddress;
-  console.log('GallerySetCard email for admin check:', email);
-  const isAdmin = email === 'rischenme@gmail.com';
+  const userId = user?.id;
+  console.log('GallerySetCard userId for admin check:', userId);
+  const isAdmin = userId === 'user_2w7FgmYkPXUKYesPpqgxeAF7C1h';
 
   const handleDelete = () => {
     if (window.confirm(`Are you sure you want to delete the set '${set.title}'? This cannot be undone.`)) {

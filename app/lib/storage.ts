@@ -538,9 +538,6 @@ export async function getAllPublishedSets() {
       seriousnessLevel: true,
       specificTopics: true,
       publishedAt: true,
-      proficiencyLevel: true,
-      topics: true,
-      ridiculousness: true,
     },
   });
   return publishedSets || [];
@@ -568,4 +565,22 @@ export async function getPublishedSetById(id: string) {
     },
   });
   return publishedSet;
+}
+
+// Delete a published set from the gallery
+export async function deletePublishedSet(id: string): Promise<boolean> {
+  if (!id) {
+    console.error('deletePublishedSet called without id.');
+    return false;
+  }
+  try {
+    await prisma.publishedSet.delete({
+      where: { id },
+    });
+    console.log(`Successfully deleted published set with id: ${id}`);
+    return true;
+  } catch (error) {
+    console.error('Error deleting published set:', error);
+    return false;
+  }
 }

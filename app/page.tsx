@@ -983,7 +983,7 @@ export default function ThaiFlashcards() {
       specificTopics: undefined,
       topicsToAvoid: undefined,
     };
-    const totalCount = 3;
+    const totalCount = 10;
     
     console.log('handleTestGeneration: Calling API route /api/generate-set');
 
@@ -1476,9 +1476,7 @@ export default function ThaiFlashcards() {
             const specificTopics = wizardState.topics.length > 0 ? wizardState.topics.join(', ') : undefined;
 
             // Always call the /api/generate-set endpoint which handles image generation
-            const totalCount = wizardState.dailyGoal?.type === 'cards' && wizardState.dailyGoal.value > 0 
-              ? wizardState.dailyGoal.value 
-              : 12;
+            const totalCount = 10;
             
             const preferences = {
               level,

@@ -67,7 +67,7 @@ const PublishConfirmationModal: React.FC<PublishConfirmationModalProps> = ({
         {/* Modal Body */}
         <div className="p-6 space-y-4">
           <p className="text-sm text-indigo-200">
-            You are about to publish the set "<span className="font-semibold text-indigo-100">{set.name}</span>" to the public gallery.
+            You are about to publish the set &quot;<span className="font-semibold text-indigo-100">{set.name}</span>&quot; to the public gallery.
           </p>
 
           {/* Anonymous Option */}

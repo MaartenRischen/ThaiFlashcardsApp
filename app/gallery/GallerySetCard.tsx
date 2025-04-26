@@ -92,13 +92,13 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
           User Set by: {username}
         </div>
 
-        {/* ADD Proficiency Level */}
+        {/* RE-ADD Proficiency Level Display */}
         {set.proficiencyLevel && (
             <p className="text-xs text-indigo-400/80 text-center mb-1">
                 Proficiency: <span className="font-medium text-indigo-300">{set.proficiencyLevel}</span>
             </p>
         )}
-
+        
         {/* ADD Ridiculousness Level */}
         {set.ridiculousness !== undefined && (
             <p className="text-xs text-indigo-400/80 text-center mb-3">

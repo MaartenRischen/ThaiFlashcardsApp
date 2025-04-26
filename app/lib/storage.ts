@@ -539,7 +539,6 @@ export async function getAllPublishedSets() {
       llmModel: true,
       seriousnessLevel: true,
       proficiencyLevel: true,
-      ridiculousness: true,
       specificTopics: true,
       publishedAt: true,
     },

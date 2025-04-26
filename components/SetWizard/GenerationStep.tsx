@@ -46,9 +46,8 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
       ].join(', ') || undefined;
 
       const specificTopics = state.topics.length > 0 ? state.topics.join(', ') : undefined;
-      const totalCount = state.dailyGoal?.type === 'cards' && state.dailyGoal.value > 0 
-        ? state.dailyGoal.value 
-        : 12;
+      // Always use 10 as the number of cards
+      const totalCount = 10;
 
       const result = await generateCustomSet(
         {

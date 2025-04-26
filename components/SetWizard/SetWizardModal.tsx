@@ -3,7 +3,6 @@ import { WelcomeStep } from './WelcomeStep';
 import { ProficiencyStep } from './ProficiencyStep';
 import { ScenarioStep } from './ScenarioStep';
 import { ToneStep } from './ToneStep';
-import { DailyGoalStep } from './DailyGoalStep';
 import { ReviewStep } from './ReviewStep';
 import { GenerationStep } from './GenerationStep';
 
@@ -17,10 +16,6 @@ export interface SetWizardState {
   customGoal?: string;
   topics: string[];
   tone: number;
-  dailyGoal?: {
-    value: number;
-    type: 'cards' | 'minutes';
-  };
 }
 
 function ProgressStepper({ step, totalSteps }: { step: number; totalSteps: number }) {
@@ -107,7 +102,6 @@ export function SetWizardModal({ onComplete, onClose }: {
         setState(prev => ({ 
           ...prev, 
           ...data,
-          // Use derived topics from custom scenarios
           topics: derivedTopics
         }));
         
@@ -125,21 +119,12 @@ export function SetWizardModal({ onComplete, onClose }: {
       }}
       onBack={() => setStep(2)}
     />,
-    <DailyGoalStep
-      key="dailyGoal"
-      value={state.dailyGoal}
-      onNext={(dailyGoal) => {
-        setState(prev => ({ ...prev, dailyGoal }));
-        setStep(5);
-      }}
-      onBack={() => setStep(3)}
-    />,
     <ReviewStep
       key="review"
       state={state}
-      onConfirm={() => setStep(6)}
+      onConfirm={() => setStep(5)}
       onEdit={setStep}
-      onBack={() => setStep(4)}
+      onBack={() => setStep(3)}
     />,
     <GenerationStep
       key="generation"
@@ -147,7 +132,7 @@ export function SetWizardModal({ onComplete, onClose }: {
       onComplete={() => {
         onComplete(state);
       }}
-      onBack={() => setStep(5)}
+      onBack={() => setStep(4)}
     />
   ];
 

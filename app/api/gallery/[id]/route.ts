@@ -32,9 +32,10 @@ export async function DELETE(
   try {
     const { sessionClaims } = await auth();
     console.log('API sessionClaims:', sessionClaims);
-    const email = sessionClaims?.email as string | undefined;
-    console.log('API email for admin check:', email);
-    if (email !== 'rischenme@gmail.com') {
+    const userId = sessionClaims?.sub as string | undefined;
+    console.log('API userId for admin check:', userId);
+    const isAdmin = userId === 'user_2w7FgmYkPXUKYesPpqgxeAF7C1h';
+    if (!isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
     const success = await deletePublishedSet(params.id);

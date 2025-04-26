@@ -11,7 +11,6 @@ interface GallerySet {
   imageUrl?: string;
   seriousnessLevel?: number;
   proficiencyLevel?: string;
-  ridiculousness?: number;
   createdAt?: string | Date;
   timestamp?: string | Date; // Assuming timestamp might exist
   author?: string;
@@ -99,10 +98,10 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
             </p>
         )}
         
-        {/* ADD Ridiculousness Level */}
-        {set.ridiculousness !== undefined && (
+        {/* CHANGE Ridiculousness Level to use seriousnessLevel */}
+        {set.seriousnessLevel !== undefined && (
             <p className="text-xs text-indigo-400/80 text-center mb-3">
-                Ridiculousness: <span className="font-medium text-indigo-300">{set.ridiculousness} / 10</span>
+                Ridiculousness: <span className="font-medium text-indigo-300">{set.seriousnessLevel} / 10</span>
             </p>
         )}
         

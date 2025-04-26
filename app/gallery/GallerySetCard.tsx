@@ -1,5 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
+import { useUser } from '@clerk/nextjs';
+import { Trash2 } from 'lucide-react';
 
 // Define a more specific type for the set prop
 interface GallerySet {
@@ -12,9 +14,6 @@ interface GallerySet {
   timestamp?: string | Date; // Assuming timestamp might exist
   author?: string;
   cardCount?: number;
-  proficiencyLevel?: string;
-  ridiculousness?: string;
-  topics?: string[];
   // Add any other expected properties based on usage
 }
 
@@ -23,17 +22,25 @@ interface GallerySetCardProps {
   importingSetId: string | null;
   contextIsLoading: boolean;
   handleImport: (setId: string) => void;
-  isAdmin?: boolean;
+  onDelete?: (setId: string) => void; // Optional delete handler
 }
 
-const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, contextIsLoading, handleImport, isAdmin }) => {
+const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, contextIsLoading, handleImport, onDelete }) => {
   // Image fallback
   const imgUrl = set.imageUrl || '/images/default-set-logo.png';
   // Get username with proper fallback
   const username = set.author && set.author.trim() !== '' ? set.author : 'Anonymous';
+  const { user } = useUser();
+  const isAdmin = user?.primaryEmailAddress?.emailAddress === 'rischenme@gmail.com';
+
+  const handleDelete = () => {
+    if (window.confirm(`Are you sure you want to delete the set '${set.title}'? This cannot be undone.`)) {
+      onDelete && onDelete(set.id);
+    }
+  };
 
   return (
-    <div className="bg-indigo-950/30 border border-indigo-800/30 rounded-lg overflow-hidden hover:border-indigo-600/50 hover:shadow-md hover:shadow-indigo-900/20 transition-all flex flex-col">
+    <div className="bg-indigo-950/30 border border-indigo-800/30 rounded-lg overflow-hidden hover:border-indigo-600/50 hover:shadow-md hover:shadow-indigo-900/20 transition-all flex flex-col relative">
       {/* Set Image */}
       <div className="relative w-full aspect-[16/9] bg-indigo-950/50 overflow-hidden">
         <Image
@@ -49,6 +56,15 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
             }
           }}
         />
+        {isAdmin && (
+          <button
+            className="absolute top-2 right-2 bg-red-700/80 hover:bg-red-800 text-white rounded-full p-1.5 z-10 shadow"
+            title="Delete set"
+            onClick={handleDelete}
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
       </div>
       
       <div className="p-4 flex-grow flex flex-col">
@@ -60,23 +76,6 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
         {/* Author label */}
         <div className="text-indigo-400 text-sm font-medium mb-2 text-center">
           User Set by: {username}
-        </div>
-        
-        {/* Badges */}
-        <div className="flex flex-wrap gap-1 justify-center mb-2">
-          {set.proficiencyLevel && (
-            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-900/60 text-blue-200 border border-blue-700">
-              {set.proficiencyLevel}
-            </span>
-          )}
-          {set.ridiculousness && (
-            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${set.ridiculousness === 'Serious' ? 'bg-gray-800/60 text-gray-200 border-gray-700' : set.ridiculousness === 'Balanced' ? 'bg-yellow-900/60 text-yellow-200 border-yellow-700' : 'bg-pink-900/60 text-pink-200 border-pink-700'}`}>{set.ridiculousness}</span>
-          )}
-          {(set.topics || []).map(topic => (
-            <span key={topic} className="px-2 py-0.5 rounded-full text-xs bg-indigo-800/40 text-indigo-100 border border-indigo-700">
-              {topic}
-            </span>
-          ))}
         </div>
         
         {/* Import button */}

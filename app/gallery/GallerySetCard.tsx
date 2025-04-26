@@ -10,6 +10,8 @@ interface GallerySet {
   description?: string;
   imageUrl?: string;
   seriousnessLevel?: number;
+  proficiencyLevel?: string;
+  ridiculousness?: number;
   createdAt?: string | Date;
   timestamp?: string | Date; // Assuming timestamp might exist
   author?: string;
@@ -90,9 +92,18 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
           User Set by: {username}
         </div>
 
-        {/* Card Count (Optional but useful) */}
-        {set.cardCount !== undefined && (
-            <p className="text-xs text-indigo-400/80 text-center mb-3">{set.cardCount} cards</p>
+        {/* ADD Proficiency Level */}
+        {set.proficiencyLevel && (
+            <p className="text-xs text-indigo-400/80 text-center mb-1">
+                Proficiency: <span className="font-medium text-indigo-300">{set.proficiencyLevel}</span>
+            </p>
+        )}
+
+        {/* ADD Ridiculousness Level */}
+        {set.ridiculousness !== undefined && (
+            <p className="text-xs text-indigo-400/80 text-center mb-3">
+                Ridiculousness: <span className="font-medium text-indigo-300">{set.ridiculousness} / 10</span>
+            </p>
         )}
         
         {/* Action Buttons */}

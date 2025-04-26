@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { Phrase } from '@/app/lib/set-generator';
 import type { PhraseProgressData } from '@/app/lib/storage';
 import type { SetMetaData } from '@/app/lib/storage';
+import { useUser } from '@clerk/nextjs'; // Add Clerk hook
+import PublishConfirmationModal from './PublishConfirmationModal';
 
 interface CombinedOptionsModalProps {
   isOpen: boolean;
@@ -317,13 +319,8 @@ export function SetManagerModal({ isOpen, onClose }: {
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const {
-    availableSets,
-    activeSetId,
-    switchSet,
-    deleteSet,
-    // addSet, etc.
-  } = useSet();
+  const { availableSets, switchSet, activeSetId, deleteSet } = useSet();
+  const { user } = useUser(); // Get user data
   const [selected, setSelected] = useState<string[]>([]);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [cardsModalSetId, setCardsModalSetId] = useState<string | null>(null);
@@ -334,6 +331,10 @@ export function SetManagerModal({ isOpen, onClose }: {
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('Anonymous');
   
+  // --- State for Publish Confirmation Modal ---
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [setBeingPublished, setSetBeingPublished] = useState<SetMetaData | null>(null);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setUserId(localStorage.getItem('userId'));
@@ -436,6 +437,72 @@ export function SetManagerModal({ isOpen, onClose }: {
   const totalLearned = 0; // Placeholder, not available
   const dueToday = 0; // Placeholder, not available
 
+  // --- Function to OPEN the confirmation modal ---
+  const handleOpenPublishModal = (set: SetMetaData) => {
+    setSetBeingPublished(set);
+    setIsPublishModalOpen(true);
+  };
+
+  // --- Function to CLOSE the confirmation modal ---
+  const handleClosePublishModal = () => {
+    setIsPublishModalOpen(false);
+    setSetBeingPublished(null); 
+    setPublishingSetId(null); // Also reset loading state if modal is cancelled
+  };
+
+  // --- Function to handle the ACTUAL publication (will be called by the modal) ---
+  const handleConfirmPublish = async (authorName: string | null) => {
+    if (!setBeingPublished) return;
+    
+    const set = setBeingPublished;
+    setPublishingSetId(set.id); // Indicate loading on the card
+    setIsPublishModalOpen(false); // Close the modal immediately
+
+    try {
+      // Fetch content via API (or use getSetContent from context if available and preferred)
+      const contentResponse = await fetch(`/api/flashcard-sets/${set.id}/content`, {
+        credentials: 'include'
+      });
+      
+      if (!contentResponse.ok) {
+        throw new Error(`Failed to fetch content: ${contentResponse.statusText}`);
+      }
+      
+      const phrases = await contentResponse.json();
+      
+      // Determine author based on input
+      const author = authorName === null ? '' : authorName; // Use empty string for Anonymous
+
+      const res = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: set.id,
+          title: set.cleverTitle || set.name,
+          description: set.specificTopics || '',
+          phrases: phrases || [],
+          author: author, // Use the author name from the modal
+          imageUrl: set.imageUrl || '',
+          cardCount: set.phraseCount || 0,
+          llmBrand: set.llmBrand || '',
+          llmModel: set.llmModel || '',
+          seriousnessLevel: set.seriousnessLevel,
+          specificTopics: set.specificTopics,
+        }),
+      });
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || 'Publish API Error');
+      }
+      alert('Set published to gallery!');
+    } catch (err: unknown) {
+      alert('Failed to publish: ' + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setPublishingSetId(null);
+      setSetBeingPublished(null); // Clear the set being published state
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="neumorphic max-w-5xl w-full p-6 bg-[#1f1f1f] max-h-[90vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
@@ -516,51 +583,15 @@ export function SetManagerModal({ isOpen, onClose }: {
                 
                 {/* Card Actions: Publish and Cards icon buttons side by side */}
                 <div className="flex gap-2 justify-end mt-auto">
-                  {/* Publish icon button */}
+                  {/* Publish icon button - MODIFIED onClick */}
                   {!isDefault && (
                     <button
                       className={`p-2 rounded-full bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold transition flex items-center justify-center${publishingSetId === set.id ? ' opacity-50 cursor-not-allowed' : ''}`}
                       title="Publish to Gallery"
-                      disabled={publishingSetId === set.id}
+                      disabled={publishingSetId === set.id} // Still disable if publishing
                       onClick={async e => {
                         e.stopPropagation();
-                        setPublishingSetId(set.id);
-                        try {
-                          // Fetch content via API
-                          const contentResponse = await fetch(`/api/flashcard-sets/${set.id}/content`, {
-                            credentials: 'include'
-                          });
-                          
-                          if (!contentResponse.ok) {
-                            throw new Error(`Failed to fetch content: ${contentResponse.statusText}`);
-                          }
-                          
-                          const phrases = await contentResponse.json();
-                          
-                          const res = await fetch('/api/gallery', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              id: set.id,
-                              title: set.cleverTitle || set.name,
-                              description: set.specificTopics || '',
-                              phrases: phrases || [],
-                              author: userName,
-                              imageUrl: set.imageUrl || '',
-                              cardCount: set.phraseCount || 0,
-                              llmBrand: set.llmBrand || '',
-                              llmModel: set.llmModel || '',
-                              seriousnessLevel: set.seriousnessLevel,
-                              specificTopics: set.specificTopics,
-                            }),
-                          });
-                          if (!res.ok) throw new Error(await res.text());
-                          alert('Set published to gallery!');
-                        } catch (err: unknown) {
-                          alert('Failed to publish: ' + (err instanceof Error ? err.message : String(err)));
-                        } finally {
-                          setPublishingSetId(null);
-                        }
+                        handleOpenPublishModal(set); // Open the modal instead
                       }}
                     >
                       {/* Paper plane SVG icon */}
@@ -646,6 +677,18 @@ export function SetManagerModal({ isOpen, onClose }: {
               )}
             </div>
           </div>
+        )}
+
+        {/* --- Render Publish Confirmation Modal --- */}
+        {isPublishModalOpen && setBeingPublished && (
+          <PublishConfirmationModal
+            isOpen={isPublishModalOpen}
+            onClose={handleClosePublishModal}
+            onConfirm={handleConfirmPublish}
+            set={setBeingPublished}
+            defaultUsername={user?.username || user?.firstName || ''} // Pass default username
+            isPublishing={publishingSetId === setBeingPublished.id} // Pass loading state
+          />
         )}
       </div>
     </div>

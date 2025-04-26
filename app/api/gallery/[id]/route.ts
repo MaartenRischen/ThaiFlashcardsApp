@@ -30,7 +30,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { userId, sessionClaims } = await auth();
+    const { sessionClaims } = await auth();
     const email = sessionClaims?.email as string | undefined;
     if (email !== 'rischenme@gmail.com') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });

@@ -1,37 +1,55 @@
 import React, { useState } from 'react';
-import { Slider } from '../ui/slider';
 import Image from 'next/image';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+
+const styles = [
+  {
+    label: 'Serious & Practical',
+    value: 0,
+    image: 'A',
+    preview: {
+      label: 'Serious',
+      thai: 'ขอกาแฟร้อนหนึ่งแก้ว',
+      english: 'One hot coffee, please.',
+      mnemonic: 'Think of ordering coffee in a business meeting.'
+    }
+  },
+  {
+    label: 'Balanced',
+    value: 1,
+    image: 'B',
+    preview: {
+      label: 'Balanced',
+      thai: 'ขอกาแฟร้อนหนึ่งแก้ว',
+      english: 'One hot coffee, please.',
+      mnemonic: 'Picture yourself confidently ordering coffee with a friendly smile.'
+    }
+  },
+  {
+    label: 'Absolutely Ridiculous',
+    value: 2,
+    image: 'C',
+    preview: {
+      label: 'Ridiculous',
+      thai: 'ขอกาแฟร้อนหนึ่งแก้ว',
+      english: 'One hot coffee, please.',
+      mnemonic: 'Imagine a coffee-loving elephant doing a happy dance while ordering!'
+    }
+  }
+];
 
 export function ToneStep({ value, onNext, onBack }: { 
   value: number, 
   onNext: (tone: number) => void,
   onBack: () => void
 }) {
-  const [tone, setTone] = useState(value ?? 50);
+  // Map value to style index
+  const initialIndex = value <= 30 ? 0 : value >= 70 ? 2 : 1;
+  const [selected, setSelected] = useState<number | null>(initialIndex);
 
-  // Determine which image to show based on tone value
-  const getImageForTone = () => {
-    if (tone <= 30) return "A"; // Serious
-    if (tone >= 70) return "C"; // Playful
-    return "B"; // Balanced
-  };
+  const handleSelect = (idx: number) => setSelected(idx);
 
-  const preview = tone <= 30 ? {
-    label: "Serious",
-    thai: "ขอกาแฟร้อนหนึ่งแก้ว",
-    english: "One hot coffee, please.",
-    mnemonic: "Think of ordering coffee in a business meeting."
-  } : tone >= 70 ? {
-    label: "Ridiculous",
-    thai: "ขอกาแฟร้อนหนึ่งแก้ว",
-    english: "One hot coffee, please.",
-    mnemonic: "Imagine a coffee-loving elephant doing a happy dance while ordering!"
-  } : {
-    label: "Balanced",
-    thai: "ขอกาแฟร้อนหนึ่งแก้ว",
-    english: "One hot coffee, please.",
-    mnemonic: "Picture yourself confidently ordering coffee with a friendly smile."
-  };
+  const selectedStyle = selected !== null ? styles[selected] : styles[1];
 
   return (
     <div className="space-y-5 px-2">
@@ -40,47 +58,73 @@ export function ToneStep({ value, onNext, onBack }: {
           How would you like to learn?
         </h3>
         <p className="text-xs text-gray-400">
-          Choose between serious, practical mnemonics or fun, memorable ones.
+          Choose between serious, practical{' '}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="underline text-blue-300 hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+              >
+                mnemonics
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 bg-gray-800 text-white border-gray-700" side="top" align="center">
+              <div className="p-2">
+                <h4 className="font-semibold text-blue-400 mb-1">What's a mnemonic?</h4>
+                <p className="text-sm text-gray-200 mb-2">
+                  A mnemonic is a memory aid—a trick or story that helps you remember something more easily.
+                </p>
+                <p className="text-xs text-gray-400">
+                  The app's name, <span className="font-semibold text-yellow-300">Donkey Bridge</span>, is a literal translation of the Dutch word <span className="italic">"ezelsbruggetje"</span>, which means mnemonic!
+                </p>
+              </div>
+            </PopoverContent>
+          </Popover>
+          {' '}or fun, memorable ones.
         </p>
       </div>
 
       {/* Learning Style Image */}
       <div className="flex justify-center">
-        <div className="relative w-[340px] h-[220px] rounded-lg overflow-hidden border border-blue-900/30">
+        <div className="relative w-full max-w-[300px] h-[160px] rounded-lg overflow-hidden border border-blue-900/30">
           <Image
-            src={`/images/serious/${getImageForTone()}.png`}
-            alt={`${preview.label} learning style illustration`}
-            width={340}
-            height={220}
+            src={`/images/serious/${selectedStyle.image}.png`}
+            alt={`${selectedStyle.label} learning style illustration`}
+            fill
             className="object-cover"
           />
         </div>
       </div>
 
-      <div className="space-y-5">
-        <div className="flex items-center gap-4">
-          <span className="text-gray-400 text-xs w-20">Serious & Practical</span>
-          <Slider
-            value={[tone]}
-            onValueChange={([newTone]) => setTone(newTone)}
-            max={100}
-            step={1}
-            className="flex-1"
-          />
-          <span className="text-gray-400 text-xs w-20 text-right">Absolutely Ridiculous</span>
-        </div>
+      {/* Choice Buttons - horizontal */}
+      <div className="flex flex-row gap-3">
+        {styles.map((style, idx) => (
+          <button
+            key={style.label}
+            type="button"
+            onClick={() => handleSelect(idx)}
+            className={`flex-1 rounded-lg border-2 px-4 py-4 text-base font-semibold transition-all relative
+              ${selected === idx
+                ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
+                : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'}
+            `}
+          >
+            {style.label}
+          </button>
+        ))}
+      </div>
 
-        <div className="bg-[#1e1e1e] rounded-lg p-4 space-y-3 text-center">
-          <h4 className="text-sm font-medium text-white">
-            {preview.label} Style Example
-          </h4>
-          
-          <div className="space-y-2">
-            <p className="text-blue-400 text-base">{preview.thai}</p>
-            <p className="text-gray-300 text-sm">{preview.english}</p>
-            <div className="text-xs text-gray-500">
-              <span className="text-gray-400">Mnemonic:</span> {preview.mnemonic}
-            </div>
+      {/* Preview Example */}
+      <div className="bg-[#1e1e1e] rounded-lg p-4 space-y-3 text-center">
+        <h4 className="text-sm font-medium text-white">
+          {selectedStyle.preview.label} Style Example
+        </h4>
+        <div className="space-y-2">
+          <p className="text-blue-400 text-base">{selectedStyle.preview.thai}</p>
+          <p className="text-gray-300 text-sm">{selectedStyle.preview.english}</p>
+          <div className="text-xs text-gray-500">
+            <span className="text-gray-400">Mnemonic:</span> {selectedStyle.preview.mnemonic}
           </div>
         </div>
       </div>
@@ -94,7 +138,8 @@ export function ToneStep({ value, onNext, onBack }: {
         </button>
         <button
           className="neumorphic-button text-blue-400"
-          onClick={() => onNext(tone)}
+          onClick={() => selected !== null && onNext(selected === 0 ? 0 : selected === 2 ? 100 : 50)}
+          disabled={selected === null}
         >
           Next
         </button>

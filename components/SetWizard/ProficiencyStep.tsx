@@ -27,6 +27,11 @@ const proficiencyLevels = [
     level: 'Native/Fluent',
     value: 100,
     examples: 'Can understand Thai media and engage in complex conversations'
+  },
+  {
+    level: 'God Mode',
+    value: 200,
+    examples: ''
   }
 ];
 
@@ -43,36 +48,19 @@ export function ProficiencyStep({ value, onNext, onBack }: {
   // Find the level index based on the current value
   const initialLevelIndex = value?.levelEstimate 
     ? proficiencyLevels.findIndex(pl => pl.level === value.levelEstimate)
-    : 0;
-  
-  // Use level value for the slider
-  const [sliderValue, setSliderValue] = useState(
-    initialLevelIndex >= 0 ? proficiencyLevels[initialLevelIndex].value : 0
-  );
-  
-  // Derived active level based on slider value
-  const getActiveLevelIndex = () => {
-    // Get the closest level based on slider value
-    const closest = proficiencyLevels.reduce((prev, curr) => {
-      return (Math.abs(curr.value - sliderValue) < Math.abs(prev.value - sliderValue) ? curr : prev);
-    });
-    return proficiencyLevels.findIndex(pl => pl.level === closest.level);
-  };
-  
-  const activeLevelIndex = getActiveLevelIndex();
-  
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSliderValue(Number(e.target.value));
+    : 2; // Default to 'Intermediate' if not set
+
+  const [selectedIndex, setSelectedIndex] = useState(initialLevelIndex);
+
+  const handleSelect = (idx: number) => {
+    setSelectedIndex(idx);
   };
 
   const handleNext = () => {
-    // Get the selected level based on slider position
-    const selectedLevel = proficiencyLevels[activeLevelIndex];
-    
-    // Derive capabilities based on the selected level
+    if (selectedIndex < 0) return;
+    const selectedLevel = proficiencyLevels[selectedIndex];
     let capabilities: string[] = [];
-    
-    switch(activeLevelIndex) {
+    switch(selectedIndex) {
       case 1: // Basic Understanding
         capabilities = ['Basic greetings'];
         break;
@@ -90,12 +78,14 @@ export function ProficiencyStep({ value, onNext, onBack }: {
       default: // Complete Beginner
         capabilities = [];
     }
-    
     onNext({
       canDoSelections: capabilities,
       levelEstimate: selectedLevel.level
     });
   };
+
+  // Use selectedIndex for image and description, fallback to 0 if none selected
+  const activeLevelIndex = selectedIndex >= 0 ? selectedIndex : 0;
 
   return (
     <div className="space-y-6 px-2">
@@ -104,52 +94,49 @@ export function ProficiencyStep({ value, onNext, onBack }: {
           What is your Thai proficiency level?
         </h3>
         <p className="text-xs text-gray-400">
-          Slide to select your current level of Thai speaking and listening ability.
+          Tap your current level of Thai speaking and listening ability.
         </p>
       </div>
 
       {/* Proficiency Level Image */}
       <div className="flex justify-center">
-        <div className="relative w-[340px] h-[220px] rounded-lg overflow-hidden border border-blue-900/30">
+        <div className="relative w-full max-w-[300px] h-[160px] rounded-lg overflow-hidden border border-blue-900/30">
           <Image
             src={`/images/level/${activeLevelIndex + 1}.png`}
             alt={`${proficiencyLevels[activeLevelIndex].level} level illustration`}
-            width={340}
-            height={220}
+            fill
             className="object-cover"
           />
         </div>
       </div>
 
-      {/* Slider */}
-      <div className="space-y-5">
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={sliderValue}
-          onChange={handleSliderChange}
-          className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-        />
-        
-        {/* Labels */}
-        <div className="grid grid-cols-5 text-[0.6rem] text-gray-500">
-          {proficiencyLevels.map((level, index) => (
-            <div key={index} className="text-center">
-              {level.level}
-            </div>
-          ))}
+      {/* Choice Buttons with numbering and labels */}
+      <div className="flex flex-col gap-2 items-stretch">
+        <div className="flex justify-start mb-1">
+          <span className="text-xs text-gray-400 pl-2">Lowest</span>
         </div>
-      </div>
-
-      {/* Active level details */}
-      <div className="bg-blue-900/20 border border-blue-800/30 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-blue-400 mb-1">
-          {proficiencyLevels[activeLevelIndex].level}
-        </h4>
-        <p className="text-xs text-gray-300">
-          {proficiencyLevels[activeLevelIndex].examples}
-        </p>
+        {proficiencyLevels.map((level, idx) => (
+          <button
+            key={level.level}
+            type="button"
+            onClick={() => handleSelect(idx)}
+            className={`w-full flex items-center gap-3 rounded-lg border px-4 py-3 text-left transition-all font-medium
+              ${selectedIndex === idx
+                ? 'bg-blue-600/90 text-white border-blue-500 shadow-md scale-105'
+                : 'bg-[#1e1e1e] text-gray-200 border-blue-900/30 hover:bg-blue-900/30'}
+            `}
+          >
+            <span className={`flex items-center justify-center font-bold rounded-full w-7 h-7 text-base
+              ${selectedIndex === idx ? 'bg-blue-400 text-white' : 'bg-gray-800 text-blue-300 border border-blue-900/30'}`}>{idx + 1}</span>
+            <div>
+              <div className="text-base">{level.level}</div>
+              <div className="text-xs text-gray-400 mt-1">{level.examples}</div>
+            </div>
+          </button>
+        ))}
+        <div className="flex justify-end mt-1">
+          <span className="text-xs text-gray-400 pr-2">Highest</span>
+        </div>
       </div>
 
       <div className="flex justify-between pt-3">
@@ -162,6 +149,7 @@ export function ProficiencyStep({ value, onNext, onBack }: {
         <button
           className="neumorphic-button text-blue-400"
           onClick={handleNext}
+          disabled={selectedIndex < 0}
         >
           Next
         </button>

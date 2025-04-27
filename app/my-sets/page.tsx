@@ -194,6 +194,27 @@ export default function SetManagerPage() {
                 <div className="text-blue-400 text-sm font-medium mb-2 text-center">
                   {set.source === "default" ? "System Set" : "My Set"}
                 </div>
+
+                {/* Proficiency Level */}
+                {set.level && (
+                  <p className="text-xs text-blue-400/80 text-center mb-1">
+                    Proficiency: <span className="font-medium text-blue-300">
+                      {(() => {
+                        // Convert lowercase level to Title Case for display
+                        const level = set.level;
+                        switch(level) {
+                          case 'complete beginner': return 'Complete Beginner';
+                          case 'basic understanding': return 'Basic Understanding';
+                          case 'intermediate': return 'Intermediate';
+                          case 'advanced': return 'Advanced';
+                          case 'native/fluent': return 'Native/Fluent';
+                          case 'god mode': return 'God Mode';
+                          default: return level; // Fallback to whatever is stored
+                        }
+                      })()}
+                    </span>
+                  </p>
+                )}
               </div>
             </Link>
           ))}

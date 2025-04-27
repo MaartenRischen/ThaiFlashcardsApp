@@ -18,9 +18,18 @@ export function ReviewStep({ state, onConfirm, onBack }: {
         <h3 className="text-lg font-medium text-white">
           Almost Ready!
         </h3>
-        <p className="text-sm text-gray-400">
-          Here's your personalized learning plan.
-        </p>
+        <div className="text-gray-400 text-sm">
+          You&apos;re ready to start learning with:
+        </div>
+        <div className="text-gray-300 text-base">
+          {state.proficiency.canDoSelections.length} &quot;I can do&quot; goals selected
+        </div>
+        <div className="text-gray-300 text-base">
+          {state.scenarios.length} learning scenarios
+        </div>
+        <div className="text-gray-300 text-base">
+          Learning style: {getLearningStyleName()}
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -37,7 +46,7 @@ export function ReviewStep({ state, onConfirm, onBack }: {
         <div className="bg-[#1e1e1e]/50 rounded-lg p-3">
           <div className="flex justify-center items-baseline gap-2 mb-1">
             <h4 className="text-sm font-medium text-white">Selected Scenarios</h4>
-            <span className="text-xs text-gray-500">What you'll learn</span>
+            <span className="text-xs text-gray-500">What you&apos;ll learn</span>
           </div>
           <div className="flex flex-col items-center gap-1">
             {state.scenarios.map((scenario, index) => (
@@ -53,7 +62,7 @@ export function ReviewStep({ state, onConfirm, onBack }: {
         <div className="bg-[#1e1e1e]/50 rounded-lg p-3">
           <div className="flex justify-center items-baseline gap-2 mb-1">
             <h4 className="text-sm font-medium text-white">Learning Style</h4>
-            <span className="text-xs text-gray-500">How you'll learn</span>
+            <span className="text-xs text-gray-500">How you&apos;ll learn</span>
           </div>
           <div className="text-gray-300 text-sm font-medium text-center">{getLearningStyleName()}</div>
         </div>

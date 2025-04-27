@@ -160,8 +160,7 @@ export async function POST(request: Request) {
       const metaDataForStorage: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
         name: generationResult.cleverTitle || (isFallback ? 'Placeholder Set' : 'Custom Set'),
         cleverTitle: generationResult.cleverTitle,
-        // Convert to lowercase and assert the specific type
-        level: preferences.level.toLowerCase() as ProficiencyLevelLowercase,
+        level: preferences.level ? preferences.level.toLowerCase() as SetMetaData['level'] : undefined,
         specificTopics: preferences.specificTopics,
         // Use 'generated' for source, even for fallbacks, as they originate from a generation attempt
         source: 'generated',
@@ -350,7 +349,7 @@ export async function POST(request: Request) {
         cleverTitle: updatedMetadata?.cleverTitle || insertedRecord.cleverTitle || undefined,
         createdAt: updatedMetadata?.createdAt || insertedRecord.createdAt.toISOString(),
         phraseCount: phrasesToSave.length,
-        level: updatedMetadata?.level || insertedRecord.level as SetMetaData['level'] || undefined,
+        level: updatedMetadata?.level || (insertedRecord.level ? insertedRecord.level.toLowerCase() as SetMetaData['level'] : undefined),
         goals: updatedMetadata?.goals || insertedRecord.goals || [],
         specificTopics: updatedMetadata?.specificTopics || insertedRecord.specificTopics || undefined,
         source: updatedMetadata?.source || insertedRecord.source as SetMetaData['source'] || 'generated',

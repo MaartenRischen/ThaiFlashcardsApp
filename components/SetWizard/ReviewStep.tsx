@@ -23,15 +23,17 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
 
   // Get the learning style image based on tone value
   const getLearningStyleImage = () => {
-    if (state.tone <= 30) return "A"; // Serious
-    if (state.tone >= 70) return "C"; // Playful/Ridiculous
-    return "B"; // Balanced
+    // Use string comparison instead of numeric
+    if (state.tone === 'serious') return "A"; 
+    if (state.tone === 'absolutely ridiculous') return "C";
+    return "B"; // Default to Balanced
   };
 
   // Get the learning style name
   const getLearningStyleName = () => {
-    if (state.tone <= 30) return "Serious";
-    if (state.tone >= 70) return "Ridiculous";
+    // Use string comparison instead of numeric
+    if (state.tone === 'serious') return "Serious";
+    if (state.tone === 'absolutely ridiculous') return "Ridiculous";
     return "Balanced";
   };
 

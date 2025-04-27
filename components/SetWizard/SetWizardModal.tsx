@@ -5,6 +5,7 @@ import { ScenarioStep } from './ScenarioStep';
 import { ToneStep } from './ToneStep';
 import { ReviewStep } from './ReviewStep';
 import { GenerationStep } from './GenerationStep';
+import Image from 'next/image';
 
 // Import the specific type (adjust path if needed, or redefine here)
 // Assuming ProficiencyLevelString is defined/exported in ProficiencyStep
@@ -21,6 +22,54 @@ export interface SetWizardState {
   customGoal?: string;
   topics: string[];
   tone: number;
+}
+
+// Image Preloader Component
+function ImagePreloader() {
+  return (
+    <div className="hidden">
+      {/* Proficiency level images */}
+      {[...Array(6)].map((_, i) => (
+        <Image
+          key={`level-${i + 1}`}
+          src={`/images/level/${i + 1}.png`}
+          alt=""
+          width={300}
+          height={160}
+          priority
+        />
+      ))}
+      {/* Tone step images */}
+      {[...Array(10)].map((_, i) => (
+        <Image
+          key={`level2-${i + 1}`}
+          src={`/images/level2/${i + 1}.png`}
+          alt=""
+          width={300}
+          height={160}
+          priority
+        />
+      ))}
+      {/* Welcome step donkey image */}
+      <Image
+        key="donkey"
+        src="/images/donkeycards.png"
+        alt=""
+        width={300}
+        height={160}
+        priority
+      />
+      {/* Default set logo */}
+      <Image
+        key="default-set"
+        src="/images/default-set-logo.png"
+        alt=""
+        width={300}
+        height={160}
+        priority
+      />
+    </div>
+  );
 }
 
 function ProgressStepper({ step, totalSteps }: { step: number; totalSteps: number }) {
@@ -52,7 +101,7 @@ export function SetWizardModal({ onComplete, onClose }: {
     },
     scenarios: [],
     topics: [],
-    tone: 5, // Default to balanced (5)
+    tone: 1, // Default to serious & practical
   });
 
   // Show close button for all steps except generation (6)
@@ -147,6 +196,7 @@ export function SetWizardModal({ onComplete, onClose }: {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <ImagePreloader />
       <div className={`${modalWidth} w-full bg-[#1F1F1F] rounded-lg overflow-hidden shadow-xl border border-[#404040]`}>
         <div className="p-5 space-y-4">
           <div className="flex justify-between items-center relative">
@@ -161,7 +211,7 @@ export function SetWizardModal({ onComplete, onClose }: {
               </button>
             )}
             {/* Centered heading */}
-            <h2 className="text-lg font-medium text-[#BB86FC] w-full text-center">Make Your Own Cards</h2>
+            <h2 className="text-lg font-medium text-[#60A5FA] w-full text-center">Make Your Own Cards</h2>
           </div>
           {showProgressStepper && <ProgressStepper step={step} totalSteps={totalSteps} />}
           <div className="max-h-[75vh] overflow-y-auto pr-1">

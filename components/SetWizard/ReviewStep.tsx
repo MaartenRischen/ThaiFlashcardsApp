@@ -19,7 +19,7 @@ export function ReviewStep({ state, onConfirm, onBack }: {
           Almost Ready!
         </h3>
         <p className="text-sm text-gray-400">
-          Here&apos;s your personalized learning plan.
+          Here's your personalized learning plan.
         </p>
       </div>
 
@@ -34,51 +34,41 @@ export function ReviewStep({ state, onConfirm, onBack }: {
         </div>
 
         {/* Selected Scenarios Section */}
-        <div className="bg-[#2C2C2C] rounded-lg p-3">
+        <div className="bg-[#1e1e1e]/50 rounded-lg p-3">
           <div className="flex justify-center items-baseline gap-2 mb-1">
-            <h4 className="text-sm font-medium text-[#E0E0E0]">Selected Scenarios</h4>
-            <span className="text-xs text-[#BDBDBD]">What you&apos;ll learn</span>
+            <h4 className="text-sm font-medium text-white">Selected Scenarios</h4>
+            <span className="text-xs text-gray-500">What you'll learn</span>
           </div>
-          <div className="flex flex-col items-center space-y-1 text-center">
-            {state.scenarios.map(scenario => (
-              <div key={scenario} className="text-[#E0E0E0] text-sm flex items-center gap-2 justify-center">
-                <span className="text-[#BB86FC]">•</span>
-                {scenario}
+          <div className="flex flex-col items-center gap-1">
+            {state.scenarios.map((scenario, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#8AB4F8]"></span>
+                <span className="text-gray-300 text-sm">{scenario}</span>
               </div>
             ))}
-            {state.customGoal && (
-              <div className="text-[#BDBDBD] text-sm mt-1 italic">
-                + {state.customGoal}
-              </div>
-            )}
-            {!state.customGoal && state.scenarios.length === 0 && (
-              <div className="text-[#BDBDBD] text-sm italic">(Using custom instructions)</div>
-            )}
           </div>
         </div>
 
         {/* Learning Style Section */}
-        <div className="bg-[#2C2C2C] rounded-lg p-3">
+        <div className="bg-[#1e1e1e]/50 rounded-lg p-3">
           <div className="flex justify-center items-baseline gap-2 mb-1">
-            <h4 className="text-sm font-medium text-[#E0E0E0]">Learning Style</h4>
-            <span className="text-xs text-[#BDBDBD]">How you&apos;ll learn</span>
+            <h4 className="text-sm font-medium text-white">Learning Style</h4>
+            <span className="text-xs text-gray-500">How you'll learn</span>
           </div>
-          <div className="text-[#E0E0E0] text-sm font-medium text-center">
-            {getLearningStyleName()}
-          </div>
+          <div className="text-gray-300 text-sm font-medium text-center">{getLearningStyleName()}</div>
         </div>
       </div>
 
-      <div className="flex justify-center gap-3 pt-3">
+      <div className="flex justify-between pt-3">
         <button
-          className="neumorphic-button text-[#BB86FC]"
           onClick={onBack}
+          className="text-[#8AB4F8] neumorphic-button"
         >
           Back
         </button>
         <button
-          className="neumorphic-button text-[#BB86FC]"
           onClick={onConfirm}
+          className="text-[#8AB4F8] neumorphic-button"
         >
           Create My Set
         </button>

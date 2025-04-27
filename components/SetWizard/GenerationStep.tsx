@@ -36,7 +36,7 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
 
       const result = await generateCustomSet(
         {
-          level: state.proficiency.levelEstimate as any,
+          level: state.proficiency.levelEstimate,
           specificTopics,
           topicsToDiscuss,
           tone: state.tone,

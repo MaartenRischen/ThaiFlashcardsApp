@@ -1,4 +1,79 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+
+// --- Data Structure for Scenarios by Level ---
+const scenariosByLevel: Record<string, string[]> = {
+  "Complete Beginner": [
+    "Essential Greetings & Leave-takings (Polite)",
+    "Introducing Yourself (Simple)",
+    "Basic Numbers (1-100 & Zero)",
+    "Identifying Common Objects (Classroom/Home)",
+    "Basic Question Words & Simple Answers",
+    "Saying \"Thank You\" & \"Sorry/Excuse Me\" (Polite)",
+    "Basic Colors",
+    "Simple Commands & Requests (Polite)",
+  ],
+  "Basic Understanding": [
+    "Asking for & Giving Personal Information",
+    "Basic Shopping & Prices",
+    "Telling Time & Dates",
+    "Simple Directions & Locations",
+    "Ordering Simple Food & Drinks",
+    "Talking About Daily Routines (Simple Present)",
+    "Describing People & Things (Simple Adjectives)",
+    "Expressing Likes & Dislikes (Simple)",
+  ],
+  "Intermediate": [
+    "Making Travel Arrangements",
+    "Discussing Hobbies & Interests",
+    "Narrating Past Events (Simple Past)",
+    "Giving & Understanding More Complex Directions",
+    "Ordering a Full Meal & Making Specific Requests",
+    "Talking About Work & Study",
+    "Expressing Opinions & Feelings (Simple)",
+    "Understanding Basic Cultural Norms",
+  ],
+  "Advanced": [
+    "Discussing Current Events & News",
+    "Explaining Problems & Solutions",
+    "Talking About Thai Culture in Depth",
+    "Workplace Communication",
+    "Discussing Films, Books, or Music",
+    "Giving Advice & Making Recommendations",
+    "Understanding Different Registers",
+    "Narrating Complex Experiences",
+  ],
+  "Native/Fluent": [
+    "Analyzing Social & Political Issues in Thailand",
+    "Understanding Thai Literature & Arts",
+    "Advanced Workplace & Business Communication",
+    "Exploring Thai History & Belief Systems",
+    "Understanding Idioms & Colloquialisms",
+    "Discussing Hypothetical Situations & Speculation",
+    "Debating & Persuasion",
+    "Understanding Regional Dialects & Variations (Awareness)",
+  ],
+  "God Mode": [
+    "Specialized Academic/Professional Fields",
+    "Classical Thai Literature & Poetry",
+    "Advanced Linguistic Analysis of Thai",
+    "Thai Media Analysis & Critique",
+    "Translating & Interpreting Nuances",
+    "Mastering Thai Humor & Wordplay",
+    "Royal Thai Language (ราชาศัพท์ - Rachasap)",
+    "Contemporary Thai Sociolinguistics",
+  ]
+};
+
+// Mapping from proficiency estimate string to the keys used in scenariosByLevel
+const proficiencyLevelMap: Record<string, string> = {
+  'complete beginner': "Complete Beginner",
+  'basic understanding': "Basic Understanding",
+  'intermediate': "Intermediate",
+  'advanced': "Advanced",
+  'native/fluent': "Native/Fluent",
+  'god mode': "God Mode",
+};
+// --- End Data Structure ---
 
 // Reduced list of pre-made scenarios
 const scenarios = [
@@ -149,30 +224,45 @@ function getRandomWeirdScenarios(count: number, exclude: string[] = []) {
   return selected;
 }
 
-export function ScenarioStep({ value, onNext, onBack }: { 
-  value: { scenarios: string[]; customGoal?: string }, 
-  onNext: (data: { scenarios: string[]; customGoal?: string }) => void,
-  onBack: () => void
-}) {
-  // Map old 'Custom Scenario' to new name for backward compatibility
-  const initialScenarios = value?.scenarios?.map(s => 
+// --- Update Props Interface ---
+interface ScenarioStepProps {
+  selectedScenarios: string[];
+  customGoal?: string;
+  proficiencyLevelEstimate: string; // Added prop
+  onNext: (data: { scenarios: string[]; customGoal?: string }) => void;
+  onBack: () => void;
+}
+// --- End Update Props Interface ---
+
+export function ScenarioStep({ selectedScenarios: initialSelectedScenarios, customGoal: initialCustomGoal, proficiencyLevelEstimate, onNext, onBack }: ScenarioStepProps) { // Destructure new props
+  
+  // --- Get Level-Appropriate Scenarios ---
+  const levelKey = proficiencyLevelMap[proficiencyLevelEstimate?.toLowerCase()] || "Complete Beginner";
+  const levelScenarios = useMemo(() => scenariosByLevel[levelKey] || scenariosByLevel["Complete Beginner"], [levelKey]);
+  // --- End Get Level-Appropriate Scenarios ---
+
+  // Map old 'Custom Scenario' to new name for backward compatibility in initial state
+  const initialScenarios = initialSelectedScenarios?.map(s => 
     s === 'Custom Scenario' ? CUSTOM_SCENARIO : s
   ) || [];
   
   const [selected, setSelected] = useState<string[]>(initialScenarios);
-  const [custom, setCustom] = useState(value?.customGoal || "");
+  const [custom, setCustom] = useState(initialCustomGoal || ""); // Use initialCustomGoal
   const [customTags, setCustomTags] = useState<string[]>([]);
-  // Store the two weird scenarios for this session
   const [weirdScenarios, setWeirdScenarios] = useState<string[]>([]);
 
   useEffect(() => {
     // Only pick new weird scenarios if not already set
     if (weirdScenarios.length === 0) {
-      const picked = getRandomWeirdScenarios(2, scenarios);
+      // Exclude level scenarios as well when picking weird ones
+      const picked = getRandomWeirdScenarios(2, levelScenarios); 
       setWeirdScenarios(picked);
     }
-    // eslint-disable-next-line
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [levelScenarios]); // Depend on levelScenarios so weird ones change if level changes back/forth
+
+  // Combine level scenarios and weird scenarios for display
+  const allDisplayScenarios = useMemo(() => [...levelScenarios, ...weirdScenarios], [levelScenarios, weirdScenarios]);
 
   const handleToggle = (scenario: string) => {
     setSelected(sel =>
@@ -196,6 +286,7 @@ export function ScenarioStep({ value, onNext, onBack }: {
           setSelected(prev => [...prev, newTag]);
         }
       }
+      // Automatically select "Tell Us!" if a custom tag is added
       if (!selected.includes(CUSTOM_SCENARIO)) {
         setSelected(prev => [...prev, CUSTOM_SCENARIO]);
       }
@@ -211,21 +302,25 @@ export function ScenarioStep({ value, onNext, onBack }: {
   };
 
   const handleNext = () => {
-    const mappedScenarios = selected.map(s => 
-      s === CUSTOM_SCENARIO ? 'Custom Scenario' : s
+    // Map "Tell Us!" back to "Custom Scenario" for internal logic if needed,
+    // but filter it out if no custom tags were actually added.
+    // Also filter out any of the bizarre scenarios from the final list sent onwards.
+    const finalSelectedScenarios = selected.filter(s => 
+        s !== CUSTOM_SCENARIO && 
+        !weirdScenarios.includes(s) && 
+        !customTags.includes(s) // Don't send custom tags as scenarios
     );
-    const filteredScenarios = mappedScenarios.filter(s => 
-      !customTags.includes(s)
-    );
-    let customGoalText = custom;
-    if (selected.includes(CUSTOM_SCENARIO) && customTags.length > 0) {
-      const customText = custom.trim() ? `${custom.trim()}. ` : '';
-      const tagsText = `Selected topics: ${customTags.join(', ')}`;
-      customGoalText = customText + tagsText;
+
+    let finalCustomGoal: string | undefined = undefined;
+    if (selected.includes(CUSTOM_SCENARIO) && (custom.trim() || customTags.length > 0)) {
+        const customText = custom.trim() ? `${custom.trim()}. ` : '';
+        const tagsText = customTags.length > 0 ? `Selected topics: ${customTags.join(', ')}` : '';
+        finalCustomGoal = (customText + tagsText).trim() || undefined; // Ensure it's not empty string
     }
+    
     onNext({ 
-      scenarios: filteredScenarios, 
-      customGoal: selected.includes(CUSTOM_SCENARIO) ? customGoalText : undefined 
+      scenarios: finalSelectedScenarios, 
+      customGoal: finalCustomGoal // Use the potentially combined custom goal text
     });
   };
 
@@ -239,113 +334,94 @@ export function ScenarioStep({ value, onNext, onBack }: {
         <p className="text-xs text-gray-400">Choose one or more scenarios that interest you.</p>
       </div>
 
-      {/* Selected tags/chips */}
-      {selected.length > 0 && (
-        <div className="flex flex-wrap gap-2 justify-center mb-2">
-          {selected.filter(s => s !== CUSTOM_SCENARIO && ![...scenarios, ...weirdScenarios].includes(s)).map((tag) => (
-            <span key={tag} className="flex items-center bg-green-700/80 text-white text-xs rounded-full px-3 py-1">
-              {tag}
-              <button
-                onClick={() => handleRemoveCustomTag(tag)}
-                className="ml-2 text-white hover:text-red-300 focus:outline-none"
-                aria-label="Remove"
-              >
-                ×
-              </button>
-            </span>
-          ))}
-          {selected.filter(s => [...scenarios, ...weirdScenarios].includes(s)).map((tag) => (
-            <span key={tag} className="flex items-center bg-blue-700/80 text-white text-xs rounded-full px-3 py-1">
-              {tag}
-              <button
-                onClick={() => handleToggle(tag)}
-                className="ml-2 text-white hover:text-red-300 focus:outline-none"
-                aria-label="Remove"
-              >
-                ×
-              </button>
-            </span>
-          ))}
+      {/* "Tell Us!" Button */}
+      <button
+        onClick={() => handleToggle(CUSTOM_SCENARIO)}
+        className={`w-full rounded-lg p-4 text-left transition-all border-2 ${
+          selected.includes(CUSTOM_SCENARIO)
+            ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
+            : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'
+        }`}
+      >
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="font-semibold">{CUSTOM_SCENARIO}</div>
+            <div className="text-xs mt-1">Get a personalized set tailored exactly to your needs</div>
+          </div>
+          <span className="text-xs font-semibold bg-blue-500/80 text-white px-2 py-0.5 rounded-full">RECOMMENDED</span>
+        </div>
+      </button>
+
+      {/* Custom Goal Input Area (only shows if "Tell Us!" is selected) */}
+      {selected.includes(CUSTOM_SCENARIO) && (
+        <div className="bg-[#1e1e1e]/50 rounded-xl p-4 space-y-3">
+          <label htmlFor="customGoal" className="block text-sm font-medium text-gray-300">
+            Tell us what you want to learn (optional focus)
+          </label>
+          <input
+            id="customGoal"
+            type="text"
+            value={custom}
+            onChange={(e) => setCustom(e.target.value)}
+            onKeyPress={handleCustomKeyPress}
+            placeholder="e.g., focus on street food vendors"
+            className="w-full bg-gray-900/50 border border-gray-700 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+           <button 
+            onClick={handleAddCustomTag}
+            className="text-xs bg-green-700 hover:bg-green-600 text-white px-3 py-1 rounded-full ml-2"
+          >
+            Add as Topic
+          </button>
+          <p className="text-xs text-gray-400">
+            Optionally add specific topics you want included (press Enter or click Add). We&apos;ll use these to refine your set.
+          </p>
+          {/* Display added custom tags */}
+          {customTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 pt-1">
+              {customTags.map(tag => (
+                 <span key={tag} className="flex items-center bg-green-700/80 text-white text-xs rounded-full px-2 py-0.5">
+                  {tag}
+                  <button onClick={() => handleRemoveCustomTag(tag)} className="ml-1.5 text-green-200 hover:text-red-300"> &times;</button>
+                 </span>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {/* Recommended option - highlighted */}
-      <div className="mb-3">
-        <button
-          onClick={() => handleToggle(CUSTOM_SCENARIO)}
-          className={`w-full text-left px-4 py-4 rounded-lg text-base font-semibold transition-all border-2 relative
-            ${selected.includes(CUSTOM_SCENARIO)
-              ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
-              : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'}
-          `}
-        >
-          <span className="absolute top-0 right-0 bg-blue-500 text-[10px] px-2 py-0.5 rounded-bl-md font-medium">
-            RECOMMENDED
-          </span>
-          <div className="mt-1 text-center">{CUSTOM_SCENARIO}</div>
-          <div className="text-xs mt-1 opacity-80 text-center font-normal">
-            Get a personalized set tailored exactly to your needs
-          </div>
-          {selected.includes(CUSTOM_SCENARIO) && (
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 bg-white text-blue-600 rounded-full w-6 h-6 flex items-center justify-center font-bold shadow">✓</span>
-          )}
-        </button>
-        {selected.includes(CUSTOM_SCENARIO) && (
-          <div className="mt-3 flex gap-2">
-            <input
-              type="text"
-              className="flex-1 bg-[#1e1e1e] border border-gray-800 rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="E.g., Talking to locals at the beach, ordering street food..."
-              value={custom}
-              onChange={e => setCustom(e.target.value)}
-              onKeyPress={handleCustomKeyPress}
-            />
-            <button
-              onClick={handleAddCustomTag}
-              className="bg-blue-600/70 hover:bg-blue-600/90 text-white px-3 rounded-md text-xs font-medium"
-            >
-              Add
-            </button>
-          </div>
-        )}
+      <div className="text-center text-sm text-gray-400 pt-2">Or choose from our pre-made scenarios:</div>
+
+      {/* Pre-made Scenario Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {allDisplayScenarios.map(scenario => ( // Use the combined list
+          <button
+            key={scenario}
+            onClick={() => handleToggle(scenario)}
+            className={`rounded-lg p-4 text-left transition-all border-2 ${
+              selected.includes(scenario)
+                ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
+                : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'
+            }`}
+            // Disable selecting pre-made if "Tell Us!" is selected
+            disabled={selected.includes(CUSTOM_SCENARIO) && scenario !== CUSTOM_SCENARIO && !weirdScenarios.includes(scenario)}
+          >
+            {scenario}
+          </button>
+        ))}
       </div>
 
-      <div>
-        <div className="text-xs text-gray-400 pb-2 text-center font-medium">
-          Or choose from our pre-made scenarios:
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {[...scenarios, ...weirdScenarios].map(scenario => (
-            <button
-              key={scenario}
-              type="button"
-              onClick={() => handleToggle(scenario)}
-              className={`flex items-center justify-between px-4 py-3 rounded-lg text-base font-medium transition-all border-2
-                ${selected.includes(scenario)
-                  ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
-                  : 'bg-[#1e1e1e] text-gray-200 border-blue-900/30 hover:bg-blue-900/30'}
-              `}
-            >
-              <span>{scenario}</span>
-              {selected.includes(scenario) && (
-                <span className="bg-white text-blue-600 rounded-full w-6 h-6 flex items-center justify-center font-bold shadow ml-2">✓</span>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex justify-between pt-4">
+      {/* Navigation Buttons */}
+      <div className="flex justify-between pt-3">
         <button
           onClick={onBack}
-          className="rounded-full bg-[#1e1e1e] hover:bg-[#2a2a2a] text-gray-400 px-4 py-1.5 text-xs"
+          className="neumorphic-button text-blue-400"
         >
           Back
         </button>
         <button
-          className={`rounded-full ${selected.length === 0 ? 'bg-blue-600/50 cursor-not-allowed' : 'bg-blue-600/90 hover:bg-blue-600'} text-white px-4 py-1.5 text-xs`}
+          className="neumorphic-button text-blue-400"
           onClick={handleNext}
-          disabled={selected.length === 0}
         >
           Next
         </button>

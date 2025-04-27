@@ -7,7 +7,7 @@ import { ttsService } from './lib/tts-service';
 import AdminSettings from './components/AdminSettings';
 import { INITIAL_PHRASES, type Phrase, type ExampleSentence } from './data/phrases';
 import { useSet } from './context/SetContext';
-import { Phrase as GeneratorPhrase } from './lib/set-generator';
+import { Phrase as GeneratorPhrase, GeneratePromptOptions } from './lib/set-generator';
 import { SetMetaData, SetProgress } from './lib/storage';
 import {
   Popover,
@@ -980,7 +980,7 @@ export default function ThaiFlashcards() {
     const totalCount = 10; // Hardcoded for now, get from wizardState later
     
     // Create simple preferences object for test generation
-    const preferences = {
+    const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
       level: 'intermediate' as 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode',
       specificTopics: undefined,
       tone: 'balanced' as 'serious' | 'balanced' | 'absolutely ridiculous',
@@ -1469,9 +1469,9 @@ export default function ThaiFlashcards() {
             // like "complete beginner", "God Mode", etc.
             const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
               level: wizardState.proficiency.levelEstimate, // Correctly access the nested property
-              specificTopics: wizardState.topics.join(', ') || undefined, // Join topics array
+              specificTopics: wizardState.topics.length > 0 ? wizardState.topics.join(', ') : undefined, // Join topics array
               tone: wizardState.tone,
-              topicsToDiscuss: wizardState.scenarios, // Use scenarios array
+              topicsToDiscuss: wizardState.scenarios.length > 0 ? wizardState.scenarios.join(', ') : undefined, // Join scenarios
             };
             
             console.log('SetWizard Completion: Calling /api/generate-set with preferences:', preferences, 'count:', totalCount);

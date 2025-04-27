@@ -1,7 +1,6 @@
 import React from 'react';
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
 import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal } from 'lucide-react';
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
@@ -33,9 +32,6 @@ export function FlashcardHeader({
     setImageUrl = '/images/defaultnew.png';
   }
   setImageUrl = setImageUrl || '/images/defaultnew.png';
-  
-  const [showSettings, setShowSettings] = useState(false);
-  const [showImage, setShowImage] = useState(false);
 
   const router = useRouter();
 

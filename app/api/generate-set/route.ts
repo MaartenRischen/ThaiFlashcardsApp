@@ -215,8 +215,9 @@ export async function POST(request: Request) {
       if (!setImageUrl) {
         try {
           console.log('Image processing: Generating our own image');
-          const topicDescription = generationResult.cleverTitle || 'language learning';
-          const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}. Use vibrant colors that are friendly and engaging. IMPORTANT: Absolutely NO text, words, or letters should appear anywhere in the image.`;
+          const topicDescription = generationResult.cleverTitle || 'general language learning themes';
+          // NEW PROMPT: Emphasize humor and exaggeration, using topic as inspiration
+          const imagePrompt = `Create a HILARIOUS and EXAGGERATED cartoon illustration featuring a comical donkey and a slightly absurd bridge. The scene should be FUNNY and inspired by the theme: '${topicDescription}'. Prioritize humor and comedy above all else. Use vibrant, eye-catching colors. CRITICAL: Absolutely NO text, words, or letters anywhere in the image.`;
           
           console.log(`API Route: Generating set cover image with prompt:`, imagePrompt);
           console.log('Image processing: About to call generateImage');

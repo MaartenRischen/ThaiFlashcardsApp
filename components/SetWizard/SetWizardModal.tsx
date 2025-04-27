@@ -131,7 +131,6 @@ export function SetWizardModal({ onComplete, onClose }: {
       key="review"
       state={state}
       onConfirm={() => setStep(5)}
-      onEdit={setStep}
       onBack={() => setStep(3)}
     />,
     <GenerationStep

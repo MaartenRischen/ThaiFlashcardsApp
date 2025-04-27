@@ -23,7 +23,7 @@ export interface ExampleSentence {
 }
 
 export interface GeneratePromptOptions {
-  level: 'complete beginner' | 'basic understanding' | 'intermediate' | 'advanced' | 'native/fluent' | 'god mode';
+  level: 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode';
   specificTopics?: string;
   count: number;
   existingPhrases?: string[];

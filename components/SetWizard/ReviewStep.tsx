@@ -1,33 +1,33 @@
 import React from 'react';
 import { SetWizardState } from './SetWizardModal';
-import Image from 'next/image';
+// import Image from 'next/image'; // REMOVE unused import
 
-export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
+export function ReviewStep({ state, onConfirm, /* onEdit, */ onBack }: { // REMOVE unused onEdit prop
   state: SetWizardState,
   onConfirm: () => void,
-  onEdit: (step: number) => void,
+  // onEdit: (step: number) => void, // REMOVE unused onEdit prop type
   onBack: () => void,
 }) {
-  // Get the proficiency level index (0-5) for image selection, including God Mode
-  const getProficiencyIndex = () => {
-    const levelMap = {
-      'Complete Beginner': 0,
-      'Basic Understanding': 1,
-      'Intermediate': 2,
-      'Advanced': 3,
-      'Native/Fluent': 4,
-      'God Mode': 5,
-    };
-    return levelMap[state.proficiency.levelEstimate as keyof typeof levelMap] ?? 0;
-  };
+  // REMOVE unused getProficiencyIndex function
+  // const getProficiencyIndex = () => {
+  //   const levelMap = {
+  //     'Complete Beginner': 0,
+  //     'Basic Understanding': 1,
+  //     'Intermediate': 2,
+  //     'Advanced': 3,
+  //     'Native/Fluent': 4,
+  //     'God Mode': 5,
+  //   };
+  //   return levelMap[state.proficiency.levelEstimate as keyof typeof levelMap] ?? 0;
+  // };
 
-  // Get the learning style image based on tone value
-  const getLearningStyleImage = () => {
-    // Use string comparison instead of numeric
-    if (state.tone === 'serious') return "A"; 
-    if (state.tone === 'absolutely ridiculous') return "C";
-    return "B"; // Default to Balanced
-  };
+  // REMOVE unused getLearningStyleImage function
+  // const getLearningStyleImage = () => {
+  //   // Use string comparison instead of numeric
+  //   if (state.tone === 'serious') return "A"; 
+  //   if (state.tone === 'absolutely ridiculous') return "C";
+  //   return "B"; // Default to Balanced
+  // };
 
   // Get the learning style name
   const getLearningStyleName = () => {

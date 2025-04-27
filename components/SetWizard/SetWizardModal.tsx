@@ -6,11 +6,16 @@ import { ToneStep } from './ToneStep';
 import { ReviewStep } from './ReviewStep';
 import { GenerationStep } from './GenerationStep';
 
+// Import the specific type (adjust path if needed, or redefine here)
+// Assuming ProficiencyLevelString is defined/exported in ProficiencyStep
+// If not, redefine it here:
+type ProficiencyLevelString = 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode';
+
 // Wizard state interface
 export interface SetWizardState {
   proficiency: {
     canDoSelections: string[];
-    levelEstimate: string;
+    levelEstimate: ProficiencyLevelString;
   };
   scenarios: string[];
   customGoal?: string;
@@ -43,7 +48,7 @@ export function SetWizardModal({ onComplete, onClose }: {
   const [state, setState] = useState<SetWizardState>({
     proficiency: {
       canDoSelections: [],
-      levelEstimate: '',
+      levelEstimate: 'Intermediate',
     },
     scenarios: [],
     topics: [],

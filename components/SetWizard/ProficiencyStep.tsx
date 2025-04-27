@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 
-// Define proficiency levels with matching capabilities
-const proficiencyLevels = [
+// Define the specific proficiency level type
+type ProficiencyLevelString = 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode';
+
+// Define proficiency levels with matching capabilities and specific type
+const proficiencyLevels: { level: ProficiencyLevelString; value: number; examples: string }[] = [
   {
     level: 'Complete Beginner',
     value: 0,
@@ -31,13 +34,13 @@ const proficiencyLevels = [
   {
     level: 'God Mode',
     value: 200,
-    examples: ''
+    examples: '' // God Mode doesn't need examples here
   }
 ];
 
 interface ProficiencyValue {
   canDoSelections: string[];
-  levelEstimate: string;
+  levelEstimate: ProficiencyLevelString; // Use the specific type
 }
 
 export function ProficiencyStep({ value, onNext, onBack }: { 
@@ -48,7 +51,7 @@ export function ProficiencyStep({ value, onNext, onBack }: {
   // Find the level index based on the current value
   const initialLevelIndex = value?.levelEstimate 
     ? proficiencyLevels.findIndex(pl => pl.level === value.levelEstimate)
-    : 2; // Default to 'Intermediate' if not set
+    : 2; // Default to 'Intermediate' index if not set
 
   const [selectedIndex, setSelectedIndex] = useState(initialLevelIndex);
 

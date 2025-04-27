@@ -88,18 +88,18 @@ export function ProgressDashboard({ stats, onSelectCard }: ProgressDashboardProp
         {/* Reviews Card */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>Review Schedule</CardTitle>
-            <CardDescription>Cards due for review</CardDescription>
+            <CardTitle className="text-[#E0E0E0]">Review Schedule</CardTitle>
+            <CardDescription className="text-[#BDBDBD]">Cards due for review</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-blue-900/30 rounded-lg p-3 text-center">
-                <p className="text-2xl font-bold text-blue-400">{stats.cardsToReviewToday}</p>
-                <p className="text-xs text-gray-400">Due Today</p>
+              <div className="bg-[#2C2C2C] border border-[#404040] rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-[#BB86FC]">{stats.cardsToReviewToday}</p>
+                <p className="text-xs text-[#BDBDBD]">Due Today</p>
               </div>
-              <div className="bg-purple-900/30 rounded-lg p-3 text-center">
-                <p className="text-2xl font-bold text-purple-400">{stats.cardsToReview - stats.cardsToReviewToday}</p>
-                <p className="text-xs text-gray-400">Due Soon</p>
+              <div className="bg-[#2C2C2C] border border-[#404040] rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-[#BB86FC]">{stats.cardsToReview - stats.cardsToReviewToday}</p>
+                <p className="text-xs text-[#BDBDBD]">Due Soon</p>
               </div>
             </div>
             

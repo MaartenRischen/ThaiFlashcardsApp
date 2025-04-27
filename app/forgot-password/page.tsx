@@ -52,26 +52,26 @@ export default function ForgotPasswordPage() {
     <div className="container flex items-center justify-center min-h-screen py-12">
       <div className="mx-auto space-y-6 w-full max-w-md">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">Reset Password</h1>
-          <p className="text-gray-500 dark:text-gray-400">
+          <h1 className="text-3xl font-bold text-[#E0E0E0]">Reset Password</h1>
+          <p className="text-[#BDBDBD]">
             Enter your email address to receive a password reset link.
           </p>
         </div>
 
         {message && (
-          <div className="p-3 bg-green-50 border border-green-200 rounded-md text-green-700">
+          <div className="p-3 bg-[#2C2C2C] border border-[#404040] rounded-md text-[#BB86FC]">
             {message}
           </div>
         )}
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600">
+          <div className="p-3 bg-[#2C2C2C] border border-red-900 rounded-md text-red-400">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-[#E0E0E0]">Email</Label>
             <Input
               id="email"
               name="email"
@@ -81,6 +81,7 @@ export default function ForgotPasswordPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={isLoading}
+              className="bg-[#3C3C3C] text-[#E0E0E0] border-[#404040] focus:border-[#BB86FC] focus:ring-[#BB86FC]"
             />
           </div>
 
@@ -90,9 +91,9 @@ export default function ForgotPasswordPage() {
         </form>
         
         <div className="text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-[#BDBDBD]">
               Remember your password?{" "}
-              <Link href="/login" className="text-primary hover:underline">
+              <Link href="/login" className="text-[#BB86FC] hover:underline">
                 Back to Login
               </Link>
             </p>

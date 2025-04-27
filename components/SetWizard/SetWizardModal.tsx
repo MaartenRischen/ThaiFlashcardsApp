@@ -147,21 +147,21 @@ export function SetWizardModal({ onComplete, onClose }: {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className={`${modalWidth} w-full bg-[#1a1a1a] rounded-lg overflow-hidden shadow-xl border border-gray-800/30`}>
+      <div className={`${modalWidth} w-full bg-[#1F1F1F] rounded-lg overflow-hidden shadow-xl border border-[#404040]`}>
         <div className="p-5 space-y-4">
           <div className="flex justify-between items-center relative">
             {/* Close button on the right */}
             {showCloseButton && (
               <button 
                 onClick={onClose}
-                className="absolute right-0 w-6 h-6 flex items-center justify-center rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition-colors text-gray-400"
+                className="absolute right-0 w-6 h-6 flex items-center justify-center rounded-full bg-[#2C2C2C] hover:bg-[#3C3C3C] transition-colors text-[#BDBDBD]"
                 aria-label="Close"
               >
                 <span className="text-sm">&times;</span>
               </button>
             )}
             {/* Centered heading */}
-            <h2 className="text-lg font-medium text-blue-400 w-full text-center">Make Your Own Cards</h2>
+            <h2 className="text-lg font-medium text-[#BB86FC] w-full text-center">Make Your Own Cards</h2>
           </div>
           {showProgressStepper && <ProgressStepper step={step} totalSteps={totalSteps} />}
           <div className="max-h-[75vh] overflow-y-auto pr-1">

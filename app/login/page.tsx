@@ -121,19 +121,19 @@ export default function LoginPage() {
         {isRecoveryMode ? (
           <>
             <div className="space-y-2 text-center">
-              <h1 className="text-3xl font-bold">Set New Password</h1>
-              <p className="text-gray-500 dark:text-gray-400">
+              <h1 className="text-3xl font-bold text-[#E0E0E0]">Set New Password</h1>
+              <p className="text-[#BDBDBD]">
                 Enter and confirm your new password below.
               </p>
             </div>
 
             {message && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md text-blue-700">
+              <div className="p-3 bg-[#2C2C2C] border border-[#404040] rounded-md text-[#BB86FC]">
                 {message}
               </div>
             )}
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600">
+              <div className="p-3 bg-[#2C2C2C] border border-red-900 rounded-md text-red-400">
                 {error}
               </div>
             )}
@@ -177,26 +177,26 @@ export default function LoginPage() {
         ) : (
           <>
             <div className="space-y-2 text-center">
-              <h1 className="text-3xl font-bold">Login</h1>
-              <p className="text-gray-500 dark:text-gray-400">
+              <h1 className="text-3xl font-bold text-[#E0E0E0]">Login</h1>
+              <p className="text-[#BDBDBD]">
                 Enter your credentials to access your account
               </p>
             </div>
 
             {message && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-md text-green-700">
+              <div className="p-3 bg-[#2C2C2C] border border-[#404040] rounded-md text-[#BB86FC]">
                 {message}
               </div>
             )}
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600">
+              <div className="p-3 bg-[#2C2C2C] border border-red-900 rounded-md text-red-400">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-[#E0E0E0]">Email</Label>
                 <Input
                   id="email"
                   name="email"
@@ -206,13 +206,14 @@ export default function LoginPage() {
                   onChange={handleLoginChange}
                   required
                   disabled={isLoading}
+                  className="bg-[#3C3C3C] text-[#E0E0E0] border-[#404040] focus:border-[#BB86FC] focus:ring-[#BB86FC]"
                 />
               </div>
               
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                  <Label htmlFor="password" className="text-[#E0E0E0]">Password</Label>
+                  <Link href="/forgot-password" className="text-sm text-[#BB86FC] hover:underline">
                     Forgot password?
                   </Link>
                 </div>
@@ -225,6 +226,7 @@ export default function LoginPage() {
                   onChange={handleLoginChange}
                   required
                   disabled={isLoading}
+                  className="bg-[#3C3C3C] text-[#E0E0E0] border-[#404040] focus:border-[#BB86FC] focus:ring-[#BB86FC]"
                 />
               </div>
               

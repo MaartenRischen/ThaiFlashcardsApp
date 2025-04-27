@@ -101,8 +101,8 @@ export function CombinedOptionsModal({
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-6 flex-shrink-0">
-          <h2 className="text-xl font-bold text-blue-400">Options</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+          <h2 className="text-xl font-bold text-[#E0E0E0]">Options</h2>
+          <button onClick={onClose} className="text-[#BDBDBD] hover:text-[#E0E0E0] text-2xl">&times;</button>
         </div>
 
         {/* Scrollable Content */}
@@ -110,11 +110,11 @@ export function CombinedOptionsModal({
         
           {/* App Options Section */}
           <section>
-            <h3 className="text-lg font-semibold text-gray-200 mb-3 border-b border-gray-700 pb-1">App Options</h3>
+            <h3 className="text-lg font-semibold text-[#A9C4FC] mb-3 border-b border-[#404040] pb-1">App Options</h3>
             <div className="space-y-4">
               {/* Dark Mode */}
               <div className="flex items-center justify-between">
-                <label htmlFor="darkModeToggleApp" className="text-gray-300">Dark Mode</label>
+                <label htmlFor="darkModeToggleApp" className="text-[#E0E0E0]">Dark Mode</label>
                 <Switch
                   id="darkModeToggleApp"
                   checked={isDarkMode}
@@ -124,35 +124,35 @@ export function CombinedOptionsModal({
               </div>
               {/* Voice Gender */}
               <div className="flex items-center justify-between">
-                 <label htmlFor="genderToggleApp" className="text-gray-300">Voice Gender (Krap/Ka)</label>
+                 <label htmlFor="genderToggleApp" className="text-[#E0E0E0]">Voice Gender (Krap/Ka)</label>
                  <div className="flex items-center">
-                   <span className="mr-2 text-sm font-medium text-gray-400">Female</span>
+                   <span className="mr-2 text-sm font-medium text-[#BDBDBD]">Female</span>
                     <Switch
                       id="genderToggleApp"
                       checked={isMale}
                       onCheckedChange={setIsMale}
                       className="neumorphic-switch"
                     />
-                   <span className="ml-2 text-sm font-medium text-gray-400">Male</span>
+                   <span className="ml-2 text-sm font-medium text-[#BDBDBD]">Male</span>
                  </div>
               </div>
               {/* Polite Mode */}
               <div className="flex items-center justify-between">
-                 <label htmlFor="politeToggleApp" className="text-gray-300">Polite Mode (Add ครับ/ค่ะ)</label>
+                 <label htmlFor="politeToggleApp" className="text-[#E0E0E0]">Polite Mode (Add ครับ/ค่ะ)</label>
                  <div className="flex items-center">
-                    <span className="mr-2 text-sm font-medium text-gray-400">Casual</span>
+                    <span className="mr-2 text-sm font-medium text-[#BDBDBD]">Casual</span>
                      <Switch
                        id="politeToggleApp"
                        checked={isPoliteMode}
                        onCheckedChange={setIsPoliteMode}
                        className="neumorphic-switch"
                      />
-                    <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
+                    <span className="ml-2 text-sm font-medium text-[#BDBDBD]">Polite</span>
                  </div>
               </div>
               {/* Autoplay Audio */}
               <div className="flex items-center justify-between">
-                <label htmlFor="autoplayToggleApp" className="text-gray-300">Autoplay Audio on Reveal</label>
+                <label htmlFor="autoplayToggleApp" className="text-[#E0E0E0]">Autoplay Audio on Reveal</label>
                 <Switch
                   id="autoplayToggleApp"
                   checked={autoplay}
@@ -165,44 +165,44 @@ export function CombinedOptionsModal({
 
           {/* Set Options Section */}
           <section>
-            <h3 className="text-lg font-semibold text-gray-200 mb-3 border-b border-gray-700 pb-1">Current Set Options</h3>
-            <div className="bg-gray-800 p-4 rounded-lg text-center mb-4">
-              <p className="text-sm text-gray-400 mb-1">Current Set:</p>
-              <p className="text-lg text-white font-semibold">
+            <h3 className="text-lg font-semibold text-[#A9C4FC] mb-3 border-b border-[#404040] pb-1">Current Set Options</h3>
+            <div className="bg-[#2C2C2C] p-4 rounded-lg text-center mb-4">
+              <p className="text-sm text-[#BDBDBD] mb-1">Current Set:</p>
+              <p className="text-lg text-[#E0E0E0] font-semibold">
                 {currentSetName}
               </p>
             </div>
             <div className="space-y-3">
                 <button
                   onClick={() => { onClose(); onOpenSetManager(); }}
-                  className="neumorphic-button w-full text-blue-400"
+                  className="neumorphic-button w-full text-[#A9C4FC]"
                 >
                   Open My Sets...
                 </button>
                 <button
                   onClick={onExportSet}
-                  className="neumorphic-button w-full text-green-400"
+                  className="neumorphic-button w-full text-[#A9C4FC]"
                   disabled={isLoading || isDefaultSet} 
                 >
                   Export This Set
                 </button>
                 <button
-                  onClick={onResetSetProgress} // Call the passed function
-                  className="neumorphic-button w-full text-yellow-400"
+                  onClick={onResetSetProgress}
+                  className="neumorphic-button w-full text-[#A9C4FC]"
                   disabled={isLoading || isDefaultSet}
                 >
                   Reset Progress for This Set
                 </button>
-                  <button
-                    onClick={onDeleteSet} // Call the passed function
-                    className="neumorphic-button w-full text-red-400"
-                    disabled={isLoading || isDefaultSet}
-                  >
-                    Delete This Set
-                  </button>
+                <button
+                  onClick={onDeleteSet}
+                  className="neumorphic-button w-full text-red-400"
+                  disabled={isLoading || isDefaultSet}
+                >
+                  Delete This Set
+                </button>
                 <button
                   onClick={handleShare}
-                  className="neumorphic-button w-full text-purple-400"
+                  className="neumorphic-button w-full text-[#A9C4FC]"
                   disabled={isLoading || isDefaultSet || shareLoading}
                 >
                   {shareLoading ? 'Generating Link...' : 'Share This Set'}
@@ -216,27 +216,27 @@ export function CombinedOptionsModal({
         {/* Share Dialog */}
         {showShare && shareUrl && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60" onClick={() => setShowShare(false)}>
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg max-w-md w-full" onClick={e => e.stopPropagation()}>
-              <h3 className="text-lg font-bold mb-2 text-purple-300">Share This Set</h3>
-              <p className="text-gray-300 mb-2">Anyone with this link can view and import your set:</p>
-              <div className="flex items-center bg-gray-800 rounded px-2 py-1 mb-3">
+            <div className="bg-[#1F1F1F] p-6 rounded-lg shadow-lg max-w-md w-full border border-[#404040]" onClick={e => e.stopPropagation()}>
+              <h3 className="text-lg font-bold mb-2 text-[#A9C4FC]">Share This Set</h3>
+              <p className="text-[#E0E0E0] mb-2">Anyone with this link can view and import your set:</p>
+              <div className="flex items-center bg-[#2C2C2C] rounded px-2 py-1 mb-3 border border-[#404040]">
                 <input
                   type="text"
                   value={shareUrl}
                   readOnly
-                  className="flex-1 bg-transparent text-white outline-none text-sm"
+                  className="flex-1 bg-transparent text-[#E0E0E0] outline-none text-sm"
                   onFocus={e => e.target.select()}
                 />
-                <button onClick={handleCopy} className="ml-2 px-2 py-1 text-xs bg-purple-700 text-white rounded hover:bg-purple-600">Copy</button>
+                <button onClick={handleCopy} className="ml-2 px-2 py-1 text-xs bg-[#A9C4FC] text-[#121212] rounded hover:bg-[#A9C4FC]/80">Copy</button>
               </div>
-              <button onClick={() => setShowShare(false)} className="mt-2 neumorphic-button text-sm text-gray-400">Close</button>
+              <button onClick={() => setShowShare(false)} className="mt-2 neumorphic-button text-sm text-[#BDBDBD]">Close</button>
             </div>
           </div>
         )}
 
-        {/* Footer (optional, maybe for a main close button) */}
-        <div className="mt-6 pt-4 border-t border-gray-700 flex justify-end flex-shrink-0">
-           <button onClick={onClose} className="neumorphic-button text-sm text-gray-400">Close</button>
+        {/* Footer */}
+        <div className="mt-6 pt-4 border-t border-[#404040] flex justify-end flex-shrink-0">
+           <button onClick={onClose} className="neumorphic-button text-sm text-[#BDBDBD]">Close</button>
         </div>
 
       </div>
@@ -275,36 +275,36 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="neumorphic max-w-lg w-full p-6 bg-[#1f1f1f] max-h-[85vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6 flex-shrink-0">
-          <h2 className="text-xl font-bold text-blue-400">Settings</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+          <h2 className="text-xl font-bold text-[#E0E0E0]">Settings</h2>
+          <button onClick={onClose} className="text-[#BDBDBD] hover:text-[#E0E0E0] text-2xl">&times;</button>
         </div>
         <div className="overflow-y-auto pr-2 flex-grow space-y-6">
           <section>
-            <h3 className="text-lg font-semibold text-blue-400 mb-4">App Settings</h3>
+            <h3 className="text-lg font-semibold text-[#A9C4FC] mb-4">App Settings</h3>
             <div className="grid grid-cols-[1fr_auto] gap-y-4 gap-x-6 items-center">
-              <label htmlFor="genderToggleApp" className="text-gray-300">Voice/Particle Gender</label>
+              <label htmlFor="genderToggleApp" className="text-[#E0E0E0]">Voice/Particle Gender</label>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-400">Female (Ka)</span>
+                <span className="text-sm font-medium text-[#BDBDBD]">Female (Ka)</span>
                 <Switch id="genderToggleApp" checked={isMale} onCheckedChange={setIsMale} />
-                <span className="text-sm font-medium text-gray-400">Male (Krap)</span>
+                <span className="text-sm font-medium text-[#BDBDBD]">Male (Krap)</span>
               </div>
-              <label htmlFor="politeToggleApp" className="text-gray-300">Politeness Particles</label>
+              <label htmlFor="politeToggleApp" className="text-[#E0E0E0]">Politeness Particles</label>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-400">Casual</span>
+                <span className="text-sm font-medium text-[#BDBDBD]">Casual</span>
                 <Switch id="politeToggleApp" checked={isPoliteMode} onCheckedChange={setIsPoliteMode} />
-                <span className="text-sm font-medium text-gray-400">Polite</span>
+                <span className="text-sm font-medium text-[#BDBDBD]">Polite</span>
               </div>
-              <label htmlFor="autoplayToggleApp" className="text-gray-300">Autoplay Voice</label>
+              <label htmlFor="autoplayToggleApp" className="text-[#E0E0E0]">Autoplay Voice</label>
               <Switch id="autoplayToggleApp" checked={autoplay} onCheckedChange={setAutoplay} />
-              <label htmlFor="darkModeToggleApp" className="text-gray-300">Dark Mode</label>
+              <label htmlFor="darkModeToggleApp" className="text-[#E0E0E0]">Dark Mode</label>
               <Switch id="darkModeToggleApp" checked={isDarkMode} onCheckedChange={toggleDarkMode} />
             </div>
           </section>
           <div className="mt-10 flex flex-col gap-2">
-            <button onClick={handleFactoryResetPreferences} className="w-full border border-yellow-400 text-yellow-400 rounded py-2 text-sm font-semibold hover:bg-yellow-400 hover:text-black transition flex items-center justify-center gap-2 bg-transparent">
+            <button onClick={handleFactoryResetPreferences} className="w-full border border-[#A9C4FC] text-[#A9C4FC] rounded py-2 text-sm font-semibold hover:bg-[#A9C4FC] hover:text-[#121212] transition flex items-center justify-center gap-2 bg-transparent">
               <span aria-hidden="true">⚠️</span> Factory Reset (Preferences)
             </button>
-            <button onClick={handleFactoryResetFull} className="w-full border border-red-400 text-red-400 rounded py-2 text-sm font-semibold hover:bg-red-400 hover:text-black transition flex items-center justify-center gap-2 bg-transparent">
+            <button onClick={handleFactoryResetFull} className="w-full border border-red-400 text-red-400 rounded py-2 text-sm font-semibold hover:bg-red-400 hover:text-[#121212] transition flex items-center justify-center gap-2 bg-transparent">
               <span aria-hidden="true">⚠️</span> Factory Reset (Full App + Sets)
             </button>
           </div>
@@ -502,8 +502,8 @@ export function SetManagerModal({ isOpen, onClose }: {
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="neumorphic max-w-5xl w-full p-6 bg-[#1f1f1f] max-h-[90vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6 flex-shrink-0">
-          <h2 className="text-xl font-bold text-blue-400">My Sets</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+          <h2 className="text-xl font-bold text-[#E0E0E0]">My Sets</h2>
+          <button onClick={onClose} className="text-[#BDBDBD] hover:text-[#E0E0E0] text-2xl">&times;</button>
         </div>
         <div className="flex justify-end gap-2 mb-4">
           <button 
@@ -532,7 +532,7 @@ export function SetManagerModal({ isOpen, onClose }: {
             return (
               <div
                 key={set.id}
-                className="relative bg-gray-900 rounded-xl p-3 flex flex-col shadow-lg border border-gray-800 cursor-pointer hover:ring-2 hover:ring-blue-400 transition"
+                className="relative bg-gray-900 rounded-xl p-3 flex flex-col shadow-lg border border-gray-800 cursor-pointer hover:ring-2 hover:ring-[#A9C4FC] transition"
                 onClick={async () => {
                   if (set.id !== activeSetId) {
                     await switchSet(set.id);
@@ -543,7 +543,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                 {/* Checkbox for bulk actions */}
                 <input
                   type="checkbox"
-                  className="absolute top-3 right-3 w-5 h-5 accent-blue-500 z-10"
+                  className="absolute top-3 right-3 w-5 h-5 accent-[#A9C4FC] z-10"
                   disabled={isDefault || bulkLoading}
                   checked={checked}
                   onClick={e => e.stopPropagation()}
@@ -553,7 +553,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                   }}
                 />
                 {/* Set Image */}
-                <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-2 bg-gray-800">
+                <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-2 bg-[#2C2C2C]">
                   <Image
                     src={imgUrl}
                     alt={set.cleverTitle || set.name}
@@ -577,8 +577,8 @@ export function SetManagerModal({ isOpen, onClose }: {
                 
                 {/* ADDED: Proficiency and Seriousness */}
                 <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">
-                  {set.level && <span>Level: <span className="font-medium text-indigo-300">{set.level}</span></span>}
-                  {set.seriousnessLevel !== undefined && <span>Tone: <span className="font-medium text-purple-300">{set.seriousnessLevel}/10</span></span>}
+                  {set.level && <span>Level: <span className="font-medium text-[#A9C4FC]">{set.level}</span></span>}
+                  {set.seriousnessLevel !== undefined && <span>Tone: <span className="font-medium text-[#A9C4FC]">{set.seriousnessLevel}/10</span></span>}
                 </div>
                 
                 {/* Phrase Count - moved lower */}
@@ -589,7 +589,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                   {/* Publish icon button - MODIFIED onClick */}
                   {!isDefault && (
                     <button
-                      className={`p-1.5 rounded-full bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold transition flex items-center justify-center${publishingSetId === set.id ? ' opacity-50 cursor-not-allowed' : ''}`}
+                      className={`p-1.5 rounded-full bg-[#A9C4FC] hover:bg-[#A9C4FC]/80 text-[#121212] text-xs font-semibold transition flex items-center justify-center${publishingSetId === set.id ? ' opacity-50 cursor-not-allowed' : ''}`}
                       title="Publish to Gallery"
                       disabled={publishingSetId === set.id} // Still disable if publishing
                       onClick={async e => {
@@ -632,7 +632,7 @@ export function SetManagerModal({ isOpen, onClose }: {
           <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={() => setCardsModalSetId(null)}>
             <div className="bg-gray-900 rounded-xl p-4 max-w-md w-full max-h-[80vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
               <button className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl" onClick={() => setCardsModalSetId(null)}>&times;</button>
-              <h3 className="text-lg font-bold text-blue-300 mb-3">Cards in Set</h3>
+              <h3 className="text-lg font-bold text-[#A9C4FC] mb-3">Cards in Set</h3>
               {cardsModalLoading ? (
                 <div className="text-center text-gray-400">Loading...</div>
               ) : (
@@ -654,28 +654,47 @@ export function SetManagerModal({ isOpen, onClose }: {
                     </div>
                   </div>
                   {/* Cards List */}
-                  <ul className="divide-y divide-gray-700">
+                  <div className="bg-[#1a1b26] rounded-lg overflow-hidden">
                     {cardsModalPhrases.map((phrase, idx) => (
-                      <li
+                      <div
                         key={idx}
-                        className="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-800 rounded px-2"
                         onClick={() => handlePhraseClick(cardsModalSetId, idx)}
+                        className="cursor-pointer border-b border-gray-700/50 last:border-b-0 hover:bg-[#1f2937]"
                       >
-                        <div className="flex-1">
-                          <div className="font-semibold text-white truncate">{phrase.english}</div>
-                          <div className="text-sm text-gray-400 truncate">{phrase.thai}</div>
+                        <div className="flex p-4 items-center gap-3">
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <p className="text-[15px] text-white break-words" style={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              wordBreak: 'break-word',
+                              lineHeight: '1.4'
+                            }}>
+                              {phrase.english}
+                            </p>
+                            <p className="text-[13px] text-gray-400 mt-1 truncate">
+                              {phrase.thai}
+                            </p>
+                          </div>
+                          <div className="flex-shrink-0 ml-2">
+                            <div
+                              className="px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap text-center"
+                              style={{
+                                backgroundColor: getCardStatus(cardsModalProgress, idx) === 'Easy' ? '#22c55e' :
+                                  getCardStatus(cardsModalProgress, idx) === 'Correct' ? '#3b82f6' :
+                                    getCardStatus(cardsModalProgress, idx) === 'Wrong' ? '#ef4444' :
+                                      '#6b7280',
+                                minWidth: '80px'
+                              }}
+                            >
+                              {getCardStatus(cardsModalProgress, idx)}
+                            </div>
+                          </div>
                         </div>
-                        <span className="ml-3 text-xs px-2 py-1 rounded-full font-bold"
-                          style={{
-                            backgroundColor: getCardStatus(cardsModalProgress, idx) === 'Easy' ? '#22c55e' : getCardStatus(cardsModalProgress, idx) === 'Correct' ? '#3b82f6' : getCardStatus(cardsModalProgress, idx) === 'Wrong' ? '#ef4444' : '#6b7280',
-                            color: 'white',
-                          }}
-                        >
-                          {getCardStatus(cardsModalProgress, idx)}
-                        </span>
-                      </li>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </>
               )}
             </div>

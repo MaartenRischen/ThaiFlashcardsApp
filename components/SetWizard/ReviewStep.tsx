@@ -34,36 +34,36 @@ export function ReviewStep({ state, onConfirm, onBack }: {
         </div>
 
         {/* Selected Scenarios Section */}
-        <div className="bg-[#1e1e1e]/50 rounded-lg p-3">
+        <div className="bg-[#2C2C2C] rounded-lg p-3">
           <div className="flex justify-center items-baseline gap-2 mb-1">
-            <h4 className="text-sm font-medium text-white">Selected Scenarios</h4>
-            <span className="text-xs text-gray-500">What you&apos;ll learn</span>
+            <h4 className="text-sm font-medium text-[#E0E0E0]">Selected Scenarios</h4>
+            <span className="text-xs text-[#BDBDBD]">What you&apos;ll learn</span>
           </div>
           <div className="flex flex-col items-center space-y-1 text-center">
             {state.scenarios.map(scenario => (
-              <div key={scenario} className="text-gray-300 text-sm flex items-center gap-2 justify-center">
-                <span className="text-blue-400/80">•</span>
+              <div key={scenario} className="text-[#E0E0E0] text-sm flex items-center gap-2 justify-center">
+                <span className="text-[#BB86FC]">•</span>
                 {scenario}
               </div>
             ))}
             {state.customGoal && (
-              <div className="text-gray-400 text-sm mt-1 italic">
+              <div className="text-[#BDBDBD] text-sm mt-1 italic">
                 + {state.customGoal}
               </div>
             )}
             {!state.customGoal && state.scenarios.length === 0 && (
-              <div className="text-gray-500 text-sm italic">(Using custom instructions)</div>
+              <div className="text-[#BDBDBD] text-sm italic">(Using custom instructions)</div>
             )}
           </div>
         </div>
 
         {/* Learning Style Section */}
-        <div className="bg-[#1e1e1e]/50 rounded-lg p-3">
+        <div className="bg-[#2C2C2C] rounded-lg p-3">
           <div className="flex justify-center items-baseline gap-2 mb-1">
-            <h4 className="text-sm font-medium text-white">Learning Style</h4>
-            <span className="text-xs text-gray-500">How you&apos;ll learn</span>
+            <h4 className="text-sm font-medium text-[#E0E0E0]">Learning Style</h4>
+            <span className="text-xs text-[#BDBDBD]">How you&apos;ll learn</span>
           </div>
-          <div className="text-gray-300 text-sm font-medium text-center">
+          <div className="text-[#E0E0E0] text-sm font-medium text-center">
             {getLearningStyleName()}
           </div>
         </div>
@@ -71,13 +71,13 @@ export function ReviewStep({ state, onConfirm, onBack }: {
 
       <div className="flex justify-center gap-3 pt-3">
         <button
-          className="neumorphic-button text-blue-400"
+          className="neumorphic-button text-[#BB86FC]"
           onClick={onBack}
         >
           Back
         </button>
         <button
-          className="neumorphic-button text-blue-400"
+          className="neumorphic-button text-[#BB86FC]"
           onClick={onConfirm}
         >
           Create My Set

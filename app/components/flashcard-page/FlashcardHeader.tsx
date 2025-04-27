@@ -34,26 +34,25 @@ export function FlashcardHeader({
   }
   setImageUrl = setImageUrl || '/images/defaultnew.png';
   
-  const [showShare, setShowShare] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showImage, setShowImage] = useState(false);
 
   const router = useRouter();
 
   return (
-    <div className="bg-[#111] border-b border-[#333] flex flex-col">
+    <div className="bg-[#1F1F1F] border-b border-[#404040] flex flex-col">
       {/* Full-width Ideogram set image (16:9 aspect ratio) */}
-      <div className="w-full flex items-center justify-center py-3 relative mt-6">
-        <div className="w-full max-w-2xl aspect-[16/9] rounded-lg overflow-hidden relative">
+      <div className="w-full flex items-center justify-center py-2 relative mt-2 bg-[#121212]">
+        <div className="w-full max-w-lg aspect-[16/9] rounded-xl overflow-hidden relative border border-[#404040] bg-[#2C2C2C]">
           {/* Overlay (Top) */}
           <div
             className="absolute top-0 left-0 right-0 z-20 flex flex-col items-center pointer-events-none"
-            style={{ paddingTop: '8px' }}
+            style={{ paddingTop: '4px' }}
           >
             <div
-              className="bg-black bg-opacity-30 rounded-none px-0 py-1 text-white text-lg font-semibold shadow-none border-b border-white border-opacity-10 w-full max-w-2xl mx-auto text-center"
+              className="bg-[#1F1F1F]/90 backdrop-blur-sm px-0 py-0.5 text-[#E0E0E0] text-base font-semibold shadow-none border-b border-[#404040] w-full max-w-2xl mx-auto text-center"
               style={{
-                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
                 letterSpacing: '0.04em',
-                backdropFilter: 'blur(1px)',
                 maxWidth: '100%',
                 textAlign: 'center',
                 fontWeight: 600,
@@ -77,17 +76,15 @@ export function FlashcardHeader({
               target.src = '/images/defaultnew.png';
             }}
           />
-          {/* Set Title Overlay at Bottom (move outside top overlay) */}
+          {/* Set Title Overlay at Bottom */}
           <div
             className="absolute bottom-0 left-0 right-0 z-30 flex flex-col items-center pointer-events-none"
-            style={{ paddingBottom: '8px' }}
+            style={{ paddingBottom: '4px' }}
           >
             <div
-              className="bg-black bg-opacity-40 px-2 py-1 text-white text-sm font-semibold shadow-none border-t border-white border-opacity-10 w-full max-w-2xl mx-auto text-center"
+              className="bg-[#1F1F1F]/90 backdrop-blur-sm px-2 py-0.5 text-[#E0E0E0] text-xs font-semibold shadow-none border-t border-[#404040] w-full max-w-2xl mx-auto text-center"
               style={{
-                textShadow: '0 1px 4px rgba(0,0,0,0.5)',
                 letterSpacing: '0.02em',
-                backdropFilter: 'blur(1px)',
                 maxWidth: '100%',
                 textAlign: 'center',
                 fontWeight: 600,
@@ -100,108 +97,88 @@ export function FlashcardHeader({
           </div>
         </div>
       </div>
-      {/* Content column - with all the buttons */}
-      <div className="flex flex-col w-full">
-        {/* Line 2: All action buttons in a single row, always full width */}
-        <div className="px-2 py-2 w-full">
-          <div className="flex flex-row items-center w-full justify-between gap-x-2">
-            {/* Cards */}
-            <div className="flex flex-col items-center">
+      {/* Navigation Buttons */}
+      <div className="px-4 py-3 w-full bg-[#121212]">
+        <div className="flex flex-row items-center w-full justify-between gap-x-3">
+          {/* Create! */}
+          <div className="flex flex-col items-center">
+            <button
+              onClick={onOpenSetWizard}
+              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d4a3d] text-[#22c55e] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(34,197,94,0.15)] before:pointer-events-none"
+              style={{
+                boxShadow: '0 0 20px rgba(34, 197, 94, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
+              }}
+              title="Create!"
+              aria-label="Create!"
+            >
+              <Plus size={28} />
+            </button>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Create!</span>
+          </div>
+          {/* Gallery */}
+          <div className="flex flex-col items-center">
+            <button
+              onClick={() => router.push('/gallery')}
+              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#BB86FC] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(187,134,252,0.15)] before:pointer-events-none"
+              style={{
+                boxShadow: '0 0 20px rgba(187, 134, 252, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
+              }}
+              title="User Gallery"
+              aria-label="User Gallery"
+            >
+              <GalleryHorizontal />
+            </button>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">User Gallery</span>
+          </div>
+          {/* Set Manager */}
+          <div className="flex flex-col items-center">
+            <button
+              onClick={onOpenSetManager}
+              className="neumorphic-icon-button text-xl rounded-xl"
+              title="My Sets"
+              aria-label="My Sets"
+            >
+              <Grid />
+            </button>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">My Sets</span>
+          </div>
+          {/* Cards */}
+          <div className="flex flex-col items-center">
             <button
               onClick={onOpenCards}
-              className="neumorphic-icon-button text-xl text-white"
+              className="neumorphic-icon-button text-xl rounded-xl"
               title="Cards"
               aria-label="Cards"
             >
               <Layers />
             </button>
-              <span className="block text-xs text-gray-200 mt-1 text-center">Progress</span>
-            </div>
-            {/* Set Manager */}
-            <div className="flex flex-col items-center">
-            <button
-              onClick={onOpenSetManager}
-              className="neumorphic-icon-button text-xl text-white"
-                title="My Sets"
-                aria-label="My Sets"
-            >
-              <Grid />
-            </button>
-              <span className="block text-xs text-gray-200 mt-1 text-center">My Sets</span>
-            </div>
-            {/* Gallery */}
-            <div className="flex flex-col items-center">
-            <button
-                onClick={() => router.push('/gallery')}
-                className="neumorphic-icon-button text-xl text-blue-400 shadow-[0_0_10px_2px_#3B82F6] border border-blue-400"
-                title="User Gallery"
-                aria-label="User Gallery"
-            >
-                <GalleryHorizontal />
-            </button>
-              <span className="block text-xs text-blue-400 mt-1 text-center">User Gallery</span>
-            </div>
-            {/* Create Set! */}
-            <div className="flex flex-col items-center">
-            <button
-              onClick={onOpenSetWizard}
-                className="neumorphic-icon-button text-xl text-green-300 shadow-[0_0_10px_#10B981]"
-                title="Create"
-                aria-label="Create"
-            >
-                <Plus size={28} />
-            </button>
-              <span className="block text-xs text-green-300 mt-1 text-center">Create</span>
-            </div>
-            {/* Settings */}
-            <div className="flex flex-col items-center">
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Progress</span>
+          </div>
+          {/* Settings */}
+          <div className="flex flex-col items-center">
             <button
               onClick={onOpenSettings}
-              className="neumorphic-icon-button text-xl text-white"
+              className="neumorphic-icon-button text-xl rounded-xl"
               title="Settings"
               aria-label="Settings"
             >
               <Settings />
             </button>
-              <span className="block text-xs text-gray-200 mt-1 text-center">Settings</span>
-            </div>
-            {/* Help */}
-            <div className="flex flex-col items-center">
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Settings</span>
+          </div>
+          {/* Help */}
+          <div className="flex flex-col items-center">
             <button
               onClick={() => setShowHowItWorks(true)}
-              className="neumorphic-icon-button text-xl text-white"
-                title="Help"
-                aria-label="Help"
+              className="neumorphic-icon-button text-xl rounded-xl"
+              title="Help"
+              aria-label="Help"
             >
               <HelpCircle />
             </button>
-              <span className="block text-xs text-gray-200 mt-1 text-center">Help</span>
-            </div>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Help</span>
           </div>
         </div>
-        {/* Share Dialog */}
-        {showShare && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60" onClick={() => setShowShare(false)}>
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg max-w-md w-full" onClick={e => e.stopPropagation()}>
-              <h3 className="text-lg font-bold mb-2 text-purple-300">Share This Set</h3>
-              <p className="text-gray-300 mb-2">Anyone with this link can view and import your set:</p>
-              <div className="flex items-center bg-gray-800 rounded px-2 py-1 mb-3">
-                <input
-                  type="text"
-                  readOnly
-                  className="flex-1 bg-transparent text-white outline-none text-sm"
-                  onFocus={e => e.target.select()}
-                />
-                <button onClick={() => {
-                  const urlToCopy = window.location.href; // Placeholder: copy current page URL?
-                  navigator.clipboard.writeText(urlToCopy);
-                  alert('URL copied! (Placeholder)');
-                }} className="ml-2 px-2 py-1 text-xs bg-purple-700 text-white rounded hover:bg-purple-600">Copy</button>
-              </div>
-              <button onClick={() => setShowShare(false)} className="mt-2 neumorphic-button text-sm text-gray-400">Close</button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

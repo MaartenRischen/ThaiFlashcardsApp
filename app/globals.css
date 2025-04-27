@@ -4,6 +4,158 @@
 @tailwind utilities;
 
 :root {
+  --background: #121212;
+  --foreground: #E0E0E0;
+  --card-bg: #2C2C2C;
+  --button-bg: #3C3C3C;
+  --button-hover: #4C4C4C;
+  --text: #E0E0E0;
+  --text-secondary: #BDBDBD;
+  --border: #404040;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --highlight-color: rgba(255, 255, 255, 0.05);
+  --accent-color: #BB86FC;
+}
+
+@layer base {
+  body {
+    @apply bg-[#121212] text-[#E0E0E0];
+  }
+}
+
+@layer components {
+  /* Header Bar */
+  .header-section {
+    @apply bg-[#1F1F1F] border-b border-[#404040] text-[#E0E0E0];
+  }
+
+  /* Main Content Area */
+  .main-content {
+    @apply bg-[#121212] min-h-screen pb-8;
+  }
+
+  /* Navigation Buttons */
+  .neumorphic-icon-button {
+    @apply bg-[#3C3C3C] text-[#BDBDBD] rounded-xl p-3 transition-all duration-500 border border-[#404040];
+  }
+
+  .neumorphic-icon-button:hover {
+    @apply bg-[#4C4C4C];
+    transform: translateY(1px);
+  }
+
+  /* Remove all specific button shadow styles to prevent conflicts */
+  .neumorphic-icon-button[title="Create!"],
+  .neumorphic-icon-button[title="Create!"]:hover,
+  .neumorphic-icon-button[title="User Gallery"],
+  .neumorphic-icon-button[title="User Gallery"]:hover {
+    box-shadow: none;
+  }
+
+  /* Flashcard Container */
+  .flashcard-container {
+    @apply bg-[#2C2C2C] text-[#E0E0E0] rounded-lg p-4 mt-4 mx-4 border border-[#404040];
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  /* SRS Buttons */
+  .neumorphic-button {
+    @apply px-4 py-2 bg-[#3C3C3C] text-[#E0E0E0] rounded-full transition-all border border-[#404040];
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .neumorphic-button:hover {
+    @apply bg-[#4C4C4C];
+    transform: translateY(1px);
+  }
+
+  .neumorphic-button.wrong {
+    @apply bg-red-900 border-red-800 text-[#E0E0E0];
+  }
+
+  .neumorphic-button.correct {
+    @apply bg-[#4CAF50] border-[#45A049] text-white;
+  }
+
+  .neumorphic-button.easy {
+    @apply bg-green-900 border-green-800 text-[#E0E0E0];
+  }
+
+  /* Toggle Controls Area */
+  .toggle-area {
+    @apply bg-[#2C2C2C] text-[#E0E0E0] rounded-lg p-4 mt-4 border border-[#404040];
+  }
+
+  .toggle-switch {
+    @apply bg-[#3C3C3C] border-[#404040] relative transition-all duration-300 ease-in-out;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .toggle-switch:hover {
+    @apply bg-[#454545];
+  }
+
+  .toggle-switch[data-state="checked"] {
+    @apply bg-[#8AB4F8];
+    box-shadow: 0 0 8px rgba(138, 180, 248, 0.4);
+  }
+
+  .toggle-switch[data-state="checked"]:hover {
+    @apply bg-[#9BBFF8];
+    box-shadow: 0 0 12px rgba(138, 180, 248, 0.5);
+  }
+
+  .toggle-switch::after {
+    content: '';
+    @apply absolute top-0.5 left-0.5 w-5 h-5 bg-[#E0E0E0] rounded-full transition-transform duration-200 ease-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .toggle-switch[data-state="checked"]::after {
+    transform: translateX(100%);
+    @apply bg-white;
+  }
+
+  /* Card Styles */
+  .neumorphic {
+    @apply bg-[#2C2C2C] rounded-lg border border-[#404040];
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  /* Input Styles */
+  .neumorphic-input {
+    @apply w-full px-4 py-2 bg-[#3C3C3C] text-[#E0E0E0] rounded-lg border border-[#404040] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-transparent;
+  }
+
+  /* Animation keyframes */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Animation classes */
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease forwards;
+  }
+
+  .animate-slideUp {
+    animation: slideUp 0.5s ease forwards;
+  }
+}
+
+/* Dark mode overrides if needed */
+.dark {
   --background: #1a1a1a;
   --foreground: #ffffff;
   --card-bg: #2a2a2a;
@@ -14,202 +166,6 @@
   --border: #333333;
   --shadow-color: rgba(0, 0, 0, 0.5);
   --highlight-color: rgba(255, 255, 255, 0.07);
-}
-
-@layer components {
-  .neumorphic {
-    @apply bg-[#2a2a2a] rounded-2xl;
-    box-shadow: 
-      8px 8px 16px var(--shadow-color),
-      -8px -8px 16px var(--highlight-color);
-  }
-
-  .neumorphic-button {
-    @apply px-4 py-2 bg-[#2a2a2a] text-white rounded-full transition-all;
-    box-shadow: 
-      5px 5px 10px var(--shadow-color),
-      -5px -5px 10px var(--highlight-color);
-  }
-
-  .neumorphic-button:hover {
-    @apply bg-[#2a2a2a];
-    box-shadow: 
-      3px 3px 6px var(--shadow-color),
-      -3px -3px 6px var(--highlight-color);
-    transform: translateY(1px);
-  }
-
-  .neumorphic-button:active {
-    box-shadow: inset 
-      2px 2px 4px var(--shadow-color),
-      inset -2px -2px 4px var(--highlight-color);
-  }
-
-  .neumorphic-button:disabled {
-    @apply opacity-60 cursor-not-allowed;
-    box-shadow: 
-      3px 3px 6px var(--shadow-color),
-      -3px -3px 6px var(--highlight-color);
-  }
-
-  .neumorphic-input {
-    @apply w-full px-4 py-2 bg-[#2a2a2a] text-white rounded-full focus:outline-none transition-all;
-    box-shadow: inset 
-      3px 3px 6px var(--shadow-color),
-      inset -3px -3px 6px var(--highlight-color);
-    border: none;
-  }
-
-  .neumorphic-input:focus {
-    box-shadow: inset 
-      4px 4px 8px var(--shadow-color),
-      inset -4px -4px 8px var(--highlight-color);
-  }
-
-  .neumorphic-circle {
-    @apply w-9 h-9 flex items-center justify-center bg-[#2a2a2a] rounded-full transition-all;
-    box-shadow: 
-      4px 4px 8px var(--shadow-color),
-      -4px -4px 8px var(--highlight-color);
-  }
-
-  .neumorphic-circle:hover {
-    box-shadow: 
-      2px 2px 4px var(--shadow-color),
-      -2px -2px 4px var(--highlight-color);
-  }
-
-  .neumorphic-circle:active {
-    box-shadow: inset 
-      2px 2px 4px var(--shadow-color),
-      inset -2px -2px 4px var(--highlight-color);
-  }
-  
-  .settings-button {
-    @apply w-12 h-12 flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors;
-    box-shadow: 
-      5px 5px 10px var(--shadow-color),
-      -5px -5px 10px var(--highlight-color);
-  }
-  
-  .neumorphic-card {
-    @apply bg-[#222222] rounded-xl;
-    box-shadow: 
-      4px 4px 8px var(--shadow-color),
-      -4px -4px 8px var(--highlight-color);
-    transition: all 0.3s ease;
-  }
-  
-  .neumorphic-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      6px 6px 12px var(--shadow-color),
-      -6px -6px 12px var(--highlight-color);
-  }
-
-  .neumorphic-button.selected,
-  .neumorphic-button.selected:hover,
-  .neumorphic-button.selected:active {
-    background-color: #2563eb !important; /* blue-600 */
-    color: #fff !important;
-    border-color: #3b82f6 !important; /* blue-500 */
-    box-shadow: 3px 3px 6px var(--shadow-color), -3px -3px 6px var(--highlight-color), 0 0 0 2px #1e40af33;
-    transform: translateY(1px);
-  }
-}
-
-/* Animation keyframes */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { 
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Animation classes */
-.animate-fadeIn {
-  animation: fadeIn 0.5s ease forwards;
-}
-
-.animate-slideUp {
-  animation: slideUp 0.5s ease forwards;
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-    background-color: var(--background);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    font-family: 'Roboto', sans-serif;
-  }
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-  }
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
 }
 
 /* Fake Dark Mode Easter Egg */

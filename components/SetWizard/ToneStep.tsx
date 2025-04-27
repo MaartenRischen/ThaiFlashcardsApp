@@ -1,60 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
-const styles = [
-  {
-    label: 'Serious & Practical',
-    value: 0,
-    image: 'A',
-    preview: {
-      label: 'Serious',
-      thai: 'ขอกาแฟร้อนหนึ่งแก้ว',
-      english: 'One hot coffee, please.',
-      mnemonic: 'Think of ordering coffee in a business meeting.'
-    }
-  },
-  {
-    label: 'Balanced',
-    value: 1,
-    image: 'B',
-    preview: {
-      label: 'Balanced',
-      thai: 'ขอกาแฟร้อนหนึ่งแก้ว',
-      english: 'One hot coffee, please.',
-      mnemonic: 'Picture yourself confidently ordering coffee with a friendly smile.'
-    }
-  },
-  {
-    label: 'Absolutely Ridiculous',
-    value: 2,
-    image: 'C',
-    preview: {
-      label: 'Ridiculous',
-      thai: 'ขอกาแฟร้อนหนึ่งแก้ว',
-      english: 'One hot coffee, please.',
-      mnemonic: 'Imagine a coffee-loving elephant doing a happy dance while ordering!'
-    }
+// Map slider values (1-10) to tone categories
+const getToneFromValue = (value: number): 'serious' | 'balanced' | 'absolutely ridiculous' => {
+  if (value <= 3) return 'serious';
+  if (value <= 7) return 'balanced';
+  return 'absolutely ridiculous';
+};
+
+const getValueFromTone = (tone: 'serious' | 'balanced' | 'absolutely ridiculous'): number => {
+  switch (tone) {
+    case 'serious': return 2;
+    case 'balanced': return 5;
+    case 'absolutely ridiculous': return 9;
   }
-];
+};
+
+const getLabelFromValue = (value: number): string => {
+  switch (value) {
+    case 1: return '1/10 Serious & practical';
+    case 2: return '2/10 Balanced';
+    case 3: return '3/10 A bit of fun involved';
+    case 4: return '4/10 Party time';
+    case 5: return '5/10 Ehm...';
+    case 6: return '6/10 Oh shit';
+    case 7: return '7/10 Oh well';
+    case 8: return '8/10 You sure about that?';
+    case 9: return '9/10 Heeeheeeheheheeeeeeheheheee';
+    case 10: return '10/10 ̷̡̹͙͚͕̦̖̼̬̺̹͍̟͔͗̏͗͐͘͘͠E̶̡̩̟̳̪͖̼͎͚͍̖͖͈̖̥̒͑̍̊̈́͐̾̑͂̽͘͠R̷̛̦̯̖͎̼̯̙̳̟͗̇̀̍͒͌̋͝R̸̡͇̞͕̖̩̯̺̜̲͌̈́̽͗̋̅͆͑̾̊͑͜͠͠͝ͅƠ̵̻͍͖͖͕̳̜̹̰͓̞̠̈́̾͋̀̀̑͝R̴̢̨̢̜̥̥̭͚̺̖̮̻̜̐̍̎̀͗̈́̎̏̈́̆̄̈́͜͝ͅ ̶̛̬̮͕̙͕͚͖̹̻̦͋̇̓͐̑̆́̋̿̚0̷͈͚̍͋̈́̀̽̎̌̑̓͘͜x̵̦̖͇̖̼̺͚̤͎̆͋͋̐͂̔̃͛̾͘ͅD̶̨͔͎̬̪̎̋̒̆̃̌̀͒͗̓͌̚͝ͅ3̷̨͕̜̍́́̃́̿͑̅͑͑̑͜͠Ȁ̶̛̹͙̺͖͈͚͓̅̀̾́͋̋͆̈́͜͝D̷̢̛̛̻̹͎̲͔̭̤̮̟͗͂̏̈́̈́̀͊̎̚̚:̸̡̼̪̘̙̥͉̭́̍̓̈́̅̈́̌̾̃̓̎͘͜͠ ̸̧̧̛̻̹̲̟̜̺̱̯͇̲̙̬̯̘̭̤̞̯̐͗̈́̄̆̅̒͛͛';
+    default: return '1/10 Serious & practical';
+  }
+};
+
+const examples = {
+  serious: {
+    thai: 'ขอกาแฟร้อนหนึ่งแก้ว',
+    english: 'One hot coffee, please.',
+    mnemonic: 'Think of ordering coffee in a business meeting.'
+  },
+  balanced: {
+    thai: 'ขอกาแฟร้อนหนึ่งแก้ว',
+    english: 'One hot coffee, please.',
+    mnemonic: 'Picture yourself confidently ordering coffee with a friendly smile.'
+  },
+  'absolutely ridiculous': {
+    thai: 'ขอกาแฟร้อนหนึ่งแก้ว',
+    english: 'One hot coffee, please.',
+    mnemonic: 'Imagine a coffee-loving elephant doing a happy dance while ordering!'
+  }
+};
 
 export function ToneStep({ value, onNext, onBack }: { 
   value: 'serious' | 'balanced' | 'absolutely ridiculous',
   onNext: (tone: 'serious' | 'balanced' | 'absolutely ridiculous') => void,
   onBack: () => void
 }) {
-  // Map initial string value to style index
-  const getIndexFromValue = (val: 'serious' | 'balanced' | 'absolutely ridiculous'): number => {
-    if (val === 'serious') return 0;
-    if (val === 'absolutely ridiculous') return 2;
-    return 1; // Default to balanced
-  };
-  const initialIndex = getIndexFromValue(value);
-  const [selected, setSelected] = useState<number | null>(initialIndex);
+  const [sliderValue, setSliderValue] = useState(getValueFromTone(value));
+  const [isDragging, setIsDragging] = useState(false);
 
-  const handleSelect = (idx: number) => setSelected(idx);
+  // Handle touch events for better mobile experience
+  useEffect(() => {
+    const handleTouchEnd = () => setIsDragging(false);
+    document.addEventListener('touchend', handleTouchEnd);
+    return () => document.removeEventListener('touchend', handleTouchEnd);
+  }, []);
 
-  const selectedStyle = selected !== null ? styles[selected] : styles[1];
+  const currentTone = getToneFromValue(sliderValue);
+  const currentExample = examples[currentTone];
 
   return (
     <div className="space-y-5 px-2">
@@ -94,42 +107,60 @@ export function ToneStep({ value, onNext, onBack }: {
       <div className="flex justify-center">
         <div className="relative w-full max-w-[300px] h-[160px] rounded-lg overflow-hidden border border-blue-900/30">
           <Image
-            src={`/images/serious/${selectedStyle.image}.png`}
-            alt={`${selectedStyle.label} learning style illustration`}
+            src={`/images/level2/${sliderValue}.png`}
+            alt={`Learning style illustration - Level ${sliderValue}`}
             fill
-            className="object-cover"
+            className={`object-cover transition-opacity duration-300 ${isDragging ? 'opacity-100' : 'opacity-100'}`}
+            priority
           />
         </div>
       </div>
 
-      {/* Choice Buttons - horizontal */}
-      <div className="flex flex-row gap-3">
-        {styles.map((style, idx) => (
-          <button
-            key={style.label}
-            type="button"
-            onClick={() => handleSelect(idx)}
-            className={`flex-1 rounded-lg border-2 px-4 py-4 text-base font-semibold transition-all relative
-              ${selected === idx
-                ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
-                : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'}
-            `}
-          >
-            {style.label}
-          </button>
-        ))}
+      {/* Style Label */}
+      <div className="text-center">
+        <h4 className="text-lg font-semibold text-blue-400 min-h-[3rem] transition-all duration-300">
+          {getLabelFromValue(sliderValue)}
+        </h4>
+      </div>
+
+      {/* Slider */}
+      <div className="space-y-2">
+        <input
+          type="range"
+          min="1"
+          max="10"
+          value={sliderValue}
+          onChange={(e) => setSliderValue(parseInt(e.target.value))}
+          onTouchStart={() => setIsDragging(true)}
+          onTouchEnd={() => setIsDragging(false)}
+          onMouseDown={() => setIsDragging(true)}
+          onMouseUp={() => setIsDragging(false)}
+          className="w-full h-3 rounded-lg appearance-none cursor-pointer bg-blue-900/30
+            [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 
+            [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 
+            [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 
+            [&::-webkit-slider-thumb]:border-blue-400 [&::-webkit-slider-thumb]:shadow-lg
+            [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:rounded-full 
+            [&::-moz-range-thumb]:bg-blue-500 [&::-moz-range-thumb]:cursor-pointer 
+            [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-blue-400
+            [&::-moz-range-thumb]:shadow-lg"
+        />
+        <div className="flex justify-between px-1 text-xs text-gray-400">
+          <span>1/10</span>
+          <span>10/10</span>
+        </div>
       </div>
 
       {/* Preview Example */}
       <div className="bg-[#1e1e1e] rounded-lg p-4 space-y-3 text-center">
         <h4 className="text-sm font-medium text-white">
-          {selectedStyle.preview.label} Style Example
+          {getLabelFromValue(sliderValue)} Style Example
         </h4>
         <div className="space-y-2">
-          <p className="text-blue-400 text-base">{selectedStyle.preview.thai}</p>
-          <p className="text-gray-300 text-sm">{selectedStyle.preview.english}</p>
+          <p className="text-blue-400 text-base">{currentExample.thai}</p>
+          <p className="text-gray-300 text-sm">{currentExample.english}</p>
           <div className="text-xs text-gray-500">
-            <span className="text-gray-400">Mnemonic:</span> {selectedStyle.preview.mnemonic}
+            <span className="text-gray-400">Mnemonic:</span> {currentExample.mnemonic}
           </div>
         </div>
       </div>
@@ -143,13 +174,7 @@ export function ToneStep({ value, onNext, onBack }: {
         </button>
         <button
           className="neumorphic-button text-blue-400"
-          onClick={() => {
-            if (selected !== null) {
-              const toneValue = selected === 0 ? 'serious' : selected === 2 ? 'absolutely ridiculous' : 'balanced';
-              onNext(toneValue);
-            }
-          }}
-          disabled={selected === null}
+          onClick={() => onNext(currentTone)}
         >
           Next
         </button>

@@ -25,9 +25,6 @@ console.log('DEBUG: DATABASE_URL in generate-set route:', process.env.DATABASE_U
 // Add more detailed debug logging for Ideogram key
 console.log('DEBUG: IDEOGRAM_API_KEY first 10 chars:', process.env.IDEOGRAM_API_KEY ? process.env.IDEOGRAM_API_KEY.substring(0, 10) + '...' : 'undefined');
 
-// Define the expected lowercase level type (matches SetMetaData)
-type ProficiencyLevelLowercase = 'complete beginner' | 'basic understanding' | 'intermediate' | 'advanced' | 'native/fluent' | 'god mode';
-
 // Define expected request body structure (can be shared or redefined here)
 interface GenerateSetRequestBody {
   preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>;

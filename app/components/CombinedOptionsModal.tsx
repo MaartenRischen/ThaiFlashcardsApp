@@ -532,7 +532,7 @@ export function SetManagerModal({ isOpen, onClose }: {
             return (
               <div
                 key={set.id}
-                className="relative bg-gray-900 rounded-xl p-4 flex flex-col shadow-lg border border-gray-800 cursor-pointer hover:ring-2 hover:ring-blue-400 transition"
+                className="relative bg-gray-900 rounded-xl p-3 flex flex-col shadow-lg border border-gray-800 cursor-pointer hover:ring-2 hover:ring-blue-400 transition"
                 onClick={async () => {
                   if (set.id !== activeSetId) {
                     await switchSet(set.id);
@@ -553,7 +553,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                   }}
                 />
                 {/* Set Image */}
-                <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-gray-800">
+                <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-2 bg-gray-800">
                   <Image
                     src={imgUrl}
                     alt={set.cleverTitle || set.name}
@@ -575,21 +575,21 @@ export function SetManagerModal({ isOpen, onClose }: {
                   {set.source === 'generated' ? 'AI Set' : set.source === 'import' ? 'Imported' : 'Default'} (ID: {set.id})
                 </p>
                 
-                {/* ADDED: Proficiency and Seriousness */} 
-                <div className="text-xs text-gray-400 mt-1 flex flex-wrap gap-x-2">
+                {/* ADDED: Proficiency and Seriousness */}
+                <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">
                   {set.level && <span>Level: <span className="font-medium text-indigo-300">{set.level}</span></span>}
                   {set.seriousnessLevel !== undefined && <span>Tone: <span className="font-medium text-purple-300">{set.seriousnessLevel}/10</span></span>}
                 </div>
                 
                 {/* Phrase Count - moved lower */}
-                <p className="text-xs text-gray-400 mt-1">{set.phraseCount} cards</p>
+                <p className="text-xs text-gray-400 mt-0.5">{set.phraseCount} cards</p>
                 
                 {/* Card Actions: Publish and Cards icon buttons side by side */}
-                <div className="flex gap-2 justify-end mt-auto">
+                <div className="flex gap-1.5 justify-end mt-auto pt-2">
                   {/* Publish icon button - MODIFIED onClick */}
                   {!isDefault && (
                     <button
-                      className={`p-2 rounded-full bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold transition flex items-center justify-center${publishingSetId === set.id ? ' opacity-50 cursor-not-allowed' : ''}`}
+                      className={`p-1.5 rounded-full bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold transition flex items-center justify-center${publishingSetId === set.id ? ' opacity-50 cursor-not-allowed' : ''}`}
                       title="Publish to Gallery"
                       disabled={publishingSetId === set.id} // Still disable if publishing
                       onClick={async e => {
@@ -598,19 +598,19 @@ export function SetManagerModal({ isOpen, onClose }: {
                       }}
                     >
                       {/* Paper plane SVG icon */}
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21l16.5-9-16.5-9v7.5l13.5 1.5-13.5 1.5V21z" />
                       </svg>
                     </button>
                   )}
                   {/* Cards icon button */}
                   <button
-                    className="p-2 rounded-full bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold transition flex items-center justify-center"
+                    className="p-1.5 rounded-full bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold transition flex items-center justify-center"
                     title="View Cards"
                     onClick={e => { e.stopPropagation(); handleOpenCardsModal(set); }}
                   >
                     {/* Layers/stack SVG icon */}
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                       <path d="M3 7l9 5 9-5-9-5-9 5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
                       <path d="M3 12l9 5 9-5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
                       <path d="M3 17l9 5 9-5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>

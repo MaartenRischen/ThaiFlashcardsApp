@@ -128,32 +128,6 @@ export function ToneStep({ value, onNext, onBack }: {
         <h3 className="text-base font-medium text-white">
           How would you like to learn?
         </h3>
-        <p className="text-xs text-gray-400">
-          Choose between serious, practical{' '}
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className="underline text-blue-300 hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-                style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-              >
-                mnemonics
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 bg-gray-800 text-white border-gray-700" side="top" align="center">
-              <div className="p-2">
-                <h4 className="font-semibold text-blue-400 mb-1">What&apos;s a mnemonic?</h4>
-                <p className="text-sm text-gray-200 mb-2">
-                  A mnemonic is a memory aid—a trick or story that helps you remember something more easily.
-                </p>
-                <p className="text-xs text-gray-400">
-                  The app&apos;s name, <span className="font-semibold text-yellow-300">Donkey Bridge</span>, is a literal translation of the Dutch word <span className="italic">&quot;ezelsbruggetje&quot;</span>, which means mnemonic!
-                </p>
-              </div>
-            </PopoverContent>
-          </Popover>
-          {' '}or fun, memorable ones.
-        </p>
       </div>
 
       {/* Learning Style Image */}

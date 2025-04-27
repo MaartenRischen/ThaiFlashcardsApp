@@ -976,14 +976,21 @@ export default function ThaiFlashcards() {
     setTestGenResult(null); // Clear previous results
     alert("Starting test generation... this might take a minute."); // User feedback
 
-    const preferences = {
-      level: 'beginner' as 'beginner',
-      seriousnessLevel: 50,
-      topicsToDiscuss: undefined,
-      specificTopics: undefined,
-      topicsToAvoid: undefined,
+    // --- Prepare preferences from wizard state ---
+    const totalCount = 10; // Hardcoded for now, get from wizardState later
+    
+    // TODO: Ensure wizardState.proficiencyLevel contains the FULL string
+    // like "complete beginner", "God Mode", etc.
+    console.log('WIZARD STATE DEBUG - Full wizardState object:', JSON.stringify(wizardState, null, 2));
+    console.log('WIZARD STATE DEBUG - proficiency object:', JSON.stringify(wizardState.proficiency, null, 2));
+    console.log('WIZARD STATE DEBUG - levelEstimate value:', wizardState.proficiency.levelEstimate);
+    
+    const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
+      level: wizardState.proficiency.levelEstimate, // Correctly access the nested property
+      specificTopics: wizardState.topics.join(', ') || undefined, // Join topics array
+      tone: wizardState.tone,
+      topicsToDiscuss: wizardState.scenarios, // Use scenarios array
     };
-    const totalCount = 10;
     
     console.log('handleTestGeneration: Calling API route /api/generate-set');
 
@@ -1461,28 +1468,18 @@ export default function ThaiFlashcards() {
             });
             
             // Prepare data for the API call
-            let level: 'beginner' | 'intermediate' | 'advanced' = 'beginner';
-            const estimate = wizardState.proficiency.levelEstimate.toLowerCase();
-            if (estimate.includes('intermediate')) level = 'intermediate';
-            else if (estimate.includes('advanced')) level = 'advanced';
-            
-            const scenarios = wizardState.scenarios?.filter(Boolean) || [];
-            const customGoal = wizardState.customGoal?.trim();
-            const topicsToDiscuss = [
-              ...scenarios,
-              ...(customGoal ? [customGoal] : [])
-            ].join(', ') || undefined;
-            
-            const specificTopics = wizardState.topics.length > 0 ? wizardState.topics.join(', ') : undefined;
-
-            // Always call the /api/generate-set endpoint which handles image generation
             const totalCount = 10;
             
-            const preferences = {
-              level,
-              topicsToDiscuss,
-              specificTopics,
-              seriousnessLevel: wizardState.tone ?? 50,
+            // TODO: Ensure wizardState.proficiencyLevel contains the FULL string
+            // like "complete beginner", "God Mode", etc.
+            console.log('WIZARD STATE DEBUG - proficiency object:', JSON.stringify(wizardState.proficiency, null, 2));
+            console.log('WIZARD STATE DEBUG - levelEstimate value:', wizardState.proficiency.levelEstimate);
+            
+            const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
+              level: wizardState.proficiency.levelEstimate, // Correctly access the nested property
+              specificTopics: wizardState.topics.join(', ') || undefined, // Join topics array
+              tone: wizardState.tone,
+              topicsToDiscuss: wizardState.scenarios, // Use scenarios array
             };
             
             console.log('SetWizard Completion: Calling /api/generate-set with preferences:', preferences, 'count:', totalCount);

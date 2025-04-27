@@ -157,10 +157,18 @@ export async function POST(request: Request) {
         default: seriousnessLevelValue = undefined; // Or a default like 5?
       }
 
+      // Add detailed logging for proficiency level
+      console.log('LEVEL DEBUG - Original level from client:', preferences.level);
+      console.log('LEVEL DEBUG - Level type:', typeof preferences.level);
+      
+      // Convert level to lowercase if it exists
+      const levelToStore = preferences.level ? preferences.level.toLowerCase() as SetMetaData['level'] : undefined;
+      console.log('LEVEL DEBUG - Level after conversion:', levelToStore);
+
       const metaDataForStorage: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
         name: generationResult.cleverTitle || (isFallback ? 'Placeholder Set' : 'Custom Set'),
         cleverTitle: generationResult.cleverTitle,
-        level: preferences.level ? preferences.level.toLowerCase() as SetMetaData['level'] : undefined,
+        level: levelToStore,
         specificTopics: preferences.specificTopics,
         // Use 'generated' for source, even for fallbacks, as they originate from a generation attempt
         source: 'generated',

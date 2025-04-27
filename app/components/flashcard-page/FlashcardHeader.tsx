@@ -126,6 +126,8 @@ export function FlashcardHeader({
             </button>
             <span className="block text-xs text-[#BDBDBD] mt-1 text-center">User Gallery</span>
           </div>
+          {/* Divider */}
+          <div className="h-12 w-px bg-[#404040]/50 mx-1" />
           {/* Set Manager */}
           <div className="flex flex-col items-center">
             <button
@@ -150,6 +152,8 @@ export function FlashcardHeader({
             </button>
             <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Progress</span>
           </div>
+          {/* Divider */}
+          <div className="h-12 w-px bg-[#404040]/50 mx-1" />
           {/* Settings */}
           <div className="flex flex-col items-center">
             <button

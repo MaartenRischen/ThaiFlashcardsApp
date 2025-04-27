@@ -124,7 +124,7 @@ export function FlashcardHeader({
             >
               <GalleryHorizontal />
             </button>
-            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">User Gallery</span>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Gallery</span>
           </div>
           {/* Divider */}
           <div className="h-12 w-px bg-[#404040]/50 mx-1" />
@@ -132,7 +132,10 @@ export function FlashcardHeader({
           <div className="flex flex-col items-center">
             <button
               onClick={onOpenSetManager}
-              className="neumorphic-icon-button text-xl rounded-xl"
+              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#2563EB] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(37,99,235,0.15)] before:pointer-events-none"
+              style={{
+                boxShadow: '0 0 20px rgba(37, 99, 235, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
+              }}
               title="My Sets"
               aria-label="My Sets"
             >
@@ -144,7 +147,10 @@ export function FlashcardHeader({
           <div className="flex flex-col items-center">
             <button
               onClick={onOpenCards}
-              className="neumorphic-icon-button text-xl rounded-xl"
+              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#2563EB] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(37,99,235,0.15)] before:pointer-events-none"
+              style={{
+                boxShadow: '0 0 20px rgba(37, 99, 235, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
+              }}
               title="Cards"
               aria-label="Cards"
             >

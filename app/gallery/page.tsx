@@ -157,7 +157,7 @@ export default function GalleryPage() {
     });
 
     return filtered;
-  }, [sets, search, sortOrder, proficiencyFilter, seriousnessFilter, authorFilter]);
+  }, [sets, search, sortOrder, proficiencyFilter, seriousnessFilter, authorFilter, mapProficiencyLevel]);
 
   useEffect(() => {
     setLoading(true);

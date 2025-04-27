@@ -23,16 +23,6 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
       setError(null);
       setGeneratedPhrases([]);
 
-      // Map SetWizardState to generateCustomSet parameters
-      let level: 'complete beginner' | 'basic understanding' | 'intermediate' | 'advanced' | 'native/fluent' | 'god mode' = 'complete beginner';
-      const estimate = state.proficiency.levelEstimate.toLowerCase();
-      if (estimate.includes('basic')) level = 'basic understanding';
-      else if (estimate.includes('intermediate')) level = 'intermediate';
-      else if (estimate.includes('advanced')) level = 'advanced';
-      else if (estimate.includes('native') || estimate.includes('fluent')) level = 'native/fluent';
-      else if (estimate.includes('god')) level = 'god mode';
-      // Default is 'complete beginner'
-
       const scenarios = state.scenarios?.filter(Boolean) || [];
       const customGoal = state.customGoal?.trim();
       const topicsToDiscuss = [
@@ -46,7 +36,7 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
 
       const result = await generateCustomSet(
         {
-          level,
+          level: state.proficiency.levelEstimate as any,
           specificTopics,
           topicsToDiscuss,
           tone: state.tone,

@@ -39,12 +39,17 @@ const styles = [
 ];
 
 export function ToneStep({ value, onNext, onBack }: { 
-  value: number,
+  value: 'serious' | 'balanced' | 'absolutely ridiculous',
   onNext: (tone: 'serious' | 'balanced' | 'absolutely ridiculous') => void,
   onBack: () => void
 }) {
-  // Map initial numeric value to style index
-  const initialIndex = value <= 30 ? 0 : value >= 70 ? 2 : 1;
+  // Map initial string value to style index
+  const getIndexFromValue = (val: 'serious' | 'balanced' | 'absolutely ridiculous'): number => {
+    if (val === 'serious') return 0;
+    if (val === 'absolutely ridiculous') return 2;
+    return 1; // Default to balanced
+  };
+  const initialIndex = getIndexFromValue(value);
   const [selected, setSelected] = useState<number | null>(initialIndex);
 
   const handleSelect = (idx: number) => setSelected(idx);

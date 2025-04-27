@@ -2,21 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
-// Map slider values (1-10) to tone categories
-const getToneFromValue = (value: number): 'serious' | 'balanced' | 'absolutely ridiculous' => {
-  if (value <= 3) return 'serious';
-  if (value <= 7) return 'balanced';
-  return 'absolutely ridiculous';
-};
-
-const getValueFromTone = (tone: 'serious' | 'balanced' | 'absolutely ridiculous'): number => {
-  switch (tone) {
-    case 'serious': return 2;
-    case 'balanced': return 5;
-    case 'absolutely ridiculous': return 9;
-  }
-};
-
 const getLabelFromValue = (value: number): string => {
   switch (value) {
     case 1: return 'Serious & practical';

@@ -147,11 +147,10 @@ export async function POST(request: Request) {
       // --- 4. Prepare Metadata for Storage ---
       // Map tone preference to seriousnessLevel (adjust mapping if needed)
       let seriousnessLevelValue: number | undefined;
-      switch (preferences.tone) {
-        case 'serious': seriousnessLevelValue = 1; break;
-        case 'balanced': seriousnessLevelValue = 5; break;
-        case 'absolutely ridiculous': seriousnessLevelValue = 10; break;
-        default: seriousnessLevelValue = undefined; // Or a default like 5?
+      if (typeof preferences.tone === 'number') {
+        seriousnessLevelValue = preferences.tone;
+      } else {
+        seriousnessLevelValue = 5; // Default to balanced
       }
 
       // Add detailed logging for proficiency level

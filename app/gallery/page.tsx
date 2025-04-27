@@ -61,30 +61,6 @@ export default function GalleryPage() {
     'God Mode'
   ];
 
-  // Function to map non-standard proficiency levels to standard ones
-  const mapProficiencyLevel = (level: string | undefined): string => {
-    if (!level) return 'Complete Beginner';
-    
-    const normalizedLevel = level.toLowerCase().trim();
-    
-    // Direct matches
-    if (proficiencyLevels.some(l => l.toLowerCase() === normalizedLevel)) {
-      return level;
-    }
-
-    // Mapping logic for non-standard values
-    if (normalizedLevel.includes('beginner') || normalizedLevel.includes('basic')) {
-      return normalizedLevel.includes('complete') ? 'Complete Beginner' : 'Basic Understanding';
-    }
-    if (normalizedLevel.includes('intermediate')) return 'Intermediate';
-    if (normalizedLevel.includes('advanced')) return 'Advanced';
-    if (normalizedLevel.includes('native') || normalizedLevel.includes('fluent')) return 'Native/Fluent';
-    if (normalizedLevel.includes('god')) return 'God Mode';
-
-    // Default to Complete Beginner if no match
-    return 'Complete Beginner';
-  };
-
   // Get unique authors from sets
   const authors = useMemo(() => {
     const uniqueAuthors = new Set(sets.map(set => set.author || 'Anonymous').filter(Boolean));
@@ -96,6 +72,30 @@ export default function GalleryPage() {
   }, [sets]);
 
   const filteredSets = useMemo(() => {
+    // Move mapProficiencyLevel inside useMemo
+    const mapProficiencyLevel = (level: string | undefined): string => {
+      if (!level) return 'Complete Beginner';
+      
+      const normalizedLevel = level.toLowerCase().trim();
+      
+      // Direct matches
+      if (proficiencyLevels.some(l => l.toLowerCase() === normalizedLevel)) {
+        return level;
+      }
+
+      // Mapping logic for non-standard values
+      if (normalizedLevel.includes('beginner') || normalizedLevel.includes('basic')) {
+        return normalizedLevel.includes('complete') ? 'Complete Beginner' : 'Basic Understanding';
+      }
+      if (normalizedLevel.includes('intermediate')) return 'Intermediate';
+      if (normalizedLevel.includes('advanced')) return 'Advanced';
+      if (normalizedLevel.includes('native') || normalizedLevel.includes('fluent')) return 'Native/Fluent';
+      if (normalizedLevel.includes('god')) return 'God Mode';
+
+      // Default to Complete Beginner if no match
+      return 'Complete Beginner';
+    };
+
     let filtered = sets;
 
     // Text search
@@ -157,7 +157,7 @@ export default function GalleryPage() {
     });
 
     return filtered;
-  }, [sets, search, sortOrder, proficiencyFilter, seriousnessFilter, authorFilter, mapProficiencyLevel]);
+  }, [sets, search, sortOrder, proficiencyFilter, seriousnessFilter, authorFilter, proficiencyLevels]);
 
   useEffect(() => {
     setLoading(true);

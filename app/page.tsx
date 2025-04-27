@@ -983,7 +983,7 @@ export default function ThaiFlashcards() {
     const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
       level: 'intermediate' as 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode',
       specificTopics: undefined,
-      tone: 'balanced' as 'serious' | 'balanced' | 'absolutely ridiculous',
+      tone: 5, // Default to balanced (5)
       topicsToDiscuss: undefined,
     };
     

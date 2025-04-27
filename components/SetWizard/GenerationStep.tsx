@@ -33,11 +33,6 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
       else if (estimate.includes('god')) level = 'god mode';
       // Default is 'complete beginner'
 
-      // Map numeric tone to string
-      let tone: 'serious' | 'balanced' | 'absolutely ridiculous' = 'balanced';
-      if (state.tone <= 30) tone = 'serious';
-      else if (state.tone >= 70) tone = 'absolutely ridiculous';
-
       const scenarios = state.scenarios?.filter(Boolean) || [];
       const customGoal = state.customGoal?.trim();
       const topicsToDiscuss = [
@@ -54,7 +49,7 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
           level,
           specificTopics,
           topicsToDiscuss,
-          tone,
+          tone: state.tone,
         },
         totalCount,
         (progress) => {

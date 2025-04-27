@@ -94,14 +94,17 @@ export function SetWizardModal({ onComplete, onClose }: {
     />,
     <ScenarioStep
       key="scenario"
-      value={{ scenarios: state.scenarios, customGoal: state.customGoal }}
+      selectedScenarios={state.scenarios}
+      customGoal={state.customGoal}
+      proficiencyLevelEstimate={state.proficiency.levelEstimate}
       onNext={(data) => {
         // Automatically derive topics from custom scenarios
         const derivedTopics = deriveTopicsFromScenarios(data.scenarios, data.customGoal);
         
         setState(prev => ({ 
           ...prev, 
-          ...data,
+          scenarios: data.scenarios, 
+          customGoal: data.customGoal, 
           topics: derivedTopics
         }));
         

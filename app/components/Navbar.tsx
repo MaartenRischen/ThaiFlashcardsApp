@@ -7,12 +7,14 @@ import {
   SignedIn,
   SignedOut,
   SignInButton,
-  UserButton
+  UserButton,
+  useUser
 } from "@clerk/nextjs";
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { user } = useUser();
   
   // Don't show navbar on auth pages
   if (pathname === "/login" || pathname === "/register") {
@@ -33,7 +35,7 @@ export function Navbar() {
         </button>
         {/* Title: single responsive span, no duplicate */}
         <span className="flex-1 min-w-0 text-[0.6em] xs:text-[0.7em] md:text-[0.85em] text-gray-400 font-normal ml-2 align-middle">
-          Ultra Personal Thai Language Experience
+          Ultra Personal Thai Language Learning Experience{user ? ` For ${user.firstName || user.username}` : ''}
         </span>
         <nav className="flex items-center gap-2 ml-auto flex-shrink-0">
           <SignedOut>

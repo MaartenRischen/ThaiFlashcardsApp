@@ -13,6 +13,7 @@ interface GallerySet {
   description?: string;
   imageUrl?: string;
   seriousnessLevel?: number;
+  proficiencyLevel?: string;
   createdAt?: string | Date;
   timestamp?: string | Date;
   author?: string;
@@ -43,35 +44,120 @@ export default function GalleryPage() {
 
   // --- Search/Filter State ---
   const [search, setSearch] = useState('');
-  const [sortOrder, setSortOrder] = useState<'Newest' | 'Oldest'>('Newest');
+  const [sortOrder, setSortOrder] = useState<'Newest' | 'Oldest' | 'Most Cards' | 'Highest Rated'>('Newest');
+  const [proficiencyFilter, setProficiencyFilter] = useState<string>('All');
+  const [seriousnessFilter, setSeriousnessFilter] = useState<string>('All');
+  const [authorFilter, setAuthorFilter] = useState<string>('All');
 
   // --- Filtering Logic ---
-  const sortOptions = ['Newest', 'Oldest'];
+  const sortOptions = ['Newest', 'Oldest', 'Most Cards', 'Highest Rated'];
+  const proficiencyLevels = [
+    'All',
+    'Complete Beginner',
+    'Basic Understanding',
+    'Intermediate',
+    'Advanced',
+    'Native/Fluent',
+    'God Mode'
+  ];
+
+  // Function to map non-standard proficiency levels to standard ones
+  const mapProficiencyLevel = (level: string | undefined): string => {
+    if (!level) return 'Complete Beginner';
+    
+    const normalizedLevel = level.toLowerCase().trim();
+    
+    // Direct matches
+    if (proficiencyLevels.some(l => l.toLowerCase() === normalizedLevel)) {
+      return level;
+    }
+
+    // Mapping logic for non-standard values
+    if (normalizedLevel.includes('beginner') || normalizedLevel.includes('basic')) {
+      return normalizedLevel.includes('complete') ? 'Complete Beginner' : 'Basic Understanding';
+    }
+    if (normalizedLevel.includes('intermediate')) return 'Intermediate';
+    if (normalizedLevel.includes('advanced')) return 'Advanced';
+    if (normalizedLevel.includes('native') || normalizedLevel.includes('fluent')) return 'Native/Fluent';
+    if (normalizedLevel.includes('god')) return 'God Mode';
+
+    // Default to Complete Beginner if no match
+    return 'Complete Beginner';
+  };
+
+  // Get unique authors from sets
+  const authors = useMemo(() => {
+    const uniqueAuthors = new Set(sets.map(set => set.author || 'Anonymous').filter(Boolean));
+    return ['All', ...Array.from(uniqueAuthors)].sort((a, b) => {
+      if (a === 'All') return -1;
+      if (b === 'All') return 1;
+      return a.localeCompare(b);
+    });
+  }, [sets]);
 
   const filteredSets = useMemo(() => {
     let filtered = sets;
+
+    // Text search
     if (search.trim()) {
       const s = search.trim().toLowerCase();
       filtered = filtered.filter(set =>
         set.title?.toLowerCase().includes(s) ||
-        set.description?.toLowerCase().includes(s)
+        set.description?.toLowerCase().includes(s) ||
+        set.specificTopics?.toLowerCase().includes(s)
       );
     }
-    if (sortOrder === 'Newest') {
-      filtered = filtered.slice().sort((a, b) => {
-        const aDate = new Date(a.createdAt || 0).getTime();
-        const bDate = new Date(b.createdAt || 0).getTime();
-        return bDate - aDate;
-      });
-    } else {
-      filtered = filtered.slice().sort((a, b) => {
-        const aDate = new Date(a.createdAt || 0).getTime();
-        const bDate = new Date(b.createdAt || 0).getTime();
-        return aDate - bDate;
+
+    // Proficiency filter
+    if (proficiencyFilter !== 'All') {
+      filtered = filtered.filter(set => 
+        mapProficiencyLevel(set.proficiencyLevel) === proficiencyFilter
+      );
+    }
+
+    // Seriousness filter
+    if (seriousnessFilter !== 'All') {
+      filtered = filtered.filter(set => {
+        const level = set.seriousnessLevel || 0;
+        switch (seriousnessFilter) {
+          case '1-3 (Serious)':
+            return level >= 1 && level <= 3;
+          case '4-7 (Balanced)':
+            return level >= 4 && level <= 7;
+          case '8-10 (Fun)':
+            return level >= 8 && level <= 10;
+          default:
+            return true;
+        }
       });
     }
+
+    // Author filter
+    if (authorFilter !== 'All') {
+      filtered = filtered.filter(set => 
+        (set.author || 'Anonymous') === authorFilter
+      );
+    }
+
+    // Sorting
+    filtered = filtered.slice().sort((a, b) => {
+      switch (sortOrder) {
+        case 'Newest':
+          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        case 'Oldest':
+          return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+        case 'Most Cards':
+          return (b.cardCount || 0) - (a.cardCount || 0);
+        case 'Highest Rated':
+          // TODO: Implement rating system
+          return 0;
+        default:
+          return 0;
+      }
+    });
+
     return filtered;
-  }, [sets, search, sortOrder]);
+  }, [sets, search, sortOrder, proficiencyFilter, seriousnessFilter, authorFilter]);
 
   useEffect(() => {
     setLoading(true);
@@ -202,26 +288,62 @@ export default function GalleryPage() {
           <h1 className="text-xl font-medium text-indigo-400">User Gallery</h1>
         </div>
       </div>
-      {/* --- Search/Filter UI --- */}
+      {/* --- Enhanced Search/Filter UI --- */}
       <div className="mb-6 flex flex-col gap-3">
         <div className="flex flex-col md:flex-row md:items-center gap-3">
           <input
             type="text"
             className="bg-indigo-900/40 border border-indigo-700/40 rounded-md px-3 py-2 text-indigo-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-72"
-            placeholder="Search sets..."
+            placeholder="Search sets by title, description, or topics..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
+          <select
+            className="bg-indigo-900/40 border border-indigo-700/40 rounded-md px-3 py-2 text-indigo-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-48"
+            value={authorFilter}
+            onChange={e => setAuthorFilter(e.target.value)}
+          >
+            {authors.map(author => (
+              <option key={author} value={author}>
+                {author === 'All' ? 'Select Author' : author}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-indigo-300 text-xs font-medium">Sort:</span>
           <select
             className="bg-indigo-900/40 border border-indigo-700/40 rounded-md px-2 py-1 text-indigo-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={sortOrder}
-            onChange={e => setSortOrder(e.target.value as 'Newest' | 'Oldest')}
+            onChange={e => setSortOrder(e.target.value as typeof sortOrder)}
           >
             {sortOptions.map(opt => (
               <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+
+          <span className="text-indigo-300 text-xs font-medium ml-4">Level:</span>
+          <select
+            className="bg-indigo-900/40 border border-indigo-700/40 rounded-md px-2 py-1 text-indigo-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={proficiencyFilter}
+            onChange={e => setProficiencyFilter(e.target.value)}
+          >
+            {proficiencyLevels.map(level => (
+              <option key={level} value={level}>
+                {level === 'All' ? 'All Levels' : level}
+              </option>
+            ))}
+          </select>
+
+          <span className="text-indigo-300 text-xs font-medium ml-4">Style:</span>
+          <select
+            className="bg-indigo-900/40 border border-indigo-700/40 rounded-md px-2 py-1 text-indigo-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={seriousnessFilter}
+            onChange={e => setSeriousnessFilter(e.target.value)}
+          >
+            {['All', '1-3 (Serious)', '4-7 (Balanced)', '8-10 (Fun)'].map(level => (
+              <option key={level} value={level}>{level}</option>
             ))}
           </select>
         </div>

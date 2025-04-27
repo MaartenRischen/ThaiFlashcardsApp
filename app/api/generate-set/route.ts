@@ -240,8 +240,8 @@ export async function POST(request: Request) {
         try {
           console.log('Image processing: Generating our own image');
           const topicDescription = generationResult.cleverTitle || 'general language learning themes';
-          // NEW PROMPT: Emphasize humor and exaggeration, using topic as inspiration
-          const imagePrompt = `Create a HILARIOUS and EXAGGERATED cartoon illustration featuring a comical donkey and a slightly absurd bridge. The scene should be FUNNY and inspired by the theme: '${topicDescription}'. Prioritize humor and comedy above all else. Use vibrant, eye-catching colors. CRITICAL: Absolutely NO text, words, or letters anywhere in the image.`;
+          // Updated prompt: More cute, less cringy, allow numbers
+          const imagePrompt = `Create a cute and funny cartoon illustration featuring a cute donkey and a slightly absurd bridge. Clearly depict the theme(s): '${topicDescription}'. Use vibrant, eye-catching colors. CRITICAL: Absolutely NO text or words anywhere in the image, though numbers are acceptable.`;
           
           console.log(`API Route: Generating set cover image with prompt:`, imagePrompt);
           console.log('Image processing: About to call generateImage');

@@ -1,39 +1,14 @@
 import React from 'react';
 import { SetWizardState } from './SetWizardModal';
-// import Image from 'next/image'; // REMOVE unused import
 
-export function ReviewStep({ state, onConfirm, /* onEdit, */ onBack }: { // REMOVE unused onEdit prop
+export function ReviewStep({ state, onConfirm, onBack }: {
   state: SetWizardState,
   onConfirm: () => void,
-  // onEdit: (step: number) => void, // REMOVE unused onEdit prop type
   onBack: () => void,
 }) {
-  // REMOVE unused getProficiencyIndex function
-  // const getProficiencyIndex = () => {
-  //   const levelMap = {
-  //     'Complete Beginner': 0,
-  //     'Basic Understanding': 1,
-  //     'Intermediate': 2,
-  //     'Advanced': 3,
-  //     'Native/Fluent': 4,
-  //     'God Mode': 5,
-  //   };
-  //   return levelMap[state.proficiency.levelEstimate as keyof typeof levelMap] ?? 0;
-  // };
-
-  // REMOVE unused getLearningStyleImage function
-  // const getLearningStyleImage = () => {
-  //   // Use string comparison instead of numeric
-  //   if (state.tone === 'serious') return "A"; 
-  //   if (state.tone === 'absolutely ridiculous') return "C";
-  //   return "B"; // Default to Balanced
-  // };
-
-  // Get the learning style name
   const getLearningStyleName = () => {
-    // Use string comparison instead of numeric
-    if (state.tone === 'serious') return "Serious";
-    if (state.tone === 'absolutely ridiculous') return "Ridiculous";
+    if (state.tone <= 3) return "Serious";
+    if (state.tone >= 8) return "Ridiculous";
     return "Balanced";
   };
 

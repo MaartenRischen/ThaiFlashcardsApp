@@ -38,8 +38,8 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
   };
 
   return (
-    <div className="space-y-5 px-2">
-      <div className="space-y-2 text-center">
+    <div className="space-y-3 px-2">
+      <div className="space-y-1 text-center mb-4">
         <h3 className="text-lg font-medium text-white">
           Almost Ready!
         </h3>
@@ -48,115 +48,53 @@ export function ReviewStep({ state, onConfirm, onEdit, onBack }: {
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* Proficiency Level Section */}
-        <div className="bg-[#1e1e1e]/50 rounded-xl p-4">
-          <div className="flex flex-col items-center mb-3">
-            <div className="flex items-center gap-2 mb-1">
-              <h4 className="text-sm text-white">Proficiency Level</h4>
-              <span className="text-xs text-gray-500">Your current skill</span>
-            </div>
-            <button 
-              onClick={() => onEdit(1)}
-              className="neumorphic-button text-blue-400 text-xs py-1 px-3 mt-1"
-            >
-              Edit
-            </button>
+        <div className="bg-[#1e1e1e]/50 rounded-lg p-3">
+          <div className="flex justify-center items-baseline gap-2 mb-1">
+            <h4 className="text-sm font-medium text-white">Proficiency Level</h4>
+            <span className="text-xs text-gray-500">Your current skill</span>
           </div>
-          <div className="flex flex-col items-center">
-            <div className="relative w-[320px] h-[180px] rounded-lg overflow-hidden border border-blue-900/30 mb-3">
-              <Image
-                src={`/images/level/${getProficiencyIndex() + 1}.png`}
-                alt={`${state.proficiency.levelEstimate} proficiency illustration`}
-                width={320}
-                height={180}
-                className="object-cover"
-              />
-            </div>
-            <div className="text-gray-300 text-sm font-medium">{state.proficiency.levelEstimate}</div>
-          </div>
+          <div className="text-gray-300 text-sm font-medium text-center">{state.proficiency.levelEstimate}</div>
         </div>
 
         {/* Selected Scenarios Section */}
-        <div className="bg-[#1e1e1e]/50 rounded-xl p-4">
-          <div className="flex flex-col items-center mb-3">
-            <div className="flex items-center gap-2 mb-1">
-              <h4 className="text-sm text-white">Selected Scenarios</h4>
-              <span className="text-xs text-gray-500">What you&apos;ll learn</span>
-            </div>
-            <button 
-              onClick={() => onEdit(2)}
-              className="neumorphic-button text-blue-400 text-xs py-1 px-3 mt-1"
-            >
-              Edit
-            </button>
+        <div className="bg-[#1e1e1e]/50 rounded-lg p-3">
+          <div className="flex justify-center items-baseline gap-2 mb-1">
+            <h4 className="text-sm font-medium text-white">Selected Scenarios</h4>
+            <span className="text-xs text-gray-500">What you&apos;ll learn</span>
           </div>
-          <div className="flex flex-col items-center space-y-2">
+          <div className="flex flex-col items-center space-y-1 text-center">
             {state.scenarios.map(scenario => (
-              <div key={scenario} className="text-gray-300 text-sm flex items-center gap-2">
+              <div key={scenario} className="text-gray-300 text-sm flex items-center gap-2 justify-center">
                 <span className="text-blue-400/80">•</span>
                 {scenario}
               </div>
             ))}
             {state.customGoal && (
-              <div className="text-gray-400 text-sm">
+              <div className="text-gray-400 text-sm mt-1 italic">
                 + {state.customGoal}
               </div>
+            )}
+            {!state.customGoal && state.scenarios.length === 0 && (
+              <div className="text-gray-500 text-sm italic">(Using custom instructions)</div>
             )}
           </div>
         </div>
 
         {/* Learning Style Section */}
-        <div className="bg-[#1e1e1e]/50 rounded-xl p-4">
-          <div className="flex flex-col items-center mb-3">
-            <div className="flex items-center gap-2 mb-1">
-              <h4 className="text-sm text-white">Learning Style</h4>
-              <span className="text-xs text-gray-500">How you&apos;ll learn</span>
-            </div>
-            <button 
-              onClick={() => onEdit(3)}
-              className="neumorphic-button text-blue-400 text-xs py-1 px-3 mt-1"
-            >
-              Edit
-            </button>
+        <div className="bg-[#1e1e1e]/50 rounded-lg p-3">
+          <div className="flex justify-center items-baseline gap-2 mb-1">
+            <h4 className="text-sm font-medium text-white">Learning Style</h4>
+            <span className="text-xs text-gray-500">How you&apos;ll learn</span>
           </div>
-          <div className="flex flex-col items-center">
-            <div className="relative w-[240px] h-[160px] rounded-lg overflow-hidden border border-blue-900/30 mb-3">
-              <Image
-                src={`/images/serious/${getLearningStyleImage()}.png`}
-                alt={`${getLearningStyleName()} learning style illustration`}
-                width={240}
-                height={160}
-                className="object-cover"
-              />
-            </div>
-            <div className="text-gray-300 text-sm font-medium">
-              {getLearningStyleName()}
-            </div>
-          </div>
-        </div>
-
-        {/* Daily Goal Section */}
-        <div className="bg-[#1e1e1e]/50 rounded-xl p-4">
-          <div className="flex flex-col items-center mb-3">
-            <div className="flex items-center gap-2 mb-1">
-              <h4 className="text-sm text-white">Daily Goal</h4>
-              <span className="text-xs text-gray-500">Your commitment</span>
-            </div>
-            <button 
-              onClick={() => onEdit(4)}
-              className="neumorphic-button text-blue-400 text-xs py-1 px-3 mt-1"
-            >
-              Edit
-            </button>
-          </div>
-          <div className="text-gray-300 text-sm text-center">
-            10 cards/day
+          <div className="text-gray-300 text-sm font-medium text-center">
+            {getLearningStyleName()}
           </div>
         </div>
       </div>
 
-      <div className="flex justify-center gap-3 pt-4">
+      <div className="flex justify-center gap-3 pt-3">
         <button
           className="neumorphic-button text-blue-400"
           onClick={onBack}

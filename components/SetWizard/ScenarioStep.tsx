@@ -1,66 +1,66 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
-// --- Data Structure for Scenarios by Level ---
+// --- Data Structure for Scenarios by Level --- (Sentence Case)
 const scenariosByLevel: Record<string, string[]> = {
   "Complete Beginner": [
-    "Essential Greetings & Leave-takings (Polite)",
-    "Introducing Yourself (Simple)",
-    "Basic Numbers (1-100 & Zero)",
-    "Identifying Common Objects (Classroom/Home)",
-    "Basic Question Words & Simple Answers",
-    "Saying \"Thank You\" & \"Sorry/Excuse Me\" (Polite)",
-    "Basic Colors",
-    "Simple Commands & Requests (Polite)",
+    "Essential greetings & leave-takings (polite)",
+    "Introducing yourself (simple)",
+    "Basic numbers (1-100 & zero)",
+    "Identifying common objects (classroom/home)",
+    "Basic question words & simple answers",
+    "Saying \"Thank You\" & \"Sorry/Excuse Me\" (polite)",
+    "Basic colors",
+    "Simple commands & requests (polite)",
   ],
   "Basic Understanding": [
-    "Asking for & Giving Personal Information",
-    "Basic Shopping & Prices",
-    "Telling Time & Dates",
-    "Simple Directions & Locations",
-    "Ordering Simple Food & Drinks",
-    "Talking About Daily Routines (Simple Present)",
-    "Describing People & Things (Simple Adjectives)",
-    "Expressing Likes & Dislikes (Simple)",
+    "Asking for & giving personal information",
+    "Basic shopping & prices",
+    "Telling time & dates",
+    "Simple directions & locations",
+    "Ordering simple food & drinks",
+    "Talking about daily routines (simple present)",
+    "Describing people & things (simple adjectives)",
+    "Expressing likes & dislikes (simple)",
   ],
   "Intermediate": [
-    "Making Travel Arrangements",
-    "Discussing Hobbies & Interests",
-    "Narrating Past Events (Simple Past)",
-    "Giving & Understanding More Complex Directions",
-    "Ordering a Full Meal & Making Specific Requests",
-    "Talking About Work & Study",
-    "Expressing Opinions & Feelings (Simple)",
-    "Understanding Basic Cultural Norms",
+    "Making travel arrangements",
+    "Discussing hobbies & interests",
+    "Narrating past events (simple past)",
+    "Giving & understanding more complex directions",
+    "Ordering a full meal & making specific requests",
+    "Talking about work & study",
+    "Expressing opinions & feelings (simple)",
+    "Understanding basic cultural norms",
   ],
   "Advanced": [
-    "Discussing Current Events & News",
-    "Explaining Problems & Solutions",
-    "Talking About Thai Culture in Depth",
-    "Workplace Communication",
-    "Discussing Films, Books, or Music",
-    "Giving Advice & Making Recommendations",
-    "Understanding Different Registers",
-    "Narrating Complex Experiences",
+    "Discussing current events & news",
+    "Explaining problems & solutions",
+    "Talking about Thai culture in depth",
+    "Workplace communication",
+    "Discussing films, books, or music",
+    "Giving advice & making recommendations",
+    "Understanding different registers",
+    "Narrating complex experiences",
   ],
   "Native/Fluent": [
-    "Analyzing Social & Political Issues in Thailand",
-    "Understanding Thai Literature & Arts",
-    "Advanced Workplace & Business Communication",
-    "Exploring Thai History & Belief Systems",
-    "Understanding Idioms & Colloquialisms",
-    "Discussing Hypothetical Situations & Speculation",
-    "Debating & Persuasion",
-    "Understanding Regional Dialects & Variations (Awareness)",
+    "Analyzing social & political issues in Thailand",
+    "Understanding Thai literature & arts",
+    "Advanced workplace & business communication",
+    "Exploring Thai history & belief systems",
+    "Understanding idioms & colloquialisms",
+    "Discussing hypothetical situations & speculation",
+    "Debating & persuasion",
+    "Understanding regional dialects & variations (awareness)",
   ],
   "God Mode": [
-    "Specialized Academic/Professional Fields",
-    "Classical Thai Literature & Poetry",
-    "Advanced Linguistic Analysis of Thai",
-    "Thai Media Analysis & Critique",
-    "Translating & Interpreting Nuances",
-    "Mastering Thai Humor & Wordplay",
-    "Royal Thai Language (ราชาศัพท์ - Rachasap)",
-    "Contemporary Thai Sociolinguistics",
+    "Specialized academic/professional fields",
+    "Classical Thai literature & poetry",
+    "Advanced linguistic analysis of Thai",
+    "Thai media analysis & critique",
+    "Translating & interpreting nuances",
+    "Mastering Thai humor & wordplay",
+    "Royal Thai language (ราชาศัพท์ - Rachasap)",
+    "Contemporary Thai sociolinguistics",
   ]
 };
 
@@ -337,7 +337,7 @@ export function ScenarioStep({ selectedScenarios: initialSelectedScenarios, cust
       {/* "Tell Us!" Button */}
       <button
         onClick={() => handleToggle(CUSTOM_SCENARIO)}
-        className={`w-full rounded-lg p-4 text-left transition-all border-2 ${
+        className={`w-full rounded-lg p-3 text-left transition-all border-2 ${
           selected.includes(CUSTOM_SCENARIO)
             ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
             : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'
@@ -345,7 +345,7 @@ export function ScenarioStep({ selectedScenarios: initialSelectedScenarios, cust
       >
         <div className="flex justify-between items-center">
           <div>
-            <div className="font-semibold">{CUSTOM_SCENARIO}</div>
+            <div className="font-semibold text-sm">{CUSTOM_SCENARIO}</div>
             <div className="text-xs mt-1">Get a personalized set tailored exactly to your needs</div>
           </div>
           <span className="text-xs font-semibold bg-blue-500/80 text-white px-2 py-0.5 rounded-full">RECOMMENDED</span>
@@ -393,12 +393,12 @@ export function ScenarioStep({ selectedScenarios: initialSelectedScenarios, cust
       <div className="text-center text-sm text-gray-400 pt-2">Or choose from our pre-made scenarios:</div>
 
       {/* Pre-made Scenario Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {allDisplayScenarios.map(scenario => ( // Use the combined list
           <button
             key={scenario}
             onClick={() => handleToggle(scenario)}
-            className={`rounded-lg p-4 text-left transition-all border-2 ${
+            className={`rounded-lg p-3 text-left transition-all border-2 text-sm ${
               selected.includes(scenario)
                 ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
                 : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'

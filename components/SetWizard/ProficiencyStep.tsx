@@ -88,7 +88,7 @@ export function ProficiencyStep({ value, onNext, onBack }: {
   const activeLevelIndex = selectedIndex >= 0 ? selectedIndex : 0;
 
   return (
-    <div className="space-y-6 px-2">
+    <div className="space-y-4 px-2">
       <div className="space-y-2.5">
         <h3 className="text-base font-medium text-white">
           What is your Thai proficiency level?
@@ -100,7 +100,7 @@ export function ProficiencyStep({ value, onNext, onBack }: {
 
       {/* Proficiency Level Image */}
       <div className="flex justify-center">
-        <div className="relative w-full max-w-[300px] h-[160px] rounded-lg overflow-hidden border border-blue-900/30">
+        <div className="relative w-full max-w-[300px] h-[140px] rounded-lg overflow-hidden border border-blue-900/30">
           <Image
             src={`/images/level/${activeLevelIndex + 1}.png`}
             alt={`${proficiencyLevels[activeLevelIndex].level} level illustration`}
@@ -111,35 +111,32 @@ export function ProficiencyStep({ value, onNext, onBack }: {
       </div>
 
       {/* Choice Buttons with numbering and labels */}
-      <div className="flex flex-col gap-2 items-stretch">
-        <div className="flex justify-start mb-1">
-          <span className="text-xs text-gray-400 pl-2">Lowest</span>
-        </div>
+      <div className="space-y-1.5">
         {proficiencyLevels.map((level, idx) => (
           <button
             key={level.level}
             type="button"
             onClick={() => handleSelect(idx)}
-            className={`w-full flex items-center gap-3 rounded-lg border px-4 py-3 text-left transition-all font-medium
-              ${selectedIndex === idx
-                ? 'bg-blue-600/90 text-white border-blue-500 shadow-md scale-105'
-                : 'bg-[#1e1e1e] text-gray-200 border-blue-900/30 hover:bg-blue-900/30'}
-            `}
+            className={`flex items-center w-full rounded-lg border-2 px-3 py-2 text-left transition-all ${
+              activeLevelIndex === idx
+                ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
+                : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'
+            }`}
           >
-            <span className={`flex items-center justify-center font-bold rounded-full w-7 h-7 text-base
-              ${selectedIndex === idx ? 'bg-blue-400 text-white' : 'bg-gray-800 text-blue-300 border border-blue-900/30'}`}>{idx + 1}</span>
+            <span className={`flex h-6 w-6 items-center justify-center rounded-full mr-3 text-xs font-bold ${
+              activeLevelIndex === idx ? 'bg-white text-blue-600' : 'bg-blue-950/60 text-blue-400'
+            }`}>
+              {idx + 1}
+            </span>
             <div>
-              <div className="text-base">{level.level}</div>
-              <div className="text-xs text-gray-400 mt-1">{level.examples}</div>
+              <div className="font-medium text-sm">{level.level}</div>
+              <div className="text-xs mt-0.5 opacity-80">{level.examples}</div>
             </div>
           </button>
         ))}
-        <div className="flex justify-end mt-1">
-          <span className="text-xs text-gray-400 pr-2">Highest</span>
-        </div>
       </div>
 
-      <div className="flex justify-between pt-3">
+      <div className="flex justify-between pt-2">
         <button
           onClick={onBack}
           className="neumorphic-button text-blue-400"

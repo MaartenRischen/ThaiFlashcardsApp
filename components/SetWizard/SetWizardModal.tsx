@@ -15,7 +15,7 @@ export interface SetWizardState {
   scenarios: string[];
   customGoal?: string;
   topics: string[];
-  tone: number;
+  tone: 'serious' | 'balanced' | 'absolutely ridiculous';
 }
 
 function ProgressStepper({ step, totalSteps }: { step: number; totalSteps: number }) {
@@ -47,7 +47,7 @@ export function SetWizardModal({ onComplete, onClose }: {
     },
     scenarios: [],
     topics: [],
-    tone: 50,
+    tone: 'balanced',
   });
 
   // Show close button for all steps except generation (6)

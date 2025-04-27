@@ -333,7 +333,7 @@ export function SetManagerModal({ isOpen, onClose }: {
   // --- State for Publish Confirmation Modal ---
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [setBeingPublished, setSetBeingPublished] = useState<SetMetaData | null>(null);
-
+  
   useEffect(() => {
     // Keep useEffect for userId if still needed elsewhere, otherwise remove
     if (typeof window !== 'undefined') {
@@ -569,12 +569,20 @@ export function SetManagerModal({ isOpen, onClose }: {
                   />
                 </div>
                 {/* Set Name */}
-                <div className="font-bold text-lg text-white mb-1 text-center line-clamp-3 break-words whitespace-pre-line">{set.cleverTitle || set.name}</div>
+                <h3 className="text-base font-medium text-gray-200 group-hover:text-white transition-colors truncate" title={set.name}>{set.name}</h3>
+                {/* Set Source & ID - smaller text */}
+                <p className="text-xs text-gray-500">
+                  {set.source === 'generated' ? 'AI Set' : set.source === 'import' ? 'Imported' : 'Default'} (ID: {set.id})
+                </p>
                 
-                {/* Author label */}
-                <div className="text-blue-400 text-sm font-medium mb-3 text-center">
-                  {isDefault ? "System Set" : "My Set"}
+                {/* ADDED: Proficiency and Seriousness */} 
+                <div className="text-xs text-gray-400 mt-1 flex flex-wrap gap-x-2">
+                  {set.level && <span>Level: <span className="font-medium text-indigo-300">{set.level}</span></span>}
+                  {set.seriousnessLevel !== undefined && <span>Tone: <span className="font-medium text-purple-300">{set.seriousnessLevel}/10</span></span>}
                 </div>
+                
+                {/* Phrase Count - moved lower */}
+                <p className="text-xs text-gray-400 mt-1">{set.phraseCount} cards</p>
                 
                 {/* Card Actions: Publish and Cards icon buttons side by side */}
                 <div className="flex gap-2 justify-end mt-auto">

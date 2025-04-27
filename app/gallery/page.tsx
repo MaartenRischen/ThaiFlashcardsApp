@@ -51,7 +51,9 @@ export default function GalleryPage() {
 
   // --- Filtering Logic ---
   const sortOptions = ['Newest', 'Oldest', 'Most Cards', 'Highest Rated'];
-  const proficiencyLevels = [
+  
+  // Move proficiencyLevels into useMemo
+  const proficiencyLevels = useMemo(() => [
     'All',
     'Complete Beginner',
     'Basic Understanding',
@@ -59,7 +61,7 @@ export default function GalleryPage() {
     'Advanced',
     'Native/Fluent',
     'God Mode'
-  ];
+  ], []); // Empty dependency array since this never changes
 
   // Get unique authors from sets
   const authors = useMemo(() => {

@@ -28,7 +28,7 @@ export interface GeneratePromptOptions {
   count: number;
   existingPhrases?: string[];
   topicsToDiscuss?: string;
-  tone?: 'serious' | 'balanced' | 'absolutely ridiculous';
+  tone?: number; // 1-10 scale, where 1 is most serious and 10 is most absurd
 }
 
 // Define structured error types for better error handling
@@ -91,7 +91,7 @@ function buildGenerationPrompt(
     specificTopics,
     count,
     topicsToDiscuss,
-    tone = 'balanced', // Default to balanced
+    tone = 5, // Default to level 5 (balanced)
   } = options;
 
   // Define the output schema (remains the same)
@@ -145,7 +145,7 @@ function buildGenerationPrompt(
   **User Preferences:**
   - Situations for Use: ${topicsToDiscuss || 'General conversation'}
   ${specificTopics ? `- Specific Focus: ${specificTopics}` : ''}
-  - **TONE: ${tone.toUpperCase()}**
+  - **TONE: ${tone.toString()}**
 
   **CRITICAL INSTRUCTIONS:**
 
@@ -159,20 +159,73 @@ function buildGenerationPrompt(
       *   Native/Fluent: Use idiomatic, natural, and authentic language as used by educated native speakers. Include slang, cultural references, and subtle nuances. Examples should sound like real, fluent Thai in diverse contexts.
       *   God Mode: Use extremely elaborate, idiomatic, and sophisticated language. Phrases and examples should be more complex than those for native speakers, featuring rare vocabulary, advanced grammar, and highly nuanced, academic, or literary expressions. Push the boundaries of complexity and naturalness, as if the user is a superhuman Thai speaker.
 
-  3.  **TONE Implementation (${tone.toUpperCase()}):** THIS IS PARAMOUNT. The tone MUST heavily influence ALL content. Use the following style guide based on the selected tone:
-      *   **Serious:** All content should be practical, standard, and factual. Avoid humor, absurdity, or surrealism. Example sentences should be realistic and directly applicable to everyday situations.
-      *   **Balanced:** Content should be mostly practical and realistic, but may include occasional quirks, mild humor, or unusual phrasing. Example sentences can blend standard usage with some creative or amusing twists.
-      *   **Absolutely Ridiculous:** Content should be highly absurd, surreal, and humorous. Use non-sequiturs, bizarre scenarios, and unexpected juxtapositions. Example sentences should prioritize humor, strangeness, and unpredictability, even at the expense of realism.
-      *   **Mnemonics:**
-        * Provide a concise, intuitive mnemonic in *English* that maps the Thai sound to an English word/phrase that sounds similar **and** hints at the meaning.
-        * NEVER reference the user‑provided situations or specific focus.
-        * If the Thai entry is longer than three words, choose the single most important word and give a mnemonic for *that* word only.
-        * Do **not** attempt to be funny or clever—prioritise memory effectiveness.
-        * Use only real English words or widely‑recognised sounds; avoid nonsense syllables.
-      *   **Example Sentences:** MUST strongly reflect the tone. 
-          *   Serious: Practical, standard examples.
-          *   Balanced: Mildly amusing or odd situations.
-          *   Absolutely Ridiculous: SURREAL or NONSENSICAL scenarios.
+  3.  **TONE Implementation (${tone.toString()}):** THIS IS PARAMOUNT. The tone MUST heavily influence ALL content. Use the following style guide based on the selected tone level (1-10):
+
+      *   **Levels 1-4 (Practical Base with Increasing Humor):**
+          - Level 1: 100% dead serious. No humor whatsoever. Pure business and survival Thai. Examples must be completely practical situations you'd find in a textbook.
+          - Level 2: 95% serious with 5% very mild humor. Like level 1 but occasionally a small smile might escape.
+          - Level 3: 85% practical with 15% humor. Starting to have fun but still very much focused on learning.
+          - Level 4: 70% practical with 30% humor. The last level where learning is still the main priority.
+
+      *   **Levels 5-7 (Decreasing Practicality):**
+          - Level 5: 50% practical, 50% absurd. Learning is optional. Examples start involving impossible scenarios.
+          - Level 6: 30% practical, 70% weird. Phrases might still be useful but in contexts that make no sense.
+          - Level 7: 15% practical, 85% bizarre. You might learn something by accident, but that's not the point anymore.
+
+      *   **Levels 8-10 (Pure WTF Territory):**
+          - Level 8: 5% practical, 95% insanity. Examples should make readers question their reality.
+          - Level 9: 1% practical, 99% chaos. Should trigger existential crises in readers.
+          - Level 10: 0% practical, 100% brain-melting madness. Maximum surrealism. Should make Dali paintings look normal.
+
+      *   **Content Guidelines by Component:**
+          - **Main Phrases:** 
+            * Levels 1-4: Must be actually useful Thai phrases
+            * Levels 5-7: Can be real phrases in completely wrong contexts
+            * Levels 8-10: Can be grammatically correct but semantically insane
+
+          - **Example Sentences:** 
+            * Levels 1-4: Progress from textbook examples to slightly amusing situations
+            * Levels 5-7: Start breaking laws of physics and logic
+            * Levels 8-10: Should read like fever dreams written by an AI on LSD
+
+          - **Mnemonics:** 
+            * Levels 1-4: Focus on memorability with increasing creativity
+            * Levels 5-7: Can be bizarre but should somehow still help memory
+            * Levels 8-10: Pure chaos that accidentally might help remember
+
+      *   **Example Outputs by Level:**
+          - Level 1 (Dead Serious):
+            * Phrase: "ขอกาแฟร้อนหนึ่งแก้ว" (One hot coffee, please)
+            * Example: "ดิฉันต้องการกาแฟร้อนที่ร้านกาแฟ" (I would like hot coffee at the coffee shop)
+            * Mnemonic: "Cafe" sounds like "กาแฟ" - both mean coffee
+
+          - Level 4 (Last Practical Level):
+            * Phrase: "ขอกาแฟร้อนหนึ่งแก้ว" (One hot coffee, please)
+            * Example: "ผมสั่งกาแฟร้อนให้แมวของผม" (I ordered hot coffee for my cat)
+            * Mnemonic: "Cafe" sounds like "กาแฟ" - imagine a cat in a cafe
+
+          - Level 7 (Barely Useful):
+            * Phrase: "ขอกาแฟร้อนหนึ่งแก้ว" (One hot coffee, please)
+            * Example: "กาแฟของผมแต่งงานกับน้ำแข็งและหนีไปอยู่ดาวพลูโต" (My coffee married an ice cube and eloped to Pluto)
+            * Mnemonic: "Cafe" sounds like "กาแฟ" - picture a coffee cup in a wedding dress
+
+          - Level 9 (Reality-Breaking):
+            * Phrase: "ขอกาแฟร้อนหนึ่งแก้ว" (One hot coffee, please)
+            * Example: "กาแฟของผมกลายเป็นประธานาธิบดีของจักรวาลที่ทำจากเนยแข็งและความฝัน" (My coffee became president of a universe made of cheese and dreams)
+            * Mnemonic: "Cafe" sounds like "กาแฟ" - visualize a coffee cup wearing a suit made of melting cheese while floating in space
+
+          - Level 10 (Maximum WTF):
+            * Phrase: "ขอกาแฟร้อนหนึ่งแก้ว" (One hot coffee, please)
+            * Example: "กาแฟไร้ตัวตนของผมกำลังจัดงานแต่งงานกับความว่างเปล่าในมิติที่ห้าซึ่งทำจากเสียงหัวเราะของสีม่วง" (My non-existent coffee is having a wedding with the void in the fifth dimension made of purple laughter)
+            * Mnemonic: "Cafe" sounds like "กาแฟ" - imagine a quantum coffee cup existing and not existing simultaneously while purple sound waves laugh in geometrically impossible patterns
+
+      *   **Key Rules:**
+          - Level 1 must be absolutely serious and practical
+          - Levels 2-4 maintain practicality while adding touches of humor
+          - Levels 5-7 sacrifice practicality for increasing absurdity
+          - Levels 8-10 should make readers question their sanity
+          - ALL levels must maintain perfect Thai grammar
+          - Higher levels should feel like they were generated by an AI having an existential crisis
 
   4.  **Topic/Situation Control:**
       *   Focus content *primarily* on the 'Situations for Use': ${topicsToDiscuss || 'General conversation'}. Use this as inspiration, especially for absurd examples.
@@ -559,10 +612,33 @@ export async function generateSingleFlashcard(
 }
 
 // Utility to map seriousnessLevel (ridiculousness) to temperature
-function getTemperatureFromSeriousness(seriousnessLevel: number | undefined): number {
-  if (!seriousnessLevel || seriousnessLevel <= 0) return 0;
-  // Map 1-100 to 0.2-1.2 (linear)
-  return Math.round((0.2 + (seriousnessLevel / 100) * 1.0) * 100) / 100;
+function getTemperatureFromSeriousness(toneLevel: number | undefined): number {
+  // Default to level 5 (balanced) if undefined
+  const level = toneLevel ?? 5;
+  
+  // Clamp the level between 1 and 10
+  const clampedLevel = Math.max(1, Math.min(10, level));
+  
+  // Create a more extreme non-linear progression:
+  // Level 1: 0.1 (extremely conservative - textbook perfect)
+  // Level 2-4: 0.3-0.5 (gradually allowing mild creativity)
+  // Level 5-7: 0.7-0.9 (rapidly increasing chaos)
+  // Level 8-10: 0.95-2.0 (maximum chaos, beyond normal bounds)
+  
+  const temperatureMap: Record<number, number> = {
+    1: 0.1,   // Dead serious
+    2: 0.3,   // Barely a smile
+    3: 0.4,   // Slight humor
+    4: 0.5,   // Last practical level
+    5: 0.7,   // Starting to get weird
+    6: 0.8,   // Definitely weird
+    7: 0.9,   // Very weird
+    8: 0.95,  // Reality-bending
+    9: 1.5,   // Reality-breaking
+    10: 2.0   // Maximum possible chaos
+  };
+  
+  return temperatureMap[clampedLevel];
 }
 
 // Refactored OpenRouter call with fallback logic and temperature

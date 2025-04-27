@@ -976,20 +976,15 @@ export default function ThaiFlashcards() {
     setTestGenResult(null); // Clear previous results
     alert("Starting test generation... this might take a minute."); // User feedback
 
-    // --- Prepare preferences from wizard state ---
+    // Prepare data for the API call
     const totalCount = 10; // Hardcoded for now, get from wizardState later
     
-    // TODO: Ensure wizardState.proficiencyLevel contains the FULL string
-    // like "complete beginner", "God Mode", etc.
-    console.log('WIZARD STATE DEBUG - Full wizardState object:', JSON.stringify(wizardState, null, 2));
-    console.log('WIZARD STATE DEBUG - proficiency object:', JSON.stringify(wizardState.proficiency, null, 2));
-    console.log('WIZARD STATE DEBUG - levelEstimate value:', wizardState.proficiency.levelEstimate);
-    
-    const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
-      level: wizardState.proficiency.levelEstimate, // Correctly access the nested property
-      specificTopics: wizardState.topics.join(', ') || undefined, // Join topics array
-      tone: wizardState.tone,
-      topicsToDiscuss: wizardState.scenarios, // Use scenarios array
+    // Create simple preferences object for test generation
+    const preferences = {
+      level: 'intermediate' as 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode',
+      specificTopics: undefined,
+      tone: 'balanced' as 'serious' | 'balanced' | 'absolutely ridiculous',
+      topicsToDiscuss: undefined,
     };
     
     console.log('handleTestGeneration: Calling API route /api/generate-set');
@@ -1472,9 +1467,6 @@ export default function ThaiFlashcards() {
             
             // TODO: Ensure wizardState.proficiencyLevel contains the FULL string
             // like "complete beginner", "God Mode", etc.
-            console.log('WIZARD STATE DEBUG - proficiency object:', JSON.stringify(wizardState.proficiency, null, 2));
-            console.log('WIZARD STATE DEBUG - levelEstimate value:', wizardState.proficiency.levelEstimate);
-            
             const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
               level: wizardState.proficiency.levelEstimate, // Correctly access the nested property
               specificTopics: wizardState.topics.join(', ') || undefined, // Join topics array

@@ -161,8 +161,28 @@ export async function POST(request: Request) {
       console.log('LEVEL DEBUG - Original level from client:', preferences.level);
       console.log('LEVEL DEBUG - Level type:', typeof preferences.level);
       
-      // Convert level to lowercase if it exists
-      const levelToStore = preferences.level ? preferences.level.toLowerCase() as SetMetaData['level'] : undefined;
+      // Map any proficiency level string to the correct lowercase version
+      let levelToStore: SetMetaData['level'] | undefined = undefined;
+      
+      if (preferences.level) {
+        const levelLower = preferences.level.toLowerCase();
+        
+        // Map to one of the expected values based on content
+        if (levelLower.includes('beginner') && levelLower.includes('complete')) {
+          levelToStore = 'complete beginner';
+        } else if (levelLower.includes('basic') || levelLower.includes('understanding')) {
+          levelToStore = 'basic understanding';
+        } else if (levelLower.includes('intermediate')) {
+          levelToStore = 'intermediate';
+        } else if (levelLower.includes('advanced')) {
+          levelToStore = 'advanced';
+        } else if (levelLower.includes('native') || levelLower.includes('fluent')) {
+          levelToStore = 'native/fluent';
+        } else if (levelLower.includes('god')) {
+          levelToStore = 'god mode';
+        }
+      }
+      
       console.log('LEVEL DEBUG - Level after conversion:', levelToStore);
 
       const metaDataForStorage: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
@@ -357,7 +377,7 @@ export async function POST(request: Request) {
         cleverTitle: updatedMetadata?.cleverTitle || insertedRecord.cleverTitle || undefined,
         createdAt: updatedMetadata?.createdAt || insertedRecord.createdAt.toISOString(),
         phraseCount: phrasesToSave.length,
-        level: updatedMetadata?.level || (insertedRecord.level ? insertedRecord.level.toLowerCase() as SetMetaData['level'] : undefined),
+        level: updatedMetadata?.level || levelToStore,
         goals: updatedMetadata?.goals || insertedRecord.goals || [],
         specificTopics: updatedMetadata?.specificTopics || insertedRecord.specificTopics || undefined,
         source: updatedMetadata?.source || insertedRecord.source as SetMetaData['source'] || 'generated',

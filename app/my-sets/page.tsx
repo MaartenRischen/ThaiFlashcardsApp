@@ -186,7 +186,7 @@ export default function SetManagerPage() {
               
               <div className="p-4 flex-grow flex flex-col">
                 {/* Set Name */}
-                <h3 className="font-medium text-sm text-white mb-1 line-clamp-2 group-hover:text-blue-400 transition-colors text-center">
+                <h3 className="font-medium text-sm text-white mb-1 line-clamp-3 min-h-[3.6rem] group-hover:text-blue-400 transition-colors text-center">
                   {set.name}
                 </h3>
                 

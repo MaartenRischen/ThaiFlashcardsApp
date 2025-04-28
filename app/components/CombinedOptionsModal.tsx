@@ -569,7 +569,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                   />
                 </div>
                 {/* Set Name */}
-                <h3 className="text-base font-medium text-gray-200 group-hover:text-white transition-colors truncate" title={set.name}>{set.name}</h3>
+                <h3 className="text-base font-medium text-gray-200 group-hover:text-white transition-colors line-clamp-3" title={set.name}>{set.name}</h3>
                 
                 {/* ADDED: Proficiency and Seriousness */}
                 <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">

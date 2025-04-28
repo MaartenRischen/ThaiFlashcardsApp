@@ -135,6 +135,52 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [userId, isLoaded]); // Add isLoaded dependency
 
+  // Function to force refresh the list of available sets from the backend
+  const refreshSets = useCallback(async () => {
+    if (!userId || !isLoaded) {
+      console.warn('[refreshSets] User not loaded yet, cannot refresh.');
+      return;
+    }
+    setIsLoading(true);
+    console.log(`[refreshSets] Fetching sets for userId: ${userId}`);
+    try {
+      const response = await fetch('/api/flashcard-sets', { credentials: 'include' });
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      
+      let userSetsResponse = await response.json(); // Expect { sets: [...] }
+      
+      // FIX: Extract sets array from the response object
+      if (!userSetsResponse || !Array.isArray(userSetsResponse.sets)) {
+          console.warn('[refreshSets] API response was not the expected object { sets: [...] }:', userSetsResponse);
+          userSetsResponse = { sets: [] }; // Treat as empty
+      }
+
+      const userSets: SetMetaData[] = userSetsResponse.sets; // Extract the array
+
+      console.log(`[refreshSets] Sets returned from API: ${userSets?.length ?? 0}`);
+      
+      const combinedSets = [
+          DEFAULT_SET_METADATA,
+          ...userSets.filter(set => set.id !== DEFAULT_SET_ID)
+      ];
+      
+      // ADD LOGGING BEFORE/AFTER STATE UPDATE
+      console.log(`[refreshSets] Preparing to call setAvailableSets with ${combinedSets.length} sets:`, combinedSets);
+      setAvailableSets(combinedSets);
+      console.log(`[refreshSets] Called setAvailableSets. State *should* update.`);
+
+      setSetsHaveLoaded(true); // Mark as loaded after successful refresh
+      console.log(`[refreshSets] Combined sets updated. Total available: ${combinedSets.length}`);
+
+    } catch (error: unknown) {
+      console.error('[refreshSets] Error fetching sets:', error);
+      setSetsHaveLoaded(true); 
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId, isLoaded]);
 
   // Function to save progress for the active set
   const updateSetProgress = useCallback(async (newProgress: SetProgress) => {
@@ -394,9 +440,11 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
       console.log(`[addSet] Received completeNewMetaData from API:`, completeNewMetaData);
 
-      // Update local state with the data confirmed by the backend
-      setAvailableSets(prev => [...prev, completeNewMetaData]);
-      setActiveSetId(completeNewMetaData.id); // Switch to the newly added set
+      // Refresh the sets to get the updated phrase count
+      await refreshSets();
+
+      // Switch to the newly added set
+      setActiveSetId(completeNewMetaData.id);
       console.log(`SetContext: Added new set ${completeNewMetaData.id} via API with ${phrases.length} phrases.`);
       return completeNewMetaData.id;
 
@@ -408,7 +456,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [userId, isLoaded]); // Dependencies remain the same
+  }, [userId, isLoaded, refreshSets]); // Add refreshSets to dependencies
 
   // --- Refactor deleteSet --- 
   const deleteSet = useCallback(async (id: string) => {
@@ -436,8 +484,9 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
         throw new Error(data.error || `API request failed with status ${response.status}`);
       }
 
-      // Update local state
-      setAvailableSets(prev => prev.filter(set => set.id !== id));
+      // Refresh the sets to get the updated phrase counts
+      await refreshSets();
+
       // Switch back to default set if the active one was deleted
       if (activeSetId === id) {
         setActiveSetId(DEFAULT_SET_ID); // Triggers useEffect to load default
@@ -450,8 +499,8 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     } finally {
        setIsLoading(false);
     }
-  // Add userId dependency
-  }, [activeSetId, userId, isLoaded]);
+  // Add refreshSets to dependencies
+  }, [activeSetId, userId, isLoaded, refreshSets]);
 
   // --- switchSet (No backend call needed, just state update) --- 
   const switchSet = useCallback(async (id: string) => {
@@ -567,10 +616,8 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
             throw new Error(data.error || `API request failed with status ${response.status}`);
           }
           
-          // Update the state
-          setAvailableSets(prevSets => 
-            prevSets.map(set => set.id === id ? updatedSetData : set)
-          );
+          // Refresh the sets to get the updated phrase counts
+          await refreshSets();
           console.log(`SetContext: Set ${id} renamed successfully.`);
       } catch(error) {
           console.error("SetContext: Error renaming set:", error);
@@ -581,55 +628,8 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     } else {
       console.error(`SetContext: Set ${id} not found for renaming.`);
     }
-  // Add userId dependency
-  }, [availableSets, userId, isLoaded]);
-
-  // Function to force refresh the list of available sets from the backend
-  const refreshSets = useCallback(async () => {
-    if (!userId || !isLoaded) {
-      console.warn('[refreshSets] User not loaded yet, cannot refresh.');
-      return;
-    }
-    setIsLoading(true);
-    console.log(`[refreshSets] Fetching sets for userId: ${userId}`);
-    try {
-      const response = await fetch('/api/flashcard-sets', { credentials: 'include' });
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-      
-      let userSetsResponse = await response.json(); // Expect { sets: [...] }
-      
-      // FIX: Extract sets array from the response object
-      if (!userSetsResponse || !Array.isArray(userSetsResponse.sets)) {
-          console.warn('[refreshSets] API response was not the expected object { sets: [...] }:', userSetsResponse);
-          userSetsResponse = { sets: [] }; // Treat as empty
-      }
-
-      const userSets: SetMetaData[] = userSetsResponse.sets; // Extract the array
-
-      console.log(`[refreshSets] Sets returned from API: ${userSets?.length ?? 0}`);
-      
-      const combinedSets = [
-          DEFAULT_SET_METADATA,
-          ...userSets.filter(set => set.id !== DEFAULT_SET_ID)
-      ];
-      
-      // ADD LOGGING BEFORE/AFTER STATE UPDATE
-      console.log(`[refreshSets] Preparing to call setAvailableSets with ${combinedSets.length} sets:`, combinedSets);
-      setAvailableSets(combinedSets);
-      console.log(`[refreshSets] Called setAvailableSets. State *should* update.`);
-
-      setSetsHaveLoaded(true); // Mark as loaded after successful refresh
-      console.log(`[refreshSets] Combined sets updated. Total available: ${combinedSets.length}`);
-
-    } catch (error: unknown) {
-      console.error('[refreshSets] Error fetching sets:', error);
-      setSetsHaveLoaded(true); 
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId, isLoaded]);
+  // Add refreshSets to dependencies
+  }, [availableSets, userId, isLoaded, refreshSets]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({

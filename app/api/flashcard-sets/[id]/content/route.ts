@@ -54,4 +54,53 @@ export async function GET(
       { status: 500 }
     );
   }
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const { userId } = await auth();
+  const setId = params.id;
+
+  console.log(`API Route: /api/flashcard-sets/${setId}/content POST request received`);
+
+  // Check for userId existence
+  if (!userId) {
+    console.warn(`API Route /api/flashcard-sets/${setId}/content POST: Unauthorized - No userId`);
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!setId) {
+    console.warn(`API Route /api/flashcard-sets/${setId}/content POST: Bad Request - Missing setId`);
+    return NextResponse.json({ error: "Set ID is required" }, { status: 400 });
+  }
+
+  try {
+    const requestBody = await request.json();
+    const phrases = requestBody.phrases;
+
+    if (!Array.isArray(phrases)) {
+      console.warn(`API Route /api/flashcard-sets/${setId}/content POST: Bad Request - Invalid phrases array`);
+      return NextResponse.json({ error: "Invalid phrases array" }, { status: 400 });
+    }
+
+    console.log(`API Route /api/flashcard-sets/${setId}/content POST: Saving content for user: ${userId}, setId: ${setId}`);
+    const contentSaved = await storage.saveSetContent(setId, phrases);
+
+    if (!contentSaved) {
+      throw new Error("Failed to save set content");
+    }
+
+    console.log(`API Route /api/flashcard-sets/${setId}/content POST: Content saved successfully (${phrases.length} phrases).`);
+    return NextResponse.json({ success: true }, { status: 200 });
+
+  } catch (error: unknown) {
+    const message = getErrorMessage(error);
+    console.error(`API Route /api/flashcard-sets/${setId}/content POST: Error saving set content:`, error);
+    return NextResponse.json(
+      { error: "Failed to save set content", details: message },
+      { status: 500 }
+    );
+  }
 } 

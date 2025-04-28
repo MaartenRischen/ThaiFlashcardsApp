@@ -61,23 +61,28 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
   }
   console.log(`Fetching SetMetaData from Supabase for userId: ${userId}`);
   try {
-    // Fetch sets directly using Prisma
+    // Fetch sets directly using Prisma, including phrase count
     const prismaSets = await prisma.flashcardSet.findMany({
       where: {
         userId: userId,
       },
+      include: {
+        _count: {
+          select: { phrases: true }
+        }
+      }
     });
 
     console.log('Successfully fetched SetMetaData:', prismaSets);
     const sets = prismaSets || [];
 
     // Map Supabase record to SetMetaData interface, including imageUrl and LLM info
-    return sets.map((dbSet: FlashcardSet) => ({ 
+    return sets.map((dbSet: FlashcardSet & { _count: { phrases: number } }) => ({ 
       id: dbSet.id,
       name: dbSet.name,
       cleverTitle: dbSet.cleverTitle || undefined,
       createdAt: dbSet.createdAt.toISOString(),
-      phraseCount: 0, // Set default 0
+      phraseCount: dbSet._count.phrases, // Use actual count from database
       level: dbSet.level as SetMetaData['level'] || undefined, 
       goals: dbSet.goals || [],
       specificTopics: dbSet.specificTopics || undefined,
@@ -322,8 +327,26 @@ export async function saveSetContent(setId: string, phrases: Phrase[]): Promise<
   }));
 
   try {
+    // First, delete any existing phrases for this set
+    await prisma.phrase.deleteMany({
+      where: {
+        setId: setId,
+      },
+    });
+
+    // Then insert the new phrases
     await prisma.phrase.createMany({
       data: recordsToInsert,
+    });
+
+    // Update the set's updatedAt timestamp
+    await prisma.flashcardSet.update({
+      where: {
+        id: setId,
+      },
+      data: {
+        updatedAt: new Date().toISOString()
+      },
     });
 
     console.log(`Successfully saved ${phrases.length} Phrases for setId: ${setId}`);

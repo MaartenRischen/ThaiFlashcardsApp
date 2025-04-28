@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useSession } from 'next-auth/react';
-import { Loader2, Plus, BookOpen, Settings } from "lucide-react";
+import { Loader2, Plus, BookOpen, Settings, Layers } from "lucide-react";
 
 type FlashcardSet = {
   id: string;
@@ -154,41 +154,36 @@ export default function SetManagerPage() {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sets.map((set) => (
-            <Link
-              key={set.id}
-              href={`/?setId=${set.id}`}
-              className="group bg-[#1a1a1a] border border-gray-800/30 rounded-lg overflow-hidden hover:border-blue-600/50 hover:shadow-md hover:shadow-blue-900/10 transition-all flex flex-col"
-            >
-              <div className="relative w-full aspect-[16/9] bg-[#111] overflow-hidden">
-                {set.imageUrl ? (
-                  <Image
-                    src={set.imageUrl}
-                    alt={set.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/images/default-set-logo.png';
-                    }}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <BookOpen className="h-10 w-10 text-gray-700" />
-                  </div>
-                )}
-                <div className="absolute top-2 right-2">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${getBadgeColor(set.source)}`}>
-                    {getSourceLabel(set.source)}
-                  </span>
+            <div key={set.id} className="group bg-[#1a1a1a] border border-gray-800/30 rounded-lg overflow-hidden hover:border-blue-600/50 hover:shadow-md hover:shadow-blue-900/10 transition-all flex flex-col">
+              <Link href={`/?setId=${set.id}`} className="block">
+                <div className="relative w-full aspect-[16/9] bg-[#111] overflow-hidden">
+                  {set.imageUrl ? (
+                    <Image
+                      src={set.imageUrl}
+                      alt={set.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/images/default-set-logo.png';
+                      }}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <BookOpen className="h-10 w-10 text-gray-700" />
+                    </div>
+                  )}
                 </div>
-              </div>
+              </Link>
               
               <div className="p-4 flex-grow flex flex-col">
                 {/* Set Name */}
-                <h3 className="font-medium text-sm text-white mb-1 line-clamp-3 min-h-[3.6rem] group-hover:text-blue-400 transition-colors text-center">
-                  {set.name}
-                </h3>
+                <Link href={`/?setId=${set.id}`}>
+                  <h3 className="font-medium text-sm text-white mb-1 line-clamp-3 min-h-[3.6rem] group-hover:text-blue-400 transition-colors text-center">
+                    {set.name}
+                  </h3>
+                </Link>
                 
                 {/* Author label */}
                 <div className="text-blue-400 text-sm font-medium mb-2 text-center">
@@ -215,8 +210,33 @@ export default function SetManagerPage() {
                     </span>
                   </p>
                 )}
+
+                {/* Card Actions: View Cards and Progress buttons */}
+                <div className="mt-auto flex justify-center gap-2">
+                  <div className="flex flex-col items-center">
+                    <button
+                      onClick={() => router.push(`/?setId=${set.id}`)}
+                      className="p-2.5 rounded-full bg-gray-700 hover:bg-gray-800 text-white transition flex items-center justify-center"
+                      title="View Cards"
+                    >
+                      <BookOpen className="w-4 h-4" />
+                    </button>
+                    <span className="text-xs text-gray-400 mt-1">View Cards</span>
+                  </div>
+
+                  <div className="flex flex-col items-center">
+                    <button
+                      onClick={() => router.push(`/?setId=${set.id}&showProgress=true`)}
+                      className="p-2.5 rounded-full bg-gray-700 hover:bg-gray-800 text-white transition flex items-center justify-center"
+                      title="Progress"
+                    >
+                      <Layers className="w-4 h-4" />
+                    </button>
+                    <span className="text-xs text-gray-400 mt-1">Progress</span>
+                  </div>
+                </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}

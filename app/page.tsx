@@ -9,7 +9,6 @@ import { INITIAL_PHRASES, type Phrase, type ExampleSentence } from './data/phras
 import { useSet } from './context/SetContext';
 import { Phrase as GeneratorPhrase, GeneratePromptOptions } from './lib/set-generator';
 import { SetMetaData, SetProgress } from './lib/storage';
-import { VERSION_INFO } from './version';
 import {
   Popover,
   PopoverContent,
@@ -1680,11 +1679,6 @@ export default function ThaiFlashcards() {
           </div>
         </div>
       )}
-
-      {/* Version indicator at the bottom - shows changes and timestamp in Amsterdam timezone */}
-      <div className="text-center p-2 text-xs text-gray-600">
-        <span>v{VERSION_INFO.version} - {VERSION_INFO.changes}</span>
-      </div>
 
     </main>
   );

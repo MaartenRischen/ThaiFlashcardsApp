@@ -251,7 +251,7 @@ function validatePhrase(data: unknown): data is Phrase {
     typeof phraseData.thaiMasculine === 'string' && phraseData.thaiMasculine.trim() !== '' &&
     typeof phraseData.thaiFeminine === 'string' && phraseData.thaiFeminine.trim() !== '' &&
     typeof phraseData.pronunciation === 'string' && phraseData.pronunciation.trim() !== '' &&
-    Array.isArray(phraseData.examples) && phraseData.examples.length >= 2; // Require at least 2 examples
+    Array.isArray(phraseData.examples) && phraseData.examples.length >= 2; // Require at least 2 examples per phrase
 
   if (!hasRequiredFields) return false;
 

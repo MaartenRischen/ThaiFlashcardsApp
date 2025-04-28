@@ -13,7 +13,7 @@ export interface Phrase {
   thaiFeminine: string;
   pronunciation: string;
   mnemonic?: string;
-  examples: ExampleSentence[];
+  examples: ExampleSentence[]; // REQUIRED: Must have at least 2 example sentences
 }
 
 export const INITIAL_PHRASES: Phrase[] = [

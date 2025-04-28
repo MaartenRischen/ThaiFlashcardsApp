@@ -3,17 +3,17 @@ import Image from 'next/image';
 
 const getLabelFromValue = (value: number): string => {
   switch (value) {
-    case 1: return 'Serious & practical';
-    case 2: return 'Balanced';
-    case 3: return 'A bit of fun involved';
-    case 4: return 'Party time';
-    case 5: return 'Ehm...';
-    case 6: return 'Oh shit';
-    case 7: return 'Oh well';
-    case 8: return 'You sure about that?';
-    case 9: return 'Heeeheeeheheheeeeeeheheheee';
-    case 10: return '̷̛̤̖̯͕̭͙̏̀̏̑̔̆͝Ǫ̶̬̩͇̼͖͖͈̯̳͎͛̀̐͌̅̿̈́̏̾̏̽̎H̶̼̹͓̩̥͈̞̫̯͋̓̄́̓̽̈́̈́̈́͛̎͒̿͜H̴̘͎̗̮̱̗̰̱͓̪̘͛̅̅̐͌̑͆̆̐͐̈́͌̚O̴̖̥̺͎̰̰̠͙̹̔̑̆͆͋̀̐̄̈́͝ͅI̴̢̛̩͔̺͓̯̯̟̱͎͓̾̃̅̈́̍͋̒̔̚͜͠͠͝͝Ḋ̵̻͓̹̼̳̻̼̼̥̳͍͛̈́̑̆̈́̈́̅͜͝͝͠͝Ǫ̶͔̯̟͙̪͗̆͛̍̓̒̔̒̎̄̈́̅͜͝͠N̵̢̢̩̫͚̪̦̥̳̯͚̺̍̏͂͗̌̍̿̾̿́̓͌͛͝K̷̨̨̟̺͔̻̮̯̰̤̬͇̟̙̆͆͗̀̈́̔̅͒͛͊͘͝͠I̶̡̢̡̛͔͎͍̤̤̪͍͙̜͚̓̀͋́̈́̈́̿͂̈́̐͘͘͜E̵͈̪̩͚͍͓͈͓̦͕͖̥͂̎̐̋̾̋̾̈́͐͐̔̔̓̔͜';
-    default: return 'Serious & practical';
+    case 1: return 'Textbook realism';
+    case 2: return 'Serious & practical';
+    case 3: return 'Sorta funny, but like your \'funny\' uncle';
+    case 4: return 'Actually funny';
+    case 5: return 'A little too much maybe';
+    case 6: return 'Definitely too much';
+    case 7: return 'Woah now';
+    case 8: return 'Ehrm..';
+    case 9: return 'You sure about this?';
+    case 10: return '̷̛̤̖̯͕̭͙̏̀̏̑̔̆͝Ǫ̶̬̩͇̼͖͖͈̯̳͎͛̀̐͌̅̿̈́̏̾̏̽̎H̶̼̹͓̩̥͈̞̫̯͋̓̄́̓̽̈́̈́̈́͛̎͒̿͜H̴̘͎̗̮̱̗̰̱͓̪̘͛̅̅̐͌̑͆̆̐͐̈́͌̚O̴̖̥̺͎̰̰̠͙̹̔̑̆͆͋̀̐̄̈́͝ͅI̴̢̛̩͔̺͓̯̯̟̱͎͓̾̃̅̈́̍͋̒̔̚͜͠͠͝͝Ḋ̵̻͓̹̼̳̻̼̼̥̳͍͛̈́̑̆̈́̈́̅͜͝͝͠͝Ǫ̶͔̯̟͙̪͗̆͛̍̓̒̔̒̎̄̈́̅͜͝͠N̵̢̢̩̫͚̪̦̥̳̯͚̺̍̏͂͗̌̍̿̾̿́̓͌͛͝K̷̨̨̟̺͔̻̮̯̰̤̬͇̟̙̆͆͗̀̈́̔̅͒͛͊͘͝͠I̶̡̢̡̛͔͎͍̤̤̪͍͙̜͚̓̀͋́̈́̈́̿͂̈́̐͘͘͜E';
+    default: return 'Textbook realism';
   }
 };
 
@@ -22,73 +22,73 @@ const examples = {
     thai: 'ลาอยู่บนสะพาน',
     thaiMasculine: 'ลาอยู่บนสะพานครับ',
     thaiFeminine: 'ลาอยู่บนสะพานค่ะ',
-    english: 'The donkey is on the bridge.',
+    english: 'The donkey is on the bridge',
     pronunciation: 'laa yuu bon sa-paan',
-    mnemonic: 'Think "laa" like "la-la" - the donkey standing quietly!'
+    mnemonic: 'Think "laa" (donkey) on "sa-paan" (bridge) - simple and straightforward!'
   },
   2: {
-    thai: 'เฮ้! ลาอยู่บนสะพาน!',
-    thaiMasculine: 'เฮ้! ลาอยู่บนสะพานครับ!',
-    thaiFeminine: 'เฮ้! ลาอยู่บนสะพานค่ะ!',
-    english: 'Hey! The donkey is on the bridge!',
-    pronunciation: 'hey! laa yuu bon sa-paan!',
-    mnemonic: 'Think "hey!" - excitement is building!'
+    thai: 'ดูสิ! ลาอยู่บนสะพาน!',
+    thaiMasculine: 'ดูสิ! ลาอยู่บนสะพานครับ!',
+    thaiFeminine: 'ดูสิ! ลาอยู่บนสะพานค่ะ!',
+    english: 'Look! The donkey is on the bridge!',
+    pronunciation: 'duu si! laa yuu bon sa-paan!',
+    mnemonic: 'Think "duu si" like "Do see!" - you\'re pointing out the donkey!'
   },
   3: {
-    thai: 'ลาตัวนั้นเต้นอยู่บนสะพาน!',
-    thaiMasculine: 'ลาตัวนั้นเต้นอยู่บนสะพานครับ!',
-    thaiFeminine: 'ลาตัวนั้นเต้นอยู่บนสะพานค่ะ!',
-    english: 'That donkey there... dances on that bridge!',
-    pronunciation: 'laa dtua nan dten yuu bon sa-paan!',
-    mnemonic: 'Think "dten" like "dancing" - getting groovy!'
+    thai: 'นั่นลาบนสะพานชัดๆเลย ถ้าฉันเคยเห็นมาก่อน!',
+    thaiMasculine: 'นั่นลาบนสะพานชัดๆเลยครับ ถ้าฉันเคยเห็นมาก่อน!',
+    thaiFeminine: 'นั่นลาบนสะพานชัดๆเลยค่ะ ถ้าฉันเคยเห็นมาก่อน!',
+    english: 'That\'s a donkey on a bridge if I\'ve ever seen one!',
+    pronunciation: 'nan laa bon sa-paan chat chat loei, taa chan koei hen maa gorn!',
+    mnemonic: 'Think "chat chat" like "got that!" - you\'re absolutely certain about the donkey!'
   },
   4: {
-    thai: 'ลาทำอึบนสะพานปาร์ตี้',
-    thaiMasculine: 'ลาทำอึบนสะพานปาร์ตี้ครับ',
-    thaiFeminine: 'ลาทำอึบนสะพานปาร์ตี้ค่ะ',
-    english: 'Donkey dude be doing a doodoo on the party bridge.',
-    pronunciation: 'laa tam ue bon sa-paan paa-dtee',
-    mnemonic: 'Think "tam ue" like "tummy ooops" - party time got messy!'
+    thai: 'นั่นลาตลกจริงๆบนสะพานเลย',
+    thaiMasculine: 'นั่นลาตลกจริงๆบนสะพานเลยครับ',
+    thaiFeminine: 'นั่นลาตลกจริงๆบนสะพานเลยค่ะ',
+    english: 'That\'s one actually funny donkey on a bridge',
+    pronunciation: 'nan laa ta-lok jing jing bon sa-paan loei',
+    mnemonic: 'Think "ta-lok" like "talk-laugh" - this donkey is genuinely amusing!'
   },
   5: {
-    thai: 'ลาตลกกับเป็ดน้อยทำอะไรบางอย่างจริงๆนะ ใช่ไหม?',
-    thaiMasculine: 'ลาตลกกับเป็ดน้อยทำอะไรบางอย่างจริงๆนะครับ ใช่ไหม?',
-    thaiFeminine: 'ลาตลกกับเป็ดน้อยทำอะไรบางอย่างจริงๆนะคะ ใช่ไหม?',
-    english: 'The clonkey (clown donkey) and his buddy ducky do the deed indeed, do they?',
-    pronunciation: 'laa dta-lok gap bped noi tam a-rai baang yaang jing jing na, chai mai?',
-    mnemonic: 'Think "dta-lok" like "the lock" - but nothing is locked down anymore!'
+    thai: 'เฮ้ยยย ไอ้หนุ่มลา! สบายดีบนสะพานนั้นปะเพื่อนนน?',
+    thaiMasculine: 'เฮ้ยยย ไอ้หนุ่มลา! สบายดีบนสะพานนั้นปะเพื่อนนนครับ?',
+    thaiFeminine: 'เฮ้ยยย ไอ้หนุ่มลา! สบายดีบนสะพานนั้นปะเพื่อนนนค่ะ?',
+    english: 'Heeyyy donkey dude! You good on that bridge duude?',
+    pronunciation: 'heyyy ai noom laa! sa-baai dee bon sa-paan nan pa pueaan?',
+    mnemonic: 'Think "ai noom" for "dude" and stretch "pueaan" like "duuude" - super casual!'
   },
   6: {
-    thai: 'ลาตลก เป็ดน้อย และแม่ของพวกเขาบินออกจากสะพาน โอ้มายก้อด เฮ้นี่!',
-    thaiMasculine: 'ลาตลก เป็ดน้อย และแม่ของพวกเขาบินออกจากสะพาน โอ้มายก้อด เฮ้นี่ครับ!',
-    thaiFeminine: 'ลาตลก เป็ดน้อย และแม่ของพวกเขาบินออกจากสะพาน โอ้มายก้อด เฮ้นี่ค่ะ!',
-    english: 'The clonkey, his buddy ducky and their moother fly off the bridge omg. Hey now.',
-    pronunciation: 'laa dta-lok, bped noi, lae mae kong puak kao bin ork jaak sa-paan, oh-my-god, hey nee!',
-    mnemonic: 'Think "bin ork" like "been orc" - but flying not fighting!'
+    thai: 'ลาบินออกไปจากสะพานแล้ว',
+    thaiMasculine: 'ลาบินออกไปจากสะพานแล้วครับ',
+    thaiFeminine: 'ลาบินออกไปจากสะพานแล้วค่ะ',
+    english: 'The donkey took off from the bridge',
+    pronunciation: 'laa bin ork pai jaak sa-paan laew',
+    mnemonic: 'Think "bin ork" like "been orc" - but it means flying away!'
   },
   7: {
-    thai: 'ชีวิตลาตลกมันฟังกี้ ขอเงินฉันสิ เอ้ย ลิงฉัน โอเคเพื่อน?',
-    thaiMasculine: 'ชีวิตลาตลกมันฟังกี้ ขอเงินฉันสิ เอ้ย ลิงฉัน โอเคเพื่อนครับ?',
-    thaiFeminine: 'ชีวิตลาตลกมันฟังกี้ ขอเงินฉันสิ เอ้ย ลิงฉัน โอเคเพื่อนค่ะ?',
-    english: 'Clonkey donkey life is fonkey give me my monkey I mean money ok buddy?',
-    pronunciation: 'chee-wit laa dta-lok man fun-kee kor ngern chan si, oei, ling chan, ok buddy?',
-    mnemonic: 'Think "fun-kee" like "funky" - everything\'s getting wild!'
+    thai: 'ลาคือสะพาน ถ้าคุณคิดให้ดีๆ',
+    thaiMasculine: 'ลาคือสะพาน ถ้าคุณคิดให้ดีๆครับ',
+    thaiFeminine: 'ลาคือสะพาน ถ้าคุณคิดให้ดีๆค่ะ',
+    english: 'Donkeys are bridges if you really think about it',
+    pronunciation: 'laa kuue sa-paan taa kun kit hai dee dee',
+    mnemonic: 'Think "kuue" as "is" and "kit hai dee dee" like "deep thinking" - philosophical donkeys!'
   },
   8: {
-    thai: 'เย่ เย่ เย่ เอ้า ลาที่รัก เธอทำหรือทำอึ ฉันไม่รู้ที่ตำรวจนี่',
-    thaiMasculine: 'เย่ เย่ เย่ เอ้า ลาที่รัก เธอทำหรือทำอึ ฉันไม่รู้ที่ตำรวจนี่ครับ',
-    thaiFeminine: 'เย่ เย่ เย่ เอ้า ลาที่รัก เธอทำหรือทำอึ ฉันไม่รู้ที่ตำรวจนี่ค่ะ',
-    english: 'Yeah yeah yeah now well hey dear donkey do you do or dodo cause I don\'t know at this popo',
-    pronunciation: 'yay yay yay ao laa tee rak ter tam rue tam ue chan mai roo tee tam-ruat nee',
-    mnemonic: 'Think "tam-ruat" like "tumbling rat" - everything\'s spinning!'
+    thai: 'ในจักรวาลหลายมิติ ลาปกครองทฤษฎีคำหลายความหมาย',
+    thaiMasculine: 'ในจักรวาลหลายมิติ ลาปกครองทฤษฎีคำหลายความหมายครับ',
+    thaiFeminine: 'ในจักรวาลหลายมิติ ลาปกครองทฤษฎีคำหลายความหมายค่ะ',
+    english: 'Within multiverses, donkeys rule the multiple words theory.',
+    pronunciation: 'nai jak-ra-waan laai mi-ti, laa pok-krong trit-sa-dee kam laai kwaam-maai',
+    mnemonic: 'Think "jak-ra-waan" for "universe" and "trit-sa-dee" for "theory" - cosmic donkey physics!'
   },
   9: {
-    thai: 'ฮี่ฮ่ะฮี่ฮ่ะฮี่ฮ่ะฮี่ฮ่ะฮี่ฮ่ะฮี่',
-    thaiMasculine: 'ฮี่ฮ่ะฮี่ฮ่ะฮี่ฮ่ะฮี่ฮ่ะฮี่ฮ่ะฮี่ครับ',
-    thaiFeminine: 'ฮี่ฮ่ะฮี่ฮ่ะฮี่ฮ่ะฮี่ฮ่ะฮี่ฮ่ะฮี่ค่ะ',
-    english: 'Heeeheheheeeheheheheheheheheeeee',
-    pronunciation: 'hee-ha-hee-ha-hee-ha-hee',
-    mnemonic: 'Think "hee-ha" like "heehaw" - but way more chaotic!'
+    thai: 'ลา, ลาเหลา, ลูกกุญแจประตู และลิง ลาลาลาลา',
+    thaiMasculine: 'ลา, ลาเหลา, ลูกกุญแจประตู และลิง ลาลาลาลาครับ',
+    thaiFeminine: 'ลา, ลาเหลา, ลูกกุญแจประตู และลิง ลาลาลาลาค่ะ',
+    english: 'Donkeys, dorkeys, door keys and monkeys lalalalala',
+    pronunciation: 'laa, laa-lao, look-kun-jae pra-dtuu lae ling la-la-la-la',
+    mnemonic: 'Think sing-song "la-la-la" and "look-kun-jae" for door keys - pure chaotic silliness!'
   },
   10: {
     thai: 'า̶̬̩͇̼͖͖͈̯̳͎͛̀̐͌̅̿̈́̏̾̏̽̎',
@@ -172,7 +172,7 @@ export function ToneStep({ value, onNext, onBack }: {
             [&::-moz-range-thumb]:shadow-lg"
         />
         <div className="flex justify-between px-1 text-xs text-gray-400">
-          <span>1/10</span>
+          <span>{safeSliderValue}/10</span>
           <span>10/10</span>
         </div>
       </div>

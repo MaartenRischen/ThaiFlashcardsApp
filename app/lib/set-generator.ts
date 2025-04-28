@@ -691,8 +691,8 @@ function validatePhrase(data: unknown, existingPhrases: Phrase[] = []): data is 
     });
 
     // Process compound words
-    let processedWords: string[] = [];
-    let skipIndices = new Set<number>();
+    const processedWords: string[] = [];
+    const skipIndices = new Set<number>();
 
     // Check for compound words
     for (let i = 0; i < words.length; i++) {

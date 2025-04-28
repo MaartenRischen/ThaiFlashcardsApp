@@ -6,30 +6,12 @@ export function ReviewStep({ state, onConfirm, onBack }: {
   onConfirm: () => void,
   onBack: () => void,
 }) {
-  const getLearningStyleName = () => {
-    if (state.tone <= 3) return "Serious";
-    if (state.tone >= 8) return "Ridiculous";
-    return "Balanced";
-  };
-
   return (
     <div className="space-y-3 px-2">
       <div className="space-y-1 text-center mb-4">
         <h3 className="text-lg font-medium text-white">
           Almost Ready!
         </h3>
-        <div className="text-gray-400 text-sm">
-          You&apos;re ready to start learning with:
-        </div>
-        <div className="text-gray-300 text-base">
-          {state.proficiency.canDoSelections.length} &quot;I can do&quot; goals selected
-        </div>
-        <div className="text-gray-300 text-base">
-          {state.scenarios.length} learning scenarios
-        </div>
-        <div className="text-gray-300 text-base">
-          Learning style: {getLearningStyleName()}
-        </div>
       </div>
 
       <div className="space-y-3">
@@ -55,6 +37,12 @@ export function ReviewStep({ state, onConfirm, onBack }: {
                 <span className="text-gray-300 text-sm">{scenario}</span>
               </div>
             ))}
+            {state.customGoal && (
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#8AB4F8]"></span>
+                <span className="text-gray-300 text-sm">{state.customGoal}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -64,7 +52,9 @@ export function ReviewStep({ state, onConfirm, onBack }: {
             <h4 className="text-sm font-medium text-white">Learning Style</h4>
             <span className="text-xs text-gray-500">How you&apos;ll learn</span>
           </div>
-          <div className="text-gray-300 text-sm font-medium text-center">{getLearningStyleName()}</div>
+          <div className="text-gray-300 text-sm font-medium text-center">
+            Ridiculousness Level: {state.tone}/10
+          </div>
         </div>
       </div>
 

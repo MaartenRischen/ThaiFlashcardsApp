@@ -302,25 +302,23 @@ export function ScenarioStep({ selectedScenarios: initialSelectedScenarios, cust
   };
 
   const handleNext = () => {
-    // Map "Tell Us!" back to "Custom Scenario" for internal logic if needed,
-    // but filter it out if no custom tags were actually added.
-    // Also filter out any of the bizarre scenarios from the final list sent onwards.
+    // Include both pre-made scenarios and custom tags, but filter out the CUSTOM_SCENARIO marker
+    // and any weird scenarios
     const finalSelectedScenarios = selected.filter(s => 
         s !== CUSTOM_SCENARIO && 
-        !weirdScenarios.includes(s) && 
-        !customTags.includes(s) // Don't send custom tags as scenarios
+        !weirdScenarios.includes(s)
     );
 
     let finalCustomGoal: string | undefined = undefined;
     if (selected.includes(CUSTOM_SCENARIO) && (custom.trim() || customTags.length > 0)) {
         const customText = custom.trim() ? `${custom.trim()}. ` : '';
         const tagsText = customTags.length > 0 ? `Selected topics: ${customTags.join(', ')}` : '';
-        finalCustomGoal = (customText + tagsText).trim() || undefined; // Ensure it's not empty string
+        finalCustomGoal = (customText + tagsText).trim() || undefined;
     }
     
     onNext({ 
       scenarios: finalSelectedScenarios, 
-      customGoal: finalCustomGoal // Use the potentially combined custom goal text
+      customGoal: finalCustomGoal
     });
   };
 

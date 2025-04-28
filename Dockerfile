@@ -46,8 +46,9 @@ ENV NEXT_PUBLIC_CLERK_SIGN_UP_URL=$NEXT_PUBLIC_CLERK_SIGN_UP_URL
 ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=$NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL
 ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=$NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
 
-# Python and build tools for native dependencies
-RUN apk add --no-cache python3 make g++
+# Update alpine package index and install Python and build tools
+RUN apk update && \
+    apk add --no-cache python3 python3-dev py3-pip make g++ build-base
 
 # Install sharp explicitly for production image processing
 RUN npm install sharp

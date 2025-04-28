@@ -461,12 +461,10 @@ function buildGenerationPrompt(
   const schemaDescription = `
   **Output Format:**
   Generate a JSON object containing two keys: "cleverTitle" and "phrases".
-  - "cleverTitle": Write a single, natural, matter-of-fact, grammatically correct English sentence that describes the set. Use the user's situations and specific focus, but do NOT just list them. The title should sound like a native English speaker describing what the set is about. Do not use awkward connectors or forced structure. Do not use title case—use normal sentence case. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title. Examples:
-    - Situations: "learning the guitar, walking to school", Specific Focus: "mustard" → "Learning the guitar and walking to school while thinking about mustard."
-    - Situations: "talking to christians", Specific Focus: "cats" → "Talking to christians about cats."
-    - Situations: "talking to christians, looking up something in the dictionary", Specific Focus: "cats" → "Looking up something in the dictionary and talking to christians about cats."
-    - Situations: "talking to christians" (no specific focus) → "Talking to christians."
-    - Specific Focus: "cats" (no situations) → "All about cats."
+  - "cleverTitle": Use the exact user's input as the title. If there are multiple inputs, combine them with "and". Do not add any descriptive phrases like "describing the experience of" or "learning about". Just use the raw input(s). Examples:
+    - Input: "living in the Nile" → "Living in the Nile"
+    - Inputs: "birds, living in the Nile" → "Birds and living in the Nile"
+    - Input: "street food vendors" → "Street food vendors"
   - "phrases": An array containing exactly ${count} unique flashcard objects. Each phrase object MUST conform to the following TypeScript interface:
 
   \`\`\`typescript
@@ -505,13 +503,10 @@ function buildGenerationPrompt(
 
   **CRITICAL INSTRUCTIONS:**
 
-  1.  **Set Title:** Write a single, natural, matter-of-fact, grammatically correct English sentence that describes the set. Use the user's situations and specific focus, but do NOT just list them. The title should sound like a native English speaker describing what the set is about. Do not use awkward connectors or forced structure. Do not use title case—use normal sentence case. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
-      Examples:
-      - Situations: "learning the guitar, walking to school", Specific Focus: "mustard" → "Learning the guitar and walking to school while thinking about mustard."
-      - Situations: "talking to christians", Specific Focus: "cats" → "Talking to christians about cats."
-      - Situations: "talking to christians, looking up something in the dictionary", Specific Focus: "cats" → "Looking up something in the dictionary and talking to christians about cats."
-      - Situations: "talking to christians" (no specific focus) → "Talking to christians."
-      - Specific Focus: "cats" (no situations) → "All about cats."
+  1.  **Set Title:** Use the exact user's input as the title. If there are multiple inputs, combine them with "and". Do not add any descriptive phrases like "describing the experience of" or "learning about". Just use the raw input(s). Examples:
+      - Input: "living in the Nile" → "Living in the Nile"
+      - Inputs: "birds, living in the Nile" → "Birds and living in the Nile"
+      - Input: "street food vendors" → "Street food vendors"
 
   2.  **Level-Specific Content:** (Ensure strict adherence)
       *   Complete Beginner: Use only the most essential, high-frequency words and very short descriptive phrases (1-3 words). Avoid sentences except for the simplest descriptive S-V-O (subject-verb-object) forms. NO dialogues or questions. Examples should be extremely simple descriptive statements, suitable for someone with zero prior knowledge.

@@ -401,8 +401,6 @@ export function ScenarioStep({ selectedScenarios: initialSelectedScenarios, cust
                 ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
                 : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'
             }`}
-            // Disable selecting pre-made if "Tell Us!" is selected
-            disabled={selected.includes(CUSTOM_SCENARIO) && scenario !== CUSTOM_SCENARIO && !weirdScenarios.includes(scenario)}
           >
             {scenario}
           </button>

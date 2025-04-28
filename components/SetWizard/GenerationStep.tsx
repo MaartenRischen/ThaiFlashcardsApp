@@ -31,8 +31,24 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
       ].join(', ') || undefined;
 
       const specificTopics = state.topics.length > 0 ? state.topics.join(', ') : undefined;
-      // Always use 10 as the number of cards
-      const totalCount = 10;
+      
+      // Calculate total cards based on number of topics
+      const totalTopics = [
+        ...state.topics,
+        ...scenarios,
+        ...(customGoal ? [customGoal] : [])
+      ].filter(Boolean).length;
+      
+      // Calculate cards per topic, ensuring total doesn't exceed 50
+      const totalCount = Math.min(
+        totalTopics === 0 ? 10 : totalTopics * 10, // 10 cards per topic, minimum 10
+        50 // Maximum 50 cards total
+      );
+      
+      // If we have more than 5 topics, reduce cards per topic to stay under 50
+      const cardsPerTopic = totalTopics > 5 ? Math.floor(50 / totalTopics) : 10;
+      
+      console.log(`Generating set with ${totalCount} cards (${totalTopics} topics, ${cardsPerTopic} cards per topic)`);
 
       const result = await generateCustomSet(
         {

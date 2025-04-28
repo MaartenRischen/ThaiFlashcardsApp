@@ -1,6 +1,6 @@
 {
   "name": "Donkey Bridge",
-  "short_name": "DonkeyBridge",
+  "short_name": "Donkey Bridge",
   "description": "Learn Thai vocabulary effectively with mnemonics and spaced repetition",
   "start_url": "/",
   "display": "standalone",

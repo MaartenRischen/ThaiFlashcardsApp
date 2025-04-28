@@ -136,14 +136,6 @@ function buildGenerationPrompt(
   const prompt = `
   You are an expert AI assistant specialized in creating language learning flashcards. Your task is to generate ${count} flashcards and a set title.
 
-  - For the set title ("cleverTitle"), write a single, natural, matter-of-fact, grammatically correct English sentence that describes the set. Use the user's situations and specific focus, but do NOT just list them. The title should sound like a native English speaker describing what the set is about. Do not use awkward connectors or forced structure. Do not use title case—use normal sentence case. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
-  - Examples:
-    - Situations: "learning the guitar, walking to school", Specific Focus: "mustard" → "Learning the guitar and walking to school while thinking about mustard."
-    - Situations: "talking to christians", Specific Focus: "cats" → "Talking to christians about cats."
-    - Situations: "talking to christians, looking up something in the dictionary", Specific Focus: "cats" → "Looking up something in the dictionary and talking to christians about cats."
-    - Situations: "talking to christians" (no specific focus) → "Talking to christians."
-    - Specific Focus: "cats" (no situations) → "All about cats."
-
   **User Preferences:**
   - Situations for Use: ${topicsToDiscuss || 'General conversation'}
   ${specificTopics ? `- Specific Focus: ${specificTopics}` : ''}
@@ -151,7 +143,13 @@ function buildGenerationPrompt(
 
   **CRITICAL INSTRUCTIONS:**
 
-  1.  **Set Title:** Follow the above instructions for the set title. Make sure it is a single, natural, grammatically correct English sentence. Do NOT try to be clever or funny. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
+  1.  **Set Title:** Write a single, natural, matter-of-fact, grammatically correct English sentence that describes the set. Use the user's situations and specific focus, but do NOT just list them. The title should sound like a native English speaker describing what the set is about. Do not use awkward connectors or forced structure. Do not use title case—use normal sentence case. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
+      Examples:
+      - Situations: "learning the guitar, walking to school", Specific Focus: "mustard" → "Learning the guitar and walking to school while thinking about mustard."
+      - Situations: "talking to christians", Specific Focus: "cats" → "Talking to christians about cats."
+      - Situations: "talking to christians, looking up something in the dictionary", Specific Focus: "cats" → "Looking up something in the dictionary and talking to christians about cats."
+      - Situations: "talking to christians" (no specific focus) → "Talking to christians."
+      - Specific Focus: "cats" (no situations) → "All about cats."
 
   2.  **Level-Specific Content:** (Ensure strict adherence)
       *   Complete Beginner: Use only the most essential, high-frequency words and very short descriptive phrases (1-3 words). Avoid sentences except for the simplest descriptive S-V-O (subject-verb-object) forms. NO dialogues or questions. Examples should be extremely simple descriptive statements, suitable for someone with zero prior knowledge.

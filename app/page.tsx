@@ -9,6 +9,7 @@ import { INITIAL_PHRASES, type Phrase, type ExampleSentence } from './data/phras
 import { useSet } from './context/SetContext';
 import { Phrase as GeneratorPhrase, GeneratePromptOptions } from './lib/set-generator';
 import { SetMetaData, SetProgress } from './lib/storage';
+import { VERSION_INFO } from './version';
 import {
   Popover,
   PopoverContent,
@@ -50,13 +51,6 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
   
   return <>{children}</>;
 }
-
-// Update version info
-const VERSION_INFO = {
-  lastUpdated: new Date().toISOString(),
-  version: "1.3.54", // Incremented version
-  changes: "Implement Supabase backend for persistent user sets & progress."
-};
 
 interface Review {
   date: string;

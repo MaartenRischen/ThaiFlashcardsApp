@@ -22,7 +22,7 @@ import { SetWizardModal, SetWizardState } from '../components/SetWizard/SetWizar
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Dialog } from '@/components/ui/dialog';
-import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle, Grid, Layers, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Utility function to detect mobile devices
@@ -1346,7 +1346,7 @@ export default function ThaiFlashcards() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-auto" onClick={() => setShowHowItWorks(false)}>
           <div className="neumorphic max-w-lg w-full p-6 bg-[#1f1f1f]" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-[#A9C4FC]">How DonkeyBridge Works</h2>
+              <h2 className="text-xl font-bold text-[#A9C4FC]">How Donkey Bridge Works</h2>
               <button
                 onClick={() => setShowHowItWorks(false)}
                 className="text-gray-400 hover:text-white text-2xl"
@@ -1355,102 +1355,125 @@ export default function ThaiFlashcards() {
               </button>
             </div>
 
-            <div className="space-y-5 text-gray-300 text-sm max-h-[70vh] overflow-y-auto pr-2">
+            <div className="space-y-8 text-gray-300 text-sm max-h-[70vh] overflow-y-auto pr-2">
               {/* Core Flashcard System */}
               <div>
-                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-2">Flashcard System & SRS</h3>
-                <p className="mb-2">DonkeyBridge uses a Spaced Repetition System (SRS) to optimize your learning:</p>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li><span className="text-red-400">Wrong</span> cards reappear quickly for immediate reinforcement</li>
-                  <li><span className="text-yellow-400">Correct</span> cards return after a moderate delay</li>
-                  <li><span className="text-green-400">Easy</span> cards are scheduled further in the future</li>
-                  <li>The scheduling interval increases automatically the more often you get a card right</li>
-                  <li>Each day, the system selects cards that are due for review, prioritizing difficult ones</li>
+                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-3">Flashcard System & SRS</h3>
+                <p className="mb-3">Donkey Bridge uses a Spaced Repetition System (SRS) to optimize your learning:</p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2"><span className="text-red-400">●</span> Wrong cards reappear quickly for immediate reinforcement</li>
+                  <li className="flex items-center gap-2"><span className="text-yellow-400">●</span> Correct cards return after a moderate delay</li>
+                  <li className="flex items-center gap-2"><span className="text-green-400">●</span> Easy cards are scheduled further in the future</li>
+                  <li className="flex items-center gap-2"><span className="text-blue-400">●</span> The scheduling interval increases automatically the more often you get a card right</li>
+                  <li className="flex items-center gap-2"><span className="text-blue-400">●</span> Each day, the system selects cards that are due for review, prioritizing difficult ones</li>
                 </ul>
               </div>
               
-              {/* Set Management */}
+              {/* Card Study Features */}
               <div>
-                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-2">Set Management</h3>
-                <p className="mb-2">You can work with multiple vocabulary sets:</p>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li>Click <span className="text-[#A9C4FC]">My Sets</span> to see all available vocabulary sets</li>
-                  <li>Each set contains themed vocabulary with Thai translations and examples</li>
-                  <li>Switch between sets at any time without losing your progress</li>
-                  <li>Import or export sets to share with others or back up your data</li>
-                  <li>View detailed card info by clicking the cards icon in the set manager</li>
-                  <li>Share sets with others using the publish feature</li>
-                </ul>
+                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-3">Card Study Features</h3>
+                <p className="mb-3">Each flashcard includes multiple tools to enhance learning:</p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#A9C4FC] font-semibold min-w-[100px]">'Show Answer'</span>
+                    <span className="bg-[#252525] text-blue-400 px-3 py-1 rounded text-xs">Show Answer</span>
+                    <span className="text-gray-300">reveals the Thai translation, pronunciation, and examples</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#A9C4FC] font-semibold min-w-[100px]">'Show Hint'</span>
+                    <span className="bg-[#252525] text-blue-400 px-3 py-1 rounded text-xs">Show Hint</span>
+                    <span className="text-gray-300">displays a mnemonic aid before revealing the answer</span>
+                  </div>
+                  <div className="pl-4 space-y-2">
+                    <li>Text-to-speech buttons let you hear proper Thai pronunciation</li>
+                    <li>Example sentences demonstrate the vocabulary in context</li>
+                    <li>Create or edit your own mnemonics to personalize your learning</li>
+                  </div>
+                </div>
               </div>
               
-              {/* AI Set Generation */}
+              {/* Customization Options */}
               <div>
-                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-2">AI Set Creation</h3>
-                <p className="mb-2">Create custom vocabulary sets tailored to your learning needs:</p>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li>Click <span className="text-[#A9C4FC]">Make Your Own Set!</span> to launch the Set Wizard</li>
-                  <li>Specify your Thai proficiency level for appropriate vocabulary difficulty</li>
-                  <li>Choose topics you want to learn (food, travel, business, etc.)</li>
-                  <li>Set your own preferred tone from formal/serious and useful to absolutely ridiculous and pretty much useless but good fun.</li>
-                  <li>Add specific scenarios you want to prepare for</li>
-                  <li>The AI generates vocabulary, translations, pronunciations, example sentences, and mnemonic aids</li>
-                </ul>
-              </div>
-              
-              {/* Card Features */}
-              <div>
-                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-2">Card Study Features</h3>
-                <p className="mb-2">Each flashcard includes multiple tools to enhance learning:</p>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li><span className="text-[#A9C4FC]">Show Answer</span> reveals the Thai translation, pronunciation, and examples</li>
-                  <li><span className="text-[#A9C4FC]">Show Hint</span> displays a mnemonic aid before revealing the answer</li>
-                  <li>Text-to-speech buttons let you hear proper Thai pronunciation</li>
-                  <li>Example sentences demonstrate the vocabulary in context</li>
-                  <li>Create or edit your own mnemonics to personalize your learning</li>
-                  <li>Toggle between male/female forms with gender selector</li>
-                  <li>Switch between casual and polite speech with politeness toggle</li>
-                </ul>
-              </div>
-              
-              {/* Customization & Settings */}
-              <div>
-                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-2">Customization Options</h3>
-                <p className="mb-2">Tailor the app to your preferences:</p>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li><span className="text-[#A9C4FC]">Gender Toggle</span>: Switch between male (krap) and female (ka) speech patterns</li>
-                  <li><span className="text-[#A9C4FC]">Polite Mode</span>: Add formal particles (ครับ/ค่ะ) to phrases</li>
-                  <li><span className="text-[#A9C4FC]">Autoplay</span>: Automatically play audio when revealing answers</li>
-                  <li>Personalize mnemonics to create your own memory aids</li>
-                  <li>View your progress to track learning across all cards</li>
-                  <li>Reset progress for individual cards or entire sets when needed</li>
-                </ul>
+                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-3">Customization Options</h3>
+                <p className="mb-3">Tailor the app to your preferences:</p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#A9C4FC] font-semibold min-w-[100px]">Gender Toggle</span>
+                    <div className="flex items-center gap-2 bg-[#252525] px-3 py-1 rounded">
+                      <span className="text-gray-400 text-xs">Female</span>
+                      <div className="relative w-8 h-4 bg-gray-600 rounded-full">
+                        <div className="absolute left-1 top-1 w-2 h-2 bg-pink-400 rounded-full"></div>
+                      </div>
+                      <span className="text-gray-400 text-xs">Male</span>
+                    </div>
+                    <span className="text-gray-300">Switch between male (krap) and female (ka) speech patterns</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#A9C4FC] font-semibold min-w-[100px]">Polite Mode</span>
+                    <div className="flex items-center gap-2 bg-[#252525] px-3 py-1 rounded">
+                      <span className="text-gray-400 text-xs">Casual</span>
+                      <div className="relative w-8 h-4 bg-gray-600 rounded-full">
+                        <div className="absolute left-1 top-1 w-2 h-2 bg-gray-400 rounded-full"></div>
+                      </div>
+                      <span className="text-gray-400 text-xs">Polite</span>
+                    </div>
+                    <span className="text-gray-300">Add formal particles (ครับ/ค่ะ) to phrases</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#A9C4FC] font-semibold min-w-[100px]">'Autoplay'</span>
+                    <div className="flex items-center gap-2 bg-[#252525] px-3 py-1 rounded">
+                      <div className="relative w-8 h-4 bg-gray-600 rounded-full">
+                        <div className="absolute right-1 top-1 w-2 h-2 bg-blue-400 rounded-full"></div>
+                      </div>
+                      <span className="text-gray-400 text-xs">Autoplay</span>
+                    </div>
+                    <span className="text-gray-300">Automatically play audio when revealing answers</span>
+                  </div>
+                  <div className="pl-4 space-y-2">
+                    <li>Personalize mnemonics to create your own memory aids</li>
+                    <li>View your progress to track learning across all cards</li>
+                    <li>Reset progress for individual cards or entire sets when needed</li>
+                  </div>
+                </div>
               </div>
               
               {/* Progress Tracking */}
               <div>
-                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-2">Progress Tracking</h3>
-                <p className="mb-2">Monitor your learning journey:</p>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li>The <span className="text-[#A9C4FC]">Cards in Set</span> view shows the status of each card</li>
-                  <li>Cards are color-coded by status: Unseen, Wrong, Correct, or Easy</li>
-                  <li>Progress bars indicate how much of a set you've learned</li>
-                  <li>The system automatically prioritizes cards needing review</li>
-                  <li>Your learning data is saved automatically between sessions</li>
-                </ul>
+                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-3">Progress Tracking</h3>
+                <p className="mb-3">Monitor your learning journey:</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span>The</span>
+                    <span className="text-[#A9C4FC] font-semibold">'Cards'</span>
+                    <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-[#2563EB]"><Layers className="w-4 h-4" /></span>
+                    <span>view shows the status of each card</span>
+                  </div>
+                  <div className="pl-4 space-y-2">
+                    <li>Cards are color-coded by status: Unseen, Wrong, Correct, or Easy</li>
+                    <li>Progress bars indicate how much of a set you've learned</li>
+                    <li>The system automatically prioritizes cards needing review</li>
+                    <li>Your learning data is saved automatically between sessions</li>
+                  </div>
+                </div>
               </div>
               
               {/* Tips & Tricks */}
               <div>
-                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-2">Tips for Effective Learning</h3>
-                <ul className="list-disc pl-5 space-y-1">
+                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-3">Tips for Effective Learning</h3>
+                <div className="space-y-2">
                   <li>Study regularly - short daily sessions are better than cramming</li>
                   <li>Create personal mnemonics that are vivid and memorable</li>
                   <li>Use the context examples to understand how words are used naturally</li>
                   <li>Speak aloud with the audio to practice pronunciation</li>
                   <li>Be honest with the difficulty buttons - they optimize your learning schedule</li>
                   <li>Generate specialized sets for situations you'll actually encounter</li>
-                  <li>Review previously learned cards periodically through the Cards view</li>
-                </ul>
+                  <div className="flex items-center gap-2">
+                    <span>Review previously learned cards periodically through the</span>
+                    <span className="text-[#A9C4FC] font-semibold">'Cards'</span>
+                    <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-[#2563EB]"><Layers className="w-4 h-4" /></span>
+                    <span>view</span>
+                  </div>
+                </div>
               </div>
 
               <div className="pt-4 text-center">
@@ -1541,11 +1564,25 @@ export default function ThaiFlashcards() {
               id: 'set-generation',
             });
             
-            // Prepare data for the API call
-            const totalCount = 10;
+            // Calculate total cards based on number of topics
+            const totalTopics = [
+              ...wizardState.topics,
+              ...wizardState.scenarios,
+              ...(wizardState.customGoal ? [wizardState.customGoal] : [])
+            ].filter(Boolean).length;
             
-            // TODO: Ensure wizardState.proficiencyLevel contains the FULL string
-            // like "complete beginner", "God Mode", etc.
+            // Calculate cards per topic, ensuring total doesn't exceed 50
+            const totalCount = Math.min(
+              totalTopics === 0 ? 10 : totalTopics * 10, // 10 cards per topic, minimum 10
+              50 // Maximum 50 cards total
+            );
+            
+            // If we have more than 5 topics, reduce cards per topic to stay under 50
+            const cardsPerTopic = totalTopics > 5 ? Math.floor(50 / totalTopics) : 10;
+            
+            console.log(`Generating set with ${totalCount} cards (${totalTopics} topics, ${cardsPerTopic} cards per topic)`);
+            
+            // Create preferences object for test generation
             const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
               level: wizardState.proficiency.levelEstimate, // Correctly access the nested property
               specificTopics: wizardState.topics.length > 0 ? wizardState.topics.join(', ') : undefined, // Join topics array

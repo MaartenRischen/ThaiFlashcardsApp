@@ -27,9 +27,26 @@ export async function generateMnemonic(thaiWord: string, englishMeaning: string)
       return "Error: Gemini model not available.";
   }
   try {
-    const prompt = `Create a memorable mnemonic to help remember the Thai word "${thaiWord}" which means "${englishMeaning}" in English. 
-                    The mnemonic should connect the Thai pronunciation with its English meaning 
-                    in a memorable way. Keep it under 100 characters.`;
+    const prompt = `Create a memorable mnemonic to help remember the Thai word "${thaiWord}" which means "${englishMeaning}" in English.
+
+CRITICAL REQUIREMENTS:
+1. The mnemonic MUST contain English words or sounds that are phonetically similar to the Thai pronunciation
+2. The mnemonic MUST also reference or relate to the English meaning in some way
+3. Keep it under 100 characters
+4. Do not include any names or personal references
+5. Focus on creating a clear phonetic connection to help remember the Thai pronunciation
+
+Example good mnemonics:
+- For "สวัสดี" (sa-wat-dee) meaning "hello": "Think: 'Saw what, dee?' - a friendly hello"
+- For "ขอบคุณ" (khop-khun) meaning "thank you": "Think: 'Cope-Kun' - coping with gratitude"
+- For "ใช่" (chai) meaning "yes": "Think: 'Chai tea' - say yes to chai"
+
+BAD examples to avoid:
+- Mnemonics that don't sound like the Thai word
+- Mnemonics that don't reference the meaning
+- Mnemonics with random names or irrelevant words
+
+Generate a mnemonic following these rules:`;
     
     const result = await geminiPro.generateContent(prompt);
     const response = result.response;
@@ -48,7 +65,13 @@ export async function generateExampleSentence(thaiWord: string, englishMeaning: 
       return "Error: Gemini model not available.";
   }
   try {
-    const prompt = `Create a simple example sentence in Thai using the word "${thaiWord}" which means "${englishMeaning}" in English.
+    const prompt = `Create a simple descriptive example sentence in Thai using the word "${thaiWord}" which means "${englishMeaning}" in English.
+                    The sentence should be a statement, NOT a dialogue or question. Avoid using:
+                    - Questions or exclamations
+                    - Polite phrases like "please", "thank you", "excuse me"
+                    - Question words like "what", "where", "when", "why", "how"
+                    - Dialogue phrases like "can you", "do you", "may I"
+                    Instead, create a simple descriptive statement about a fact, situation, or observation.
                     Return the result as JSON in this exact format:
                     {
                       "thai": "Thai sentence here",

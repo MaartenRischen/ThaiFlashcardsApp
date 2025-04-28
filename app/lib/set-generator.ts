@@ -152,41 +152,41 @@ function buildGenerationPrompt(
   1.  **Set Title:** Follow the above instructions for the set title. Make sure it is a single, natural, grammatically correct English sentence. Do NOT try to be clever or funny. Do NOT include any names, usernames, language, or country. Do NOT use the phrase 'AI Set:' or anything similar. Never use names or the username in the title.
 
   2.  **Level-Specific Content:** (Ensure strict adherence)
-      *   Complete Beginner: Use only the most essential, high-frequency words and very short phrases (1-3 words). Avoid sentences except for the simplest S-V-O (subject-verb-object) forms. Examples should be extremely simple and practical, suitable for someone with zero prior knowledge.
-      *   Basic Understanding: Use short, practical phrases and very simple sentences (up to 5 words). Introduce basic grammar and common expressions. Examples should be easy to follow and directly useful in daily life.
-      *   Intermediate: Use conversational sentences (5-10 words), common grammar structures, and typical phrases. Examples should reflect everyday conversation and introduce some variety in structure and vocabulary.
-      *   Advanced: Use only complex sentences (10+ words), nuanced vocabulary, and varied grammar. Do NOT use simple phrases. Examples should be sophisticated and demonstrate advanced language use.
-      *   Native/Fluent: Use idiomatic, natural, and authentic language as used by educated native speakers. Include slang, cultural references, and subtle nuances. Examples should sound like real, fluent Thai in diverse contexts.
-      *   God Mode: Use extremely elaborate, idiomatic, and sophisticated language. Phrases and examples should be more complex than those for native speakers, featuring rare vocabulary, advanced grammar, and highly nuanced, academic, or literary expressions. Push the boundaries of complexity and naturalness, as if the user is a superhuman Thai speaker.
+      *   Complete Beginner: Use only the most essential, high-frequency words and very short descriptive phrases (1-3 words). Avoid sentences except for the simplest descriptive S-V-O (subject-verb-object) forms. NO dialogues or questions. Examples should be extremely simple descriptive statements, suitable for someone with zero prior knowledge.
+      *   Basic Understanding: Use short, practical descriptive phrases and very simple statements (up to 5 words). Introduce basic grammar and common expressions. NO dialogues, questions, or conversational phrases. Examples should be easy to follow descriptive statements about daily life.
+      *   Intermediate: Use descriptive sentences (5-10 words), common grammar structures, and typical phrases. NO dialogues or questions. Examples should describe everyday situations and introduce some variety in structure and vocabulary.
+      *   Advanced: Use only complex descriptive sentences (10+ words), nuanced vocabulary, and varied grammar. Do NOT use simple phrases, dialogues, or questions. Examples should be sophisticated descriptive statements.
+      *   Native/Fluent: Use idiomatic, natural, and authentic descriptive language as used by educated native speakers. Include slang and cultural references, but NO dialogues or questions. Examples should be descriptive statements that sound like real, fluent Thai.
+      *   God Mode: Use extremely elaborate, idiomatic, and sophisticated descriptive language. Phrases and examples should be more complex than those for native speakers, featuring rare vocabulary and advanced grammar in descriptive statements. NO dialogues or questions. Push the boundaries of complexity and naturalness in descriptive language.
 
-  3.  **TONE Implementation (${tone.toString()}):** THIS IS PARAMOUNT. The tone MUST heavily influence ALL content. Use the following style guide based on the selected tone level (1-10):
+  3.  **TONE Implementation (${tone.toString()}):** THIS IS PARAMOUNT. The tone MUST heavily influence ALL content, but NEVER use dialogues or questions. Use the following style guide based on the selected tone level (1-10):
 
       *   **Levels 1-4 (Practical Base with Increasing Humor):**
-          - Level 1: 100% dead serious. No humor whatsoever. Pure business and survival Thai. Examples must be completely practical situations you'd find in a textbook.
-          - Level 2: 95% serious with 5% very mild humor. Like level 1 but occasionally a small smile might escape.
-          - Level 3: 85% practical with 15% humor. Starting to have fun but still very much focused on learning.
-          - Level 4: 70% practical with 30% humor. The last level where learning is still the main priority.
+          - Level 1: 100% dead serious descriptive statements. No humor whatsoever. Pure business and survival Thai in statement form.
+          - Level 2: 95% serious descriptive statements with 5% very mild humor. Like level 1 but occasionally a small smile might escape.
+          - Level 3: 85% practical descriptive statements with 15% humor. Starting to have fun but still very much focused on learning.
+          - Level 4: 70% practical descriptive statements with 30% humor. The last level where learning is still the main priority.
 
       *   **Levels 5-7 (Decreasing Practicality):**
-          - Level 5: 50% practical, 50% absurd. Learning is optional. Examples start involving impossible scenarios.
-          - Level 6: 30% practical, 70% weird. Phrases might still be useful but in contexts that make no sense.
-          - Level 7: 15% practical, 85% bizarre. You might learn something by accident, but that's not the point anymore.
+          - Level 5: 50% practical descriptive statements, 50% absurd statements. Learning is optional. Examples describe impossible scenarios.
+          - Level 6: 30% practical descriptive statements, 70% weird statements. Phrases might still be useful but in contexts that make no sense.
+          - Level 7: 15% practical descriptive statements, 85% bizarre statements. You might learn something by accident, but that's not the point anymore.
 
       *   **Levels 8-10 (Pure WTF Territory):**
-          - Level 8: 5% practical, 95% insanity. Examples should make readers question their reality.
-          - Level 9: 1% practical, 99% chaos. Should trigger existential crises in readers.
-          - Level 10: 0% practical, 100% brain-melting madness. Maximum surrealism. Should make Dali paintings look normal.
+          - Level 8: 5% practical descriptive statements, 95% insanity. Examples should make readers question their reality.
+          - Level 9: 1% practical descriptive statements, 99% chaos. Should trigger existential crises in readers.
+          - Level 10: 0% practical descriptive statements, 100% brain-melting madness. Maximum surrealism. Should make Dali paintings look normal.
 
       *   **Content Guidelines by Component:**
           - **Main Phrases:** 
-            * Levels 1-4: Must be actually useful Thai phrases
-            * Levels 5-7: Can be real phrases in completely wrong contexts
-            * Levels 8-10: Can be grammatically correct but semantically insane
+            * Levels 1-4: Must be actually useful Thai descriptive phrases, NO dialogues or questions
+            * Levels 5-7: Can be real descriptive phrases in completely wrong contexts
+            * Levels 8-10: Can be grammatically correct but semantically insane descriptive statements
 
           - **Example Sentences:** 
-            * Levels 1-4: Progress from textbook examples to slightly amusing situations
-            * Levels 5-7: Start breaking laws of physics and logic
-            * Levels 8-10: Should read like fever dreams written by an AI on LSD
+            * Levels 1-4: Progress from textbook descriptive examples to slightly amusing situations, NO dialogues
+            * Levels 5-7: Start breaking laws of physics and logic in descriptive statements
+            * Levels 8-10: Should read like fever dreams written by an AI on LSD, but still in statement form
 
           - **Mnemonics:** 
             * Levels 1-4: Focus on memorability with increasing creativity
@@ -195,29 +195,24 @@ function buildGenerationPrompt(
 
       *   **Example Outputs by Level:**
           - Level 1 (Dead Serious):
-            * Phrase: "ขอกาแฟร้อนหนึ่งแก้ว" (One hot coffee, please)
-            * Example: "ดิฉันต้องการกาแฟร้อนที่ร้านกาแฟ" (I would like hot coffee at the coffee shop)
+            * Phrase: "กาแฟร้อนหนึ่งแก้ว" (One hot coffee)
+            * Example: "กาแฟร้อนอยู่บนโต๊ะ" (The hot coffee is on the table)
             * Mnemonic: "Cafe" sounds like "กาแฟ" - both mean coffee
 
-          - Level 4 (Last Practical Level):
-            * Phrase: "ขอกาแฟร้อนหนึ่งแก้ว" (One hot coffee, please)
-            * Example: "ผมสั่งกาแฟร้อนให้แมวของผม" (I ordered hot coffee for my cat)
-            * Mnemonic: "Cafe" sounds like "กาแฟ" - imagine a cat in a cafe
+          - Level 3 (Fun but Practical):
+            * Phrase: "แมวตัวอ้วน" (Fat cat)
+            * Example: "แมวตัวอ้วนนอนอยู่บนโซฟาสีชมพู" (The fat cat is sleeping on the pink sofa)
+            * Mnemonic: Think of Garfield lounging around
 
-          - Level 7 (Barely Useful):
-            * Phrase: "ขอกาแฟร้อนหนึ่งแก้ว" (One hot coffee, please)
-            * Example: "กาแฟของผมแต่งงานกับน้ำแข็งและหนีไปอยู่ดาวพลูโต" (My coffee married an ice cube and eloped to Pluto)
-            * Mnemonic: "Cafe" sounds like "กาแฟ" - picture a coffee cup in a wedding dress
+          - Level 5 (50/50):
+            * Phrase: "ดวงอาทิตย์สีม่วง" (Purple sun)
+            * Example: "ดวงอาทิตย์สีม่วงส่องแสงลงบนต้นไม้ที่ทำจากช็อกโกแลต" (The purple sun shines down on trees made of chocolate)
+            * Mnemonic: Imagine a purple sun melting chocolate trees
 
-          - Level 9 (Reality-Breaking):
-            * Phrase: "ขอกาแฟร้อนหนึ่งแก้ว" (One hot coffee, please)
-            * Example: "กาแฟของผมกลายเป็นประธานาธิบดีของจักรวาลที่ทำจากเนยแข็งและความฝัน" (My coffee became president of a universe made of cheese and dreams)
-            * Mnemonic: "Cafe" sounds like "กาแฟ" - visualize a coffee cup wearing a suit made of melting cheese while floating in space
-
-          - Level 10 (Maximum WTF):
-            * Phrase: "ขอกาแฟร้อนหนึ่งแก้ว" (One hot coffee, please)
-            * Example: "กาแฟไร้ตัวตนของผมกำลังจัดงานแต่งงานกับความว่างเปล่าในมิติที่ห้าซึ่งทำจากเสียงหัวเราะของสีม่วง" (My non-existent coffee is having a wedding with the void in the fifth dimension made of purple laughter)
-            * Mnemonic: "Cafe" sounds like "กาแฟ" - imagine a quantum coffee cup existing and not existing simultaneously while purple sound waves laugh in geometrically impossible patterns
+          - Level 8 (Pure Chaos):
+            * Phrase: "สมองกินพิซซ่า" (Brain eating pizza)
+            * Example: "สมองที่มีขาเต้นรำกำลังกินพิซซ่าในอวกาศที่ทำจากความฝัน" (The dancing brain with legs is eating pizza in space made of dreams)
+            * Mnemonic: Picture your brain growing legs and moonwalking while eating pizza in zero gravity
 
       *   **Key Rules:**
           - Level 1 must be absolutely serious and practical
@@ -257,11 +252,47 @@ function validatePhrase(data: unknown): data is Phrase {
 
   if (!hasRequiredFields) return false;
 
-  // Optional fields validation
-  if (phraseData.mnemonic !== undefined && phraseData.mnemonic !== null && typeof phraseData.mnemonic !== 'string') return false; // Allow null
-  if (phraseData.mnemonic === '') phraseData.mnemonic = undefined; // Treat empty string as undefined
-  
-  if (phraseData.examples !== undefined && phraseData.examples !== null) { // Allow null
+  // At this point we know these fields exist and are non-empty strings
+  const thai = phraseData.thai as string;
+  const pronunciation = phraseData.pronunciation as string;
+  const english = phraseData.english as string;
+
+  // Enhanced mnemonic validation
+  if (phraseData.mnemonic !== undefined && phraseData.mnemonic !== null) {
+    // Basic type check
+    if (typeof phraseData.mnemonic !== 'string') return false;
+    if (phraseData.mnemonic === '') {
+      phraseData.mnemonic = undefined;
+    } else {
+      // Validate mnemonic content
+      const mnemonic = phraseData.mnemonic.toLowerCase();
+      
+      // Check if mnemonic contains any reference to the Thai word's pronunciation
+      const pronunciationParts = pronunciation.toLowerCase().split(/[-\s]+/);
+      const hasPhoneticReference = pronunciationParts.some(part => 
+        mnemonic.includes(part) || 
+        // Check for similar sounds (basic phonetic matching)
+        mnemonic.includes(part.replace(/[aeiou]/g, ''))
+      );
+      
+      // Check if mnemonic references the meaning
+      const meaningWords = english.toLowerCase().split(/\s+/);
+      const hasMeaningReference = meaningWords.some(word => 
+        mnemonic.includes(word) ||
+        // Check for word stems
+        (word.length > 4 && mnemonic.includes(word.slice(0, -2)))
+      );
+      
+      // Reject if mnemonic doesn't help with either pronunciation or meaning
+      if (!hasPhoneticReference && !hasMeaningReference) {
+        console.warn(`Invalid mnemonic for "${thai}" (${english}): "${phraseData.mnemonic}"`);
+        phraseData.mnemonic = undefined; // Clear invalid mnemonic
+      }
+    }
+  }
+
+  // Validate examples if present
+  if (phraseData.examples !== undefined && phraseData.examples !== null) {
     if (!Array.isArray(phraseData.examples)) return false;
     
     // Validate each example sentence
@@ -269,7 +300,7 @@ function validatePhrase(data: unknown): data is Phrase {
       // Cast ex to unknown first for safety
       const exampleData = ex as unknown;
       if (!exampleData || typeof exampleData !== 'object') return false;
-      const example = exampleData as Partial<ExampleSentence>; // Cast to partial
+      const example = exampleData as Partial<ExampleSentence>;
 
       if (typeof example.thai !== 'string' || example.thai.trim() === '' ||
           typeof example.thaiMasculine !== 'string' || example.thaiMasculine.trim() === '' ||
@@ -277,7 +308,7 @@ function validatePhrase(data: unknown): data is Phrase {
           typeof example.pronunciation !== 'string' || example.pronunciation.trim() === '' ||
           typeof example.translation !== 'string' || example.translation.trim() === '') {
         console.warn("Invalid example structure:", ex);
-        return false; // Invalid example sentence structure
+        return false;
       }
     }
   }

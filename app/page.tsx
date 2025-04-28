@@ -533,12 +533,36 @@ export default function ThaiFlashcards() {
     }
   };
 
-  // Update generateRandomPhrase to ensure it just sets the ExampleSentence
+  // Add this function before generateRandomPhrase
+  const isDialogueExample = (example: ExampleSentence): boolean => {
+    const translation = example.translation.toLowerCase();
+    // Check for common dialogue indicators
+    if (translation.includes('?') || 
+        translation.includes('!') ||
+        translation.includes('please') ||
+        translation.includes('thank you') ||
+        translation.includes('excuse me') ||
+        translation.includes('sorry') ||
+        translation.includes('may i') ||
+        translation.includes('can you') ||
+        translation.includes('do you') ||
+        translation.includes('what') ||
+        translation.includes('where') ||
+        translation.includes('when') ||
+        translation.includes('why') ||
+        translation.includes('how')) {
+      return true;
+    }
+    return false;
+  };
+
+  // Update generateRandomPhrase to filter out dialogues
   const generateRandomPhrase = (direction: 'next' | 'prev' | 'first' = 'first') => {
     try {
-      const examples = phrases[index].examples || [];
+      const examples = phrases[index]?.examples?.filter(ex => !isDialogueExample(ex)) || [];
       if (!examples || examples.length === 0) {
-        setRandomSentence(null); return;
+        setRandomSentence(null); 
+        return;
       }
       let nextExampleData: ExampleSentence;
       if (!randomSentence) {
@@ -1156,7 +1180,7 @@ export default function ThaiFlashcards() {
                 <div className="flex flex-col items-center justify-center mb-4">
                   <div className="text-center">
                     {/* Thai word */}
-                    <div className="text-2xl md:text-3xl font-extrabold mb-2 text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
+                    <div className="text-3xl md:text-4xl font-extrabold mb-2 text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
                       {getThaiWithGender(phrases[index], isMale, isPoliteMode)}
                     </div>
                     {/* Pronunciation button */}
@@ -1247,7 +1271,7 @@ export default function ThaiFlashcards() {
                 {/* Mnemonic Section */} 
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm text-gray-400">Mnemonic</label>
+                    <label className="text-sm text-gray-400">Mnemonic (editable)</label>
                     <button onClick={resetCurrentMnemonic} className="text-xs text-blue-400 hover:text-blue-300">Reset</button>
                   </div>
                   
@@ -1374,7 +1398,7 @@ export default function ThaiFlashcards() {
                   <li>Click <span className="text-[#A9C4FC]">Make Your Own Set!</span> to launch the Set Wizard</li>
                   <li>Specify your Thai proficiency level for appropriate vocabulary difficulty</li>
                   <li>Choose topics you want to learn (food, travel, business, etc.)</li>
-                  <li>Set your preferred tone from formal to casual (1-10 scale)</li>
+                  <li>Set your own preferred tone from formal/serious and useful to absolutely ridiculous and pretty much useless but good fun.</li>
                   <li>Add specific scenarios you want to prepare for</li>
                   <li>The AI generates vocabulary, translations, pronunciations, example sentences, and mnemonic aids</li>
                 </ul>

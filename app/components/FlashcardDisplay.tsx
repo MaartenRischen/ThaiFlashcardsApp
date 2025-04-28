@@ -9,7 +9,7 @@ interface ExampleSentence {
 export interface Phrase extends ExampleSentence {
   id?: number;
   english: string;
-  examples?: ExampleSentence[];
+  examples: ExampleSentence[];
   mnemonic?: string;
 }
 

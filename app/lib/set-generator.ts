@@ -10,7 +10,7 @@ export interface Phrase {
   thaiFeminine: string;
   pronunciation: string;
   mnemonic?: string;
-  examples?: ExampleSentence[];
+  examples: ExampleSentence[]; // Required, not optional
   difficulty?: 'easy' | 'good' | 'hard';
 }
 
@@ -115,7 +115,7 @@ function buildGenerationPrompt(
     thaiFeminine: string; // Polite female version ("ค่ะ").
     pronunciation: string; // Simple phonetic guide (e.g., 'sa-wat-dee krap').
     mnemonic?: string; // Provide a concise, intuitive mnemonic in *English* that helps remember the Thai word or short phrase by (1) using English words that sound phonetically similar to the Thai and (2) hinting at its meaning. NEVER reference the user‑provided situations or specific focus. If the Thai entry is longer than three words, pick the single most important word and give a mnemonic for *that* word only. Do not attempt humour or cleverness—prioritise recall effectiveness. Avoid nonsense syllables: only real English words or common sounds.
-    examples?: ExampleSentence[]; // 1-2 example sentences reflecting the TONE and LEVEL.
+    examples: ExampleSentence[]; // REQUIRED: Must provide at least 2 example sentences reflecting the TONE and LEVEL.
   }
 
   interface ExampleSentence {
@@ -126,6 +126,8 @@ function buildGenerationPrompt(
     translation: string; // English translation.
   }
   \`\`\`
+
+  CRITICAL: Each phrase MUST include at least 2 example sentences. No exceptions. The examples should reflect both the tone level and proficiency level of the set.
 
   Ensure the entire response is ONLY the JSON object, starting with '{' and ending with '}'. Do not include any introductory text, explanations, or markdown formatting outside the JSON structure itself.
   `;
@@ -248,7 +250,8 @@ function validatePhrase(data: unknown): data is Phrase {
     typeof phraseData.thai === 'string' && phraseData.thai.trim() !== '' &&
     typeof phraseData.thaiMasculine === 'string' && phraseData.thaiMasculine.trim() !== '' &&
     typeof phraseData.thaiFeminine === 'string' && phraseData.thaiFeminine.trim() !== '' &&
-    typeof phraseData.pronunciation === 'string' && phraseData.pronunciation.trim() !== '';
+    typeof phraseData.pronunciation === 'string' && phraseData.pronunciation.trim() !== '' &&
+    Array.isArray(phraseData.examples) && phraseData.examples.length >= 2; // Require at least 2 examples
 
   if (!hasRequiredFields) return false;
 
@@ -256,6 +259,25 @@ function validatePhrase(data: unknown): data is Phrase {
   const thai = phraseData.thai as string;
   const pronunciation = phraseData.pronunciation as string;
   const english = phraseData.english as string;
+
+  // Validate examples (now required)
+  const examples = phraseData.examples as unknown[];
+  // Validate each example sentence
+  for (const ex of examples) {
+    // Cast ex to unknown first for safety
+    const exampleData = ex as unknown;
+    if (!exampleData || typeof exampleData !== 'object') return false;
+    const example = exampleData as Partial<ExampleSentence>;
+
+    if (typeof example.thai !== 'string' || example.thai.trim() === '' ||
+        typeof example.thaiMasculine !== 'string' || example.thaiMasculine.trim() === '' ||
+        typeof example.thaiFeminine !== 'string' || example.thaiFeminine.trim() === '' ||
+        typeof example.pronunciation !== 'string' || example.pronunciation.trim() === '' ||
+        typeof example.translation !== 'string' || example.translation.trim() === '') {
+      console.warn("Invalid example structure:", ex);
+      return false;
+    }
+  }
 
   // Enhanced mnemonic validation
   if (phraseData.mnemonic !== undefined && phraseData.mnemonic !== null) {
@@ -287,28 +309,6 @@ function validatePhrase(data: unknown): data is Phrase {
       if (!hasPhoneticReference && !hasMeaningReference) {
         console.warn(`Invalid mnemonic for "${thai}" (${english}): "${phraseData.mnemonic}"`);
         phraseData.mnemonic = undefined; // Clear invalid mnemonic
-      }
-    }
-  }
-
-  // Validate examples if present
-  if (phraseData.examples !== undefined && phraseData.examples !== null) {
-    if (!Array.isArray(phraseData.examples)) return false;
-    
-    // Validate each example sentence
-    for (const ex of phraseData.examples) {
-      // Cast ex to unknown first for safety
-      const exampleData = ex as unknown;
-      if (!exampleData || typeof exampleData !== 'object') return false;
-      const example = exampleData as Partial<ExampleSentence>;
-
-      if (typeof example.thai !== 'string' || example.thai.trim() === '' ||
-          typeof example.thaiMasculine !== 'string' || example.thaiMasculine.trim() === '' ||
-          typeof example.thaiFeminine !== 'string' || example.thaiFeminine.trim() === '' ||
-          typeof example.pronunciation !== 'string' || example.pronunciation.trim() === '' ||
-          typeof example.translation !== 'string' || example.translation.trim() === '') {
-        console.warn("Invalid example structure:", ex);
-        return false;
       }
     }
   }

@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
-import { Trash2, BookOpen } from 'lucide-react';
+import { Trash2, BookOpen, Download, Layers } from 'lucide-react';
 
 // Define a more specific type for the set prop
 interface GallerySet {
@@ -40,8 +40,8 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
   };
 
   return (
-    <div className="group bg-[#1a1a1a] border border-gray-800/30 rounded-lg overflow-hidden hover:border-blue-600/50 hover:shadow-md hover:shadow-blue-900/10 transition-all flex flex-col">
-      <div className="relative w-full aspect-[16/9] bg-[#111] overflow-hidden">
+    <div className="group bg-[#1a1a1a] border border-gray-800/30 rounded-xl overflow-hidden hover:border-blue-600/50 hover:shadow-md hover:shadow-blue-900/10 transition-all flex flex-col">
+      <div className="relative w-full aspect-[16/9] bg-[#111] overflow-hidden rounded-t-xl">
         {set.imageUrl ? (
           <Image
             src={imgUrl}
@@ -73,42 +73,54 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
       </div>
       
       <div className="p-4 flex-grow flex flex-col">
-        <h3 className="font-medium text-sm text-white mb-1 line-clamp-3 min-h-[3.6rem] group-hover:text-blue-400 transition-colors text-center">
+        <h3 className="font-medium text-sm text-white line-clamp-3 group-hover:text-blue-400 transition-colors">
           {set.title}
         </h3>
-        
-        <div className="text-blue-400 text-sm font-medium mb-2 text-center">
-          User Set by: {username}
-        </div>
 
         {set.proficiencyLevel && (
-          <p className="text-xs text-blue-400/80 text-center mb-1">
-            Proficiency: <span className="font-medium text-blue-300">{set.proficiencyLevel}</span>
-          </p>
+          <div className="text-xs text-gray-400 flex flex-wrap gap-x-2 -mt-1">
+            <span>Level: <span className="font-medium text-[#A9C4FC]">{set.proficiencyLevel}</span></span>
+            {set.seriousnessLevel !== undefined && (
+              <span>Tone: <span className="font-medium text-[#A9C4FC]">{set.seriousnessLevel}/10</span></span>
+            )}
+          </div>
         )}
         
-        {set.seriousnessLevel !== undefined && (
-          <p className="text-xs text-blue-400/80 text-center mb-3">
-            Ridiculousness: <span className="font-medium text-blue-300">{set.seriousnessLevel} / 10</span>
-          </p>
-        )}
+        <p className="text-xs text-gray-400 mt-0.5">{set.cardCount || 0} cards</p>
         
-        <div className="mt-auto flex gap-2 justify-center">
-          <button
-            className="neumorphic-button-secondary text-blue-300 hover:text-blue-200 px-3 py-1 text-xs"
-            onClick={() => handleViewCards(set.id)}
-            disabled={importingSetId === set.id || contextIsLoading}
-          >
-            View Cards
-          </button>
+        {/* Card Actions: Import and Cards icon buttons side by side */}
+        <div className="mt-auto flex justify-center gap-2">
+          <div className="flex flex-col items-center">
+            <button
+              onClick={() => handleViewCards(set.id)}
+              disabled={importingSetId === set.id || contextIsLoading}
+              className="p-2.5 rounded-full bg-gray-700 hover:bg-gray-800 text-white transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              title="View Cards"
+            >
+              <Layers className="w-4 h-4" />
+            </button>
+            <span className="text-xs text-gray-400 mt-1">View Cards</span>
+          </div>
 
-          <button
-            className={`neumorphic-button text-blue-300 hover:text-blue-200 px-3 py-1 text-xs ${importingSetId === set.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-            onClick={() => handleImport(set.id)}
-            disabled={importingSetId === set.id || contextIsLoading}
-          >
-            {importingSetId === set.id ? 'Importing...' : 'Import'}
-          </button>
+          <div className="flex flex-col items-center">
+            <button
+              onClick={() => handleImport(set.id)}
+              disabled={importingSetId === set.id || contextIsLoading}
+              className="p-2.5 rounded-full bg-gray-700 hover:bg-gray-800 text-white transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Import Set"
+            >
+              {importingSetId === set.id ? (
+                <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+            </button>
+            <span className="text-xs text-gray-400 mt-1">Import</span>
+          </div>
+        </div>
+
+        <div className="text-xs text-blue-400/70 mt-4 text-center">
+          User Set by: {username}
         </div>
       </div>
     </div>

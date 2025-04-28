@@ -283,69 +283,47 @@ export default function GalleryPage() {
   };
 
   return (
-    <div className="container max-w-5xl py-8 bg-indigo-950/20 rounded-lg my-4">
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-2">
-          <GalleryHorizontal className="h-5 w-5 text-indigo-400" />
-          <h1 className="text-xl font-medium text-indigo-400">User Gallery</h1>
-        </div>
-      </div>
-      {/* --- Enhanced Search/Filter UI --- */}
-      <div className="mb-6 flex flex-col gap-3">
-        <div className="flex flex-col md:flex-row md:items-center gap-3">
+    <div className="container max-w-5xl py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-xl font-medium text-indigo-400">User Gallery</h1>
+        
+        {/* Search and Filter Controls */}
+        <div className="flex gap-2">
           <input
             type="text"
-            className="bg-indigo-900/40 border border-indigo-700/40 rounded-md px-3 py-2 text-indigo-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-72"
-            placeholder="Search sets by title, description, or topics..."
+            placeholder="Search sets..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
+            className="px-3 py-1 text-sm bg-indigo-900/30 border border-indigo-800/30 rounded-lg text-indigo-200 placeholder-indigo-400/50 focus:outline-none focus:border-indigo-600/50"
           />
+          
           <select
-            className="bg-indigo-900/40 border border-indigo-700/40 rounded-md px-3 py-2 text-indigo-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-48"
-            value={authorFilter}
-            onChange={e => setAuthorFilter(e.target.value)}
-          >
-            {authors.map(author => (
-              <option key={author} value={author}>
-                {author === 'All' ? 'Select Author' : author}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-indigo-300 text-xs font-medium">Sort:</span>
-          <select
-            className="bg-indigo-900/40 border border-indigo-700/40 rounded-md px-2 py-1 text-indigo-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={sortOrder}
-            onChange={e => setSortOrder(e.target.value as typeof sortOrder)}
+            onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
+            className="px-3 py-1 text-sm bg-indigo-900/30 border border-indigo-800/30 rounded-lg text-indigo-200"
           >
-            {sortOptions.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
+            {sortOptions.map(option => (
+              <option key={option} value={option}>{option}</option>
             ))}
           </select>
-
-          <span className="text-indigo-300 text-xs font-medium ml-4">Level:</span>
+          
           <select
-            className="bg-indigo-900/40 border border-indigo-700/40 rounded-md px-2 py-1 text-indigo-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={proficiencyFilter}
-            onChange={e => setProficiencyFilter(e.target.value)}
+            onChange={(e) => setProficiencyFilter(e.target.value)}
+            className="px-3 py-1 text-sm bg-indigo-900/30 border border-indigo-800/30 rounded-lg text-indigo-200"
           >
             {proficiencyLevels.map(level => (
-              <option key={level} value={level}>
-                {level === 'All' ? 'All Levels' : level}
-              </option>
+              <option key={level} value={level}>{level}</option>
             ))}
           </select>
-
-          <span className="text-indigo-300 text-xs font-medium ml-4">Style:</span>
+          
           <select
-            className="bg-indigo-900/40 border border-indigo-700/40 rounded-md px-2 py-1 text-indigo-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={seriousnessFilter}
-            onChange={e => setSeriousnessFilter(e.target.value)}
+            value={authorFilter}
+            onChange={(e) => setAuthorFilter(e.target.value)}
+            className="px-3 py-1 text-sm bg-indigo-900/30 border border-indigo-800/30 rounded-lg text-indigo-200"
           >
-            {['All', '1-3 (Serious)', '4-7 (Balanced)', '8-10 (Fun)'].map(level => (
-              <option key={level} value={level}>{level}</option>
+            {authors.map(author => (
+              <option key={author} value={author}>{author}</option>
             ))}
           </select>
         </div>

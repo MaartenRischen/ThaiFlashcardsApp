@@ -570,10 +570,6 @@ export function SetManagerModal({ isOpen, onClose }: {
                 </div>
                 {/* Set Name */}
                 <h3 className="text-base font-medium text-gray-200 group-hover:text-white transition-colors truncate" title={set.name}>{set.name}</h3>
-                {/* Set Source & ID - smaller text */}
-                <p className="text-xs text-gray-500">
-                  {set.source === 'generated' ? 'AI Set' : set.source === 'import' ? 'Imported' : 'Default'} (ID: {set.id})
-                </p>
                 
                 {/* ADDED: Proficiency and Seriousness */}
                 <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">

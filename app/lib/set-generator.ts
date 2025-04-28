@@ -79,6 +79,368 @@ const TEXT_MODELS = [
   'mistralai/mixtral-8x7b', // Other fallback
 ];
 
+// Common word variations mapping - Expanded
+const COMMON_VARIATIONS: Record<string, string> = {
+  // Contractions
+  "dont": "do not", "doesnt": "does not", "isnt": "is not", "arent": "are not",
+  "cant": "cannot", "couldnt": "could not", "wouldnt": "would not", "shouldnt": "should not",
+  "hasnt": "has not", "havent": "have not", "hadnt": "had not",
+  "wont": "will not", "wasnt": "was not", "werent": "were not",
+  
+  // Personal pronouns
+  "im": "i am", "ive": "i have", "id": "i would", "ill": "i will",
+  "youre": "you are", "youve": "you have", "youd": "you would", "youll": "you will",
+  "theyre": "they are", "theyve": "they have", "theyd": "they would", "theyll": "they will",
+  "weve": "we have", "wed": "we would", "well": "we will",
+  "shes": "she is", "hes": "he is", "its": "it is",
+  
+  // Common informal
+  "wanna": "want to", "gonna": "going to", "gotta": "got to", "lemme": "let me",
+  "gimme": "give me", "dunno": "do not know", "kinda": "kind of", "sorta": "sort of",
+  "lotsa": "lots of", "outta": "out of", "hafta": "have to",
+  
+  // Time expressions
+  "oclock": "o clock", "tonite": "tonight", "tmrw": "tomorrow", "tmw": "tomorrow",
+  "rn": "right now", "asap": "as soon as possible",
+  
+  // Common abbreviations
+  "mins": "minutes", "hrs": "hours", "sec": "second", "yr": "year",
+  "jan": "january", "feb": "february", "mar": "march", "apr": "april",
+  "aug": "august", "sept": "september", "oct": "october", "nov": "november", "dec": "december",
+  
+  // Numbers and quantities
+  "1st": "first", "2nd": "second", "3rd": "third", "4th": "fourth", "5th": "fifth",
+  "0": "zero", "1": "one", "2": "two", "3": "three", "4": "four", "5": "five",
+  "6": "six", "7": "seven", "8": "eight", "9": "nine", "10": "ten",
+  "dozen": "twelve", "half": "50 percent", "quarter": "25 percent",
+  
+  // Common internet/text speak
+  "pls": "please", "plz": "please", "thx": "thanks", "ty": "thank you",
+  "bc": "because", "b4": "before", "gr8": "great", "l8": "late", "l8r": "later",
+  "idk": "i do not know", "tbh": "to be honest", "imo": "in my opinion",
+  
+  // Measurement variations
+  "meter": "metre", "liter": "litre", "kilometer": "kilometre",
+  "lb": "pound", "kg": "kilogram", "km": "kilometer", "cm": "centimeter",
+  
+  // Common misspellings
+  "alot": "a lot", "allright": "all right", "alright": "all right",
+  "thankyou": "thank you", "goodby": "goodbye", "goodnight": "good night",
+  "noone": "no one", "eventhough": "even though", "atleast": "at least",
+  "ofcourse": "of course", "eachother": "each other", "anymore": "any more",
+  "everyday": "every day", "everyone": "every one", "goodluck": "good luck"
+};
+
+// Expanded semantic groups for common synonyms
+const SEMANTIC_GROUPS: Record<string, string[]> = {
+  // Emotions and Feelings
+  "happy": ["glad", "joyful", "pleased", "delighted", "cheerful", "merry", "content", "satisfied", "elated", "jubilant"],
+  "sad": ["unhappy", "upset", "down", "depressed", "gloomy", "miserable", "melancholy", "sorrowful", "dejected", "heartbroken"],
+  "angry": ["mad", "furious", "enraged", "irritated", "annoyed", "frustrated", "outraged", "irate", "cross", "livid"],
+  "scared": ["afraid", "frightened", "terrified", "fearful", "anxious", "nervous", "worried", "panicked", "alarmed", "startled"],
+  "tired": ["exhausted", "sleepy", "weary", "fatigued", "drained", "worn out", "drowsy", "lethargic", "beat", "spent"],
+  
+  // Size and Quantity
+  "big": ["large", "huge", "enormous", "gigantic", "massive", "colossal", "vast", "immense", "substantial", "mammoth"],
+  "small": ["little", "tiny", "miniature", "petite", "minute", "microscopic", "compact", "diminutive", "modest", "slight"],
+  "many": ["numerous", "several", "multiple", "various", "plenty", "abundant", "countless", "lots", "myriad", "copious"],
+  "few": ["scarce", "limited", "rare", "sparse", "scant", "insufficient", "minimal", "meager", "negligible", "handful"],
+  
+  // Speed and Time
+  "fast": ["quick", "rapid", "swift", "speedy", "hasty", "prompt", "brisk", "expeditious", "nimble", "fleet"],
+  "slow": ["sluggish", "unhurried", "leisurely", "gradual", "plodding", "dawdling", "languid", "lackadaisical", "crawling", "tardy"],
+  "early": ["soon", "beforehand", "ahead", "premature", "preliminary", "initial", "first", "prior", "advance", "precocious"],
+  "late": ["tardy", "delayed", "overdue", "behind", "belated", "deferred", "postponed", "afterward", "subsequent", "trailing"],
+  
+  // Quality and Condition
+  "good": ["great", "excellent", "wonderful", "fantastic", "superb", "outstanding", "magnificent", "splendid", "marvelous", "exceptional"],
+  "bad": ["terrible", "awful", "horrible", "poor", "inferior", "unsatisfactory", "inadequate", "deficient", "substandard", "mediocre"],
+  "new": ["fresh", "recent", "novel", "modern", "current", "contemporary", "latest", "innovative", "original", "unprecedented"],
+  "old": ["aged", "ancient", "vintage", "antique", "elderly", "mature", "senior", "traditional", "classic", "outdated"],
+  
+  // Appearance
+  "beautiful": ["pretty", "gorgeous", "lovely", "attractive", "stunning", "handsome", "elegant", "charming", "graceful", "exquisite"],
+  "ugly": ["unattractive", "hideous", "unsightly", "plain", "homely", "unpleasant", "grotesque", "repulsive", "repugnant", "disfigured"],
+  "clean": ["spotless", "pristine", "immaculate", "tidy", "neat", "sanitary", "sterile", "hygienic", "unblemished", "pure"],
+  "dirty": ["unclean", "soiled", "filthy", "grimy", "muddy", "stained", "messy", "sullied", "tarnished", "polluted"],
+  
+  // Temperature
+  "hot": ["warm", "burning", "boiling", "scorching", "sizzling", "sweltering", "tropical", "heated", "fiery", "torrid"],
+  "cold": ["cool", "chilly", "freezing", "frosty", "icy", "frigid", "arctic", "bitter", "wintry", "glacial"],
+  
+  // Difficulty
+  "easy": ["simple", "straightforward", "effortless", "basic", "elementary", "uncomplicated", "manageable", "painless", "clear", "obvious"],
+  "hard": ["difficult", "challenging", "complicated", "complex", "tough", "demanding", "strenuous", "arduous", "laborious", "problematic"],
+  
+  // Importance
+  "important": ["crucial", "essential", "vital", "critical", "significant", "key", "fundamental", "primary", "central", "paramount"],
+  "unimportant": ["trivial", "minor", "insignificant", "irrelevant", "negligible", "secondary", "marginal", "peripheral", "inconsequential", "meaningless"],
+  
+  // Movement
+  "walk": ["stroll", "amble", "stride", "trek", "hike", "march", "wander", "saunter", "trudge", "promenade"],
+  "run": ["sprint", "dash", "race", "jog", "bolt", "rush", "hurry", "scamper", "gallop", "flee"],
+  
+  // Communication
+  "say": ["tell", "speak", "utter", "express", "state", "mention", "declare", "announce", "proclaim", "articulate"],
+  "quiet": ["silent", "hushed", "mute", "soundless", "noiseless", "peaceful", "still", "tranquil", "inaudible", "voiceless"],
+  
+  // Common Actions
+  "eat": ["consume", "devour", "dine", "feast", "munch", "nibble", "ingest", "feed", "gorge", "snack"],
+  "sleep": ["rest", "slumber", "doze", "nap", "snooze", "hibernate", "repose", "retire", "crash", "drift off"],
+  
+  // Relationships
+  "friend": ["companion", "buddy", "pal", "mate", "comrade", "ally", "associate", "colleague", "acquaintance", "confidant"],
+  "enemy": ["foe", "adversary", "opponent", "rival", "antagonist", "nemesis", "opposition", "competitor", "opposition", "hostile"],
+  
+  // Weather
+  "rainy": ["wet", "drizzly", "showery", "stormy", "pouring", "drenched", "soaked", "soggy", "precipitous", "monsoon"],
+  "sunny": ["bright", "clear", "cloudless", "fair", "radiant", "shining", "brilliant", "luminous", "gleaming", "glorious"]
+};
+
+// Simple plural endings for basic plural/singular normalization
+const PLURAL_ENDINGS = ['s', 'es', 'ies'];
+
+// Expanded irregular plurals
+const IRREGULAR_PLURALS: Record<string, string> = {
+  // People
+  "children": "child", "people": "person", "men": "man", "women": "woman",
+  "wives": "wife", "selves": "self", "wolves": "wolf",
+  "thieves": "thief", "sheep": "sheep", "deer": "deer", "fish": "fish",
+  
+  // Body parts
+  "feet": "foot", "teeth": "tooth", "geese": "goose", "mice": "mouse",
+  
+  // Nature
+  "leaves": "leaf", "lives": "life", "hooves": "hoof", "scarves": "scarf",
+  "elves": "elf", "shelves": "shelf", "loaves": "loaf", "calves": "calf",
+  
+  // Latin/Greek derived
+  "criteria": "criterion", "phenomena": "phenomenon", "analyses": "analysis",
+  "theses": "thesis", "crises": "crisis", "hypotheses": "hypothesis",
+  "diagnoses": "diagnosis", "bases": "basis", "axes": "axis",
+  
+  // Other common
+  "cacti": "cactus", "fungi": "fungus", "nuclei": "nucleus", "syllabi": "syllabus",
+  "alumni": "alumnus", "radii": "radius", "stimuli": "stimulus", "media": "medium"
+};
+
+// Expanded compound words with more everyday phrases
+const COMPOUND_WORDS: string[][] = [
+  // Food and Drink
+  ["ice", "cream"], ["hot", "dog"], ["french", "fries"], ["fried", "rice"],
+  ["green", "tea"], ["coffee", "shop"], ["fast", "food"], ["take", "out"],
+  ["soft", "drink"], ["orange", "juice"], ["mineral", "water"], ["food", "court"],
+  
+  // Places and Locations
+  ["post", "office"], ["high", "school"], ["middle", "school"],
+  ["train", "station"], ["bus", "stop"], ["air", "port"], ["sea", "port"],
+  ["shopping", "center"], ["shopping", "mall"], ["super", "market"],
+  ["book", "store"], ["book", "shop"], ["drug", "store"], ["convenience", "store"],
+  ["department", "store"], ["grocery", "store"], ["coffee", "shop"],
+  ["gas", "station"], ["police", "station"], ["fire", "station"],
+  ["movie", "theater"], ["art", "gallery"], ["night", "club"],
+  ["food", "court"], ["town", "hall"], ["city", "center"],
+  
+  // Home and Furniture
+  ["living", "room"], ["dining", "room"], ["bed", "room"], ["bath", "room"],
+  ["kitchen", "sink"], ["coffee", "table"], ["dining", "table"],
+  ["computer", "desk"], ["book", "shelf"], ["shoe", "rack"],
+  ["washing", "machine"], ["dish", "washer"], ["vacuum", "cleaner"],
+  ["air", "conditioner"], ["ceiling", "fan"], ["floor", "lamp"],
+  
+  // Personal Items
+  ["cell", "phone"], ["mobile", "phone"], ["smart", "phone"],
+  ["credit", "card"], ["debit", "card"], ["id", "card"],
+  ["tooth", "brush"], ["tooth", "paste"], ["hair", "brush"],
+  ["sun", "glasses"], ["contact", "lenses"], ["make", "up"],
+  ["back", "pack"], ["hand", "bag"], ["shopping", "bag"],
+  
+  // Time and Events
+  ["birth", "day"], ["new", "year"], ["week", "end"],
+  ["rush", "hour"], ["lunch", "time"], ["dinner", "time"],
+  ["day", "time"], ["night", "time"], ["holiday", "season"],
+  ["spring", "break"], ["summer", "vacation"], ["winter", "holiday"],
+  
+  // Family Relations
+  ["grand", "father"], ["grand", "mother"], ["grand", "parents"],
+  ["mother", "in", "law"], ["father", "in", "law"], ["sister", "in", "law"],
+  ["brother", "in", "law"], ["step", "mother"], ["step", "father"],
+  ["step", "sister"], ["step", "brother"], ["half", "sister"],
+  ["half", "brother"], ["great", "grand", "mother"], ["great", "grand", "father"],
+  
+  // Transportation
+  ["public", "transport"], ["bullet", "train"], ["express", "train"],
+  ["subway", "station"], ["bus", "terminal"], ["taxi", "stand"],
+  ["parking", "lot"], ["parking", "space"], ["bike", "lane"],
+  ["traffic", "light"], ["traffic", "jam"], ["speed", "limit"],
+  
+  // Sports and Recreation
+  ["swimming", "pool"], ["tennis", "court"], ["basketball", "court"],
+  ["golf", "course"], ["fitness", "center"], ["sports", "club"],
+  ["theme", "park"], ["water", "park"], ["skate", "park"],
+  ["bowling", "alley"], ["ice", "rink"], ["ski", "resort"],
+  
+  // Technology
+  ["wifi", "network"], ["internet", "connection"], ["web", "site"],
+  ["social", "media"], ["search", "engine"], ["email", "address"],
+  ["user", "name"], ["pass", "word"], ["hard", "drive"],
+  ["thumb", "drive"], ["memory", "card"], ["power", "bank"],
+  
+  // Business and Work
+  ["business", "card"], ["name", "card"], ["office", "building"],
+  ["meeting", "room"], ["break", "room"], ["work", "place"],
+  ["job", "interview"], ["lunch", "break"], ["coffee", "break"],
+  ["over", "time"], ["part", "time"], ["full", "time"],
+  
+  // Health and Medical
+  ["first", "aid"], ["emergency", "room"], ["waiting", "room"],
+  ["operating", "room"], ["medical", "center"], ["health", "care"],
+  ["blood", "pressure"], ["heart", "rate"], ["body", "temperature"],
+  ["side", "effects"], ["health", "insurance"], ["medical", "history"]
+];
+
+// Common phrasal verbs and their variations
+const PHRASAL_VERBS: Record<string, string[]> = {
+  "get up": ["wake up", "rise", "stand up"],
+  "get on": ["board", "mount", "climb on"],
+  "get off": ["exit", "dismount", "leave"],
+  "get in": ["enter", "go inside", "come in"],
+  "get out": ["exit", "leave", "go outside"],
+  "put on": ["wear", "don", "dress in"],
+  "take off": ["remove", "undress", "discard"],
+  "pick up": ["collect", "gather", "lift"],
+  "drop off": ["deliver", "leave", "deposit"],
+  "turn on": ["activate", "start", "switch on"],
+  "turn off": ["deactivate", "stop", "switch off"],
+  "look for": ["search", "seek", "hunt"],
+  "look at": ["view", "observe", "watch"],
+  "look after": ["care for", "tend to", "watch over"],
+  "give up": ["quit", "surrender", "abandon"],
+  "give back": ["return", "restore", "repay"],
+  "come back": ["return", "revisit", "come again"],
+  "go back": ["return", "retreat", "reverse"],
+  "run out": ["deplete", "exhaust", "finish"],
+  "run into": ["meet", "encounter", "bump into"],
+  "clean up": ["tidy", "organize", "arrange"],
+  "set up": ["arrange", "establish", "prepare"],
+  "break down": ["fail", "collapse", "malfunction"],
+  "break up": ["separate", "split", "divide"],
+  "carry on": ["continue", "proceed", "persist"],
+  "find out": ["discover", "learn", "determine"],
+  "figure out": ["understand", "solve", "comprehend"],
+  "fill in": ["complete", "enter", "write"],
+  "fill out": ["complete", "finish", "write"],
+  "hang up": ["disconnect", "end call", "terminate"],
+  "hold on": ["wait", "pause", "stay"],
+  "make up": ["invent", "create", "fabricate"],
+  "point out": ["indicate", "show", "highlight"],
+  "put away": ["store", "place", "keep"],
+  "show up": ["arrive", "appear", "come"],
+  "take care": ["manage", "handle", "attend to"],
+  "think about": ["consider", "contemplate", "ponder"],
+  "work out": ["exercise", "solve", "resolve"],
+  "write down": ["record", "note", "document"]
+};
+
+// Contextual variations for common concepts
+const CONTEXTUAL_VARIATIONS: Record<string, string[]> = {
+  // Time expressions
+  "morning": ["am", "ante meridiem", "before noon", "sunrise", "dawn"],
+  "afternoon": ["pm", "post meridiem", "after noon", "midday"],
+  "evening": ["night", "nighttime", "dusk", "sunset"],
+  "today": ["this day", "current day", "now"],
+  "tomorrow": ["next day", "following day"],
+  "yesterday": ["previous day", "day before"],
+  
+  // Locations
+  "here": ["this place", "this location", "this spot"],
+  "there": ["that place", "that location", "that spot"],
+  "everywhere": ["all places", "all locations", "all around"],
+  "nowhere": ["no place", "no location", "no where"],
+  
+  // Quantities
+  "all": ["every", "each", "complete", "entire", "whole"],
+  "some": ["few", "several", "various", "certain"],
+  "none": ["nothing", "zero", "no one", "not any"],
+  
+  // Directions
+  "left": ["port side", "leftward", "lefthand"],
+  "right": ["starboard", "rightward", "righthand"],
+  "up": ["upward", "upstairs", "above"],
+  "down": ["downward", "downstairs", "below"],
+  
+  // Common measurements
+  "kilometer": ["km", "kilometres", "kilometers"],
+  "meter": ["m", "metres", "meters"],
+  "centimeter": ["cm", "centimetres", "centimeters"],
+  "millimeter": ["mm", "millimetres", "millimeters"],
+  "kilogram": ["kg", "kilos", "kilograms"],
+  "gram": ["g", "grams", "grammes"],
+  "liter": ["l", "litre", "liters", "litres"],
+  "milliliter": ["ml", "millilitre", "milliliters", "millilitres"],
+  
+  // Common status
+  "open": ["opened", "operating", "available", "accessible"],
+  "closed": ["shut", "unavailable", "inaccessible"],
+  "busy": ["occupied", "engaged", "unavailable"],
+  "free": ["available", "unoccupied", "vacant"],
+  "full": ["filled", "complete", "no space"],
+  "empty": ["vacant", "unfilled", "no content"],
+  
+  // Common actions
+  "help": ["assist", "aid", "support", "facilitate"],
+  "start": ["begin", "commence", "initiate", "launch"],
+  "finish": ["end", "complete", "conclude", "terminate"],
+  "continue": ["proceed", "carry on", "keep going", "persist"],
+  "stop": ["halt", "cease", "discontinue", "terminate"],
+  
+  // Common states
+  "broken": ["damaged", "not working", "malfunctioning", "out of order"],
+  "fixed": ["repaired", "working", "functional", "in order"],
+  "ready": ["prepared", "set", "available", "good to go"],
+  "waiting": ["pending", "on hold", "standing by"],
+  "done": ["finished", "completed", "over", "ended"]
+};
+
+// Verb forms for normalization
+const VERB_FORMS: Record<string, string> = {
+  // Be
+  "am": "be", "is": "be", "are": "be", "was": "be", "were": "be", "been": "be", "being": "be",
+  // Have
+  "has": "have", "had": "have", "having": "have",
+  // Do
+  "does": "do", "did": "do", "doing": "do", "done": "do",
+  // Common irregular verbs
+  "went": "go", "gone": "go", "going": "go",
+  "ate": "eat", "eaten": "eat", "eating": "eat",
+  "saw": "see", "seen": "see", "seeing": "see",
+  "took": "take", "taken": "take", "taking": "take",
+  "came": "come", "coming": "come",
+  "knew": "know", "known": "know", "knowing": "know",
+  "got": "get", "gotten": "get", "getting": "get",
+  "made": "make", "making": "make",
+  "said": "say", "saying": "say",
+  "found": "find", "finding": "find",
+  "gave": "give", "given": "give", "giving": "give",
+  // Regular verb forms (-ed, -ing patterns)
+  "walked": "walk", "walking": "walk",
+  "talked": "talk", "talking": "talk",
+  "played": "play", "playing": "play",
+  "worked": "work", "working": "work",
+  "studied": "study", "studying": "study",
+  "called": "call", "calling": "call",
+  "looked": "look", "looking": "look",
+  "wanted": "want", "wanting": "want",
+  "needed": "need", "needing": "need",
+  "tried": "try", "trying": "try",
+  "moved": "move", "moving": "move",
+  "lived": "live", "living": "live",
+  "started": "start", "starting": "start",
+  "ended": "end", "ending": "end",
+  "asked": "ask", "asking": "ask",
+  "answered": "answer", "answering": "answer"
+};
+
 /**
  * Builds a significantly updated prompt for generating Thai flashcards based on detailed user preferences.
  */
@@ -226,7 +588,7 @@ function buildGenerationPrompt(
       *   Focus content *primarily* on the 'Situations for Use': ${topicsToDiscuss || 'General conversation'}. Use this as inspiration, especially for absurd examples.
       *   If 'Specific Focus' (${specificTopics || 'None'}) provided, try to incorporate it.
 
-  5.  **Avoid Duplicates:** Do not generate for these existing English phrases: ${existingPhrases && existingPhrases.length > 0 ? existingPhrases.join(', ') : 'None'}
+  5.  **Avoid Duplicates:** Do not generate for these existing English phrases (case-insensitive): ${existingPhrases && existingPhrases.length > 0 ? existingPhrases.join(', ') : 'None'}. CRITICAL: Ensure that no generated English phrases match any existing ones, ignoring case (e.g. if "Red" exists, do not generate "red" or "RED").
 
   ${schemaDescription}
   `;
@@ -237,10 +599,9 @@ function buildGenerationPrompt(
 /**
  * Validates a phrase object to ensure it follows the correct structure
  */
-function validatePhrase(data: unknown): data is Phrase {
+function validatePhrase(data: unknown, existingPhrases: Phrase[] = []): data is Phrase {
   if (!data || typeof data !== 'object') return false;
   
-  // Use type assertions carefully after checking existence
   const phraseData = data as Partial<Phrase>;
 
   const hasRequiredFields =
@@ -249,14 +610,129 @@ function validatePhrase(data: unknown): data is Phrase {
     typeof phraseData.thaiMasculine === 'string' && phraseData.thaiMasculine.trim() !== '' &&
     typeof phraseData.thaiFeminine === 'string' && phraseData.thaiFeminine.trim() !== '' &&
     typeof phraseData.pronunciation === 'string' && phraseData.pronunciation.trim() !== '' &&
-    Array.isArray(phraseData.examples) && phraseData.examples.length >= 2; // Require at least 2 examples per phrase
+    Array.isArray(phraseData.examples) && phraseData.examples.length >= 2;
 
   if (!hasRequiredFields) return false;
 
-  // At this point we know these fields exist and are non-empty strings
   const thai = phraseData.thai as string;
   const pronunciation = phraseData.pronunciation as string;
   const english = phraseData.english as string;
+
+  // Enhanced normalization function with improved word order handling
+  const normalizeEnglish = (text: string): string => {
+    // Initial basic normalization
+    let normalized = text
+      .toLowerCase()
+      .trim()
+      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')  // Remove punctuation
+      .replace(/\s+/g, ' ')  // Normalize whitespace
+      .replace(/^(a|an|the)\s+/i, '')  // Remove leading articles
+      .replace(/\s+(a|an|the)\s+/g, ' '); // Remove articles in middle of phrase
+
+    // Handle common variations
+    for (const [variation, standard] of Object.entries(COMMON_VARIATIONS)) {
+      normalized = normalized.replace(new RegExp(`\\b${variation}\\b`, 'g'), standard);
+    }
+
+    // Split into words for processing
+    let words = normalized.split(' ');
+
+    // Handle verb forms before other processing
+    words = words.map(word => VERB_FORMS[word] || word);
+
+    // Handle phrasal verbs
+    for (let i = 0; i < words.length - 1; i++) {
+      const possiblePhrasalVerb = words[i] + ' ' + words[i + 1];
+      const phrasalVerbVariations = PHRASAL_VERBS[possiblePhrasalVerb];
+      if (phrasalVerbVariations) {
+        // Replace with canonical form
+        words[i] = possiblePhrasalVerb.replace(' ', '_');
+        words.splice(i + 1, 1);
+      }
+    }
+
+    // Handle contextual variations
+    words = words.map(word => {
+      for (const [primary, variations] of Object.entries(CONTEXTUAL_VARIATIONS)) {
+        if (variations.includes(word)) {
+          return primary;
+        }
+      }
+      return word;
+    });
+
+    // Handle plurals
+    words = words.map(word => {
+      // Check irregular plurals first
+      if (word in IRREGULAR_PLURALS) {
+        return IRREGULAR_PLURALS[word];
+      }
+      
+      // Check regular plural endings
+      for (const ending of PLURAL_ENDINGS) {
+        if (word.endsWith(ending)) {
+          const singular = word.endsWith('ies') 
+            ? word.slice(0, -3) + 'y'  // babies -> baby
+            : word.slice(0, -ending.length);  // cats -> cat
+          return singular;
+        }
+      }
+      return word;
+    });
+
+    // Handle semantic groups
+    words = words.map(word => {
+      for (const [primary, synonyms] of Object.entries(SEMANTIC_GROUPS)) {
+        if (synonyms.includes(word)) {
+          return primary;
+        }
+      }
+      return word;
+    });
+
+    // Process compound words
+    let processedWords: string[] = [];
+    let skipIndices = new Set<number>();
+
+    // Check for compound words
+    for (let i = 0; i < words.length; i++) {
+      if (skipIndices.has(i)) continue;
+
+      let foundCompound = false;
+      for (const compound of COMPOUND_WORDS) {
+        if (i + compound.length <= words.length) {
+          const slice = words.slice(i, i + compound.length);
+          if (compound.every((word, j) => word === slice[j])) {
+            processedWords.push(compound.join('_'));
+            for (let j = i; j < i + compound.length; j++) {
+              skipIndices.add(j);
+            }
+            foundCompound = true;
+            break;
+          }
+        }
+      }
+
+      if (!foundCompound && !skipIndices.has(i)) {
+        processedWords.push(words[i]);
+      }
+    }
+
+    // Sort processed words while keeping compound words intact
+    return processedWords.sort().join(' ');
+  };
+
+  const normalizedEnglish = normalizeEnglish(english);
+
+  // Check for duplicates using enhanced normalized comparison
+  const isDuplicate = existingPhrases.some(p => 
+    normalizeEnglish(p.english) === normalizedEnglish
+  );
+
+  if (isDuplicate) {
+    console.warn(`Duplicate English phrase detected (normalized): "${english}"`);
+    return false;
+  }
 
   // Validate examples (now required)
   const examples = phraseData.examples as unknown[];
@@ -785,7 +1261,7 @@ export async function generateOpenRouterBatch(
     const validatedPhrases: Phrase[] = [];
     const validationErrors: string[] = [];
     for (const phraseData of parsedResponse.phrases) {
-      if (validatePhrase(phraseData)) {
+      if (validatePhrase(phraseData, validatedPhrases)) {
          const validatedPhrase = phraseData as Phrase;
          if (validatedPhrase.mnemonic === null) {
             validatedPhrase.mnemonic = undefined;

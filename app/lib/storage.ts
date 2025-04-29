@@ -616,14 +616,14 @@ export async function deletePublishedSet(id: string): Promise<boolean> {
 }
 
 // Add mapping functions for database compatibility
-export function mapDatabaseToStorage(dbSet: any): SetMetaData {
+export function mapDatabaseToStorage(dbSet: SetMetaData): SetMetaData {
   return {
     ...dbSet,
     toneLevel: dbSet.seriousnessLevel,
   };
 }
 
-export function mapStorageToDatabase(storageSet: SetMetaData): any {
+export function mapStorageToDatabase(storageSet: SetMetaData): Omit<SetMetaData, 'toneLevel'> & { seriousnessLevel?: number } {
   const { toneLevel, ...rest } = storageSet;
   return {
     ...rest,

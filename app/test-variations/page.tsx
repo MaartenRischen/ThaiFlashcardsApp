@@ -4,6 +4,8 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { GeneratePromptOptions, Phrase } from '../lib/set-generator';
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 // Define all possible proficiency levels
 const PROFICIENCY_LEVELS = [
@@ -61,10 +63,8 @@ type FilterState = {
 // NEW: Define an interface for the generation task parameters
 interface GenerationTask {
   level: GeneratePromptOptions['level'];
-  tone: number;
-  levelIndex: number;
-  toneIndex: number;
-  count?: number; // Optional count for single task mode
+  toneLevel: number;
+  count?: number; // Add back count for single task mode
 }
 
 // Pool of truly bizarre, surreal, and unexpected scenarios
@@ -131,38 +131,33 @@ export default function TestVariations() {
     if (isGenerating) return;
     setIsGenerating(true);
     setError(null);
-    const startTime = Date.now();
-    let generatedCardsCount = 0;
-    const errors: string[] = [];
-    const tasks: GenerationTask[] = []; // Use the new interface
 
     const selectedModel = LLM_MODELS[currentModel];
 
     // Determine generation tasks based on checkboxes
+    let tasks: GenerationTask[] = [];
     if (generateAllLevels && generateAllTones) {
       // All combinations (60 tasks)
       PROFICIENCY_LEVELS.forEach((level, levelIndex) => {
         TONE_LEVELS.forEach((tone, toneIndex) => {
-          tasks.push({ level, tone, levelIndex, toneIndex });
+          tasks.push({ level, toneLevel: tone });
         });
       });
     } else if (generateAllLevels) {
       // All levels, selected tone (6 tasks)
       PROFICIENCY_LEVELS.forEach((level, levelIndex) => {
-        tasks.push({ level, tone: TONE_LEVELS[currentTone], levelIndex, toneIndex: currentTone });
+        tasks.push({ level, toneLevel: TONE_LEVELS[currentTone] });
       });
     } else if (generateAllTones) {
       // Selected level, all tones (10 tasks)
       TONE_LEVELS.forEach((tone, toneIndex) => {
-        tasks.push({ level: PROFICIENCY_LEVELS[currentProficiency], tone, levelIndex: currentProficiency, toneIndex });
+        tasks.push({ level: PROFICIENCY_LEVELS[currentProficiency], toneLevel: tone });
       });
     } else {
       // Specific selection (1 task, potentially multiple cards)
       tasks.push({ 
         level: PROFICIENCY_LEVELS[currentProficiency], 
-        tone: TONE_LEVELS[currentTone], 
-        levelIndex: currentProficiency, 
-        toneIndex: currentTone,
+        toneLevel: TONE_LEVELS[currentTone],
         count: cardCount 
       });
     }
@@ -174,12 +169,11 @@ export default function TestVariations() {
 
       // Process tasks sequentially
       for (const task of tasks) {
-        const taskStartTime = Date.now();
         try {
           const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
             level: task.level,
             specificTopics: undefined,
-            tone: task.tone,
+            toneLevel: task.toneLevel,
             topicsToDiscuss: topic,
           };
 
@@ -196,10 +190,9 @@ export default function TestVariations() {
           });
 
           const apiResult = await response.json();
-          const generationTime = Date.now() - taskStartTime; // Time for this specific task
 
           if (!response.ok) {
-            throw new Error(apiResult.error || `Failed for Level: ${task.level}, Tone: ${task.tone}`);
+            throw new Error(apiResult.error || `Failed for Level: ${task.level}, Tone: ${task.toneLevel}`);
           }
 
           if (apiResult.phrases && apiResult.phrases.length > 0) {
@@ -208,26 +201,25 @@ export default function TestVariations() {
                 ...phrase,
                 settings: {
                   proficiency: task.level,
-                  tone: task.tone,
+                  tone: task.toneLevel,
                   llmBrand: apiResult.llmBrand,
                   llmModel: apiResult.llmModel,
                   topic,
-                  generationTime // Use task-specific time
+                  generationTime: apiResult.generationTime // Use task-specific time
                 }
               };
               newCardsBatch.push(newCard);
-              generatedCardsCount++;
             });
-             console.log(`Task success: Level ${task.level}, Tone ${task.tone}`);
+             console.log(`Task success: Level ${task.level}, Tone ${task.toneLevel}`);
           } else {
             console.warn('No phrases in response for task:', task, apiResult);
-            errors.push(`No phrases returned for Level: ${task.level}, Tone: ${task.tone}`);
+            setError(`No phrases returned for Level: ${task.level}, Tone: ${task.toneLevel}`);
           }
         } catch (taskError: unknown) { // Use unknown instead of any
-          console.error(`API call failed for task: Level ${task.level}, Tone ${task.tone}`, taskError);
+          console.error(`API call failed for task: Level ${task.level}, Tone ${task.toneLevel}`, taskError);
           // Type check before accessing message
           const errorMessage = taskError instanceof Error ? taskError.message : String(taskError);
-          errors.push(`API Error for Level: ${task.level}, Tone: ${task.tone}: ${errorMessage}`);
+          setError(`API Error for Level: ${task.level}, Tone: ${task.toneLevel}: ${errorMessage}`);
         }
       } // End of sequential loop
 
@@ -235,10 +227,6 @@ export default function TestVariations() {
       if (newCardsBatch.length > 0) {
         setCards(prev => [...prev, ...newCardsBatch]);
         console.log(`Added ${newCardsBatch.length} new cards in total sequentially.`);
-      }
-
-      if (errors.length > 0) {
-        setError(`Sequential generation completed with ${errors.length} errors:\n- ${errors.join('\n- ')}`);
       }
 
     } catch (err) {

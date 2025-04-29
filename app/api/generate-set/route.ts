@@ -27,17 +27,13 @@ console.log('DEBUG: DATABASE_URL in generate-set route:', process.env.DATABASE_U
 // Add more detailed debug logging for Ideogram key
 console.log('DEBUG: IDEOGRAM_API_KEY first 10 chars:', process.env.IDEOGRAM_API_KEY ? process.env.IDEOGRAM_API_KEY.substring(0, 10) + '...' : 'undefined');
 
-// Define the expected request body structure
-interface GenerateSetRequestBody {
+// Define only the types we actually use
+interface RequestBody {
   preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>;
   totalCount: number;
-  source?: 'user' | 'test'; // Optional source field
-  isTestRequest?: boolean; // Flag for test requests
-  forcedModel?: string; // Optional model override
+  isTestRequest?: boolean;
+  forcedModel?: string;
 }
-
-// Define the source enum or type if not already defined elsewhere
-type SetSource = 'user' | 'test';
 
 // Placeholder Thailand images (use existing project images)
 const PLACEHOLDER_IMAGES = [
@@ -83,7 +79,7 @@ export async function POST(request: Request) {
     console.log(`API Route: Authentication successful for userId: ${userId}`);
 
     const body = await request.json();
-    const { preferences, totalCount, source, isTestRequest, forcedModel } = body;
+    const { preferences, totalCount, isTestRequest, forcedModel } = body;
 
     if (!preferences || !totalCount) {
       console.error("API Route: Missing required parameters (preferences or totalCount).");

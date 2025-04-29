@@ -156,7 +156,7 @@ export function SetWizardModal({ onComplete, onClose }: {
         setState(prev => ({ ...prev, proficiency }));
         setStep(2);
       }}
-      onBack={() => setStep(0)}
+      onBack={onClose}
     />,
     <ScenarioStep
       key="scenario"
@@ -181,9 +181,9 @@ export function SetWizardModal({ onComplete, onClose }: {
     />,
     <ToneStep
       key="tone"
-      value={state.tone}
-      onNext={(tone) => {
-        setState(prev => ({ ...prev, tone }));
+      toneLevel={state.tone}
+      onNext={(toneLevel) => {
+        setState(prev => ({ ...prev, tone: toneLevel }));
         setStep(4);
       }}
       onBack={() => setStep(2)}
@@ -191,7 +191,9 @@ export function SetWizardModal({ onComplete, onClose }: {
     <ReviewStep
       key="review"
       state={state}
-      onConfirm={() => setStep(5)}
+      onConfirm={() => {
+        onComplete(state);
+      }}
       onBack={() => setStep(3)}
     />,
     <GenerationStep

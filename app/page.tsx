@@ -1000,7 +1000,7 @@ export default function ThaiFlashcards() {
     const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
       level: 'intermediate' as 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode',
       specificTopics: undefined,
-      tone: 5, // Default to balanced (5)
+      toneLevel: 5, // Default to balanced (5)
       topicsToDiscuss: undefined,
     };
     
@@ -1586,7 +1586,7 @@ export default function ThaiFlashcards() {
             const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
               level: wizardState.proficiency.levelEstimate, // Correctly access the nested property
               specificTopics: wizardState.topics.length > 0 ? wizardState.topics.join(', ') : undefined, // Join topics array
-              tone: wizardState.tone,
+              toneLevel: wizardState.tone,
               topicsToDiscuss: wizardState.scenarios.length > 0 ? wizardState.scenarios.join(', ') : undefined, // Join scenarios
             };
             

@@ -71,8 +71,9 @@ const MAX_RETRIES = 3;
 const BATCH_SIZE = 8;
 
 // Prioritized list of text models for set generation
-const TEXT_MODELS = [
-  'google/gemini-2.5-pro-preview-03-25', // Gemini 2.5 Pro Preview
+export const TEXT_MODELS = [
+  'google/gemini-2.5-flash-preview', // Gemini 2.5 Flash - Primary
+  'google/gemini-2.5-pro-preview-03-25', // Gemini 2.5 Pro - Fallback
   'openai/gpt-4',          // OpenAI GPT-4
   'openai/gpt-3.5-turbo',  // OpenAI GPT-3.5 Turbo
   'anthropic/claude-3-opus', // Anthropic Claude
@@ -450,14 +451,27 @@ function buildGenerationPrompt(
   existingPhrases: string[] = []
 ): string {
   const {
+    level, // Explicitly get level
     specificTopics,
     count,
     topicsToDiscuss,
     tone = 5, // Default to level 5 (balanced)
   } = options;
 
-  // Define the output schema (remains the same)
-  // Use escaped backticks for the schema description
+  // Define proficiency level descriptions
+  const levelDescriptions: Record<GeneratePromptOptions['level'], string> = {
+    'Complete Beginner': "Use only the most essential, high-frequency words and very short descriptive phrases (1-3 words). Focus on basic identification and simple S-V-O structures. Examples must be extremely simple descriptive statements. Avoid questions and dialogues.",
+    'Basic Understanding': "Use short, practical descriptive phrases and simple statements (up to ~5 words). Introduce basic grammar and common expressions for everyday needs. Simple questions directly related to the phrase are acceptable. Avoid dialogues. Examples should be easy descriptive statements or simple questions about daily life.",
+    'Intermediate': "Use descriptive sentences (~5-10 words), common grammar structures, and typical vocabulary for common situations. Simple, relevant questions are okay. Avoid dialogues. Examples should describe everyday situations and show some variety in structure.",
+    'Advanced': "Use complex descriptive sentences (10+ words), nuanced vocabulary, and varied intermediate-to-advanced grammar. Relevant questions are okay. Avoid dialogues. Examples should be sophisticated descriptive statements or relevant questions.",
+    'Native/Fluent': "Use idiomatic, natural, authentic descriptive language (including slang/cultural refs). Complexity reflects educated native speech. Relevant questions are okay. Avoid dialogues. Examples should sound like real, fluent Thai descriptive statements or questions.",
+    'God Mode': "Use extremely elaborate, idiomatic, sophisticated descriptive language, pushing complexity beyond typical native speech (rare vocab, advanced grammar). Relevant questions are okay. Avoid dialogues. Examples should be exceptionally complex descriptive statements or questions."
+  };
+
+  // Get the specific description for the requested level
+  const selectedLevelDescription = levelDescriptions[level] || levelDescriptions['Intermediate']; // Default fallback if level is invalid
+
+  // Define the output schema (remains the same, minor update to mnemonic description)
   const schemaDescription = `
   **Output Format:**
   Generate a JSON object containing two keys: "cleverTitle" and "phrases".
@@ -474,7 +488,7 @@ function buildGenerationPrompt(
     thaiMasculine: string; // Polite male version ("ครับ").
     thaiFeminine: string; // Polite female version ("ค่ะ").
     pronunciation: string; // Simple phonetic guide (e.g., 'sa-wat-dee krap').
-    mnemonic?: string; // Provide a concise, intuitive mnemonic in *English* that helps remember the Thai word or short phrase by (1) using English words that sound phonetically similar to the Thai and (2) hinting at its meaning. NEVER reference the user‑provided situations or specific focus. If the Thai entry is longer than three words, pick the single most important word and give a mnemonic for *that* word only. Do not attempt humour or cleverness—prioritise recall effectiveness. Avoid nonsense syllables: only real English words or common sounds.
+    mnemonic?: string; // Provide a concise, intuitive mnemonic in *English* that helps remember the Thai word/short phrase by (1) linking English sounds to Thai sounds and (2) hinting at meaning. Focus on recall effectiveness, reflecting the Tone stylistically. For Tones 9 & 10, chaotic style takes precedence over strict recall utility. If >3 Thai words, focus mnemonic on the key word.
     examples: ExampleSentence[]; // REQUIRED: Must provide at least 2 example sentences reflecting the TONE and LEVEL.
   }
 
@@ -496,43 +510,40 @@ function buildGenerationPrompt(
   const prompt = `
   You are an expert AI assistant specialized in creating language learning flashcards. Your task is to generate ${count} flashcards and a set title.
 
+  **CRITICAL TASK REQUIREMENTS:**
+  - You MUST generate content that STRICTLY adheres to the specified **Proficiency Level (${level})**.
+  - You MUST generate content that STRICTLY adheres to the specified **Tone Level (${tone.toString()})**.
+  - Both Level and Tone MUST be reflected in the generated 'phrases' and their 'examples'.
+  - Follow ALL instructions below precisely.
+
   **User Preferences:**
+  - Proficiency Level: **${level}**
+  - Tone Level: **${tone.toString()}**
   - Situations for Use: ${topicsToDiscuss || 'General conversation'}
   ${specificTopics ? `- Specific Focus: ${specificTopics}` : ''}
-  - **TONE: ${tone.toString()}**
 
-  **CRITICAL INSTRUCTIONS:**
+  **DETAILED INSTRUCTIONS:**
 
-  1.  **Set Title:** Use the exact user's input as the title. If there are multiple inputs, combine them with "and". Do not add any descriptive phrases like "describing the experience of" or "learning about". Just use the raw input(s). Examples:
+  1.  **Set Title:** Use the exact user's input topic ('Situations for Use' or 'Specific Focus' if provided) as the title. Combine multiple topics with "and". Do not add descriptive phrases like "learning about". Examples:
       - Input: "living in the Nile" → "Living in the Nile"
       - Inputs: "birds, living in the Nile" → "Birds and living in the Nile"
       - Input: "street food vendors" → "Street food vendors"
 
-  2.  **Level-Specific Content:** (Ensure strict adherence)
-      *   Complete Beginner: Use only the most essential, high-frequency words and very short descriptive phrases (1-3 words). Avoid sentences except for the simplest descriptive S-V-O (subject-verb-object) forms. NO dialogues or questions. Examples should be extremely simple descriptive statements, suitable for someone with zero prior knowledge.
-      *   Basic Understanding: Use short, practical descriptive phrases and very simple statements (up to 5 words). Introduce basic grammar and common expressions. NO dialogues, questions, or conversational phrases. Examples should be easy to follow descriptive statements about daily life.
-      *   Intermediate: Use descriptive sentences (5-10 words), common grammar structures, and typical phrases. NO dialogues or questions. Examples should describe everyday situations and introduce some variety in structure and vocabulary.
-      *   Advanced: Use only complex descriptive sentences (10+ words), nuanced vocabulary, and varied grammar. Do NOT use simple phrases, dialogues, or questions. Examples should be sophisticated descriptive statements.
-      *   Native/Fluent: Use idiomatic, natural, and authentic descriptive language as used by educated native speakers. Include slang and cultural references, but NO dialogues or questions. Examples should be descriptive statements that sound like real, fluent Thai.
-      *   God Mode: Use extremely elaborate, idiomatic, and sophisticated descriptive language. Phrases and examples should be more complex than those for native speakers, featuring rare vocabulary and advanced grammar in descriptive statements. NO dialogues or questions. Push the boundaries of complexity and naturalness in descriptive language.
+  2.  **Proficiency Level Implementation (${level}):** (Vocabulary, Grammar, Complexity) - THIS IS CRITICAL. Apply the following rules rigorously:
+      *   **${selectedLevelDescription}**
 
-  3.  **TONE Implementation (${tone.toString()}):** THIS IS PARAMOUNT. The tone MUST heavily influence ALL content, but NEVER use dialogues or questions. Use the following style guide based on the selected tone level (1-10):
-
-      *   **Levels 1-4 (Practical Base with Increasing Humor):**
-          - Level 1: 100% dead serious descriptive statements. No humor whatsoever. Pure business and survival Thai in statement form.
-          - Level 2: 95% serious descriptive statements with 5% very mild humor. Like level 1 but occasionally a small smile might escape.
-          - Level 3: 85% practical descriptive statements with 15% humor. Starting to have fun but still very much focused on learning.
-          - Level 4: 70% practical descriptive statements with 30% humor. The last level where learning is still the main priority.
-
-      *   **Levels 5-7 (Decreasing Practicality):**
-          - Level 5: 50% practical descriptive statements, 50% absurd statements. Learning is optional. Examples describe impossible scenarios.
-          - Level 6: 30% practical descriptive statements, 70% weird statements. Phrases might still be useful but in contexts that make no sense.
-          - Level 7: 15% practical descriptive statements, 85% bizarre statements. You might learn something by accident, but that's not the point anymore.
-
-      *   **Levels 8-10 (Pure WTF Territory):**
-          - Level 8: 5% practical descriptive statements, 95% insanity. Examples should make readers question their reality.
-          - Level 9: 1% practical descriptive statements, 99% chaos. Should trigger existential crises in readers.
-          - Level 10: 0% practical descriptive statements, 100% brain-melting madness. Maximum surrealism. Should make Dali paintings look normal.
+  3.  **TONE Implementation (${tone.toString()}):** (Context, Theme, Style) - THIS IS EQUALLY CRITICAL.
+      *   **Tone Style Guide (1-10):**
+          - Level 1 (Serious): Content is purely practical, serious, and focused on essential communication. No humor. Examples are textbook-style, descriptive.
+          - Level 2 (Serious + Hint of Levity): Overwhelmingly practical and serious, but allows for very subtle, occasional hints of mild humor or slightly less formal phrasing.
+          - Level 3 (Practical + Emerging Fun): Still primarily practical, but humor and playful elements become more noticeable. Examples can describe slightly amusing but plausible situations.
+          - Level 4 (Playful Practicality): A clear blend. Content remains practical but is presented with noticeable humor, wit, or lightheartedness. Examples are often amusing but grounded.
+          - Level 5 (Balanced Absurdity): Equal mix of potentially practical phrases and concepts introducing illogical or surreal elements. Examples start describing impossible or highly improbable scenarios.
+          - Level 6 (Leaning Weird): Practicality decreases. Phrases might be useful but are often presented in bizarre or nonsensical contexts. Examples increasingly defy logic/physics.
+          - Level 7 (Strongly Bizarre): Usefulness is secondary. Most content involves bizarre situations, surreal humor, or strange concepts. Examples are highly imaginative and illogical.
+          - Level 8 (Reality Bending): Usefulness is minimal. Content focuses on semantically strange but grammatically correct statements. Examples should feel like coherent fever dreams, questioning reality.
+          - Level 9 (Chaos): Usefulness is almost non-existent. Content is intentionally chaotic, nonsensical, or paradoxical. Examples aim for existential absurdity. Mnemonic utility is secondary.
+          - Level 10 (Maximum Absurdity): Content is pure brain-melting madness, surrealism, and non-sequiturs, while maintaining grammatical structure. Examples should be maximally bizarre and nonsensical. Mnemonic utility is secondary.
 
       *   **Content Guidelines by Component:**
           - **Main Phrases:** 
@@ -1161,7 +1172,7 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
   let lastError: string | null = null;
   for (const model of models) {
     try {
-      console.log(`Trying OpenRouter model: ${model} with temperature: ${temperature}`);
+      console.log(`Attempting generation with model: ${model} (temperature: ${temperature})`);
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -1179,13 +1190,18 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
       if (!response.ok) {
         const errorStatus = response.status;
         const errorText = await response.text();
-        console.error(`OpenRouter API Error (model: ${model}): Status ${errorStatus}, Body: ${errorText}`);
+        console.error(`OpenRouter API Error for model ${model}:`, {
+          status: errorStatus,
+          body: errorText,
+          headers: Object.fromEntries(response.headers.entries())
+        });
         try {
           const errorJson = JSON.parse(errorText);
           lastError = errorJson.error?.message || errorText;
         } catch {
           lastError = errorText;
         }
+        console.log(`Failed with model ${model}, trying next model...`);
         continue;
       }
       const data: unknown = await response.json();
@@ -1210,11 +1226,13 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
       } else {
         console.error(`Unexpected OpenRouter response structure for model ${model}:`, data);
         lastError = `Unexpected response structure from ${model}`;
+        console.log(`Failed with model ${model}, trying next model...`);
         continue;
       }
     } catch (error) {
       console.error(`Error calling OpenRouter model ${model}:`, error);
       lastError = error instanceof Error ? error.message : String(error);
+      console.log(`Failed with model ${model}, trying next model...`);
       continue;
     }
   }

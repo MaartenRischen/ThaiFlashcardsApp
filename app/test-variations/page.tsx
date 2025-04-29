@@ -15,6 +15,16 @@ const PROFICIENCY_LEVELS = [
   'God Mode'
 ] as const;
 
+// Add proficiency level order mapping
+const PROFICIENCY_LEVEL_ORDER: Record<string, number> = {
+  'Complete Beginner': 0,
+  'Basic Understanding': 1,
+  'Intermediate': 2,
+  'Advanced': 3,
+  'Native/Fluent': 4,
+  'God Mode': 5
+};
+
 // Define tone levels (1-10)
 const TONE_LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -301,7 +311,11 @@ export default function TestVariations() {
       let valA: unknown;
       let valB: unknown;
 
-      if (sortKey.startsWith('settings.')) {
+      if (sortKey === 'settings.proficiency') {
+        // Special handling for proficiency levels
+        valA = PROFICIENCY_LEVEL_ORDER[a.settings.proficiency] ?? -1;
+        valB = PROFICIENCY_LEVEL_ORDER[b.settings.proficiency] ?? -1;
+      } else if (sortKey.startsWith('settings.')) {
         const settingKey = sortKey.split('.')[1] as keyof TestCard['settings'];
         valA = a.settings[settingKey];
         valB = b.settings[settingKey];

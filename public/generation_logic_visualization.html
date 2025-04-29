@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generation Logic Visualization</title>
+    <title>Card Generation Logic Visualization</title>
     <style>
         body {
-            font-family: sans-serif;
-            line-height: 1.6;
-            margin: 2em;
+            font-family: Arial, sans-serif;
+            margin: 20px;
             background-color: #f8f9fa;
             color: #333;
         }
@@ -26,6 +25,9 @@
             border-bottom: 1px solid #e2e6ea;
             padding-bottom: 0.2em;
         }
+        .section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .code { font-family: monospace; background: #f5f5f5; padding: 10px; }
+        .flow-diagram { margin: 20px 0; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -95,169 +97,291 @@
 </head>
 <body>
 
-    <h1>Flashcard Generation Logic Visualization</h1>
+    <h1>Thai Flashcard Generation Logic</h1>
 
-    <h2>1. Proficiency Level → Content Complexity</h2>
-    <p>This table shows how the selected <code>Proficiency Level</code> primarily dictates the vocabulary, grammar, and complexity of the generated content.</p>
-    <table>
-        <thead>
-            <tr>
-                <th>Proficiency Level</th>
-                <th>Phrase Complexity</th>
-                <th>Vocabulary Type</th>
-                <th>Example Sentence / Question Complexity</th>
-                <th>Key Constraint</th>
-                <th>Key Prompt Instruction Snippet (Level)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>Complete Beginner</strong></td>
-                <td>1-3 words (essential)</td>
-                <td>High-frequency</td>
-                <td>Very simple descriptive S-V-O</td>
-                <td>NO questions/dialogues</td>
-                <td><code>Complete Beginner: Use only the most essential, high-frequency words and very short descriptive phrases (1-3 words). Focus on basic identification and simple S-V-O structures. Examples must be extremely simple descriptive statements. Avoid questions and dialogues.</code></td>
-            </tr>
-            <tr>
-                <td><strong>Basic Understanding</strong></td>
-                <td>Up to ~5 words (simple statements)</td>
-                <td>Common expressions</td>
-                <td>Easy descriptive statements or simple Qs (daily life)</td>
-                <td>NO dialogues</td>
-                <td><code>Basic Understanding: Use short, practical descriptive phrases and simple statements (up to ~5 words). Introduce basic grammar and common expressions for everyday needs. Simple questions directly related to the phrase are acceptable. Avoid dialogues. Examples should be easy descriptive statements or simple questions about daily life.</code></td>
-            </tr>
-            <tr>
-                <td><strong>Intermediate</strong></td>
-                <td>~5-10 words (descriptive sentences)</td>
-                <td>Typical phrases</td>
-                <td>Everyday situations, varied structure; Simple Qs OK</td>
-                <td>NO dialogues</td>
-                <td><code>Intermediate: Use descriptive sentences (~5-10 words), common grammar structures, and typical vocabulary for common situations. Simple, relevant questions are okay. Avoid dialogues. Examples should describe everyday situations and show some variety in structure.</code></td>
-            </tr>
-            <tr>
-                <td><strong>Advanced</strong></td>
-                <td>10+ words (complex sentences)</td>
-                <td>Nuanced vocabulary</td>
-                <td>Sophisticated descriptive statements or relevant Qs</td>
-                <td>NO dialogues</td>
-                <td><code>Advanced: Use complex descriptive sentences (10+ words), nuanced vocabulary, and varied intermediate-to-advanced grammar. Relevant questions are okay. Avoid dialogues. Examples should be sophisticated descriptive statements or relevant questions.</code></td>
-            </tr>
-            <tr>
-                <td><strong>Native/Fluent</strong></td>
-                <td>Idiomatic, natural</td>
-                <td>Slang, cultural refs</td>
-                <td>Authentic native descriptive statements or relevant Qs</td>
-                <td>NO dialogues</td>
-                <td><code>Native/Fluent: Use idiomatic, natural, authentic descriptive language (including slang/cultural refs). Complexity reflects educated native speech. Relevant questions are okay. Avoid dialogues. Examples should sound like real, fluent Thai descriptive statements or questions.</code></td>
-            </tr>
-            <tr>
-                <td><strong>God Mode</strong></td>
-                <td>Extremely elaborate, complex</td>
-                <td>Rare vocabulary, advanced</td>
-                <td>Exceptionally complex descriptive statements or relevant Qs</td>
-                <td>NO dialogues</td>
-                <td><code>God Mode: Use extremely elaborate, idiomatic, sophisticated descriptive language, pushing complexity beyond typical native speech (rare vocab, advanced grammar). Relevant questions are okay. Avoid dialogues. Examples should be exceptionally complex descriptive statements or questions.</code></td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="section">
+        <h2>1. Model Selection and Fallback System</h2>
+        <div class="code">
+            const TEXT_MODELS = [
+                'google/gemini-2.5-flash-preview',    // Primary choice
+                'google/gemini-2.5-pro-preview-03-25', // First fallback
+                'openai/gpt-4',                       // Second fallback
+                'openai/gpt-3.5-turbo',               // Third fallback
+                'anthropic/claude-3-opus',            // Fourth fallback
+                'mistralai/mixtral-8x7b'             // Final fallback
+            ];
+        </div>
+    </div>
 
-    <h2>2. Tone Level → Content Style & Theme</h2>
-    <p>This table outlines how the <code>Tone Level</code> (1-10) influences the style, context, realism, and theme of the generated content, including mnemonics.</p>
-    <table>
-        <thead>
-            <tr>
-                <th>Tone Level</th>
-                <th>Tone Description</th>
-                <th>Phrase Content Style (Context/Theme)</th>
-                <th>Example Sentence Style (Context/Theme)</th>
-                <th>Mnemonic Style & Utility</th>
-                <th>Key Prompt Instruction Snippet (Tone)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>1</strong> (Serious)</td>
-                <td>Purely practical, serious, essential.</td>
-                <td>Dead serious, practical context.</td>
-                <td>Textbook serious, descriptive context.</td>
-                <td>Simple, focused on recall.</td>
-                <td><code>Level 1 (Serious): Content is purely practical, serious, and focused on essential communication. No humor. Examples are textbook-style, descriptive.</code></td>
-            </tr>
-            <tr>
-                <td><strong>2</strong> (Serious + Levity)</td>
-                <td>Overwhelmingly practical, subtle hints of humor/informality.</td>
-                <td>Mostly serious context, occasional slightly informal phrase.</td>
-                <td>Mostly serious context, hint of mild humor possible.</td>
-                <td>Focused on recall.</td>
-                <td><code>Level 2 (Serious + Hint of Levity): Overwhelmingly practical and serious, but allows for very subtle, occasional hints of mild humor or slightly less formal phrasing.</code></td>
-            </tr>
-            <tr>
-                <td><strong>3</strong> (Practical + Fun)</td>
-                <td>Primarily practical, noticeable playful elements.</td>
-                <td>Practical context, starting to be fun/creative.</td>
-                <td>Slightly amusing but plausible situations.</td>
-                <td>Increasingly creative, aims for recall.</td>
-                <td><code>Level 3 (Practical + Emerging Fun): Still primarily practical, but humor and playful elements become more noticeable. Examples can describe slightly amusing but plausible situations.</code></td>
-            </tr>
-            <tr>
-                <td><strong>4</strong> (Playful Practicality)</td>
-                <td>Clear blend of practical content with noticeable humor/wit.</td>
-                <td>Practical topics in humorous/lighthearted context.</td>
-                <td>Amusing situations, still grounded in reality.</td>
-                <td>Creative, aids recall.</td>
-                <td><code>Level 4 (Playful Practicality): A clear blend. Content remains practical but is presented with noticeable humor, wit, or lightheartedness. Examples are often amusing but grounded.</code></td>
-            </tr>
-            <tr>
-                <td><strong>5</strong> (Balanced Absurdity)</td>
-                <td>Mix of practical concepts & illogical/surreal elements.</td>
-                <td>Practical phrases mixed with absurd concepts.</td>
-                <td>Impossible or highly improbable scenarios.</td>
-                <td>Bizarre style, still attempts to aid recall.</td>
-                <td><code>Level 5 (Balanced Absurdity): Equal mix of potentially practical phrases and concepts introducing illogical or surreal elements. Examples start describing impossible or highly improbable scenarios.</code></td>
-            </tr>
-            <tr>
-                <td><strong>6</strong> (Leaning Weird)</td>
-                <td>Practicality decreases; focus on bizarre/nonsensical contexts.</td>
-                <td>Useful phrases often in bizarre/nonsensical context.</td>
-                <td>Increasingly defies logic/physics.</td>
-                <td>Bizarre style, still attempts to aid recall.</td>
-                <td><code>Level 6 (Leaning Weird): Practicality decreases. Phrases might be useful but are often presented in bizarre or nonsensical contexts. Examples increasingly defy logic/physics.</code></td>
-            </tr>
-            <tr>
-                <td><strong>7</strong> (Strongly Bizarre)</td>
-                <td>Usefulness secondary; bizarre situations, surreal humor.</td>
-                <td>Mostly bizarre concepts, potentially useful phrases.</td>
-                <td>Highly imaginative and illogical scenarios.</td>
-                <td>Bizarre style, still attempts to aid recall.</td>
-                <td><code>Level 7 (Strongly Bizarre): Usefulness is secondary. Most content involves bizarre situations, surreal humor, or strange concepts. Examples are highly imaginative and illogical.</code></td>
-            </tr>
-            <tr>
-                <td><strong>8</strong> (Reality Bending)</td>
-                <td>Usefulness minimal; semantically strange content.</td>
-                <td>Semantically strange but grammatical phrases.</td>
-                <td>Coherent fever dreams, reality-questioning.</td>
-                <td>Chaotic style, attempts recall link.</td>
-                <td><code>Level 8 (Reality Bending): Usefulness is minimal. Content focuses on semantically strange but grammatically correct statements. Examples should feel like coherent fever dreams, questioning reality.</code></td>
-            </tr>
-            <tr>
-                <td><strong>9</strong> (Chaos)</td>
-                <td>Usefulness near zero; chaotic, nonsensical, paradoxical.</td>
-                <td>Intentionally chaotic/nonsensical phrases.</td>
-                <td>Existential absurdity.</td>
-                <td>Chaotic style, utility secondary.</td>
-                <td><code>Level 9 (Chaos): Usefulness is almost non-existent. Content is intentionally chaotic, nonsensical, or paradoxical. Examples aim for existential absurdity. Mnemonic utility is secondary.</code></td>
-            </tr>
-            <tr>
-                <td><strong>10</strong> (Max Absurdity)</td>
-                <td>Pure madness, surrealism, non-sequiturs (grammatical).</td>
-                <td>Brain-melting madness, non-sequiturs.</td>
-                <td>Maximally bizarre, nonsensical, Dali-esque.</td>
-                <td>Chaotic style, utility secondary.</td>
-                <td><code>Level 10 (Maximum Absurdity): Content is pure brain-melting madness, surrealism, and non-sequiturs, while maintaining grammatical structure. Examples should be maximally bizarre and nonsensical. Mnemonic utility is secondary.</code></td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="section">
+        <h2>2. Batch Processing</h2>
+        <div class="flow-diagram">
+            <pre>
+Generation Process
+├── Input: Total cards requested (N)
+├── Batch Size: 8 cards per batch
+├── Number of batches = ceil(N/8)
+└── For each batch:
+    ├── Calculate remaining cards needed
+    ├── Try primary model (Gemini 2.5)
+    │   └── If fails, try fallback models in sequence
+    ├── Maximum 3 retries per model
+    ├── Validate generated content
+    └── Store successful generations
+            </pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>3. Error Handling and Validation</h2>
+        <div class="flow-diagram">
+            <pre>
+Error Handling Pipeline
+├── Per-batch error handling
+│   ├── Network errors (retryable)
+│   ├── API errors (retryable)
+│   └── Validation errors (non-retryable)
+├── Aggregated error collection
+└── Fallback mechanisms
+    ├── Model fallbacks
+    └── INITIAL_PHRASES fallback if all models fail
+            </pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>4. Storage Pipeline</h2>
+        <div class="flow-diagram">
+            <pre>
+Storage Flow
+├── 1. Save metadata
+│   └── Set details (name, level, topics, etc.)
+├── 2. Handle image storage
+│   ├── Generated image URL or
+│   └── Fallback to placeholder
+├── 3. Save content (phrases)
+│   └── Rollback metadata if fails
+├── 4. Save progress
+│   └── Rollback content & metadata if fails
+└── 5. Return complete set data
+            </pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>5. Prompt Structure</h2>
+        <div class="code">
+            // Prompt includes:
+            1. Proficiency Level Implementation
+            2. Tone Level Implementation (1-10 scale)
+            3. Content Guidelines
+               - Phrases
+               - Examples
+               - Mnemonics
+            4. Thai Grammar Rules
+            5. Example Outputs by Level
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>6. Generation Parameters</h2>
+        <ul>
+            <li>Batch Size: 8 cards</li>
+            <li>Max Retries: 3 per model</li>
+            <li>Models: 6 different LLMs in fallback sequence</li>
+            <li>Validation: Strict JSON schema validation</li>
+            <li>Error Types: Network, API, Parse, Validation, Unknown</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>7. Output Format</h2>
+        <div class="code">
+interface Phrase {
+    english: string;
+    thai: string;
+    thaiMasculine: string;
+    thaiFeminine: string;
+    pronunciation: string;
+    mnemonic?: string;
+    examples: ExampleSentence[];
+}
+
+interface ExampleSentence {
+    thai: string;
+    thaiMasculine: string;
+    thaiFeminine: string;
+    pronunciation: string;
+    translation: string;
+}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>8. Proficiency Level → Content Complexity</h2>
+        <p>This table shows how the selected <code>Proficiency Level</code> primarily dictates the vocabulary, grammar, and complexity of the generated content.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Proficiency Level</th>
+                    <th>Phrase Complexity</th>
+                    <th>Vocabulary Type</th>
+                    <th>Example Sentence / Question Complexity</th>
+                    <th>Key Constraint</th>
+                    <th>Key Prompt Instruction Snippet (Level)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Complete Beginner</strong></td>
+                    <td>1-3 words (essential)</td>
+                    <td>High-frequency</td>
+                    <td>Very simple descriptive S-V-O</td>
+                    <td>NO questions/dialogues</td>
+                    <td><code>Complete Beginner: Use only the most essential, high-frequency words and very short descriptive phrases (1-3 words). Focus on basic identification and simple S-V-O structures. Examples must be extremely simple descriptive statements. Avoid questions and dialogues.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Basic Understanding</strong></td>
+                    <td>Up to ~5 words (simple statements)</td>
+                    <td>Common expressions</td>
+                    <td>Easy descriptive statements or simple Qs (daily life)</td>
+                    <td>NO dialogues</td>
+                    <td><code>Basic Understanding: Use short, practical descriptive phrases and simple statements (up to ~5 words). Introduce basic grammar and common expressions for everyday needs. Simple questions directly related to the phrase are acceptable. Avoid dialogues. Examples should be easy descriptive statements or simple questions about daily life.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Intermediate</strong></td>
+                    <td>~5-10 words (descriptive sentences)</td>
+                    <td>Typical phrases</td>
+                    <td>Everyday situations, varied structure; Simple Qs OK</td>
+                    <td>NO dialogues</td>
+                    <td><code>Intermediate: Use descriptive sentences (~5-10 words), common grammar structures, and typical vocabulary for common situations. Simple, relevant questions are okay. Avoid dialogues. Examples should describe everyday situations and show some variety in structure.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Advanced</strong></td>
+                    <td>10+ words (complex sentences)</td>
+                    <td>Nuanced vocabulary</td>
+                    <td>Sophisticated descriptive statements or relevant Qs</td>
+                    <td>NO dialogues</td>
+                    <td><code>Advanced: Use complex descriptive sentences (10+ words), nuanced vocabulary, and varied intermediate-to-advanced grammar. Relevant questions are okay. Avoid dialogues. Examples should be sophisticated descriptive statements or relevant questions.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Native/Fluent</strong></td>
+                    <td>Idiomatic, natural</td>
+                    <td>Slang, cultural refs</td>
+                    <td>Authentic native descriptive statements or relevant Qs</td>
+                    <td>NO dialogues</td>
+                    <td><code>Native/Fluent: Use idiomatic, natural, authentic descriptive language (including slang/cultural refs). Complexity reflects educated native speech. Relevant questions are okay. Avoid dialogues. Examples should sound like real, fluent Thai descriptive statements or questions.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>God Mode</strong></td>
+                    <td>Extremely elaborate, complex</td>
+                    <td>Rare vocabulary, advanced</td>
+                    <td>Exceptionally complex descriptive statements or relevant Qs</td>
+                    <td>NO dialogues</td>
+                    <td><code>God Mode: Use extremely elaborate, idiomatic, sophisticated descriptive language, pushing complexity beyond typical native speech (rare vocab, advanced grammar). Relevant questions are okay. Avoid dialogues. Examples should be exceptionally complex descriptive statements or questions.</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>9. Tone Level → Context & Style</h2>
+        <p>This table outlines how the <code>Tone Level</code> (1-10) influences the style, context, realism, and theme of the generated content, including mnemonics.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tone Level</th>
+                    <th>Tone Description</th>
+                    <th>Phrase Content Style (Context/Theme)</th>
+                    <th>Example Sentence Style (Context/Theme)</th>
+                    <th>Mnemonic Style & Utility</th>
+                    <th>Key Prompt Instruction Snippet (Tone)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1</strong> (Serious)</td>
+                    <td>Purely practical, serious, essential.</td>
+                    <td>Dead serious, practical context.</td>
+                    <td>Textbook serious, descriptive context.</td>
+                    <td>Simple, focused on recall.</td>
+                    <td><code>Level 1 (Serious): Content is purely practical, serious, and focused on essential communication. No humor. Examples are textbook-style, descriptive.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>2</strong> (Serious + Levity)</td>
+                    <td>Overwhelmingly practical, subtle hints of humor/informality.</td>
+                    <td>Mostly serious context, occasional slightly informal phrase.</td>
+                    <td>Mostly serious context, hint of mild humor possible.</td>
+                    <td>Focused on recall.</td>
+                    <td><code>Level 2 (Serious + Hint of Levity): Overwhelmingly practical and serious, but allows for very subtle, occasional hints of mild humor or slightly less formal phrasing.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>3</strong> (Practical + Fun)</td>
+                    <td>Primarily practical, noticeable playful elements.</td>
+                    <td>Practical context, starting to be fun/creative.</td>
+                    <td>Slightly amusing but plausible situations.</td>
+                    <td>Increasingly creative, aims for recall.</td>
+                    <td><code>Level 3 (Practical + Emerging Fun): Still primarily practical, but humor and playful elements become more noticeable. Examples can describe slightly amusing but plausible situations.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>4</strong> (Playful Practicality)</td>
+                    <td>Clear blend of practical content with noticeable humor/wit.</td>
+                    <td>Practical topics in humorous/lighthearted context.</td>
+                    <td>Amusing situations, still grounded in reality.</td>
+                    <td>Creative, aids recall.</td>
+                    <td><code>Level 4 (Playful Practicality): A clear blend. Content remains practical but is presented with noticeable humor, wit, or lightheartedness. Examples are often amusing but grounded.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>5</strong> (Balanced Absurdity)</td>
+                    <td>Mix of practical concepts & illogical/surreal elements.</td>
+                    <td>Practical phrases mixed with absurd concepts.</td>
+                    <td>Impossible or highly improbable scenarios.</td>
+                    <td>Bizarre style, still attempts to aid recall.</td>
+                    <td><code>Level 5 (Balanced Absurdity): Equal mix of potentially practical phrases and concepts introducing illogical or surreal elements. Examples start describing impossible or highly improbable scenarios.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>6</strong> (Leaning Weird)</td>
+                    <td>Practicality decreases; focus on bizarre/nonsensical contexts.</td>
+                    <td>Useful phrases often in bizarre/nonsensical context.</td>
+                    <td>Increasingly defies logic/physics.</td>
+                    <td>Bizarre style, still attempts to aid recall.</td>
+                    <td><code>Level 6 (Leaning Weird): Practicality decreases. Phrases might be useful but are often presented in bizarre or nonsensical contexts. Examples increasingly defy logic/physics.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>7</strong> (Strongly Bizarre)</td>
+                    <td>Usefulness secondary; bizarre situations, surreal humor.</td>
+                    <td>Mostly bizarre concepts, potentially useful phrases.</td>
+                    <td>Highly imaginative and illogical scenarios.</td>
+                    <td>Bizarre style, still attempts to aid recall.</td>
+                    <td><code>Level 7 (Strongly Bizarre): Usefulness is secondary. Most content involves bizarre situations, surreal humor, or strange concepts. Examples are highly imaginative and illogical.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>8</strong> (Reality Bending)</td>
+                    <td>Usefulness minimal; semantically strange content.</td>
+                    <td>Semantically strange but grammatical phrases.</td>
+                    <td>Coherent fever dreams, reality-questioning.</td>
+                    <td>Chaotic style, attempts recall link.</td>
+                    <td><code>Level 8 (Reality Bending): Usefulness is minimal. Content focuses on semantically strange but grammatically correct statements. Examples should feel like coherent fever dreams, questioning reality.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>9</strong> (Chaos)</td>
+                    <td>Usefulness near zero; chaotic, nonsensical, paradoxical.</td>
+                    <td>Intentionally chaotic/nonsensical phrases.</td>
+                    <td>Existential absurdity.</td>
+                    <td>Chaotic style, utility secondary.</td>
+                    <td><code>Level 9 (Chaos): Usefulness is almost non-existent. Content is intentionally chaotic, nonsensical, or paradoxical. Examples aim for existential absurdity. Mnemonic utility is secondary.</code></td>
+                </tr>
+                <tr>
+                    <td><strong>10</strong> (Max Absurdity)</td>
+                    <td>Pure madness, surrealism, non-sequiturs (grammatical).</td>
+                    <td>Brain-melting madness, non-sequiturs.</td>
+                    <td>Maximally bizarre, nonsensical, Dali-esque.</td>
+                    <td>Chaotic style, utility secondary.</td>
+                    <td><code>Level 10 (Maximum Absurdity): Content is pure brain-melting madness, surrealism, and non-sequiturs, while maintaining grammatical structure. Examples should be maximally bizarre and nonsensical. Mnemonic utility is secondary.</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <div class="key-takeaways">
         <h3>Key Takeaways (Updated)</h3>

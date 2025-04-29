@@ -57,70 +57,6 @@ interface GenerationTask {
   count?: number; // Optional count for single task mode
 }
 
-// --- Data Structure for Scenarios by Level --- (Sentence Case)
-const scenariosByLevel: Record<string, string[]> = {
-  "Complete Beginner": [
-    "Essential greetings & leave-takings (polite)",
-    "Introducing yourself (simple)",
-    "Basic numbers (1-100 & zero)",
-    "Identifying common objects (classroom/home)",
-    "Basic question words & simple answers",
-    "Saying \"Thank You\" & \"Sorry/Excuse Me\" (polite)",
-    "Basic colors",
-    "Simple commands & requests (polite)",
-  ],
-  "Basic Understanding": [
-    "Asking for & giving personal information",
-    "Basic shopping & prices",
-    "Telling time & dates",
-    "Simple directions & locations",
-    "Ordering simple food & drinks",
-    "Talking about daily routines (simple present)",
-    "Describing people & things (simple adjectives)",
-    "Expressing likes & dislikes (simple)",
-  ],
-  "Intermediate": [
-    "Making travel arrangements",
-    "Discussing hobbies & interests",
-    "Narrating past events (simple past)",
-    "Giving & understanding more complex directions",
-    "Ordering a full meal & making specific requests",
-    "Talking about work & study",
-    "Expressing opinions & feelings (simple)",
-    "Understanding basic cultural norms",
-  ],
-  "Advanced": [
-    "Discussing current events & news",
-    "Explaining problems & solutions",
-    "Talking about Thai culture in depth",
-    "Workplace communication",
-    "Discussing films, books, or music",
-    "Giving advice & making recommendations",
-    "Understanding different registers",
-    "Narrating complex experiences",
-  ],
-  "Native/Fluent": [
-    "Analyzing social & political issues in Thailand",
-    "Understanding Thai literature & arts",
-    "Advanced workplace & business communication",
-    "Exploring Thai history & belief systems",
-    "Understanding idioms & colloquialisms",
-    "Discussing hypothetical situations & speculation",
-    "Debating & persuasion",
-    "Understanding regional dialects & variations (awareness)",
-  ],
-  "God Mode": [
-    "Specialized academic/professional fields",
-    "Classical Thai literature & poetry",
-    "Advanced linguistic analysis of Thai",
-    "Thai media analysis & critique",
-    "Translating & interpreting nuances",
-    "Mastering Thai humor & wordplay",
-    "Royal Thai language (ราชาศัพท์ - Rachasap)",
-    "Contemporary Thai sociolinguistics",
-  ]
-};
-
 // Pool of truly bizarre, surreal, and unexpected scenarios
 const weirdScenariosPool = [
   'Convincing a cloud to pay its taxes',
@@ -198,19 +134,16 @@ export default function TestVariations() {
   }, [generateAllLevels, generateAllTones, cardCount]);
 
   // Get level-appropriate scenarios based on proficiency
-  const levelScenarios = useMemo(() => {
-    const level = PROFICIENCY_LEVELS[currentProficiency];
-    return scenariosByLevel[level] || scenariosByLevel["Complete Beginner"];
-  }, [currentProficiency]);
+  const levelScenarios = useMemo(() => [], [currentProficiency]);
 
   // Effect to update weird scenarios when proficiency changes
   useEffect(() => {
-    const picked = getRandomWeirdScenarios(2, levelScenarios);
+    const picked = getRandomWeirdScenarios(2, []);
     setWeirdScenarios(picked);
-  }, [levelScenarios]);
+  }, []);
 
   // Combine level scenarios and weird scenarios for display
-  const allDisplayScenarios = useMemo(() => [...levelScenarios, ...weirdScenarios], [levelScenarios, weirdScenarios]);
+  const allDisplayScenarios = useMemo(() => [...weirdScenarios], [weirdScenarios]);
 
   const generateCard = async () => {
     if (isGenerating) return;

@@ -563,17 +563,27 @@ Ensure the entire response is ONLY the JSON object, starting with '{' and ending
 
     <div class="section">
         <h2>10. Temperature Settings</h2>
-        <p>The temperature setting affects the creativity and randomness of the generated content. It is automatically adjusted based on the seriousness level of the request.</p>
+        <p>The temperature setting affects the creativity and randomness of the generated content. It is automatically adjusted based on the seriousness level of the request, using a non-linear mapping to create distinct generation behavior groups.</p>
         <div class="code">
             function getTemperatureFromSeriousness(seriousness: number | undefined): number {
-                // Default to balanced temperature if no seriousness specified
+                // Default to balanced temperature (level 5) if no seriousness specified
                 if (typeof seriousness !== 'number') return 0.7;
                 
-                // Scale 1-10 seriousness to temperature:
-                // - Lower seriousness (more creative) = higher temperature
-                // - Higher seriousness (more focused) = lower temperature
-                const normalizedTemp = 1 - (seriousness - 1) / 9; // Convert 1-10 to 1-0
-                return 0.4 + (normalizedTemp * 0.6); // Scale to 0.4-1.0 range
+                // Use a non-linear temperature mapping for distinct behavior groups
+                const temperatureMap: Record<number, number> = {
+                    1: 0.1,   // Dead serious
+                    2: 0.3,   // Barely a smile
+                    3: 0.4,   // Slight humor
+                    4: 0.5,   // Last practical level
+                    5: 0.7,   // Starting to get weird
+                    6: 0.8,   // Definitely weird
+                    7: 0.9,   // Very weird
+                    8: 0.95,  // Reality-bending
+                    9: 1.5,   // Reality-breaking
+                    10: 2.0   // Maximum possible chaos
+                };
+                
+                return temperatureMap[seriousness];
             }
         </div>
         <table>
@@ -582,26 +592,72 @@ Ensure the entire response is ONLY the JSON object, starting with '{' and ending
                     <th>Seriousness Level</th>
                     <th>Temperature</th>
                     <th>Effect on Generation</th>
+                    <th>Behavior Group</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>1 (Most Serious)</td>
+                    <td>0.1</td>
+                    <td>Extremely focused and deterministic outputs</td>
+                    <td rowspan="4">Conservative Group (0.1-0.5)<br>Practical, focused content</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>0.3</td>
+                    <td>Very conservative with minimal variation</td>
+                </tr>
+                <tr>
+                    <td>3</td>
                     <td>0.4</td>
-                    <td>Most focused and deterministic outputs, best for practical/serious content</td>
+                    <td>Conservative with slight playfulness</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>0.5</td>
+                    <td>Last fully practical level</td>
                 </tr>
                 <tr>
                     <td>5 (Balanced)</td>
                     <td>0.7</td>
-                    <td>Balanced between creativity and focus</td>
+                    <td>Starting to get weird</td>
+                    <td rowspan="4">Creative Group (0.7-0.95)<br>Increasing randomness</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>0.8</td>
+                    <td>Definitely weird outputs</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>0.9</td>
+                    <td>Very weird combinations</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>0.95</td>
+                    <td>Reality-bending content</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>1.5</td>
+                    <td>Reality-breaking outputs</td>
+                    <td rowspan="2">Chaotic Group (1.5-2.0)<br>Maximum unpredictability</td>
                 </tr>
                 <tr>
                     <td>10 (Least Serious)</td>
-                    <td>1.0</td>
-                    <td>Most creative and varied outputs, best for humorous/absurd content</td>
+                    <td>2.0</td>
+                    <td>Maximum possible chaos</td>
                 </tr>
             </tbody>
         </table>
+        <p><strong>Note:</strong> The temperature mapping uses three distinct groups to create clear behavioral boundaries:
+            <ul>
+                <li><strong>Conservative (Levels 1-4):</strong> Temperatures 0.1-0.5 for practical, focused content</li>
+                <li><strong>Creative (Levels 5-8):</strong> Temperatures 0.7-0.95 for increasing randomness and creativity</li>
+                <li><strong>Chaotic (Levels 9-10):</strong> Temperatures 1.5-2.0 for maximum unpredictability</li>
+            </ul>
+        </p>
     </div>
 
     <script>

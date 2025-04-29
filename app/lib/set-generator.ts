@@ -460,12 +460,12 @@ function buildGenerationPrompt(
 
   // Define proficiency level descriptions
   const levelDescriptions: Record<GeneratePromptOptions['level'], string> = {
-    'Complete Beginner': "Use only the most essential, high-frequency words and very short descriptive phrases (1-3 words). Focus on basic identification and simple S-V-O structures. Examples must be extremely simple descriptive statements. Avoid questions and dialogues.",
-    'Basic Understanding': "Use short, practical descriptive phrases and simple statements (up to ~5 words). Introduce basic grammar and common expressions for everyday needs. Simple questions directly related to the phrase are acceptable. Avoid dialogues. Examples should be easy descriptive statements or simple questions about daily life.",
-    'Intermediate': "Use descriptive sentences (~5-10 words), common grammar structures, and typical vocabulary for common situations. Simple, relevant questions are okay. Avoid dialogues. Examples should describe everyday situations and show some variety in structure.",
-    'Advanced': "Use complex descriptive sentences (10+ words), nuanced vocabulary, and varied intermediate-to-advanced grammar. Relevant questions are okay. Avoid dialogues. Examples should be sophisticated descriptive statements or relevant questions.",
-    'Native/Fluent': "Use idiomatic, natural, authentic descriptive language (including slang/cultural refs). Complexity reflects educated native speech. Relevant questions are okay. Avoid dialogues. Examples should sound like real, fluent Thai descriptive statements or questions.",
-    'God Mode': "Use extremely elaborate, idiomatic, sophisticated descriptive language, pushing complexity beyond typical native speech (rare vocab, advanced grammar). Relevant questions are okay. Avoid dialogues. Examples should be exceptionally complex descriptive statements or questions."
+    'Complete Beginner': "Use ONLY single words or two-word combinations (noun+verb or noun+adjective). Focus on the absolute most basic, high-frequency vocabulary. Examples must be single-word or two-word statements only. NO questions, NO dialogues, NO complex structures.",
+    'Basic Understanding': "Use short, practical phrases (2-4 words). Focus on basic S-V-O structures and common expressions for everyday needs. Simple questions are okay. Avoid dialogues. Examples should be basic descriptive statements about daily life.",
+    'Intermediate': "Use medium-length descriptive sentences (4-7 words). Include basic compound structures and typical vocabulary for common situations. Simple questions and compound sentences are okay. Avoid dialogues. Examples should describe everyday situations.",
+    'Advanced': "Use moderately complex sentences (7-12 words). Include varied grammar structures and more nuanced vocabulary. Complex questions and compound-complex sentences are okay. Avoid dialogues. Examples should demonstrate natural Thai expression.",
+    'Native/Fluent': "Use natural, idiomatic Thai (any appropriate length). Include slang, cultural references, and educated native speech patterns. Complex questions and varied sentence structures are encouraged. Avoid dialogues. Examples should sound like authentic Thai.",
+    'God Mode': "Use sophisticated, elaborate Thai (extended length). Include rare vocabulary, advanced grammar patterns, and literary/academic language. Complex questions and varied structures are encouraged. Avoid dialogues. Examples should demonstrate mastery of formal and literary Thai."
   };
 
   // Get the specific description for the requested level

@@ -6,6 +6,7 @@ import GallerySetCard from './GallerySetCard';
 import { GalleryHorizontal, Loader2 } from 'lucide-react';
 // Import a modal component (we'll create this next)
 import CardViewerModal from './CardViewerModal';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 interface GallerySet {
   id: string;
@@ -29,9 +30,17 @@ interface FullGallerySet extends GallerySet {
   llmModel?: string;
 }
 
+interface DisplaySet extends Omit<GallerySet, 'phrases' | 'createdAt'> {
+  id: string;
+  createdAt: Date; // Keep as Date object for sorting
+  phraseCount: number;
+  generationMeta?: { imageUrl?: string | null } | null; 
+  userId: string;
+}
+
 export default function GalleryPage() {
   const { availableSets, addSet, isLoading: contextIsLoading } = useSet();
-  const [sets, setSets] = useState<GallerySet[]>([]);
+  const [sets, setSets] = useState<DisplaySet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [importingSetId, setImportingSetId] = useState<string | null>(null);
@@ -46,7 +55,6 @@ export default function GalleryPage() {
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'Newest' | 'Oldest' | 'Most Cards' | 'Highest Rated'>('Newest');
   const [proficiencyFilter, setProficiencyFilter] = useState<string>('All');
-  const [seriousnessFilter, setSeriousnessFilter] = useState<string>('All');
   const [authorFilter, setAuthorFilter] = useState<string>('All');
 
   // --- Filtering Logic ---
@@ -117,23 +125,6 @@ export default function GalleryPage() {
       );
     }
 
-    // Seriousness filter
-    if (seriousnessFilter !== 'All') {
-      filtered = filtered.filter(set => {
-        const level = set.seriousnessLevel || 0;
-        switch (seriousnessFilter) {
-          case '1-3 (Serious)':
-            return level >= 1 && level <= 3;
-          case '4-7 (Balanced)':
-            return level >= 4 && level <= 7;
-          case '8-10 (Fun)':
-            return level >= 8 && level <= 10;
-          default:
-            return true;
-        }
-      });
-    }
-
     // Author filter
     if (authorFilter !== 'All') {
       filtered = filtered.filter(set => 
@@ -159,7 +150,7 @@ export default function GalleryPage() {
     });
 
     return filtered;
-  }, [sets, search, sortOrder, proficiencyFilter, seriousnessFilter, authorFilter, proficiencyLevels]);
+  }, [sets, search, sortOrder, proficiencyFilter, authorFilter, proficiencyLevels]);
 
   useEffect(() => {
     setLoading(true);
@@ -172,7 +163,7 @@ export default function GalleryPage() {
       .then(data => {
         console.log('Gallery sets data:', data);
         // Log each set's author to debug
-        data.forEach((set: GallerySet, index: number) => {
+        data.forEach((set: DisplaySet, index: number) => {
           console.log(`Set ${index} - Title: ${set.title}, Author: '${set.author}'`);
         });
         setSets(data);

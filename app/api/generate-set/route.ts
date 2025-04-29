@@ -9,10 +9,11 @@ import {
 } from '@/app/lib/set-generator'; 
 import * as storage from '@/app/lib/storage';
 import { SetMetaData } from '@/app/lib/storage'; // Import SetMetaData
-import { generateImage } from '@/app/lib/ideogram-service';
+// import { generateImage } from '@/app/lib/ideogram-service'; // Removed unused import
 import { INITIAL_PHRASES } from '@/app/data/phrases'; // Import INITIAL_PHRASES only
-import { prisma } from "@/app/lib/prisma"; // Import prisma client
-import { uploadImageFromUrl } from '../../lib/imageStorage'; // Use relative path
+// import { prisma } from "@/app/lib/prisma"; // Removed unused import
+// import { uploadImageFromUrl } from '../../lib/imageStorage'; // Removed unused import
+import { Prisma } from '@prisma/client'; // Import Prisma client types
 
 // Debug environment variables - this will help diagnose Railway issues
 console.log('API Route Environment Variables:');
@@ -26,13 +27,17 @@ console.log('DEBUG: DATABASE_URL in generate-set route:', process.env.DATABASE_U
 // Add more detailed debug logging for Ideogram key
 console.log('DEBUG: IDEOGRAM_API_KEY first 10 chars:', process.env.IDEOGRAM_API_KEY ? process.env.IDEOGRAM_API_KEY.substring(0, 10) + '...' : 'undefined');
 
-// Define expected request body structure (can be shared or redefined here)
+// Define the expected request body structure
 interface GenerateSetRequestBody {
   preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>;
   totalCount: number;
-  isTestRequest: boolean;
-  forcedModel?: string;
+  source?: 'user' | 'test'; // Optional source field
+  isTestRequest?: boolean; // Flag for test requests
+  forcedModel?: string; // Optional model override
 }
+
+// Define the source enum or type if not already defined elsewhere
+type SetSource = 'user' | 'test';
 
 // Placeholder Thailand images (use existing project images)
 const PLACEHOLDER_IMAGES = [
@@ -78,7 +83,7 @@ export async function POST(request: Request) {
     console.log(`API Route: Authentication successful for userId: ${userId}`);
 
     const body = await request.json();
-    const { preferences, totalCount, isTestRequest, forcedModel } = body;
+    const { preferences, totalCount, source, isTestRequest, forcedModel } = body;
 
     if (!preferences || !totalCount) {
       console.error("API Route: Missing required parameters (preferences or totalCount).");
@@ -94,7 +99,6 @@ export async function POST(request: Request) {
       // If forcedModel is provided, temporarily override TEXT_MODELS
       const originalModels = [...TEXT_MODELS];
       if (forcedModel && typeof forcedModel === 'string') {
-        // @ts-ignore - We're intentionally modifying the const array
         TEXT_MODELS.splice(0, TEXT_MODELS.length, forcedModel);
       }
 
@@ -109,7 +113,6 @@ export async function POST(request: Request) {
 
       // Restore original models if we modified them
       if (forcedModel) {
-        // @ts-ignore - We're intentionally modifying the const array
         TEXT_MODELS.splice(0, TEXT_MODELS.length, ...originalModels);
       }
 

@@ -4,7 +4,8 @@ import {
   generateCustomSet, 
   GeneratePromptOptions,
   GenerationResult,
-  Phrase as GeneratorPhrase // Import the correct Phrase type
+  Phrase as GeneratorPhrase, // Import the correct Phrase type
+  TEXT_MODELS
 } from '@/app/lib/set-generator'; 
 import * as storage from '@/app/lib/storage';
 import { SetMetaData } from '@/app/lib/storage'; // Import SetMetaData
@@ -29,6 +30,8 @@ console.log('DEBUG: IDEOGRAM_API_KEY first 10 chars:', process.env.IDEOGRAM_API_
 interface GenerateSetRequestBody {
   preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>;
   totalCount: number;
+  isTestRequest: boolean;
+  forcedModel?: string;
 }
 
 // Placeholder Thailand images (use existing project images)
@@ -61,62 +64,60 @@ function getErrorMessage(error: unknown): string {
 export async function POST(request: Request) {
   console.log("API Route: /api/generate-set received POST request");
   
-  let newMetaId: string | null = null; 
-  
+  let newMetaId = ''; // Track the ID for potential cleanup
+  let userId: string | null = null; // Track userId
+
   try {
-    // Add detailed auth debugging
-    console.log("API Route: Attempting to get auth session...");
+    console.log("API Route: Checking authentication...");
     const authResult = await auth();
-    console.log("API Route: Auth result:", JSON.stringify(authResult, null, 2));
-    
-    const { userId } = authResult;
+    if (!authResult || !authResult.userId) {
+      console.error("API Route: Authentication failed or userId missing.");
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+    userId = authResult.userId;
+    console.log(`API Route: Authentication successful for userId: ${userId}`);
 
-    if (!userId) {
-      console.error("API Route: Unauthorized access - No user ID found in auth result.");
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const body = await request.json();
+    const { preferences, totalCount, isTestRequest, forcedModel } = body;
+
+    if (!preferences || !totalCount) {
+      console.error("API Route: Missing required parameters (preferences or totalCount).");
+      return NextResponse.json(
+        { error: "Missing required parameters" },
+        { status: 400 }
+      );
     }
 
-    console.log(`API Route: Successfully authenticated user with ID: ${userId}`);
-
-    // --- Check/Create User in DB ---
-    try {
-      await prisma.user.upsert({
-        where: { id: userId },
-        update: {}, // No fields to update if user exists
-        create: { 
-          id: userId, 
-          // Add other default fields for your User model if necessary
-        },
-      });
-      console.log(`Ensured user exists in DB: ${userId}`);
-    } catch (userError) {
-      console.error(`API Route: Failed to ensure user ${userId} exists in DB:`, userError);
-      return NextResponse.json({ error: 'Failed to process user data' }, { status: 500 });
-    }
-    // --- End User Check/Create ---
-
-    let requestBody: GenerateSetRequestBody;
-    try {
-      requestBody = await request.json();
-      console.log("API Route: Parsed request body:", requestBody);
-    } catch (e) {
-      console.error("API Route: Invalid request body:", e);
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-    }
-
-    const { preferences, totalCount } = requestBody;
-
-    if (!preferences || typeof totalCount !== 'number' || totalCount <= 0) {
-       console.error("API Route: Missing or invalid preferences/totalCount in request body.");
-       return NextResponse.json({ error: 'Missing preferences or invalid totalCount' }, { status: 400 });
-    }
-
-    console.log(`API Route: Starting generation for userId: ${userId}`);
+    console.log(`API Route: Starting generation process for userId: ${userId}, count: ${totalCount}, isTest: ${isTestRequest}`);
     let generationResult: GenerationResult | null = null;
     try {
-      // --- 1. Generate Phrases ---
-      generationResult = await generateCustomSet(preferences, totalCount);
+      // If forcedModel is provided, temporarily override TEXT_MODELS
+      const originalModels = [...TEXT_MODELS];
+      if (forcedModel && typeof forcedModel === 'string') {
+        // @ts-ignore - We're intentionally modifying the const array
+        TEXT_MODELS.splice(0, TEXT_MODELS.length, forcedModel);
+      }
+
+      generationResult = await generateCustomSet(
+        preferences,
+        totalCount,
+        isTestRequest ? undefined : (progress) => {
+          // Optional progress tracking for non-test requests
+          console.log(`Generation progress: ${progress.completed}/${progress.total}`);
+        }
+      );
+
+      // Restore original models if we modified them
+      if (forcedModel) {
+        // @ts-ignore - We're intentionally modifying the const array
+        TEXT_MODELS.splice(0, TEXT_MODELS.length, ...originalModels);
+      }
+
       console.log("API Route: generateCustomSet result:", generationResult);
+      
+      if (!generationResult.phrases || generationResult.phrases.length === 0) {
+        throw new Error("No phrases generated");
+      }
 
       // Explicitly type phrasesToSave as the stricter GeneratorPhrase[]
       let phrasesToSave: GeneratorPhrase[] = generationResult.phrases; 
@@ -125,45 +126,35 @@ export async function POST(request: Request) {
       // --- 2. Handle Fallback ---
       if (generationResult.errorSummary || !generationResult.phrases.length) {
         console.warn('API Route: Generation failed or returned no phrases. Using fallback.');
-        // Map INITIAL_PHRASES to GeneratorPhrase structure
         phrasesToSave = INITIAL_PHRASES.slice(0, totalCount).map(p => ({
           english: p.english,
           thai: p.thai,
-          thaiMasculine: p.thaiMasculine || '', // Ensure string
-          thaiFeminine: p.thaiFeminine || '',   // Ensure string
+          thaiMasculine: p.thaiMasculine || '',
+          thaiFeminine: p.thaiFeminine || '',
           pronunciation: p.pronunciation,
           mnemonic: p.mnemonic,
           examples: p.examples?.map(ex => ({
             thai: ex.thai,
-            thaiMasculine: ex.thaiMasculine || '', // Ensure string
-            thaiFeminine: ex.thaiFeminine || '',   // Ensure string
+            thaiMasculine: ex.thaiMasculine || '',
+            thaiFeminine: ex.thaiFeminine || '',
             pronunciation: ex.pronunciation,
             translation: ex.translation,
           })) || undefined,
-        })); // No need to cast here as we mapped directly to the target structure
+        }));
         isFallback = true;
       }
 
       // --- 4. Prepare Metadata for Storage ---
-      // Map tone preference to seriousnessLevel (adjust mapping if needed)
       let seriousnessLevelValue: number | undefined;
       if (typeof preferences.tone === 'number') {
         seriousnessLevelValue = preferences.tone;
       } else {
-        seriousnessLevelValue = 5; // Default to balanced
+        seriousnessLevelValue = 5;
       }
-
-      // Add detailed logging for proficiency level
-      console.log('LEVEL DEBUG - Original level from client:', preferences.level);
-      console.log('LEVEL DEBUG - Level type:', typeof preferences.level);
       
-      // Map any proficiency level string to the correct lowercase version
       let levelToStore: SetMetaData['level'] | undefined = undefined;
-      
       if (preferences.level) {
         const levelLower = preferences.level.toLowerCase();
-        
-        // Map to one of the expected values based on content
         if (levelLower.includes('beginner') && levelLower.includes('complete')) {
           levelToStore = 'complete beginner';
         } else if (levelLower.includes('basic') || levelLower.includes('understanding')) {
@@ -178,153 +169,40 @@ export async function POST(request: Request) {
           levelToStore = 'god mode';
         }
       }
-      
-      console.log('LEVEL DEBUG - Level after conversion:', levelToStore);
 
       const metaDataForStorage: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
         name: generationResult.cleverTitle || (isFallback ? 'Placeholder Set' : 'Custom Set'),
         cleverTitle: generationResult.cleverTitle,
         level: levelToStore,
         specificTopics: preferences.specificTopics,
-        // Use 'generated' for source, even for fallbacks, as they originate from a generation attempt
         source: 'generated',
         imageUrl: undefined,
         seriousnessLevel: seriousnessLevelValue,
-        llmBrand: generationResult.llmBrand || undefined, 
-        llmModel: generationResult.llmModel || undefined, 
+        llmBrand: generationResult.llmBrand || undefined,
+        llmModel: generationResult.llmModel || undefined,
       };
-      console.log("API Route: Prepared metaDataForStorage:", metaDataForStorage);
 
       // --- 5. Save to Database ---
+      console.log(`API Route: Attempting to save metadata for userId: ${userId}`);
       const insertedRecord = await storage.addSetMetaData(userId, metaDataForStorage);
       if (!insertedRecord) {
+        console.error(`API Route: Failed to save metadata for userId: ${userId}. Metadata:`, metaDataForStorage);
         throw new Error("Failed to save set metadata to database.");
       }
-      newMetaId = insertedRecord.id; // Assign to pre-declared variable
-      console.log(`API Route: Metadata saved with ID: ${newMetaId}`);
+      newMetaId = insertedRecord.id;
+      console.log(`API Route: Successfully saved metadata for userId: ${userId}, newMetaId: ${newMetaId}`);
 
       // --- 6. Handle Image Storage ---
-      let setImageUrl: string | null = generationResult.imageUrl || null;
-      console.log('Image processing: Starting with imageUrl:', !!setImageUrl, 'Ideogram API Key:', !!process.env.IDEOGRAM_API_KEY);
+      let setImageUrl: string | null = null;
       
-      if (typeof setImageUrl === 'string') {
-        // Upload the image to Supabase Storage
-        console.log('Image processing: Using generationResult.imageUrl');
-        try {
-          const storedImageUrl = await uploadImageFromUrl(setImageUrl, newMetaId);
-          console.log('Image processing: uploadImageFromUrl result:', !!storedImageUrl);
-          
-          if (storedImageUrl) {
-            setImageUrl = storedImageUrl;
-            console.log('API Route: Successfully stored image in Supabase:', storedImageUrl);
-            
-            // Update the metadata with the new image URL
-            await storage.updateSetMetaData({
-              ...metaDataForStorage,
-              id: newMetaId,
-              createdAt: insertedRecord.createdAt.toISOString(),
-              phraseCount: phrasesToSave.length,
-              imageUrl: storedImageUrl
-            });
-            console.log('Image processing: Metadata updated with image URL');
-          }
-        } catch (uploadError) {
-          console.error('Error uploading existing image to Supabase:', uploadError);
-          setImageUrl = null; // Reset so we try generating our own image
-        }
-      } 
-      
-      // If no image URL yet, generate one (for both regular and fallback paths)
-      if (!setImageUrl) {
-        try {
-          console.log('Image processing: Generating our own image');
-          const topicDescription = generationResult.cleverTitle || 'general language learning themes';
-          // Updated prompt: More cute, less cringy, allow numbers
-          const imagePrompt = `Create a cute and funny cartoon illustration featuring a cute donkey and a slightly absurd bridge. Clearly depict the theme(s): '${topicDescription}'. Use vibrant, eye-catching colors. DO NOT INCLUDE ANY TEXT, WORDS, LETTERS, WRITING, OR LABELS ANYWHERE IN THE IMAGE. THIS IS EXTREMELY IMPORTANT.`;
-          
-          console.log(`API Route: Generating set cover image with prompt:`, imagePrompt);
-          console.log('Image processing: About to call generateImage');
-          
-          const tempImageUrl = await generateImage(imagePrompt);
-          console.log('Image generation result:', !!tempImageUrl, tempImageUrl ? tempImageUrl.substring(0, 30) + '...' : 'null');
-          
-          if (typeof tempImageUrl === 'string') {
-            try {
-              console.log('Image processing: Got image URL, uploading to Supabase');
-              const storedImageUrl = await uploadImageFromUrl(tempImageUrl, newMetaId);
-              console.log('Image processing: Upload result:', !!storedImageUrl);
-              
-              if (storedImageUrl) {
-                setImageUrl = storedImageUrl;
-                console.log('API Route: Successfully generated and stored image:', storedImageUrl);
-                
-                // Update the metadata with the new image URL
-                const updateResult = await storage.updateSetMetaData({
-                  ...metaDataForStorage,
-                  id: newMetaId,
-                  createdAt: insertedRecord.createdAt.toISOString(),
-                  phraseCount: phrasesToSave.length,
-                  imageUrl: storedImageUrl
-                });
-                console.log('Image processing: Metadata update result:', !!updateResult);
-              } else {
-                console.warn('API Route: Failed to upload generated image to storage');
-                setImageUrl = tempImageUrl; // Fallback to temporary URL
-                
-                // Still try to update metadata with temporary URL
-                await storage.updateSetMetaData({
-                  ...metaDataForStorage,
-                  id: newMetaId,
-                  createdAt: insertedRecord.createdAt.toISOString(),
-                  phraseCount: phrasesToSave.length,
-                  imageUrl: tempImageUrl
-                });
-                console.log('Image processing: Updated metadata with temporary URL');
-              }
-            } catch (uploadError) {
-              console.error('Error uploading generated image to Supabase:', uploadError);
-              setImageUrl = tempImageUrl; // Fallback to temporary URL
-              
-              // Still try to update metadata with temporary URL
-              try {
-                await storage.updateSetMetaData({
-                  ...metaDataForStorage,
-                  id: newMetaId,
-                  createdAt: insertedRecord.createdAt.toISOString(),
-                  phraseCount: phrasesToSave.length,
-                  imageUrl: tempImageUrl
-                });
-                console.log('Image processing: Updated metadata with temporary URL after upload error');
-              } catch (err) {
-                console.error('Failed to update metadata with temporary URL:', err);
-              }
-            }
-          } else {
-            console.warn('API Route: Generated image URL is null or invalid, using placeholder image');
-            // Use placeholder image
+      // Skip image generation for test requests
+      if (!isTestRequest) {
+        setImageUrl = generationResult.imageUrl || null;
+        if (!setImageUrl) {
+          try {
             const placeholderImageUrl = getRandomPlaceholderImage();
             setImageUrl = placeholderImageUrl;
             
-            try {
-              await storage.updateSetMetaData({
-                ...metaDataForStorage,
-                id: newMetaId,
-                createdAt: insertedRecord.createdAt.toISOString(),
-                phraseCount: phrasesToSave.length,
-                imageUrl: placeholderImageUrl
-              });
-              console.log('Image processing: Updated metadata with placeholder image URL');
-            } catch (err) {
-              console.error('Failed to update metadata with placeholder URL:', err);
-            }
-          }
-        } catch (imgErr) {
-          console.error('API Route: Error during set image generation:', imgErr);
-          // Use placeholder image
-          const placeholderImageUrl = getRandomPlaceholderImage();
-          setImageUrl = placeholderImageUrl;
-          
-          try {
             await storage.updateSetMetaData({
               ...metaDataForStorage,
               id: newMetaId,
@@ -332,76 +210,77 @@ export async function POST(request: Request) {
               phraseCount: phrasesToSave.length,
               imageUrl: placeholderImageUrl
             });
-            console.log('Image processing: Updated metadata with placeholder image URL after error');
           } catch (err) {
-            console.error('Failed to update metadata with placeholder URL after error:', err);
+            console.error('Failed to update metadata with placeholder URL:', err);
           }
         }
       }
 
       // --- 7. Save Content and Progress ---
-      const contentSaved = await storage.saveSetContent(newMetaId, phrasesToSave); 
+      console.log(`API Route: Attempting to save content for newMetaId: ${newMetaId}`);
+      const contentSaved = await storage.saveSetContent(newMetaId, phrasesToSave);
       if (!contentSaved) {
-        await storage.deleteSetMetaData(newMetaId);
+        console.error(`API Route: Failed to save content for newMetaId: ${newMetaId}. Rolling back metadata.`);
+        await storage.deleteSetMetaData(newMetaId); // Attempt cleanup
         throw new Error("Failed to save set content to database.");
       }
-      console.log(`API Route: Content saved for set ID: ${newMetaId}`);
+      console.log(`API Route: Successfully saved content for newMetaId: ${newMetaId}`);
 
+      console.log(`API Route: Attempting to save progress for userId: ${userId}, newMetaId: ${newMetaId}`);
       const progressSaved = await storage.saveSetProgress(userId, newMetaId, {});
       if (!progressSaved) {
-        await storage.deleteSetContent(newMetaId);
-        await storage.deleteSetMetaData(newMetaId);
+        console.error(`API Route: Failed to save progress for userId: ${userId}, newMetaId: ${newMetaId}. Rolling back content and metadata.`);
+        await storage.deleteSetContent(newMetaId); // Attempt cleanup
+        await storage.deleteSetMetaData(newMetaId); // Attempt cleanup
         throw new Error("Failed to save initial set progress.");
       }
-      console.log(`API Route: Initial progress saved for set ID: ${newMetaId}`);
+      console.log(`API Route: Successfully saved progress for userId: ${userId}, newMetaId: ${newMetaId}`);
 
       // --- 8. Return Success Response ---
-      // Get the latest metadata through a query
-      let updatedMetadata = null;
-      try {
-        // Try to get the latest metadata
-        const sets = await storage.getAllSetMetaData(userId);
-        updatedMetadata = sets.find(set => set.id === newMetaId);
-        console.log('Found updated metadata via getAllSetMetaData:', !!updatedMetadata);
-      } catch (err) {
-        console.error('Error fetching updated metadata:', err);
-      }
-      
       const completeNewMetaData: SetMetaData = {
-        id: updatedMetadata?.id || insertedRecord.id,
-        name: updatedMetadata?.name || insertedRecord.name,
-        cleverTitle: updatedMetadata?.cleverTitle || insertedRecord.cleverTitle || undefined,
-        createdAt: updatedMetadata?.createdAt || insertedRecord.createdAt.toISOString(),
+        id: newMetaId,
+        name: metaDataForStorage.name,
+        cleverTitle: metaDataForStorage.cleverTitle,
+        createdAt: insertedRecord.createdAt.toISOString(),
         phraseCount: phrasesToSave.length,
-        level: updatedMetadata?.level || levelToStore,
-        goals: updatedMetadata?.goals || insertedRecord.goals || [],
-        specificTopics: updatedMetadata?.specificTopics || insertedRecord.specificTopics || undefined,
-        source: updatedMetadata?.source || insertedRecord.source as SetMetaData['source'] || 'generated',
-        imageUrl: updatedMetadata?.imageUrl || setImageUrl || undefined,
+        level: levelToStore,
+        goals: [],
+        specificTopics: metaDataForStorage.specificTopics,
+        source: 'generated',
+        imageUrl: setImageUrl || undefined,
         isFullyLearned: false,
-        seriousnessLevel: updatedMetadata?.seriousnessLevel || insertedRecord.seriousnessLevel || undefined,
-        llmBrand: updatedMetadata?.llmBrand || insertedRecord.llmBrand || undefined,
-        llmModel: updatedMetadata?.llmModel || insertedRecord.llmModel || undefined
+        seriousnessLevel: seriousnessLevelValue,
+        llmBrand: metaDataForStorage.llmBrand,
+        llmModel: metaDataForStorage.llmModel,
       };
-      console.log(`API Route: Successfully created set ${newMetaId}. Returning metadata with imageUrl:`, completeNewMetaData.imageUrl ? 'set' : 'not set');
-      return NextResponse.json({ newSetMetaData: completeNewMetaData }, { status: 201 });
+
+      // Return the metadata AND the phrases separately
+      return NextResponse.json({ 
+        newSetMetaData: completeNewMetaData,
+        phrases: phrasesToSave
+      }, { status: 201 });
 
     } catch (error: unknown) {
       console.error("API Route: Error during set creation process:", error);
       if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
         if ((error as { message: string }).message.includes("save set content") || (error as { message: string }).message.includes("save initial set progress")) {
           if(newMetaId) {
-              console.log(`API Route: Cleaning up metadata ${newMetaId} due to content/progress save error.`);
-              await storage.deleteSetMetaData(newMetaId); 
+              console.log(`API Route: Attempting cleanup for failed content/progress save - deleting metadata ${newMetaId}.`);
+              try {
+                  await storage.deleteSetMetaData(newMetaId); 
+                  console.log(`API Route: Successfully cleaned up metadata ${newMetaId}.`);
+              } catch (cleanupError) {
+                  console.error(`API Route: Error during metadata cleanup for ${newMetaId}:`, cleanupError);
+              }
           }
         } else if ((error as { message: string }).message.includes("save set metadata")) {
-            console.log("API Route: Metadata save failed, no cleanup needed.");
+            console.log("API Route: Metadata save failed, no specific cleanup needed for this ID.");
         }
       }
       return NextResponse.json({ error: `Set generation failed: ${getErrorMessage(error)}` }, { status: 500 });
     }
   } catch (authError) {
-    console.error("API Route: Authentication error:", authError);
+    console.error("API Route: Outer catch - Authentication error:", authError);
     return NextResponse.json({ error: 'Authentication failed' }, { status: 401 });
   }
 } 

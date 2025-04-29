@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server'; // Use Clerk authentication correctly
+import { auth } from '@clerk/nextjs/server';
 import { 
   generateCustomSet, 
   GeneratePromptOptions,
   GenerationResult,
-  Phrase as GeneratorPhrase, // Import the correct Phrase type
+  Phrase as GeneratorPhrase,
   TEXT_MODELS
 } from '@/app/lib/set-generator'; 
 import * as storage from '@/app/lib/storage';
-import { SetMetaData } from '@/app/lib/storage'; // Import SetMetaData
+import { SetMetaData } from '@/app/lib/storage';
+import { INITIAL_PHRASES } from '@/app/data/phrases';
 // import { generateImage } from '@/app/lib/ideogram-service'; // Removed unused import
-import { INITIAL_PHRASES } from '@/app/data/phrases'; // Import INITIAL_PHRASES only
 // import { prisma } from "@/app/lib/prisma"; // Removed unused import
 // import { uploadImageFromUrl } from '../../lib/imageStorage'; // Removed unused import
 import { Prisma } from '@prisma/client'; // Import Prisma client types

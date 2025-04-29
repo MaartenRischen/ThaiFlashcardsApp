@@ -6,27 +6,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useSession } from 'next-auth/react';
-import { Loader2, Plus, BookOpen, Settings, Layers, Trash2, Edit } from "lucide-react";
+import { Loader2, Plus, BookOpen, Settings, Trash2 } from "lucide-react";
 import { useSet } from '@/app/context/SetContext';
-import { CustomSet } from '@/app/lib/set-generator';
+import { SetMetaData } from '@/app/lib/storage';
 import { Badge } from "@/components/ui/badge";
 
 export default function SetManagerPage() {
   const router = useRouter();
   const { status } = useSession();
   const { availableSets, deleteSet, isLoading } = useSet();
-  const [sets, setSets] = useState<CustomSet[]>([]);
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
-  const proficiencyLevels = useMemo(() => [
-    'All',
-    'Complete Beginner',
-    'Basic Understanding',
-    'Intermediate',
-    'Advanced',
-    'Native/Fluent',
-    'God Mode'
-  ], []);
+  const [sets, setSets] = useState<SetMetaData[]>([]);
+  const [search] = useState("");
+  const [filter] = useState("all");
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -108,9 +99,9 @@ export default function SetManagerPage() {
             <div key={set.id} className="group bg-[#1a1a1a] border border-gray-800/30 rounded-lg overflow-hidden hover:border-blue-600/50 hover:shadow-md hover:shadow-blue-900/10 transition-all flex flex-col">
               <Link href={`/?setId=${set.id}`} className="block">
                 <div className="relative h-40 w-full overflow-hidden">
-                  {set.generationMeta?.imageUrl ? (
+                  {set.imageUrl ? (
                     <Image
-                      src={set.generationMeta.imageUrl}
+                      src={set.imageUrl}
                       alt={`Image for ${set.name}`}
                       layout="fill"
                       objectFit="cover"
@@ -124,10 +115,10 @@ export default function SetManagerPage() {
                 </div>
                 <div className="p-4 flex-grow">
                   <h3 className="font-semibold text-lg mb-1 group-hover:text-blue-400 transition-colors">{set.name}</h3>
-                  <Badge variant="outline" className={`text-xs ${set.level === 'Complete Beginner' ? 'border-green-500/50 text-green-400' : 'border-gray-600 text-gray-400'}`}>
+                  <Badge variant="outline" className={`text-xs ${set.level === 'complete beginner' ? 'border-green-500/50 text-green-400' : 'border-gray-600 text-gray-400'}`}>
                     {set.level}
                   </Badge>
-                  <p className="text-sm text-gray-500 mt-2">{set.phrases.length} cards</p>
+                  <p className="text-sm text-gray-500 mt-2">{set.phraseCount} cards</p>
                 </div>
               </Link>
               <div className="p-4 pt-0 mt-auto flex justify-end space-x-2">

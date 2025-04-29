@@ -32,7 +32,8 @@ export interface SetMetaData {
   source: 'default' | 'import' | 'generated';
   imageUrl?: string; // Add optional imageUrl here
   isFullyLearned?: boolean; // Keep the flag here (not in DB)
-  seriousnessLevel?: number; // Add seriousnessLevel for tone/ridiculousness
+  seriousnessLevel?: number; // Keep for DB compatibility
+  toneLevel?: number; // New field that mirrors seriousnessLevel
   llmBrand?: string; // NEW: LLM brand
   llmModel?: string; // NEW: LLM model
 }
@@ -90,6 +91,7 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
       imageUrl: dbSet.imageUrl || undefined, // Map imageUrl
       isFullyLearned: false,
       seriousnessLevel: dbSet.seriousnessLevel || undefined,
+      toneLevel: dbSet.seriousnessLevel || undefined,
       llmBrand: dbSet.llmBrand || undefined, // NEW
       llmModel: dbSet.llmModel || undefined  // NEW
     }));
@@ -120,6 +122,7 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
     source: newSetData.source,
     imageUrl: newSetData.imageUrl || null,
     seriousnessLevel: newSetData.seriousnessLevel || null,
+    toneLevel: newSetData.seriousnessLevel || null,
     llmBrand: newSetData.llmBrand || null,
     llmModel: newSetData.llmModel || null,
     shareId: null, // Assuming shareId is optional or generated elsewhere/later
@@ -160,6 +163,7 @@ export async function updateSetMetaData(updatedSet: SetMetaData): Promise<boolea
       source: updatedSet.source,
       imageUrl: updatedSet.imageUrl || null,
       seriousnessLevel: updatedSet.seriousnessLevel || null,
+      toneLevel: updatedSet.seriousnessLevel || null,
       llmBrand: updatedSet.llmBrand || null, // NEW
       llmModel: updatedSet.llmModel || null, // NEW
       updatedAt: new Date().toISOString()
@@ -609,4 +613,20 @@ export async function deletePublishedSet(id: string): Promise<boolean> {
     console.error('Error deleting published set:', error);
     return false;
   }
+}
+
+// Add mapping functions for database compatibility
+export function mapDatabaseToStorage(dbSet: any): SetMetaData {
+  return {
+    ...dbSet,
+    toneLevel: dbSet.seriousnessLevel,
+  };
+}
+
+export function mapStorageToDatabase(storageSet: SetMetaData): any {
+  const { toneLevel, ...rest } = storageSet;
+  return {
+    ...rest,
+    seriousnessLevel: toneLevel,
+  };
 }

@@ -9,7 +9,7 @@ interface GallerySet {
   title: string;
   description?: string;
   imageUrl?: string;
-  seriousnessLevel?: number;
+  toneLevel?: number;
   proficiencyLevel?: string;
   createdAt?: string | Date;
   timestamp?: string | Date;
@@ -80,8 +80,8 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
         {set.proficiencyLevel && (
           <div className="text-xs text-gray-400 flex flex-wrap gap-x-2 -mt-1">
             <span>Level: <span className="font-medium text-[#A9C4FC]">{set.proficiencyLevel}</span></span>
-            {set.seriousnessLevel !== undefined && (
-              <span>Tone: <span className="font-medium text-[#A9C4FC]">{set.seriousnessLevel}/10</span></span>
+            {set.toneLevel !== undefined && (
+              <span>Tone Level: <span className="font-medium text-[#A9C4FC]">{set.toneLevel}/10</span></span>
             )}
           </div>
         )}

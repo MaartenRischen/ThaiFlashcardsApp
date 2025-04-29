@@ -148,11 +148,11 @@ export async function POST(request: Request) {
       }
 
       // --- 4. Prepare Metadata for Storage ---
-      let seriousnessLevelValue: number | undefined;
-      if (typeof preferences.tone === 'number') {
-        seriousnessLevelValue = preferences.tone;
-      } else {
-        seriousnessLevelValue = 5;
+      let toneLevel: number | undefined;
+      try {
+        toneLevel = preferences.toneLevel;
+      } catch {
+        toneLevel = 5;
       }
       
       let levelToStore: SetMetaData['level'] | undefined = undefined;
@@ -180,7 +180,8 @@ export async function POST(request: Request) {
         specificTopics: preferences.specificTopics,
         source: 'generated',
         imageUrl: undefined,
-        seriousnessLevel: seriousnessLevelValue,
+        seriousnessLevel: toneLevel,
+        toneLevel: toneLevel,
         llmBrand: generationResult.llmBrand || undefined,
         llmModel: generationResult.llmModel || undefined,
       };
@@ -252,7 +253,8 @@ export async function POST(request: Request) {
         source: 'generated',
         imageUrl: setImageUrl || undefined,
         isFullyLearned: false,
-        seriousnessLevel: seriousnessLevelValue,
+        seriousnessLevel: toneLevel,
+        toneLevel: toneLevel,
         llmBrand: metaDataForStorage.llmBrand,
         llmModel: metaDataForStorage.llmModel,
       };

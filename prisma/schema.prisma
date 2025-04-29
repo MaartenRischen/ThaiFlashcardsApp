@@ -78,6 +78,7 @@ model FlashcardSet {
   source         String   
   imageUrl       String?  
   seriousnessLevel Int?   
+  toneLevel      Int?    
   llmBrand       String?  
   llmModel       String?  
   createdAt      DateTime @default(now())

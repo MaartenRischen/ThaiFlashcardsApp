@@ -481,7 +481,7 @@ export function SetManagerModal({ isOpen, onClose }: {
           cardCount: set.phraseCount || 0,
           llmBrand: set.llmBrand || '',
           llmModel: set.llmModel || '',
-          seriousnessLevel: set.seriousnessLevel,
+          toneLevel: set.toneLevel,
           specificTopics: set.specificTopics,
         }),
       });
@@ -571,10 +571,10 @@ export function SetManagerModal({ isOpen, onClose }: {
                 {/* Set Name */}
                 <h3 className="text-base font-medium text-gray-200 group-hover:text-white transition-colors line-clamp-3" title={set.name}>{set.name}</h3>
                 
-                {/* ADDED: Proficiency and Seriousness */}
+                {/* ADDED: Proficiency and Tone Level */}
                 <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">
                   {set.level && <span>Level: <span className="font-medium text-[#A9C4FC]">{set.level}</span></span>}
-                  {set.seriousnessLevel !== undefined && <span>Tone: <span className="font-medium text-[#A9C4FC]">{set.seriousnessLevel}/10</span></span>}
+                  {set.toneLevel !== undefined && <span>Tone Level: <span className="font-medium text-[#A9C4FC]">{set.toneLevel}/10</span></span>}
                 </div>
                 
                 {/* Phrase Count - moved lower */}

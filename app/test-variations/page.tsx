@@ -72,18 +72,6 @@ const weirdScenariosPool = [
   // ... Add more weird scenarios as needed
 ];
 
-// Reduced list of pre-made scenarios
-const scenarios = [
-  'Ordering Food & Drinks',
-  'Travel & Directions',
-  'Shopping',
-  'Making Small Talk',
-  'Business Meetings',
-  'Daily Routines',
-  'Emergencies',
-  'Dating & Romance',
-];
-
 function getRandomWeirdScenarios(count: number, exclude: string[] = []) {
   const pool = weirdScenariosPool.filter(s => !exclude.includes(s));
   const selected: string[] = [];
@@ -115,10 +103,6 @@ export default function TestVariations() {
   });
   const [generateAllLevels, setGenerateAllLevels] = useState(false);
   const [generateAllTones, setGenerateAllTones] = useState(false);
-  const [selectedScenarios, setSelectedScenarios] = useState<string[]>([]);
-  const [customScenario, setCustomScenario] = useState("");
-  const [customScenarios, setCustomScenarios] = useState<string[]>([]);
-  const [weirdScenarios, setWeirdScenarios] = useState<string[]>([]);
 
   // Calculate the number of cards to be generated based on selections
   const numCardsToGenerate = useMemo(() => {
@@ -132,18 +116,6 @@ export default function TestVariations() {
       return cardCount; // User-specified count
     }
   }, [generateAllLevels, generateAllTones, cardCount]);
-
-  // Get level-appropriate scenarios based on proficiency
-  const levelScenarios = useMemo(() => [], [currentProficiency]);
-
-  // Effect to update weird scenarios when proficiency changes
-  useEffect(() => {
-    const picked = getRandomWeirdScenarios(2, []);
-    setWeirdScenarios(picked);
-  }, []);
-
-  // Combine level scenarios and weird scenarios for display
-  const allDisplayScenarios = useMemo(() => [...weirdScenarios], [weirdScenarios]);
 
   const generateCard = async () => {
     if (isGenerating) return;
@@ -383,30 +355,6 @@ export default function TestVariations() {
     ...Array.from(new Set(cards.map(c => c.settings.topic).filter(Boolean)))
   ], [cards]);
 
-  const handleScenarioToggle = (scenario: string) => {
-    setSelectedScenarios(prev =>
-      prev.includes(scenario)
-        ? prev.filter(s => s !== scenario)
-        : [...prev, scenario]
-    );
-  };
-
-  const handleAddCustomScenario = () => {
-    if (customScenario.trim()) {
-      const newScenario = customScenario.trim();
-      if (!customScenarios.includes(newScenario)) {
-        setCustomScenarios(prev => [...prev, newScenario]);
-        setSelectedScenarios(prev => [...prev, newScenario]);
-      }
-      setCustomScenario("");
-    }
-  };
-
-  const handleRemoveCustomScenario = (scenario: string) => {
-    setCustomScenarios(prev => prev.filter(s => s !== scenario));
-    setSelectedScenarios(prev => prev.filter(s => s !== scenario));
-  };
-
   return (
     <div className="min-h-screen bg-[#1a1a1a] p-8">
       <div className="flex flex-col space-y-6 mb-8">
@@ -625,91 +573,6 @@ export default function TestVariations() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Right Column - Scenario Selection */}
-        <div className="space-y-4">
-          <div>
-            <label className="block text-gray-400 mb-2">Custom Scenario</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={customScenario}
-                onChange={(e) => setCustomScenario(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddCustomScenario()}
-                className="flex-1 bg-[#2a2a2a] text-white rounded-md px-3 py-2 border border-gray-700"
-                placeholder="Enter custom scenario..."
-              />
-              <button
-                onClick={handleAddCustomScenario}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-
-          {/* Custom Scenarios Display */}
-          {customScenarios.length > 0 && (
-            <div className="bg-[#2a2a2a]/50 rounded-lg p-3">
-              <h3 className="text-sm font-medium text-white mb-2">Custom Scenarios</h3>
-              <div className="flex flex-wrap gap-2">
-                {customScenarios.map((scenario) => (
-                  <span key={scenario} className="flex items-center bg-green-700/80 text-white text-xs rounded-full px-2 py-0.5">
-                    {scenario}
-                    <button
-                      onClick={() => handleRemoveCustomScenario(scenario)}
-                      className="ml-1.5 text-green-200 hover:text-red-300"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Level-Appropriate Scenarios */}
-          <div className="bg-[#2a2a2a]/50 rounded-lg p-3">
-            <h3 className="text-sm font-medium text-white mb-2">Level-Appropriate Scenarios</h3>
-            <div className="grid grid-cols-1 gap-2">
-              {allDisplayScenarios.map((scenario) => (
-                <button
-                  key={scenario}
-                  onClick={() => handleScenarioToggle(scenario)}
-                  className={`rounded-lg p-2 text-left transition-all border ${
-                    selectedScenarios.includes(scenario)
-                      ? 'bg-blue-600/90 text-white border-blue-500'
-                      : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'
-                  }`}
-                >
-                  <div className="text-sm">{scenario}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Pre-made Scenarios */}
-          <div className="bg-[#2a2a2a]/50 rounded-lg p-3">
-            <h3 className="text-sm font-medium text-white mb-2">Common Scenarios</h3>
-            <div className="grid grid-cols-1 gap-2">
-              {scenarios.map((scenario) => (
-                <button
-                  key={scenario}
-                  onClick={() => handleScenarioToggle(scenario)}
-                  className={`rounded-lg p-2 text-left transition-all border ${
-                    selectedScenarios.includes(scenario)
-                      ? 'bg-blue-600/90 text-white border-blue-500'
-                      : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'
-                  }`}
-                >
-                  <div className="text-sm">{scenario}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filteredAndSortedCards.map((card, index) => (
           <div 
             key={index}

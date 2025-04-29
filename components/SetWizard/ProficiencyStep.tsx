@@ -1,40 +1,61 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { StarIcon, SparklesIcon } from '@heroicons/react/24/solid';
 
 // Define the specific proficiency level type
+type ProficiencyLevel = {
+  value: ProficiencyLevelString;
+  label: string;
+  description: string;
+  example: string;
+  icon: JSX.Element;
+};
+
 type ProficiencyLevelString = 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode';
 
 // Define proficiency levels with matching capabilities and specific type
-const proficiencyLevels: { level: ProficiencyLevelString; value: number; examples: string }[] = [
+const proficiencyLevels: ProficiencyLevel[] = [
   {
-    level: 'Complete Beginner',
-    value: 0,
-    examples: 'Just starting to learn basic words and phrases'
+    value: 'Complete Beginner',
+    label: 'Complete Beginner',
+    description: 'Single words and two-word combinations only',
+    example: 'กินข้าว (eat rice), หมาวิ่ง (dog runs)',
+    icon: <StarIcon className="h-5 w-5" />
   },
   {
-    level: 'Basic Understanding',
-    value: 25,
-    examples: 'Can use basic greetings and recognize common phrases'
+    value: 'Basic Understanding',
+    label: 'Basic Understanding',
+    description: 'Short phrases with 2-4 words',
+    example: 'ผมชอบกินข้าว (I like to eat rice)',
+    icon: <StarIcon className="h-5 w-5" />
   },
   {
-    level: 'Intermediate',
-    value: 50,
-    examples: 'Can have simple conversations and order food in restaurants'
+    value: 'Intermediate',
+    label: 'Intermediate',
+    description: 'Medium-length sentences with 4-7 words',
+    example: 'วันนี้ผมไปทำงานที่ออฟฟิศ (Today I went to work at the office)',
+    icon: <StarIcon className="h-5 w-5" />
   },
   {
-    level: 'Advanced',
-    value: 75,
-    examples: 'Can discuss daily activities and give directions confidently'
+    value: 'Advanced',
+    label: 'Advanced',
+    description: 'Complex sentences with 7-12 words',
+    example: 'ถึงแม้ว่าฝนจะตก ผมก็ต้องไปทำงานที่ออฟฟิศทุกวัน (Even though it rains, I still have to go to work at the office every day)',
+    icon: <StarIcon className="h-5 w-5" />
   },
   {
-    level: 'Native/Fluent',
-    value: 100,
-    examples: 'Can understand Thai media and engage in complex conversations'
+    value: 'Native/Fluent',
+    label: 'Native/Fluent',
+    description: 'Natural, idiomatic Thai of any appropriate length',
+    example: 'พอดีว่าเมื่อวานนี้ฝนตกหนักมากเลย เลยต้องทำงานจากที่บ้านแทน (As it happened, it rained very heavily yesterday, so I had to work from home instead)',
+    icon: <StarIcon className="h-5 w-5" />
   },
   {
-    level: 'God Mode',
-    value: 200,
-    examples: '' // God Mode doesn't need examples here
+    value: 'God Mode',
+    label: 'God Mode',
+    description: 'Sophisticated, elaborate Thai with literary/academic language',
+    example: 'ท่ามกลางสภาวะเศรษฐกิจที่ผันผวน การปรับตัวให้เข้ากับความเปลี่ยนแปลงนั้นถือเป็นสิ่งสำคัญยิ่ง (Amidst volatile economic conditions, adaptation to change is of utmost importance)',
+    icon: <SparklesIcon className="h-5 w-5" />
   }
 ];
 
@@ -50,7 +71,7 @@ export function ProficiencyStep({ value, onNext, onBack }: {
 }) {
   // Find the level index based on the current value
   const initialLevelIndex = value?.levelEstimate 
-    ? proficiencyLevels.findIndex(pl => pl.level === value.levelEstimate)
+    ? proficiencyLevels.findIndex(pl => pl.value === value.levelEstimate)
     : 2; // Default to 'Intermediate' index if not set
 
   const [selectedIndex, setSelectedIndex] = useState(initialLevelIndex);
@@ -83,7 +104,7 @@ export function ProficiencyStep({ value, onNext, onBack }: {
     }
     onNext({
       canDoSelections: capabilities,
-      levelEstimate: selectedLevel.level
+      levelEstimate: selectedLevel.value
     });
   };
 
@@ -106,7 +127,7 @@ export function ProficiencyStep({ value, onNext, onBack }: {
         <div className="relative w-full max-w-[300px] h-[140px] rounded-lg overflow-hidden border border-blue-900/30">
           <Image
             src={`/images/level/${activeLevelIndex + 1}.png`}
-            alt={`${proficiencyLevels[activeLevelIndex].level} level illustration`}
+            alt={`${proficiencyLevels[activeLevelIndex].label} level illustration`}
             fill
             className="object-cover"
           />
@@ -117,7 +138,7 @@ export function ProficiencyStep({ value, onNext, onBack }: {
       <div className="space-y-1.5">
         {proficiencyLevels.map((level, idx) => (
           <button
-            key={level.level}
+            key={level.value}
             type="button"
             onClick={() => handleSelect(idx)}
             className={`flex items-center w-full rounded-lg border-2 px-3 py-2 text-left transition-all ${
@@ -132,8 +153,8 @@ export function ProficiencyStep({ value, onNext, onBack }: {
               {idx + 1}
             </span>
             <div>
-              <div className="font-medium text-sm">{level.level}</div>
-              <div className="text-xs mt-0.5 opacity-80">{level.examples}</div>
+              <div className="font-medium text-sm">{level.label}</div>
+              <div className="text-xs mt-0.5 opacity-80">{level.description}</div>
             </div>
           </button>
         ))}

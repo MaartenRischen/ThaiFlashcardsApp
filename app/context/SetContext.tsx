@@ -594,7 +594,6 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     const setIndex = availableSets.findIndex(set => set.id === id);
     if (setIndex !== -1) {
       const currentSet = availableSets[setIndex];
-      const updatedSetData = { ...currentSet, name: newName, cleverTitle: newName }; 
       
       setIsLoading(true);
       try {

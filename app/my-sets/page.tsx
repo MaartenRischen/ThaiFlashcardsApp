@@ -1,31 +1,32 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useSession } from 'next-auth/react';
-import { Loader2, Plus, BookOpen, Settings, Layers } from "lucide-react";
-
-type FlashcardSet = {
-  id: string;
-  name: string;
-  level?: string;
-  createdAt: string;
-  source: string;
-  imageUrl?: string;
-  _count?: {
-    phrases: number;
-  };
-};
+import { Loader2, Plus, BookOpen, Settings, Layers, Trash2, Edit } from "lucide-react";
+import { useSet } from '@/app/context/SetContext';
+import { CustomSet } from '@/app/lib/set-generator';
+import { Badge } from "@/components/ui/badge";
 
 export default function SetManagerPage() {
   const router = useRouter();
   const { status } = useSession();
-  const [isLoading, setIsLoading] = useState(true);
-  const [sets, setSets] = useState<FlashcardSet[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const { availableSets, deleteSet, isLoading } = useSet();
+  const [sets, setSets] = useState<CustomSet[]>([]);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+  const proficiencyLevels = useMemo(() => [
+    'All',
+    'Complete Beginner',
+    'Basic Understanding',
+    'Intermediate',
+    'Advanced',
+    'Native/Fluent',
+    'God Mode'
+  ], []);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -37,34 +38,19 @@ export default function SetManagerPage() {
   // Fetch user's sets
   useEffect(() => {
     if (status === "authenticated") {
-      fetchUserSets();
+      setSets(availableSets || []);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status]);
+  }, [status, availableSets]);
 
-  const fetchUserSets = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/flashcard-sets", {
-        method: "GET",
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to fetch flashcard sets");
-      }
-
-      const data = await response.json();
-      setSets(data.sets);
-    } catch (error) {
-      console.error("Error fetching sets:", error);
-      setError("Failed to load your flashcard sets");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Filter sets based on search and filter criteria
+  const filteredSets = useMemo(() => {
+    return sets.filter((set) => {
+      const nameMatch = set.name.toLowerCase().includes(search.toLowerCase());
+      const levelMatch = filter === "all" || set.level === filter;
+      return nameMatch && levelMatch;
+    });
+  }, [sets, search, filter]);
 
   if (status === "loading") {
     return (
@@ -73,35 +59,6 @@ export default function SetManagerPage() {
       </div>
     );
   }
-
-  const getSourceLabel = (source: string) => {
-    switch (source) {
-      case "default":
-        return "Default";
-      case "generated":
-        return "AI Generated";
-      case "wizard":
-        return "AI Generated";
-      case "import":
-        return "Imported";
-      default:
-        return source;
-    }
-  };
-
-  const getBadgeColor = (source: string) => {
-    switch (source) {
-      case "default":
-        return "bg-gray-500/20 text-gray-300";
-      case "generated":
-      case "wizard":
-        return "bg-blue-600/20 text-blue-400";
-      case "import":
-        return "bg-green-600/20 text-green-400";
-      default:
-        return "bg-gray-500/20 text-gray-300";
-    }
-  };
 
   return (
     <div className="container max-w-5xl py-8">
@@ -125,12 +82,6 @@ export default function SetManagerPage() {
         Manage your flashcard sets and track your learning progress
       </p>
       
-      {error && (
-        <div className="p-3 bg-red-900/20 border border-red-700/30 rounded-md text-red-400 text-sm mb-4">
-          {error}
-        </div>
-      )}
-      
       {isLoading ? (
         <div className="flex justify-center py-10">
           <Loader2 className="h-6 w-6 animate-spin text-blue-600/90" />
@@ -153,88 +104,41 @@ export default function SetManagerPage() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sets.map((set) => (
+          {filteredSets.map((set) => (
             <div key={set.id} className="group bg-[#1a1a1a] border border-gray-800/30 rounded-lg overflow-hidden hover:border-blue-600/50 hover:shadow-md hover:shadow-blue-900/10 transition-all flex flex-col">
               <Link href={`/?setId=${set.id}`} className="block">
-                <div className="relative w-full aspect-[16/9] bg-[#111] overflow-hidden">
-                  {set.imageUrl ? (
+                <div className="relative h-40 w-full overflow-hidden">
+                  {set.generationMeta?.imageUrl ? (
                     <Image
-                      src={set.imageUrl}
-                      alt={set.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/images/default-set-logo.png';
-                      }}
+                      src={set.generationMeta.imageUrl}
+                      alt={`Image for ${set.name}`}
+                      layout="fill"
+                      objectFit="cover"
+                      className="group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <BookOpen className="h-10 w-10 text-gray-700" />
+                    <div className="h-full w-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                      <span className="text-gray-400 text-sm">No Image</span>
                     </div>
                   )}
                 </div>
+                <div className="p-4 flex-grow">
+                  <h3 className="font-semibold text-lg mb-1 group-hover:text-blue-400 transition-colors">{set.name}</h3>
+                  <Badge variant="outline" className={`text-xs ${set.level === 'Complete Beginner' ? 'border-green-500/50 text-green-400' : 'border-gray-600 text-gray-400'}`}>
+                    {set.level}
+                  </Badge>
+                  <p className="text-sm text-gray-500 mt-2">{set.phrases.length} cards</p>
+                </div>
               </Link>
-              
-              <div className="p-4 flex-grow flex flex-col">
-                {/* Set Name */}
-                <Link href={`/?setId=${set.id}`}>
-                  <h3 className="font-medium text-sm text-white mb-1 line-clamp-3 min-h-[3.6rem] group-hover:text-blue-400 transition-colors text-center">
-                    {set.name}
-                  </h3>
-                </Link>
-                
-                {/* Author label */}
-                <div className="text-blue-400 text-sm font-medium mb-2 text-center">
-                  {set.source === "default" ? "System Set" : "My Set"}
-                </div>
-
-                {/* Proficiency Level */}
-                {set.level && (
-                  <p className="text-xs text-blue-400/80 text-center mb-1">
-                    Proficiency: <span className="font-medium text-blue-300">
-                      {(() => {
-                        // Convert lowercase level to Title Case for display
-                        const level = set.level;
-                        switch(level) {
-                          case 'complete beginner': return 'Complete Beginner';
-                          case 'basic understanding': return 'Basic Understanding';
-                          case 'intermediate': return 'Intermediate';
-                          case 'advanced': return 'Advanced';
-                          case 'native/fluent': return 'Native/Fluent';
-                          case 'god mode': return 'God Mode';
-                          default: return level; // Fallback to whatever is stored
-                        }
-                      })()}
-                    </span>
-                  </p>
-                )}
-
-                {/* Card Actions: View Cards and Progress buttons */}
-                <div className="mt-auto flex justify-center gap-2">
-                  <div className="flex flex-col items-center">
-                    <button
-                      onClick={() => router.push(`/?setId=${set.id}`)}
-                      className="p-2.5 rounded-full bg-gray-700 hover:bg-gray-800 text-white transition flex items-center justify-center"
-                      title="View Cards"
-                    >
-                      <BookOpen className="w-4 h-4" />
-                    </button>
-                    <span className="text-xs text-gray-400 mt-1">View Cards</span>
-                  </div>
-
-                  <div className="flex flex-col items-center">
-                    <button
-                      onClick={() => router.push(`/?setId=${set.id}&showProgress=true`)}
-                      className="p-2.5 rounded-full bg-gray-700 hover:bg-gray-800 text-white transition flex items-center justify-center"
-                      title="Progress"
-                    >
-                      <Layers className="w-4 h-4" />
-                    </button>
-                    <span className="text-xs text-gray-400 mt-1">Progress</span>
-                  </div>
-                </div>
+              <div className="p-4 pt-0 mt-auto flex justify-end space-x-2">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => deleteSet(set.id)}
+                  className="bg-red-900/50 hover:bg-red-900/80 border border-red-700/50 hover:border-red-600 text-red-300"
+                >
+                  <Trash2 className="h-4 w-4 mr-1" /> Delete
+                </Button>
               </div>
             </div>
           ))}

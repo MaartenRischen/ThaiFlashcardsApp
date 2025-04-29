@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { GeneratePromptOptions, Phrase } from '../lib/set-generator';
+import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button"
 
 // Define all possible proficiency levels
 const PROFICIENCY_LEVELS = [
@@ -46,6 +48,15 @@ type FilterState = {
   topic: string;       // 'any' or a specific topic string
 };
 
+// NEW: Define an interface for the generation task parameters
+interface GenerationTask {
+  level: GeneratePromptOptions['level'];
+  tone: number;
+  levelIndex: number;
+  toneIndex: number;
+  count?: number; // Optional count for single task mode
+}
+
 export default function TestVariations() {
   const [cards, setCards] = useState<TestCard[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -87,7 +98,7 @@ export default function TestVariations() {
     const startTime = Date.now();
     let generatedCardsCount = 0;
     const errors: string[] = [];
-    const tasks: any[] = []; // Holds parameters for each API call
+    const tasks: GenerationTask[] = []; // Use the new interface
 
     const selectedModel = LLM_MODELS[currentModel];
 
@@ -176,9 +187,11 @@ export default function TestVariations() {
             console.warn('No phrases in response for task:', task, apiResult);
             errors.push(`No phrases returned for Level: ${task.level}, Tone: ${task.tone}`);
           }
-        } catch (taskError: any) {
+        } catch (taskError: unknown) { // Use unknown instead of any
           console.error(`API call failed for task: Level ${task.level}, Tone ${task.tone}`, taskError);
-          errors.push(`API Error for Level: ${task.level}, Tone: ${task.tone}: ${taskError?.message || 'Unknown error'}`);
+          // Type check before accessing message
+          const errorMessage = taskError instanceof Error ? taskError.message : String(taskError);
+          errors.push(`API Error for Level: ${task.level}, Tone: ${task.tone}: ${errorMessage}`);
         }
       } // End of sequential loop
 
@@ -259,8 +272,8 @@ export default function TestVariations() {
 
     // 2. Sorting (applied to the filtered list)
     const sorted = [...filtered].sort((a, b) => {
-      let valA: any;
-      let valB: any;
+      let valA: unknown;
+      let valB: unknown;
 
       if (sortKey.startsWith('settings.')) {
         const settingKey = sortKey.split('.')[1] as keyof TestCard['settings'];

@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from "@/app/lib/prisma";
+import { CustomSet } from '@/app/lib/set-generator'; // Assuming CustomSet type includes a source
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
     const authResult = await auth();
     if (!authResult || !authResult.userId) {

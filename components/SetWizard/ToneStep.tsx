@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-const getLabelFromValue = (value: number): string => {
+const getToneLevelLabel = (value: number): string => {
   switch (value) {
     case 1: return 'Textbook realism';
     case 2: return 'Serious & practical';
@@ -102,12 +102,12 @@ const examples = {
 
 type ExampleKey = keyof typeof examples;
 
-export function ToneStep({ value, onNext, onBack }: { 
-  value: number,
-  onNext: (value: number) => void,
+export function ToneStep({ toneLevel, onNext, onBack }: { 
+  toneLevel: number,
+  onNext: (toneLevel: number) => void,
   onBack: () => void
 }) {
-  const [sliderValue, setSliderValue] = useState(value);
+  const [currentToneLevel, setCurrentToneLevel] = useState(toneLevel);
   const [isDragging, setIsDragging] = useState(false);
 
   // Handle touch events for better mobile experience
@@ -117,9 +117,9 @@ export function ToneStep({ value, onNext, onBack }: {
     return () => document.removeEventListener('touchend', handleTouchEnd);
   }, []);
 
-  // Ensure sliderValue is within valid range and is a number
-  const safeSliderValue = Math.max(1, Math.min(10, Number(sliderValue) || 1)) as ExampleKey;
-  const currentExample = examples[safeSliderValue];
+  // Ensure currentToneLevel is within valid range and is a number
+  const safeToneLevel = Math.max(1, Math.min(10, Number(currentToneLevel) || 1)) as ExampleKey;
+  const currentExample = examples[safeToneLevel];
 
   return (
     <div className="space-y-5 px-2">
@@ -133,8 +133,8 @@ export function ToneStep({ value, onNext, onBack }: {
       <div className="flex justify-center">
         <div className="relative w-full max-w-[300px] h-[160px] rounded-lg overflow-hidden border border-blue-900/30">
           <Image
-            src={`/images/level2/${safeSliderValue}.png`}
-            alt={`Learning style illustration - Level ${safeSliderValue}`}
+            src={`/images/level2/${safeToneLevel}.png`}
+            alt={`Learning style illustration - Tone Level ${safeToneLevel}`}
             fill
             className={`object-cover transition-opacity duration-300 ${isDragging ? 'opacity-100' : 'opacity-100'}`}
             priority
@@ -145,7 +145,7 @@ export function ToneStep({ value, onNext, onBack }: {
       {/* Style Label */}
       <div className="text-center">
         <h4 className="text-lg font-semibold text-blue-400 min-h-[3rem] transition-all duration-300">
-          {getLabelFromValue(safeSliderValue)}
+          {getToneLevelLabel(safeToneLevel)}
         </h4>
       </div>
 
@@ -155,8 +155,8 @@ export function ToneStep({ value, onNext, onBack }: {
           type="range"
           min="1"
           max="10"
-          value={safeSliderValue}
-          onChange={(e) => setSliderValue(parseInt(e.target.value))}
+          value={safeToneLevel}
+          onChange={(e) => setCurrentToneLevel(parseInt(e.target.value))}
           onTouchStart={() => setIsDragging(true)}
           onTouchEnd={() => setIsDragging(false)}
           onMouseDown={() => setIsDragging(true)}
@@ -172,7 +172,7 @@ export function ToneStep({ value, onNext, onBack }: {
             [&::-moz-range-thumb]:shadow-lg"
         />
         <div className="flex justify-between px-1 text-xs text-gray-400">
-          <span>{safeSliderValue}/10</span>
+          <span>Tone Level: {safeToneLevel}/10</span>
           <span>10/10</span>
         </div>
       </div>
@@ -198,21 +198,22 @@ export function ToneStep({ value, onNext, onBack }: {
 
           {/* Mnemonic */}
           <p className="text-xs text-gray-500 text-center">
-            <span className="text-gray-400">Mnemonic:</span> {currentExample.mnemonic}
+            {currentExample.mnemonic}
           </p>
         </div>
       </div>
 
-      <div className="flex justify-between pt-3">
+      {/* Navigation Buttons */}
+      <div className="flex justify-between space-x-4">
         <button
           onClick={onBack}
-          className="neumorphic-button text-blue-400"
+          className="flex-1 px-4 py-2 text-sm font-medium text-blue-400 bg-transparent border border-blue-400 rounded-lg hover:bg-blue-400/10 transition-colors"
         >
           Back
         </button>
         <button
-          className="neumorphic-button text-blue-400"
-          onClick={() => onNext(safeSliderValue)}
+          onClick={() => onNext(safeToneLevel)}
+          className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
         >
           Next
         </button>

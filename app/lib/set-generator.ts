@@ -28,7 +28,7 @@ export interface GeneratePromptOptions {
   count: number;
   existingPhrases?: string[];
   topicsToDiscuss?: string;
-  tone?: number; // 1-10 scale, where 1 is most serious and 10 is most absurd
+  toneLevel?: number; // 1-10 scale, where 1 is most serious and 10 is most absurd
 }
 
 // Define structured error types for better error handling
@@ -455,7 +455,7 @@ function buildGenerationPrompt(
     specificTopics,
     count,
     topicsToDiscuss,
-    tone = 5, // Default to level 5 (balanced)
+    toneLevel = 5, // Default to level 5 (balanced)
   } = options;
 
   // Define proficiency level descriptions
@@ -512,13 +512,13 @@ function buildGenerationPrompt(
 
   **CRITICAL TASK REQUIREMENTS:**
   - You MUST generate content that STRICTLY adheres to the specified **Proficiency Level (${level})**.
-  - You MUST generate content that STRICTLY adheres to the specified **Tone Level (${tone.toString()})**.
+  - You MUST generate content that STRICTLY adheres to the specified **Tone Level (${toneLevel.toString()})**.
   - Both Level and Tone MUST be reflected in the generated 'phrases' and their 'examples'.
   - Follow ALL instructions below precisely.
 
   **User Preferences:**
   - Proficiency Level: **${level}**
-  - Tone Level: **${tone.toString()}**
+  - Tone Level: **${toneLevel.toString()}**
   - Situations for Use: ${topicsToDiscuss || 'General conversation'}
   ${specificTopics ? `- Specific Focus: ${specificTopics}` : ''}
 
@@ -532,7 +532,7 @@ function buildGenerationPrompt(
   2.  **Proficiency Level Implementation (${level}):** (Vocabulary, Grammar, Complexity) - THIS IS CRITICAL. Apply the following rules rigorously:
       *   **${selectedLevelDescription}**
 
-  3.  **TONE Implementation (${tone.toString()}):** (Context, Theme, Style) - THIS IS EQUALLY CRITICAL.
+  3.  **TONE Implementation (${toneLevel.toString()}):** (Context, Theme, Style) - THIS IS EQUALLY CRITICAL.
       *   **Tone Style Guide (1-10):**
           - Level 1 (Serious): Content is purely practical, serious, and focused on essential communication. No humor. Examples are textbook-style, descriptive.
           - Level 2 (Serious + Hint of Levity): Overwhelmingly practical and serious, but allows for very subtle, occasional hints of mild humor or slightly less formal phrasing.
@@ -1122,8 +1122,8 @@ export async function generateSingleFlashcard(
   }
 }
 
-// Utility to map seriousnessLevel (ridiculousness) to temperature
-function getTemperatureFromSeriousness(toneLevel: number | undefined): number {
+// Utility to map toneLevel to temperature
+function getTemperatureFromToneLevel(toneLevel: number | undefined): number {
   // Default to level 5 (balanced) if undefined
   const level = toneLevel ?? 5;
   
@@ -1243,10 +1243,11 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
 export async function generateOpenRouterBatch(
   prompt: string,
   models: string[],
-  batchIndex: number
+  batchIndex: number,
+  toneLevel?: number  // Add toneLevel parameter
 ): Promise<{phrases: Phrase[], cleverTitle?: string, error?: BatchError}> {
   try {
-    const temperature = getTemperatureFromSeriousness(undefined);
+    const temperature = getTemperatureFromToneLevel(toneLevel);
     const responseText = await callOpenRouterWithFallback(prompt, models, temperature);
     // Clean the response (remove markdown, etc.)
     const cleanedText = responseText.replace(/^```json\s*|```$/g, '').trim();

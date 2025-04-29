@@ -561,6 +561,49 @@ Ensure the entire response is ONLY the JSON object, starting with '{' and ending
 
     </section>
 
+    <div class="section">
+        <h2>10. Temperature Settings</h2>
+        <p>The temperature setting affects the creativity and randomness of the generated content. It is automatically adjusted based on the seriousness level of the request.</p>
+        <div class="code">
+            function getTemperatureFromSeriousness(seriousness: number | undefined): number {
+                // Default to balanced temperature if no seriousness specified
+                if (typeof seriousness !== 'number') return 0.7;
+                
+                // Scale 1-10 seriousness to temperature:
+                // - Lower seriousness (more creative) = higher temperature
+                // - Higher seriousness (more focused) = lower temperature
+                const normalizedTemp = 1 - (seriousness - 1) / 9; // Convert 1-10 to 1-0
+                return 0.4 + (normalizedTemp * 0.6); // Scale to 0.4-1.0 range
+            }
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Seriousness Level</th>
+                    <th>Temperature</th>
+                    <th>Effect on Generation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1 (Most Serious)</td>
+                    <td>0.4</td>
+                    <td>Most focused and deterministic outputs, best for practical/serious content</td>
+                </tr>
+                <tr>
+                    <td>5 (Balanced)</td>
+                    <td>0.7</td>
+                    <td>Balanced between creativity and focus</td>
+                </tr>
+                <tr>
+                    <td>10 (Least Serious)</td>
+                    <td>1.0</td>
+                    <td>Most creative and varied outputs, best for humorous/absurd content</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
     <script>
         const proficiencyLevels = [
             'Complete Beginner',

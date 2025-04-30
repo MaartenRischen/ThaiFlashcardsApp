@@ -3,812 +3,504 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Card Generation Logic Visualization</title>
+    <title>Thai Flashcard Generation Logic - Implementation Details</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f8f9fa;
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
             color: #333;
         }
-        h1, h2, h3 {
-            color: #0056b3;
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
         }
-        h1, h2 {
-            border-bottom: 2px solid #dee2e6;
-            padding-bottom: 0.3em;
-            margin-bottom: 1em;
+        .implementation-note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin: 10px 0;
         }
-        h3 {
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
-            border-bottom: 1px solid #e2e6ea;
-            padding-bottom: 0.2em;
+        .code {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            white-space: pre;
         }
-        .section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
-        .code { font-family: monospace; background: #f5f5f5; padding: 10px; }
-        .flow-diagram { margin: 20px 0; }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 2em;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            background-color: #fff;
+            margin: 20px 0;
         }
         th, td {
-            border: 1px solid #dee2e6;
-            padding: 0.8em 1em;
+            border: 1px solid #ddd;
+            padding: 8px;
             text-align: left;
-            vertical-align: top; /* Align content top */
         }
         th {
-            background-color: #e9ecef;
-            font-weight: bold;
-            color: #495057;
-        }
-        tbody tr:nth-child(odd) {
             background-color: #f8f9fa;
         }
-        tbody tr:hover {
-            background-color: #e2e6ea;
-        }
-        strong {
-            color: #0056b3;
-        }
-        code {
-            background-color: #e9ecef;
-            padding: 0.2em 0.4em;
-            border-radius: 3px;
-            font-family: monospace;
-            white-space: pre-wrap; /* Allow wrapping */
-            word-break: break-word; /* Break long words */
-            display: block; /* Make code block for better formatting */
-            margin-top: 0.5em;
-            font-size: 0.9em; /* Slightly smaller code */
-        }
-        pre > code { /* Style code inside pre differently if needed */
-            display: block;
-            padding: 1em;
-            margin-top: 0;
-        }
-        .key-takeaways, .detail-section, .controls, .snippet-display, .full-prompt-display {
-            background-color: #fff;
-            padding: 1.5em;
-            border: 1px solid #dee2e6;
+        .warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 10px;
+            margin: 10px 0;
             border-radius: 4px;
-            margin-bottom: 1.5em;
-        }
-        .key-takeaways {
-            border-left: 5px solid #0056b3;
-            margin-top: 2em;
-        }
-        .key-takeaways h3, .detail-section h3, .snippet-display h3, .full-prompt-display h3 {
-            margin-top: 0;
-            color: #0056b3;
-        }
-        .key-takeaways ul {
-            margin-bottom: 0;
-            padding-left: 20px;
-        }
-        .key-takeaways li {
-            margin-bottom: 0.5em;
         }
     </style>
 </head>
 <body>
-
-    <h1>Thai Flashcard Generation Logic</h1>
-
+    <h1>Thai Flashcard Generation Logic - Implementation Details</h1>
+    
     <div class="section">
-        <h2>1. Model Selection and Fallback System</h2>
+        <h2>1. Model Selection & Fallback System</h2>
+        <div class="implementation-note">
+            ⚠️ Note: This section reflects the actual implementation with dynamic batch sizing and sophisticated retry mechanisms.
+        </div>
+        
+        <h3>Model Priority Chain</h3>
         <div class="code">
-            const TEXT_MODELS = [
-                'google/gemini-2.5-flash-preview',    // Primary choice
-                'google/gemini-2.5-pro-preview-03-25', // First fallback
-                'openai/gpt-4',                       // Second fallback
-                'openai/gpt-3.5-turbo',               // Third fallback
-                'anthropic/claude-3-opus',            // Fourth fallback
-                'mistralai/mixtral-8x7b'             // Final fallback
-            ];
+const TEXT_MODELS = [
+    'google/gemini-2.5-flash-preview',    // Primary choice
+    'google/gemini-2.5-pro-preview-03-25', // First fallback
+    'openai/gpt-4',                       // Second fallback
+    'openai/gpt-3.5-turbo',               // Third fallback
+    'anthropic/claude-3-opus',            // Fourth fallback
+    'mistralai/mixtral-8x7b'             // Final fallback
+];
         </div>
+
+        <h3>Dynamic Batch Processing</h3>
+        <div class="code">
+// Dynamic batch size based on model capabilities
+function getBatchSize(model: string): number {
+    switch (model) {
+        case 'google/gemini-2.5-flash-preview': return 8;
+        case 'openai/gpt-4': return 4;
+        default: return 3;
+    }
+}
+
+// Exponential backoff retry strategy
+const MAX_RETRIES = 3;
+const getBackoffDelay = (retry: number) => Math.pow(2, retry) * 1000;
+        </div>
+
+        <h3>Error Handling System</h3>
+        <table>
+            <tr>
+                <th>Error Type</th>
+                <th>Handling Strategy</th>
+                <th>Retry Logic</th>
+            </tr>
+            <tr>
+                <td>API Errors</td>
+                <td>Model fallback + exponential backoff</td>
+                <td>Up to 3 retries per model</td>
+            </tr>
+            <tr>
+                <td>Network Errors</td>
+                <td>Immediate retry with backoff</td>
+                <td>Up to 3 retries</td>
+            </tr>
+            <tr>
+                <td>Validation Errors</td>
+                <td>Partial result acceptance + continue</td>
+                <td>No retry (non-retryable)</td>
+            </tr>
+            <tr>
+                <td>Parse Errors</td>
+                <td>Model fallback</td>
+                <td>Switch model, then retry</td>
+            </tr>
+        </table>
     </div>
 
     <div class="section">
-        <h2>2. Batch Processing</h2>
-        <div class="flow-diagram">
-            <pre>
-Generation Process
-├── Input: Total cards requested (N)
-├── Batch Size: 8 cards per batch
-├── Number of batches = ceil(N/8)
-└── For each batch:
-    ├── Calculate remaining cards needed
-    ├── Try primary model (Gemini 2.5)
-    │   └── If fails, try fallback models in sequence
-    ├── Maximum 3 retries per model
-    ├── Validate generated content
-    └── Store successful generations
-            </pre>
+        <h2>2. Temperature Control System</h2>
+        <div class="implementation-note">
+            ⚠️ Note: Temperature control is tightly integrated with tone levels and affects both generation and validation.
         </div>
+
+        <h3>Temperature Mapping</h3>
+        <div class="code">
+// Non-linear temperature progression based on tone level
+function getTemperatureFromToneLevel(toneLevel: number | undefined): number {
+    // Default to level 5 (balanced) if undefined
+    const level = toneLevel ?? 5;
+    
+    // Clamp between 1 and 10
+    const clampedLevel = Math.max(1, Math.min(10, level));
+    
+    const temperatureMap: Record<number, number> = {
+        1: 0.1,   // Dead serious
+        2: 0.3,   // Barely a smile
+        3: 0.4,   // Slight humor
+        4: 0.5,   // Last practical level
+        5: 0.7,   // Starting to get weird
+        6: 0.8,   // Definitely weird
+        7: 0.9,   // Very weird
+        8: 0.95,  // Reality-bending
+        9: 1.5,   // Reality-breaking
+        10: 2.0   // Maximum possible chaos
+    };
+    
+    return temperatureMap[clampedLevel];
+}
+        </div>
+
+        <h3>Temperature Behavior by Level</h3>
+        <table>
+            <tr>
+                <th>Level</th>
+                <th>Temperature</th>
+                <th>Generation Behavior</th>
+                <th>Validation Rules</th>
+            </tr>
+            <tr><td>1</td><td>0.1</td><td>Dead serious, purely practical, textbook-style</td><td>Strict practicality and grammar</td></tr>
+            <tr><td>2</td><td>0.3</td><td>Serious, very subtle levity allowed</td><td>Strict practicality and grammar</td></tr>
+            <tr><td>3</td><td>0.4</td><td>Practical, emerging fun/humor</td><td>Practicality, grammar</td></tr>
+            <tr><td>4</td><td>0.5</td><td>Playful practicality, noticeable humor</td><td>Practicality, grammar</td></tr>
+            <tr><td>5</td><td>0.7</td><td>Balanced absurdity, mix of practical and illogical</td><td>Grammar, relaxed semantic validation</td></tr>
+            <tr><td>6</td><td>0.8</td><td>Leaning weird, bizarre contexts</td><td>Grammar, relaxed semantic validation</td></tr>
+            <tr><td>7</td><td>0.9</td><td>Very weird, surreal humor, strange concepts</td><td>Grammar, relaxed semantic validation</td></tr>
+            <tr><td>8</td><td>0.95</td><td>Reality-bending, semantically strange</td><td>Grammar only</td></tr>
+            <tr><td>9</td><td>1.5</td><td>Reality-breaking, chaotic, nonsensical</td><td>Grammar only</td></tr>
+            <tr><td>10</td><td>2.0</td><td>Maximum chaos, pure surrealism</td><td>Grammar only</td></tr>
+        </table>
     </div>
 
     <div class="section">
-        <h2>3. Error Handling and Validation</h2>
-        <div class="flow-diagram">
-            <pre>
-Error Handling Pipeline
-├── Per-batch error handling
-│   ├── Network errors (retryable)
-│   ├── API errors (retryable)
-│   └── Validation errors (non-retryable)
-├── Aggregated error collection
-└── Fallback mechanisms
-    ├── Model fallbacks
-    └── INITIAL_PHRASES fallback if all models fail
-            </pre>
+        <h2>3. Batch Processing System</h2>
+        <div class="implementation-note">
+            ⚠️ Note: Batch processing includes sophisticated progress tracking and error aggregation.
+        </div>
+
+        <h3>Batch Generation Flow</h3>
+        <div class="code">
+interface BatchProgress {
+    completed: number;
+    total: number;
+    latestPhrases?: Phrase[];
+}
+
+// Main generation loop with progress tracking
+for (let i = 0; i < batchesNeeded; i++) {
+    // Update progress immediately
+    onProgressUpdate?.({ 
+        completed: allPhrases.length, 
+        total: totalCount,
+        latestPhrases: allPhrases.slice(-3)
+    });
+    
+    // Calculate remaining phrases needed
+    const remaining = totalCount - allPhrases.length;
+    const countForBatch = Math.min(remaining, batchSize);
+    
+    // Generate batch with retries
+    let retries = 0;
+    while (retries < MAX_RETRIES) {
+        try {
+            const result = await generateOpenRouterBatch(
+                prompt, 
+                TEXT_MODELS,
+                i,
+                preferences.toneLevel
+            );
+            
+            if (result.phrases.length > 0) break;
+            
+            retries++;
+            await new Promise(resolve => 
+                setTimeout(resolve, getBackoffDelay(retries))
+            );
+        } catch (error) {
+            aggregatedErrors.push(createBatchError(error, i));
+            retries++;
+        }
+    }
+}
+        </div>
+
+        <h3>Error Aggregation</h3>
+        <div class="code">
+interface BatchError {
+    type: 'PARSE' | 'VALIDATION' | 'API' | 'NETWORK' | 'UNKNOWN';
+    message: string;
+    details?: unknown;
+    batchIndex: number;
+}
+
+interface ErrorSummary {
+    errorTypes: string[];
+    totalErrors: number;
+    userMessage: string;
+}
         </div>
     </div>
 
     <div class="section">
         <h2>4. Storage Pipeline</h2>
-        <div class="flow-diagram">
-            <pre>
-Storage Flow
-├── 1. Save metadata
-│   └── Set details (name, level, topics, etc.)
-├── 2. Handle image storage
-│   ├── Generated image URL or
-│   └── Fallback to placeholder
-├── 3. Save content (phrases)
-│   └── Rollback metadata if fails
-├── 4. Save progress
-│   └── Rollback content & metadata if fails
-└── 5. Return complete set data
-            </pre>
+        <div class="implementation-note">
+            ⚠️ Note: Storage includes compatibility mapping and rollback mechanisms.
+        </div>
+
+        <h3>Storage Flow</h3>
+        <div class="code">
+// Metadata mapping for database compatibility
+function mapStorageToDatabase(storageSet: SetMetaData): DatabaseSet {
+    const { toneLevel, ...rest } = storageSet;
+    return {
+        ...rest,
+        seriousnessLevel: toneLevel, // Backward compatibility
+    };
+}
+
+function mapDatabaseToStorage(dbSet: DatabaseSet): SetMetaData {
+    return {
+        ...dbSet,
+        toneLevel: dbSet.seriousnessLevel,
+    };
+}
+
+// Storage sequence with rollback
+async function storeGeneratedSet(userId: string, set: CustomSet) {
+    const session = await startTransaction();
+    try {
+        // 1. Save metadata
+        const meta = await saveMetadata(session, userId, set);
+        
+        // 2. Save phrases
+        const phrases = await savePhrases(session, meta.id, set.phrases);
+        
+        // 3. Save progress data
+        const progress = await saveProgress(session, meta.id);
+        
+        await session.commitTransaction();
+        return { meta, phrases, progress };
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    }
+}
         </div>
     </div>
 
     <div class="section">
         <h2>5. Prompt Structure</h2>
-        <div class="code">
-            // Prompt includes:
-            1. Proficiency Level Implementation
-            2. Tone Level Implementation (1-10 scale)
-            3. Content Guidelines
-               - Phrases
-               - Examples
-               - Mnemonics
-            4. Thai Grammar Rules
-            5. Example Outputs by Level
+        <div class="implementation-note">
+            ⚠️ Note: Prompt includes dynamic components based on tone level and proficiency.
         </div>
+
+        <h3>Core Components</h3>
+        <ol>
+            <li>Task Context & Requirements
+                <ul>
+                    <li>AI role definition</li>
+                    <li>Critical requirements (Level & Tone)</li>
+                    <li>User preferences</li>
+                </ul>
+            </li>
+            <li>Detailed Instructions
+                <ul>
+                    <li>Set title generation rules</li>
+                    <li>Proficiency level implementation</li>
+                    <li>Tone level implementation</li>
+                    <li>Topic/situation control</li>
+                    <li>Duplicate prevention</li>
+                </ul>
+            </li>
+            <li>Output Schema
+                <ul>
+                    <li>JSON structure definition</li>
+                    <li>Interface specifications</li>
+                    <li>Validation requirements</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Dynamic Elements</h3>
+        <table>
+            <tr>
+                <th>Component</th>
+                <th>Dynamic Factors</th>
+                <th>Implementation Notes</th>
+            </tr>
+            <tr>
+                <td>Example Generation</td>
+                <td>Tone Level + Proficiency</td>
+                <td>Examples match both complexity and absurdity level</td>
+            </tr>
+            <tr>
+                <td>Mnemonic Rules</td>
+                <td>Tone Level</td>
+                <td>Balance between memorability and tone-appropriate style</td>
+            </tr>
+            <tr>
+                <td>Validation Rules</td>
+                <td>Proficiency Level</td>
+                <td>Strict enforcement of level-appropriate complexity</td>
+            </tr>
+        </table>
     </div>
 
     <div class="section">
         <h2>6. Generation Parameters</h2>
+        <div class="implementation-note">
+            ⚠️ Note: Parameters are dynamically adjusted based on multiple factors.
+        </div>
+
+        <h3>Dynamic Parameters</h3>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Range</th>
+                <th>Adjustment Factors</th>
+            </tr>
+            <tr>
+                <td>Batch Size</td>
+                <td>3-8</td>
+                <td>Model capabilities, memory constraints</td>
+            </tr>
+            <tr>
+                <td>Temperature</td>
+                <td>0.1-2.0</td>
+                <td>Tone level, model characteristics</td>
+            </tr>
+            <tr>
+                <td>Retry Count</td>
+                <td>0-3</td>
+                <td>Error type, model availability</td>
+            </tr>
+            <tr>
+                <td>Backoff Delay</td>
+                <td>1s-8s</td>
+                <td>Retry attempt number</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>7. Validation System</h2>
+        <div class="implementation-note">
+            ⚠️ Note: Comprehensive validation system with tone-aware rules.
+        </div>
+
+        <h3>Validation Rules</h3>
+        <div class="code">
+interface ValidationRules {
+    // Structure validation
+    requiredFields: string[];
+    typeChecks: Record<string, string>;
+    
+    // Content validation
+    minExamples: number;
+    maxPhraseLength: Record<string, number>;
+    requireMnemonic: boolean;
+    
+    // Tone-specific rules
+    allowedContexts: string[];
+    semanticChecks: boolean;
+    grammarChecks: boolean;
+}
+
+// Rule sets vary by tone level
+const validationRules: Record<number, ValidationRules> = {
+    1: { strict: true, semanticChecks: true, ... },
+    5: { strict: false, semanticChecks: partial, ... },
+    10: { strict: false, semanticChecks: false, ... }
+};
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>8. Progress Tracking</h2>
+        <div class="implementation-note">
+            ⚠️ Note: Sophisticated progress tracking with multiple metrics.
+        </div>
+
+        <h3>Progress Interface</h3>
+        <div class="code">
+interface GenerationProgress {
+    completed: number;
+    total: number;
+    latestPhrases?: Phrase[];
+    errors?: BatchError[];
+    currentModel?: string;
+    batchesCompleted: number;
+    estimatedTimeRemaining?: number;
+}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>9. Error Handling</h2>
+        <div class="implementation-note">
+            ⚠️ Note: Comprehensive error handling with aggregation and recovery.
+        </div>
+
+        <h3>Error Types</h3>
+        <table>
+            <tr>
+                <th>Type</th>
+                <th>Recovery Strategy</th>
+                <th>User Impact</th>
+            </tr>
+            <tr>
+                <td>Model Errors</td>
+                <td>Fallback to next model</td>
+                <td>Minimal - transparent retry</td>
+            </tr>
+            <tr>
+                <td>Validation Errors</td>
+                <td>Partial acceptance</td>
+                <td>Reduced set size</td>
+            </tr>
+            <tr>
+                <td>Critical Errors</td>
+                <td>Fallback content</td>
+                <td>Basic set provided</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>10. UI Integration</h2>
+        <div class="implementation-note">
+            ⚠️ Note: Complete UI system for tone selection and progress tracking.
+        </div>
+
+        <h3>Components</h3>
         <ul>
-            <li>Batch Size: 8 cards</li>
-            <li>Max Retries: 3 per model</li>
-            <li>Models: 6 different LLMs in fallback sequence</li>
-            <li>Validation: Strict JSON schema validation</li>
-            <li>Error Types: Network, API, Parse, Validation, Unknown</li>
+            <li>Tone Selection
+                <ul>
+                    <li>Slider interface (1-10)</li>
+                    <li>Visual previews</li>
+                    <li>Example content</li>
+                </ul>
+            </li>
+            <li>Progress Display
+                <ul>
+                    <li>Completion percentage</li>
+                    <li>Latest phrases</li>
+                    <li>Error summaries</li>
+                </ul>
+            </li>
+            <li>Error Handling
+                <ul>
+                    <li>User-friendly messages</li>
+                    <li>Retry options</li>
+                    <li>Fallback content</li>
+                </ul>
+            </li>
         </ul>
     </div>
-
-    <div class="section">
-        <h2>7. Output Format</h2>
-        <div class="code">
-interface Phrase {
-    english: string;
-    thai: string;
-    thaiMasculine: string;
-    thaiFeminine: string;
-    pronunciation: string;
-    mnemonic?: string;
-    examples: ExampleSentence[];
-}
-
-interface ExampleSentence {
-    thai: string;
-    thaiMasculine: string;
-    thaiFeminine: string;
-    pronunciation: string;
-    translation: string;
-}
-        </div>
-    </div>
-
-    <div class="section">
-        <h2>8. Proficiency Level → Content Complexity</h2>
-        <p>This table shows how the selected <code>Proficiency Level</code> primarily dictates the vocabulary, grammar, and complexity of the generated content.</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Proficiency Level</th>
-                    <th>Phrase Complexity</th>
-                    <th>Vocabulary Type</th>
-                    <th>Example Sentence / Question Complexity</th>
-                    <th>Key Constraint</th>
-                    <th>Key Prompt Instruction Snippet (Level)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Complete Beginner</strong></td>
-                    <td>1-2 words (essential)</td>
-                    <td>High-frequency only</td>
-                    <td>Single-word or two-word S-V</td>
-                    <td>NO questions/dialogues</td>
-                    <td><code>Complete Beginner: Use ONLY single words or two-word combinations (noun+verb or noun+adjective). Focus on the absolute most basic, high-frequency vocabulary. Examples must be single-word or two-word statements only. NO questions, NO dialogues, NO complex structures.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>Basic Understanding</strong></td>
-                    <td>2-4 words (simple statements)</td>
-                    <td>Common expressions</td>
-                    <td>Simple S-V-O statements</td>
-                    <td>NO dialogues</td>
-                    <td><code>Basic Understanding: Use short, practical phrases (2-4 words). Focus on basic S-V-O structures and common expressions for everyday needs. Simple questions are okay. Avoid dialogues. Examples should be basic descriptive statements about daily life.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>Intermediate</strong></td>
-                    <td>4-7 words (descriptive)</td>
-                    <td>Typical phrases</td>
-                    <td>Basic compound sentences</td>
-                    <td>NO dialogues</td>
-                    <td><code>Intermediate: Use medium-length descriptive sentences (4-7 words). Include basic compound structures and typical vocabulary for common situations. Simple questions and compound sentences are okay. Avoid dialogues. Examples should describe everyday situations.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>Advanced</strong></td>
-                    <td>7-12 words (complex)</td>
-                    <td>Nuanced vocabulary</td>
-                    <td>Complex sentences</td>
-                    <td>NO dialogues</td>
-                    <td><code>Advanced: Use moderately complex sentences (7-12 words). Include varied grammar structures and more nuanced vocabulary. Complex questions and compound-complex sentences are okay. Avoid dialogues. Examples should demonstrate natural Thai expression.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>Native/Fluent</strong></td>
-                    <td>Natural length</td>
-                    <td>Slang, cultural refs</td>
-                    <td>Native-like complexity</td>
-                    <td>NO dialogues</td>
-                    <td><code>Native/Fluent: Use natural, idiomatic Thai (any appropriate length). Include slang, cultural references, and educated native speech patterns. Complex questions and varied sentence structures are encouraged. Avoid dialogues. Examples should sound like authentic Thai.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>God Mode</strong></td>
-                    <td>Extended length</td>
-                    <td>Rare vocabulary</td>
-                    <td>Academic/literary</td>
-                    <td>NO dialogues</td>
-                    <td><code>God Mode: Use sophisticated, elaborate Thai (extended length). Include rare vocabulary, advanced grammar patterns, and literary/academic language. Complex questions and varied structures are encouraged. Avoid dialogues. Examples should demonstrate mastery of formal and literary Thai.</code></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <h2>9. Tone Level → Context & Style</h2>
-        <p>This table outlines how the <code>Tone Level</code> (1-10) influences the style, context, realism, and theme of the generated content, including mnemonics.</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Tone Level</th>
-                    <th>Tone Description</th>
-                    <th>Phrase Content Style (Context/Theme)</th>
-                    <th>Example Sentence Style (Context/Theme)</th>
-                    <th>Mnemonic Style & Utility</th>
-                    <th>Key Prompt Instruction Snippet (Tone)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>1</strong> (Serious)</td>
-                    <td>Purely practical, serious, essential.</td>
-                    <td>Dead serious, practical context.</td>
-                    <td>Textbook serious, descriptive context.</td>
-                    <td>Simple, focused on recall.</td>
-                    <td><code>Level 1 (Serious): Content is purely practical, serious, and focused on essential communication. No humor. Examples are textbook-style, descriptive.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>2</strong> (Serious + Levity)</td>
-                    <td>Overwhelmingly practical, subtle hints of humor/informality.</td>
-                    <td>Mostly serious context, occasional slightly informal phrase.</td>
-                    <td>Mostly serious context, hint of mild humor possible.</td>
-                    <td>Focused on recall.</td>
-                    <td><code>Level 2 (Serious + Hint of Levity): Overwhelmingly practical and serious, but allows for very subtle, occasional hints of mild humor or slightly less formal phrasing.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>3</strong> (Practical + Fun)</td>
-                    <td>Primarily practical, noticeable playful elements.</td>
-                    <td>Practical context, starting to be fun/creative.</td>
-                    <td>Slightly amusing but plausible situations.</td>
-                    <td>Increasingly creative, aims for recall.</td>
-                    <td><code>Level 3 (Practical + Emerging Fun): Still primarily practical, but humor and playful elements become more noticeable. Examples can describe slightly amusing but plausible situations.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>4</strong> (Playful Practicality)</td>
-                    <td>Clear blend of practical content with noticeable humor/wit.</td>
-                    <td>Practical topics in humorous/lighthearted context.</td>
-                    <td>Amusing situations, still grounded in reality.</td>
-                    <td>Creative, aids recall.</td>
-                    <td><code>Level 4 (Playful Practicality): A clear blend. Content remains practical but is presented with noticeable humor, wit, or lightheartedness. Examples are often amusing but grounded.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>5</strong> (Balanced Absurdity)</td>
-                    <td>Mix of practical concepts & illogical/surreal elements.</td>
-                    <td>Practical phrases mixed with absurd concepts.</td>
-                    <td>Impossible or highly improbable scenarios.</td>
-                    <td>Bizarre style, still attempts to aid recall.</td>
-                    <td><code>Level 5 (Balanced Absurdity): Equal mix of potentially practical phrases and concepts introducing illogical or surreal elements. Examples start describing impossible or highly improbable scenarios.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>6</strong> (Leaning Weird)</td>
-                    <td>Practicality decreases; focus on bizarre/nonsensical contexts.</td>
-                    <td>Useful phrases often in bizarre/nonsensical context.</td>
-                    <td>Increasingly defies logic/physics.</td>
-                    <td>Bizarre style, still attempts to aid recall.</td>
-                    <td><code>Level 6 (Leaning Weird): Practicality decreases. Phrases might be useful but are often presented in bizarre or nonsensical contexts. Examples increasingly defy logic/physics.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>7</strong> (Strongly Bizarre)</td>
-                    <td>Usefulness secondary; bizarre situations, surreal humor.</td>
-                    <td>Mostly bizarre concepts, potentially useful phrases.</td>
-                    <td>Highly imaginative and illogical scenarios.</td>
-                    <td>Bizarre style, still attempts to aid recall.</td>
-                    <td><code>Level 7 (Strongly Bizarre): Usefulness is secondary. Most content involves bizarre situations, surreal humor, or strange concepts. Examples are highly imaginative and illogical.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>8</strong> (Reality Bending)</td>
-                    <td>Usefulness minimal; semantically strange content.</td>
-                    <td>Semantically strange but grammatical phrases.</td>
-                    <td>Coherent fever dreams, reality-questioning.</td>
-                    <td>Chaotic style, attempts recall link.</td>
-                    <td><code>Level 8 (Reality Bending): Usefulness is minimal. Content focuses on semantically strange but grammatically correct statements. Examples should feel like coherent fever dreams, questioning reality.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>9</strong> (Chaos)</td>
-                    <td>Usefulness near zero; chaotic, nonsensical, paradoxical.</td>
-                    <td>Intentionally chaotic/nonsensical phrases.</td>
-                    <td>Existential absurdity.</td>
-                    <td>Chaotic style, utility secondary.</td>
-                    <td><code>Level 9 (Chaos): Usefulness is almost non-existent. Content is intentionally chaotic, nonsensical, or paradoxical. Examples aim for existential absurdity. Mnemonic utility is secondary.</code></td>
-                </tr>
-                <tr>
-                    <td><strong>10</strong> (Max Absurdity)</td>
-                    <td>Pure madness, surrealism, non-sequiturs (grammatical).</td>
-                    <td>Brain-melting madness, non-sequiturs.</td>
-                    <td>Maximally bizarre, nonsensical, Dali-esque.</td>
-                    <td>Chaotic style, utility secondary.</td>
-                    <td><code>Level 10 (Maximum Absurdity): Content is pure brain-melting madness, surrealism, and non-sequiturs, while maintaining grammatical structure. Examples should be maximally bizarre and nonsensical. Mnemonic utility is secondary.</code></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="key-takeaways">
-        <h3>Key Takeaways (Updated)</h3>
-        <ul>
-            <li><strong>Refined Control:</strong> Proficiency focuses on <strong>vocabulary/complexity</strong>, Tone focuses on <strong>context/theme/style</strong>.</li>
-            <li><strong>Questions Allowed:</strong> Simple, relevant questions are now permitted (except for Complete Beginner), but complex dialogues are still forbidden.</li>
-            <li><strong>Smoother Transitions:</strong> Tone/Level descriptions now use more qualitative language for gradual changes.</li>
-            <li><strong>Mnemonic Utility:</strong> Recall effectiveness is emphasized for Tones 1-8; chaotic style takes precedence only for Tones 9-10.</li>
-            <li><strong>Example Sentences:</strong> Reflect *both* the required complexity (Level) and the stylistic theme (Tone).</li>
-        </ul>
-    </div>
-
-    <hr style="margin: 3em 0; border: 1px solid #dee2e6;">
-
-    <section id="interactive-prompt-explorer">
-        <h2>3. Interactive Prompt Explorer</h2>
-        <p>Select a Proficiency Level and Tone Level to see the key instruction snippets and the full prompt that would be generated for the LLM (using "Example Topic" and Count=1 for demonstration).</p>
-
-        <div class="controls">
-            <div>
-                <label for="select-proficiency" style="display: block; margin-bottom: 0.5em; font-weight: bold;">Proficiency Level:</label>
-                <select id="select-proficiency" style="padding: 0.5em; border: 1px solid #ccc; border-radius: 3px; min-width: 200px;">
-                    <!-- Options will be populated by JS -->
-                </select>
-            </div>
-            <div>
-                <label for="select-tone" style="display: block; margin-bottom: 0.5em; font-weight: bold;">Tone Level:</label>
-                <select id="select-tone" style="padding: 0.5em; border: 1px solid #ccc; border-radius: 3px; min-width: 100px;">
-                    <!-- Options will be populated by JS -->
-                </select>
-            </div>
-        </div>
-
-        <div class="prompt-display" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2em;">
-            <div class="snippet-display">
-                <h3>Key Instruction Snippets</h3>
-                <div>
-                    <strong>Level Snippet:</strong>
-                    <code id="level-snippet-display">Select a level...</code>
-                </div>
-                <div style="margin-top: 1em;">
-                    <strong>Tone Snippet:</strong>
-                    <code id="tone-snippet-display">Select a tone...</code>
-                </div>
-            </div>
-            <div class="full-prompt-display">
-                <h3>Full Generated Prompt</h3>
-                <pre id="full-prompt-display-area" style="white-space: pre-wrap; word-wrap: break-word; background-color: #e9ecef; padding: 1em; border-radius: 3px; max-height: 500px; overflow-y: auto; font-size: 0.85em;">Select options above...</pre>
-            </div>
-        </div>
-    </section>
-
-    <hr style="margin: 3em 0; border: 1px solid #dee2e6;">
-
-    <section id="full-prompt-details">
-        <h2>4. Full Prompt Section Details (Updated)</h2>
-        <p>This section provides the complete, unabbreviated text for the parts of the generation prompt that were omitted for brevity in the interactive explorer above. Reflects latest logic updates.</p>
-
-        <div class="detail-section">
-            <h3>Output Format & Schema Description</h3>
-            <pre><code>
-**Output Format:**
-Generate a JSON object containing two keys: "cleverTitle" and "phrases".
-- "cleverTitle": Use the exact user's input as the title. If there are multiple inputs, combine them with "and". Do not add any descriptive phrases like "describing the experience of" or "learning about". Just use the raw input(s). Examples:
-  - Input: "living in the Nile" → "Living in the Nile"
-  - Inputs: "birds, living in the Nile" → "Birds and living in the Nile"
-  - Input: "street food vendors" → "Street food vendors"
-- "phrases": An array containing exactly [COUNT] unique flashcard objects. Each phrase object MUST conform to the following TypeScript interface:
-
-\`\`\`typescript
-interface Phrase {
-  english: string; // Concise English translation.
-  thai: string; // Thai script (base form).
-  thaiMasculine: string; // Polite male version ("ครับ").
-  thaiFeminine: string; // Polite female version ("ค่ะ").
-  pronunciation: string; // Simple phonetic guide (e.g., 'sa-wat-dee krap').
-  mnemonic?: string; // Provide a concise, intuitive mnemonic in *English* that helps remember the Thai word/short phrase by (1) linking English sounds to Thai sounds and (2) hinting at meaning. Focus on recall effectiveness, reflecting the Tone stylistically. For Tones 9 & 10, chaotic style takes precedence over strict recall utility. If >3 Thai words, focus mnemonic on the key word.
-  examples: ExampleSentence[]; // REQUIRED: Must provide at least 2 example sentences reflecting the TONE and LEVEL.
-}
-
-interface ExampleSentence {
-  thai: string; // Example sentence in Thai script.
-  thaiMasculine: string; // Polite male version.
-  thaiFeminine: string; // Polite female version.
-  pronunciation: string; // Phonetic pronunciation.
-  translation: string; // English translation.
-}
-\`\`\`
-
-CRITICAL: Each phrase MUST include at least 2 example sentences. No exceptions. The examples should reflect both the tone level and proficiency level of the set.
-
-Ensure the entire response is ONLY the JSON object, starting with '{' and ending with '}'. Do not include any introductory text, explanations, or markdown formatting outside the JSON structure itself.
-            </code></pre>
-        </div>
-
-        <div class="detail-section">
-            <h3>Critical Instructions: 1. Set Title</h3>
-            <pre><code>
-1.  **Set Title:** Use the exact user's input as the title. If there are multiple inputs, combine them with "and". Do not add any descriptive phrases like "describing the experience of" or "learning about". Just use the raw input(s). Examples:
-    - Input: "living in the Nile" → "Living in the Nile"
-    - Inputs: "birds, living in the Nile" → "Birds and living in the Nile"
-    - Input: "street food vendors" → "Street food vendors"
-            </code></pre>
-        </div>
-
-        <div class="detail-section">
-            <h3>Critical Instructions: 2. Level-Specific Content (Full)</h3>
-            <pre><code>
-2.  **Level-Specific Content:** (Vocabulary, Grammar, Complexity)
-    *   Complete Beginner: Use ONLY single words or two-word combinations (noun+verb or noun+adjective). Focus on the absolute most basic, high-frequency vocabulary. Examples must be single-word or two-word statements only. NO questions, NO dialogues, NO complex structures.
-    *   Basic Understanding: Use short, practical phrases (2-4 words). Focus on basic S-V-O structures and common expressions for everyday needs. Simple questions are okay. Avoid dialogues. Examples should be basic descriptive statements about daily life.
-    *   Intermediate: Use medium-length descriptive sentences (4-7 words). Include basic compound structures and typical vocabulary for common situations. Simple questions and compound sentences are okay. Avoid dialogues. Examples should describe everyday situations.
-    *   Advanced: Use moderately complex sentences (7-12 words). Include varied grammar structures and more nuanced vocabulary. Complex questions and compound-complex sentences are okay. Avoid dialogues. Examples should demonstrate natural Thai expression.
-    *   Native/Fluent: Use natural, idiomatic Thai (any appropriate length). Include slang, cultural references, and educated native speech patterns. Complex questions and varied sentence structures are encouraged. Avoid dialogues. Examples should sound like authentic Thai.
-    *   God Mode: Use sophisticated, elaborate Thai (extended length). Include rare vocabulary, advanced grammar patterns, and literary/academic language. Complex questions and varied structures are encouraged. Avoid dialogues. Examples should demonstrate mastery of formal and literary Thai.
-            </code></pre>
-        </div>
-
-        <div class="detail-section">
-            <h3>Critical Instructions: 3. TONE Implementation (Full)</h3>
-            <pre><code>
-3.  **TONE Implementation (${tone.toString()}):** (Context, Theme, Style) - THIS IS PARAMOUNT.
-    *   While Proficiency Level (Point 2) primarily dictates vocabulary choice and grammatical complexity, the Tone Level dictates the *context*, *theme*, and *semantic nature* of the phrases and example sentences.
-
-    *   **Tone Style Guide (1-10):**
-        - Level 1 (Serious): Content is purely practical, serious, and focused on essential communication. No humor. Examples are textbook-style, descriptive.
-        - Level 2 (Serious + Hint of Levity): Overwhelmingly practical and serious, but allows for very subtle, occasional hints of mild humor or slightly less formal phrasing.
-        - Level 3 (Practical + Emerging Fun): Still primarily practical, but humor and playful elements become more noticeable. Examples can describe slightly amusing but plausible situations.
-        - Level 4 (Playful Practicality): A clear blend. Content remains practical but is presented with noticeable humor, wit, or lightheartedness. Examples are often amusing but grounded.
-        - Level 5 (Balanced Absurdity): Equal mix of potentially practical phrases and concepts introducing illogical or surreal elements. Examples start describing impossible or highly improbable scenarios.
-        - Level 6 (Leaning Weird): Practicality decreases. Phrases might be useful but are often presented in bizarre or nonsensical contexts. Examples increasingly defy logic/physics.
-        - Level 7 (Strongly Bizarre): Usefulness is secondary. Most content involves bizarre situations, surreal humor, or strange concepts. Examples are highly imaginative and illogical.
-        - Level 8 (Reality Bending): Usefulness is minimal. Content focuses on semantically strange but grammatically correct statements. Examples should feel like coherent fever dreams, questioning reality.
-        - Level 9 (Chaos): Usefulness is almost non-existent. Content is intentionally chaotic, nonsensical, or paradoxical. Examples aim for existential absurdity. Mnemonic utility is secondary.
-        - Level 10 (Maximum Absurdity): Content is pure brain-melting madness, surrealism, and non-sequiturs, while maintaining grammatical structure. Examples should be maximally bizarre and nonsensical. Mnemonic utility is secondary.
-
-    *   **Content Guidelines by Component:**
-        - **Main Phrases:** 
-            * Reflect the chosen Tone in their semantic meaning and context, while adhering to the complexity set by the Proficiency Level.
-        - **Example Sentences:** 
-            * Must reflect both the Proficiency Level (complexity, grammar) AND the Tone Level (context, theme, realism/absurdity).
-            * Simple questions may be used as examples if appropriate for the Level (Basic+) and Topic, but avoid conversational dialogues.
-        - **Mnemonics:** 
-            * Stylistically reflect the Tone (serious -> creative -> bizarre -> chaotic).
-            * Tones 1-8: Prioritize recall effectiveness via sound/meaning links.
-            * Tones 9-10: Chaotic style takes precedence, but attempt a link if feasible.
-
-    *   **Example Outputs by Level (Illustrative - actual content varies):**
-        - Level 1 (Dead Serious): Phrase: "One hot coffee"; Example: "The hot coffee is on the table."
-        - Level 3 (Fun but Practical): Phrase: "Fat cat"; Example: "The fat cat sleeps on the pink sofa."
-        - Level 5 (50/50): Phrase: "Purple sun"; Example: "The purple sun shines on chocolate trees."
-        - Level 8 (Pure Chaos): Phrase: "Brain eating pizza"; Example: "The dancing brain eats pizza in dream space."
-
-    *   **Key Rules:**
-        - Maintain perfect Thai grammar regardless of Tone.
-        - Adhere strictly to the complexity constraints of the Proficiency Level.
-        - Ensure Tone influences context and theme, not core grammar complexity.
-        - Avoid conversational dialogues between implied speakers.
-            </code></pre>
-        </div>
-
-        <div class="detail-section">
-            <h3>Critical Instructions: 4. Topic/Situation Control</h3>
-            <pre><code>
-4.  **Topic/Situation Control:**
-    *   Focus content *primarily* on the 'Situations for Use': [TOPICS_TO_DISCUSS]. Use this as inspiration for vocabulary (matching Level) and context (matching Tone).
-    *   If 'Specific Focus' ([SPECIFIC_TOPICS]) provided, ensure vocabulary related to the focus appears and is used appropriately in examples.
-            </code></pre>
-        </div>
-
-        <div class="detail-section">
-            <h3>Critical Instructions: 5. Avoid Duplicates</h3>
-            <pre><code>
-5.  **Avoid Duplicates:** Do not generate for these existing English phrases (case-insensitive): [EXISTING_PHRASES]. CRITICAL: Ensure that no generated English phrases match any existing ones, ignoring case (e.g. if "Red" exists, do not generate "red" or "RED").
-            </code></pre>
-        </div>
-
-    </section>
-
-    <div class="section">
-        <h2>10. Temperature Settings</h2>
-        <p>The temperature setting affects the creativity and randomness of the generated content. It is automatically adjusted based on the seriousness level of the request, using a non-linear mapping to create distinct generation behavior groups.</p>
-        <div class="code">
-            function getTemperatureFromSeriousness(seriousness: number | undefined): number {
-                // Default to balanced temperature (level 5) if no seriousness specified
-                if (typeof seriousness !== 'number') return 0.7;
-                
-                // Use a non-linear temperature mapping for distinct behavior groups
-                const temperatureMap: Record<number, number> = {
-                    1: 0.1,   // Dead serious
-                    2: 0.3,   // Barely a smile
-                    3: 0.4,   // Slight humor
-                    4: 0.5,   // Last practical level
-                    5: 0.7,   // Starting to get weird
-                    6: 0.8,   // Definitely weird
-                    7: 0.9,   // Very weird
-                    8: 0.95,  // Reality-bending
-                    9: 1.5,   // Reality-breaking
-                    10: 2.0   // Maximum possible chaos
-                };
-                
-                return temperatureMap[seriousness];
-            }
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Seriousness Level</th>
-                    <th>Temperature</th>
-                    <th>Effect on Generation</th>
-                    <th>Behavior Group</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1 (Most Serious)</td>
-                    <td>0.1</td>
-                    <td>Extremely focused and deterministic outputs</td>
-                    <td rowspan="4">Conservative Group (0.1-0.5)<br>Practical, focused content</td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>0.3</td>
-                    <td>Very conservative with minimal variation</td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>0.4</td>
-                    <td>Conservative with slight playfulness</td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td>0.5</td>
-                    <td>Last fully practical level</td>
-                </tr>
-                <tr>
-                    <td>5 (Balanced)</td>
-                    <td>0.7</td>
-                    <td>Starting to get weird</td>
-                    <td rowspan="4">Creative Group (0.7-0.95)<br>Increasing randomness</td>
-                </tr>
-                <tr>
-                    <td>6</td>
-                    <td>0.8</td>
-                    <td>Definitely weird outputs</td>
-                </tr>
-                <tr>
-                    <td>7</td>
-                    <td>0.9</td>
-                    <td>Very weird combinations</td>
-                </tr>
-                <tr>
-                    <td>8</td>
-                    <td>0.95</td>
-                    <td>Reality-bending content</td>
-                </tr>
-                <tr>
-                    <td>9</td>
-                    <td>1.5</td>
-                    <td>Reality-breaking outputs</td>
-                    <td rowspan="2">Chaotic Group (1.5-2.0)<br>Maximum unpredictability</td>
-                </tr>
-                <tr>
-                    <td>10 (Least Serious)</td>
-                    <td>2.0</td>
-                    <td>Maximum possible chaos</td>
-                </tr>
-            </tbody>
-        </table>
-        <p><strong>Note:</strong> The temperature mapping uses three distinct groups to create clear behavioral boundaries:
-            <ul>
-                <li><strong>Conservative (Levels 1-4):</strong> Temperatures 0.1-0.5 for practical, focused content</li>
-                <li><strong>Creative (Levels 5-8):</strong> Temperatures 0.7-0.95 for increasing randomness and creativity</li>
-                <li><strong>Chaotic (Levels 9-10):</strong> Temperatures 1.5-2.0 for maximum unpredictability</li>
-            </ul>
-        </p>
-    </div>
-
-    <script>
-        const proficiencyLevels = [
-            'Complete Beginner',
-            'Basic Understanding',
-            'Intermediate',
-            'Advanced',
-            'Native/Fluent',
-            'God Mode'
-        ];
-        const toneLevels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-        // --- Store Snippets (Updated based on refined prompt logic) ---\
-        const levelSnippets = {
-            'Complete Beginner': `Complete Beginner: Use ONLY single words or two-word combinations (noun+verb or noun+adjective). Focus on the absolute most basic, high-frequency vocabulary. Examples must be single-word or two-word statements only. NO questions, NO dialogues, NO complex structures.`,
-            'Basic Understanding': `Basic Understanding: Use short, practical phrases (2-4 words). Focus on basic S-V-O structures and common expressions for everyday needs. Simple questions are okay. Avoid dialogues. Examples should be basic descriptive statements about daily life.`,
-            'Intermediate': `Intermediate: Use medium-length descriptive sentences (4-7 words). Include basic compound structures and typical vocabulary for common situations. Simple questions and compound sentences are okay. Avoid dialogues. Examples should describe everyday situations.`,
-            'Advanced': `Advanced: Use moderately complex sentences (7-12 words). Include varied grammar structures and more nuanced vocabulary. Complex questions and compound-complex sentences are okay. Avoid dialogues. Examples should demonstrate natural Thai expression.`,
-            'Native/Fluent': `Native/Fluent: Use natural, idiomatic Thai (any appropriate length). Include slang, cultural references, and educated native speech patterns. Complex questions and varied sentence structures are encouraged. Avoid dialogues. Examples should sound like authentic Thai.`,
-            'God Mode': `God Mode: Use sophisticated, elaborate Thai (extended length). Include rare vocabulary, advanced grammar patterns, and literary/academic language. Complex questions and varied structures are encouraged. Avoid dialogues. Examples should demonstrate mastery of formal and literary Thai.`
-        };
-
-        const toneSnippets = {
-            1: `Level 1 (Serious): Content is purely practical, serious, and focused on essential communication. No humor. Examples are textbook-style, descriptive.`,
-            2: `Level 2 (Serious + Hint of Levity): Overwhelmingly practical and serious, but allows for very subtle, occasional hints of mild humor or slightly less formal phrasing.`,
-            3: `Level 3 (Practical + Emerging Fun): Still primarily practical, but humor and playful elements become more noticeable. Examples can describe slightly amusing but plausible situations.`,
-            4: `Level 4 (Playful Practicality): A clear blend. Content remains practical but is presented with noticeable humor, wit, or lightheartedness. Examples are often amusing but grounded.`,
-            5: `Level 5 (Balanced Absurdity): Equal mix of potentially practical phrases and concepts introducing illogical or surreal elements. Examples start describing impossible or highly improbable scenarios.`,
-            6: `Level 6 (Leaning Weird): Practicality decreases. Phrases might be useful but are often presented in bizarre or nonsensical contexts. Examples increasingly defy logic/physics.`,
-            7: `Level 7 (Strongly Bizarre): Usefulness is secondary. Most content involves bizarre situations, surreal humor, or strange concepts. Examples are highly imaginative and illogical.`,
-            8: `Level 8 (Reality Bending): Usefulness is minimal. Content focuses on semantically strange but grammatically correct statements. Examples should feel like coherent fever dreams, questioning reality.`,
-            9: `Level 9 (Chaos): Usefulness is almost non-existent. Content is intentionally chaotic, nonsensical, or paradoxical. Examples aim for existential absurdity. Mnemonic utility is secondary.`,
-            10: `Level 10 (Maximum Absurdity): Content is pure brain-melting madness, surrealism, and non-sequiturs, while maintaining grammatical structure. Examples should be maximally bizarre and nonsensical. Mnemonic utility is secondary.`
-        };
-
-        // --- Prompt Reconstruction Logic (Updated to reflect latest prompt changes) ---\
-        function reconstructPrompt(level, tone, topicsToDiscuss = "Example Topic", specificTopics = undefined, count = 1, existingPhrases = []) {
-            // Updated Schema description (mainly mnemonic part)
-            const schemaDescription = `
-  **Output Format:**
-  Generate a JSON object containing two keys: "cleverTitle" and "phrases".
-  - "cleverTitle": ... (Omitted) ...
-  - "phrases": An array containing exactly ${count} unique flashcard objects... interface:
-
-  \`\`\`typescript
-  interface Phrase {
-    english: string; 
-    thai: string; 
-    thaiMasculine: string; 
-    thaiFeminine: string; 
-    pronunciation: string; 
-    mnemonic?: string; // Provide a concise, intuitive mnemonic in *English* that helps remember the Thai word/short phrase by (1) linking English sounds to Thai sounds and (2) hinting at meaning. Focus on recall effectiveness, reflecting the Tone stylistically. For Tones 9 & 10, chaotic style takes precedence over strict recall utility. If >3 Thai words, focus mnemonic on the key word.
-    examples: ExampleSentence[]; // REQUIRED: Must provide at least 2 example sentences reflecting the TONE and LEVEL.
-  }
-
-  interface ExampleSentence { ... }
-  \`\`\`
-
-  CRITICAL: Each phrase MUST include at least 2 example sentences...
-  Ensure the entire response is ONLY the JSON object...
-  `;
-
-            const levelInstruction = levelSnippets[level] || '/* Invalid Level Selected */';
-            const toneInstruction = toneSnippets[tone] || '/* Invalid Tone Selected */';
-            // Extract relevant sub-parts for TONE section (using placeholders as full logic is complex)
-            const toneSubPoints = `
-      *   **Content Guidelines by Component:** ... (Full Text in Section 4) ...
-      *   **Example Outputs by Level:** ... (Full Text in Section 4) ...
-      *   **Key Rules:** ... (Full Text in Section 4) ...
-      `;
-
-            const prompt = `
-  You are an expert AI assistant specialized in creating language learning flashcards. Your task is to generate ${count} flashcards and a set title.
-
-  **CRITICAL TASK REQUIREMENTS:**
-  - You MUST generate content that STRICTLY adheres to the specified **Proficiency Level ([LEVEL])**.
-  - You MUST generate content that STRICTLY adheres to the specified **Tone Level ([TONE])**.
-  - Both Level and Tone MUST be reflected in the generated 'phrases' and their 'examples'.
-  - Follow ALL instructions below precisely.
-
-  **User Preferences:**
-  - Proficiency Level: **[LEVEL]**
-  - Tone Level: **[TONE]**
-  - Situations for Use: [TOPICS_TO_DISCUSS]
-  - Specific Focus: [SPECIFIC_TOPICS]
-
-  **DETAILED INSTRUCTIONS:**
-
-  1.  **Set Title:** ... (Instructions on title generation) ...
-
-  2.  **Proficiency Level Implementation ([LEVEL]):** (Vocabulary, Grammar, Complexity) - THIS IS CRITICAL. Apply the following rules rigorously:
-      *   **[SELECTED_LEVEL_DESCRIPTION]**  &lt;!-- Only the description for the chosen level is inserted here --&gt;
-
-  3.  **TONE Implementation ([TONE]):** (Context, Theme, Style) - THIS IS EQUALLY CRITICAL.
-      *   **Tone Style Guide (1-10):**
-          - ${toneInstruction}
-
-${toneSubPoints} 
-
-  4.  **Topic/Situation Control:** ... (Instructions on using topics) ...
-
-  5.  **Avoid Duplicates:** ... (Instructions with existing phrases) ...
-
-  ${schemaDescription}
-  `;
-            return prompt.trim();
-        }
-
-        // --- Setup and Event Handlers ---\
-        const proficiencySelect = document.getElementById('select-proficiency');
-        const toneSelect = document.getElementById('select-tone');
-        const levelSnippetDisplay = document.getElementById('level-snippet-display');
-        const toneSnippetDisplay = document.getElementById('tone-snippet-display');
-        const fullPromptDisplayArea = document.getElementById('full-prompt-display-area'); // Changed ID slightly
-
-        // Populate dropdowns
-        proficiencyLevels.forEach(level => {
-            const option = document.createElement('option');
-            option.value = level;
-            option.textContent = level;
-            proficiencySelect.appendChild(option);
-        });
-
-        toneLevels.forEach(tone => {
-            const option = document.createElement('option');
-            option.value = tone.toString();
-            option.textContent = tone.toString();
-            toneSelect.appendChild(option);
-        });
-
-        // Update display function
-        function updateDisplay() {
-            const selectedLevel = proficiencySelect.value;
-            const selectedTone = parseInt(toneSelect.value, 10);
-
-            levelSnippetDisplay.textContent = levelSnippets[selectedLevel] || 'N/A';
-            toneSnippetDisplay.textContent = toneSnippets[selectedTone] || 'N/A';
-
-            const fullPrompt = reconstructPrompt(selectedLevel, selectedTone);
-            fullPromptDisplayArea.textContent = fullPrompt; // Update correct element
-        }
-
-        // Add event listeners
-        proficiencySelect.addEventListener('change', updateDisplay);
-        toneSelect.addEventListener('change', updateDisplay);
-
-        // Initial load
-        updateDisplay();
-
-    </script>
-
 </body>
 </html> 

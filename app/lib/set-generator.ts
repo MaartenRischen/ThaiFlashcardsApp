@@ -534,32 +534,53 @@ function buildGenerationPrompt(
 
   3.  **TONE Implementation (${toneLevel.toString()}):** (Context, Theme, Style) - THIS IS EQUALLY CRITICAL.
       *   **Tone Style Guide (1-10):**
-          - Level 1 (Serious): Content is purely practical, serious, and focused on essential communication. No humor. Examples are textbook-style, descriptive.
-          - Level 2 (Serious + Hint of Levity): Overwhelmingly practical and serious, but allows for very subtle, occasional hints of mild humor or slightly less formal phrasing.
-          - Level 3 (Practical + Emerging Fun): Still primarily practical, but humor and playful elements become more noticeable. Examples can describe slightly amusing but plausible situations.
-          - Level 4 (Playful Practicality): A clear blend. Content remains practical but is presented with noticeable humor, wit, or lightheartedness. Examples are often amusing but grounded.
-          - Level 5 (Balanced Absurdity): Equal mix of potentially practical phrases and concepts introducing illogical or surreal elements. Examples start describing impossible or highly improbable scenarios.
-          - Level 6 (Leaning Weird): Practicality decreases. Phrases might be useful but are often presented in bizarre or nonsensical contexts. Examples increasingly defy logic/physics.
-          - Level 7 (Strongly Bizarre): Usefulness is secondary. Most content involves bizarre situations, surreal humor, or strange concepts. Examples are highly imaginative and illogical.
-          - Level 8 (Reality Bending): Usefulness is minimal. Content focuses on semantically strange but grammatically correct statements. Examples should feel like coherent fever dreams, questioning reality.
-          - Level 9 (Chaos): Usefulness is almost non-existent. Content is intentionally chaotic, nonsensical, or paradoxical. Examples aim for existential absurdity. Mnemonic utility is secondary.
-          - Level 10 (Maximum Absurdity): Content is pure brain-melting madness, surrealism, and non-sequiturs, while maintaining grammatical structure. Examples should be maximally bizarre and nonsensical. Mnemonic utility is secondary.
+          - Level 1: Content is purely practical, serious, and focused on essential communication. No humor. Examples are textbook-style, descriptive. Mnemonics must be practical and directly aid recall.
+          - Level 2: Overwhelmingly practical and serious, but allows for very subtle, occasional hints of mild humor or slightly less formal phrasing. Mnemonics are practical, with a touch of creativity.
+          - Level 3: Still primarily practical, but humor and playful elements become more noticeable. Examples can describe slightly amusing but plausible situations. Mnemonics can be a bit more playful.
+          - Level 4: A clear blend. Content remains practical but is presented with noticeable humor, wit, or lightheartedness. Examples are often amusing but grounded. Mnemonics are creative and memorable.
+          - Level 5: Equal mix of potentially practical phrases and concepts introducing illogical or surreal elements. Examples start describing impossible or highly improbable scenarios. Mnemonics can be bizarre but should still help memory.
+          - Level 6: Practicality decreases. Phrases might be useful but are often presented in bizarre or nonsensical contexts. Examples increasingly defy logic/physics. Mnemonics can be strange and imaginative.
+          - Level 7: Usefulness is secondary. Most content involves bizarre situations, surreal humor, or strange concepts. Examples are highly imaginative and illogical. Mnemonics can be very weird, with recall utility being less important.
+          - Level 8: Usefulness is minimal. Content focuses on semantically strange but grammatically correct statements. Examples should feel like fever dreams, questioning reality. Mnemonics can be chaotic and nonsensical.
+          - Level 9: Usefulness is almost non-existent. Content is intentionally chaotic, nonsensical, or paradoxical. Examples aim for existential absurdity. Mnemonic utility is secondary and can be completely random.
+          - Level 10: Content is pure brain-melting madness, surrealism, and non-sequiturs, while maintaining grammatical structure. Examples should be maximally bizarre and nonsensical. Mnemonics can be pure chaos, with no requirement for recall utility.
 
       *   **Content Guidelines by Component:**
           - **Main Phrases:** 
-            * Levels 1-4: Must be actually useful Thai descriptive phrases, NO dialogues or questions
-            * Levels 5-7: Can be real descriptive phrases in completely wrong contexts
-            * Levels 8-10: Can be grammatically correct but semantically insane descriptive statements
+            * Level 1: Must be actually useful Thai descriptive phrases, NO dialogues or questions
+            * Level 2: Practical phrases, very subtle levity allowed
+            * Level 3: Practical phrases, emerging fun/humor
+            * Level 4: Playful practicality, noticeable humor
+            * Level 5: Mix of practical and illogical, some absurdity
+            * Level 6: Bizarre contexts, practicality decreases
+            * Level 7: Surreal humor, usefulness is secondary
+            * Level 8: Semantically strange, reality-bending
+            * Level 9: Chaotic, nonsensical, reality-breaking
+            * Level 10: Maximum chaos, pure surrealism
 
           - **Example Sentences:** 
-            * Levels 1-4: Progress from textbook descriptive examples to slightly amusing situations, NO dialogues
-            * Levels 5-7: Start breaking laws of physics and logic in descriptive statements
-            * Levels 8-10: Should read like fever dreams written by an AI on LSD, but still in statement form
+            * Level 1: Textbook descriptive examples, no dialogues
+            * Level 2: Practical, very subtle humor
+            * Level 3: Practical, slightly amusing situations
+            * Level 4: Amusing but grounded
+            * Level 5: Impossible or improbable scenarios
+            * Level 6: Breaking laws of physics/logic
+            * Level 7: Highly imaginative, illogical
+            * Level 8: Fever dream-like, questioning reality
+            * Level 9: Existential absurdity
+            * Level 10: Maximally bizarre, nonsensical
 
           - **Mnemonics:** 
-            * Levels 1-4: Focus on memorability with increasing creativity
-            * Levels 5-7: Can be bizarre but should somehow still help memory
-            * Levels 8-10: Pure chaos that accidentally might help remember
+            * Level 1: Focus on memorability, practical
+            * Level 2: Practical, touch of creativity
+            * Level 3: Playful, still aids recall
+            * Level 4: Creative and memorable
+            * Level 5: Bizarre but should help memory
+            * Level 6: Strange and imaginative
+            * Level 7: Very weird, recall utility less important
+            * Level 8: Chaotic, nonsensical
+            * Level 9: Completely random, utility is secondary
+            * Level 10: Pure chaos, no requirement for recall utility
 
       *   **Example Outputs by Level:**
           - Level 1 (Dead Serious):

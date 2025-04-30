@@ -68,7 +68,6 @@ export interface CustomSet {
 
 // Configuration constants
 const MAX_RETRIES = 3;
-const BATCH_SIZE = 8;
 
 // Prioritized list of text models for set generation
 export const TEXT_MODELS = [
@@ -79,6 +78,15 @@ export const TEXT_MODELS = [
   'anthropic/claude-3-opus', // Anthropic Claude
   'mistralai/mixtral-8x7b', // Other fallback
 ];
+
+// Dynamic batch size based on model capabilities
+function getBatchSize(model: string): number {
+  switch (model) {
+    case 'google/gemini-2.5-flash-preview': return 8;
+    case 'openai/gpt-4': return 4;
+    default: return 3;
+  }
+}
 
 // Common word variations mapping - Expanded
 const COMMON_VARIATIONS: Record<string, string> = {
@@ -843,28 +851,24 @@ export async function generateCustomSet(
   onProgressUpdate?: (progress: { completed: number, total: number, latestPhrases?: Phrase[] }) => void
 ): Promise<GenerationResult> {
   try {
-    // Initialize progress right away
     if (onProgressUpdate) {
       onProgressUpdate({ completed: 0, total: totalCount });
     }
-    
     console.log(`Starting card generation (OpenRouter): ${totalCount} total cards requested with preferences:`, preferences);
-    
-    // Define our batch size
-    const batchSize = BATCH_SIZE;
-    const batchesNeeded = Math.ceil(totalCount / batchSize);
-    
+
+    // Use the first model as the primary for batch sizing
+    let modelIndex = 0;
+    let currentModel = TEXT_MODELS[modelIndex];
+    let batchSize = getBatchSize(currentModel);
+    let batchesNeeded = Math.ceil(totalCount / batchSize);
+
     const aggregatedErrors: (BatchError & { batchIndex: number })[] = [];
     const allPhrases: Phrase[] = [];
     let cleverTitle: string | undefined;
-    
-    // Prepare the fallback data early so it's ready if needed
     const fallbackPhrases = INITIAL_PHRASES.slice(0, totalCount);
 
-    // Loop through batches
     for (let i = 0; i < batchesNeeded; i++) {
       try {
-        // Update progress immediately with batch attempt
         if (onProgressUpdate) {
           onProgressUpdate({ 
             completed: allPhrases.length, 
@@ -872,96 +876,79 @@ export async function generateCustomSet(
             latestPhrases: allPhrases.slice(-3)
           });
         }
-        
-        // Calculate how many phrases we still need
         const remaining = totalCount - allPhrases.length;
+        // Always use the current model for batch size
+        batchSize = getBatchSize(currentModel);
         const countForBatch = Math.min(remaining, batchSize);
-        
-        // If we already have enough phrases, break early
         if (remaining <= 0) break;
-        
-        // Build prompt for this batch
         const existingPhrasesMeanings = allPhrases.map(p => p.english);
         const prompt = buildGenerationPrompt("", {
           ...preferences,
           count: countForBatch,
           existingPhrases: existingPhrasesMeanings,
         });
-        
-        // Generate batch
         let retries = 0;
         let batchResult: { phrases: Phrase[], cleverTitle?: string, error?: BatchError } | null = null;
-        
         // Try OpenRouter models first
         while (retries < MAX_RETRIES) {
           try {
+            currentModel = TEXT_MODELS[modelIndex];
+            batchSize = getBatchSize(currentModel);
             batchResult = await generateOpenRouterBatch(
               prompt, 
-              TEXT_MODELS,
+              [currentModel], // Only use the current model for this batch
               i
             );
-            
-            // If got results, break out of retry loop
             if (batchResult.phrases.length > 0 || !batchResult.error) {
               break;
             } 
-            
-            // Got an error but still want to retry
             console.error(`Batch ${i} attempt ${retries + 1} failed: ${batchResult.error?.message}`);
             retries++;
-            
-            // Short pause before retry
+            // On retry, try the next model in the list
+            if (modelIndex < TEXT_MODELS.length - 1) {
+              modelIndex++;
+            }
+            currentModel = TEXT_MODELS[modelIndex];
+            batchSize = getBatchSize(currentModel);
             await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
           } catch (error) {
             console.error(`Unexpected error in batch ${i} attempt ${retries + 1}:`, error);
             retries++;
-            
-            // Short pause before retry
+            if (modelIndex < TEXT_MODELS.length - 1) {
+              modelIndex++;
+            }
+            currentModel = TEXT_MODELS[modelIndex];
+            batchSize = getBatchSize(currentModel);
             await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
           }
         }
-        
-        // Process batch results
         if (batchResult) {
-          // Save clever title from first batch if available
           if (i === 0 && batchResult.cleverTitle) {
             cleverTitle = batchResult.cleverTitle;
           }
-          
-          // Add phrases to our collection
           if (batchResult.phrases.length > 0) {
             allPhrases.push(...batchResult.phrases);
           }
-          
-          // Store any errors
           if (batchResult.error) {
             aggregatedErrors.push({
               ...batchResult.error,
               batchIndex: i
             });
-            
-            // Log batch failure after retries
             if (retries >= MAX_RETRIES) {
               console.error(`Batch ${i} failed after ${retries} retries. Aborting further generation.`);
             }
           }
         }
-        
-        // Update progress after batch completion
         if (onProgressUpdate) {
-          // Calculate completion based on phrases successfully generated
           const progressPercentage = Math.min(
             Math.floor((allPhrases.length / totalCount) * 100), 
             100
           );
-          
-          // Update with the completed batch results
           onProgressUpdate({ 
             completed: allPhrases.length, 
             total: totalCount,
             latestPhrases: batchResult?.phrases || []
           });
-          
           console.log(`Batch ${i} complete. Progress: ${progressPercentage}% (${allPhrases.length}/${totalCount} cards)`);
         }
       } catch (error) {
@@ -971,7 +958,6 @@ export async function generateCustomSet(
           `Unhandled error in batch ${i}: ${error instanceof Error ? error.message : String(error)}`,
           { error }
         );
-        
         aggregatedErrors.push({
           ...batchError,
           batchIndex: i,

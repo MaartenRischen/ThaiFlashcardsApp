@@ -9,6 +9,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from "sonner"
 import { initializeApp } from './lib/init'
 import { FeedbackFooterClient } from "./components/FeedbackFooterClient";
+import { FeedbackProvider } from "./context/FeedbackContext";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -58,26 +59,28 @@ export default function RootLayout({
           <Tooltip.Provider>
           <Providers>
             <SetProvider>
-              <Navbar />
-              <main className="main-content min-h-screen relative">
-                {children}
-                {/* Temporary Dev Buttons */}
-                <div className="fixed bottom-4 left-4 flex gap-2 opacity-50 hover:opacity-100 transition-opacity">
-                  <a 
-                    href="/test-variations" 
-                    className="px-3 py-1 bg-purple-900/50 hover:bg-purple-800/50 text-purple-200 text-xs rounded-full border border-purple-700/30"
-                  >
-                    Test Variations
-                  </a>
-                  <a 
-                    href="/generation_logic_visualization.html" 
-                    className="px-3 py-1 bg-blue-900/50 hover:bg-blue-800/50 text-blue-200 text-xs rounded-full border border-blue-700/30"
-                  >
-                    Logic Visualization
-                  </a>
-                </div>
-              </main>
-              <FeedbackFooterClient />
+              <FeedbackProvider>
+                <Navbar />
+                <main className="main-content min-h-screen relative">
+                  {children}
+                  {/* Temporary Dev Buttons */}
+                  <div className="fixed bottom-4 left-4 flex gap-2 opacity-50 hover:opacity-100 transition-opacity">
+                    <a 
+                      href="/test-variations" 
+                      className="px-3 py-1 bg-purple-900/50 hover:bg-purple-800/50 text-purple-200 text-xs rounded-full border border-purple-700/30"
+                    >
+                      Test Variations
+                    </a>
+                    <a 
+                      href="/generation_logic_visualization.html" 
+                      className="px-3 py-1 bg-blue-900/50 hover:bg-blue-800/50 text-blue-200 text-xs rounded-full border border-blue-700/30"
+                    >
+                      Logic Visualization
+                    </a>
+                  </div>
+                </main>
+                <FeedbackFooterClient />
+              </FeedbackProvider>
             </SetProvider>
           </Providers>
           </Tooltip.Provider>

@@ -1,18 +1,23 @@
 "use client";
 import { useState } from "react";
 import { FeedbackModal } from "./FeedbackModal";
+import { useFeedback } from "../context/FeedbackContext";
+import { useUser } from "@clerk/nextjs";
 
 export function FeedbackFooterClient() {
-  const [isFeedbackOpen, setFeedbackOpen] = useState(false);
+  const { isFeedbackOpen, openFeedbackModal, closeFeedbackModal } = useFeedback();
+  const { user } = useUser();
   const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [includeConsoleLogs, setIncludeConsoleLogs] = useState(false);
   const [includeGenerationDetails, setIncludeGenerationDetails] = useState(false);
 
   const handleFeedbackSubmit = async (feedback: string) => {
     setFeedbackStatus('idle');
+    const username = user?.username || user?.firstName || 'anonymous';
     try {
       const payload = {
         feedback,
+        username,
         includeConsoleLogs,
         includeGenerationDetails,
       };
@@ -25,7 +30,7 @@ export function FeedbackFooterClient() {
       if (res.ok) {
         setFeedbackStatus('success');
         setTimeout(() => {
-          setFeedbackOpen(false);
+          closeFeedbackModal();
           setFeedbackStatus('idle');
         }, 1500);
       } else {
@@ -43,7 +48,7 @@ export function FeedbackFooterClient() {
           This is a <span className="bg-blue-500 text-white rounded-full px-2 py-0.5 font-bold mx-1">Beta</span> version, 100% free to use. If you could take a minute to give us your unbridled feedback in return, we would massively appreciate that.
         </span>
         <button
-          onClick={() => setFeedbackOpen(true)}
+          onClick={openFeedbackModal}
           className="mt-3 px-4 py-1 rounded bg-blue-600 text-white font-bold hover:bg-blue-500 transition text-xs md:text-sm shadow"
         >
           Give Feedback
@@ -51,7 +56,7 @@ export function FeedbackFooterClient() {
       </div>
       <FeedbackModal
         isOpen={isFeedbackOpen}
-        onClose={() => { setFeedbackOpen(false); setFeedbackStatus('idle'); }}
+        onClose={() => { closeFeedbackModal(); setFeedbackStatus('idle'); }}
         onSubmit={handleFeedbackSubmit}
         status={feedbackStatus}
         includeConsoleLogs={includeConsoleLogs}

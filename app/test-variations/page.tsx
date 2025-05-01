@@ -85,6 +85,14 @@ export default function TestVariations() {
   const [generateAllLevels, setGenerateAllLevels] = useState(false);
   const [generateAllTones, setGenerateAllTones] = useState(false);
 
+  // State for toggling element visibility
+  const [showEnglish, setShowEnglish] = useState(true);
+  const [showThai, setShowThai] = useState(true);
+  const [showPronunciation, setShowPronunciation] = useState(true);
+  const [showMnemonic, setShowMnemonic] = useState(true);
+  const [showContext, setShowContext] = useState(true);
+  const [showSettings, setShowSettings] = useState(true);
+
   // Calculate the number of cards to be generated based on selections
   const numCardsToGenerate = useMemo(() => {
     if (generateAllLevels && generateAllTones) {
@@ -539,41 +547,62 @@ export default function TestVariations() {
         </div>
       )}
 
+      {/* Visibility Toggles */}
+      <div className="mt-6 p-4 bg-gray-800 rounded-lg mb-4">
+        <h3 className="text-lg font-medium mb-3 text-gray-300">Show/Hide Card Elements:</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[ 
+            { label: 'English', state: showEnglish, setter: setShowEnglish },
+            { label: 'Thai', state: showThai, setter: setShowThai },
+            { label: 'Pronunciation', state: showPronunciation, setter: setShowPronunciation },
+            { label: 'Mnemonic', state: showMnemonic, setter: setShowMnemonic },
+            { label: 'Context', state: showContext, setter: setShowContext },
+            { label: 'Settings', state: showSettings, setter: setShowSettings },
+          ].map(({ label, state, setter }) => (
+            <label key={label} className="flex items-center space-x-2 text-sm text-gray-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={state}
+                onChange={(e) => setter(e.target.checked)}
+                className="accent-blue-500"
+              />
+              <span>{label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredAndSortedCards.map((card, index) => (
-          <div 
-            key={index}
-            className="bg-[#2a2a2a] rounded-lg p-3 border border-gray-700 space-y-2 flex flex-col justify-between"
-          >
+          <div key={index} className="bg-gray-800 p-4 rounded-lg border border-gray-700">
             <div className="space-y-1">
-              <p className="text-base text-white">{card.thai}</p>
-              <p className="text-sm text-gray-400">{card.english}</p>
-              <p className="text-xs text-gray-300 italic">{card.pronunciation}</p>
-              {card.mnemonic && (
+              {showThai && <p className="text-base text-white">{card.thai}</p>}
+              {showEnglish && <p className="text-sm text-gray-400">{card.english}</p>}
+              {showPronunciation && <p className="text-xs text-gray-300 italic">{card.pronunciation}</p>}
+              {showMnemonic && card.mnemonic && (
                 <p className="text-xs text-yellow-500/70 italic mt-1">
                   Mnemonic: {card.mnemonic}
                 </p>
               )}
             </div>
-
-            <div className="mt-2 text-xs space-y-1">
-              <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                <span className="text-blue-400">L: {card.settings.proficiency}</span>
-                <span className="text-purple-400">T: {card.settings.tone} ({getToneDescription(card.settings.tone)})</span>
-                <span className="text-yellow-400">Topic: {card.settings.topic}</span>
+            {showContext && card.examples && card.examples.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-gray-700 space-y-1 text-xs">
+                <p className="text-gray-400 font-medium">Context (Example 1):</p>
+                <p className="text-white">{card.examples[0].thai}</p>
+                <p className="text-gray-300 italic">{card.examples[0].pronunciation}</p>
+                <p className="text-gray-400">({card.examples[0].translation})</p>
               </div>
-              <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                <span className="text-green-400">Model: {card.settings.llmModel || '-'}</span>
-                <span className="text-pink-400">Temp: {card.settings.temperature !== undefined ? card.settings.temperature.toFixed(2) : 'N/A'}</span>
-                <span className="text-orange-400">Time: {card.settings.generationTime ? (card.settings.generationTime / 1000).toFixed(2) + 's' : '-'}</span>
+            )}
+            {showSettings && (
+              <div className="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-500 space-y-1">
+                <p><span className="font-medium text-gray-400">Proficiency:</span> {card.settings.proficiency}</p>
+                <p><span className="font-medium text-gray-400">Tone:</span> {card.settings.tone} ({getToneDescription(card.settings.tone)})</p>
+                <p><span className="font-medium text-gray-400">Topic:</span> {card.settings.topic}</p>
+                <p><span className="font-medium text-gray-400">Model:</span> {card.settings.llmModel || 'N/A'}</p>
+                <p><span className="font-medium text-gray-400">Temp:</span> {card.settings.temperature?.toFixed(2) || 'N/A'}</p>
+                <p><span className="font-medium text-gray-400">Time:</span> {card.settings.generationTime ? `${(card.settings.generationTime / 1000).toFixed(2)}s` : 'N/A'}</p>
               </div>
-            </div>
-            <div className="mt-2 text-xs text-gray-300">
-              <strong>Examples:</strong>
-              {card.examples.map((ex, idx) => (
-                <div key={idx}>{ex.thai} ({ex.translation})</div>
-              ))}
-            </div>
+            )}
           </div>
         ))}
       </div>

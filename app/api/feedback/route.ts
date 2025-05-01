@@ -6,7 +6,7 @@ const FEEDBACK_FILE = path.join(process.cwd(), 'feedback.json');
 
 export async function POST(req: NextRequest) {
   try {
-    const { feedback, includeConsoleLogs, includeGenerationDetails } = await req.json();
+    const { feedback, username, includeConsoleLogs, includeGenerationDetails } = await req.json();
     if (!feedback || typeof feedback !== 'string') {
       return NextResponse.json({ error: 'Invalid feedback' }, { status: 400 });
     }
@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
     // Append new feedback
     feedbackList.push({
       feedback,
+      username: username || 'anonymous',
       includeConsoleLogs: !!includeConsoleLogs,
       includeGenerationDetails: !!includeGenerationDetails,
       timestamp: new Date().toISOString(),

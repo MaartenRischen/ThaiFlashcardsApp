@@ -6,7 +6,6 @@ import GallerySetCard from './GallerySetCard';
 import { GalleryHorizontal, Loader2 } from 'lucide-react';
 // Import a modal component (we'll create this next)
 import CardViewerModal from './CardViewerModal';
-import { useUser } from '@clerk/nextjs';
 
 interface GallerySet {
   id: string;

@@ -13,7 +13,6 @@ import { INITIAL_PHRASES } from '@/app/data/phrases';
 // import { generateImage } from '@/app/lib/ideogram-service'; // Removed unused import
 // import { prisma } from "@/app/lib/prisma"; // Removed unused import
 // import { uploadImageFromUrl } from '../../lib/imageStorage'; // Removed unused import
-import { Prisma } from '@prisma/client'; // Import Prisma client types
 
 // Debug environment variables - this will help diagnose Railway issues
 console.log('API Route Environment Variables:');
@@ -26,14 +25,6 @@ console.log('- NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL);
 console.log('DEBUG: DATABASE_URL in generate-set route:', process.env.DATABASE_URL);
 // Add more detailed debug logging for Ideogram key
 console.log('DEBUG: IDEOGRAM_API_KEY first 10 chars:', process.env.IDEOGRAM_API_KEY ? process.env.IDEOGRAM_API_KEY.substring(0, 10) + '...' : 'undefined');
-
-// Define only the types we actually use
-interface RequestBody {
-  preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>;
-  totalCount: number;
-  isTestRequest?: boolean;
-  forcedModel?: string;
-}
 
 // Placeholder Thailand images (use existing project images)
 const PLACEHOLDER_IMAGES = [

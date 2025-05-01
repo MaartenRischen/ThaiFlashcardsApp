@@ -1,11 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { GeneratePromptOptions, Phrase } from '../lib/set-generator';
-import { Checkbox } from "@/components/ui/checkbox"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 
 // Define all possible proficiency levels
 const PROFICIENCY_LEVELS = [
@@ -68,32 +64,6 @@ interface GenerationTask {
   count?: number; // Add back count for single task mode
 }
 
-// Pool of truly bizarre, surreal, and unexpected scenarios
-const weirdScenariosPool = [
-  'Convincing a cloud to pay its taxes',
-  'Negotiating a peace treaty between socks and shoes',
-  'Explaining existential dread to a potato',
-  'Hosting a cooking show for invisible guests',
-  'Arguing with your own shadow about quantum mechanics',
-  'Teaching a goldfish to use a smartphone',
-  'Applying for a job as a professional echo',
-  'Debating the ethics of time travel with a traffic cone',
-  'Translating whale song for a committee of bees',
-  'Filing a noise complaint against the concept of silence',
-  // ... Add more weird scenarios as needed
-];
-
-function getRandomWeirdScenarios(count: number, exclude: string[] = []) {
-  const pool = weirdScenariosPool.filter(s => !exclude.includes(s));
-  const selected: string[] = [];
-  while (selected.length < count && pool.length > 0) {
-    const idx = Math.floor(Math.random() * pool.length);
-    selected.push(pool[idx]);
-    pool.splice(idx, 1);
-  }
-  return selected;
-}
-
 export default function TestVariations() {
   const [cards, setCards] = useState<TestCard[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -136,7 +106,7 @@ export default function TestVariations() {
     const selectedModel = LLM_MODELS[currentModel];
 
     // Determine generation tasks based on checkboxes
-    let tasks: GenerationTask[] = [];
+    const tasks: GenerationTask[] = [];
     if (generateAllLevels && generateAllTones) {
       // All combinations (60 tasks)
       PROFICIENCY_LEVELS.forEach((level, levelIndex) => {
@@ -276,13 +246,6 @@ export default function TestVariations() {
       case 10: return 'Maximum Chaos & Hilarity';
       default: return '';
     }
-  };
-
-  const formatTime = (ms: number): string => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   // Filter and Sort Logic

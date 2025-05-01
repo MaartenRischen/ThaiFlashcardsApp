@@ -1289,17 +1289,42 @@ export async function generateOpenRouterBatch(
     }
     const validatedPhrases: Phrase[] = [];
     const validationErrors: string[] = [];
-    for (const phraseData of parsedResponse.phrases) {
-      if (validatePhrase(phraseData, validatedPhrases)) {
-         const validatedPhrase = phraseData as Phrase;
-         if (validatedPhrase.mnemonic === null) {
-            validatedPhrase.mnemonic = undefined;
-         }
-         validatedPhrases.push(validatedPhrase);
-      } else {
-        validationErrors.push(`Invalid phrase structure: ${JSON.stringify(phraseData).substring(0, 100)}...`);
-      }
+
+    // Determine semantic check requirement based on tone level
+    const tone = toneLevel ?? 5; // Default to 5 if undefined
+    let performSemanticCheck: 'strict' | 'none' = 'none';
+    if (tone >= 1 && tone <= 6) {
+      performSemanticCheck = 'strict';
     }
+    // No 'partial' for now, treat 7+ as 'none'
+
+    for (const phraseData of parsedResponse.phrases) {
+      // Basic structural validation
+      if (!validatePhrase(phraseData, validatedPhrases)) {
+        validationErrors.push(`Invalid phrase structure: ${JSON.stringify(phraseData).substring(0, 100)}...`);
+        continue; // Skip to next phrase if basic structure fails
+      }
+
+      // Semantic Check (if required by tone)
+      if (performSemanticCheck === 'strict') {
+        // Placeholder for actual semantic check logic
+        // For now, we assume it passes if basic validation passed.
+        // TODO: Implement actual semantic validation (e.g., keyword checks, LLM call?)
+        const isSemanticallyValid = true; // Replace with actual check
+        if (!isSemanticallyValid) {
+          validationErrors.push(`Failed semantic check (Tone ${tone}): ${JSON.stringify(phraseData).substring(0, 100)}...`);
+          continue; // Skip semantically invalid phrases for strict tones
+        }
+      }
+
+      // If passes all checks, add it
+      const validatedPhrase = phraseData as Phrase;
+      if (validatedPhrase.mnemonic === null) {
+         validatedPhrase.mnemonic = undefined;
+      }
+      validatedPhrases.push(validatedPhrase);
+    }
+
     if (validationErrors.length > 0) {
        console.warn(`Validation errors in batch ${batchIndex}:`, validationErrors);
       if (validatedPhrases.length === 0) {

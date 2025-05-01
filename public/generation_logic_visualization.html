@@ -294,65 +294,97 @@ async function storeGeneratedSet(userId: string, set: CustomSet) {
     </div>
 
     <div class="section">
-        <h2>5. Prompt Structure</h2>
+        <h2>5. Proficiency Level Implementation Rules</h2>
         <div class="implementation-note">
-            ⚠️ Note: Prompt includes dynamic components based on tone level and proficiency.
+            ⚠️ Note: These rules are strictly enforced during generation to tailor vocabulary, grammar, and complexity.
         </div>
-
-        <h3>Core Components</h3>
-        <ol>
-            <li>Task Context & Requirements
-                <ul>
-                    <li>AI role definition</li>
-                    <li>Critical requirements (Level & Tone)</li>
-                    <li>User preferences</li>
-                </ul>
-            </li>
-            <li>Detailed Instructions
-                <ul>
-                    <li>Set title generation rules</li>
-                    <li>Proficiency level implementation</li>
-                    <li>Tone level implementation</li>
-                    <li>Topic/situation control</li>
-                    <li>Duplicate prevention</li>
-                </ul>
-            </li>
-            <li>Output Schema
-                <ul>
-                    <li>JSON structure definition</li>
-                    <li>Interface specifications</li>
-                    <li>Validation requirements</li>
-                </ul>
-            </li>
-        </ol>
-
-        <h3>Dynamic Elements</h3>
-    <table>
-            <tr>
-                <th>Component</th>
-                <th>Dynamic Factors</th>
-                <th>Implementation Notes</th>
-            </tr>
-            <tr>
-                <td>Example Generation</td>
-                <td>Tone Level + Proficiency</td>
-                <td>Examples match both complexity and absurdity level</td>
-            </tr>
-            <tr>
-                <td>Mnemonic Rules</td>
-                <td>Tone Level</td>
-                <td>Balance between memorability and tone-appropriate style</td>
-            </tr>
-            <tr>
-                <td>Validation Rules</td>
-                <td>Proficiency Level</td>
-                <td>Strict enforcement of level-appropriate complexity</td>
-            </tr>
+        <table>
+            <thead>
+                <tr>
+                    <th>Proficiency Level</th>
+                    <th>Description & Constraints</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Complete Beginner</td>
+                    <td>Use ONLY single words or two-word combinations (noun+verb or noun+adjective). Focus on the absolute most basic, high-frequency vocabulary. Examples must be single-word or two-word statements only. NO questions, NO dialogues, NO complex structures.</td>
+                </tr>
+                <tr>
+                    <td>Basic Understanding</td>
+                    <td>Use short, practical phrases (2-4 words). Focus on basic S-V-O structures and common expressions for everyday needs. Simple questions are okay. Avoid dialogues. Examples should be basic descriptive statements about daily life.</td>
+                </tr>
+                <tr>
+                    <td>Intermediate</td>
+                    <td>Use medium-length descriptive sentences (4-7 words). Include basic compound structures and typical vocabulary for common situations. Simple questions and compound sentences are okay. Avoid dialogues. Examples should describe everyday situations.</td>
+                </tr>
+                <tr>
+                    <td>Advanced</td>
+                    <td>Use moderately complex sentences (7-12 words). Include varied grammar structures and more nuanced vocabulary. Complex questions and compound-complex sentences are okay. Avoid dialogues. Examples should demonstrate natural Thai expression.</td>
+                </tr>
+                <tr>
+                    <td>Native/Fluent</td>
+                    <td>Use natural, idiomatic Thai (any appropriate length). Include slang, cultural references, and educated native speech patterns. Complex questions and varied sentence structures are encouraged. Avoid dialogues. Examples should sound like authentic Thai.</td>
+                </tr>
+                <tr>
+                    <td>God Mode</td>
+                    <td>Use sophisticated, elaborate Thai (extended length). Include rare vocabulary, advanced grammar patterns, and literary/academic language. Complex questions and varied structures are encouraged. Avoid dialogues. Examples should demonstrate mastery of formal and literary Thai.</td>
+                </tr>
+            </tbody>
         </table>
     </div>
 
     <div class="section">
-        <h2>6. Generation Parameters</h2>
+        <h2>6. Prompt Structure (Simplified)</h2>
+        <div class="implementation-note">
+            ⚠️ Note: This shows the main sections of the prompt sent to the LLM. The actual prompt includes dynamically injected preferences and detailed rule sets for Tone and Proficiency.
+        </div>
+        <div class="code">
+You are an expert AI assistant specialized in creating language learning flashcards...
+
+**CRITICAL TASK REQUIREMENTS:**
+- Adhere STRICTLY to Proficiency Level: \${level}
+- Adhere STRICTLY to Tone Level: \${toneLevel}
+- ...
+
+**User Preferences:**
+- Proficiency Level: \${level}
+- Tone Level: \${toneLevel}
+- Situations for Use: \${topicsToDiscuss || 'General conversation'}
+- Specific Focus: \${specificTopics || 'None'}
+
+**DETAILED INSTRUCTIONS:**
+
+1.  **Set Title:** (Rules for generating title based on user topics)
+
+2.  **Proficiency Level Implementation (\${level}):** 
+    *   \${selectedLevelDescription} // Inject specific rules here
+
+3.  **TONE Implementation (\${toneLevel}):** 
+    *   Tone Style Guide (Detailed rules for levels 1-10)
+    *   Content Guidelines by Component (Phrases, Examples, Mnemonics)
+    *   Example Outputs by Level
+    *   Key Rules (e.g., maintain grammar, level constraints)
+
+4.  **Topic/Situation Control:** (Instructions on focusing content)
+
+5.  **Avoid Duplicates:** (Instructions to avoid generating existing phrases: \${existingPhrases})
+
+**Output Format:**
+Generate a JSON object containing "cleverTitle" and "phrases".
+- "cleverTitle": (Rules)
+- "phrases": An array containing exactly \${count} unique flashcard objects...
+  \`\`\`typescript
+  interface Phrase { ... } // Full interface definition
+  interface ExampleSentence { ... } // Full interface definition
+  \`\`\`
+  CRITICAL: Each phrase MUST include at least 2 example sentences...
+  Ensure the entire response is ONLY the JSON object...
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>7. Generation Parameters</h2>
         <div class="implementation-note">
             ⚠️ Note: Parameters are dynamically adjusted based on multiple factors.
         </div>
@@ -388,40 +420,65 @@ async function storeGeneratedSet(userId: string, set: CustomSet) {
     </div>
 
     <div class="section">
-        <h2>7. Validation System</h2>
+        <h2>8. Validation System</h2>
         <div class="implementation-note">
-            ⚠️ Note: Comprehensive validation system with tone-aware rules.
+            ⚠️ Note: Validation checks structure, content, and semantics (based on tone).
         </div>
 
-        <h3>Validation Rules</h3>
-        <div class="code">
-interface ValidationRules {
-    // Structure validation
-    requiredFields: string[];
-    typeChecks: Record<string, string>;
-    
-    // Content validation
-    minExamples: number;
-    maxPhraseLength: Record<string, number>;
-    requireMnemonic: boolean;
-    
-    // Tone-specific rules
-    allowedContexts: string[];
-    semanticChecks: boolean;
-    grammarChecks: boolean;
-}
+        <h3>Validation Steps & Tone Logic</h3>
+        <ol>
+            <li><strong>Structure & Content Validation:</strong> Checks if required fields exist (<code>english</code>, <code>thai</code>, etc.), data types are correct, and minimum example count (>=2) is met. Checks basic mnemonic quality. Performed on all tones.</li>
+            <li><strong>Duplicate Check:</strong> Normalizes and compares the <code>english</code> phrase against existing phrases in the batch to prevent duplicates. Performed on all tones.</li>
+            <li>
+                <strong>Semantic Validation (Tone-Dependent):</strong> Checks if the generated content makes logical sense.
+                <ul>
+                    <li><strong>Tones 1-6 (Strict):</strong> Semantic checks are performed. Illogical or nonsensical phrases/examples should be rejected. (<em>Code currently has placeholder - assumes pass</em>).</li>
+                    <li><strong>Tones 7-8 (Partial):</strong> Semantic checks are currently <strong>skipped</strong> (treated as 'none').</li>
+                    <li><strong>Tones 9-10 (None):</strong> Semantic checks are skipped, allowing absurd or nonsensical (but grammatically correct) content.</li>
+                </ul>
+            </li>
+        </ol>
 
-// Rule sets vary by tone level
-const validationRules: Record<number, ValidationRules> = {
-    1: { strict: true, semanticChecks: true, ... },
-    5: { strict: false, semanticChecks: partial, ... },
-    10: { strict: false, semanticChecks: false, ... }
-};
+        <div class="warning">
+            <strong>Current Implementation Status:</strong> The codebase includes the *structure* for tone-dependent semantic validation, but the actual semantic check logic for Tones 1-6 is currently a placeholder and always passes. Further implementation is needed for full semantic validation.
+        </div>
+
+        <div class="code">
+// Example of how rules *might* be represented (Conceptual)
+ interface ValidationRules {
+     // Structure validation
+     requiredFields: string[];
+     typeChecks: Record<string, string>;
+     
+     // Content validation
+     minExamples: number;
+     // maxPhraseLength: Record<string, number>; // Not currently implemented based on tone
+     // requireMnemonic: boolean; // Quality checked instead
+     
+     // Tone-specific rules
+     // allowedContexts: string[]; // Handled by semanticChecks
+     semanticChecks: 'strict' | 'partial' | 'none'; // Determines if logical sense is checked
+     grammarChecks: boolean; // Should always be true
+ }
+ 
+ // Conceptual rule sets based on CURRENT IMPLEMENTATION:
+ const validationRulesByTone: Record<number, { semanticChecks: 'strict' | 'none' }> = {
+     1: { semanticChecks: 'strict' }, // Tones 1-6
+     2: { semanticChecks: 'strict' },
+     3: { semanticChecks: 'strict' },
+     4: { semanticChecks: 'strict' },
+     5: { semanticChecks: 'strict' },
+     6: { semanticChecks: 'strict' },
+     7: { semanticChecks: 'none' },   // Tones 7-10 (incl. 'partial')
+     8: { semanticChecks: 'none' },
+     9: { semanticChecks: 'none' },
+     10: { semanticChecks: 'none' }
+ };
         </div>
         </div>
 
     <div class="section">
-        <h2>8. Progress Tracking</h2>
+        <h2>9. Progress Tracking</h2>
         <div class="implementation-note">
             ⚠️ Note: Sophisticated progress tracking with multiple metrics.
         </div>
@@ -441,7 +498,7 @@ interface GenerationProgress {
         </div>
 
     <div class="section">
-        <h2>9. Error Handling</h2>
+        <h2>10. Error Handling</h2>
         <div class="implementation-note">
             ⚠️ Note: Comprehensive error handling with aggregation and recovery.
         </div>
@@ -472,7 +529,7 @@ interface GenerationProgress {
         </div>
 
     <div class="section">
-        <h2>10. UI Integration</h2>
+        <h2>11. UI Integration</h2>
         <div class="implementation-note">
             ⚠️ Note: Complete UI system for tone selection and progress tracking.
         </div>

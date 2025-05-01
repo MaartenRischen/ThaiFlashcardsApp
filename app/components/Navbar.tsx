@@ -44,6 +44,12 @@ export function Navbar() {
             </SignInButton>
           </SignedOut>
           <SignedIn>
+            <span
+              className="bg-yellow-400 text-black rounded-full px-2 py-0.5 text-xs font-bold shadow mr-1"
+              title="This app is in beta. Features may change."
+            >
+              Beta
+            </span>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
         </nav>

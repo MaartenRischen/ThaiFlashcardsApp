@@ -31,7 +31,7 @@ export default async function DevFeedbackPage() {
     <div className="min-h-screen bg-[#181818] text-gray-200 flex flex-col items-center py-12">
       <h1 className="text-2xl font-bold mb-8 text-yellow-400">Feedback Dashboard</h1>
       {!isAuthed ? (
-        <form method="POST" className="bg-[#222] p-6 rounded shadow max-w-xs w-full flex flex-col gap-4">
+        <form method="POST" action="/dev-feedback/api" className="bg-[#222] p-6 rounded shadow max-w-xs w-full flex flex-col gap-4">
           <label htmlFor="pw" className="text-sm">Enter password:</label>
           <input type="password" name="pw" id="pw" className="rounded p-2 bg-[#181818] border border-gray-600 text-white" />
           <button type="submit" className="bg-yellow-400 text-black font-bold rounded py-2">Login</button>
@@ -52,25 +52,4 @@ export default async function DevFeedbackPage() {
   );
 }
 
-export const dynamic = 'force-dynamic';
-
-// Handle password POST
-export async function POST(req: Request) {
-  const data = await req.formData();
-  const pw = data.get('pw');
-  if (pw && pw === process.env.DEV_FEEDBACK_PASSWORD) {
-    // Set cookie for 1 day
-    return new Response(null, {
-      status: 302,
-      headers: {
-        'Set-Cookie': `${PASSWORD_COOKIE}=${pw}; Path=/; Max-Age=86400; HttpOnly`,
-        Location: '/dev-feedback',
-      },
-    });
-  }
-  // Wrong password, reload
-  return new Response(null, {
-    status: 302,
-    headers: { Location: '/dev-feedback' },
-  });
-} 
+export const dynamic = 'force-dynamic'; 

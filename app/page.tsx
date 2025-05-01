@@ -22,8 +22,9 @@ import { SetWizardModal, SetWizardState } from '../components/SetWizard/SetWizar
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Dialog } from '@/components/ui/dialog';
-import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle, Grid, Layers, Plus } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle, Grid, Layers, Plus, Settings, HelpCircle, GalleryHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 // Utility function to detect mobile devices
 const isMobileDevice = (): boolean => {
@@ -1355,131 +1356,151 @@ export default function ThaiFlashcards() {
               </button>
             </div>
 
-            <div className="space-y-8 text-gray-300 text-sm max-h-[70vh] overflow-y-auto pr-2">
+            <Accordion type="single" collapsible className="w-full space-y-2 text-gray-300 text-sm max-h-[70vh] overflow-y-auto pr-2">
               {/* Core Flashcard System */}
-              <div>
-                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-3">Flashcard System & SRS</h3>
-                <p className="mb-3">Donkey Bridge uses a Spaced Repetition System (SRS) to optimize your learning:</p>
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2"><span className="text-red-400">●</span> Wrong cards reappear quickly for immediate reinforcement</li>
-                  <li className="flex items-center gap-2"><span className="text-yellow-400">●</span> Correct cards return after a moderate delay</li>
-                  <li className="flex items-center gap-2"><span className="text-green-400">●</span> Easy cards are scheduled further in the future</li>
-                  <li className="flex items-center gap-2"><span className="text-blue-400">●</span> The scheduling interval increases automatically the more often you get a card right</li>
-                  <li className="flex items-center gap-2"><span className="text-blue-400">●</span> Each day, the system selects cards that are due for review, prioritizing difficult ones</li>
-                </ul>
-              </div>
+              <AccordionItem value="item-1" className="border-[#333]">
+                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
+                  Flashcard System & SRS
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 space-y-2 text-gray-300 text-sm">
+                  <p>Donkey Bridge uses a Spaced Repetition System (SRS) to optimize your learning:</p>
+                  <ul className="space-y-1 pl-4">
+                    <li className="flex items-center gap-2"><span className="text-red-400">●</span> Wrong cards reappear quickly for immediate reinforcement</li>
+                    <li className="flex items-center gap-2"><span className="text-yellow-400">●</span> Correct cards return after a moderate delay</li>
+                    <li className="flex items-center gap-2"><span className="text-green-400">●</span> Easy cards are scheduled further in the future</li>
+                    <li className="flex items-center gap-2"><span className="text-blue-400">●</span> The scheduling interval increases automatically the more often you get a card right</li>
+                    <li className="flex items-center gap-2"><span className="text-blue-400">●</span> Each day, the system selects cards that are due for review, prioritizing difficult ones</li>
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
               
               {/* Card Study Features */}
-              <div>
-                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-3">Card Study Features</h3>
-                <p className="mb-3">Each flashcard includes multiple tools to enhance learning:</p>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#A9C4FC] font-semibold min-w-[100px]">'Show Answer'</span>
-                    <span className="bg-[#252525] text-blue-400 px-3 py-1 rounded text-xs">Show Answer</span>
-                    <span className="text-gray-300">reveals the Thai translation, pronunciation, and examples</span>
+              <AccordionItem value="item-2" className="border-[#333]">
+                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
+                  Card Study Features
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 space-y-3 text-gray-300 text-sm">
+                  <p>Each flashcard includes multiple tools to enhance learning:</p>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#A9C4FC] font-semibold min-w-[100px]">'Show Answer'</span>
+                      <span className="bg-[#252525] text-blue-400 px-3 py-1 rounded text-xs">Show Answer</span>
+                      <span className="text-gray-300">reveals the Thai translation, pronunciation, and examples</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#A9C4FC] font-semibold min-w-[100px]">'Show Hint'</span>
+                      <span className="bg-[#252525] text-blue-400 px-3 py-1 rounded text-xs">Show Hint</span>
+                      <span className="text-gray-300">displays a mnemonic aid before revealing the answer</span>
+                    </div>
+                    <ul className="pl-4 space-y-1 list-disc list-inside">
+                      <li>Text-to-speech buttons let you hear proper Thai pronunciation</li>
+                      <li>Example sentences demonstrate the vocabulary in context</li>
+                      <li>Create or edit your own mnemonics to personalize your learning</li>
+                    </ul>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#A9C4FC] font-semibold min-w-[100px]">'Show Hint'</span>
-                    <span className="bg-[#252525] text-blue-400 px-3 py-1 rounded text-xs">Show Hint</span>
-                    <span className="text-gray-300">displays a mnemonic aid before revealing the answer</span>
-                  </div>
-                  <div className="pl-4 space-y-2">
-                    <li>Text-to-speech buttons let you hear proper Thai pronunciation</li>
-                    <li>Example sentences demonstrate the vocabulary in context</li>
-                    <li>Create or edit your own mnemonics to personalize your learning</li>
-                  </div>
-                </div>
-              </div>
+                </AccordionContent>
+              </AccordionItem>
               
               {/* Customization Options */}
-              <div>
-                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-3">Customization Options</h3>
-                <p className="mb-3">Tailor the app to your preferences:</p>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#A9C4FC] font-semibold min-w-[100px]">Gender Toggle</span>
-                    <div className="flex items-center gap-2 bg-[#252525] px-3 py-1 rounded">
-                      <span className="text-gray-400 text-xs">Female</span>
-                      <div className="relative w-8 h-4 bg-gray-600 rounded-full">
-                        <div className="absolute left-1 top-1 w-2 h-2 bg-pink-400 rounded-full"></div>
+              <AccordionItem value="item-3" className="border-[#333]">
+                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
+                  Customization Options
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 space-y-3 text-gray-300 text-sm">
+                  <p>Tailor the app to your preferences:</p>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#A9C4FC] font-semibold min-w-[100px]">Gender Toggle</span>
+                      <div className="flex items-center gap-2 bg-[#252525] px-3 py-1 rounded">
+                        <span className="text-gray-400 text-xs">Female</span>
+                        <div className="relative w-8 h-4 bg-gray-600 rounded-full">
+                          <div className="absolute left-1 top-1 w-2 h-2 bg-pink-400 rounded-full"></div>
+                        </div>
+                        <span className="text-gray-400 text-xs">Male</span>
                       </div>
-                      <span className="text-gray-400 text-xs">Male</span>
+                      <span className="text-gray-300">Switch between male (krap) and female (ka) speech patterns</span>
                     </div>
-                    <span className="text-gray-300">Switch between male (krap) and female (ka) speech patterns</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#A9C4FC] font-semibold min-w-[100px]">Polite Mode</span>
-                    <div className="flex items-center gap-2 bg-[#252525] px-3 py-1 rounded">
-                      <span className="text-gray-400 text-xs">Casual</span>
-                      <div className="relative w-8 h-4 bg-gray-600 rounded-full">
-                        <div className="absolute left-1 top-1 w-2 h-2 bg-gray-400 rounded-full"></div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#A9C4FC] font-semibold min-w-[100px]">Polite Mode</span>
+                      <div className="flex items-center gap-2 bg-[#252525] px-3 py-1 rounded">
+                        <span className="text-gray-400 text-xs">Casual</span>
+                        <div className="relative w-8 h-4 bg-gray-600 rounded-full">
+                          <div className="absolute left-1 top-1 w-2 h-2 bg-gray-400 rounded-full"></div>
+                        </div>
+                        <span className="text-gray-400 text-xs">Polite</span>
                       </div>
-                      <span className="text-gray-400 text-xs">Polite</span>
+                      <span className="text-gray-300">Add formal particles (ครับ/ค่ะ) to phrases</span>
                     </div>
-                    <span className="text-gray-300">Add formal particles (ครับ/ค่ะ) to phrases</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#A9C4FC] font-semibold min-w-[100px]">'Autoplay'</span>
-                    <div className="flex items-center gap-2 bg-[#252525] px-3 py-1 rounded">
-                      <div className="relative w-8 h-4 bg-gray-600 rounded-full">
-                        <div className="absolute right-1 top-1 w-2 h-2 bg-blue-400 rounded-full"></div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#A9C4FC] font-semibold min-w-[100px]">'Autoplay'</span>
+                      <div className="flex items-center gap-2 bg-[#252525] px-3 py-1 rounded">
+                        <div className="relative w-8 h-4 bg-gray-600 rounded-full">
+                          <div className="absolute right-1 top-1 w-2 h-2 bg-blue-400 rounded-full"></div>
+                        </div>
+                        <span className="text-gray-400 text-xs">Autoplay</span>
                       </div>
-                      <span className="text-gray-400 text-xs">Autoplay</span>
+                      <span className="text-gray-300">Automatically play audio when revealing answers</span>
                     </div>
-                    <span className="text-gray-300">Automatically play audio when revealing answers</span>
+                    <ul className="pl-4 space-y-1 list-disc list-inside">
+                      <li>Personalize mnemonics to create your own memory aids</li>
+                      <li>View your progress to track learning across all cards</li>
+                      <li>Reset progress for individual cards or entire sets when needed</li>
+                    </ul>
                   </div>
-                  <div className="pl-4 space-y-2">
-                    <li>Personalize mnemonics to create your own memory aids</li>
-                    <li>View your progress to track learning across all cards</li>
-                    <li>Reset progress for individual cards or entire sets when needed</li>
-                  </div>
-                </div>
-              </div>
+                </AccordionContent>
+              </AccordionItem>
               
               {/* Progress Tracking */}
-              <div>
-                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-3">Progress Tracking</h3>
-                <p className="mb-3">Monitor your learning journey:</p>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span>The</span>
-                    <span className="text-[#A9C4FC] font-semibold">'Cards'</span>
-                    <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-[#2563EB]"><Layers className="w-4 h-4" /></span>
-                    <span>view shows the status of each card</span>
+              <AccordionItem value="item-4" className="border-[#333]">
+                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
+                  Progress Tracking
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 space-y-2 text-gray-300 text-sm">
+                  <p>Monitor your learning journey:</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span>The</span>
+                      <span className="text-[#A9C4FC] font-semibold">'Cards'</span>
+                      <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-[#2563EB]"><Layers className="w-4 h-4" /></span>
+                      <span>view shows the status of each card</span>
+                    </div>
+                    <ul className="pl-4 space-y-1 list-disc list-inside">
+                      <li>Cards are color-coded by status: Unseen, Wrong, Correct, or Easy</li>
+                      <li>Progress bars indicate how much of a set you've learned</li>
+                      <li>The system automatically prioritizes cards needing review</li>
+                      <li>Your learning data is saved automatically between sessions</li>
+                    </ul>
                   </div>
-                  <div className="pl-4 space-y-2">
-                    <li>Cards are color-coded by status: Unseen, Wrong, Correct, or Easy</li>
-                    <li>Progress bars indicate how much of a set you've learned</li>
-                    <li>The system automatically prioritizes cards needing review</li>
-                    <li>Your learning data is saved automatically between sessions</li>
-                  </div>
-                </div>
-              </div>
+                </AccordionContent>
+              </AccordionItem>
               
               {/* Tips & Tricks */}
-              <div>
-                <h3 className="text-lg font-semibold text-[#A9C4FC] mb-3">Tips for Effective Learning</h3>
-                <div className="space-y-2">
-                  <li>Study regularly - short daily sessions are better than cramming</li>
-                  <li>Create personal mnemonics that are vivid and memorable</li>
-                  <li>Use the context examples to understand how words are used naturally</li>
-                  <li>Speak aloud with the audio to practice pronunciation</li>
-                  <li>Be honest with the difficulty buttons - they optimize your learning schedule</li>
-                  <li>Generate specialized sets for situations you'll actually encounter</li>
+              <AccordionItem value="item-5" className="border-[#333]">
+                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
+                  Tips for Effective Learning
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 space-y-2 text-gray-300 text-sm">
+                  <ul className="space-y-1 list-disc list-inside">
+                    <li>Study regularly - short daily sessions are better than cramming</li>
+                    <li>Create personal mnemonics that are vivid and memorable</li>
+                    <li>Use the context examples to understand how words are used naturally</li>
+                    <li>Speak aloud with the audio to practice pronunciation</li>
+                    <li>Be honest with the difficulty buttons - they optimize your learning schedule</li>
+                    <li>Generate specialized sets for situations you'll actually encounter</li>
+                  </ul>
                   <div className="flex items-center gap-2">
                     <span>Review previously learned cards periodically through the</span>
                     <span className="text-[#A9C4FC] font-semibold">'Cards'</span>
                     <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-[#2563EB]"><Layers className="w-4 h-4" /></span>
                     <span>view</span>
                   </div>
-                </div>
-              </div>
+                </AccordionContent>
+              </AccordionItem>
 
               <div className="pt-4 text-center">
                 <button onClick={() => setShowHowItWorks(false)} className="neumorphic-button py-2 px-8 text-[#A9C4FC]">Got It!</button>
               </div>
-            </div>
+            </Accordion>
           </div>
         </div>
       )}

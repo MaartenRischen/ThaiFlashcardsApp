@@ -576,50 +576,6 @@ export default function TestVariations() {
         </div>
       )}
 
-      {/* Table of generated cards */}
-      {filteredAndSortedCards.length > 0 && (
-        <div className="overflow-x-auto mb-8">
-          <table className="min-w-full text-sm text-left text-gray-300 border border-gray-700">
-            <thead className="bg-[#232323]">
-              <tr>
-                <th className="px-2 py-1 border-b border-gray-700">English</th>
-                <th className="px-2 py-1 border-b border-gray-700">Thai</th>
-                <th className="px-2 py-1 border-b border-gray-700">Pronunciation</th>
-                <th className="px-2 py-1 border-b border-gray-700">Mnemonic</th>
-                <th className="px-2 py-1 border-b border-gray-700">Proficiency</th>
-                <th className="px-2 py-1 border-b border-gray-700">Tone</th>
-                <th className="px-2 py-1 border-b border-gray-700">Temp.</th>
-                <th className="px-2 py-1 border-b border-gray-700">LLM Model</th>
-                <th className="px-2 py-1 border-b border-gray-700">Topic</th>
-                <th className="px-2 py-1 border-b border-gray-700">Gen Time</th>
-                <th className="px-2 py-1 border-b border-gray-700">Examples</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredAndSortedCards.map((card, idx) => (
-                <tr key={idx} className="border-b border-gray-700">
-                  <td className="px-2 py-1">{card.english}</td>
-                  <td className="px-2 py-1">{card.thai}</td>
-                  <td className="px-2 py-1">{card.pronunciation}</td>
-                  <td className="px-2 py-1">{card.mnemonic || '-'}</td>
-                  <td className="px-2 py-1">{card.settings.proficiency}</td>
-                  <td className="px-2 py-1">{card.settings.tone} ({getToneDescription(card.settings.tone)})</td>
-                  <td className="px-2 py-1">{card.settings.temperature !== undefined ? card.settings.temperature.toFixed(2) : 'N/A'}</td>
-                  <td className="px-2 py-1">{card.settings.llmModel || '-'}</td>
-                  <td className="px-2 py-1">{card.settings.topic}</td>
-                  <td className="px-2 py-1">{card.settings.generationTime ? formatTime(card.settings.generationTime) : '-'}</td>
-                  <td className="px-2 py-1">
-                    {card.examples.map((ex, exIdx) => (
-                      <div key={exIdx}>{ex.thai} ({ex.translation})</div>
-                    ))}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredAndSortedCards.map((card, index) => (
           <div 
@@ -644,9 +600,16 @@ export default function TestVariations() {
                 <span className="text-yellow-400">Topic: {card.settings.topic}</span>
               </div>
               <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                 <span className="text-green-400">M: {card.settings.llmModel}</span>
-                 <span className="text-orange-400">Time: {formatTime(card.settings.generationTime || 0)}</span>
+                <span className="text-green-400">Model: {card.settings.llmModel || '-'}</span>
+                <span className="text-pink-400">Temp: {card.settings.temperature !== undefined ? card.settings.temperature.toFixed(2) : 'N/A'}</span>
+                <span className="text-orange-400">Time: {card.settings.generationTime ? (card.settings.generationTime / 1000).toFixed(2) + 's' : '-'}</span>
               </div>
+            </div>
+            <div className="mt-2 text-xs text-gray-300">
+              <strong>Examples:</strong>
+              {card.examples.map((ex, idx) => (
+                <div key={idx}>{ex.thai} ({ex.translation})</div>
+              ))}
             </div>
           </div>
         ))}

@@ -91,6 +91,7 @@ export async function POST(request: Request) {
 
     console.log(`API Route: Starting generation process for userId: ${userId}, count: ${totalCount}, isTest: ${isTestRequest}`);
     let generationResult: GenerationResult | null = null;
+    const startTime = Date.now();
     try {
       // If forcedModel is provided, temporarily override TEXT_MODELS
       const originalModels = [...TEXT_MODELS];
@@ -111,6 +112,9 @@ export async function POST(request: Request) {
       if (forcedModel) {
         TEXT_MODELS.splice(0, TEXT_MODELS.length, ...originalModels);
       }
+
+      const endTime = Date.now();
+      const generationTime = endTime - startTime;
 
       console.log("API Route: generateCustomSet result:", generationResult);
       
@@ -255,10 +259,13 @@ export async function POST(request: Request) {
         llmModel: metaDataForStorage.llmModel,
       };
 
-      // Return the metadata AND the phrases separately
+      // Return the metadata AND the phrases separately, plus generation time, model, and temperature
       return NextResponse.json({ 
         newSetMetaData: completeNewMetaData,
-        phrases: phrasesToSave
+        phrases: phrasesToSave,
+        llmModel: generationResult.llmModel,
+        temperature: generationResult.temperature,
+        generationTime
       }, { status: 201 });
 
     } catch (error: unknown) {

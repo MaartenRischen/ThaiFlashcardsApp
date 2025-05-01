@@ -593,7 +593,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
     const setIndex = availableSets.findIndex(set => set.id === id);
     if (setIndex !== -1) {
-      const currentSet = availableSets[setIndex];
+      const _currentSet = availableSets[setIndex];
       
       setIsLoading(true);
       try {

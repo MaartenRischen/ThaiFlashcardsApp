@@ -54,6 +54,7 @@ export interface GenerationResult {
   llmBrand?: string;
   llmModel?: string;
   imageUrl?: string;
+  temperature?: number; // Add temperature used for generation
 }
 
 export interface CustomSet {
@@ -860,12 +861,13 @@ export async function generateCustomSet(
     let modelIndex = 0;
     let currentModel = TEXT_MODELS[modelIndex];
     let batchSize = getBatchSize(currentModel);
-    let batchesNeeded = Math.ceil(totalCount / batchSize);
+    const batchesNeeded = Math.ceil(totalCount / batchSize);
 
     const aggregatedErrors: (BatchError & { batchIndex: number })[] = [];
     const allPhrases: Phrase[] = [];
     let cleverTitle: string | undefined;
     const fallbackPhrases = INITIAL_PHRASES.slice(0, totalCount);
+    let lastUsedTemperature: number | undefined;
 
     for (let i = 0; i < batchesNeeded; i++) {
       try {
@@ -888,17 +890,20 @@ export async function generateCustomSet(
           existingPhrases: existingPhrasesMeanings,
         });
         let retries = 0;
-        let batchResult: { phrases: Phrase[], cleverTitle?: string, error?: BatchError } | null = null;
+        let batchResult: { phrases: Phrase[], cleverTitle?: string, error?: BatchError, temperature?: number } | null = null;
         // Try OpenRouter models first
         while (retries < MAX_RETRIES) {
           try {
             currentModel = TEXT_MODELS[modelIndex];
             batchSize = getBatchSize(currentModel);
+            // Capture the result including temperature
             batchResult = await generateOpenRouterBatch(
               prompt, 
-              [currentModel], // Only use the current model for this batch
-              i
+              [currentModel], 
+              i,
+              preferences.toneLevel // Pass toneLevel here
             );
+            lastUsedTemperature = batchResult.temperature; // Store the temperature used
             if (batchResult.phrases.length > 0 || !batchResult.error) {
               break;
             } 
@@ -1007,6 +1012,7 @@ export async function generateCustomSet(
       errorSummary,
       llmBrand: 'OpenRouter',
       llmModel: TEXT_MODELS[0], // Record the primary model
+      temperature: lastUsedTemperature // Add the last used temperature to the final result
     };
     
     return result;
@@ -1026,7 +1032,8 @@ export async function generateCustomSet(
         errorTypes: ['UNKNOWN'],
         totalErrors: 1,
         userMessage: 'An unexpected error occurred during set generation.'
-      }
+      },
+      temperature: undefined // Or calculate based on preferences if possible
     };
   }
 }
@@ -1251,12 +1258,11 @@ export async function generateOpenRouterBatch(
   prompt: string,
   models: string[],
   batchIndex: number,
-  toneLevel?: number  // Add toneLevel parameter
-): Promise<{phrases: Phrase[], cleverTitle?: string, error?: BatchError}> {
+  toneLevel?: number
+): Promise<{phrases: Phrase[], cleverTitle?: string, error?: BatchError, temperature?: number}> {
   try {
     const temperature = getTemperatureFromToneLevel(toneLevel);
     const responseText = await callOpenRouterWithFallback(prompt, models, temperature);
-    // Clean the response (remove markdown, etc.)
     const cleanedText = responseText.replace(/^```json\s*|```$/g, '').trim();
     let parsedResponse: unknown;
     try {
@@ -1265,14 +1271,16 @@ export async function generateOpenRouterBatch(
       const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
       return {
         phrases: [],
-        error: createBatchError('PARSE', `Failed to parse API response (Batch ${batchIndex}): ${errorMessage}`, { responseText: cleanedText, parseError: String(parseError) })
+        error: createBatchError('PARSE', `Failed to parse API response (Batch ${batchIndex}): ${errorMessage}`, { responseText: cleanedText, parseError: String(parseError) }),
+        temperature // Include temperature even on error
       };
     }
     if (typeof parsedResponse !== 'object' || parsedResponse === null || !('phrases' in parsedResponse) || !Array.isArray(parsedResponse.phrases)) {
       console.error(`Invalid JSON structure received (Batch ${batchIndex}): Expected { phrases: [...] }, got:`, parsedResponse);
       return {
         phrases: [],
-        error: createBatchError('VALIDATION', `Invalid JSON structure received (Batch ${batchIndex}). Expected object with 'phrases' array.`, { parsedResponse })
+        error: createBatchError('VALIDATION', `Invalid JSON structure received (Batch ${batchIndex}). Expected object with 'phrases' array.`, { parsedResponse }),
+        temperature // Include temperature
       };
     }
     const cleverTitle = ('cleverTitle' in parsedResponse && typeof parsedResponse.cleverTitle === 'string') ? parsedResponse.cleverTitle : undefined;
@@ -1298,7 +1306,8 @@ export async function generateOpenRouterBatch(
         return {
           phrases: [],
           cleverTitle,
-          error: createBatchError('VALIDATION', `All ${parsedResponse.phrases.length} phrases failed validation (Batch ${batchIndex}).`, { errors: validationErrors })
+          error: createBatchError('VALIDATION', `All ${parsedResponse.phrases.length} phrases failed validation (Batch ${batchIndex}).`, { errors: validationErrors }),
+          temperature // Include temperature
         };
       } else {
         console.warn(`Batch ${batchIndex} completed with ${validationErrors.length} validation errors out of ${parsedResponse.phrases.length} phrases. Returning ${validatedPhrases.length} valid phrases.`);
@@ -1307,13 +1316,15 @@ export async function generateOpenRouterBatch(
     if (validatedPhrases.length === 0 && !cleverTitle) {
         return {
             phrases: [],
-            error: createBatchError('VALIDATION', `API returned empty or invalid phrases array and no title (Batch ${batchIndex})`, { parsedResponse })
+            error: createBatchError('VALIDATION', `API returned empty or invalid phrases array and no title (Batch ${batchIndex})`, { parsedResponse }),
+            temperature // Include temperature
         };
     }
     console.log(`Batch ${batchIndex} successful: Generated ${validatedPhrases.length} valid phrases.${cleverTitle ? ' Title: "' + cleverTitle + '"':''}`);
     return {
       phrases: validatedPhrases,
-      cleverTitle
+      cleverTitle,
+      temperature // Include temperature in successful result
     };
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -1321,9 +1332,11 @@ export async function generateOpenRouterBatch(
     let errorType: BatchErrorType = 'UNKNOWN';
     if (errorMessage.includes('API error')) errorType = 'API';
     else if (errorMessage.includes('network') || errorMessage.includes('fetch')) errorType = 'NETWORK';
+    const temperature = getTemperatureFromToneLevel(toneLevel); // Calculate temperature even on catch
     return {
       phrases: [],
-      error: createBatchError(errorType, `General error processing batch ${batchIndex}: ${errorMessage}`, { error })
+      error: createBatchError(errorType, `General error processing batch ${batchIndex}: ${errorMessage}`, { error }),
+      temperature // Include temperature
     };
   }
 } 

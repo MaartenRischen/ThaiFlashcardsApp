@@ -59,7 +59,7 @@ export default function RootLayout({
           <Providers>
             <SetProvider>
               <Navbar />
-              <main className="main-content min-h-screen relative pb-24">
+              <main className="main-content min-h-screen relative">
                 {children}
                 {/* Temporary Dev Buttons */}
                 <div className="fixed bottom-4 left-4 flex gap-2 opacity-50 hover:opacity-100 transition-opacity">
@@ -76,8 +76,8 @@ export default function RootLayout({
                     Logic Visualization
                   </a>
                 </div>
-                <FeedbackFooterClient />
               </main>
+              <FeedbackFooterClient />
             </SetProvider>
           </Providers>
           </Tooltip.Provider>

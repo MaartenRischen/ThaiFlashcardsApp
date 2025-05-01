@@ -5,16 +5,31 @@ interface FeedbackModalProps {
   onClose: () => void;
   onSubmit: (feedback: string) => void;
   status: 'idle' | 'success' | 'error';
+  includeConsoleLogs: boolean;
+  setIncludeConsoleLogs: (value: boolean) => void;
+  includeGenerationDetails: boolean;
+  setIncludeGenerationDetails: (value: boolean) => void;
 }
 
-export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit, status }) => {
+export const FeedbackModal: React.FC<FeedbackModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  status,
+  includeConsoleLogs,
+  setIncludeConsoleLogs,
+  includeGenerationDetails,
+  setIncludeGenerationDetails,
+}) => {
   const [feedback, setFeedback] = useState('');
 
   useEffect(() => {
     if (!isOpen || status === 'success') {
       setFeedback('');
+      setIncludeConsoleLogs(false);
+      setIncludeGenerationDetails(false);
     }
-  }, [isOpen, status]);
+  }, [isOpen, status, setIncludeConsoleLogs, setIncludeGenerationDetails]);
 
   if (!isOpen) return null;
 
@@ -34,7 +49,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
         >
           ×
         </button>
-        <h2 className="text-lg font-bold text-yellow-400 mb-2">We&apos;d love your feedback!</h2>
+        <h2 className="text-lg font-bold text-blue-400 mb-4">We&apos;d love your feedback!</h2>
         {status === 'success' ? (
           <div className="text-green-400 text-center py-8">
             Thank you for your feedback! 🙏
@@ -46,13 +61,35 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
         ) : (
           <form onSubmit={handleSubmit}>
             <textarea
-              className="w-full h-32 p-2 rounded bg-[#222] border border-gray-600 text-white resize-none mb-4 focus:outline-none focus:border-yellow-400"
+              className="w-full h-28 p-2 rounded bg-[#222] border border-gray-600 text-white resize-none mb-4 focus:outline-none focus:border-blue-400"
               placeholder="Share your thoughts, suggestions, or report a bug..."
               value={feedback}
               onChange={e => setFeedback(e.target.value)}
               required
               autoFocus
             />
+            <div className="space-y-2 mb-4">
+              <label className="flex items-center text-sm text-gray-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="includeConsoleLogs"
+                  className="mr-2 accent-blue-500"
+                  checked={includeConsoleLogs}
+                  onChange={(e) => setIncludeConsoleLogs(e.target.checked)}
+                />
+                Include browser console logs (helps with debugging)
+              </label>
+              <label className="flex items-center text-sm text-gray-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="includeGenerationDetails"
+                  className="mr-2 accent-blue-500"
+                  checked={includeGenerationDetails}
+                  onChange={(e) => setIncludeGenerationDetails(e.target.checked)}
+                />
+                Include last generation details (input, prompt, output)
+              </label>
+            </div>
             <div className="flex justify-end gap-2">
               <button
                 type="button"
@@ -63,7 +100,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
               </button>
               <button
                 type="submit"
-                className="px-4 py-1 rounded bg-yellow-400 text-black font-bold hover:bg-yellow-300 transition"
+                className="px-4 py-1 rounded bg-blue-600 text-white font-bold hover:bg-blue-500 transition"
                 disabled={feedback.trim().length === 0}
               >
                 Submit

@@ -856,13 +856,13 @@ export async function generateCustomSet(
       onProgressUpdate({ completed: 0, total: totalCount });
     }
     console.log(`Starting card generation (OpenRouter): ${totalCount} total cards requested with preferences:`, preferences);
-
+    
     // Use the first model as the primary for batch sizing
     let modelIndex = 0;
     let currentModel = TEXT_MODELS[modelIndex];
     let batchSize = getBatchSize(currentModel);
     const batchesNeeded = Math.ceil(totalCount / batchSize);
-
+    
     const aggregatedErrors: (BatchError & { batchIndex: number })[] = [];
     const allPhrases: Phrase[] = [];
     let cleverTitle: string | undefined;

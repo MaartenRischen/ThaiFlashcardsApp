@@ -51,9 +51,9 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
       console.log(`Generating set with ${totalCount} cards (${totalTopics} topics, ${cardsPerTopic} cards per topic)`);
 
       const preferences = {
-        level: state.proficiency.levelEstimate,
-        specificTopics,
-        topicsToDiscuss,
+          level: state.proficiency.levelEstimate,
+          specificTopics,
+          topicsToDiscuss,
         toneLevel: state.tone,
       };
 

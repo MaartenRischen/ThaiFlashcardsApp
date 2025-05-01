@@ -8,7 +8,10 @@ const PASSWORD_COOKIE = 'dev_feedback_pw';
 
 type FeedbackEntry = {
   feedback: string;
+  username: string;
   timestamp: string;
+  includeConsoleLogs?: boolean;
+  includeGenerationDetails?: boolean;
 };
 
 async function getFeedbackList() {
@@ -42,8 +45,15 @@ export default async function DevFeedbackPage() {
             <div className="text-gray-400">No feedback yet.</div>
           ) : feedbackList.map((entry: FeedbackEntry, i: number) => (
             <div key={i} className="bg-[#232323] border border-gray-700 rounded p-4">
-              <div className="text-xs text-gray-400 mb-2">{new Date(entry.timestamp).toLocaleString()}</div>
+              <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
+                <span>{new Date(entry.timestamp).toLocaleString()}</span>
+                {entry.username && <span>User: <span className="text-gray-300">{entry.username}</span></span>}
+              </div>
               <div className="whitespace-pre-line text-base">{entry.feedback}</div>
+              <div className="text-xs text-gray-500 mt-2 flex gap-4">
+                {entry.includeConsoleLogs && <span>(Console Logs Requested)</span>}
+                {entry.includeGenerationDetails && <span>(Generation Details Requested)</span>}
+              </div>
             </div>
           ))}
         </div>

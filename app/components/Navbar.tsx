@@ -10,11 +10,13 @@ import {
   UserButton,
   useUser
 } from "@clerk/nextjs";
+import { useFeedback } from "../context/FeedbackContext";
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useUser();
+  const { openFeedbackModal } = useFeedback();
   
   // Don't show navbar on auth pages
   if (pathname === "/login" || pathname === "/register") {
@@ -44,12 +46,13 @@ export function Navbar() {
             </SignInButton>
           </SignedOut>
           <SignedIn>
-            <span
-              className="bg-blue-500 text-white rounded-full px-2 py-0.5 text-xs font-bold shadow mr-1"
+            <button
+              onClick={openFeedbackModal}
+              className="bg-blue-500 text-white rounded-full px-2 py-0.5 text-xs font-bold shadow mr-1 cursor-pointer hover:bg-blue-400 transition"
               title="This app is in beta. Features may change."
             >
               Beta
-            </span>
+            </button>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
         </nav>

@@ -34,7 +34,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
         >
           ×
         </button>
-        <h2 className="text-lg font-bold text-yellow-400 mb-2">We'd love your feedback!</h2>
+        <h2 className="text-lg font-bold text-yellow-400 mb-2">We&apos;d love your feedback!</h2>
         {status === 'success' ? (
           <div className="text-green-400 text-center py-8">
             Thank you for your feedback! 🙏

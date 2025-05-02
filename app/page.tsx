@@ -1496,6 +1496,43 @@ export default function ThaiFlashcards() {
                   </div>
                 </AccordionContent>
               </AccordionItem>
+              
+              {/* --- NEW ITEM: Link to Visualization --- */}
+              <AccordionItem value="item-6" className="border-[#333]">
+                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
+                  App & Language Logic (For Nerds)
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 text-gray-300 text-sm">
+                  <p>
+                    For those interested in the technical details, the generation and validation logic is visualized here:
+                  </p>
+                  <p className="mt-2">
+                    <a 
+                      href="/generation_logic_visualization.html" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 underline"
+                    >
+                      View Detailed Generation Logic Visualization (Opens in new tab)
+                    </a>
+                  </p>
+                  
+                  <p className="mt-4">
+                    You can also experiment with different generation parameters (like proficiency and tone) and see example outputs on the test variations page:
+                  </p>
+                  <p className="mt-2">
+                    <a 
+                      href="/test-variations" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 underline"
+                    >
+                      Go to Test Variations Page (Opens in new tab)
+                    </a>
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+              {/* --- END NEW ITEM --- */}
 
               <div className="pt-4 text-center">
                 <button onClick={() => setShowHowItWorks(false)} className="neumorphic-button py-2 px-8 text-[#A9C4FC]">Got It!</button>

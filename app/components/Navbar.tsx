@@ -30,15 +30,15 @@ export function Navbar() {
         {/* Home Icon */}
         <button
           onClick={() => router.push("/")}
-          className="flex items-center justify-center p-0 mr-2 hover:scale-105 transition-transform"
+          className="flex items-center justify-center p-0 mr-1 hover:scale-105 transition-transform"
           aria-label="Home"
           style={{ minWidth: 32 }}
         >
           <Image 
             src="/images/logonobg-rev.png"
             alt="Home" 
-            width={20}
-            height={20} 
+            width={24}
+            height={24} 
             className="rounded-sm"
           />
         </button>
@@ -53,13 +53,6 @@ export function Navbar() {
             </SignInButton>
           </SignedOut>
           <SignedIn>
-            <button
-              onClick={openFeedbackModal}
-              className="bg-blue-500 text-white rounded-full px-2 py-0.5 text-xs font-bold shadow mr-1 cursor-pointer hover:bg-blue-400 transition"
-              title="This app is in beta. Features may change."
-            >
-              Beta
-            </button>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
         </nav>

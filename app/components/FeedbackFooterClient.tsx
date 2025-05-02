@@ -43,7 +43,7 @@ export function FeedbackFooterClient() {
 
   return (
     <>
-      <div className="w-full flex flex-col items-center justify-center bg-[#181818] border-t border-gray-700 py-4 px-4 mt-12 shadow-lg">
+      <div className="w-full flex flex-col items-center justify-center bg-[#181818] border-t border-gray-700 py-4 px-4 mt-4 shadow-lg">
         <span className="text-xs md:text-sm text-gray-300 text-center mb-2 md:mb-0">
           This is a <span className="bg-blue-500 text-white rounded-full px-2 py-0.5 font-bold mx-1">Beta</span> version, 100% free to use. If you could take a minute to give us your unbridled feedback in return, we would massively appreciate that.
         </span>

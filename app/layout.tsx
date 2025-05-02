@@ -75,6 +75,7 @@ export default function RootLayout({
                 <main className="main-content min-h-screen relative">
                   {children}
                   {/* Temporary Dev Buttons */}
+                  {/* 
                   <div className="fixed bottom-4 left-4 flex gap-2 opacity-50 hover:opacity-100 transition-opacity">
                     <a 
                       href="/test-variations" 
@@ -89,6 +90,7 @@ export default function RootLayout({
                       Logic Visualization
                     </a>
                   </div>
+                   */}
                 </main>
                 <FeedbackFooterClient />
               </FeedbackProvider>

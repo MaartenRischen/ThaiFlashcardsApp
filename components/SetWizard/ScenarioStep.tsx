@@ -329,16 +329,16 @@ export function ScenarioStep({ selectedScenarios: initialSelectedScenarios, cust
         <h3 className="text-base font-medium text-white">
           What do you want to be able to do in Thai?
         </h3>
-        <p className="text-xs text-gray-400">Choose one or more scenarios that interest you.</p>
+        {/* <p className="text-xs text-gray-400">Choose one or more scenarios that interest you.</p> */}
       </div>
 
-      {/* "Tell Us!" Button */}
+      {/* "Tell Us!" Button - Added Glow */}
       <button
         onClick={() => handleToggle(CUSTOM_SCENARIO)}
         className={`w-full rounded-lg p-3 text-left transition-all border-2 ${
           selected.includes(CUSTOM_SCENARIO)
-            ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
-            : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'
+            ? 'bg-blue-600/90 text-white border-blue-500 shadow-lg shadow-blue-500/50 ring-1 ring-blue-500/30'
+            : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40 shadow-lg shadow-blue-500/30'
         }`}
       >
         <div className="flex justify-between items-center">

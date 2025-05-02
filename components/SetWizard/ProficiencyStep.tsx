@@ -19,42 +19,42 @@ const proficiencyLevels: ProficiencyLevel[] = [
     value: 'Complete Beginner',
     label: 'Complete Beginner',
     description: 'Single words and two-word combinations only',
-    example: 'กินข้าว (eat rice), หมาวิ่ง (dog runs)',
+    example: 'ลา บนสะพาน (donkey on bridge)',
     icon: <StarIcon className="h-5 w-5" />
   },
   {
     value: 'Basic Understanding',
     label: 'Basic Understanding',
     description: 'Short phrases with 2-4 words',
-    example: 'ผมชอบกินข้าว (I like to eat rice)',
+    example: 'ลาเดินบนสะพาน (donkey walks on bridge)',
     icon: <StarIcon className="h-5 w-5" />
   },
   {
     value: 'Intermediate',
     label: 'Intermediate',
     description: 'Medium-length sentences with 4-7 words',
-    example: 'วันนี้ผมไปทำงานที่ออฟฟิศ (Today I went to work at the office)',
+    example: 'ลาตัวนี้กำลังเดินข้ามสะพาน (This donkey is crossing the bridge)',
     icon: <StarIcon className="h-5 w-5" />
   },
   {
     value: 'Advanced',
     label: 'Advanced',
     description: 'Complex sentences with 7-12 words',
-    example: 'ถึงแม้ว่าฝนจะตก ผมก็ต้องไปทำงานที่ออฟฟิศทุกวัน (Even though it rains, I still have to go to work at the office every day)',
+    example: 'ลาตัวนี้ชอบเดินเล่นบนสะพานไม้ทุกๆเช้า (This donkey likes to walk on the wooden bridge every morning)',
     icon: <StarIcon className="h-5 w-5" />
   },
   {
     value: 'Native/Fluent',
     label: 'Native/Fluent',
     description: 'Natural, idiomatic Thai of any appropriate length',
-    example: 'พอดีว่าเมื่อวานนี้ฝนตกหนักมากเลย เลยต้องทำงานจากที่บ้านแทน (As it happened, it rained very heavily yesterday, so I had to work from home instead)',
+    example: 'ทุกครั้งที่เห็นลาเดินอยู่บนสะพาน มันดูมีความสุขมากที่ได้ชมวิวสวยๆ (Every time I see the donkey on the bridge, it looks so happy enjoying the beautiful view)',
     icon: <StarIcon className="h-5 w-5" />
   },
   {
     value: 'God Mode',
     label: 'God Mode',
     description: 'Sophisticated, elaborate Thai with literary/academic language',
-    example: 'ท่ามกลางสภาวะเศรษฐกิจที่ผันผวน การปรับตัวให้เข้ากับความเปลี่ยนแปลงนั้นถือเป็นสิ่งสำคัญยิ่ง (Amidst volatile economic conditions, adaptation to change is of utmost importance)',
+    example: 'Heeyyy donkey dude! You good on that bridge duude?\n\nเฮ้ยยย ไอ้หนุ่มลา! สบายดีบนสะพานนั้นปะเพื่อน นน?\n\nheyyy ai noom laa! sa-baai dee bon sa-paan nan pa puean?\n\nThink "ai noom" for "dude" and stretch "pueaan" like "duuude" - super casual!',
     icon: <SparklesIcon className="h-5 w-5" />
   }
 ];
@@ -117,14 +117,14 @@ export function ProficiencyStep({ value, onNext, onBack }: {
         <h3 className="text-base font-medium text-white">
           What is your Thai proficiency level?
         </h3>
-        <p className="text-xs text-gray-400">
+        {/* <p className="text-xs text-gray-400">
           Tap your current level of Thai speaking and listening ability.
-        </p>
+        </p> */}
       </div>
 
       {/* Proficiency Level Image */}
       <div className="flex justify-center">
-        <div className="relative w-full max-w-[300px] h-[140px] rounded-lg overflow-hidden border border-blue-900/30">
+        <div className="relative w-full max-w-[300px] h-[300px] rounded-lg overflow-hidden border border-blue-900/30 scale-[0.8]">
           <Image
             src={`/images/level/${activeLevelIndex + 1}.png`}
             alt={`${proficiencyLevels[activeLevelIndex].label} level illustration`}

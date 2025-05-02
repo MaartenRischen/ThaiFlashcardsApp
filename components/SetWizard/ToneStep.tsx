@@ -12,95 +12,10 @@ const getToneLevelLabel = (value: number): string => {
     case 7: return 'Woah now';
     case 8: return 'Ehrm..';
     case 9: return 'You sure about this?';
-    case 10: return '̷̛̤̖̯͕̭͙̏̀̏̑̔̆͝Ǫ̶̬̩͇̼͖͖͈̯̳͎͛̀̐͌̅̿̈́̏̾̏̽̎H̶̼̹͓̩̥͈̞̫̯͋̓̄́̓̽̈́̈́̈́͛̎͒̿͜H̴̘͎̗̮̱̗̰̱͓̪̘͛̅̅̐͌̑͆̆̐͐̈́͌̚O̴̖̥̺͎̰̰̠͙̹̔̑̆͆͋̀̐̄̈́͝ͅI̴̢̛̩͔̺͓̯̯̟̱͎͓̾̃̅̈́̍͋̒̔̚͜͠͠͝͝Ḋ̵̻͓̹̼̳̻̼̼̥̳͍͛̈́̑̆̈́̈́̅͜͝͝͠͝Ǫ̶͔̯̟͙̪͗̆͛̍̓̒̔̒̎̄̈́̅͜͝͠N̵̢̢̩̫͚̪̦̥̳̯͚̺̍̏͂͗̌̍̿̾̿́̓͌͛͝K̷̨̨̟̺͔̻̮̯̰̤̬͇̟̙̆͆͗̀̈́̔̅͒͛͊͘͝͠I̶̡̢̡̛͔͎͍̤̤̪͍͙̜͚̓̀͋́̈́̈́̿͂̈́̐͘͘͜E';
+    case 10: return '̷̛̤̖̯͕̭͙̏̀̏̑̔̆͝Ǫ̶̬̩͇̼͖͖͈̯̳͎͛̀̐͌̅̿̈́̏̾̏̽̎H̶̼̹͓̩̥͈̞̫̯͋̓̄́̓̽̈́̈́̈́͛̎͒̿͜H̴̘͎̗̮̱̗̰̱͓̪̘͛̅̅̐͌̑͆̆̐͐̈́͌̚O̴̖̥̺͎̰̰̠͙̹̔̑̆͆͋̀̐̄̈́͝ͅI̴̢̛̩͔̺͓̯̯̟̱͎͓̾̃̅̈́̍͋̒̔̚͜͠͠͝͝Ḋ̵̻͓̹̼̳̻̼̼̥̳͍͛̈́̑̆̈́̈́̅͜͝͝͠͝Ǫ̶͔̯̟͙̪͗̆͛̍̓̒̔̒̎̄̈́̅͜͝͠N̵̢̢̩̫͚̪̦̥̳̯͚̺̍̏͂͗̌̍̿̾̿́̓͌͛͝K̷̨̨̟̺͔̻̮̯̰̤̬͇̟̙̆͆͗̀̈́̔̅͒͛͊͘͝͠I̶̡̢̡̛͔͎͍̤̤̪͍͙̜͚̓̀͋́̈́̈́̿͂̈́̐͘͘͜';
     default: return 'Textbook realism';
   }
 };
-
-const examples = {
-  1: {
-    thai: 'ลาอยู่บนสะพาน',
-    thaiMasculine: 'ลาอยู่บนสะพานครับ',
-    thaiFeminine: 'ลาอยู่บนสะพานค่ะ',
-    english: 'The donkey is on the bridge',
-    pronunciation: 'laa yuu bon sa-paan',
-    mnemonic: 'Think "laa" (donkey) on "sa-paan" (bridge) - simple and straightforward!'
-  },
-  2: {
-    thai: 'ดูสิ! ลาอยู่บนสะพาน!',
-    thaiMasculine: 'ดูสิ! ลาอยู่บนสะพานครับ!',
-    thaiFeminine: 'ดูสิ! ลาอยู่บนสะพานค่ะ!',
-    english: 'Look! The donkey is on the bridge!',
-    pronunciation: 'duu si! laa yuu bon sa-paan!',
-    mnemonic: 'Think "duu si" like "Do see!" - you\'re pointing out the donkey!'
-  },
-  3: {
-    thai: 'นั่นลาบนสะพานชัดๆเลย ถ้าฉันเคยเห็นมาก่อน!',
-    thaiMasculine: 'นั่นลาบนสะพานชัดๆเลยครับ ถ้าฉันเคยเห็นมาก่อน!',
-    thaiFeminine: 'นั่นลาบนสะพานชัดๆเลยค่ะ ถ้าฉันเคยเห็นมาก่อน!',
-    english: 'That\'s a donkey on a bridge if I\'ve ever seen one!',
-    pronunciation: 'nan laa bon sa-paan chat chat loei, taa chan koei hen maa gorn!',
-    mnemonic: 'Think "chat chat" like "got that!" - you\'re absolutely certain about the donkey!'
-  },
-  4: {
-    thai: 'นั่นลาตลกจริงๆบนสะพานเลย',
-    thaiMasculine: 'นั่นลาตลกจริงๆบนสะพานเลยครับ',
-    thaiFeminine: 'นั่นลาตลกจริงๆบนสะพานเลยค่ะ',
-    english: 'That\'s one actually funny donkey on a bridge',
-    pronunciation: 'nan laa ta-lok jing jing bon sa-paan loei',
-    mnemonic: 'Think "ta-lok" like "talk-laugh" - this donkey is genuinely amusing!'
-  },
-  5: {
-    thai: 'เฮ้ยยย ไอ้หนุ่มลา! สบายดีบนสะพานนั้นปะเพื่อนนน?',
-    thaiMasculine: 'เฮ้ยยย ไอ้หนุ่มลา! สบายดีบนสะพานนั้นปะเพื่อนนนครับ?',
-    thaiFeminine: 'เฮ้ยยย ไอ้หนุ่มลา! สบายดีบนสะพานนั้นปะเพื่อนนนค่ะ?',
-    english: 'Heeyyy donkey dude! You good on that bridge duude?',
-    pronunciation: 'heyyy ai noom laa! sa-baai dee bon sa-paan nan pa pueaan?',
-    mnemonic: 'Think "ai noom" for "dude" and stretch "pueaan" like "duuude" - super casual!'
-  },
-  6: {
-    thai: 'ลาบินออกไปจากสะพานแล้ว',
-    thaiMasculine: 'ลาบินออกไปจากสะพานแล้วครับ',
-    thaiFeminine: 'ลาบินออกไปจากสะพานแล้วค่ะ',
-    english: 'The donkey took off from the bridge',
-    pronunciation: 'laa bin ork pai jaak sa-paan laew',
-    mnemonic: 'Think "bin ork" like "been orc" - but it means flying away!'
-  },
-  7: {
-    thai: 'ลาคือสะพาน ถ้าคุณคิดให้ดีๆ',
-    thaiMasculine: 'ลาคือสะพาน ถ้าคุณคิดให้ดีๆครับ',
-    thaiFeminine: 'ลาคือสะพาน ถ้าคุณคิดให้ดีๆค่ะ',
-    english: 'Donkeys are bridges if you really think about it',
-    pronunciation: 'laa kuue sa-paan taa kun kit hai dee dee',
-    mnemonic: 'Think "kuue" as "is" and "kit hai dee dee" like "deep thinking" - philosophical donkeys!'
-  },
-  8: {
-    thai: 'ในจักรวาลหลายมิติ ลาปกครองทฤษฎีคำหลายความหมาย',
-    thaiMasculine: 'ในจักรวาลหลายมิติ ลาปกครองทฤษฎีคำหลายความหมายครับ',
-    thaiFeminine: 'ในจักรวาลหลายมิติ ลาปกครองทฤษฎีคำหลายความหมายค่ะ',
-    english: 'Within multiverses, donkeys rule the multiple words theory.',
-    pronunciation: 'nai jak-ra-waan laai mi-ti, laa pok-krong trit-sa-dee kam laai kwaam-maai',
-    mnemonic: 'Think "jak-ra-waan" for "universe" and "trit-sa-dee" for "theory" - cosmic donkey physics!'
-  },
-  9: {
-    thai: 'ลา, ลาเหลา, ลูกกุญแจประตู และลิง ลาลาลาลา',
-    thaiMasculine: 'ลา, ลาเหลา, ลูกกุญแจประตู และลิง ลาลาลาลาครับ',
-    thaiFeminine: 'ลา, ลาเหลา, ลูกกุญแจประตู และลิง ลาลาลาลาค่ะ',
-    english: 'Donkeys, dorkeys, door keys and monkeys lalalalala',
-    pronunciation: 'laa, laa-lao, look-kun-jae pra-dtuu lae ling la-la-la-la',
-    mnemonic: 'Think sing-song "la-la-la" and "look-kun-jae" for door keys - pure chaotic silliness!'
-  },
-  10: {
-    thai: 'า̶̬̩͇̼͖͖͈̯̳͎͛̀̐͌̅̿̈́̏̾̏̽̎',
-    thaiMasculine: 'า̶̬̩͇̼͖͖͈̯̳͎͛̀̐͌̅̿̈́̏̾̏̽̎ครับ',
-    thaiFeminine: 'า̶̬̩͇̼͖͖͈̯̳͎͛̀̐͌̅̿̈́̏̾̏̽̎ค่ะ',
-    english: 'า̶̬̩͇̼͖͖͈̯̳͎͛̀̐͌̅̿̈́̏̾̏̽̎',
-    pronunciation: 'า̶̬̩͇̼͖͖͈̯̳͎͛̀̐͌̅̿̈́̏̾̏̽̎',
-    mnemonic: 'า̶̬̩͇̼͖͖͈̯̳͎͛̀̐͌̅̿̈́̏̾̏̽̎'
-  }
-} as const;
-
-type ExampleKey = keyof typeof examples;
 
 export function ToneStep({ toneLevel, onNext, onBack }: { 
   toneLevel: number,
@@ -118,8 +33,7 @@ export function ToneStep({ toneLevel, onNext, onBack }: {
   }, []);
 
   // Ensure currentToneLevel is within valid range and is a number
-  const safeToneLevel = Math.max(1, Math.min(10, Number(currentToneLevel) || 1)) as ExampleKey;
-  const currentExample = examples[safeToneLevel];
+  const safeToneLevel = Math.max(1, Math.min(10, Number(currentToneLevel) || 1));
 
   return (
     <div className="space-y-5 px-2">
@@ -144,9 +58,18 @@ export function ToneStep({ toneLevel, onNext, onBack }: {
 
       {/* Style Label */}
       <div className="text-center">
-        <h4 className="text-lg font-semibold text-blue-400 min-h-[3rem] transition-all duration-300">
+        <h4 className="text-lg font-semibold text-blue-400 leading-tight transition-all duration-300">
           {getToneLevelLabel(safeToneLevel)}
         </h4>
+        {safeToneLevel === 1 && (
+          <p className="text-xs text-gray-400 mt-0.5">(Recommended if you want to use this app seriously.)</p>
+        )}
+        {safeToneLevel === 2 && (
+          <p className="text-xs text-gray-400 mt-0.5">(...ish. Still absolutely useful for your learning journey.)</p>
+        )}
+        {safeToneLevel === 4 && (
+          <p className="text-xs text-gray-400 mt-0.5">(But getting borderline useless.)</p>
+        )}
       </div>
 
       {/* Slider */}
@@ -177,43 +100,17 @@ export function ToneStep({ toneLevel, onNext, onBack }: {
         </div>
       </div>
 
-      {/* Preview Example */}
-      <div className="bg-[#1e1e1e] rounded-lg p-4 space-y-3">
-        <h4 className="text-sm font-medium text-white text-center">
-          Style Example
-        </h4>
-        <div className="space-y-3">
-          {/* English Translation */}
-          <p className="text-gray-300 text-sm text-center">
-            {currentExample.english}
-          </p>
-
-          {/* Thai Text */}
-          <p className="text-blue-400 text-base text-center">{currentExample.thai}</p>
-          
-          {/* Pronunciation Guide */}
-          <p className="text-gray-500 text-sm text-center italic">
-            {currentExample.pronunciation}
-          </p>
-
-          {/* Mnemonic */}
-          <p className="text-xs text-gray-500 text-center">
-            {currentExample.mnemonic}
-          </p>
-        </div>
-      </div>
-
       {/* Navigation Buttons */}
-      <div className="flex justify-between space-x-4">
+      <div className="flex justify-between pt-2">
         <button
           onClick={onBack}
-          className="flex-1 px-4 py-2 text-sm font-medium text-blue-400 bg-transparent border border-blue-400 rounded-lg hover:bg-blue-400/10 transition-colors"
+          className="neumorphic-button text-blue-400"
         >
           Back
         </button>
         <button
           onClick={() => onNext(safeToneLevel)}
-          className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
+          className="neumorphic-button text-blue-400"
         >
           Next
         </button>

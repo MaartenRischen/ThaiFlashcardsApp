@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { Home } from "lucide-react";
+import Image from 'next/image';
 import {
   SignedIn,
   SignedOut,
@@ -33,7 +34,13 @@ export function Navbar() {
           aria-label="Home"
           style={{ minWidth: 32 }}
         >
-          <Home className="h-5 w-5 text-white" />
+          <Image 
+            src="/favicon-32x32.png" 
+            alt="Home" 
+            width={20}
+            height={20} 
+            className="rounded-sm"
+          />
         </button>
         {/* Title: single responsive span, no duplicate */}
         <span className="flex-1 min-w-0 text-[0.6em] xs:text-[0.7em] md:text-[0.85em] text-gray-400 font-normal ml-2 align-middle">

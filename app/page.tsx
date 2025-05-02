@@ -181,7 +181,8 @@ export default function ThaiFlashcards() {
     switchSet,
     renameSet,
     refreshSets,
-    setAvailableSets
+    setAvailableSets,
+    setIsCardFlipped
   } = useSet();
   
   // Log activeSetProgress whenever the component renders
@@ -642,20 +643,17 @@ export default function ThaiFlashcards() {
       [index]: updated,
     });
 
-    // --- Rest of handleCardAction logic (moving to next card) remains the same --- 
-    const newActiveCardsIndex = activeCardsIndex + 1;
-    setActiveCardsIndex(newActiveCardsIndex);
-
+    // Move to next card
     const nextActiveIndex = (activeCardsIndex + 1) % activeCards.length;
-
-    setRandomSentence(null);
-    setShowAnswer(false);
-    setShowMnemonicHint(false); // Hide hint
+    setActiveCardsIndex(nextActiveIndex);
     if (activeCards.length > 0) {
       setIndex(activeCards[nextActiveIndex]);
     } else {
-      setIndex(0); // Fallback if no active cards
+      setIndex(0); // Fallback
     }
+
+    // Go back to the front of the next card
+    handleHideAnswer();
   };
 
   // Load mnemonics from localStorage
@@ -846,47 +844,18 @@ export default function ThaiFlashcards() {
   // Modified handleShowAnswer for tutorial trigger
   const handleShowAnswer = () => {
     setShowAnswer(true);
-    
-    // Scroll the card back into view after a small delay to allow rendering
+    setIsCardFlipped(true); // Set context state
+    setRandomSentence(null); // Reset example sentence
+
+    // Scroll the card back into view
     setTimeout(() => {
-      if (cardBackRef.current) {
-        const isMobile = isMobileDevice();
-        
-        // First try to use scrollIntoView with different behavior for mobile
-        cardBackRef.current.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: isMobile ? 'start' : 'nearest'
-        });
-        
-        // For mobile devices, add an additional window scroll
-        if (isMobile) {
-          const rect = cardBackRef.current.getBoundingClientRect();
-          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-          // On mobile, position the element a bit higher from the top for better visibility
-          const targetPosition = scrollTop + rect.top - 20; // 20px offset from top
-          
-          window.scrollTo({
-            top: targetPosition,
-            behavior: 'smooth'
-          });
-          
-          // For iOS specifically, sometimes need an extra nudge
-          if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-            setTimeout(() => {
-              window.scrollTo({
-                top: targetPosition,
-                behavior: 'smooth'
-              });
-            }, 100);
-          }
-        }
-      }
-    }, 150); // Ensure DOM has updated
-    
-    // Trigger next step specifically when moving from step 2 (Show Answer explanation)
-    if (tutorialStep === 2) { 
-      console.log("Tutorial: Triggering step 3 via Show Answer");
-      handleTutorialNext(); // Advance to the step explaining the back (e.g., difficulty buttons)
+      cardBackRef.current?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' // Changed from 'center' to 'start' for better positioning
+      });
+    }, 150); // Delay slightly for rendering
+    if (tutorialStep === 2) {
+      handleTutorialNext();
     }
   };
 
@@ -1052,6 +1021,15 @@ export default function ThaiFlashcards() {
       alert(`Error generating test set: ${errorMessage}`);
     } 
   }, [addSet, refreshSets, switchSet]); // Added addSet to dependencies
+
+  // Need a handler for when going back to the front
+  const handleHideAnswer = () => {
+    setShowAnswer(false);
+    setIsCardFlipped(false); // Set context state
+    setShowMnemonicHint(false); // Hide mnemonic hint on front
+    // Optionally scroll to top or card top if needed
+    // window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">

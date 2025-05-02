@@ -124,12 +124,13 @@ export function ProficiencyStep({ value, onNext, onBack }: {
 
       {/* Proficiency Level Image */}
       <div className="flex justify-center">
-        <div className="relative w-full max-w-[300px] h-[300px] rounded-lg overflow-hidden border border-blue-900/30 scale-[0.8]">
+        <div className="relative w-full max-w-[300px] rounded-lg overflow-hidden border border-blue-900/30">
           <Image
             src={`/images/level/${activeLevelIndex + 1}.png`}
             alt={`${proficiencyLevels[activeLevelIndex].label} level illustration`}
-            fill
-            className="object-cover"
+            width={300}
+            height={169}
+            className="mx-auto"
           />
         </div>
       </div>

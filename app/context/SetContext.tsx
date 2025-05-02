@@ -12,6 +12,8 @@ interface SetContextProps {
   activeSetContent: Phrase[];
   activeSetProgress: SetProgress;
   isLoading: boolean;
+  isCardFlipped: boolean;
+  setIsCardFlipped: React.Dispatch<React.SetStateAction<boolean>>;
   switchSet: (id: string) => Promise<void>;
   addSet: (
     setData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'>, 
@@ -56,6 +58,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   const [activeSetProgress, setActiveSetProgress] = useState<SetProgress>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [setsHaveLoaded, setSetsHaveLoaded] = useState(false);
+  const [isCardFlipped, setIsCardFlipped] = useState<boolean>(false);
 
   // ADD LOGGING HERE TO SEE STATE ON RENDER
   console.log('[SetProvider Render] availableSets:', availableSets);
@@ -636,7 +639,9 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       activeSetId,
       activeSetContent,
       activeSetProgress,
-      isLoading: isLoading || !isLoaded, // <-- Combine loading states
+      isLoading,
+      isCardFlipped,
+      setIsCardFlipped,
       switchSet,
       addSet,
       updateSetProgress,
@@ -651,7 +656,8 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     activeSetContent,
     activeSetProgress,
     isLoading,
-    isLoaded, // <-- Add isLoaded to dependencies
+    isCardFlipped,
+    setIsCardFlipped,
     switchSet,
     addSet,
     updateSetProgress,

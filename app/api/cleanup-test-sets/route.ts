@@ -10,16 +10,18 @@ export async function POST() {
     }
     const userId = authResult.userId;
 
-    // Delete all sets created in the last hour with "giving directions" in the name
+    // Delete all test sets created in the last hour
     const result = await prisma.flashcardSet.deleteMany({
       where: {
         userId: userId,
-        name: {
-          contains: "giving directions",
-        },
         createdAt: {
           gte: new Date(Date.now() - 60 * 60 * 1000) // Last hour
-        }
+        },
+        OR: [
+          { name: { contains: "Test Set" } },
+          { name: { contains: "giving directions" } },
+          { name: { contains: "Custom Set" } }
+        ]
       }
     });
 

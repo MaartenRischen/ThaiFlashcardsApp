@@ -1534,6 +1534,133 @@ export default function ThaiFlashcards() {
               </AccordionItem>
               {/* --- END NEW ITEM --- */}
 
+              {/* --- NEW ITEM: Set Wizard Guide --- */}
+              <AccordionItem value="item-7" className="border-[#333]">
+                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
+                  Set Wizard Guide
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 space-y-3 text-gray-300 text-sm">
+                  <p>The Set Wizard helps you create personalized Thai vocabulary sets. Access it by tapping the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-green-400"><Plus className="w-4 h-4" /></span> button at the bottom of the screen.</p>
+                  
+                  <div className="space-y-3">
+                    <div className="p-3 border border-[#333] rounded-md">
+                      <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 1: Set Your Proficiency</h4>
+                      <p>Choose your Thai language level from:</p>
+                      <ul className="pl-4 space-y-1 list-disc list-inside">
+                        <li>Complete Beginner (single words, basic nouns)</li>
+                        <li>Basic Understanding (short phrases, everyday needs)</li>
+                        <li>Intermediate (medium-length sentences, common situations)</li>
+                        <li>Advanced (complex sentences, nuanced vocabulary)</li>
+                        <li>Native/Fluent (natural, idiomatic Thai)</li>
+                        <li>God Mode (sophisticated, advanced Thai)</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="p-3 border border-[#333] rounded-md">
+                      <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 2: Select Content Style</h4>
+                      <p>Adjust the tone slider to control the style of generated content:</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-xs text-gray-400">Serious</span>
+                        <div className="w-full h-2 bg-gray-700 rounded-full relative">
+                          <div className="absolute top-0 left-0 h-2 w-1/2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+                          <div className="absolute top-0 left-1/2 h-4 w-4 -mt-1 -ml-2 bg-[#A9C4FC] rounded-full border-2 border-gray-700"></div>
+                        </div>
+                        <span className="text-xs text-gray-400">Playful</span>
+                      </div>
+                      <p className="mt-2 text-xs">Lower settings (1-4) create practical, textbook-like content. Higher settings (7-10) introduce quirky, sometimes surreal phrases.</p>
+                    </div>
+                    
+                    <div className="p-3 border border-[#333] rounded-md">
+                      <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 3: Define Topics & Goals</h4>
+                      <p>Select from preset scenarios or enter custom topics:</p>
+                      <ul className="pl-4 space-y-1 list-disc list-inside">
+                        <li>Choose from common scenarios (travel, shopping, dining)</li>
+                        <li>Enter specific topics (e.g., "hiking equipment," "vegetarian food")</li>
+                        <li>Describe specific goals (e.g., "ordering coffee at a café")</li>
+                      </ul>
+                      <p className="mt-1 text-xs">The more specific your topics, the more focused your vocabulary set will be.</p>
+                    </div>
+                    
+                    <div className="p-3 border border-[#333] rounded-md">
+                      <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 4: Generate & Wait</h4>
+                      <p>After clicking the "Generate Set" button:</p>
+                      <ul className="pl-4 space-y-1 list-disc list-inside">
+                        <li>The system will create 10-50 unique flashcards (depending on topic count)</li>
+                        <li>Generation typically takes 1-2 minutes</li>
+                        <li>A custom image for your set cover will be created</li>
+                        <li>You'll receive a notification when your set is ready</li>
+                      </ul>
+                      <p className="mt-1 text-xs">Find your new set in the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-blue-400"><Grid className="w-4 h-4" /></span> "My Sets" view after generation is complete.</p>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              
+              {/* --- NEW ITEM: Publishing & Importing Sets --- */}
+              <AccordionItem value="item-8" className="border-[#333]">
+                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
+                  Publishing & Importing Sets
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 space-y-3 text-gray-300 text-sm">
+                  <p>Share your custom sets with others or import sets created by the community:</p>
+                  
+                  <div className="space-y-3">
+                    <div className="p-3 border border-[#333] rounded-md">
+                      <h4 className="text-[#A9C4FC] font-semibold mb-2">Finding Your Sets</h4>
+                      <p>Access your sets by tapping the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-blue-400"><Grid className="w-4 h-4" /></span> "My Sets" button in the bottom navigation bar.</p>
+                      <p className="mt-2">Your custom sets and any imported sets will appear in this view, organized by creation date.</p>
+                    </div>
+                    
+                    <div className="p-3 border border-[#333] rounded-md">
+                      <h4 className="text-[#A9C4FC] font-semibold mb-2">Publishing to Gallery</h4>
+                      <p>To share a set with the community:</p>
+                      <ol className="pl-4 space-y-1 list-decimal list-inside">
+                        <li>Open the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-blue-400"><Grid className="w-4 h-4" /></span> "My Sets" view</li>
+                        <li>Long-press on the set you want to share</li>
+                        <li>Select "Publish to Gallery" from the menu</li>
+                        <li>Add optional tags and a description</li>
+                        <li>Tap "Publish" to make your set available to others</li>
+                      </ol>
+                      <p className="mt-1 text-xs">Published sets can't be edited, but you can unpublish them at any time.</p>
+                    </div>
+                    
+                    <div className="p-3 border border-[#333] rounded-md">
+                      <h4 className="text-[#A9C4FC] font-semibold mb-2">Browsing the Gallery</h4>
+                      <p>To explore sets created by other users:</p>
+                      <ol className="pl-4 space-y-1 list-decimal list-inside">
+                        <li>Tap the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-purple-400"><GalleryHorizontal className="w-4 h-4" /></span> "Gallery" button in the bottom navigation</li>
+                        <li>Browse featured sets or use the search bar to find specific content</li>
+                        <li>Filter sets by proficiency level, topic, or popularity</li>
+                        <li>Tap on any set to view details and preview cards</li>
+                      </ol>
+                    </div>
+                    
+                    <div className="p-3 border border-[#333] rounded-md">
+                      <h4 className="text-[#A9C4FC] font-semibold mb-2">Importing Sets</h4>
+                      <p>To add a set from the gallery to your collection:</p>
+                      <ol className="pl-4 space-y-1 list-decimal list-inside">
+                        <li>Find a set you want to study in the Gallery</li>
+                        <li>Tap the <span className="text-blue-400 font-bold">+ Add to My Sets</span> button</li>
+                        <li>The set will be copied to your collection</li>
+                        <li>Access it anytime from your <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-blue-400"><Grid className="w-4 h-4" /></span> "My Sets" view</li>
+                      </ol>
+                      <p className="mt-2">You can also export and import sets as JSON files using the <span className="bg-[#252525] text-xs px-2 py-1 rounded">⋮</span> menu in the "My Sets" view.</p>
+                    </div>
+                    
+                    <div className="p-3 border border-[#333] rounded-md">
+                      <h4 className="text-[#A9C4FC] font-semibold mb-2">Rating & Favorites</h4>
+                      <p>Help the community by rating sets you've imported:</p>
+                      <ul className="pl-4 space-y-1 list-disc list-inside">
+                        <li>Rate sets with 1-5 stars based on quality and usefulness</li>
+                        <li>Bookmark favorite sets by tapping the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-yellow-400"><Bookmark className="w-4 h-4" /></span> icon</li>
+                        <li>Leave comments to help others decide if a set is right for them</li>
+                      </ul>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              {/* --- END NEW ITEMS --- */}
+
               <div className="pt-4 text-center">
                 <button onClick={() => setShowHowItWorks(false)} className="neumorphic-button py-2 px-8 text-[#A9C4FC]">Got It!</button>
               </div>

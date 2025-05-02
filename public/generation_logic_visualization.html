@@ -249,54 +249,100 @@ interface ErrorSummary {
     <div class="section">
         <h2>4. Storage Pipeline</h2>
         <div class="implementation-note">
-            ⚠️ Note: Storage includes compatibility mapping and rollback mechanisms.
+            ⚠️ Note: This outlines the flow for saving generated sets and their associated data.
         </div>
 
-        <h3>Storage Flow</h3>
+        <h3>Set Data Mapping</h3>
         <div class="code">
-// Metadata mapping for database compatibility
-function mapStorageToDatabase(storageSet: SetMetaData): DatabaseSet {
-    const { toneLevel, ...rest } = storageSet;
-    return {
-        ...rest,
-        seriousnessLevel: toneLevel, // Backward compatibility
-    };
+// Data saved to Supabase 'sets' table
+interface SetData {
+    id: string; // Unique identifier (e.g., cuid)
+    userId: string; // Clerk User ID
+    name: string; // User-provided or derived name
+    description?: string; // Optional description
+    imageUrl?: string; // Supabase Storage URL for cover image
+    phrases: Phrase[]; // Array of generated phrases
+    sourcePreferences: Preferences; // User preferences used for generation
+    createdAt: timestamp;
+    updatedAt: timestamp;
 }
+        </div>
 
-function mapDatabaseToStorage(dbSet: DatabaseSet): SetMetaData {
-    return {
-        ...dbSet,
-        toneLevel: dbSet.seriousnessLevel,
-    };
-}
+        <h3>Transaction Sequence</h3>
+        <ol>
+            <li>Generate phrases using the logic described in previous sections.</li>
+            <li>If image generation is requested (and successful):
+                <ul>
+                    <li>Receive image data (e.g., base64 or buffer) from image generation service (e.g., Ideogram).</li>
+                    <li>Upload image to Supabase Storage bucket (e.g., 'set-images') under a unique path (e.g., `set-images/{setId}/{setId}_{timestamp}.webp`).</li>
+                    <li>Get the public URL for the uploaded image from Supabase Storage.</li>
+                </ul>
+            </li>
+            <li>Construct the `SetData` object, including the `imageUrl` if applicable.</li>
+            <li>Insert the `SetData` object into the Supabase `sets` table.</li>
+            <li>Handle potential errors during image upload or database insertion.</li>
+        </ol>
+    </div>
 
-// Storage sequence with rollback
-async function storeGeneratedSet(userId: string, set: CustomSet) {
-    const session = await startTransaction();
-    try {
-        // 1. Save metadata
-        const meta = await saveMetadata(session, userId, set);
-        
-        // 2. Save phrases
-        const phrases = await savePhrases(session, meta.id, set.phrases);
-        
-        // 3. Save progress data
-        const progress = await saveProgress(session, meta.id);
-        
-        await session.commitTransaction();
-        return { meta, phrases, progress };
-    } catch (error) {
-        await session.abortTransaction();
-        throw error;
-    }
+    <div class="section">
+        <h2>5. Frontend Image Handling (Supabase Optimization)</h2>
+        <div class="implementation-note">
+            ⚠️ Note: This describes how set cover images stored in Supabase are optimized for frontend display.
+        </div>
+        <p>
+            To ensure fast loading times for set cover images (which might be large when initially generated and stored in Supabase), a custom Next.js Image Loader (`supabase-image-loader.js`) is used in conjunction with the `<Image>` component.
+        </p>
+        <h3>Process:</h3>
+        <ol>
+            <li>The Next.js `<Image>` component is used wherever a set cover image needs to be displayed (e.g., in the "My Sets" modal).</li>
+            <li>The `src` prop passed to `<Image>` is the full public Supabase Storage URL (e.g., `https://<project_id>.supabase.co/storage/v1/object/public/set-images/.../image.webp`).</li>
+            <li>The `next.config.js` file is configured to use the custom `supabase-image-loader.js`.</li>
+            <li>The custom loader (`supabase-image-loader.js`):
+                <ul>
+                    <li>Intercepts the `src` provided to the `<Image>` component.</li>
+                    <li><strong>Checks if the `src` starts with `/`. If yes, it returns the `src` unchanged (passes through local images).</strong></li>
+                    <li>If the `src` is identified as a Supabase URL:
+                        <ul>
+                            <li>Extracts the bucket path (e.g., `set-images/.../image.webp`) from the full URL.</li>
+                            <li>Constructs a new Supabase Image Transformation URL using the project ID and the extracted path.</li>
+                            <li>Appends `width` and `quality` parameters to the transformation URL based on the props passed to the `<Image>` component (or defaults).</li>
+                        </ul>
+                    </li>
+                    <li>Returns the final transformation URL to the `<Image>` component.</li>
+                </ul>
+            </li>
+            <li>Supabase then serves a dynamically resized and optimized (e.g., WebP) version of the image based on the transformation URL parameters.</li>
+            <li>Local images (like logos, UI elements stored in `/public/images/`) are handled by the default Next.js loader and are not processed by the Supabase loader.</li>
+        </ol>
+        <h3>Benefits:</h3>
+        <ul>
+            <li>Reduced bandwidth usage.</li>
+            <li>Faster image loading times for users, especially for potentially large generated set covers.</li>
+            <li>Automatic optimization (like format conversion to WebP) handled by Supabase.</li>
+        </ul>
+        <div class="code">
+// Relevant configuration in next.config.js
+images: {
+    loader: 'custom',
+    loaderFile: './supabase-image-loader.js',
+    // ... other configs like remotePatterns
+},
+
+// Simplified logic within supabase-image-loader.js
+export default function supabaseLoader({ src, width, quality }) {
+    // 1. Check if src starts with '/' -> return src (local image)
+    // 2. Check if src is Supabase URL 
+    // 3. Extract path from URL
+    // 4. Construct transformation URL: https://<projectId>.supabase.co/storage/v1/render/image/public/<path>?width=...&quality=...
+    // 5. Return transformation URL
 }
         </div>
     </div>
 
     <div class="section">
-        <h2>5. Proficiency Level Implementation Rules</h2>
+        <h2>6. Proficiency Level Definitions (Generation Prompt)</h2>
         <div class="implementation-note">
-            ⚠️ Note: These rules are strictly enforced during generation to tailor vocabulary, grammar, and complexity.
+            ⚠️ Note: These rules are directly incorporated into the `buildGenerationPrompt` function to guide the LLM.
         </div>
         <table>
             <thead>
@@ -335,97 +381,37 @@ async function storeGeneratedSet(userId: string, set: CustomSet) {
     </div>
 
     <div class="section">
-        <h2>6. Prompt Structure (Simplified)</h2>
+        <h2>7. Prompt Structure (Simplified Template)</h2>
         <div class="implementation-note">
-            ⚠️ Note: This shows the main sections of the prompt sent to the LLM. The actual prompt includes dynamically injected preferences and detailed rule sets for Tone and Proficiency.
+            ⚠️ Note: This is a high-level template. The actual prompt (`buildGenerationPrompt`) is much more detailed.
         </div>
         <div class="code">
-You are an expert AI assistant specialized in creating language learning flashcards...
+## Base Instructions
+Generate [COUNT] unique, simple Thai phrases related to "[TOPIC]".
+Target audience proficiency: [PROFICIENCY LEVEL].
 
-**CRITICAL TASK REQUIREMENTS:**
-- Adhere STRICTLY to Proficiency Level: \${level}
-- Adhere STRICTLY to Tone Level: \${toneLevel}
-- ...
+## Proficiency Constraints ([PROFICIENCY LEVEL])
+[DETAILED RULES FOR THE LEVEL - e.g., word count, grammar, vocabulary based on table above]
 
-**User Preferences:**
-- Proficiency Level: \${level}
-- Tone Level: \${toneLevel}
-- Situations for Use: \${topicsToDiscuss || 'General conversation'}
-- Specific Focus: \${specificTopics || 'None'}
+## Tone and Style
+Adopt a [TONE DESCRIPTION - derived from toneLevel] tone. [Specific tone instructions].
 
-**DETAILED INSTRUCTIONS:**
+## Formatting Rules
+Provide output strictly as a JSON array of objects:
+[ { "thai": "...", "english": "...", "pronunciation": "...", "context": "...", "example": { "thai_sentence": "...", "english_sentence": "..."} } ]
+Ensure JSON is valid. No extra text.
 
-1.  **Set Title:** (Rules for generating title based on user topics)
-
-2.  **Proficiency Level Implementation (\${level}):** 
-    *   \${selectedLevelDescription} // Inject specific rules here
-
-3.  **TONE Implementation (\${toneLevel}):** 
-    *   Tone Style Guide (Detailed rules for levels 1-10)
-    *   Content Guidelines by Component (Phrases, Examples, Mnemonics)
-    *   Example Outputs by Level
-    *   Key Rules (e.g., maintain grammar, level constraints)
-
-4.  **Topic/Situation Control:** (Instructions on focusing content)
-
-5.  **Avoid Duplicates:** (Instructions to avoid generating existing phrases: \${existingPhrases})
-
-**Output Format:**
-Generate a JSON object containing "cleverTitle" and "phrases".
-- "cleverTitle": (Rules)
-- "phrases": An array containing exactly \${count} unique flashcard objects...
-  \`\`\`typescript
-  interface Phrase { ... } // Full interface definition
-  interface ExampleSentence { ... } // Full interface definition
-  \`\`\`
-  CRITICAL: Each phrase MUST include at least 2 example sentences...
-  Ensure the entire response is ONLY the JSON object...
+## Existing Phrases (Avoid Duplicates)
+[LIST OF PHRASES ALREADY GENERATED/IN SET]
         </div>
-    </div>
-
-    <div class="section">
-        <h2>7. Generation Parameters</h2>
-        <div class="implementation-note">
-            ⚠️ Note: Parameters are dynamically adjusted based on multiple factors.
-        </div>
-
-        <h3>Dynamic Parameters</h3>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Range</th>
-                <th>Adjustment Factors</th>
-            </tr>
-            <tr>
-                <td>Batch Size</td>
-                <td>3-8</td>
-                <td>Model capabilities, memory constraints</td>
-            </tr>
-            <tr>
-                <td>Temperature</td>
-                <td>0.1-2.0</td>
-                <td>Tone level, model characteristics</td>
-            </tr>
-            <tr>
-                <td>Retry Count</td>
-                <td>0-3</td>
-                <td>Error type, model availability</td>
-            </tr>
-            <tr>
-                <td>Backoff Delay</td>
-                <td>1s-8s</td>
-                <td>Retry attempt number</td>
-            </tr>
-    </table>
     </div>
 
     <div class="section">
         <h2>8. Validation System</h2>
         <div class="implementation-note">
-            ⚠️ Note: Validation checks structure, content, and semantics (based on tone).
+            ⚠️ Note: Validation steps occur after generation, before phrases are returned/saved. The tone-based semantic check is currently a placeholder.
         </div>
-
-        <h3>Validation Steps & Tone Logic</h3>
+        <h3>Validation Steps:</h3>
         <ol>
             <li><strong>Structure & Content Validation:</strong> Checks if required fields exist (<code>english</code>, <code>thai</code>, etc.), data types are correct, and minimum example count (>=2) is met. Checks basic mnemonic quality. Performed on all tones.</li>
             <li><strong>Duplicate Check:</strong> Normalizes and compares the <code>english</code> phrase against existing phrases in the batch to prevent duplicates. Performed on all tones.</li>
@@ -438,11 +424,14 @@ Generate a JSON object containing "cleverTitle" and "phrases".
                 </ul>
             </li>
         </ol>
-
+        <h3>Semantic Check Logic (Based on Tone):</h3>
+        <ul>
+            <li><strong>Tone Level 1-6 (Conservative/Creative):</strong> Require strict semantic relevance checks. <em>(Currently implemented as a placeholder `// TODO` that assumes pass).</em></li>
+            <li><strong>Tone Level 7-10 (Chaotic):</strong> Skip strict semantic checks (weirdness is expected/allowed).</li>
+        </ul>
         <div class="warning">
-            <strong>Current Implementation Status:</strong> The codebase includes the *structure* for tone-dependent semantic validation, but the actual semantic check logic for Tones 1-6 is currently a placeholder and always passes. Further implementation is needed for full semantic validation.
+            <strong>Warning:</strong> The "strict semantic check" for lower tone levels is not fully implemented in `generateOpenRouterBatch`. It currently assumes phrases pass this check. This needs to be built out for full validation accuracy.
         </div>
-
         <div class="code">
 // Example of how rules *might* be represented (Conceptual)
  interface ValidationRules {
@@ -475,89 +464,19 @@ Generate a JSON object containing "cleverTitle" and "phrases".
      10: { semanticChecks: 'none' }
  };
         </div>
-        </div>
+    </div>
 
     <div class="section">
-        <h2>9. Progress Tracking</h2>
+        <h2>9. API Route Details (/api/generate-set)</h2>
         <div class="implementation-note">
-            ⚠️ Note: Sophisticated progress tracking with multiple metrics.
+            ⚠️ Note: This details the server-side handling of generation requests.
         </div>
-
-        <h3>Progress Interface</h3>
-        <div class="code">
-interface GenerationProgress {
-    completed: number;
-    total: number;
-    latestPhrases?: Phrase[];
-    errors?: BatchError[];
-    currentModel?: string;
-    batchesCompleted: number;
-    estimatedTimeRemaining?: number;
-}
-        </div>
-        </div>
-
-    <div class="section">
-        <h2>10. Error Handling</h2>
-        <div class="implementation-note">
-            ⚠️ Note: Comprehensive error handling with aggregation and recovery.
-        </div>
-
-        <h3>Error Types</h3>
-        <table>
-            <tr>
-                <th>Type</th>
-                <th>Recovery Strategy</th>
-                <th>User Impact</th>
-            </tr>
-            <tr>
-                <td>Model Errors</td>
-                <td>Fallback to next model</td>
-                <td>Minimal - transparent retry</td>
-            </tr>
-            <tr>
-                <td>Validation Errors</td>
-                <td>Partial acceptance</td>
-                <td>Reduced set size</td>
-            </tr>
-            <tr>
-                <td>Critical Errors</td>
-                <td>Fallback content</td>
-                <td>Basic set provided</td>
-            </tr>
-        </table>
-        </div>
-
-    <div class="section">
-        <h2>11. UI Integration</h2>
-        <div class="implementation-note">
-            ⚠️ Note: Complete UI system for tone selection and progress tracking.
-        </div>
-
-        <h3>Components</h3>
-        <ul>
-            <li>Tone Selection
-                <ul>
-                    <li>Slider interface (1-10)</li>
-                    <li>Visual previews</li>
-                    <li>Example content</li>
-                </ul>
-            </li>
-            <li>Progress Display
-                <ul>
-                    <li>Completion percentage</li>
-                    <li>Latest phrases</li>
-                    <li>Error summaries</li>
-                </ul>
-            </li>
-            <li>Error Handling
-                <ul>
-                    <li>User-friendly messages</li>
-                    <li>Retry options</li>
-                    <li>Fallback content</li>
-                </ul>
-            </li>
-        </ul>
+        <h3>Authentication & Authorization</h3>
+        <!-- ... existing content ... -->
+        <h3>Request Handling Flow</h3>
+        <!-- ... existing list ... -->
+        <h3>Response Structure</h3>
+        <!-- ... existing code ... -->
     </div>
 </body>
 </html> 

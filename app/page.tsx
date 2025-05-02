@@ -182,7 +182,6 @@ export default function ThaiFlashcards() {
     renameSet,
     refreshSets,
     setAvailableSets,
-    setIsCardFlipped
   } = useSet();
   
   // Log activeSetProgress whenever the component renders
@@ -844,7 +843,6 @@ export default function ThaiFlashcards() {
   // Modified handleShowAnswer for tutorial trigger
   const handleShowAnswer = () => {
     setShowAnswer(true);
-    setIsCardFlipped(true); // Set context state
     setRandomSentence(null); // Reset example sentence
 
     // Scroll the card back into view
@@ -1025,7 +1023,6 @@ export default function ThaiFlashcards() {
   // Need a handler for when going back to the front
   const handleHideAnswer = () => {
     setShowAnswer(false);
-    setIsCardFlipped(false); // Set context state
     setShowMnemonicHint(false); // Hide mnemonic hint on front
     // Optionally scroll to top or card top if needed
     // window.scrollTo({ top: 0, behavior: 'smooth' });

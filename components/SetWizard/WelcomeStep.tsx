@@ -5,7 +5,7 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
   return (
     <div className="flex flex-col items-center text-center space-y-6">
       {/* Image with decorative background */}
-      <div className="relative w-[400px] h-[280px] mb-6">
+      <div className="relative w-[300px] h-[210px] mb-6">
         {/* Gradient background circle */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/30 via-blue-400/20 to-blue-600/10 rounded-2xl blur-md"></div>
         
@@ -17,8 +17,8 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
           <Image
             src="/images/setwizardgif2.gif"
             alt="Set Wizard Introduction"
-            width={380}
-            height={260}
+            width={285}
+            height={195}
             className="object-contain z-10"
             unoptimized={true}
           />

@@ -273,14 +273,16 @@ interface SetData {
             <li>Generate phrases using the logic described in previous sections.</li>
             <li>If image generation is requested (and successful):
                 <ul>
-                    <li>Receive image data (e.g., base64 or buffer) from image generation service (e.g., Ideogram).</li>
+                    <li>Generate a prompt for Ideogram based on the set name/topic.</li>
+                    <li>Send the prompt to the Ideogram API via a backend route (e.g., `/api/generate-image`).</li>
+                    <li>Receive the generated image data (e.g., base64 string or buffer) back from the Ideogram API/backend route.</li>
                     <li>Upload image to Supabase Storage bucket (e.g., 'set-images') under a unique path (e.g., `set-images/{setId}/{setId}_{timestamp}.webp`).</li>
                     <li>Get the public URL for the uploaded image from Supabase Storage.</li>
                 </ul>
             </li>
             <li>Construct the `SetData` object, including the `imageUrl` if applicable.</li>
             <li>Insert the `SetData` object into the Supabase `sets` table.</li>
-            <li>Handle potential errors during image upload or database insertion.</li>
+            <li>Handle potential errors during image generation, upload, or database insertion.</li>
         </ol>
     </div>
 
@@ -344,40 +346,40 @@ export default function supabaseLoader({ src, width, quality }) {
         <div class="implementation-note">
             ⚠️ Note: These rules are directly incorporated into the `buildGenerationPrompt` function to guide the LLM.
         </div>
-        <table>
-            <thead>
-                <tr>
+    <table>
+        <thead>
+            <tr>
                     <th>Proficiency Level</th>
                     <th>Description & Constraints</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
                     <td>Complete Beginner</td>
                     <td>Use ONLY single words or two-word combinations (noun+verb or noun+adjective). Focus on the absolute most basic, high-frequency vocabulary. Examples must be single-word or two-word statements only. NO questions, NO dialogues, NO complex structures.</td>
-                </tr>
-                <tr>
+            </tr>
+            <tr>
                     <td>Basic Understanding</td>
                     <td>Use short, practical phrases (2-4 words). Focus on basic S-V-O structures and common expressions for everyday needs. Simple questions are okay. Avoid dialogues. Examples should be basic descriptive statements about daily life.</td>
-                </tr>
-                <tr>
+            </tr>
+            <tr>
                     <td>Intermediate</td>
                     <td>Use medium-length descriptive sentences (4-7 words). Include basic compound structures and typical vocabulary for common situations. Simple questions and compound sentences are okay. Avoid dialogues. Examples should describe everyday situations.</td>
-                </tr>
-                <tr>
+            </tr>
+            <tr>
                     <td>Advanced</td>
                     <td>Use moderately complex sentences (7-12 words). Include varied grammar structures and more nuanced vocabulary. Complex questions and compound-complex sentences are okay. Avoid dialogues. Examples should demonstrate natural Thai expression.</td>
-                </tr>
-                <tr>
+            </tr>
+            <tr>
                     <td>Native/Fluent</td>
                     <td>Use natural, idiomatic Thai (any appropriate length). Include slang, cultural references, and educated native speech patterns. Complex questions and varied sentence structures are encouraged. Avoid dialogues. Examples should sound like authentic Thai.</td>
-                </tr>
-                <tr>
+            </tr>
+            <tr>
                     <td>God Mode</td>
                     <td>Use sophisticated, elaborate Thai (extended length). Include rare vocabulary, advanced grammar patterns, and literary/academic language. Complex questions and varied structures are encouraged. Avoid dialogues. Examples should demonstrate mastery of formal and literary Thai.</td>
-                </tr>
-            </tbody>
-        </table>
+            </tr>
+        </tbody>
+    </table>
     </div>
 
     <div class="section">
@@ -404,7 +406,7 @@ Ensure JSON is valid. No extra text.
 ## Existing Phrases (Avoid Duplicates)
 [LIST OF PHRASES ALREADY GENERATED/IN SET]
         </div>
-    </div>
+        </div>
 
     <div class="section">
         <h2>8. Validation System</h2>
@@ -464,7 +466,7 @@ Ensure JSON is valid. No extra text.
      10: { semanticChecks: 'none' }
  };
         </div>
-    </div>
+        </div>
 
     <div class="section">
         <h2>9. API Route Details (/api/generate-set)</h2>

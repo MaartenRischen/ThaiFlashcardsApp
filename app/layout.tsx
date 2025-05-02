@@ -54,12 +54,12 @@ export default function RootLayout({
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="theme-color" content="#ffffff" />
           
-          {/* Favicon tags - complete set for cross-browser compatibility */}
-          <link rel="shortcut icon" href="/favicon.ico" />
-          <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+          {/* Favicon tags - Next.js handles favicon.ico and apple-touch-icon.png automatically when placed in /app */}
+          {/* <link rel="shortcut icon" href="/favicon.ico" /> */}
+          {/* <link rel="icon" href="/favicon.ico" type="image/x-icon" /> */}
           <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
           <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-          <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+          {/* <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" /> */}
           <link rel="manifest" href="/manifest.json" />
           <meta name="msapplication-TileColor" content="#ffffff" />
           <meta name="msapplication-config" content="/browserconfig.xml" />

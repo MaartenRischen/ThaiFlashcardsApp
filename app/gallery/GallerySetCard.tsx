@@ -73,12 +73,12 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
       </div>
       
       <div className="p-4 flex-grow flex flex-col">
-        <h3 className="font-medium text-sm text-white line-clamp-3 group-hover:text-blue-400 transition-colors">
+        <h3 className="font-medium text-sm text-white line-clamp-3 group-hover:text-blue-400 transition-colors mb-2">
           {set.title}
         </h3>
 
         {set.proficiencyLevel && (
-          <div className="text-xs text-gray-400 flex flex-wrap gap-x-2 -mt-1">
+          <div className="text-xs text-gray-400 flex flex-wrap gap-x-2">
             <span>Level: <span className="font-medium text-[#A9C4FC]">{set.proficiencyLevel}</span></span>
             {set.toneLevel !== undefined && (
               <span>Tone Level: <span className="font-medium text-[#A9C4FC]">{set.toneLevel}/10</span></span>

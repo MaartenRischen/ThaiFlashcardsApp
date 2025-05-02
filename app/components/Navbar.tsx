@@ -35,7 +35,7 @@ export function Navbar() {
           style={{ minWidth: 32 }}
         >
           <Image 
-            src="/favicon-32x32.png" 
+            src="/logonobg.png"
             alt="Home" 
             width={20}
             height={20} 

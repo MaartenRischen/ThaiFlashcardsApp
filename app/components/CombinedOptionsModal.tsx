@@ -529,6 +529,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                 ? '/images/defaultnew.png'
                 : '/images/default-set-logo.png';
             }
+            console.log(`SetManagerModal: Rendering set "${set.name}" (ID: ${set.id}) with imageUrl:`, imgUrl);
             return (
               <div
                 key={set.id}

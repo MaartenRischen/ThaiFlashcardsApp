@@ -523,6 +523,7 @@ export function SetManagerModal({ isOpen, onClose }: {
             const isDefault = set.id === 'default';
             const checked = selected.includes(set.id);
             // Set image logic
+            console.log(`SetManagerModal: Raw set.imageUrl for "${set.name}":`, set.imageUrl);
             let imgUrl: string | undefined | null = set.imageUrl;
             if (!imgUrl) {
               imgUrl = set.id === 'default'

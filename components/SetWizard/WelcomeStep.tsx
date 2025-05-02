@@ -15,11 +15,12 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
         {/* Image container */}
         <div className="absolute inset-0 flex items-center justify-center">
           <Image
-            src="/images/donkeycards.png"
-            alt="Donkey Bridge Logo"
+            src="/images/setwizardgif2.gif"
+            alt="Set Wizard Introduction"
             width={380}
             height={260}
             className="object-contain z-10"
+            unoptimized={true}
           />
         </div>
       </div>

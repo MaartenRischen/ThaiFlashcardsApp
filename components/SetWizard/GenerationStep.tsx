@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Button } from '../ui/button';
-import { Progress } from '../ui/progress';
 import { Phrase } from '@/app/lib/set-generator';
 import { SetWizardState } from './SetWizardModal';
 import { Loader2 } from 'lucide-react';

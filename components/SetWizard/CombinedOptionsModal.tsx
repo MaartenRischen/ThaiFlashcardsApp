@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/app/components/ui/switch";
 import { useSet } from '@/app/context/SetContext';
-import type { SetMetaData } from '@/app/lib/storage';
 import { Upload } from 'lucide-react';
 import { getToneLabel } from '@/app/lib/utils';
 
@@ -107,41 +106,15 @@ export function SetManagerModal({ isOpen, onClose }: {
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { availableSets, /* switchSet */ activeSetId, /* deleteSet, renameSet, exportSet, addSet */ } = useSet(); // Commented out unused context functions
-  // Commented out unused state variables
-  // const [isLongPress, setIsLongPress] = useState<string | null>(null);
-  // const longPressTimeout = React.useRef<NodeJS.Timeout | null>(null);
-  // const [editingSetId, setEditingSetId] = useState<string | null>(null);
-  // const [editingTitle, setEditingTitle] = useState<string>("");
-
-  const handleTouchStart = (_setId: string) => { // Prefixed unused setId
-    // ... implementation ...
-  };
-
-  const handleTouchEnd = () => {
-    // ... implementation ...
-  };
-
-  const handleContextMenu = (_e: React.MouseEvent, _setId: string) => { // Prefixed unused e, setId
-    // ... implementation ...
-  };
-
-  // Commented out unused functions
-  // const handleStartRename = (set: SetMetaData) => { ... };
-  // const handleSaveRename = async () => { ... };
-  // const handleCancelRename = () => { ... };
-  // const handleDeleteSet = (setId: string) => { ... };
+  const { availableSets, /* switchSet */ activeSetId, /* deleteSet, renameSet, exportSet, addSet */ } = useSet();
 
   const handleImportClick = () => {
     // ... implementation ...
   };
 
-  const handleSelectSet = (_setId: string) => { // Prefixed unused setId
+  const handleSelectSet = (_setId: string) => {
     // ... implementation ...
   };
-
-  // Commented out unused publish function
-  // const handleConfirmPublish = async (set: SetMetaData) => { ... };
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -159,25 +132,16 @@ export function SetManagerModal({ isOpen, onClose }: {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto py-4 px-1 max-h-[calc(85vh-150px)]">
           {availableSets.map(set => {
-            const isDefault = set.id === 'default';
             const isActive = set.id === activeSetId;
-            // Commented out unused imgUrl assignment
-            // let imgUrl = set.imageUrl || '/images/default-set-logo.png';
-            // if (isDefault) imgUrl = '/images/default-set-logo.png';
             
             return (
               <div 
                 key={set.id}
                 className={`relative group bg-[#2C2C2C] rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-200 ${isActive ? 'border-blue-500 shadow-lg shadow-blue-500/30' : 'border-transparent hover:border-blue-600/50'}`}
                 onClick={() => handleSelectSet(set.id)}
-                onTouchStart={() => handleTouchStart(set.id)}
-                onTouchEnd={handleTouchEnd}
-                onContextMenu={(e) => handleContextMenu(e, set.id)}
               >
-                {/* ... (Overlays, Edit Input, Image rendering) ... */}
                 <div className="px-3 pb-3">
                   <h3 className="text-base font-medium text-gray-200 group-hover:text-white transition-colors line-clamp-3 mb-1" title={set.name}>{set.name}</h3>
-                  {/* ... CreatedAt ... */}
                   
                   <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">
                     {set.level && <span>Level: <span className="font-medium text-[#A9C4FC]">{set.level}</span></span>}
@@ -188,7 +152,6 @@ export function SetManagerModal({ isOpen, onClose }: {
                   
                   <p className="text-xs text-gray-400 mt-0.5">{set.phraseCount} cards</p>
                 </div>
-                {/* ... Active Indicator ... */}
               </div>
             );
           })}

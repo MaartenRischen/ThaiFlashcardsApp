@@ -35,7 +35,9 @@ const DEFAULT_SET_METADATA: SetMetaData = {
   createdAt: new Date().toISOString(),
   phraseCount: INITIAL_PHRASES.length,
   source: 'default',
-  isFullyLearned: false // Ensure default has the flag
+  isFullyLearned: false, // Ensure default has the flag
+  seriousnessLevel: null, // Add default null value
+  toneLevel: null // Add default null value
 };
 
 // Helper to get initial active set ID from localStorage (client-side only)

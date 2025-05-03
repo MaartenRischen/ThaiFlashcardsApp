@@ -3,482 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thai Flashcard Generation Logic - Implementation Details</title>
+    <title>Donkey Bridge - Generation Logic</title>
     <style>
         body {
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
             line-height: 1.6;
             max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 20px auto;
+            padding: 0 20px;
             color: #333;
+            background-color: #f9f9f9;
         }
+        h1, h2, h3 { color: #1a1a1a; }
         .section {
             margin-bottom: 40px;
-            padding: 20px;
-            border: 1px solid #ddd;
+            padding: 25px;
+            border: 1px solid #e0e0e0;
             border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .implementation-note {
-            background-color: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 10px;
-            margin: 10px 0;
+        .sub-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .note {
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #004085;
         }
         .code {
-            background-color: #f8f9fa;
+            background-color: #2d2d2d;
+            color: #f1f1f1;
             padding: 15px;
-            border-radius: 4px;
+            border-radius: 6px;
             overflow-x: auto;
-            font-family: monospace;
+            font-family: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
             white-space: pre;
+            font-size: 0.9em;
+            margin: 10px 0;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
+            font-size: 0.9em;
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 10px 12px;
             text-align: left;
         }
         th {
             background-color: #f8f9fa;
+            font-weight: 600;
         }
-        .warning {
-            color: #856404;
-            background-color: #fff3cd;
-            border: 1px solid #ffeeba;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-        }
+        .highlight { font-weight: bold; color: #0056b3; }
+        .error { color: #dc3545; font-weight: bold; }
+        .success { color: #28a745; font-weight: bold; }
+        li { margin-bottom: 5px; }
+        code { background-color: #eee; padding: 2px 5px; border-radius: 3px; font-family: monospace;}
     </style>
 </head>
 <body>
-    <h1>Thai Flashcard Generation Logic - Implementation Details</h1>
+    <h1>Donkey Bridge: Generation Logic Visualization (v1.5)</h1>
 
     <div class="section">
-        <h2>1. Model Selection & Fallback System</h2>
-        <div class="implementation-note">
-            ⚠️ Note: This section reflects the actual implementation with dynamic batch sizing and sophisticated retry mechanisms.
+        <h2>1. Set Creation Flow (Wizard UI)</h2>
+        <div class="note">
+            The Set Wizard guides users through configuring their desired flashcard set.
         </div>
-        
-        <h3>Model Priority Chain</h3>
-        <div class="code">
-const TEXT_MODELS = [
-    'google/gemini-2.5-flash-preview',    // Primary choice
-    'google/gemini-2.5-pro-preview-03-25', // First fallback
-    'openai/gpt-4',                       // Second fallback
-    'openai/gpt-3.5-turbo',               // Third fallback
-    'anthropic/claude-3-opus',            // Fourth fallback
-    'mistralai/mixtral-8x7b'             // Final fallback
-];
-        </div>
-
-        <h3>Dynamic Batch Processing</h3>
-        <div class="code">
-// Dynamic batch size based on model capabilities
-function getBatchSize(model: string): number {
-    switch (model) {
-        case 'google/gemini-2.5-flash-preview': return 8;
-        case 'openai/gpt-4': return 4;
-        default: return 3;
-    }
-}
-
-// Exponential backoff retry strategy
-const MAX_RETRIES = 3;
-const getBackoffDelay = (retry: number) => Math.pow(2, retry) * 1000;
-        </div>
-
-        <h3>Error Handling System</h3>
-    <table>
-            <tr>
-                <th>Error Type</th>
-                <th>Handling Strategy</th>
-                <th>Retry Logic</th>
-            </tr>
-            <tr>
-                <td>API Errors</td>
-                <td>Model fallback + exponential backoff</td>
-                <td>Up to 3 retries per model</td>
-            </tr>
-            <tr>
-                <td>Network Errors</td>
-                <td>Immediate retry with backoff</td>
-                <td>Up to 3 retries</td>
-            </tr>
-            <tr>
-                <td>Validation Errors</td>
-                <td>Partial result acceptance + continue</td>
-                <td>No retry (non-retryable)</td>
-            </tr>
-            <tr>
-                <td>Parse Errors</td>
-                <td>Model fallback</td>
-                <td>Switch model, then retry</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="section">
-        <h2>2. Temperature Control System</h2>
-        <div class="implementation-note">
-            ⚠️ Note: Temperature control is tightly integrated with tone levels and affects both generation and validation.
-        </div>
-
-        <h3>Temperature Mapping</h3>
-        <div class="code">
-// Non-linear temperature progression based on tone level
-function getTemperatureFromToneLevel(toneLevel: number | undefined): number {
-    // Default to level 5 (balanced) if undefined
-    const level = toneLevel ?? 5;
-    
-    // Clamp between 1 and 10
-    const clampedLevel = Math.max(1, Math.min(10, level));
-    
-    const temperatureMap: Record<number, number> = {
-        1: 0.1,   // Dead serious
-        2: 0.3,   // Barely a smile
-        3: 0.4,   // Slight humor
-        4: 0.5,   // Last practical level
-        5: 0.7,   // Starting to get weird
-        6: 0.8,   // Definitely weird
-        7: 0.9,   // Very weird
-        8: 0.95,  // Reality-bending
-        9: 1.5,   // Reality-breaking
-        10: 2.0   // Maximum possible chaos
-    };
-    
-    return temperatureMap[clampedLevel];
-}
-        </div>
-
-        <h3>Temperature Behavior by Level</h3>
-        <table>
-            <tr>
-                <th>Level</th>
-                <th>Temperature</th>
-                <th>Generation Behavior</th>
-                <th>Validation Rules</th>
-            </tr>
-            <tr><td>1</td><td>0.1</td><td>Dead serious, purely practical, textbook-style</td><td>Strict practicality and grammar</td></tr>
-            <tr><td>2</td><td>0.3</td><td>Serious, very subtle levity allowed</td><td>Strict practicality and grammar</td></tr>
-            <tr><td>3</td><td>0.4</td><td>Practical, emerging fun/humor</td><td>Practicality, grammar</td></tr>
-            <tr><td>4</td><td>0.5</td><td>Playful practicality, noticeable humor</td><td>Practicality, grammar</td></tr>
-            <tr><td>5</td><td>0.7</td><td>Balanced absurdity, mix of practical and illogical</td><td>Grammar, relaxed semantic validation</td></tr>
-            <tr><td>6</td><td>0.8</td><td>Leaning weird, bizarre contexts</td><td>Grammar, relaxed semantic validation</td></tr>
-            <tr><td>7</td><td>0.9</td><td>Very weird, surreal humor, strange concepts</td><td>Grammar, relaxed semantic validation</td></tr>
-            <tr><td>8</td><td>0.95</td><td>Reality-bending, semantically strange</td><td>Grammar only</td></tr>
-            <tr><td>9</td><td>1.5</td><td>Reality-breaking, chaotic, nonsensical</td><td>Grammar only</td></tr>
-            <tr><td>10</td><td>2.0</td><td>Maximum chaos, pure surrealism</td><td>Grammar only</td></tr>
-    </table>
-    </div>
-
-    <div class="section">
-        <h2>3. Batch Processing System</h2>
-        <div class="implementation-note">
-            ⚠️ Note: Batch processing includes sophisticated progress tracking and error aggregation.
-        </div>
-
-        <h3>Batch Generation Flow</h3>
-        <div class="code">
-interface BatchProgress {
-    completed: number;
-    total: number;
-    latestPhrases?: Phrase[];
-}
-
-// Main generation loop with progress tracking
-for (let i = 0; i < batchesNeeded; i++) {
-    // Update progress immediately
-    onProgressUpdate?.({ 
-        completed: allPhrases.length, 
-        total: totalCount,
-        latestPhrases: allPhrases.slice(-3)
-    });
-    
-    // Calculate remaining phrases needed
-    const remaining = totalCount - allPhrases.length;
-    const countForBatch = Math.min(remaining, batchSize);
-    
-    // Generate batch with retries
-    let retries = 0;
-    while (retries < MAX_RETRIES) {
-        try {
-            const result = await generateOpenRouterBatch(
-                prompt, 
-                TEXT_MODELS,
-                i,
-                preferences.toneLevel
-            );
-            
-            if (result.phrases.length > 0) break;
-            
-            retries++;
-            await new Promise(resolve => 
-                setTimeout(resolve, getBackoffDelay(retries))
-            );
-        } catch (error) {
-            aggregatedErrors.push(createBatchError(error, i));
-            retries++;
-        }
-    }
-}
-        </div>
-
-        <h3>Error Aggregation</h3>
-        <div class="code">
-interface BatchError {
-    type: 'PARSE' | 'VALIDATION' | 'API' | 'NETWORK' | 'UNKNOWN';
-    message: string;
-    details?: unknown;
-    batchIndex: number;
-}
-
-interface ErrorSummary {
-    errorTypes: string[];
-    totalErrors: number;
-    userMessage: string;
-}
-        </div>
-    </div>
-
-    <div class="section">
-        <h2>4. Storage Pipeline</h2>
-        <div class="implementation-note">
-            ⚠️ Note: This outlines the flow for saving generated sets and their associated data.
-        </div>
-
-        <h3>Set Data Mapping</h3>
-        <div class="code">
-// Data saved to Supabase 'sets' table
-interface SetData {
-    id: string; // Unique identifier (e.g., cuid)
-    userId: string; // Clerk User ID
-    name: string; // User-provided or derived name
-    description?: string; // Optional description
-    imageUrl?: string; // Supabase Storage URL for cover image
-    phrases: Phrase[]; // Array of generated phrases
-    sourcePreferences: Preferences; // User preferences used for generation
-    createdAt: timestamp;
-    updatedAt: timestamp;
-}
-        </div>
-
-        <h3>Transaction Sequence</h3>
         <ol>
-            <li>Generate phrases using the logic described in previous sections.</li>
-            <li>If image generation is requested (and successful):
+            <li><strong>Welcome:</strong> Introduction screen.</li>
+            <li><strong>Proficiency Selection:</strong> User chooses their current Thai level (e.g., Beginner, Intermediate, Advanced).</li>
+            <li><strong>Topic Selection:</strong> User selects <span class="highlight">ONE</span> topic type:
                 <ul>
-                    <li>Generate a prompt for Ideogram based on the set name/topic.</li>
-                    <li>Send the prompt to the Ideogram API via a backend route (e.g., `/api/generate-image`).</li>
-                    <li>Receive the generated image data (e.g., base64 string or buffer) back from the Ideogram API/backend route.</li>
-                    <li>Upload image to Supabase Storage bucket (e.g., 'set-images') under a unique path (e.g., `set-images/{setId}/{setId}_{timestamp}.webp`).</li>
-                    <li>Get the public URL for the uploaded image from Supabase Storage.</li>
+                    <li>Custom Goal (Text input, e.g., "Talk about holiday plans")</li>
+                    <li>Pre-defined Scenario (Chosen from a list based on proficiency level, e.g., "Ordering Food & Drinks")</li>
+                    <li>Weird Scenario (Chosen from a list of surreal options, e.g., "Convincing a black hole to be more optimistic")</li>
                 </ul>
             </li>
-            <li>Construct the `SetData` object, including the `imageUrl` if applicable.</li>
-            <li>Insert the `SetData` object into the Supabase `sets` table.</li>
-            <li>Handle potential errors during image generation, upload, or database insertion.</li>
+            <li><strong>Tone Selection:</strong> User adjusts a slider (1-10) to define the learning style (1 = Textbook realism, 10 = Maximum chaos).</li>
+            <li><strong>Review:</strong> Summary screen displays:
+                <ul>
+                    <li>Selected Proficiency Level</li>
+                    <li>Selected Topic (Value and Type: Goal/Scenario/Weird)</li>
+                    <li>Selected Tone Level (Descriptive Label, e.g., "Actually funny")</li>
+                    <li>Card Count Selection (Dropdown: 5, 10, 15, or 20 cards)</li>
+                </ul>
+            </li>
+            <li><strong>Generation:</strong> User confirms, triggering the backend API call. The UI shows a loading/progress state.</li>
         </ol>
     </div>
 
     <div class="section">
-        <h2>5. Frontend Image Handling (Supabase Optimization)</h2>
-        <div class="implementation-note">
-            ⚠️ Note: This describes how set cover images stored in Supabase are optimized for frontend display.
+        <h2>2. API Call: `/api/generate-set` (POST)</h2>
+        <div class="note">
+            The frontend sends the user's preferences to this backend endpoint to initiate set generation.
         </div>
-        <p>
-            To ensure fast loading times for set cover images (which might be large when initially generated and stored in Supabase), a custom Next.js Image Loader (`supabase-image-loader.js`) is used in conjunction with the `<Image>` component.
-        </p>
-        <h3>Process:</h3>
+
+        <h3>Request Body Structure</h3>
+        <div class="code">{
+  "preferences": {
+    "level": "Advanced", // ProficiencyLevelString
+    "specificTopics": "Convincing a black hole to be more optimistic", // Single topic string
+    "toneLevel": 4, // Number (1-10)
+    "topicsToDiscuss": "Convincing a black hole to be more optimistic" // Same as specificTopics (for prompt consistency)
+  },
+  "totalCount": 15, // Number (5, 10, 15, or 20)
+  "isTestRequest": false // Optional, boolean
+}</div>
+
+        <h3>Backend Processing Steps</h3>
         <ol>
-            <li>The Next.js `<Image>` component is used wherever a set cover image needs to be displayed (e.g., in the "My Sets" modal).</li>
-            <li>The `src` prop passed to `<Image>` is the full public Supabase Storage URL (e.g., `https://<project_id>.supabase.co/storage/v1/object/public/set-images/.../image.webp`).</li>
-            <li>The `next.config.js` file is configured to use the custom `supabase-image-loader.js`.</li>
-            <li>The custom loader (`supabase-image-loader.js`):
+            <li><strong>Authentication:</strong> Verifies user identity using Clerk `auth()`. Returns 401 if not authenticated.</li>
+            <li><strong>Input Validation:</strong> Checks if `preferences` and `totalCount` exist. Returns 400 if missing.</li>
+            <li><strong>Call `generateCustomSet` (<code style="color: #f1f1f1">app/lib/set-generator.ts</code>):</strong> Passes `preferences` and `totalCount`. This is the core phrase generation logic (see Section 3).</li>
+            <li><strong>Handle Test Requests:</strong> If `isTestRequest` is true, skips image generation and database operations, returns `generationResult` directly.</li>
+            <li><strong>Prepare Metadata:</strong> Creates initial `SetMetaData` object using `generationResult.cleverTitle` (generated by LLM), `preferences`, etc.</li>
+            <li><strong>Call `generateImage` (<code style="color: #f1f1f1">app/lib/ideogram-service.ts</code>):</strong> Generates the set cover image (see Section 4). Uploads to storage.</li>
+            <li><strong>Database Operations (<code style="color: #f1f1f1">app/lib/storage.ts</code>):</strong>
                 <ul>
-                    <li>Intercepts the `src` provided to the `<Image>` component.</li>
-                    <li><strong>Checks if the `src` starts with `/`. If yes, it returns the `src` unchanged (passes through local images).</strong></li>
-                    <li>If the `src` is identified as a Supabase URL:
+                    <li>`addSetMetaData`: Saves set metadata (including image URL) to the database.</li>
+                    <li>`saveSetContent`: Saves the generated phrases (`generationResult.phrases`).</li>
+                    <li>`saveSetProgress`: Saves initial empty progress data for the user and set.</li>
+                </ul>
+            </li>
+            <li><strong>Response:</strong>
+                <ul>
+                    <li><span class="success">On Success (201 Created):</span> Returns `{ newSetMetaData: SetMetaData, ...generationResult }`.</li>
+                    <li><span class="error">On Failure (500 Internal Server Error):</span> Returns `{ error: string }`. Attempts to delete partially created set data if an error occurred after metadata creation.</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h2>3. Core Generation Logic (`generateCustomSet`)</h2>
+        <div class="note">
+            Located in <code style="color: #004085">app/lib/set-generator.ts</code>. This function orchestrates LLM calls to generate phrases based on user preferences.
+        </div>
+
+        <div class="sub-section">
+            <h3>3.1. Temperature Calculation</h3>
+            <p>The `toneLevel` from `preferences` is mapped to an LLM `temperature` value to control creativity/randomness.</p>
+            <div class="code">function getTemperatureFromToneLevel(toneLevel: number | undefined): number {
+  // Clamps toneLevel between 1 and 10, defaults to 5
+  // Returns a temperature value based on a non-linear map:
+  // 1: 0.1 (Strict) -> 5: 0.7 (Balanced) -> 10: 2.0 (Chaos)
+  // See full map in source code.
+}</div>
+        </div>
+
+        <div class="sub-section">
+            <h3>3.2. Prompt Construction</h3>
+            <p>A detailed prompt is built for the LLM, incorporating:</p>
+            <ul>
+                <li>User's proficiency `level`.</li>
+                <li>The single `specificTopics` / `topicsToDiscuss` string.</li>
+                <li>The desired `totalCount` of phrases.</li>
+                <li>Instructions for output format (JSON array of `Phrase` objects).</li>
+                <li>Rules about politeness (`krap`/`ka`), pronunciation, mnemonics, and example sentences.</li>
+                <li>A request for a `cleverTitle` related to the topic.</li>
+                <li>Instructions to avoid generating phrases already present (passes `existingPhrases` array).</li>
+            </ul>
+        </div>
+
+        <div class="sub-section">
+            <h3>3.3. Batch Processing & LLM Calls</h3>
+            <p>Generation happens in batches to handle larger `totalCount` requests and manage different LLM capabilities.</p>
+            <ul>
+                <li>Uses `getBatchSize(model)` to determine how many phrases to request per API call (dynamic based on model).</li>
+                <li>Calls `generateOpenRouterBatch` which iterates through a prioritized list of models (`TEXT_MODELS`) via OpenRouter.</li>
+                <li>Uses calculated `temperature`.</li>
+                <li>Includes retry logic with exponential backoff for API/network errors.</li>
+                <li>Collects results from successful batches.</li>
+            </ul>
+            <div class="code">const TEXT_MODELS = [ // Prioritized list
+    'google/gemini-1.5-flash-preview-0514',
+    'google/gemini-1.5-pro-preview-0514',
+    // ... other models like GPT-4, Claude 3, Mixtral
+];</div>
+        </div>
+
+        <div class="sub-section">
+            <h3>3.4. Response Parsing & Validation</h3>
+            <ul>
+                <li>Parses the LLM's JSON response.</li>
+                <li>Calls `validateAndCleanPhrases` for each generated phrase:
+                    <ul>
+                        <li>Checks for required fields (`english`, `thai`, `pronunciation`).</li>
+                        <li>Performs basic type checks.</li>
+                        <li>Applies quality checks (e.g., length, non-empty).</li>
+                        <li><span class="highlight">Note:</span> Currently, stricter semantic validation based on `toneLevel` (checking if phrases make logical sense for low tones) is conceptual and <span class="error">not fully implemented</span> in the validation step itself. The prompt instructs the LLM, but validation doesn't enforce it rigorously post-generation.</li>
+                    </ul>
+                </li>
+                <li>Filters out invalid phrases.</li>
+            </div>
+
+            <div class="sub-section">
+                <h3>3.5. Error Handling & Fallback</h3>
+                <ul>
+                    <li>Aggregates errors encountered during batch processing (API errors, parsing errors, validation errors).</li>
+                    <li>If generation yields fewer phrases than `totalCount` (due to errors or LLM limits), it attempts to pad the results with fallback phrases from <code style="color: #004085">app/data/phrases.ts</code>.</li>
+                    <li>Returns a `GenerationResult` object containing:
                         <ul>
-                            <li>Extracts the bucket path (e.g., `set-images/.../image.webp`) from the full URL.</li>
-                            <li>Constructs a new Supabase Image Transformation URL using the project ID and the extracted path.</li>
-                            <li>Appends `width` and `quality` parameters to the transformation URL based on the props passed to the `<Image>` component (or defaults).</li>
+                            <li>`phrases`: Array of validated `Phrase` objects.</li>
+                            <li>`cleverTitle`: String title suggested by the LLM.</li>
+                            <li>`llmBrand`, `llmModel`: Info about the primary model used.</li>
+                            <li>`temperature`: The temperature value used for generation.</li>
+                            <li>`aggregatedErrors`, `errorSummary`: Details about any errors encountered.</li>
                         </ul>
                     </li>
-                    <li>Returns the final transformation URL to the `<Image>` component.</li>
                 </ul>
-            </li>
-            <li>Supabase then serves a dynamically resized and optimized (e.g., WebP) version of the image based on the transformation URL parameters.</li>
-            <li>Local images (like logos, UI elements stored in `/public/images/`) are handled by the default Next.js loader and are not processed by the Supabase loader.</li>
-        </ol>
-        <h3>Benefits:</h3>
+            </div>
+        </div>
+
+    <div class="section">
+        <h2>4. Image Generation Logic (`generateImage`)</h2>
+        <div class="note">
+            Located in <code style="color: #004085">app/lib/ideogram-service.ts</code>. Called by the API route after successful phrase generation.
+        </div>
         <ul>
-            <li>Reduced bandwidth usage.</li>
-            <li>Faster image loading times for users, especially for potentially large generated set covers.</li>
-            <li>Automatic optimization (like format conversion to WebP) handled by Supabase.</li>
-        </ul>
-        <div class="code">
-// Relevant configuration in next.config.js
-images: {
-    loader: 'custom',
-    loaderFile: './supabase-image-loader.js',
-    // ... other configs like remotePatterns
-},
-
-// Simplified logic within supabase-image-loader.js
-export default function supabaseLoader({ src, width, quality }) {
-    // 1. Check if src starts with '/' -> return src (local image)
-    // 2. Check if src is Supabase URL 
-    // 3. Extract path from URL
-    // 4. Construct transformation URL: https://<projectId>.supabase.co/storage/v1/render/image/public/<path>?width=...&quality=...
-    // 5. Return transformation URL
-}
-        </div>
-    </div>
-
-    <div class="section">
-        <h2>6. Proficiency Level Definitions (Generation Prompt)</h2>
-        <div class="implementation-note">
-            ⚠️ Note: These rules are directly incorporated into the `buildGenerationPrompt` function to guide the LLM.
-        </div>
-    <table>
-        <thead>
-            <tr>
-                    <th>Proficiency Level</th>
-                    <th>Description & Constraints</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                    <td>Complete Beginner</td>
-                    <td>Use ONLY single words or two-word combinations (noun+verb or noun+adjective). Focus on the absolute most basic, high-frequency vocabulary. Examples must be single-word or two-word statements only. NO questions, NO dialogues, NO complex structures.</td>
-            </tr>
-            <tr>
-                    <td>Basic Understanding</td>
-                    <td>Use short, practical phrases (2-4 words). Focus on basic S-V-O structures and common expressions for everyday needs. Simple questions are okay. Avoid dialogues. Examples should be basic descriptive statements about daily life.</td>
-            </tr>
-            <tr>
-                    <td>Intermediate</td>
-                    <td>Use medium-length descriptive sentences (4-7 words). Include basic compound structures and typical vocabulary for common situations. Simple questions and compound sentences are okay. Avoid dialogues. Examples should describe everyday situations.</td>
-            </tr>
-            <tr>
-                    <td>Advanced</td>
-                    <td>Use moderately complex sentences (7-12 words). Include varied grammar structures and more nuanced vocabulary. Complex questions and compound-complex sentences are okay. Avoid dialogues. Examples should demonstrate natural Thai expression.</td>
-            </tr>
-            <tr>
-                    <td>Native/Fluent</td>
-                    <td>Use natural, idiomatic Thai (any appropriate length). Include slang, cultural references, and educated native speech patterns. Complex questions and varied sentence structures are encouraged. Avoid dialogues. Examples should sound like authentic Thai.</td>
-            </tr>
-            <tr>
-                    <td>God Mode</td>
-                    <td>Use sophisticated, elaborate Thai (extended length). Include rare vocabulary, advanced grammar patterns, and literary/academic language. Complex questions and varied structures are encouraged. Avoid dialogues. Examples should demonstrate mastery of formal and literary Thai.</td>
-            </tr>
-        </tbody>
-    </table>
-    </div>
-
-    <div class="section">
-        <h2>7. Prompt Structure (Simplified Template)</h2>
-        <div class="implementation-note">
-            ⚠️ Note: This is a high-level template. The actual prompt (`buildGenerationPrompt`) is much more detailed.
-        </div>
-        <div class="code">
-## Base Instructions
-Generate [COUNT] unique, simple Thai phrases related to "[TOPIC]".
-Target audience proficiency: [PROFICIENCY LEVEL].
-
-## Proficiency Constraints ([PROFICIENCY LEVEL])
-[DETAILED RULES FOR THE LEVEL - e.g., word count, grammar, vocabulary based on table above]
-
-## Tone and Style
-Adopt a [TONE DESCRIPTION - derived from toneLevel] tone. [Specific tone instructions].
-
-## Formatting Rules
-Provide output strictly as a JSON array of objects:
-[ { "thai": "...", "english": "...", "pronunciation": "...", "context": "...", "example": { "thai_sentence": "...", "english_sentence": "..."} } ]
-Ensure JSON is valid. No extra text.
-
-## Existing Phrases (Avoid Duplicates)
-[LIST OF PHRASES ALREADY GENERATED/IN SET]
-        </div>
-        </div>
-
-    <div class="section">
-        <h2>8. Validation System</h2>
-        <div class="implementation-note">
-            ⚠️ Note: Validation steps occur after generation, before phrases are returned/saved. The tone-based semantic check is currently a placeholder.
-        </div>
-        <h3>Validation Steps:</h3>
-        <ol>
-            <li><strong>Structure & Content Validation:</strong> Checks if required fields exist (<code>english</code>, <code>thai</code>, etc.), data types are correct, and minimum example count (>=2) is met. Checks basic mnemonic quality. Performed on all tones.</li>
-            <li><strong>Duplicate Check:</strong> Normalizes and compares the <code>english</code> phrase against existing phrases in the batch to prevent duplicates. Performed on all tones.</li>
-            <li>
-                <strong>Semantic Validation (Tone-Dependent):</strong> Checks if the generated content makes logical sense.
-                <ul>
-                    <li><strong>Tones 1-6 (Strict):</strong> Semantic checks are performed. Illogical or nonsensical phrases/examples should be rejected. (<em>Code currently has placeholder - assumes pass</em>).</li>
-                    <li><strong>Tones 7-8 (Partial):</strong> Semantic checks are currently <strong>skipped</strong> (treated as 'none').</li>
-                    <li><strong>Tones 9-10 (None):</strong> Semantic checks are skipped, allowing absurd or nonsensical (but grammatically correct) content.</li>
-                </ul>
+            <li>Receives a single `prompt` string.</li>
+            <li>Constructs the prompt using the `cleverTitle` or `specificTopics` from the generation result.
+                <div class="code">const imagePrompt =
+  `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: "${topicDescription}". ` +
+  `Use vibrant colors that are friendly and engaging. ` +
+  `Crucial: do not include any text, letters, or numbers in the image.`;
+</div>
             </li>
-        </ol>
-        <h3>Semantic Check Logic (Based on Tone):</h3>
-        <ul>
-            <li><strong>Tone Level 1-6 (Conservative/Creative):</strong> Require strict semantic relevance checks. <em>(Currently implemented as a placeholder `// TODO` that assumes pass).</em></li>
-            <li><strong>Tone Level 7-10 (Chaotic):</strong> Skip strict semantic checks (weirdness is expected/allowed).</li>
+            <li><span class="highlight">No Tone Influence:</span> The image prompt is <span class="highlight">not</span> affected by the selected `toneLevel`.</li>
+            <li><span class="highlight">Strict No Text/Letters/Numbers Rule:</span> The prompt explicitly forbids any text, letters, or numbers.</li>
+            <li>Calls the Ideogram API via `callIdeogramApi`.</li>
+            <li>Handles polling for job completion.</li>
+            <li>Returns the generated image URL upon success, or `null` on failure.</li>
+            <li>Includes a fallback mechanism using a simpler prompt (`Simple cartoon illustration of a friendly donkey and a bridge doing something completely random. No text, letters, or numbers.`) if the primary generation or upload fails.</li>
+             <li>If both primary and fallback generation/upload fail, a static placeholder image is used.</li>
         </ul>
-        <div class="warning">
-            <strong>Warning:</strong> The "strict semantic check" for lower tone levels is not fully implemented in `generateOpenRouterBatch`. It currently assumes phrases pass this check. This needs to be built out for full validation accuracy.
-        </div>
-        <div class="code">
-// Example of how rules *might* be represented (Conceptual)
- interface ValidationRules {
-     // Structure validation
-     requiredFields: string[];
-     typeChecks: Record<string, string>;
-     
-     // Content validation
-     minExamples: number;
-     // maxPhraseLength: Record<string, number>; // Not currently implemented based on tone
-     // requireMnemonic: boolean; // Quality checked instead
-     
-     // Tone-specific rules
-     // allowedContexts: string[]; // Handled by semanticChecks
-     semanticChecks: 'strict' | 'partial' | 'none'; // Determines if logical sense is checked
-     grammarChecks: boolean; // Should always be true
- }
- 
- // Conceptual rule sets based on CURRENT IMPLEMENTATION:
- const validationRulesByTone: Record<number, { semanticChecks: 'strict' | 'none' }> = {
-     1: { semanticChecks: 'strict' }, // Tones 1-6
-     2: { semanticChecks: 'strict' },
-     3: { semanticChecks: 'strict' },
-     4: { semanticChecks: 'strict' },
-     5: { semanticChecks: 'strict' },
-     6: { semanticChecks: 'strict' },
-     7: { semanticChecks: 'none' },   // Tones 7-10 (incl. 'partial')
-     8: { semanticChecks: 'none' },
-     9: { semanticChecks: 'none' },
-     10: { semanticChecks: 'none' }
- };
-        </div>
-        </div>
-
-    <div class="section">
-        <h2>9. API Route Details (/api/generate-set)</h2>
-        <div class="implementation-note">
-            ⚠️ Note: This details the server-side handling of generation requests.
-        </div>
-        <h3>Authentication & Authorization</h3>
-        <!-- ... existing content ... -->
-        <h3>Request Handling Flow</h3>
-        <!-- ... existing list ... -->
-        <h3>Response Structure</h3>
-        <!-- ... existing code ... -->
     </div>
+
+     <div class="section">
+        <h2>5. Database & Storage Interaction (`storage.ts`)</h2>
+        <div class="note">
+            Located in <code style="color: #004085">app/lib/storage.ts</code>. Handles interaction with the database (Prisma/Supabase) and image storage (Supabase Storage).
+        </div>
+        <ul>
+            <li>Uses Prisma client for database operations (PostgreSQL).</li>
+            <li>`addSetMetaData`: Creates a new `FlashcardSet` record.</li>
+            <li>`saveSetContent`: Creates multiple `Phrase` records associated with the `FlashcardSet`.</li>
+            <li>`saveSetProgress`: Creates an initial `UserSetProgress` record linking the user and the new set.</li>
+            <li>`getAllSetMetaData`, `getSetContent`, `getSetProgress`, `updateSetProgress`, `deleteSetMetaData` handle fetching, updating, and deleting set data.</li>
+            <li>`uploadImageFromUrl` (in <code style="color: #004085">app/lib/imageStorage.ts</code>): Fetches an image from a URL (e.g., Ideogram's result) and uploads it to Supabase Storage.</li>
+        </ul>
+    </div>
+
 </body>
 </html> 

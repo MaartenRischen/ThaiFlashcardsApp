@@ -127,47 +127,62 @@ export async function POST(request: Request) {
       llmModel: generationResult.llmModel
     };
 
-    // Generate image for the set
+    // Generate image for the set - REVERTED LOGIC
     let imageUrl: string | null = null;
     try {
-      const topicDescription = generationResult.cleverTitle || 'Thai language learning';
-      const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}. Use vibrant colors that are friendly and engaging. Crucial: do not include any text, letters, or numbers in the image.`;
+      // Use title, fallback to specific topic input, final fallback
+      const topicDescription = generationResult.cleverTitle || preferences.specificTopics || 'a friendly donkey and bridge'; 
+      
+      // Restore original simple prompt structure
+      const imagePrompt = 
+        `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: "${topicDescription}". ` +
+        `Use vibrant colors that are friendly and engaging. ` +
+        `Crucial: do not include any text, letters, or numbers in the image.`;
+
+      console.log(`API Route: Generating image with prompt:`, imagePrompt);
       const generatedImageUrl = await generateImage(imagePrompt);
       
       if (generatedImageUrl !== null) {
-        // Upload the generated image to storage
-        imageUrl = await uploadImageFromUrl(generatedImageUrl, `set-images/${newMetaId}`);
+        // Upload logic (keeping unique ID generation)
+        const imagePathId = userId + '-' + Date.now(); 
+        imageUrl = await uploadImageFromUrl(generatedImageUrl, `set-images/${imagePathId}`);
         if (imageUrl) {
           setData.imageUrl = imageUrl;
           console.log(`API Route: Image generated and uploaded successfully: ${imageUrl}`);
         } else {
-          // If upload failed, try once more with a simpler prompt
-          try {
-            const fallbackPrompt = `Simple cartoon illustration of a donkey and a bridge doing something completely random.`;
-            console.log(`API Route: Trying fallback image generation with prompt:`, fallbackPrompt);
-            const fallbackImageUrl = await generateImage(fallbackPrompt);
-            if (fallbackImageUrl) {
-              imageUrl = await uploadImageFromUrl(fallbackImageUrl, `set-images/${newMetaId}`);
-              if (imageUrl) {
-                setData.imageUrl = imageUrl;
-              } else {
-                setData.imageUrl = getRandomPlaceholderImage();
-              }
-            } else {
-              setData.imageUrl = getRandomPlaceholderImage();
-            }
-          } catch (retryErr) {
-            console.error('API Route: Fallback image generation failed:', retryErr);
-            setData.imageUrl = getRandomPlaceholderImage();
-          }
+           console.warn("API Route: Image generated but upload failed. Attempting fallback.");
+           // Restore simpler fallback prompt
+           try {
+             const fallbackPrompt = 
+                `Simple cartoon illustration of a friendly donkey and a bridge doing something completely random. ` +
+                `No text, letters, or numbers.`;
+             console.log(`API Route: Trying fallback image generation with prompt:`, fallbackPrompt);
+             const fallbackImageUrl = await generateImage(fallbackPrompt);
+             if (fallbackImageUrl) {
+               const fallbackImagePathId = userId + '-' + Date.now() + '-fallback';
+               imageUrl = await uploadImageFromUrl(fallbackImageUrl, `set-images/${fallbackImagePathId}`);
+               if (imageUrl) {
+                 setData.imageUrl = imageUrl;
+                 console.log(`API Route: Fallback image uploaded successfully: ${imageUrl}`);
+               } else {
+                 console.warn("API Route: Fallback image upload failed. Using placeholder.");
+                 setData.imageUrl = getRandomPlaceholderImage();
+               }
+             } else {
+               console.warn("API Route: Fallback image generation failed. Using placeholder.");
+               setData.imageUrl = getRandomPlaceholderImage();
+             }
+           } catch (retryErr) {
+             console.error('API Route: Fallback image generation/upload failed:', retryErr);
+             setData.imageUrl = getRandomPlaceholderImage();
+           }
         }
       } else {
-        // If image generation failed, use a placeholder
+        console.warn("API Route: Initial image generation failed. Using placeholder.");
         setData.imageUrl = getRandomPlaceholderImage();
       }
     } catch (imageError) {
-      console.error('Failed to generate or upload image:', imageError);
-      // Don't fail the whole request if image generation fails
+      console.error('API Route: Error during image generation/upload process:', imageError);
       setData.imageUrl = getRandomPlaceholderImage();
     }
 

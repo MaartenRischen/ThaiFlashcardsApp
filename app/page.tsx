@@ -1730,8 +1730,8 @@ export default function ThaiFlashcards() {
               id: 'set-generation',
             });
             
-            // FIXED: Set totalCount to 10
-            const totalCount = 10;
+            // Get totalCount from wizard state
+            const totalCount = wizardState.cardCount; 
             
             // Use the single selected topic value
             const singleTopic = wizardState.selectedTopic.value;

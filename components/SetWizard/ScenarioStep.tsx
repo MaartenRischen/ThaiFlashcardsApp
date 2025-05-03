@@ -75,18 +75,6 @@ const proficiencyLevelMap: Record<string, string> = {
 };
 // --- End Data Structure ---
 
-// Reduced list of pre-made scenarios
-const scenarios = [
-  'Ordering Food & Drinks',
-  'Travel & Directions',
-  'Shopping',
-  'Making Small Talk',
-  'Business Meetings',
-  'Daily Routines',
-  'Emergencies',
-  'Dating & Romance',
-];
-
 // Pool of truly bizarre, surreal, and unexpected scenarios
 const weirdScenariosPool = [
   'Convincing a cloud to pay its taxes',
@@ -322,15 +310,14 @@ const weirdScenariosPool = [
   'Hosting a retirement party for old passwords'
 ];
 
-const CUSTOM_SCENARIO = 'Tell Us!';
-
+// Restore the function definition
 function getRandomWeirdScenarios(count: number, exclude: string[] = []) {
   const pool = weirdScenariosPool.filter(s => !exclude.includes(s));
   const selected: string[] = [];
   while (selected.length < count && pool.length > 0) {
     const idx = Math.floor(Math.random() * pool.length);
     selected.push(pool[idx]);
-    pool.splice(idx, 1);
+    pool.splice(idx, 1); // Remove selected item from pool
   }
   return selected;
 }

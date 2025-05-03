@@ -2,14 +2,10 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { 
   generateCustomSet, 
-  GeneratePromptOptions,
   GenerationResult,
-  Phrase as GeneratorPhrase,
-  TEXT_MODELS
 } from '@/app/lib/set-generator'; 
 import * as storage from '@/app/lib/storage';
 import { SetMetaData } from '@/app/lib/storage';
-import { INITIAL_PHRASES } from '@/app/data/phrases';
 import { generateImage } from '@/app/lib/ideogram-service';
 import { uploadImageFromUrl } from '../../lib/imageStorage';
 // import { prisma } from "@/app/lib/prisma"; // Removed unused import
@@ -72,7 +68,7 @@ export async function POST(request: Request) {
     console.log(`API Route: Authentication successful for userId: ${userId}`);
 
     const requestBody = await request.json();
-    const { preferences, totalCount, forcedModel } = requestBody;
+    const { preferences, totalCount } = requestBody;
     isTestRequest = !!requestBody.isTestRequest; // Convert to boolean
 
     if (!preferences || !totalCount) {

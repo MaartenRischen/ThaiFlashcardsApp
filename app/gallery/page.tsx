@@ -279,39 +279,36 @@ export default function GalleryPage() {
         <h1 className="text-xl font-medium text-indigo-400">User Gallery</h1>
         
         {/* Search and Filter Controls */}
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 w-full sm:flex-row sm:items-center sm:gap-2">
           <input
             type="text"
             placeholder="Search sets..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="neumorphic-input rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 placeholder-indigo-400/60 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm"
+            className="neumorphic-input rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 placeholder-indigo-400/60 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm w-full sm:w-auto"
           />
-          
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
-            className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm"
+            className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm w-full sm:w-auto"
           >
             {sortOptions.map(option => (
               <option key={option} value={option}>{option}</option>
             ))}
           </select>
-          
           <select
             value={proficiencyFilter}
             onChange={(e) => setProficiencyFilter(e.target.value)}
-            className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm"
+            className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm w-full sm:w-auto"
           >
             {proficiencyLevels.map(level => (
               <option key={level} value={level}>{level}</option>
             ))}
           </select>
-          
           <select
             value={authorFilter}
             onChange={(e) => setAuthorFilter(e.target.value)}
-            className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm"
+            className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm w-full sm:w-auto"
           >
             {authors.map(author => (
               <option key={author} value={author}>{author}</option>

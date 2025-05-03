@@ -8,6 +8,8 @@ import * as storage from '@/app/lib/storage';
 import { SetMetaData } from '@/app/lib/storage';
 import { generateImage } from '@/app/lib/ideogram-service';
 import { uploadImageFromUrl } from '../../lib/imageStorage';
+import { prisma } from "@/app/lib/prisma";
+import { getToneLabel } from '@/app/lib/utils';
 // import { prisma } from "@/app/lib/prisma"; // Removed unused import
 // import { uploadImageFromUrl } from '../../lib/imageStorage'; // Removed unused import
 
@@ -46,6 +48,9 @@ function getRandomPlaceholderImage(): string {
 function getErrorMessage(error: unknown): string {
   if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
     return (error as { message: string }).message;
+  }
+  if (error instanceof Error) {
+     return error.message;
   }
   return 'Set generation failed.';
 }
@@ -233,8 +238,8 @@ export async function POST(request: Request) {
       isFullyLearned: false,
       llmBrand: insertedRecord.llmBrand || undefined,
       llmModel: insertedRecord.llmModel || undefined,
-      seriousnessLevel: insertedRecord.seriousnessLevel || undefined,
-      toneLevel: insertedRecord.toneLevel || undefined
+      seriousnessLevel: insertedRecord.seriousnessLevel ?? null,
+      toneLevel: insertedRecord.seriousnessLevel !== null ? getToneLabel(insertedRecord.seriousnessLevel) : null
     };
 
     console.log(`API Route: Successfully created set ${newMetaId}.`);

@@ -160,12 +160,13 @@ export default function GalleryPage() {
         return res.json();
       })
       .then(data => {
-        console.log('Gallery sets data:', data);
-        // Log each set's author to debug
-        data.forEach((set: DisplaySet, index: number) => {
-          console.log(`Set ${index} - Title: ${set.title}, Author: '${set.author}'`);
-        });
-        setSets(data);
+        // Map publishedAt to createdAt and fix cardCount for all sets
+        const mapped = data.map((set: any) => ({
+          ...set,
+          createdAt: set.publishedAt || set.createdAt,
+          cardCount: set.cardCount ?? set.phraseCount ?? 0,
+        }));
+        setSets(mapped);
         setLoading(false);
       })
       .catch(err => {
@@ -284,13 +285,13 @@ export default function GalleryPage() {
             placeholder="Search sets..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-3 py-1 text-sm bg-indigo-900/30 border border-indigo-800/30 rounded-lg text-indigo-200 placeholder-indigo-400/50 focus:outline-none focus:border-indigo-600/50"
+            className="neumorphic-input rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 placeholder-indigo-400/60 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm"
           />
           
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
-            className="px-3 py-1 text-sm bg-indigo-900/30 border border-indigo-800/30 rounded-lg text-indigo-200"
+            className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm"
           >
             {sortOptions.map(option => (
               <option key={option} value={option}>{option}</option>
@@ -300,7 +301,7 @@ export default function GalleryPage() {
           <select
             value={proficiencyFilter}
             onChange={(e) => setProficiencyFilter(e.target.value)}
-            className="px-3 py-1 text-sm bg-indigo-900/30 border border-indigo-800/30 rounded-lg text-indigo-200"
+            className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm"
           >
             {proficiencyLevels.map(level => (
               <option key={level} value={level}>{level}</option>
@@ -310,7 +311,7 @@ export default function GalleryPage() {
           <select
             value={authorFilter}
             onChange={(e) => setAuthorFilter(e.target.value)}
-            className="px-3 py-1 text-sm bg-indigo-900/30 border border-indigo-800/30 rounded-lg text-indigo-200"
+            className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm"
           >
             {authors.map(author => (
               <option key={author} value={author}>{author}</option>

@@ -490,7 +490,7 @@ export function SetManagerModal({ isOpen, onClose }: {
           phrases: phrases || [],
           author: author, // Use the author name from the modal
           imageUrl: set.imageUrl || '',
-          cardCount: set.phraseCount || 0,
+          cardCount: phrases.length,
           llmBrand: set.llmBrand || '',
           llmModel: set.llmModel || '',
           toneLevel: set.toneLevel,
@@ -584,6 +584,14 @@ export function SetManagerModal({ isOpen, onClose }: {
                 </div>
                 {/* Set Name */}
                 <h3 className="text-base font-medium text-gray-200 group-hover:text-white transition-colors line-clamp-3" title={set.name}>{set.name}</h3>
+                {set.createdAt && (
+                  <div className="text-xs text-gray-500 mb-1">
+                    {(() => {
+                      const date = typeof set.createdAt === 'string' ? new Date(set.createdAt) : set.createdAt;
+                      return date ? date.toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+                    })()}
+                  </div>
+                )}
                 
                 {/* ADDED: Proficiency and Tone Level */}
                 <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">

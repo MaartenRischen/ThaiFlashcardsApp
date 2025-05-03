@@ -73,9 +73,20 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
       </div>
       
       <div className="p-4 flex-grow flex flex-col">
-        <h3 className="font-medium text-sm text-white line-clamp-3 group-hover:text-blue-400 transition-colors mb-2">
+        <h3 className="font-medium text-sm text-white line-clamp-3 group-hover:text-blue-400 transition-colors mb-1">
           {set.title}
         </h3>
+        <div className="text-xs text-blue-400/70 mb-1 text-center">
+          User Set by: {username}
+        </div>
+        {set.createdAt && (
+          <div className="text-xs text-gray-500 mb-2">
+            {(() => {
+              const date = typeof set.createdAt === 'string' ? new Date(set.createdAt) : set.createdAt;
+              return date ? date.toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+            })()}
+          </div>
+        )}
 
         {set.proficiencyLevel && (
           <div className="text-xs text-gray-400 flex flex-wrap gap-x-2">
@@ -117,10 +128,6 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
             </button>
             <span className="text-xs text-gray-400 mt-1">Import</span>
           </div>
-        </div>
-
-        <div className="text-xs text-blue-400/70 mt-4 text-center">
-          User Set by: {username}
         </div>
       </div>
     </div>

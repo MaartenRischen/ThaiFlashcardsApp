@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { SetProvider } from './context/SetContext'
 import { Providers } from './providers'
-import { Navbar } from './components/Navbar'
+import Navbar from './components/Navbar'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from "sonner"

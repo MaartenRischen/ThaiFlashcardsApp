@@ -140,14 +140,13 @@ export async function POST(request: Request) {
       const topicHasNumbers = /\d/.test(topicDescription);
 
       // Define the negative constraints conditionally
-      let negativeConstraint = "CRITICAL RULE: Absolutely NO text and NO letters are allowed anywhere in the image.";
-      if (!topicHasNumbers) {
-        negativeConstraint += " NO numbers are allowed either.";
-      } else {
-        // Allow numbers only if they are part of the topic visualization
-        negativeConstraint += " Numbers ARE allowed ONLY IF they are visually part of representing the main topic.";
-      }
-
+      const universalNegativeConstraint = [
+        "CRITICAL RULE: Absolutely NO text, NO words, NO letters, NO numbers, NO writing, NO signage, NO captions, NO subtitles, NO labels, NO logos, NO watermarks, NO symbols, NO characters, NO alphabets, NO numerals, NO digits, NO writing of any kind, NO visible language, NO English, NO Thai, NO hidden text, NO hidden letters, NO hidden numbers, NO text in the background, NO text on objects, NO text anywhere in the image.",
+        "If the topic itself is a word or phrase, do NOT render it as text—only as a visual concept.",
+        "If numbers are part of the topic, they may only appear as objects, not as digits or text.",
+        "NO text or writing on signs, banners, clothing, objects, or in the background."
+      ].join(' ');
+      
       // Construct the main prompt with corrected requirements
       const imagePrompt = 
         `Cute cartoon style illustration. ` +
@@ -156,7 +155,7 @@ export async function POST(request: Request) {
         // Make donkey/bridge mandatory and integrated with the topic
         `A friendly donkey AND a bridge MUST be clearly visible and integrated into the scene, visually representing or interacting directly with the main topic: "${topicDescription}". ` +
         `Use vibrant, friendly, and engaging colors. ` +
-        negativeConstraint; // Add the refined negative constraint
+        universalNegativeConstraint; // Add the comprehensive negative constraint
 
       console.log(`API Route: Generating image with FINAL prompt:`, imagePrompt);
       const generatedImageUrl = await generateImage(imagePrompt);
@@ -171,7 +170,7 @@ export async function POST(request: Request) {
            console.warn("API Route: Image generated but upload failed. Attempting fallback.");
            // Fallback logic - Enforce NO numbers here as topic is irrelevant
            try {
-             const fallbackNegativeConstraint = "CRITICAL RULE: Absolutely NO text, NO letters, NO numbers are allowed anywhere in the image.";
+             const fallbackNegativeConstraint = "CRITICAL RULE: Absolutely NO text, NO words, NO letters, NO numbers, NO writing, NO signage, NO captions, NO subtitles, NO labels, NO logos, NO watermarks, NO symbols, NO characters, NO alphabets, NO numerals, NO digits, NO writing of any kind, NO visible language, NO English, NO Thai, NO hidden text, NO hidden letters, NO hidden numbers, NO text in the background, NO text on objects, NO text anywhere in the image. NO text or writing on signs, banners, clothing, objects, or in the background.";
              const fallbackPrompt = 
                 `Simple, cute cartoon illustration of a friendly donkey and a bridge. ` +
                 fallbackNegativeConstraint;

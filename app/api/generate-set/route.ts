@@ -10,7 +10,8 @@ import {
 import * as storage from '@/app/lib/storage';
 import { SetMetaData } from '@/app/lib/storage';
 import { INITIAL_PHRASES } from '@/app/data/phrases';
-// import { generateImage } from '@/app/lib/ideogram-service'; // Removed unused import
+import { generateImage } from '@/app/lib/ideogram-service';
+import { uploadImageFromUrl } from '../../lib/imageStorage';
 // import { prisma } from "@/app/lib/prisma"; // Removed unused import
 // import { uploadImageFromUrl } from '../../lib/imageStorage'; // Removed unused import
 
@@ -129,6 +130,50 @@ export async function POST(request: Request) {
       llmBrand: generationResult.llmBrand,
       llmModel: generationResult.llmModel
     };
+
+    // Generate image for the set
+    let imageUrl: string | null = null;
+    try {
+      const topicDescription = generationResult.cleverTitle || 'Thai language learning';
+      const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}. Use vibrant colors that are friendly and engaging. Crucial: do not include any text or letters (numbers are ok, but discouraged).`;
+      const generatedImageUrl = await generateImage(imagePrompt);
+      
+      if (generatedImageUrl !== null) {
+        // Upload the generated image to storage
+        imageUrl = await uploadImageFromUrl(generatedImageUrl, `set-images/${newMetaId}`);
+        if (imageUrl) {
+          setData.imageUrl = imageUrl;
+          console.log(`API Route: Image generated and uploaded successfully: ${imageUrl}`);
+        } else {
+          // If upload failed, try once more with a simpler prompt
+          try {
+            const fallbackPrompt = `Simple cartoon illustration of a donkey and a bridge doing something completely random.`;
+            console.log(`API Route: Trying fallback image generation with prompt:`, fallbackPrompt);
+            const fallbackImageUrl = await generateImage(fallbackPrompt);
+            if (fallbackImageUrl) {
+              imageUrl = await uploadImageFromUrl(fallbackImageUrl, `set-images/${newMetaId}`);
+              if (imageUrl) {
+                setData.imageUrl = imageUrl;
+              } else {
+                setData.imageUrl = getRandomPlaceholderImage();
+              }
+            } else {
+              setData.imageUrl = getRandomPlaceholderImage();
+            }
+          } catch (retryErr) {
+            console.error('API Route: Fallback image generation failed:', retryErr);
+            setData.imageUrl = getRandomPlaceholderImage();
+          }
+        }
+      } else {
+        // If image generation failed, use a placeholder
+        setData.imageUrl = getRandomPlaceholderImage();
+      }
+    } catch (imageError) {
+      console.error('Failed to generate or upload image:', imageError);
+      // Don't fail the whole request if image generation fails
+      setData.imageUrl = getRandomPlaceholderImage();
+    }
 
     // Add metadata to database
     const insertedRecord = await storage.addSetMetaData(userId, setData);

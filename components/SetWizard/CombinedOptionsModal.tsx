@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/app/components/ui/switch";
 import { useSet } from '@/app/context/SetContext';
 import Image from 'next/image';
-import type { PhraseProgressData, SetMetaData } from '@/app/lib/storage';
+import { Phrase } from '@/app/lib/set-generator';
+import type { SetMetaData } from '@/app/lib/storage';
 import { useUser } from '@clerk/nextjs';
 import PublishConfirmationModal from '@/app/components/PublishConfirmationModal';
-import { toast } from 'sonner';
-import { X, Loader2, User, EyeOff, Edit, Trash2, Check, ChevronDown, Share2, Download, Upload } from 'lucide-react';
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Upload } from 'lucide-react';
 import { getToneLabel } from '@/app/lib/utils';
 
 interface CombinedOptionsModalProps {
@@ -24,13 +24,13 @@ interface CombinedOptionsModalProps {
   setIsPoliteMode: (checked: boolean) => void;
   autoplay: boolean;
   setAutoplay: (checked: boolean) => void;
-  currentSetName?: string;
-  activeSetId?: string | null;
-  onOpenSetManager?: () => void;
-  onExportSet?: () => void;
-  onResetSetProgress?: () => void;
-  onDeleteSet?: () => void;
-  isLoading?: boolean;
+  currentSetName: string;
+  activeSetId: string | null;
+  onOpenSetManager: () => void;
+  onExportSet: () => void;
+  onResetSetProgress: () => void;
+  onDeleteSet: () => void;
+  isLoading: boolean;
 }
 
 export function SettingsModal({ 
@@ -151,6 +151,25 @@ export function SetManagerModal({ isOpen, onClose }: {
 
   const handleSelectSet = (setId: string) => {
     // ... implementation ...
+  };
+
+  const handleConfirmPublish = async (set: SetMetaData) => {
+    // ... implementation ...
+    const phrases = await generatePhrases(set);
+    const response = await fetch('/api/gallery', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        cardCount: phrases.length,
+        llmBrand: set.llmBrand || '',
+        llmModel: set.llmModel || '',
+        toneLevel: set.seriousnessLevel,
+        specificTopics: set.specificTopics,
+      }),
+    });
+    // ... existing code ...
   };
 
   return (

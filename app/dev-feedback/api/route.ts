@@ -1,6 +1,6 @@
 // Remove unused: import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { prisma } from "@/app/lib/prisma";
+import { auth } from '@clerk/nextjs/server';
 
 const PASSWORD_COOKIE = 'dev_feedback_pw';
 

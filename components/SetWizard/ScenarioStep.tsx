@@ -361,7 +361,12 @@ export function ScenarioStep({ selectedTopic: initialSelectedTopic, proficiencyL
   }, [levelScenarios]); // Depend on levelScenarios so weird ones change if level changes back/forth
 
   // Combine level scenarios and weird scenarios for display
-  const allDisplayScenarios = useMemo(() => [...levelScenarios, ...weirdScenarios], [levelScenarios, weirdScenarios]);
+  // const allDisplayScenarios = useMemo(() => {
+  //   // Combine premade and weird scenarios into one list for display
+  //   const premade = PREMADE_SCENARIOS.map(s => ({ ...s, type: 'premade' as const }));
+  //   const weird = weirdScenarios.map(s => ({ ...s, type: 'weird' as const }));
+  //   return [...premade, ...weird];
+  // }, [weirdScenarios]);
 
   const handleSelect = (type: 'scenario' | 'weird', value: string) => {
     // If selecting the same one, deselect it

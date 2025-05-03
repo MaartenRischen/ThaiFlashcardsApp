@@ -127,21 +127,11 @@ export function SetWizardModal({ onComplete, onClose }: {
 
   // Use custom scenarios as topics if they exist
   const deriveTopicsFromScenarios = (scenarios: string[], customGoal?: string) => {
-    // Extract custom scenarios
-    const customScenarios: string[] = [];
-    
     if (customGoal) {
-      // Check if customGoal contains "Selected topics:" section
-      const topicsMatch = customGoal.match(/Selected topics: (.*?)($|\.)/);
-      if (topicsMatch && topicsMatch[1]) {
-        // Split by comma and trim
-        const extractedTopics = topicsMatch[1].split(',').map(t => t.trim());
-        customScenarios.push(...extractedTopics);
-      }
+      // Split by comma and trim, then filter out empty strings
+      return customGoal.split(',').map(t => t.trim()).filter(Boolean);
     }
-    
-    // Return custom scenarios as topics
-    return customScenarios;
+    return scenarios;
   };
 
   const steps = [

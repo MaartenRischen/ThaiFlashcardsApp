@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 
 export function WelcomeStep({ onNext }: { onNext: () => void }) {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+
   return (
     <div className="flex flex-col items-center text-center space-y-6">
       {/* Image with decorative background */}
@@ -12,6 +14,13 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
         {/* Subtle animated glow effect */}
         <div className="absolute inset-0 bg-blue-400/10 rounded-2xl animate-pulse"></div>
         
+        {/* Loading text */}
+        {!isImageLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center text-blue-400">
+            Cute gif loading...
+          </div>
+        )}
+        
         {/* Image container */}
         <div className="absolute inset-0 flex items-center justify-center">
           <Image
@@ -19,8 +28,9 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
             alt="Set Wizard Introduction"
             width={285}
             height={195}
-            className="object-contain z-10"
+            className={`object-contain z-10 transition-opacity duration-300 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
             unoptimized={true}
+            onLoadingComplete={() => setIsImageLoaded(true)}
           />
         </div>
       </div>

@@ -1725,11 +1725,13 @@ export default function ThaiFlashcards() {
             });
             
             // Calculate total cards based on number of topics
-            const totalTopics = [
+            const allTopics = new Set([
+              ...(wizardState.customGoal ? [wizardState.customGoal] : []),
               ...wizardState.topics,
-              ...wizardState.scenarios,
-              ...(wizardState.customGoal ? [wizardState.customGoal] : [])
-            ].filter(Boolean).length;
+              ...wizardState.scenarios
+            ].filter(Boolean));
+            
+            const totalTopics = allTopics.size;
             
             // Calculate cards per topic, ensuring total doesn't exceed 50
             const totalCount = Math.min(
@@ -1744,10 +1746,10 @@ export default function ThaiFlashcards() {
             
             // Create preferences object for test generation
             const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
-              level: wizardState.proficiency.levelEstimate, // Correctly access the nested property
-              specificTopics: wizardState.topics.length > 0 ? wizardState.topics.join(', ') : undefined, // Join topics array
+              level: wizardState.proficiency.levelEstimate,
+              specificTopics: wizardState.topics.length > 0 ? wizardState.topics.join(', ') : undefined,
               toneLevel: wizardState.tone,
-              topicsToDiscuss: wizardState.scenarios.length > 0 ? wizardState.scenarios.join(', ') : undefined, // Join scenarios
+              topicsToDiscuss: wizardState.customGoal || (wizardState.scenarios.length > 0 ? wizardState.scenarios.join(', ') : undefined),
             };
             
             console.log('SetWizard Completion: Calling /api/generate-set with preferences:', preferences, 'count:', totalCount);

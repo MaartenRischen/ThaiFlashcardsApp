@@ -4,6 +4,7 @@ import { Progress } from '../ui/progress';
 import { generateCustomSet, Phrase } from '@/app/lib/set-generator';
 import { SetWizardState } from './SetWizardModal';
 import { Loader2 } from 'lucide-react';
+import { defaultTopics, ScenarioKey } from './TopicStep';
 
 interface GenerationStepProps {
   state: SetWizardState;
@@ -25,37 +26,44 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
 
       const scenarios = state.scenarios?.filter(Boolean) || [];
       const customGoal = state.customGoal?.trim();
-      const topicsToDiscuss = [
-        ...scenarios,
-        ...(customGoal ? [customGoal] : [])
-      ].join(', ') || undefined;
-
-      const specificTopics = state.topics.length > 0 ? state.topics.join(', ') : undefined;
       
-      // Calculate total cards based on number of topics
-      const totalTopics = [
-        ...state.topics,
+      // For title generation and topics to discuss, prioritize custom goal if it exists
+      const topicsToDiscuss = customGoal || (scenarios.length > 0 
+        ? Array.from(new Set(scenarios)).join(' and ') 
+        : Array.from(new Set(state.topics)).join(', '));
+
+      // For content generation, combine all topics and deduplicate
+      const allTopics = [
+        customGoal,
         ...scenarios,
-        ...(customGoal ? [customGoal] : [])
-      ].filter(Boolean).length;
+        ...state.topics
+      ].filter(Boolean);
+      const specificTopics = Array.from(new Set(allTopics)).join(', ');
+
+      // Calculate total topics (using Set to avoid duplicates)
+      const uniqueTopics = new Set(allTopics);
+      const totalTopics = uniqueTopics.size || 1; // Ensure at least 1 topic
       
       // Calculate cards per topic, ensuring total doesn't exceed 50
       const totalCount = Math.min(
-        totalTopics === 0 ? 10 : totalTopics * 10, // 10 cards per topic, minimum 10
+        totalTopics * 10, // 10 cards per topic
         50 // Maximum 50 cards total
       );
       
       // If we have more than 5 topics, reduce cards per topic to stay under 50
       const cardsPerTopic = totalTopics > 5 ? Math.floor(50 / totalTopics) : 10;
       
-      console.log(`Generating set with ${totalCount} cards (${totalTopics} topics, ${cardsPerTopic} cards per topic)`);
+      console.log(`Generating set with ${totalCount} cards (${totalTopics} unique topics, ${cardsPerTopic} cards per topic)`);
 
+      // Generate the set
       const preferences = {
-          level: state.proficiency.levelEstimate,
-          specificTopics,
-          topicsToDiscuss,
+        level: state.proficiency.levelEstimate,
+        specificTopics,
         toneLevel: state.tone,
+        topicsToDiscuss
       };
+
+      console.log(`SetWizard Completion: Calling /api/generate-set with preferences:`, preferences, `count:`, totalCount);
 
       const result = await generateCustomSet(
         preferences,

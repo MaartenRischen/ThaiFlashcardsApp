@@ -413,23 +413,31 @@ export function ScenarioStep({ selectedScenarios: initialSelectedScenarios, cust
   };
 
   const handleNext = () => {
-    // Include both pre-made scenarios and custom tags, but filter out the CUSTOM_SCENARIO marker
-    // and any weird scenarios
-    const finalSelectedScenarios = selected.filter(s => 
-        s !== CUSTOM_SCENARIO && 
-        !weirdScenarios.includes(s)
-    );
+    // Include both pre-made scenarios and custom tags, but filter out only the CUSTOM_SCENARIO marker
+    const finalSelectedScenarios = Array.from(new Set(selected.filter(s => s !== CUSTOM_SCENARIO)));
 
     let finalCustomGoal: string | undefined = undefined;
-    if (selected.includes(CUSTOM_SCENARIO) && (custom.trim() || customTags.length > 0)) {
-        const customText = custom.trim() ? `${custom.trim()}. ` : '';
-        const tagsText = customTags.length > 0 ? `Selected topics: ${customTags.join(', ')}` : '';
-        finalCustomGoal = (customText + tagsText).trim() || undefined;
+    if (selected.includes(CUSTOM_SCENARIO)) {
+        // Always include the custom input if it exists
+        const customText = custom.trim();
+        
+        // Combine custom text and tags into a single custom goal
+        const customParts = [
+            customText,
+            ...customTags
+        ].filter(Boolean);
+        
+        finalCustomGoal = customParts.length > 0 ? Array.from(new Set(customParts)).join(', ') : undefined;
+        
+        // Remove any custom tags from scenarios since they'll be in the custom goal
+        finalSelectedScenarios.splice(0, finalSelectedScenarios.length, 
+            ...finalSelectedScenarios.filter(s => !customTags.includes(s))
+        );
     }
     
     onNext({ 
-      scenarios: finalSelectedScenarios, 
-      customGoal: finalCustomGoal
+        scenarios: finalSelectedScenarios.filter(Boolean), 
+        customGoal: finalCustomGoal
     });
   };
 

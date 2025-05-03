@@ -1,15 +1,25 @@
 import React, { useState } from 'react';
 
-type ScenarioKey = 
+export type ScenarioKey = 
   | 'Ordering Food & Drinks'
   | 'Travel & Directions'
   | 'Shopping'
   | 'Making Small Talk'
   | 'Business Meetings'
   | 'Daily Routines'
-  | 'Emergencies';
+  | 'Emergencies'
+  | 'Teaching juggling to a centipede'
+  | 'Explaining emojis to Shakespeare'
+  | 'Analyzing social & political issues in Thailand'
+  | 'Understanding Thai literature & arts'
+  | 'Advanced workplace & business communication'
+  | 'Exploring Thai history & belief systems'
+  | 'Understanding idioms & colloquialisms'
+  | 'Discussing hypothetical situations & speculation'
+  | 'Debating & persuasion'
+  | 'Understanding regional dialects & variations (awareness)';
 
-const defaultTopics: Record<ScenarioKey, string[]> = {
+export const defaultTopics: Record<ScenarioKey, string[]> = {
   'Ordering Food & Drinks': [
     'Restaurant Basics',
     'Drinks & Beverages',
@@ -58,6 +68,76 @@ const defaultTopics: Record<ScenarioKey, string[]> = {
     'Health Issues',
     'Safety & Security',
     'Asking for Help'
+  ],
+  'Teaching juggling to a centipede': [
+    'Body Parts',
+    'Movement & Actions',
+    'Numbers & Counting',
+    'Teaching Instructions',
+    'Circus & Performance'
+  ],
+  'Explaining emojis to Shakespeare': [
+    'Emotions & Feelings',
+    'Modern Technology',
+    'Literary Terms',
+    'Communication Methods',
+    'Cultural Differences'
+  ],
+  'Analyzing social & political issues in Thailand': [
+    'Current Events',
+    'Political Terms',
+    'Social Issues',
+    'Public Policy',
+    'Media & News'
+  ],
+  'Understanding Thai literature & arts': [
+    'Literary Terms',
+    'Art Forms',
+    'Cultural Expressions',
+    'Historical Context',
+    'Artistic Techniques'
+  ],
+  'Advanced workplace & business communication': [
+    'Professional Terms',
+    'Business Etiquette',
+    'Negotiation Skills',
+    'Corporate Culture',
+    'Management Concepts'
+  ],
+  'Exploring Thai history & belief systems': [
+    'Historical Events',
+    'Religious Terms',
+    'Cultural Traditions',
+    'Philosophical Concepts',
+    'Spiritual Practices'
+  ],
+  'Understanding idioms & colloquialisms': [
+    'Common Idioms',
+    'Slang Terms',
+    'Regional Expressions',
+    'Cultural Context',
+    'Informal Speech'
+  ],
+  'Discussing hypothetical situations & speculation': [
+    'Conditional Terms',
+    'Future Scenarios',
+    'Probability',
+    'Cause & Effect',
+    'Abstract Concepts'
+  ],
+  'Debating & persuasion': [
+    'Argument Structure',
+    'Logical Terms',
+    'Persuasive Language',
+    'Debate Format',
+    'Opinion Expression'
+  ],
+  'Understanding regional dialects & variations (awareness)': [
+    'Regional Terms',
+    'Dialect Features',
+    'Local Expressions',
+    'Pronunciation Variations',
+    'Cultural Context'
   ]
 };
 

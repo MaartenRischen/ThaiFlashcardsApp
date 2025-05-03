@@ -18,10 +18,12 @@ export interface SetWizardState {
     canDoSelections: string[];
     levelEstimate: ProficiencyLevelString;
   };
-  scenarios: string[];
-  customGoal?: string;
-  topics: string[];
+  selectedTopic: { 
+    type: 'scenario' | 'goal' | 'weird'; 
+    value: string; 
+  } | null;
   tone: number;
+  cardCount: number;
 }
 
 // Image Preloader Component
@@ -111,9 +113,9 @@ export function SetWizardModal({ onComplete, onClose }: {
       canDoSelections: [],
       levelEstimate: 'Intermediate',
     },
-    scenarios: [],
-    topics: [],
+    selectedTopic: null,
     tone: 1, // Default to serious & practical
+    cardCount: 10, // Default to 10 cards
   });
 
   // Show close button for all steps except generation (6)
@@ -125,13 +127,9 @@ export function SetWizardModal({ onComplete, onClose }: {
   // Set modal width based on step
   const modalWidth = step === 6 ? "max-w-3xl" : "max-w-2xl";
 
-  // Use custom scenarios as topics if they exist
-  const deriveTopicsFromScenarios = (scenarios: string[], customGoal?: string) => {
-    if (customGoal) {
-      // Split by comma and trim, then filter out empty strings
-      return customGoal.split(',').map(t => t.trim()).filter(Boolean);
-    }
-    return scenarios;
+  // Handler for card count changes
+  const handleCardCountChange = (newCount: number) => {
+    setState(prev => ({ ...prev, cardCount: newCount }));
   };
 
   const steps = [
@@ -150,21 +148,14 @@ export function SetWizardModal({ onComplete, onClose }: {
     />,
     <ScenarioStep
       key="scenario"
-      selectedScenarios={state.scenarios}
-      customGoal={state.customGoal}
+      selectedTopic={state.selectedTopic}
       proficiencyLevelEstimate={state.proficiency.levelEstimate}
       onNext={(data) => {
-        // Automatically derive topics from custom scenarios
-        const derivedTopics = deriveTopicsFromScenarios(data.scenarios, data.customGoal);
-        
         setState(prev => ({ 
           ...prev, 
-          scenarios: data.scenarios, 
-          customGoal: data.customGoal, 
-          topics: derivedTopics
+          selectedTopic: data.selectedTopic, 
         }));
         
-        // Skip the topic step and go directly to tone
         setStep(3);
       }}
       onBack={() => setStep(1)}
@@ -185,6 +176,7 @@ export function SetWizardModal({ onComplete, onClose }: {
         onComplete(state);
       }}
       onBack={() => setStep(3)}
+      onCardCountChange={handleCardCountChange}
     />,
     <GenerationStep
       key="generation"

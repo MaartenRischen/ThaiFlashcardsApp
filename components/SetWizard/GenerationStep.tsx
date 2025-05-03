@@ -27,21 +27,19 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
       const scenarios = state.scenarios?.filter(Boolean) || [];
       const customGoal = state.customGoal?.trim();
       
-      // For title generation and topics to discuss, prioritize custom goal if it exists
-      const topicsToDiscuss = customGoal || (scenarios.length > 0 
-        ? Array.from(new Set(scenarios)).join(' and ') 
-        : Array.from(new Set(state.topics)).join(', '));
-
-      // For content generation, combine all topics and deduplicate
-      const allTopics = [
+      // For title generation and topics to discuss, combine all topics with "and"
+      const allTopicsForTitle = [
         customGoal,
         ...scenarios,
         ...state.topics
       ].filter(Boolean);
-      const specificTopics = Array.from(new Set(allTopics)).join(', ');
+      const topicsToDiscuss = Array.from(new Set(allTopicsForTitle)).join(' and ');
+
+      // For content generation, combine all topics and deduplicate
+      const specificTopics = Array.from(new Set(allTopicsForTitle)).join(', ');
 
       // Calculate total topics (using Set to avoid duplicates)
-      const uniqueTopics = new Set(allTopics);
+      const uniqueTopics = new Set(allTopicsForTitle);
       const totalTopics = uniqueTopics.size || 1; // Ensure at least 1 topic
       
       // Calculate cards per topic, ensuring total doesn't exceed 50

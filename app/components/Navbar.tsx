@@ -1,22 +1,14 @@
 "use client";
 
 import React from 'react';
-import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { SetWizardModal } from '@/components/SetWizard/SetWizardModal';
-import { useSet } from '@/app/context/SetContext';
 import Image from 'next/image';
 
 export default function Navbar() {
-  const { userId } = useAuth();
-  const { refreshSets } = useSet();
   const pathname = usePathname();
   const router = useRouter();
-
-  const handleNavigate = (path: string) => {
-    router.push(path);
-  };
 
   // Don't show navbar on auth pages
   if (pathname === "/login" || pathname === "/register") {

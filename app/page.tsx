@@ -1,7 +1,7 @@
 /* eslint-disable */
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { ttsService } from './lib/tts-service';
 import AdminSettings from './components/AdminSettings';
@@ -25,6 +25,18 @@ import { Dialog } from '@/components/ui/dialog';
 import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle, Grid, Layers, Plus, Settings, HelpCircle, GalleryHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { useModal } from "./context/ModalContext";
+import { useFeedback } from './context/FeedbackContext';
+import { getToneLabel } from '@/app/lib/utils'; // Import getToneLabel
 
 // Utility function to detect mobile devices
 const isMobileDevice = (): boolean => {
@@ -740,7 +752,9 @@ export default function ThaiFlashcards() {
               level: importedData.level || 'beginner',
               goals: importedData.goals || [],
               specificTopics: importedData.specificTopics,
-              source: 'import' as const
+              source: 'import' as const,
+              seriousnessLevel: importedData.seriousnessLevel ?? null, // Add default
+              toneLevel: importedData.seriousnessLevel !== null && importedData.seriousnessLevel !== undefined ? getToneLabel(importedData.seriousnessLevel) : null // Add derived default
             };
             
             // Add the set using context

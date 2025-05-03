@@ -161,7 +161,7 @@ export default function GalleryPage() {
       })
       .then(data => {
         // Map publishedAt to createdAt and fix cardCount for all sets
-        const mapped = data.map((set: any) => ({
+        const mapped = data.map((set: GallerySet & { publishedAt?: string | Date; phraseCount?: number }) => ({
           ...set,
           createdAt: set.publishedAt || set.createdAt,
           cardCount: set.cardCount ?? set.phraseCount ?? 0,

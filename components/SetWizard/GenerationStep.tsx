@@ -4,6 +4,8 @@ import { Progress } from '../ui/progress';
 import { Phrase } from '@/app/lib/set-generator';
 import { SetWizardState } from './SetWizardModal';
 import { Loader2 } from 'lucide-react';
+import { WizardStepProps } from './SetWizardModal';
+import { Badge } from "@/components/ui/badge";
 
 interface GenerationStepProps {
   state: SetWizardState;

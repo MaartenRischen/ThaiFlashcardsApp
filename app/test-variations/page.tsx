@@ -117,19 +117,19 @@ export default function TestVariations() {
     const tasks: GenerationTask[] = [];
     if (generateAllLevels && generateAllTones) {
       // All combinations (60 tasks)
-      PROFICIENCY_LEVELS.forEach((level, levelIndex) => {
-        TONE_LEVELS.forEach((tone, toneIndex) => {
+      PROFICIENCY_LEVELS.forEach((level, _levelIndex) => {
+        TONE_LEVELS.forEach((tone, _toneIndex) => {
           tasks.push({ level, toneLevel: tone });
         });
       });
     } else if (generateAllLevels) {
       // All levels, selected tone (6 tasks)
-      PROFICIENCY_LEVELS.forEach((level, levelIndex) => {
+      PROFICIENCY_LEVELS.forEach((level, _levelIndex) => {
         tasks.push({ level, toneLevel: TONE_LEVELS[currentTone] });
       });
     } else if (generateAllTones) {
       // Selected level, all tones (10 tasks)
-      TONE_LEVELS.forEach((tone, toneIndex) => {
+      TONE_LEVELS.forEach((tone, _toneIndex) => {
         tasks.push({ level: PROFICIENCY_LEVELS[currentProficiency], toneLevel: tone });
       });
     } else {
@@ -369,8 +369,8 @@ export default function TestVariations() {
                 className="w-full bg-[#2a2a2a] text-white rounded-md px-3 py-2 border border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={generateAllLevels}
               >
-                {PROFICIENCY_LEVELS.map((level, index) => (
-                  <option key={level} value={index}>{level}</option>
+                {PROFICIENCY_LEVELS.map((level, _levelIndex) => (
+                  <option key={level} value={_levelIndex}>{level}</option>
                 ))}
               </select>
             </div>
@@ -383,8 +383,8 @@ export default function TestVariations() {
                 className="w-full bg-[#2a2a2a] text-white rounded-md px-3 py-2 border border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={generateAllTones}
               >
-                {TONE_LEVELS.map((tone, index) => (
-                  <option key={tone} value={index}>Tone {tone}: {getToneDescription(tone)}</option>
+                {TONE_LEVELS.map((tone, _toneIndex) => (
+                  <option key={tone} value={_toneIndex}>Tone {tone}: {getToneDescription(tone)}</option>
                 ))}
               </select>
             </div>
@@ -422,8 +422,8 @@ export default function TestVariations() {
                 onChange={(e) => setCurrentModel(parseInt(e.target.value))}
                 className="w-full bg-[#2a2a2a] text-white rounded-md px-3 py-2 border border-gray-700"
               >
-                {LLM_MODELS.map((model, index) => (
-                  <option key={model} value={index}>{model}</option>
+                {LLM_MODELS.map((model, _modelIndex) => (
+                  <option key={model} value={_modelIndex}>{model}</option>
                 ))}
               </select>
             </div>
@@ -498,7 +498,7 @@ export default function TestVariations() {
                  className="flex-grow bg-[#2a2a2a] text-white rounded-md px-2 py-1 border border-gray-700 text-sm"
                >
                  <option value="any">Any</option>
-                 {PROFICIENCY_LEVELS.map(level => (
+                 {PROFICIENCY_LEVELS.map((level, _levelIndex) => (
                    <option key={level} value={level}>{level}</option>
                  ))}
                </select>
@@ -511,8 +511,8 @@ export default function TestVariations() {
                  className="flex-grow bg-[#2a2a2a] text-white rounded-md px-2 py-1 border border-gray-700 text-sm"
                >
                  <option value="any">Any</option>
-                 {TONE_LEVELS.map(tone => (
-                   <option key={tone} value={tone.toString()}>{tone}</option>
+                 {TONE_LEVELS.map((tone, _toneIndex) => (
+                   <option key={tone} value={_toneIndex.toString()}>{tone}</option>
                  ))}
                </select>
              </div>
@@ -526,7 +526,7 @@ export default function TestVariations() {
                  onChange={(e) => handleFilterChange('llmModel', e.target.value)}
                  className="flex-grow bg-[#2a2a2a] text-white rounded-md px-2 py-1 border border-gray-700 text-sm"
                >
-                 {uniqueModels.map(model => (
+                 {uniqueModels.map((model, _modelIndex) => (
                    <option key={model} value={model}>{model === 'any' ? 'Any' : model}</option>
                  ))}
                </select>
@@ -538,7 +538,7 @@ export default function TestVariations() {
                  onChange={(e) => handleFilterChange('topic', e.target.value)}
                  className="flex-grow bg-[#2a2a2a] text-white rounded-md px-2 py-1 border border-gray-700 text-sm"
                >
-                 {uniqueTopics.map(topic => (
+                 {uniqueTopics.map((topic, _topicIndex) => (
                    <option key={topic} value={topic}>{topic === 'any' ? 'Any' : topic}</option>
                  ))}
                </select>

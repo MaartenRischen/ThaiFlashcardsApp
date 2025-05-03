@@ -1,26 +1,23 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { SetWizardModal } from '@/components/SetWizard/SetWizardModal';
+import { useSet } from '@/app/context/SetContext';
 import Image from 'next/image';
-import Link from 'next/link';
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-  useUser
-} from "@clerk/nextjs";
-import { useFeedback } from "../context/FeedbackContext";
-import { Plus, Grid, Settings, HelpCircle, GalleryHorizontal, LogIn, LogOut } from 'lucide-react';
 
-export function Navbar() {
+export default function Navbar() {
+  const { userId } = useAuth();
+  const { refreshSets } = useSet();
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isLoaded } = useUser();
-  const { /* openFeedbackModal */ } = useFeedback();
-  
+
+  const handleNavigate = (path: string) => {
+    router.push(path);
+  };
+
   // Don't show navbar on auth pages
   if (pathname === "/login" || pathname === "/register") {
     return null;
@@ -46,7 +43,7 @@ export function Navbar() {
         </button>
         {/* Title: single responsive span, no duplicate */}
         <span className="flex-1 min-w-0 text-[0.6em] xs:text-[0.7em] md:text-[0.85em] text-gray-400 font-normal ml-2 align-middle">
-          Ultra Personal Thai Language Learning Experience{user ? ` For ${user.firstName || user.username}` : ''}
+          Ultra Personal Thai Language Learning Experience
         </span>
         <nav className="flex items-center gap-2 ml-auto flex-shrink-0">
           <SignedOut>

@@ -8,7 +8,6 @@ import * as storage from '@/app/lib/storage';
 import { SetMetaData } from '@/app/lib/storage';
 import { generateImage } from '@/app/lib/ideogram-service';
 import { uploadImageFromUrl } from '../../lib/imageStorage';
-import { prisma } from "@/app/lib/prisma";
 import { getToneLabel } from '@/app/lib/utils';
 // import { prisma } from "@/app/lib/prisma"; // Removed unused import
 // import { uploadImageFromUrl } from '../../lib/imageStorage'; // Removed unused import

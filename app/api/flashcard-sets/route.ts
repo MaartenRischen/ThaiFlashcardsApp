@@ -4,6 +4,7 @@ import * as storage from '@/app/lib/storage';
 import { SetMetaData } from '@/app/lib/storage'; // Keep if needed by SetMetaData type def
 import { Phrase } from '@/app/lib/set-generator';
 import { prisma } from "@/app/lib/prisma";
+import { getToneLabel } from '@/app/lib/utils'; // Import getToneLabel
 
 function getErrorMessage(error: unknown): string {
   if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
@@ -121,7 +122,9 @@ export async function POST(_request: Request) {
        phraseCount: phrases.length,
        isFullyLearned: false, // Default for new sets
        llmBrand: insertedRecord.llmBrand || undefined,
-       llmModel: insertedRecord.llmModel || undefined
+       llmModel: insertedRecord.llmModel || undefined,
+       seriousnessLevel: insertedRecord.seriousnessLevel, // Add seriousnessLevel
+       toneLevel: insertedRecord.seriousnessLevel !== null ? getToneLabel(insertedRecord.seriousnessLevel) : null // Add derived toneLevel
     };
 
     console.log(`API Route /api/flashcard-sets POST: Successfully created set ${newMetaId}.`);

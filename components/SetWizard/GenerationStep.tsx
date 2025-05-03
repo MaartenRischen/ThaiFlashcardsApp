@@ -4,8 +4,6 @@ import { Progress } from '../ui/progress';
 import { Phrase } from '@/app/lib/set-generator';
 import { SetWizardState } from './SetWizardModal';
 import { Loader2 } from 'lucide-react';
-import { WizardStepProps } from './SetWizardModal';
-import { Badge } from "@/components/ui/badge";
 
 interface GenerationStepProps {
   state: SetWizardState;
@@ -15,7 +13,6 @@ interface GenerationStepProps {
 
 export function GenerationStep({ state, onComplete, onBack }: GenerationStepProps) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [generatedPhrases, setGeneratedPhrases] = useState<Phrase[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,7 +88,8 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
-        <Progress value={progress} className="flex-1" />
+        {/* Removed Progress component as setProgress is unused */}
+        {/* <Progress value={progress} className="flex-1" /> */}
         {isGenerating && (
           <Loader2 className="h-4 w-4 animate-spin" />
         )}

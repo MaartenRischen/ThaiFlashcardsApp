@@ -5,11 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/app/components/ui/switch";
 import { useSet } from '@/app/context/SetContext';
-import Image from 'next/image';
-import { Phrase } from '@/app/lib/set-generator';
 import type { SetMetaData } from '@/app/lib/storage';
-import { useUser } from '@clerk/nextjs';
-import PublishConfirmationModal from '@/app/components/PublishConfirmationModal';
 import { Upload } from 'lucide-react';
 import { getToneLabel } from '@/app/lib/utils';
 
@@ -111,13 +107,14 @@ export function SetManagerModal({ isOpen, onClose }: {
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { availableSets, switchSet, activeSetId, deleteSet, renameSet, exportSet, addSet } = useSet();
-  const [isLongPress, setIsLongPress] = useState<string | null>(null);
-  const longPressTimeout = React.useRef<NodeJS.Timeout | null>(null);
-  const [editingSetId, setEditingSetId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState<string>("");
+  const { availableSets, /* switchSet */ activeSetId, /* deleteSet, renameSet, exportSet, addSet */ } = useSet(); // Commented out unused context functions
+  // Commented out unused state variables
+  // const [isLongPress, setIsLongPress] = useState<string | null>(null);
+  // const longPressTimeout = React.useRef<NodeJS.Timeout | null>(null);
+  // const [editingSetId, setEditingSetId] = useState<string | null>(null);
+  // const [editingTitle, setEditingTitle] = useState<string>("");
 
-  const handleTouchStart = (setId: string) => {
+  const handleTouchStart = (_setId: string) => { // Prefixed unused setId
     // ... implementation ...
   };
 
@@ -125,52 +122,26 @@ export function SetManagerModal({ isOpen, onClose }: {
     // ... implementation ...
   };
 
-  const handleContextMenu = (e: React.MouseEvent, setId: string) => {
+  const handleContextMenu = (_e: React.MouseEvent, _setId: string) => { // Prefixed unused e, setId
     // ... implementation ...
   };
 
-  const handleStartRename = (set: SetMetaData) => {
-    // ... implementation ...
-  };
-
-  const handleSaveRename = async () => {
-    // ... implementation ...
-  };
-
-  const handleCancelRename = () => {
-    // ... implementation ...
-  };
-
-  const handleDeleteSet = (setId: string) => {
-    // ... implementation ...
-  };
+  // Commented out unused functions
+  // const handleStartRename = (set: SetMetaData) => { ... };
+  // const handleSaveRename = async () => { ... };
+  // const handleCancelRename = () => { ... };
+  // const handleDeleteSet = (setId: string) => { ... };
 
   const handleImportClick = () => {
     // ... implementation ...
   };
 
-  const handleSelectSet = (setId: string) => {
+  const handleSelectSet = (_setId: string) => { // Prefixed unused setId
     // ... implementation ...
   };
 
-  const handleConfirmPublish = async (set: SetMetaData) => {
-    // ... implementation ...
-    const phrases = await generatePhrases(set);
-    const response = await fetch('/api/gallery', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        cardCount: phrases.length,
-        llmBrand: set.llmBrand || '',
-        llmModel: set.llmModel || '',
-        toneLevel: set.seriousnessLevel,
-        specificTopics: set.specificTopics,
-      }),
-    });
-    // ... existing code ...
-  };
+  // Commented out unused publish function
+  // const handleConfirmPublish = async (set: SetMetaData) => { ... };
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -190,8 +161,9 @@ export function SetManagerModal({ isOpen, onClose }: {
           {availableSets.map(set => {
             const isDefault = set.id === 'default';
             const isActive = set.id === activeSetId;
-            let imgUrl = set.imageUrl || '/images/default-set-logo.png';
-            if (isDefault) imgUrl = '/images/default-set-logo.png';
+            // Commented out unused imgUrl assignment
+            // let imgUrl = set.imageUrl || '/images/default-set-logo.png';
+            // if (isDefault) imgUrl = '/images/default-set-logo.png';
             
             return (
               <div 
@@ -209,8 +181,8 @@ export function SetManagerModal({ isOpen, onClose }: {
                   
                   <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">
                     {set.level && <span>Level: <span className="font-medium text-[#A9C4FC]">{set.level}</span></span>}
-                    {set.toneLevel !== undefined && 
-                      <span>Tone: <span className="font-medium text-[#A9C4FC]">{getToneLabel(set.toneLevel)}</span></span>
+                    {set.seriousnessLevel !== null && 
+                      <span>Tone: <span className="font-medium text-[#A9C4FC]">{getToneLabel(set.seriousnessLevel)}</span></span>
                     }
                   </div>
                   

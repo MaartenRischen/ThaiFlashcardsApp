@@ -422,10 +422,11 @@ export function ScenarioStep({ selectedTopic: initialSelectedTopic, proficiencyL
         {selected?.type !== 'goal' ? 'Or Choose ONE Scenario:' : 'Or Choose ONE Scenario (deselects custom goal):'}
       </div>
 
-      {/* Scenario Grid */}
+      {/* Scenario Grid - MAP ONLY OVER levelScenarios */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {allDisplayScenarios.map(scenario => {
-          const isSelected = selected?.type === 'scenario' && selected.value === scenario;
+        {levelScenarios.map(scenario => {
+          // Check if this scenario is selected (must be type 'scenario')
+          const isSelected = selected?.type === 'scenario' && selected.value === scenario; 
           return (
             <button
               key={scenario}
@@ -441,13 +442,14 @@ export function ScenarioStep({ selectedTopic: initialSelectedTopic, proficiencyL
         })}
       </div>
       
-      {/* Weird Scenario Grid */}
+      {/* Weird Scenario Grid - MAP OVER weirdScenarios (no change needed here) */}
       <div className="text-center text-sm text-gray-400 pt-2">
          Or Be Weird:
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {weirdScenarios.map(scenario => {
-           const isSelected = selected?.type === 'weird' && selected.value === scenario;
+           // Check if this scenario is selected (must be type 'weird')
+           const isSelected = selected?.type === 'weird' && selected.value === scenario; 
            return (
              <button
                key={scenario}

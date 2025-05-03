@@ -1,21 +1,6 @@
 import React from 'react';
 import { SetWizardState } from './SetWizardModal';
-
-const getLabelFromValue = (value: number): string => {
-  switch (value) {
-    case 1: return 'Textbook realism';
-    case 2: return 'Serious & practical';
-    case 3: return 'Sorta funny, but like your \'funny\' uncle';
-    case 4: return 'Actually funny';
-    case 5: return 'A little too much maybe';
-    case 6: return 'Definitely too much';
-    case 7: return 'Woah now';
-    case 8: return 'Ehrm..';
-    case 9: return 'You sure about this?';
-    case 10: return '̷̛̤̖̯͕̭͙̏̀̏̑̔̆͝Ǫ̶̬̩͇̼͖͖͈̯̳͎͛̀̐͌̅̿̈́̏̾̏̽̎H̶̼̹͓̩̥͈̞̫̯͋̓̄́̓̽̈́̈́̈́͛̎͒̿͜H̴̘͎̗̮̱̗̰̱͓̪̘͛̅̅̐͌̑͆̆̐͐̈́͌̚O̴̖̥̺͎̰̰̠͙̹̔̑̆͆͋̀̐̄̈́͝ͅI̴̢̛̩͔̺͓̯̯̟̱͎͓̾̃̅̈́̍͋̒̔̚͜͠͠͝͝Ḋ̵̻͓̹̼̳̻̼̼̥̳͍͛̈́̑̆̈́̈́̅͜͝͝͠͝Ǫ̶͔̯̟͙̪͗̆͛̍̓̒̔̒̎̄̈́̅͜͝͠N̵̢̢̩̫͚̪̦̥̳̯͚̺̍̏͂͗̌̍̿̾̿́̓͌͛͝K̷̨̨̟̺͔̻̮̯̰̤̬͇̟̙̆͆͗̀̈́̔̅͒͛͊͘͝͠I̶̡̢̡̛͔͎͍̤̤̪͍͙̜͚̓̀͋́̈́̈́̿͂̈́̐͘͘͜E';
-    default: return 'Textbook realism';
-  }
-};
+import { getToneLabel } from '@/app/lib/utils';
 
 export function ReviewStep({ state, onConfirm, onBack, onCardCountChange }: {
   state: SetWizardState,
@@ -98,7 +83,7 @@ export function ReviewStep({ state, onConfirm, onBack, onCardCountChange }: {
             <span className="text-xs text-gray-500">How you&apos;ll learn</span>
           </div>
           <div className="text-gray-300 text-sm font-medium text-center">
-            {getLabelFromValue(state.tone)} ({state.tone}/10)
+            {getToneLabel(state.tone)}
           </div>
         </div>
       </div>

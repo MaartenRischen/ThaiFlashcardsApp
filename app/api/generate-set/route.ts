@@ -127,23 +127,37 @@ export async function POST(request: Request) {
       llmModel: generationResult.llmModel
     };
 
-    // Generate image for the set - REVERTED LOGIC
+    // Generate image for the set - REVISED PROMPT LOGIC AGAIN
     let imageUrl: string | null = null;
     try {
-      // Use title, fallback to specific topic input, final fallback
-      const topicDescription = generationResult.cleverTitle || preferences.specificTopics || 'a friendly donkey and bridge'; 
-      
-      // Restore original simple prompt structure
-      const imagePrompt = 
-        `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: "${topicDescription}". ` +
-        `Use vibrant colors that are friendly and engaging. ` +
-        `Crucial: do not include any text, letters, or numbers in the image.`;
+      const topicDescription = generationResult.cleverTitle || preferences.specificTopics || 'a friendly donkey and bridge';
 
-      console.log(`API Route: Generating image with prompt:`, imagePrompt);
+      // Check if the topic itself contains numbers
+      const topicHasNumbers = /\d/.test(topicDescription);
+
+      // Define the negative constraints conditionally
+      let negativeConstraint = "CRITICAL RULE: Absolutely NO text and NO letters are allowed anywhere in the image.";
+      if (!topicHasNumbers) {
+        negativeConstraint += " NO numbers are allowed either.";
+      } else {
+        // Allow numbers only if they are part of the topic visualization
+        negativeConstraint += " Numbers ARE allowed ONLY IF they are visually part of representing the main topic.";
+      }
+
+      // Construct the main prompt with corrected requirements
+      const imagePrompt = 
+        `Cute cartoon style illustration. ` +
+        `The absolute main focus MUST be: "${topicDescription}". ` +
+        `Visually represent the core action or concept of this topic accurately. ` +
+        // Make donkey/bridge mandatory and integrated with the topic
+        `A friendly donkey AND a bridge MUST be clearly visible and integrated into the scene, visually representing or interacting directly with the main topic: "${topicDescription}". ` +
+        `Use vibrant, friendly, and engaging colors. ` +
+        negativeConstraint; // Add the refined negative constraint
+
+      console.log(`API Route: Generating image with FINAL prompt:`, imagePrompt);
       const generatedImageUrl = await generateImage(imagePrompt);
       
       if (generatedImageUrl !== null) {
-        // Upload logic (keeping unique ID generation)
         const imagePathId = userId + '-' + Date.now(); 
         imageUrl = await uploadImageFromUrl(generatedImageUrl, `set-images/${imagePathId}`);
         if (imageUrl) {
@@ -151,11 +165,13 @@ export async function POST(request: Request) {
           console.log(`API Route: Image generated and uploaded successfully: ${imageUrl}`);
         } else {
            console.warn("API Route: Image generated but upload failed. Attempting fallback.");
-           // Restore simpler fallback prompt
+           // Fallback logic - Enforce NO numbers here as topic is irrelevant
            try {
+             const fallbackNegativeConstraint = "CRITICAL RULE: Absolutely NO text, NO letters, NO numbers are allowed anywhere in the image.";
              const fallbackPrompt = 
-                `Simple cartoon illustration of a friendly donkey and a bridge doing something completely random. ` +
-                `No text, letters, or numbers.`;
+                `Simple, cute cartoon illustration of a friendly donkey and a bridge. ` +
+                fallbackNegativeConstraint;
+                
              console.log(`API Route: Trying fallback image generation with prompt:`, fallbackPrompt);
              const fallbackImageUrl = await generateImage(fallbackPrompt);
              if (fallbackImageUrl) {

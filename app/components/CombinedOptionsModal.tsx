@@ -571,7 +571,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                   <Image
                     src={imgUrl}
                     alt={set.cleverTitle || set.name}
-                    className="object-cover"
+                    className="object-contain"
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
                     onError={ev => {
@@ -583,7 +583,9 @@ export function SetManagerModal({ isOpen, onClose }: {
                   />
                 </div>
                 {/* Set Name */}
-                <h3 className="text-base font-medium text-gray-200 group-hover:text-white transition-colors line-clamp-3" title={set.name}>{set.name}</h3>
+                <h3 className="text-base font-medium text-gray-200 group-hover:text-white transition-colors line-clamp-3" title={set.name}>{
+                  (set.cleverTitle || set.name).charAt(0).toUpperCase() + (set.cleverTitle || set.name).slice(1)
+                }</h3>
                 {set.createdAt && (
                   <div className="text-xs text-gray-500 mb-1">
                     {(() => {
@@ -596,7 +598,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                 {/* ADDED: Proficiency and Tone Level */}
                 <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">
                   {set.level && <span>Level: <span className="font-medium text-[#A9C4FC]">{set.level}</span></span>}
-                  {set.toneLevel !== undefined && <span>Tone Level: <span className="font-medium text-[#A9C4FC]">{set.toneLevel}/10</span></span>}
+                  {set.toneLevel !== undefined && set.toneLevel !== null && <span>Tone Level: <span className="font-medium text-[#A9C4FC]">{set.toneLevel}</span></span>}
                 </div>
                 
                 {/* Phrase Count - moved lower */}

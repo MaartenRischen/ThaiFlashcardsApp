@@ -4,6 +4,7 @@ import { prisma } from "@/app/lib/prisma"; // Import prisma client
 import { Prisma, FlashcardSet, Phrase as PrismaPhrase } from '@prisma/client'; // Use specific type import
 import { ExampleSentence } from './set-generator';
 import { deleteImage } from './imageStorage';
+import { getToneLabel } from '@/app/lib/utils'; // Import getToneLabel
 
 // Helper function
 function getErrorMessage(error: unknown): string {
@@ -30,12 +31,12 @@ export interface SetMetaData {
   goals?: string[];
   specificTopics?: string;
   source: 'default' | 'import' | 'generated';
-  imageUrl?: string; // Add optional imageUrl here
-  isFullyLearned?: boolean; // Keep the flag here (not in DB)
-  seriousnessLevel?: number; // Keep for DB compatibility
-  toneLevel?: number; // New field that mirrors seriousnessLevel
-  llmBrand?: string; // NEW: LLM brand
-  llmModel?: string; // NEW: LLM model
+  imageUrl?: string;
+  isFullyLearned?: boolean;
+  seriousnessLevel: number | null; // Allow null
+  toneLevel: string | null; // Allow null
+  llmBrand?: string;
+  llmModel?: string;
 }
 
 export interface PhraseProgressData {
@@ -78,23 +79,28 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
     const sets = prismaSets || [];
 
     // Map Supabase record to SetMetaData interface, including imageUrl and LLM info
-    return sets.map((dbSet: FlashcardSet & { _count: { phrases: number } }) => ({ 
-      id: dbSet.id,
-      name: dbSet.name,
-      cleverTitle: dbSet.cleverTitle || undefined,
-      createdAt: dbSet.createdAt.toISOString(),
-      phraseCount: dbSet._count.phrases, // Use actual count from database
-      level: dbSet.level as SetMetaData['level'] || undefined, 
-      goals: dbSet.goals || [],
-      specificTopics: dbSet.specificTopics || undefined,
-      source: dbSet.source as SetMetaData['source'] || 'generated',
-      imageUrl: dbSet.imageUrl || undefined, // Map imageUrl
-      isFullyLearned: false,
-      seriousnessLevel: dbSet.seriousnessLevel || undefined,
-      toneLevel: dbSet.seriousnessLevel || undefined,
-      llmBrand: dbSet.llmBrand || undefined, // NEW
-      llmModel: dbSet.llmModel || undefined  // NEW
-    }));
+    return sets.map((dbSet: FlashcardSet & { _count: { phrases: number } }) => {
+      const toneLevelValue = dbSet.seriousnessLevel; // number | null
+      const toneLabel = toneLevelValue !== null ? getToneLabel(toneLevelValue) : null;
+
+      return {
+        id: dbSet.id,
+        name: dbSet.name,
+        cleverTitle: dbSet.cleverTitle || undefined,
+        createdAt: dbSet.createdAt.toISOString(),
+        phraseCount: dbSet._count.phrases,
+        level: dbSet.level as SetMetaData['level'] || undefined,
+        goals: dbSet.goals || [],
+        specificTopics: dbSet.specificTopics || undefined,
+        source: dbSet.source as SetMetaData['source'] || 'generated',
+        imageUrl: dbSet.imageUrl || undefined,
+        isFullyLearned: false,
+        seriousnessLevel: toneLevelValue, // number | null
+        toneLevel: toneLabel, // string | null
+        llmBrand: dbSet.llmBrand || undefined,
+        llmModel: dbSet.llmModel || undefined
+      };
+    });
 
   } catch (error) {
     console.error('Unexpected error in getAllSetMetaData:', error);
@@ -121,8 +127,8 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
     specificTopics: newSetData.specificTopics || null,
     source: newSetData.source,
     imageUrl: newSetData.imageUrl || null,
-    seriousnessLevel: newSetData.seriousnessLevel || null,
-    toneLevel: newSetData.seriousnessLevel || null,
+    seriousnessLevel: newSetData.seriousnessLevel || null, // Save the number
+    toneLevel: null, // should not be saved directly to DB
     llmBrand: newSetData.llmBrand || null,
     llmModel: newSetData.llmModel || null,
     shareId: null, // Assuming shareId is optional or generated elsewhere/later
@@ -162,8 +168,8 @@ export async function updateSetMetaData(updatedSet: SetMetaData): Promise<boolea
       specificTopics: updatedSet.specificTopics || null,
       source: updatedSet.source,
       imageUrl: updatedSet.imageUrl || null,
-      seriousnessLevel: updatedSet.seriousnessLevel || null,
-      toneLevel: updatedSet.seriousnessLevel || null,
+      seriousnessLevel: updatedSet.seriousnessLevel || null, // Save the number
+      toneLevel: null, // should not be saved directly to DB
       llmBrand: updatedSet.llmBrand || null, // NEW
       llmModel: updatedSet.llmModel || null, // NEW
       updatedAt: new Date().toISOString()
@@ -616,17 +622,44 @@ export async function deletePublishedSet(id: string): Promise<boolean> {
 }
 
 // Add mapping functions for database compatibility
-export function mapDatabaseToStorage(dbSet: SetMetaData): SetMetaData {
+export function mapDatabaseToStorage(dbSet: FlashcardSet): SetMetaData {
+  const toneLevelValue = dbSet.seriousnessLevel; // number | null
+  const toneLabel = toneLevelValue !== null ? getToneLabel(toneLevelValue) : null;
+
   return {
-    ...dbSet,
-    toneLevel: dbSet.seriousnessLevel,
+    id: dbSet.id,
+    name: dbSet.name,
+    cleverTitle: dbSet.cleverTitle || undefined,
+    createdAt: dbSet.createdAt.toISOString(),
+    phraseCount: 0, // Note: This needs actual count if used directly
+    level: dbSet.level as SetMetaData['level'] || undefined,
+    goals: dbSet.goals || [],
+    specificTopics: dbSet.specificTopics || undefined,
+    source: dbSet.source as SetMetaData['source'] || 'generated',
+    imageUrl: dbSet.imageUrl || undefined,
+    isFullyLearned: false, // Placeholder
+    seriousnessLevel: toneLevelValue, // number | null
+    toneLevel: toneLabel, // string | null
+    llmBrand: dbSet.llmBrand || undefined,
+    llmModel: dbSet.llmModel || undefined
   };
 }
 
-export function mapStorageToDatabase(storageSet: SetMetaData): Omit<SetMetaData, 'toneLevel'> & { seriousnessLevel?: number } {
-  const { toneLevel, ...rest } = storageSet;
+// Maps SetMetaData (with string toneLevel) back to data suitable for Prisma create/update
+// It assumes the input `storageSet` contains the numeric `seriousnessLevel`.
+export function mapStorageToDatabase(storageSet: SetMetaData): Omit<FlashcardSet, 'id' | 'createdAt' | 'updatedAt' | 'userId' | 'shareId' | 'toneLevel'> {
+  // We only need seriousnessLevel (number) for the DB, toneLevel (string) is derived
+  const { toneLevel, isFullyLearned, phraseCount, createdAt, id, ...rest } = storageSet;
+
   return {
     ...rest,
-    seriousnessLevel: toneLevel,
+    cleverTitle: rest.cleverTitle || null,
+    level: rest.level || null,
+    goals: rest.goals || [],
+    specificTopics: rest.specificTopics || null,
+    imageUrl: rest.imageUrl || null,
+    seriousnessLevel: rest.seriousnessLevel, // Pass the number | null directly
+    llmBrand: rest.llmBrand || null,
+    llmModel: rest.llmModel || null,
   };
 }

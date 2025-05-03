@@ -23,14 +23,14 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
         
         {/* Image container */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <Image
+          <img
             src="/images/gifs/setwizardgif2.gif"
             alt="Set Wizard Introduction"
             width={285}
             height={195}
             className={`object-contain z-10 transition-opacity duration-300 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
-            unoptimized={true}
-            onLoadingComplete={() => setIsImageLoaded(true)}
+            onLoad={() => setIsImageLoaded(true)}
+            style={{ maxWidth: '100%', maxHeight: '100%', display: 'block' }}
           />
         </div>
       </div>

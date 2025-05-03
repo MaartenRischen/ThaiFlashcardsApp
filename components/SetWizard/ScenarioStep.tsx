@@ -335,31 +335,32 @@ function getRandomWeirdScenarios(count: number, exclude: string[] = []) {
   return selected;
 }
 
+// Define the type for the single selected topic
+interface SelectedTopic {
+  type: 'scenario' | 'goal' | 'weird';
+  value: string;
+}
+
 // --- Update Props Interface ---
 interface ScenarioStepProps {
-  selectedScenarios: string[];
-  customGoal?: string;
-  proficiencyLevelEstimate: string; // Added prop
-  onNext: (data: { scenarios: string[]; customGoal?: string }) => void;
+  selectedTopic: SelectedTopic | null; // Use the new type
+  proficiencyLevelEstimate: string;
+  onNext: (data: { selectedTopic: SelectedTopic | null }) => void; // Update onNext prop type
   onBack: () => void;
 }
-// --- End Update Props Interface ---
 
-export function ScenarioStep({ selectedScenarios: initialSelectedScenarios, customGoal: initialCustomGoal, proficiencyLevelEstimate, onNext, onBack }: ScenarioStepProps) { // Destructure new props
-  
+// --- Update Component Signature & State ---
+export function ScenarioStep({ selectedTopic: initialSelectedTopic, proficiencyLevelEstimate, onNext, onBack }: ScenarioStepProps) {
+  const [selected, setSelected] = useState<SelectedTopic | null>(initialSelectedTopic);
+  const [customInput, setCustomInput] = useState(
+    initialSelectedTopic?.type === 'goal' ? initialSelectedTopic.value : ''
+  ); // Initialize custom input if the initial topic is a goal
+
   // --- Get Level-Appropriate Scenarios ---
   const levelKey = proficiencyLevelMap[proficiencyLevelEstimate?.toLowerCase()] || "Complete Beginner";
   const levelScenarios = useMemo(() => scenariosByLevel[levelKey] || scenariosByLevel["Complete Beginner"], [levelKey]);
   // --- End Get Level-Appropriate Scenarios ---
 
-  // Map old 'Custom Scenario' to new name for backward compatibility in initial state
-  const initialScenarios = initialSelectedScenarios?.map(s => 
-    s === 'Custom Scenario' ? CUSTOM_SCENARIO : s
-  ) || [];
-  
-  const [selected, setSelected] = useState<string[]>(initialScenarios);
-  const [custom, setCustom] = useState(initialCustomGoal || ""); // Use initialCustomGoal
-  const [customTags, setCustomTags] = useState<string[]>([]);
   const [weirdScenarios, setWeirdScenarios] = useState<string[]>([]);
 
   useEffect(() => {
@@ -375,75 +376,36 @@ export function ScenarioStep({ selectedScenarios: initialSelectedScenarios, cust
   // Combine level scenarios and weird scenarios for display
   const allDisplayScenarios = useMemo(() => [...levelScenarios, ...weirdScenarios], [levelScenarios, weirdScenarios]);
 
-  const handleToggle = (scenario: string) => {
-    setSelected(sel =>
-      sel.includes(scenario)
-        ? sel.filter(s => s !== scenario)
-        : [...sel, scenario]
-    );
-  };
-
-  const handleRemoveCustomTag = (tag: string) => {
-    setCustomTags(prev => prev.filter(t => t !== tag));
-    setSelected(prev => prev.filter(s => s !== tag));
-  };
-
-  const handleAddCustomTag = () => {
-    if (custom.trim()) {
-      const newTag = custom.trim();
-      if (!customTags.includes(newTag)) {
-        setCustomTags(prev => [...prev, newTag]);
-        if (!selected.includes(newTag)) {
-          setSelected(prev => [...prev, newTag]);
-        }
-      }
-      // Automatically select "Tell Us!" if a custom tag is added
-      if (!selected.includes(CUSTOM_SCENARIO)) {
-        setSelected(prev => [...prev, CUSTOM_SCENARIO]);
-      }
-      setCustom("");
+  const handleSelect = (type: 'scenario' | 'weird', value: string) => {
+    // If selecting the same one, deselect it
+    if (selected && selected.type === type && selected.value === value) {
+      setSelected(null);
+    } else {
+      // Otherwise, select the new one
+      setSelected({ type, value });
+      setCustomInput(''); // Clear custom input when selecting a scenario
     }
   };
 
-  const handleCustomKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddCustomTag();
+  const handleCustomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCustomInput(value);
+    // Select the custom goal if there is input, deselect if empty
+    if (value.trim()) {
+      setSelected({ type: 'goal', value: value.trim() });
+    } else if (selected?.type === 'goal') {
+      setSelected(null);
     }
   };
 
   const handleNext = () => {
-    // Include both pre-made scenarios and custom tags, but filter out only the CUSTOM_SCENARIO marker
-    const finalSelectedScenarios = Array.from(new Set(selected.filter(s => s !== CUSTOM_SCENARIO)));
-
-    let finalCustomGoal: string | undefined = undefined;
-    if (selected.includes(CUSTOM_SCENARIO)) {
-        // Always include the custom input if it exists
-        const customText = custom.trim();
-        
-        // Combine custom text and tags into a single custom goal
-        const customParts = [
-            customText,
-            ...customTags
-        ].filter(Boolean);
-        
-        finalCustomGoal = customParts.length > 0 ? Array.from(new Set(customParts)).join(', ') : undefined;
-        
-        // Remove any custom tags from scenarios since they'll be in the custom goal
-        finalSelectedScenarios.splice(0, finalSelectedScenarios.length, 
-            ...finalSelectedScenarios.filter(s => !customTags.includes(s))
-        );
-    }
-    
-    onNext({ 
-        scenarios: finalSelectedScenarios.filter(Boolean), 
-        customGoal: finalCustomGoal
-    });
+    // Pass the currently selected topic (which could be null if nothing is selected)
+    onNext({ selectedTopic: selected });
   };
 
   // --- UI ---
   return (
-    <div className="space-y-6 px-2">
+    <div className="space-y-4 px-1">
       <div className="space-y-2.5 text-center">
         <h3 className="text-base font-medium text-white">
           What do you want to be able to do in Thai?
@@ -451,79 +413,67 @@ export function ScenarioStep({ selectedScenarios: initialSelectedScenarios, cust
         {/* <p className="text-xs text-gray-400">Choose one or more scenarios that interest you.</p> */}
       </div>
 
-      {/* "Tell Us!" Button - Added Glow */}
-      <button
-        onClick={() => handleToggle(CUSTOM_SCENARIO)}
-        className={`w-full rounded-lg p-3 text-left transition-all border-2 ${
-          selected.includes(CUSTOM_SCENARIO)
-            ? 'bg-blue-600/90 text-white border-blue-500 shadow-lg shadow-blue-500/50 ring-1 ring-blue-500/30'
-            : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40 shadow-lg shadow-blue-500/30'
-        }`}
-      >
-        <div className="flex justify-between items-center">
-          <div>
-            <div className="font-semibold text-sm">{CUSTOM_SCENARIO}</div>
-            <div className="text-xs mt-1">Get a personalized set tailored exactly to your needs</div>
-          </div>
-          <span className="text-xs font-semibold bg-blue-500/80 text-white px-2 py-0.5 rounded-full">RECOMMENDED</span>
-        </div>
-      </button>
+      {/* Custom Goal Input */}
+      <div className="bg-[#1e1e1e]/50 rounded-lg p-4">
+        <label htmlFor="custom-goal-input" className="block text-sm font-medium text-gray-300 mb-1.5">
+          1. Define a Custom Goal (Recommended!)
+        </label>
+        <input
+          id="custom-goal-input"
+          type="text"
+          value={customInput}
+          onChange={handleCustomInputChange}
+          placeholder="e.g., Talk about my holiday plans"
+          className={`w-full bg-gray-900/50 border rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+            selected?.type === 'goal' ? 'border-blue-500' : 'border-gray-700'
+          }`}
+        />
+         <p className="text-xs text-gray-400 mt-1.5">Enter your own learning goal here. Selecting this will deselect any scenario below.</p>
+      </div>
 
-      {/* Custom Goal Input Area (only shows if "Tell Us!" is selected) */}
-      {selected.includes(CUSTOM_SCENARIO) && (
-        <div className="bg-[#1e1e1e]/50 rounded-xl p-4 space-y-3">
-          <label htmlFor="customGoal" className="block text-sm font-medium text-gray-300">
-            Tell us what you want to learn (optional focus)
-          </label>
-          <input
-            id="customGoal"
-            type="text"
-            value={custom}
-            onChange={(e) => setCustom(e.target.value)}
-            onKeyPress={handleCustomKeyPress}
-            placeholder="e.g., focus on street food vendors"
-            className="w-full bg-gray-900/50 border border-gray-700 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-           <button 
-            onClick={handleAddCustomTag}
-            className="text-xs bg-green-700 hover:bg-green-600 text-white px-3 py-1 rounded-full ml-2"
-          >
-            Add as Topic
-          </button>
-          <p className="text-xs text-gray-400">
-            Optionally add specific topics you want included (press Enter or click Add). We&apos;ll use these to refine your set.
-          </p>
-          {/* Display added custom tags */}
-          {customTags.length > 0 && (
-            <div className="flex flex-wrap gap-1 pt-1">
-              {customTags.map(tag => (
-                 <span key={tag} className="flex items-center bg-green-700/80 text-white text-xs rounded-full px-2 py-0.5">
-                  {tag}
-                  <button onClick={() => handleRemoveCustomTag(tag)} className="ml-1.5 text-green-200 hover:text-red-300"> &times;</button>
-                 </span>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <div className="text-center text-sm text-gray-400 pt-1">
+        {selected?.type !== 'goal' ? 'Or Choose ONE Scenario:' : 'Or Choose ONE Scenario (deselects custom goal):'}
+      </div>
 
-      <div className="text-center text-sm text-gray-400 pt-2">Or choose from our pre-made scenarios:</div>
-
-      {/* Pre-made Scenario Grid */}
+      {/* Scenario Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {allDisplayScenarios.map(scenario => ( // Use the combined list
-          <button
-            key={scenario}
-            onClick={() => handleToggle(scenario)}
-            className={`rounded-lg p-3 text-left transition-all border-2 text-sm ${
-              selected.includes(scenario)
-                ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
-                : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'
-            }`}
-          >
-            {scenario}
-          </button>
-        ))}
+        {allDisplayScenarios.map(scenario => {
+          const isSelected = selected?.type === 'scenario' && selected.value === scenario;
+          return (
+            <button
+              key={scenario}
+              onClick={() => handleSelect('scenario', scenario)}
+              className={`rounded-lg p-3 text-left transition-all border-2 text-sm ${isSelected
+                  ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
+                  : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'
+              }`}
+            >
+              {scenario}
+            </button>
+          );
+        })}
+      </div>
+      
+      {/* Weird Scenario Grid */}
+      <div className="text-center text-sm text-gray-400 pt-2">
+         Or Be Weird:
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {weirdScenarios.map(scenario => {
+           const isSelected = selected?.type === 'weird' && selected.value === scenario;
+           return (
+             <button
+               key={scenario}
+               onClick={() => handleSelect('weird', scenario)}
+               className={`rounded-lg p-3 text-left transition-all border-2 text-sm ${isSelected
+                   ? 'bg-purple-600/90 text-white border-purple-500 shadow-md' // Weird uses purple
+                   : 'bg-purple-900/30 text-purple-300 border-purple-600/30 hover:bg-purple-800/40'
+               }`}
+             >
+               {scenario}
+             </button>
+           );
+        })}
       </div>
 
       {/* Navigation Buttons */}
@@ -535,8 +485,9 @@ export function ScenarioStep({ selectedScenarios: initialSelectedScenarios, cust
           Back
         </button>
         <button
-          className="neumorphic-button text-blue-400"
+          className="neumorphic-button text-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleNext}
+          disabled={!selected} // Disable Next if nothing is selected
         >
           Next
         </button>

@@ -135,7 +135,7 @@ export async function POST(request: Request) {
     let imageUrl: string | null = null;
     try {
       const topicDescription = generationResult.cleverTitle || 'Thai language learning';
-      const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}. Use vibrant colors that are friendly and engaging. Crucial: do not include any text or letters (numbers are ok, but discouraged).`;
+      const imagePrompt = `Cartoon style illustration featuring a friendly donkey and a bridge, related to the topic: ${topicDescription}. Use vibrant colors that are friendly and engaging. Crucial: do not include any text, letters, or numbers in the image.`;
       const generatedImageUrl = await generateImage(imagePrompt);
       
       if (generatedImageUrl !== null) {

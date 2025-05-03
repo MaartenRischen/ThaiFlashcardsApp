@@ -1714,55 +1714,52 @@ export default function ThaiFlashcards() {
       {showSetWizardModal && (
         <SetWizardModal 
           onClose={() => setShowSetWizardModal(false)}
-          onComplete={async (wizardState: SetWizardState) => {
+          onComplete={async (wizardState: SetWizardState) => { // wizardState uses the new structure
             console.log('SetWizardModal onComplete fired', wizardState);
             setShowSetWizardModal(false);
             
+            if (!wizardState.selectedTopic) {
+              console.error("Cannot generate set: No topic selected.");
+              toast.error('Set creation failed: No topic was selected.');
+              return;
+            }
+
             // Show initial toast
             toast.loading('Creating your custom set... (About 2 minutes)', {
               duration: Infinity,
               id: 'set-generation',
             });
             
-            // Calculate total cards based on number of topics
-            const allTopics = new Set([
-              ...(wizardState.customGoal ? [wizardState.customGoal] : []),
-              ...wizardState.topics,
-              ...wizardState.scenarios
-            ].filter(Boolean));
+            // FIXED: Set totalCount to 10
+            const totalCount = 10;
             
-            const totalTopics = allTopics.size;
+            // Use the single selected topic value
+            const singleTopic = wizardState.selectedTopic.value;
             
-            // Calculate cards per topic, ensuring total doesn't exceed 50
-            const totalCount = Math.min(
-              totalTopics === 0 ? 10 : totalTopics * 10, // 10 cards per topic, minimum 10
-              50 // Maximum 50 cards total
-            );
-            
-            // If we have more than 5 topics, reduce cards per topic to stay under 50
-            const cardsPerTopic = totalTopics > 5 ? Math.floor(50 / totalTopics) : 10;
-            
-            console.log(`Generating set with ${totalCount} cards (${totalTopics} topics, ${cardsPerTopic} cards per topic)`);
-            
-            // Create preferences object for test generation
-            const preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'> = {
+            console.log(`Generating set with ${totalCount} cards for topic: ${singleTopic}`);
+
+            // Prepare preferences for the API call
+            const preferences = {
               level: wizardState.proficiency.levelEstimate,
-              specificTopics: wizardState.topics.length > 0 ? wizardState.topics.join(', ') : undefined,
+              specificTopics: singleTopic, // Pass the single topic string
               toneLevel: wizardState.tone,
-              topicsToDiscuss: wizardState.customGoal || (wizardState.scenarios.length > 0 ? wizardState.scenarios.join(', ') : undefined),
+              topicsToDiscuss: singleTopic // Also use single topic here for consistency
             };
             
-            console.log('SetWizard Completion: Calling /api/generate-set with preferences:', preferences, 'count:', totalCount);
+            console.log("[page.tsx onComplete] Calling /api/generate-set with:", { preferences, totalCount });
 
             try {
               const response = await fetch('/api/generate-set', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ preferences, totalCount }),
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ preferences, totalCount }), // Send simplified data
                 credentials: 'include',
               });
+
               const result = await response.json();
-              
+
               console.log("[page.tsx onComplete] Full result from /api/generate-set:", JSON.stringify(result, null, 2));
 
               if (!response.ok) {

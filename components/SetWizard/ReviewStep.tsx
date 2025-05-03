@@ -17,11 +17,22 @@ const getLabelFromValue = (value: number): string => {
   }
 };
 
-export function ReviewStep({ state, onConfirm, onBack }: {
+export function ReviewStep({ state, onConfirm, onBack, onCardCountChange }: {
   state: SetWizardState,
   onConfirm: () => void,
   onBack: () => void,
+  onCardCountChange: (newCount: number) => void;
 }) {
+  const selectedTopicDisplay = state.selectedTopic 
+    ? state.selectedTopic.value 
+    : 'None Selected';
+
+  const topicTypeDisplay = state.selectedTopic
+    ? state.selectedTopic.type.charAt(0).toUpperCase() + state.selectedTopic.type.slice(1)
+    : '';
+
+  const cardOptions = [5, 10, 15, 20];
+
   return (
     <div className="space-y-3 px-2">
       <div className="space-y-1 text-center mb-4">
@@ -40,25 +51,43 @@ export function ReviewStep({ state, onConfirm, onBack }: {
           <div className="text-gray-300 text-sm font-medium text-center">{state.proficiency.levelEstimate}</div>
         </div>
 
-        {/* Selected Scenarios Section */}
+        {/* Updated Selected Topic Section */}
         <div className="bg-[#1e1e1e]/50 rounded-lg p-3">
           <div className="flex justify-center items-baseline gap-2 mb-1">
-            <h4 className="text-sm font-medium text-white">Selected Scenarios</h4>
+            <h4 className="text-sm font-medium text-white">Selected Topic</h4>
             <span className="text-xs text-gray-500">What you&apos;ll learn</span>
           </div>
           <div className="flex flex-col items-center gap-1">
-            {state.scenarios.map((scenario, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#8AB4F8]"></span>
-                <span className="text-gray-300 text-sm">{scenario}</span>
-              </div>
-            ))}
-            {state.customGoal && (
+            {state.selectedTopic ? (
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#8AB4F8]"></span>
-                <span className="text-gray-300 text-sm">{state.customGoal}</span>
+                <span className={`w-1.5 h-1.5 rounded-full ${state.selectedTopic.type === 'weird' ? 'bg-purple-400' : 'bg-blue-400'}`}></span>
+                <span className="text-gray-300 text-sm">{selectedTopicDisplay}</span> 
+                <span className="text-xs text-gray-500">({topicTypeDisplay})</span>
               </div>
+            ) : (
+              <span className="text-gray-400 text-sm italic">No topic selected</span>
             )}
+          </div>
+        </div>
+        
+        {/* Card Count Dropdown Section */}
+        <div className="bg-[#1e1e1e]/50 rounded-lg p-3">
+          <div className="flex justify-center items-baseline gap-2 mb-1">
+            <h4 className="text-sm font-medium text-white">Set Size</h4>
+             <span className="text-xs text-gray-500">Number of cards</span>
+          </div>
+          <div className="flex justify-center">
+            <select
+              value={state.cardCount} 
+              onChange={(e) => onCardCountChange(parseInt(e.target.value, 10))}
+              className="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1.5 neumorphic-select"
+            >
+              {cardOptions.map(count => (
+                <option key={count} value={count}>
+                  {count} Cards
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

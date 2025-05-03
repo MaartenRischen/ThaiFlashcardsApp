@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
 import { Trash2, BookOpen, Download, Layers } from 'lucide-react';
+import { getToneLabel } from '@/app/lib/utils';
 
 // Define a more specific type for the set prop
 interface GallerySet {
@@ -21,7 +22,7 @@ interface GallerySetCardProps {
   set: GallerySet;
   importingSetId: string | null;
   contextIsLoading: boolean;
-  handleImport: (setId: string) => void;
+  handleImport: (setId: string) => Promise<void>;
   handleViewCards: (setId: string) => void;
   onDelete?: (setId: string) => void;
 }
@@ -92,7 +93,7 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
           <div className="text-xs text-gray-400 flex flex-wrap gap-x-2">
             <span>Level: <span className="font-medium text-[#A9C4FC]">{set.proficiencyLevel}</span></span>
             {set.toneLevel !== undefined && (
-              <span>Tone Level: <span className="font-medium text-[#A9C4FC]">{set.toneLevel}/10</span></span>
+              <span>Tone: <span className="font-medium text-[#A9C4FC]">{getToneLabel(set.toneLevel)}</span></span>
             )}
           </div>
         )}

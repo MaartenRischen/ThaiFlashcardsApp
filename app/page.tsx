@@ -1342,7 +1342,7 @@ export default function ThaiFlashcards() {
             </div>
 
             <Accordion type="single" collapsible className="w-full space-y-2 text-gray-300 text-sm max-h-[70vh] overflow-y-auto pr-2">
-              {/* Core Flashcard System */}
+              {/* Flashcard System & SRS */}
               <AccordionItem value="item-1" className="border-[#333]">
                 <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
                   Flashcard System & SRS
@@ -1358,11 +1358,10 @@ export default function ThaiFlashcards() {
                   </ul>
                 </AccordionContent>
               </AccordionItem>
-              
-              {/* Card Study Features */}
+              {/* Card & Study Features (with Progress Tracking) */}
               <AccordionItem value="item-2" className="border-[#333]">
                 <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
-                  Card Study Features
+                  Card & Study Features
                 </AccordionTrigger>
                 <AccordionContent className="pb-4 space-y-3 text-gray-300 text-sm">
                   <p>Each flashcard includes multiple tools to enhance learning:</p>
@@ -1383,146 +1382,31 @@ export default function ThaiFlashcards() {
                       <li>Create or edit your own mnemonics to personalize your learning</li>
                     </ul>
                   </div>
+                  {/* Progress Tracking content moved here */}
+                  <div className="mt-6">
+                    <h4 className="text-[#A9C4FC] font-semibold mb-2">Progress Tracking</h4>
+                    <p>Monitor your learning journey:</p>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span>The</span>
+                        <span className="text-[#A9C4FC] font-semibold">'Cards'</span>
+                        <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-[#2563EB]"><Layers className="w-4 h-4" /></span>
+                        <span>view shows the status of each card</span>
+                      </div>
+                      <ul className="pl-4 space-y-1 list-disc list-inside">
+                        <li>Cards are color-coded by status: Unseen, Wrong, Correct, or Easy</li>
+                        <li>Progress bars indicate how much of a set you've learned</li>
+                        <li>The system automatically prioritizes cards needing review</li>
+                        <li>Your learning data is saved automatically between sessions</li>
+                      </ul>
+                    </div>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
-              
-              {/* Customization Options */}
+              {/* Set Wizard (with glow) */}
               <AccordionItem value="item-3" className="border-[#333]">
-                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
-                  Customization Options
-                </AccordionTrigger>
-                <AccordionContent className="pb-4 space-y-3 text-gray-300 text-sm">
-                  <p>Tailor the app to your preferences:</p>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-[#A9C4FC] font-semibold min-w-[100px]">Gender Toggle</span>
-                      <div className="flex items-center gap-2 bg-[#252525] px-3 py-1 rounded">
-                        <span className="text-gray-400 text-xs">Female</span>
-                        <div className="relative w-8 h-4 bg-gray-600 rounded-full">
-                          <div className="absolute left-1 top-1 w-2 h-2 bg-pink-400 rounded-full"></div>
-                        </div>
-                        <span className="text-gray-400 text-xs">Male</span>
-                      </div>
-                      <span className="text-gray-300">Switch between male (krap) and female (ka) speech patterns</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[#A9C4FC] font-semibold min-w-[100px]">Polite Mode</span>
-                      <div className="flex items-center gap-2 bg-[#252525] px-3 py-1 rounded">
-                        <span className="text-gray-400 text-xs">Casual</span>
-                        <div className="relative w-8 h-4 bg-gray-600 rounded-full">
-                          <div className="absolute left-1 top-1 w-2 h-2 bg-gray-400 rounded-full"></div>
-                        </div>
-                        <span className="text-gray-400 text-xs">Polite</span>
-                      </div>
-                      <span className="text-gray-300">Add formal particles (ครับ/ค่ะ) to phrases</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[#A9C4FC] font-semibold min-w-[100px]">'Autoplay'</span>
-                      <div className="flex items-center gap-2 bg-[#252525] px-3 py-1 rounded">
-                        <div className="relative w-8 h-4 bg-gray-600 rounded-full">
-                          <div className="absolute right-1 top-1 w-2 h-2 bg-blue-400 rounded-full"></div>
-                        </div>
-                        <span className="text-gray-400 text-xs">Autoplay</span>
-                      </div>
-                      <span className="text-gray-300">Automatically play audio when revealing answers</span>
-                    </div>
-                    <ul className="pl-4 space-y-1 list-disc list-inside">
-                      <li>Personalize mnemonics to create your own memory aids</li>
-                      <li>View your progress to track learning across all cards</li>
-                      <li>Reset progress for individual cards or entire sets when needed</li>
-                    </ul>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              
-              {/* Progress Tracking */}
-              <AccordionItem value="item-4" className="border-[#333]">
-                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
-                  Progress Tracking
-                </AccordionTrigger>
-                <AccordionContent className="pb-4 space-y-2 text-gray-300 text-sm">
-                  <p>Monitor your learning journey:</p>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span>The</span>
-                      <span className="text-[#A9C4FC] font-semibold">'Cards'</span>
-                      <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-[#2563EB]"><Layers className="w-4 h-4" /></span>
-                      <span>view shows the status of each card</span>
-                    </div>
-                    <ul className="pl-4 space-y-1 list-disc list-inside">
-                      <li>Cards are color-coded by status: Unseen, Wrong, Correct, or Easy</li>
-                      <li>Progress bars indicate how much of a set you've learned</li>
-                      <li>The system automatically prioritizes cards needing review</li>
-                      <li>Your learning data is saved automatically between sessions</li>
-                    </ul>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              
-              {/* Tips & Tricks */}
-              <AccordionItem value="item-5" className="border-[#333]">
-                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
-                  Tips for Effective Learning
-                </AccordionTrigger>
-                <AccordionContent className="pb-4 space-y-2 text-gray-300 text-sm">
-                  <ul className="space-y-1 list-disc list-inside">
-                    <li>Study regularly - short daily sessions are better than cramming</li>
-                    <li>Create personal mnemonics that are vivid and memorable</li>
-                    <li>Use the context examples to understand how words are used naturally</li>
-                    <li>Speak aloud with the audio to practice pronunciation</li>
-                    <li>Be honest with the difficulty buttons - they optimize your learning schedule</li>
-                    <li>Generate specialized sets for situations you'll actually encounter</li>
-                  </ul>
-                  <div className="flex items-center gap-2">
-                    <span>Review previously learned cards periodically through the</span>
-                    <span className="text-[#A9C4FC] font-semibold">'Cards'</span>
-                    <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-[#2563EB]"><Layers className="w-4 h-4" /></span>
-                    <span>view</span>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              
-              {/* --- NEW ITEM: Link to Visualization --- */}
-              <AccordionItem value="item-6" className="border-[#333]">
-                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
-                  App & Language Logic (For Nerds)
-                </AccordionTrigger>
-                <AccordionContent className="pb-4 text-gray-300 text-sm">
-                  <p>
-                    For those interested in the technical details, the generation and validation logic is visualized here:
-                  </p>
-                  <p className="mt-2">
-                    <a 
-                      href="/generation_logic_visualization.html" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-300 underline"
-                    >
-                      View Detailed Generation Logic Visualization (Opens in new tab)
-                    </a>
-                  </p>
-                  
-                  <p className="mt-4">
-                    You can also experiment with different generation parameters (like proficiency and tone) and see example outputs on the test variations page:
-                  </p>
-                  <p className="mt-2">
-                    <a 
-                      href="/test-variations" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-300 underline"
-                    >
-                      Go to Test Variations Page (Opens in new tab)
-                    </a>
-                  </p>
-                </AccordionContent>
-              </AccordionItem>
-              {/* --- END NEW ITEM --- */}
-
-              {/* --- NEW ITEM: Set Wizard Guide --- */}
-              <AccordionItem value="item-7" className="border-[#333]">
-                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
-                  Set Wizard Guide
+                <AccordionTrigger className="text-lg font-semibold text-[#22c55e] hover:no-underline py-3 shadow-[0_0_20px_10px_rgba(34,197,94,0.15)]" style={{ textShadow: '0 0 8px #22c55e, 0 0 16px #22c55e' }}>
+                  Set Wizard
                 </AccordionTrigger>
                 <AccordionContent className="pb-4 space-y-3 text-gray-300 text-sm">
                   <p>The Set Wizard helps you create personalized Thai vocabulary sets. Access it by tapping the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-green-400"><Plus className="w-4 h-4" /></span> button at the bottom of the screen.</p>
@@ -1580,9 +1464,8 @@ export default function ThaiFlashcards() {
                   </div>
                 </AccordionContent>
               </AccordionItem>
-              
-              {/* --- NEW ITEM: Publishing & Importing Sets --- */}
-              <AccordionItem value="item-8" className="border-[#333]">
+              {/* Publishing & Importing Sets */}
+              <AccordionItem value="item-4" className="border-[#333]">
                 <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
                   Publishing & Importing Sets
                 </AccordionTrigger>
@@ -1644,11 +1527,41 @@ export default function ThaiFlashcards() {
                   </div>
                 </AccordionContent>
               </AccordionItem>
-              {/* --- END NEW ITEMS --- */}
-
-              <div className="pt-4 text-center">
-                <button onClick={() => setShowHowItWorks(false)} className="neumorphic-button py-2 px-8 text-[#A9C4FC]">Got It!</button>
-              </div>
+              {/* App & Language Logic For Nerds */}
+              <AccordionItem value="item-5" className="border-[#333]">
+                <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
+                  App & Language Logic For Nerds
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 text-gray-300 text-sm">
+                  <p>
+                    For those interested in the technical details, the generation and validation logic is visualized here:
+                  </p>
+                  <p className="mt-2">
+                    <a 
+                      href="/generation_logic_visualization.html" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 underline"
+                    >
+                      View Detailed Generation Logic Visualization (Opens in new tab)
+                    </a>
+                  </p>
+                  
+                  <p className="mt-4">
+                    You can also experiment with different generation parameters (like proficiency and tone) and see example outputs on the test variations page:
+                  </p>
+                  <p className="mt-2">
+                    <a 
+                      href="/test-variations" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 underline"
+                    >
+                      Go to Test Variations Page (Opens in new tab)
+                    </a>
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
           </div>
         </div>

@@ -263,8 +263,20 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
       window.location.reload();
     }
   };
-  const handleFactoryResetFull = () => {
+  const handleFactoryResetFull = async () => {
     if (window.confirm('Are you sure you want to reset the entire app, including all sets and progress? This cannot be undone.')) {
+      try {
+        const res = await fetch('/api/factory-reset', { method: 'POST', credentials: 'include' });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Failed to reset app data.');
+        }
+        // Optionally show a success message
+        // alert('All sets and progress deleted. The app will now reload.');
+      } catch (err) {
+        alert('Factory reset failed: ' + (err instanceof Error ? err.message : String(err)));
+        return;
+      }
       indexedDB.deleteDatabase('localforage'); // If using localforage or similar
       localStorage.clear();
       window.location.reload();

@@ -1,9 +1,10 @@
 "use client";
 
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
-import { Home } from "lucide-react";
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   SignedIn,
   SignedOut,
@@ -12,12 +13,13 @@ import {
   useUser
 } from "@clerk/nextjs";
 import { useFeedback } from "../context/FeedbackContext";
+import { Plus, Grid, Settings, HelpCircle, GalleryHorizontal, LogIn, LogOut } from 'lucide-react';
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useUser();
-  const { openFeedbackModal } = useFeedback();
+  const { user, isLoaded } = useUser();
+  const { /* openFeedbackModal */ } = useFeedback();
   
   // Don't show navbar on auth pages
   if (pathname === "/login" || pathname === "/register") {

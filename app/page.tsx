@@ -29,12 +29,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { useModal } from "./context/ModalContext";
 import { useFeedback } from './context/FeedbackContext';
 import { getToneLabel } from '@/app/lib/utils'; // Import getToneLabel
 

@@ -25,12 +25,14 @@ export async function generateImage(prompt: string): Promise<string | null> {
     // Prepare form data for the request - works in both browser and Node.js
     const formData = new FormData();
     
-    // Get the user's preferred rendering speed from localStorage, default to TURBO
+    // Get rendering speed from localStorage if available, default to TURBO
     let renderingSpeed = 'TURBO';
     try {
-      const savedSpeed = typeof window !== 'undefined' ? localStorage.getItem('renderingSpeed') : null;
-      if (savedSpeed === 'NORMAL' || savedSpeed === 'TURBO') {
-        renderingSpeed = savedSpeed;
+      if (typeof window !== 'undefined') {
+        const savedSpeed = localStorage.getItem('renderingSpeed');
+        if (savedSpeed === 'NORMAL') {
+          renderingSpeed = 'NORMAL';
+        }
       }
     } catch (error) {
       console.warn('[IDEOGRAM WARN] Could not access localStorage for rendering speed, using default TURBO');

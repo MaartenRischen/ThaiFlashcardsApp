@@ -183,19 +183,23 @@ export async function POST(request: Request) {
                } else {
                  console.warn("API Route: Fallback image upload failed. Using placeholder.");
                  setData.imageUrl = getRandomPlaceholderImage();
+                 console.warn("API Route: Used default image because fallback image upload failed.");
                }
              } else {
                console.warn("API Route: Fallback image generation failed. Using placeholder.");
                setData.imageUrl = getRandomPlaceholderImage();
+               console.warn("API Route: Used default image because fallback image generation failed.");
              }
            } catch (retryErr) {
              console.error('API Route: Fallback image generation/upload failed:', retryErr);
              setData.imageUrl = getRandomPlaceholderImage();
+             console.error('API Route: Used default image because fallback image generation/upload threw an error.');
            }
         }
       } else {
-        console.warn("API Route: Initial image generation failed. Using placeholder.");
+        console.warn("API Route: Initial image generation failed (Ideogram API returned null). Using placeholder.");
         setData.imageUrl = getRandomPlaceholderImage();
+        console.warn("API Route: Used default image because Ideogram API returned null.");
       }
     } catch (imageError) {
       console.error('API Route: Error during image generation/upload process:', imageError);

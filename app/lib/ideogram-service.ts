@@ -41,18 +41,24 @@ export async function generateImage(prompt: string): Promise<string | null> {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Ideogram API Error: Status ${response.status}, Response: ${errorText}`);
+      console.error(`[Ideogram API] Error: Status ${response.status}, Response: ${errorText}`);
       return null;
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonErr) {
+      const errorText = await response.text();
+      console.error('[Ideogram API] Failed to parse JSON:', jsonErr, 'Raw response:', errorText);
+      return null;
+    }
     const imageUrl = data?.data?.[0]?.url;
-    
     if (imageUrl) {
-      console.log("Image generated successfully, URL:", imageUrl);
+      console.log('[Ideogram API] Image generated successfully, URL:', imageUrl);
       return imageUrl;
     } else {
-      console.error('No image URL found in Ideogram response:', data);
+      console.error('[Ideogram API] No image URL found in response:', JSON.stringify(data));
       return null;
     }
   } catch (error) {

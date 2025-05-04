@@ -1,5 +1,11 @@
 // Custom Next.js image loader for Supabase transformations
-const getSupabaseProjectId = () => {
+interface LoaderParams {
+  src: string;
+  width: number;
+  quality?: number;
+}
+
+const getSupabaseProjectId = (): string => {
   // Try to get project ID from environment variable
   if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID) {
     return process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID;
@@ -18,7 +24,7 @@ const getSupabaseProjectId = () => {
   return '';
 };
 
-export default function supabaseLoader({ src, width, quality }) {
+export default function supabaseLoader({ src, width, quality }: LoaderParams): string {
   // Apply transformations to ALL Supabase-stored images
   // Check if this is a Supabase storage URL
   if (src.includes('supabase.co/storage/v1/object/public/')) {

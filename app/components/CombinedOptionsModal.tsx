@@ -574,6 +574,7 @@ export function SetManagerModal({ isOpen, onClose }: {
                     className="object-contain"
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
+                    unoptimized={true}
                     onError={ev => {
                       const target = ev.currentTarget as HTMLImageElement;
                       if (target.src !== '/images/default-set-logo.png') {

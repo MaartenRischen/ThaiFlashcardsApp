@@ -136,9 +136,6 @@ export async function POST(request: Request) {
     try {
       const topicDescription = generationResult.cleverTitle || preferences.specificTopics || 'a friendly donkey and bridge';
 
-      // Check if the topic itself contains numbers
-      const topicHasNumbers = /\d/.test(topicDescription);
-
       // Define the negative constraints conditionally
       const universalNegativeConstraint = [
         "CRITICAL RULE: Absolutely NO text, NO words, NO letters, NO numbers, NO writing, NO signage, NO captions, NO subtitles, NO labels, NO logos, NO watermarks, NO symbols, NO characters, NO alphabets, NO numerals, NO digits, NO writing of any kind, NO visible language, NO English, NO Thai, NO hidden text, NO hidden letters, NO hidden numbers, NO text in the background, NO text on objects, NO text anywhere in the image.",

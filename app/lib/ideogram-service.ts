@@ -36,7 +36,7 @@ export async function generateImage(prompt: string): Promise<string | null> {
         // 'Content-Type' will be set automatically by FormData
         ...formData.getHeaders?.(),
       },
-      body: formData as any,
+      body: formData as unknown as BodyInit,
     });
 
     if (!response.ok) {

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { generateImage } from '@/app/lib/ideogram-service';
-import { uploadImageFromUrl } from '@/app/lib/imageStorage';
 import dotenv from 'dotenv';
 
 function getErrorMessage(error: unknown): string {

@@ -1,0 +1,61 @@
+// Custom Next.js image loader for Supabase transformations
+const getSupabaseProjectId = () => {
+  // Try to get project ID from environment variable
+  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID) {
+    return process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID;
+  }
+  
+  // Fallback: extract project ID from the Supabase URL if available
+  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    const match = process.env.NEXT_PUBLIC_SUPABASE_URL.match(/https:\/\/([a-zA-Z0-9-]+)\.supabase\.co/);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  
+  // If we can't determine the project ID, log an error
+  console.error('Could not determine Supabase project ID. Please set NEXT_PUBLIC_SUPABASE_PROJECT_ID in your environment variables.');
+  return '';
+};
+
+export default function supabaseLoader({ src, width, quality }) {
+  const projectId = getSupabaseProjectId();
+  
+  // IMPORTANT: Only apply optimization to Ideogram-generated set images
+  // Check if this is a set image that should be optimized
+  const shouldOptimize = (path) => {
+    // Only optimize set-images from Supabase that aren't the default logo
+    if (path.includes('set-images') && !path.includes('default-set-logo')) {
+      return true;
+    }
+    return false;
+  };
+  
+  // Check if the source is already a full URL
+  if (src.startsWith('http')) {
+    // If it's a Supabase URL, check if it should be optimized
+    if (src.includes('supabase.co/storage/v1/object/public/')) {
+      if (shouldOptimize(src)) {
+        // Convert normal URL to transformation URL format
+        const transformedSrc = src.replace(
+          /supabase\.co\/storage\/v1\/object\/public\//,
+          `supabase.co/storage/v1/render/image/public/`
+        );
+        return `${transformedSrc}?width=${width}&quality=${quality || 75}`;
+      }
+    }
+    // For all other URLs, return as is
+    return src;
+  }
+
+  // For paths that start with /, remove the leading slash
+  const normalizedSrc = src.startsWith('/') ? src.slice(1) : src;
+  
+  // Check if this is a local path that should be optimized
+  if (shouldOptimize(normalizedSrc)) {
+    return `https://${projectId}.supabase.co/storage/v1/render/image/public/${normalizedSrc}?width=${width}&quality=${quality || 75}`;
+  }
+  
+  // For all other paths, return the regular public URL without transformations
+  return `https://${projectId}.supabase.co/storage/v1/object/public/${normalizedSrc}`;
+} 

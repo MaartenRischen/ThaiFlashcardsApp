@@ -15,7 +15,7 @@ export async function GET() {
     console.log('Test Ideogram: IDEOGRAM_API_KEY present:', Boolean(process.env.IDEOGRAM_API_KEY));
     console.log('Test Ideogram: IDEOGRAM_API_KEY first 10 chars:', process.env.IDEOGRAM_API_KEY ? process.env.IDEOGRAM_API_KEY.substring(0, 10) + '...' : 'undefined');
     
-    const testPrompt = "Cute cartoon style illustration of a friendly donkey crossing a bridge. Use vibrant, friendly colors.";
+    const testPrompt = "Create a cute cartoon style illustration of a friendly donkey teaching Thai cooking in a traditional kitchen. The donkey should be wearing a chef's hat and using a wok near a wooden bridge. Use vibrant, friendly colors and ensure a balanced 1344x768 composition. NO TEXT OR NUMBERS ALLOWED.";
     
     console.log('Test Ideogram: Calling generateImage with prompt:', testPrompt);
     

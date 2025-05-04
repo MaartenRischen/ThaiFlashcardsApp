@@ -12,13 +12,22 @@ import { getToneLabel } from '@/app/lib/utils';
 // import { prisma } from "@/app/lib/prisma"; // Removed unused import
 // import { uploadImageFromUrl } from '../../lib/imageStorage'; // Removed unused import
 
+// Explicitly load dotenv in development
+if (process.env.NODE_ENV === 'development') {
+  try {
+    require('dotenv').config();
+    console.log('API Route: Loaded .env file in development mode');
+  } catch (e) {
+    console.warn('API Route: Failed to load dotenv:', e);
+  }
+}
+
 // Debug environment variables - this will help diagnose Railway issues
 console.log('API Route Environment Variables:');
-console.log('- DATABASE_URL:', process.env.DATABASE_URL ? 'Defined' : 'Undefined');
-console.log('- OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? 'Defined' : 'Undefined');
-console.log('- IDEOGRAM_API_KEY:', process.env.IDEOGRAM_API_KEY ? 'Defined' : 'Undefined');
 console.log('- NODE_ENV:', process.env.NODE_ENV);
-console.log('- NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL);
+console.log('- IDEOGRAM_API_KEY:', process.env.IDEOGRAM_API_KEY ? 'Defined' : 'Undefined');
+console.log('- OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? 'Defined' : 'Undefined');
+console.log('- SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Defined' : 'Undefined');
 
 console.log('DEBUG: DATABASE_URL in generate-set route:', process.env.DATABASE_URL);
 // Add more detailed debug logging for Ideogram key
@@ -151,50 +160,44 @@ export async function POST(request: Request) {
         `Visually represent the core action or concept of this topic accurately. ` +
         // Make donkey/bridge mandatory and integrated with the topic
         `A friendly donkey AND a bridge MUST be clearly visible and integrated into the scene, visually representing or interacting directly with the main topic: "${topicDescription}". ` +
-        `Use vibrant, friendly, and engaging colors. ` +
-        universalNegativeConstraint; // Add the comprehensive negative constraint
+        `Use vibrant, friendly, and engaging colors. `;
 
       console.log(`API Route: Generating image with FINAL prompt:`, imagePrompt);
+      console.log(`API Route: Starting Ideogram API call...`);
+      
+      // Check if we have the Ideogram API key
+      console.log(`API Route: IDEOGRAM_API_KEY available: ${Boolean(process.env.IDEOGRAM_API_KEY)}`);
+      if (!process.env.IDEOGRAM_API_KEY) {
+        console.error(`API Route: CRITICAL ERROR - IDEOGRAM_API_KEY is missing!`);
+      }
+      
       const generatedImageUrl = await generateImage(imagePrompt);
+      console.log(`API Route: Ideogram API call complete, result URL: ${generatedImageUrl ? 'received' : 'null'}`);
       
       if (generatedImageUrl !== null) {
-        const imagePathId = userId + '-' + Date.now(); 
-        imageUrl = await uploadImageFromUrl(generatedImageUrl, `set-images/${imagePathId}`);
-        if (imageUrl) {
-          setData.imageUrl = imageUrl;
-          console.log(`API Route: Image generated and uploaded successfully: ${imageUrl}`);
-        } else {
-           console.warn("API Route: Image generated but upload failed. Attempting fallback.");
-           // Fallback logic - Enforce NO numbers here as topic is irrelevant
-           try {
-             const fallbackNegativeConstraint = "CRITICAL RULE: Absolutely NO text, NO words, NO letters, NO numbers, NO writing, NO signage, NO captions, NO subtitles, NO labels, NO logos, NO watermarks, NO symbols, NO characters, NO alphabets, NO numerals, NO digits, NO writing of any kind, NO visible language, NO English, NO Thai, NO hidden text, NO hidden letters, NO hidden numbers, NO text in the background, NO text on objects, NO text anywhere in the image. NO text or writing on signs, banners, clothing, objects, or in the background.";
-             const fallbackPrompt = 
-                `Simple, cute cartoon illustration of a friendly donkey and a bridge. ` +
-                fallbackNegativeConstraint;
-                
-             console.log(`API Route: Trying fallback image generation with prompt:`, fallbackPrompt);
-             const fallbackImageUrl = await generateImage(fallbackPrompt);
-             if (fallbackImageUrl) {
-               const fallbackImagePathId = userId + '-' + Date.now() + '-fallback';
-               imageUrl = await uploadImageFromUrl(fallbackImageUrl, `set-images/${fallbackImagePathId}`);
-               if (imageUrl) {
-                 setData.imageUrl = imageUrl;
-                 console.log(`API Route: Fallback image uploaded successfully: ${imageUrl}`);
-               } else {
-                 console.warn("API Route: Fallback image upload failed. Setting imageUrl to null.");
-                 setData.imageUrl = null;
-               }
-             } else {
-               console.warn("API Route: Fallback image generation failed. Setting imageUrl to null.");
-               setData.imageUrl = null;
-             }
-           } catch (retryErr) {
-             console.error('API Route: Fallback image generation/upload failed:', retryErr);
-             setData.imageUrl = null;
-             console.error('API Route: Set imageUrl to null because fallback image generation/upload threw an error.');
-           }
+        console.log(`API Route: Ideogram returned valid URL, beginning upload...`);
+        // Use a unique folder path that's simpler
+        const timestamp = Date.now();
+        const imagePathId = `user_${userId.substring(0, 8)}_${timestamp}`; 
+        
+        // IMPORTANT: Store the original URL if upload fails
+        try {
+          imageUrl = await uploadImageFromUrl(generatedImageUrl, `set-images/${imagePathId}`);
+          if (imageUrl) {
+            setData.imageUrl = imageUrl;
+            console.log(`API Route: Image generated and uploaded successfully: ${imageUrl}`);
+          } else {
+            // If upload fails, store the original URL directly
+            console.warn("API Route: Image upload failed, storing original Ideogram URL as fallback");
+            setData.imageUrl = generatedImageUrl;
+          }
+        } catch (uploadError) {
+          // If upload throws an error, store the original URL
+          console.error("API Route: Image upload error, storing original Ideogram URL:", uploadError);
+          setData.imageUrl = generatedImageUrl;
         }
       } else {
+        // Fallback logic removed - we'll use a default image in the frontend instead
         console.warn("API Route: Initial image generation failed (Ideogram API returned null). Setting imageUrl to null.");
         setData.imageUrl = null;
       }

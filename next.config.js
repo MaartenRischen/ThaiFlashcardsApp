@@ -2,7 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    unoptimized: true,
+    loader: 'custom',
+    loaderFile: './lib/supabase-image-loader.js',
+    unoptimized: false, // Only set images will be optimized, all others pass through
     remotePatterns: [
       {
         protocol: 'https',

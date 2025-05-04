@@ -607,36 +607,42 @@ export function SetManagerModal({ isOpen, onClose }: {
                 
                 {/* Card Actions: Publish and Cards icon buttons side by side */}
                 <div className="flex gap-1.5 justify-end mt-auto pt-2">
-                  {/* Publish icon button - MODIFIED onClick */}
-                  {!isDefault && (
+                  {/* Cards icon button */}
+                  <div className="flex flex-col items-center">
                     <button
-                      className={`p-1.5 rounded-full bg-[#A9C4FC] hover:bg-[#A9C4FC]/80 text-[#121212] text-xs font-semibold transition flex items-center justify-center${publishingSetId === set.id ? ' opacity-50 cursor-not-allowed' : ''}`}
-                      title="Publish to Gallery"
-                      disabled={publishingSetId === set.id} // Still disable if publishing
-                      onClick={async e => {
-                        e.stopPropagation();
-                        handleOpenPublishModal(set); // Open the modal instead
-                      }}
+                      className="p-2.5 rounded-full bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold transition flex items-center justify-center"
+                      title="View Cards"
+                      onClick={e => { e.stopPropagation(); handleOpenCardsModal(set); }}
                     >
-                      {/* Paper plane SVG icon */}
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21l16.5-9-16.5-9v7.5l13.5 1.5-13.5 1.5V21z" />
+                      {/* Layers/stack SVG icon */}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                        <path d="M3 7l9 5 9-5-9-5-9 5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                        <path d="M3 12l9 5 9-5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                        <path d="M3 17l9 5 9-5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
                       </svg>
                     </button>
+                    <span className="text-xs text-gray-400 mt-1">View Cards</span>
+                  </div>
+                  {/* Publish icon button - MODIFIED onClick */}
+                  {!isDefault && (
+                    <div className="flex flex-col items-center">
+                      <button
+                        className={`p-2.5 rounded-full bg-[#A9C4FC] hover:bg-[#A9C4FC]/80 text-[#121212] text-xs font-semibold transition flex items-center justify-center${publishingSetId === set.id ? ' opacity-50 cursor-not-allowed' : ''}`}
+                        title="Publish to Gallery"
+                        disabled={publishingSetId === set.id}
+                        onClick={async e => {
+                          e.stopPropagation();
+                          handleOpenPublishModal(set);
+                        }}
+                      >
+                        {/* Paper plane SVG icon */}
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21l16.5-9-16.5-9v7.5l13.5 1.5-13.5 1.5V21z" />
+                        </svg>
+                      </button>
+                      <span className="text-xs text-gray-400 mt-1">Publish</span>
+                    </div>
                   )}
-                  {/* Cards icon button */}
-                  <button
-                    className="p-1.5 rounded-full bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold transition flex items-center justify-center"
-                    title="View Cards"
-                    onClick={e => { e.stopPropagation(); handleOpenCardsModal(set); }}
-                  >
-                    {/* Layers/stack SVG icon */}
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                      <path d="M3 7l9 5 9-5-9-5-9 5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-                      <path d="M3 12l9 5 9-5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-                      <path d="M3 17l9 5 9-5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
                 </div>
               </div>
             );

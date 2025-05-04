@@ -19,28 +19,38 @@ export async function generateImage(prompt: string): Promise<string | null> {
       return null;
     }
 
-    // Using the JSON API format instead of FormData (based on the test script)
-    console.log('[IDEOGRAM DEBUG] Using JSON API format for Ideogram');
+    // Using the latest Ideogram v3 API format with multipart form
+    console.log('[IDEOGRAM DEBUG] Using Ideogram v3 API with multipart/form-data');
     
-    const requestBody = {
-      image_request: {
-        prompt: prompt,
-        style_type: "DESIGN",
-        resolution: "RESOLUTION_1312_736",
-        negative_prompt: "CRITICAL: Absolutely NO text, NO words, NO letters, NO numbers, NO writing, NO signage, NO captions, NO subtitles, NO labels, NO logos, NO watermarks, NO symbols, NO characters, NO alphabets, NO numerals, NO digits, NO writing of any kind, NO visible language, NO English, NO Thai, NO hidden text, NO hidden letters, NO hidden numbers, NO text in the background, NO text on objects, NO text anywhere in the image.",
-        seed: Math.floor(Math.random() * 1000000)
-      }
-    };
-
-    console.log('[IDEOGRAM DEBUG] Request body:', JSON.stringify(requestBody).substring(0, 200) + '...');
+    // Prepare form data for the request - works in both browser and Node.js
+    const formData = new FormData();
+    formData.append('prompt', prompt);
+    formData.append('style_type', 'GENERAL'); // Valid options: AUTO, GENERAL, REALISTIC, DESIGN
+    formData.append('rendering_speed', 'QUALITY');
+    formData.append('resolution', '1344x768'); // Using valid resolution from API docs for 16:9 aspect ratio
     
-    const response = await fetch('https://api.ideogram.ai/generate', {
+    // Strong negative prompt to prevent text
+    formData.append('negative_prompt', 
+      "CRITICAL: NO TEXT OF ANY KIND. ABSOLUTELY FORBIDDEN: text, words, letters, numbers, writing, signage, captions, " +
+      "subtitles, labels, logos, watermarks, symbols, characters, alphabets, numerals, digits, writing, visible language, " +
+      "English, Thai, scripts, fonts, textual elements, hidden text, disguised text, text inside objects, text on signs, " +
+      "letters inside images, numbers inside images, handwriting, calligraphy, typography, lettering, inscriptions, book pages, " +
+      "displays, monitors showing text, interfaces with text, product labels, brand names, written instructions, titles, " +
+      "headlines, quotes, speech bubbles, street signs, building signs, nameplates, posters with text, artwork with text, " +
+      "clothing with text or numbers, text integrated into patterns, school blackboards with writing, license plates, calendars, " +
+      "clocks with numbers, page numbers, price tags, receipts, handwritten notes, text overlays, banners with writing, diagrams " +
+      "with labels, maps with place names, infographics with text, text in any form, text in any language, text in any style, " +
+      "text in any size, text in any color, text in any position, text in any orientation, text in any context, text in any medium."
+    );
+    
+    // Use the latest API version
+    const response = await fetch('https://api.ideogram.ai/v1/ideogram-v3/generate', {
       method: 'POST',
       headers: {
         'Api-Key': apiKey,
-        'Content-Type': 'application/json',
+        // Content-Type is set automatically by FormData
       },
-      body: JSON.stringify(requestBody),
+      body: formData,
     });
 
     console.log(`[IDEOGRAM DEBUG] Response status: ${response.status}`);
@@ -61,6 +71,7 @@ export async function generateImage(prompt: string): Promise<string | null> {
       return null;
     }
     
+    // Access URL via the updated data structure for v3 API
     const imageUrl = data?.data?.[0]?.url;
     if (imageUrl) {
       console.log('[IDEOGRAM SUCCESS] Image generated successfully, URL:', imageUrl);

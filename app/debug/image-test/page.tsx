@@ -40,11 +40,11 @@ export default function ImageTestPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Image Loading Test</h1>
+      <h1 className="text-2xl font-bold mb-4">Ideogram Image Test</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-gray-100 p-4 rounded-lg">
-          <h2 className="text-xl font-semibold mb-2">API Tests</h2>
+          <h2 className="text-xl font-semibold mb-2">API Test Controls</h2>
           
           <div className="space-y-4">
             <div>
@@ -53,7 +53,7 @@ export default function ImageTestPage() {
                 disabled={isLoading}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
               >
-                {isLoading ? 'Testing...' : 'Test Ideogram API'}
+                {isLoading ? 'Generating...' : 'Generate Test Image'}
               </button>
             </div>
           </div>
@@ -65,10 +65,10 @@ export default function ImageTestPage() {
           )}
           
           <div className="mt-4">
-            <h3 className="font-semibold">Logs:</h3>
-            <div className="bg-black text-green-400 p-3 rounded-lg h-64 overflow-y-auto font-mono text-sm">
+            <h3 className="font-semibold">Debug Logs:</h3>
+            <div className="bg-black text-green-400 p-3 rounded-lg h-48 overflow-y-auto font-mono text-sm">
               {logs.length === 0 ? (
-                <div className="text-gray-500">No logs yet. Run a test to see logs.</div>
+                <div className="text-gray-500">No logs yet. Generate an image to see logs.</div>
               ) : (
                 logs.map((log, i) => <div key={i}>{log}</div>)
               )}
@@ -77,16 +77,16 @@ export default function ImageTestPage() {
         </div>
         
         <div className="bg-gray-100 p-4 rounded-lg">
-          <h2 className="text-xl font-semibold mb-2">Image Preview</h2>
+          <h2 className="text-xl font-semibold mb-2">Generated Image Preview</h2>
           
-          <div className="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden">
+          <div className="relative w-full aspect-[1344/768] bg-gray-200 rounded-lg overflow-hidden">
             {imageUrl ? (
               <Image
                 src={imageUrl}
-                alt="Generated image"
+                alt="Generated test image"
                 fill
                 unoptimized={true}
-                style={{ objectFit: 'cover' }}
+                style={{ objectFit: 'contain' }}
                 onError={() => {
                   addLog('Error loading image!');
                   setError('Image failed to load');
@@ -95,16 +95,20 @@ export default function ImageTestPage() {
               />
             ) : (
               <div className="flex items-center justify-center h-full text-gray-500">
-                No image generated yet
+                No image generated yet. Click the button to generate one.
               </div>
             )}
           </div>
           
           {imageUrl && (
             <div className="mt-4">
-              <h3 className="font-semibold">Image URL:</h3>
-              <div className="bg-gray-200 p-2 rounded break-all text-xs">
-                {imageUrl}
+              <h3 className="font-semibold">Image Details:</h3>
+              <div className="bg-gray-200 p-2 rounded mt-2 text-sm">
+                <p><strong>Resolution:</strong> 1344x768</p>
+                <p><strong>URL:</strong></p>
+                <div className="break-all font-mono text-xs mt-1">
+                  {imageUrl}
+                </div>
               </div>
             </div>
           )}

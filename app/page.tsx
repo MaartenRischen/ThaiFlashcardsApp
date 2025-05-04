@@ -763,10 +763,14 @@ export default function ThaiFlashcards() {
             setRandomSentence(null);
             setShowMnemonicHint(false); // Hide hint
             
-            alert(`Successfully imported "${setData.name}" with ${importedData.phrases.length} phrases.`);
+            toast.success(`Successfully imported "${setData.name}" with ${importedData.phrases.length} phrases.`, {
+              duration: 5000
+            });
           } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
-            alert(`Import failed: ${message}`);
+            toast.error(`Import failed: ${message}`, {
+              duration: 5000
+            });
             console.error('Import error:', error);
           }
         };
@@ -969,7 +973,9 @@ export default function ThaiFlashcards() {
 
   const handleTestGenerationCallback = React.useCallback(async () => {
     setTestGenResult(null); // Clear previous results
-    alert("Starting test generation... this might take a minute."); // User feedback
+    toast(`Starting test generation... this might take a minute.`, {
+      duration: 10000 // Show for 10 seconds
+    }); // User feedback
 
     // Prepare data for the API call
     const totalCount = 10; // Hardcoded for now, get from wizardState later
@@ -1012,7 +1018,9 @@ export default function ThaiFlashcards() {
         await refreshSets();
         await switchSet(result.newSetMetaData.id);
         console.log('handleTestGeneration: Successfully requested switch to new set', result.newSetMetaData.id);
-        alert('Test set generated and saved successfully!'); 
+        toast.success('Test set generated and saved successfully!', {
+          duration: 5000
+        });
       } else {
         throw new Error('API route did not return a newSetId.');
       }
@@ -1026,7 +1034,9 @@ export default function ThaiFlashcards() {
       }
       console.error('handleTestGeneration: Error calling API route:', error);
       setTestGenResult({ error: errorMessage }); // Display error if needed
-      alert(`Error generating test set: ${errorMessage}`);
+      toast.error(`Error generating test set: ${errorMessage}`, {
+        duration: 5000
+      });
     } 
   }, [addSet, refreshSets, switchSet]); // Added addSet to dependencies
 
@@ -1073,6 +1083,7 @@ export default function ThaiFlashcards() {
                         fill // Use fill and let the container control size
                         style={{ objectFit: 'contain' }} // Adjust objectFit as needed
                         className="rounded shadow"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
                       />
                     </div>
                   </div>
@@ -1641,7 +1652,9 @@ export default function ThaiFlashcards() {
             
             if (!wizardState.selectedTopic) {
               console.error("Cannot generate set: No topic selected.");
-              toast.error('Set creation failed: No topic was selected.');
+              toast.error('Set creation failed: No topic was selected.', {
+                duration: 5000
+              });
               return;
             }
 

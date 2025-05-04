@@ -28,7 +28,6 @@ export default function supabaseLoader({ src, width, quality }: LoaderParams): s
   // Apply transformations to ALL Supabase-stored images
   // Check if this is a Supabase storage URL
   if (src.includes('supabase.co/storage/v1/object/public/')) {
-    const projectId = getSupabaseProjectId();
     // Convert to the transformation URL format as per Supabase docs
     const transformedSrc = src.replace(
       /supabase\.co\/storage\/v1\/object\/public\//,

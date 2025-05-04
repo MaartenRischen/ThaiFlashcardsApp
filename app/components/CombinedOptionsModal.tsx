@@ -257,6 +257,19 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
   autoplay: boolean;
   setAutoplay: (checked: boolean) => void;
 }) {
+  const [useTurboRendering, setUseTurboRendering] = useState(true); // Default to TURBO
+
+  useEffect(() => {
+    // Load the rendering speed preference from localStorage
+    const savedSpeed = localStorage.getItem('renderingSpeed');
+    setUseTurboRendering(savedSpeed !== 'NORMAL');
+  }, []);
+
+  const handleRenderingSpeedChange = (checked: boolean) => {
+    setUseTurboRendering(checked);
+    localStorage.setItem('renderingSpeed', checked ? 'TURBO' : 'NORMAL');
+  };
+
   const handleFactoryResetPreferences = () => {
     if (window.confirm('Are you sure you want to reset all preferences? This cannot be undone.')) {
       localStorage.clear();
@@ -310,6 +323,15 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
               <Switch id="autoplayToggleApp" checked={autoplay} onCheckedChange={setAutoplay} />
               <label htmlFor="darkModeToggleApp" className="text-[#E0E0E0]">Dark Mode</label>
               <Switch id="darkModeToggleApp" checked={isDarkMode} onCheckedChange={toggleDarkMode} />
+              <label htmlFor="renderingSpeedToggle" className="text-[#E0E0E0] flex items-center gap-2">
+                Image Generation Speed
+                <span className="text-xs text-[#BDBDBD] italic">(TURBO = faster but may be less accurate)</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-[#BDBDBD]">Normal</span>
+                <Switch id="renderingSpeedToggle" checked={useTurboRendering} onCheckedChange={handleRenderingSpeedChange} />
+                <span className="text-sm font-medium text-[#BDBDBD]">Turbo</span>
+              </div>
             </div>
           </section>
           <div className="mt-10 flex flex-col gap-2">

@@ -23,7 +23,7 @@ const testIdeogramApi = async () => {
     // Add required parameters
     formData.append('prompt', prompt);
     formData.append('style_type', 'GENERAL');
-    formData.append('rendering_speed', 'QUALITY');
+    formData.append('rendering_speed', 'TURBO');
     formData.append('negative_prompt', 
       "CRITICAL: NO TEXT OF ANY KIND. ABSOLUTELY FORBIDDEN: text, words, letters, numbers, writing, signage, captions, " +
       "subtitles, labels, logos, watermarks, symbols, characters, alphabets, numerals, digits, writing, visible language, " +

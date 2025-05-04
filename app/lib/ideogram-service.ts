@@ -26,7 +26,7 @@ export async function generateImage(prompt: string): Promise<string | null> {
     const formData = new FormData();
     formData.append('prompt', prompt);
     formData.append('style_type', 'GENERAL'); // Valid options: AUTO, GENERAL, REALISTIC, DESIGN
-    formData.append('rendering_speed', 'QUALITY');
+    formData.append('rendering_speed', 'TURBO');
     formData.append('resolution', '1344x768'); // Using valid resolution from API docs for 16:9 aspect ratio
     
     // Strong negative prompt to prevent text

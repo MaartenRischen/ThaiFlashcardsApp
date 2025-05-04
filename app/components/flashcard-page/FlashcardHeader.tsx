@@ -156,7 +156,7 @@ export function FlashcardHeader({
             >
               <Layers />
             </button>
-            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Current Set</span>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Current</span>
           </div>
           {/* Divider */}
           <div className="h-12 w-px bg-[#404040]/50 mx-1" />

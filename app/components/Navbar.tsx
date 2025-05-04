@@ -5,15 +5,20 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Image from 'next/image';
+import { useUser } from "@clerk/nextjs";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { user } = useUser();
 
   // Don't show navbar on auth pages
   if (pathname === "/login" || pathname === "/register") {
     return null;
   }
+
+  // Determine username (if signed in)
+  const username = user?.username || user?.firstName || user?.primaryEmailAddress?.emailAddress || "You";
 
   return (
     <header className="w-full border-b bg-background/95 backdrop-blur sticky top-0 z-40">
@@ -35,7 +40,7 @@ export default function Navbar() {
         </button>
         {/* Title: single responsive span, no duplicate */}
         <span className="flex-1 min-w-0 text-[0.6em] xs:text-[0.7em] md:text-[0.85em] text-gray-400 font-normal ml-2 align-middle">
-          Ultra Personal Thai Language Learning Experience
+          Ultra Personal Thai Language Learning Experience{user ? ` For ${username}` : ""}
         </span>
         <nav className="flex items-center gap-2 ml-auto flex-shrink-0">
           <SignedOut>

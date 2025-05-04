@@ -25,57 +25,69 @@ export async function generateImage(prompt: string): Promise<string | null> {
     // Prepare form data for the request - works in both browser and Node.js
     const formData = new FormData();
     
-    // Strengthen the main prompt to be explicit about no text
-    const enhancedPrompt = `${prompt}\n\nCRITICAL REQUIREMENTS:\n1. This image MUST NOT contain ANY text, letters, numbers, or writing of ANY kind.\n2. If the topic contains words, represent them ONLY through visual elements.\n3. NO text-like patterns or shapes that could be interpreted as writing.\n4. NO signs, labels, logos, or any form of written communication.`;
+    // Strengthen the main prompt to be explicit about no text and focus on visual elements
+    const enhancedPrompt = `VISUAL ONLY - NO TEXT ALLOWED: ${prompt}\n\nCRITICAL REQUIREMENTS FOR IMAGE GENERATION:\n1. Create a purely visual representation with absolutely NO text, letters, numbers, or writing of any kind.\n2. Focus on visual storytelling through images, colors, and scenes only.\n3. Use symbolic and pictorial elements to convey meaning.\n4. Avoid anything that could be interpreted as text or writing.\n5. Create clean, text-free compositions that tell the story through imagery alone.`;
     formData.append('prompt', enhancedPrompt);
     
-    // Core configuration
+    // Core configuration with optimized settings to prevent text
     formData.append('style_type', 'GENERAL');
     formData.append('rendering_speed', 'TURBO');
     formData.append('resolution', '1344x768');
     formData.append('magic_prompt', 'OFF'); // Prevent automatic prompt enhancement that might add text
     formData.append('seed', '31415927'); // Use a consistent seed we know works well
+    formData.append('cfg_scale', '20'); // Higher CFG scale for stronger adherence to prompt requirements
+    formData.append('steps', '30'); // More steps for better control
+    formData.append('sampler', 'DDIM'); // More precise sampler
     
-    // Expanded negative prompt with more specific patterns to exclude
+    // Expanded and reorganized negative prompt with stronger emphasis and additional patterns
     const negativePrompt = [
-      // Core text prohibitions
-      "CRITICAL: NO TEXT OF ANY KIND. ABSOLUTELY FORBIDDEN: text, words, letters, numbers, writing, signage, captions, subtitles, labels, logos, watermarks",
+      // ABSOLUTE PROHIBITIONS (strongest negative weights)
+      "(text:1.5), (writing:1.5), (letters:1.5), (numbers:1.5), (words:1.5), (captions:1.5), (labels:1.5)",
       
-      // Specific text types
-      "symbols, characters, alphabets, numerals, digits, writing, visible language, English, Thai, scripts, fonts, textual elements",
-      
-      // Hidden or subtle text
-      "hidden text, disguised text, text inside objects, text on signs, letters inside images, numbers inside images",
-      
-      // Writing forms
-      "handwriting, calligraphy, typography, lettering, inscriptions, book pages",
-      
-      // Digital/screen text
-      "displays showing text, monitors with text, interfaces with text, screens with writing, digital displays with numbers",
-      
-      // Product/commercial text
-      "product labels, brand names, written instructions, titles, headlines, price tags, barcodes, QR codes",
+      // Core text elements (with weights)
+      "(typography:1.4), (fonts:1.4), (alphabets:1.4), (characters:1.4), (scripts:1.4), (numerals:1.4)",
       
       // Communication elements
-      "quotes, speech bubbles, thought bubbles, dialogue boxes, comic text, subtitles, captions",
+      "speech bubbles, thought bubbles, dialogue boxes, subtitles, watermarks, signatures",
+      
+      // Digital/UI elements
+      "user interface, menu text, buttons with text, screen text, digital displays",
       
       // Environmental text
-      "street signs, building signs, nameplates, posters with text, billboards, banners with text",
+      "signs, banners, billboards, posters, nameplates, street signs, building text",
       
-      // Decorative/integrated text
-      "text integrated into patterns, text as texture, text as design elements, text-like shapes, letter-like forms",
-      
-      // Educational/information text
-      "school blackboards with writing, whiteboards with text, information panels, instructional text",
-      
-      // Time/date elements
-      "calendars with numbers, clocks with numbers, dates, timestamps, numerical indicators",
+      // Commercial/Product text
+      "logos, brand names, product labels, price tags, barcodes, QR codes",
       
       // Document elements
-      "page numbers, receipts, tickets, forms, certificates, documents of any kind",
+      "pages with text, books, newspapers, documents, certificates, forms",
       
-      // Comprehensive catch-all
-      "text in any form, text in any language, text in any style, text in any size, text in any color, text in any position, text in any orientation, text in any context, text in any medium, anything that could be interpreted as text or writing"
+      // Time/Date elements
+      "clocks with numbers, calendars, dates, timestamps, numerical indicators",
+      
+      // Educational elements
+      "blackboards, whiteboards, charts with text, diagrams with labels",
+      
+      // Artistic/Decorative text
+      "calligraphy, handwriting, text patterns, letter-like designs, text art",
+      
+      // Hidden/Subtle text
+      "disguised text, text within patterns, text in backgrounds, subtle writing",
+      
+      // Meta text
+      "watermarks, signatures, artist names, copyright text, metadata",
+      
+      // Comprehensive exclusions
+      "any text, all text, every kind of text, writing in any form, letters of any type, numbers in any style",
+      
+      // Additional strong negatives for text-like patterns
+      "anything resembling text, patterns that look like writing, shapes that could be letters",
+      
+      // Cultural text elements
+      "hieroglyphics, symbols, pictographs, ideographs, ancient writing",
+      
+      // Strongest possible catch-all (with maximum weight)
+      "(any form of visible language or writing:1.6), (anything that could be interpreted as text:1.6)"
     ].join(", ");
     
     formData.append('negative_prompt', negativePrompt);

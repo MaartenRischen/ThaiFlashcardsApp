@@ -41,15 +41,17 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
   };
 
   return (
-    <div className="group bg-[#1a1a1a] border border-gray-800/30 rounded-xl overflow-hidden hover:border-blue-600/50 hover:shadow-md hover:shadow-blue-900/10 transition-all flex flex-col">
-      <div className="relative w-full aspect-[16/9] bg-[#111] overflow-hidden rounded-t-xl">
+    <div className="relative bg-gray-900 rounded-xl p-3 flex flex-col shadow-lg border border-gray-800 cursor-pointer hover:ring-2 hover:ring-[#A9C4FC] transition">
+      {/* Set Image */}
+      <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-2 bg-[#2C2C2C]">
         {set.imageUrl ? (
           <Image
             src={imgUrl}
             alt={set.title}
+            className="object-contain"
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes="(max-width: 768px) 100vw, 33vw"
+            unoptimized={true}
             onError={(e) => {
               const target = e.currentTarget as HTMLImageElement;
               if (target.src !== '/images/default-set-logo.png') {
@@ -64,7 +66,7 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
         )}
         {isAdmin && (
           <button
-            className="absolute top-2 right-2 bg-red-700/80 hover:bg-red-800 text-white rounded-full p-1.5 z-10 shadow"
+            className="absolute top-3 right-3 bg-red-700/80 hover:bg-red-800 text-white rounded-full p-1.5 z-10 shadow"
             title="Delete set"
             onClick={handleDelete}
           >
@@ -73,15 +75,15 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
         )}
       </div>
       
-      <div className="p-4 flex-grow flex flex-col">
-        <h3 className="font-medium text-sm text-white line-clamp-3 group-hover:text-blue-400 transition-colors mb-1">
+      <div className="flex-grow flex flex-col">
+        <h3 className="text-base font-medium text-gray-200 group-hover:text-white transition-colors line-clamp-3 mb-1" title={set.title}>
           {set.title}
         </h3>
-        <div className="text-xs text-blue-400/70 mb-1 text-center">
+        <div className="text-xs text-blue-400/70 mb-1">
           User Set by: {username}
         </div>
         {set.createdAt && (
-          <div className="text-xs text-gray-500 mb-2">
+          <div className="text-xs text-gray-500 mb-1">
             {(() => {
               const date = typeof set.createdAt === 'string' ? new Date(set.createdAt) : set.createdAt;
               return date ? date.toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
@@ -89,14 +91,14 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
           </div>
         )}
 
-        {set.proficiencyLevel && (
-          <div className="text-xs text-gray-400 flex flex-wrap gap-x-2">
+        <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">
+          {set.proficiencyLevel && (
             <span>Level: <span className="font-medium text-[#A9C4FC]">{set.proficiencyLevel}</span></span>
-            {set.toneLevel !== undefined && (
-              <span>Tone: <span className="font-medium text-[#A9C4FC]">{getToneLabel(set.toneLevel)}</span></span>
-            )}
-          </div>
-        )}
+          )}
+          {set.toneLevel !== undefined && (
+            <span>Tone: <span className="font-medium text-[#A9C4FC]">{getToneLabel(set.toneLevel)}</span></span>
+          )}
+        </div>
         
         <p className="text-xs text-gray-400 mt-0.5">{set.cardCount || 0} cards</p>
         

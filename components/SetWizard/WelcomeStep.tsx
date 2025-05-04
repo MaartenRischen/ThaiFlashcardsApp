@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Image from 'next/image';
 
 export function WelcomeStep({ onNext }: { onNext: () => void }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -23,6 +22,7 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
         
         {/* Image container */}
         <div className="absolute inset-0 flex items-center justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/gifs/setwizardgif2.gif"
             alt="Set Wizard Introduction"

@@ -138,32 +138,27 @@ export default function SetManagerPage() {
                   <p className="text-sm text-gray-500 mt-2">{set.phraseCount} cards</p>
                 </div>
               </Link>
-              <div className="p-4 pt-0 mt-auto flex justify-end space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
+              <div className="p-4 pt-0 mt-auto flex justify-end gap-2">
+                <button
                   onClick={() => handleViewCards(set.id)}
-                  className="bg-gray-800 hover:bg-gray-700 border-gray-700 text-gray-300"
+                  className="p-2.5 rounded-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition flex items-center justify-center"
+                  title="Study Set"
                 >
-                  <Layers className="h-4 w-4 mr-1" /> View Cards
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                </button>
+                <button
                   onClick={() => handlePublish(set.id)}
-                  disabled={publishingSetId === set.id}
-                  className="bg-blue-900/50 hover:bg-blue-900/80 border-blue-700/50 hover:border-blue-600 text-blue-300"
+                  className="p-2.5 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 transition flex items-center justify-center"
+                  title="Set Options"
                 >
-                  <Send className="h-4 w-4 mr-1" /> Publish
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => deleteSet(set.id)}
-                  className="bg-red-900/50 hover:bg-red-900/80 border border-red-700/50 hover:border-red-600 text-red-300"
-                >
-                  <Trash2 className="h-4 w-4 mr-1" /> Delete
-                </Button>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                    <circle cx="12" cy="12" r="1" />
+                    <circle cx="12" cy="5" r="1" />
+                    <circle cx="12" cy="19" r="1" />
+                  </svg>
+                </button>
               </div>
             </div>
           ))}

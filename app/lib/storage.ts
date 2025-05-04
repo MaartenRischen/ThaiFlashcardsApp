@@ -31,7 +31,7 @@ export interface SetMetaData {
   goals?: string[];
   specificTopics?: string;
   source: 'default' | 'import' | 'generated';
-  imageUrl?: string;
+  imageUrl?: string | null; // Allow null
   isFullyLearned?: boolean;
   seriousnessLevel: number | null; // Allow null
   toneLevel: string | null; // Allow null

@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useSession } from 'next-auth/react';
-import { Loader2, Plus, BookOpen, Settings, Trash2 } from "lucide-react";
+import { Loader2, Plus, BookOpen, Settings, Trash2, Send, Layers } from "lucide-react";
 import { useSet } from '@/app/context/SetContext';
 import { SetMetaData } from '@/app/lib/storage';
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ export default function SetManagerPage() {
   const [sets, setSets] = useState<SetMetaData[]>([]);
   const [search] = useState("");
   const [filter] = useState("all");
+  const [publishingSetId, setPublishingSetId] = useState<string | null>(null);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -42,6 +43,22 @@ export default function SetManagerPage() {
       return nameMatch && levelMatch;
     });
   }, [sets, search, filter]);
+
+  const handlePublish = async (setId: string) => {
+    setPublishingSetId(setId);
+    try {
+      // TODO: Implement publish functionality
+      router.push(`/publish/${setId}`);
+    } catch (error) {
+      console.error('Error publishing set:', error);
+    } finally {
+      setPublishingSetId(null);
+    }
+  };
+
+  const handleViewCards = (setId: string) => {
+    router.push(`/cards/${setId}`);
+  };
 
   if (status === "loading") {
     return (
@@ -122,6 +139,23 @@ export default function SetManagerPage() {
                 </div>
               </Link>
               <div className="p-4 pt-0 mt-auto flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleViewCards(set.id)}
+                  className="bg-gray-800 hover:bg-gray-700 border-gray-700 text-gray-300"
+                >
+                  <Layers className="h-4 w-4 mr-1" /> View Cards
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePublish(set.id)}
+                  disabled={publishingSetId === set.id}
+                  className="bg-blue-900/50 hover:bg-blue-900/80 border-blue-700/50 hover:border-blue-600 text-blue-300"
+                >
+                  <Send className="h-4 w-4 mr-1" /> Publish
+                </Button>
                 <Button
                   variant="destructive"
                   size="sm"

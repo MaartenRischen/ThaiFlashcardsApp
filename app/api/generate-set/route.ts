@@ -152,17 +152,11 @@ export async function POST(request: Request) {
       
       // Construct the main prompt with corrected requirements
       const imagePrompt = 
-        `Create a cute cartoon style illustration with these STRICT REQUIREMENTS:\n` +
-        `1. MAIN FOCUS: Create a purely visual representation of "${topicDescription}" without ANY text or writing.\n` +
-        `2. MANDATORY ELEMENTS: Include a friendly donkey AND a bridge that naturally interact with the main topic.\n` +
-        `3. STYLE: Use vibrant, friendly colors and a clean cartoon style.\n` +
-        `4. CRITICAL TEXT PROHIBITION: The image MUST NOT contain ANY:\n` +
-        `   - Text, letters, numbers, or writing of any kind\n` +
-        `   - Signs, labels, logos, or watermarks\n` +
-        `   - Hidden or subtle text elements\n` +
-        `   - Text-like patterns or shapes\n` +
-        `5. COMPOSITION: Create a balanced 16:9 landscape composition.\n` +
-        `6. QUALITY: Focus on high detail and clean lines.`;
+        `Cute cartoon style illustration. ` +
+        `The absolute main focus MUST be: "${topicDescription}". ` +
+        `Visually represent the core action or concept of this topic accurately. ` +
+        `A friendly donkey AND a bridge MUST be clearly visible and integrated into the scene, visually representing or interacting directly with the main topic: "${topicDescription}". ` +
+        `Use vibrant, friendly, and engaging colors. `;
 
       console.log(`API Route: Generating image with FINAL prompt:`, imagePrompt);
       console.log(`API Route: Starting Ideogram API call...`);

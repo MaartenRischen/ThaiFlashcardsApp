@@ -25,13 +25,25 @@ export async function generateImage(prompt: string): Promise<string | null> {
     // Prepare form data for the request - works in both browser and Node.js
     const formData = new FormData();
     
+    // Get the user's preferred rendering speed from localStorage, default to TURBO
+    let renderingSpeed = 'TURBO';
+    try {
+      const savedSpeed = typeof window !== 'undefined' ? localStorage.getItem('renderingSpeed') : null;
+      if (savedSpeed === 'NORMAL' || savedSpeed === 'TURBO') {
+        renderingSpeed = savedSpeed;
+      }
+    } catch (error) {
+      console.warn('[IDEOGRAM WARN] Could not access localStorage for rendering speed, using default TURBO');
+    }
+    console.log(`[IDEOGRAM DEBUG] Using rendering speed: ${renderingSpeed}`);
+    
     // Strengthen the main prompt to be explicit about no text and focus on visual elements
     const enhancedPrompt = `VISUAL ONLY - NO TEXT ALLOWED: ${prompt}\n\nCRITICAL REQUIREMENTS FOR IMAGE GENERATION:\n1. Create a purely visual representation with absolutely NO text, letters, numbers, or writing of any kind.\n2. Focus on visual storytelling through images, colors, and scenes only.\n3. Use symbolic and pictorial elements to convey meaning.\n4. Avoid anything that could be interpreted as text or writing.\n5. Create clean, text-free compositions that tell the story through imagery alone.`;
     formData.append('prompt', enhancedPrompt);
     
     // Core configuration with optimized settings to prevent text
     formData.append('style_type', 'GENERAL');
-    formData.append('rendering_speed', 'TURBO');
+    formData.append('rendering_speed', renderingSpeed);
     formData.append('resolution', '1344x768');
     formData.append('magic_prompt', 'OFF'); // Prevent automatic prompt enhancement that might add text
     formData.append('seed', Math.floor(Math.random() * 1000000).toString()); // Use random seed for variety

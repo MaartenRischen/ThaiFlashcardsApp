@@ -1,7 +1,5 @@
 // Service to interact with Ideogram API directly
 
-import FormData from 'form-data';
-
 /**
  * Calls the Ideogram API to generate an image.
  * 

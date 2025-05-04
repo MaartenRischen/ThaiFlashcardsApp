@@ -319,4 +319,76 @@ export async function deleteImage(setId: string): Promise<boolean> {
     console.error('Error in deleteImage:', error);
     return false;
   }
+}
+
+/**
+ * Gets the URL for an optimized version of the image
+ * @param filePath The path to the image in Supabase storage
+ * @param options Transformation options
+ * @returns The URL for the transformed image
+ */
+export function getOptimizedImageUrl(
+  filePath: string, 
+  options: {
+    width?: number;
+    height?: number;
+    quality?: number;
+    resize?: 'cover' | 'contain' | 'fill';
+  } = {}
+): string {
+  // Check if this is a set image that should be optimized
+  const shouldOptimize = (path: string) => {
+    // Only optimize set-images that aren't the default logo
+    if (path.includes('set-images') && !path.includes('default-set-logo')) {
+      return true;
+    }
+    return false;
+  };
+
+  // If filePath is already a full URL
+  if (filePath?.startsWith('http')) {
+    // If it's a Supabase URL for a set image, convert it to the transformation format
+    if (filePath.includes('supabase.co/storage/v1/object/public/') && shouldOptimize(filePath)) {
+      filePath = filePath.replace(
+        /supabase\.co\/storage\/v1\/object\/public\//,
+        'supabase.co/storage/v1/render/image/public/'
+      );
+      
+      const params = new URLSearchParams();
+      if (options.width) params.append('width', options.width.toString());
+      if (options.height) params.append('height', options.height.toString());
+      if (options.quality) params.append('quality', options.quality.toString());
+      if (options.resize) params.append('resize', options.resize);
+      
+      const queryString = params.toString();
+      return `${filePath}${queryString ? '?' + queryString : ''}`;
+    }
+    
+    // If it's not a Supabase URL or not a set image, return it as is
+    return filePath;
+  }
+  
+  // If this is a local path that should be optimized
+  if (shouldOptimize(filePath)) {
+    // Use Supabase SDK to get an optimized URL
+    const { data } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath, {
+        transform: {
+          width: options.width,
+          height: options.height,
+          quality: options.quality || 80,
+          resize: options.resize || 'cover'
+        }
+      });
+    
+    return data.publicUrl;
+  }
+  
+  // For all other paths, return the regular public URL without transformations
+  const { data } = supabase.storage
+    .from(BUCKET_NAME)
+    .getPublicUrl(filePath);
+  
+  return data.publicUrl;
 } 

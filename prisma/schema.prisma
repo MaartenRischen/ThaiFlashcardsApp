@@ -81,7 +81,6 @@ model FlashcardSet {
   toneLevel      Int?    
   llmBrand       String?  
   llmModel       String?  
-  renderingSpeed String?  @default("TURBO") // Can be "TURBO" or "NORMAL"
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   shareId        String?  @unique 

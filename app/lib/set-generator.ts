@@ -1005,8 +1005,9 @@ export async function generateCustomSet(
     }
     
     // Final result
+    const dedupedPhrases = dedupeAndCapitalizePhrases(allPhrases);
     const result: GenerationResult = {
-      phrases: allPhrases,
+      phrases: dedupedPhrases,
       cleverTitle,
       aggregatedErrors,
       errorSummary,
@@ -1365,3 +1366,20 @@ export async function generateOpenRouterBatch(
     };
   }
 } 
+
+// Utility: Deduplicate and capitalize phrases
+function dedupeAndCapitalizePhrases(phrases: Phrase[]): Phrase[] {
+  const seen = new Set<string>();
+  const result: Phrase[] = [];
+  for (const phrase of phrases) {
+    // Normalize for deduplication
+    const normEnglish = phrase.english.trim().toLowerCase();
+    if (!seen.has(normEnglish)) {
+      seen.add(normEnglish);
+      // Capitalize English field (first letter upper, rest as-is)
+      phrase.english = phrase.english.trim().charAt(0).toUpperCase() + phrase.english.trim().slice(1);
+      result.push(phrase);
+    }
+  }
+  return result;
+}

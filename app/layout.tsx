@@ -66,7 +66,7 @@ export default function RootLayout({
           <meta name="theme-color" content="#ffffff" />
         </head>
         <body className={inter.className}>
-          <Toaster richColors position="top-left" />
+          <Toaster richColors position="top-left" duration={5000} />
           <Tooltip.Provider>
           <Providers>
             <SetProvider>

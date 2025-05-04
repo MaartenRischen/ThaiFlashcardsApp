@@ -9,17 +9,14 @@ import { SetMetaData } from '@/app/lib/storage';
 import { generateImage } from '@/app/lib/ideogram-service';
 import { uploadImageFromUrl } from '../../lib/imageStorage';
 import { getToneLabel } from '@/app/lib/utils';
+import dotenv from 'dotenv';
 // import { prisma } from "@/app/lib/prisma"; // Removed unused import
 // import { uploadImageFromUrl } from '../../lib/imageStorage'; // Removed unused import
 
-// Explicitly load dotenv in development
+// Initialize environment variables in development
 if (process.env.NODE_ENV === 'development') {
-  try {
-    require('dotenv').config();
-    console.log('API Route: Loaded .env file in development mode');
-  } catch (e) {
-    console.warn('API Route: Failed to load dotenv:', e);
-  }
+  dotenv.config();
+  console.log('API Route: Loaded .env file in development mode');
 }
 
 // Debug environment variables - this will help diagnose Railway issues
@@ -49,7 +46,7 @@ const PLACEHOLDER_IMAGES = [
   '/images/defaults-backup/default-thailand-12.png',
 ];
 
-function getRandomPlaceholderImage(): string {
+const _getRandomPlaceholderImage = () => {
   return PLACEHOLDER_IMAGES[Math.floor(Math.random() * PLACEHOLDER_IMAGES.length)];
 }
 
@@ -146,7 +143,7 @@ export async function POST(request: Request) {
       const topicDescription = generationResult.cleverTitle || preferences.specificTopics || 'a friendly donkey and bridge';
 
       // Define the negative constraints conditionally
-      const universalNegativeConstraint = [
+      const _universalNegativeConstraint = [
         "CRITICAL RULE: Absolutely NO text, NO words, NO letters, NO numbers, NO writing, NO signage, NO captions, NO subtitles, NO labels, NO logos, NO watermarks, NO symbols, NO characters, NO alphabets, NO numerals, NO digits, NO writing of any kind, NO visible language, NO English, NO Thai, NO hidden text, NO hidden letters, NO hidden numbers, NO text in the background, NO text on objects, NO text anywhere in the image.",
         "If the topic itself is a word or phrase, do NOT render it as text—only as a visual concept.",
         "If numbers are part of the topic, they may only appear as objects, not as digits or text.",

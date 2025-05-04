@@ -1,26 +1,15 @@
 import { NextResponse } from 'next/server';
 import { generateImage } from '@/app/lib/ideogram-service';
+import dotenv from 'dotenv';
 
-// Explicitly load dotenv in development
+// Initialize environment variables in development
 if (process.env.NODE_ENV === 'development') {
-  try {
-    require('dotenv').config();
-    console.log('Test Ideogram: Loaded .env file in development mode');
-  } catch (e) {
-    console.warn('Test Ideogram: Failed to load dotenv:', e);
-  }
+  dotenv.config();
+  console.log('Test Ideogram: Loaded .env file in development mode');
 }
 
 export async function GET() {
   try {
-    // Load environment variables in development mode
-    try {
-      require('dotenv').config();
-      console.log('Test Ideogram: Loaded .env file in development mode');
-    } catch (e) {
-      console.warn('Test Ideogram: Failed to load dotenv:', e);
-    }
-    
     // Test environment variables
     console.log('Test Ideogram: Starting test...');
     console.log('Test Ideogram: IDEOGRAM_API_KEY present:', Boolean(process.env.IDEOGRAM_API_KEY));

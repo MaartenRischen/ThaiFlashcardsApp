@@ -1,20 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { generateImage } from '@/app/lib/ideogram-service';
+import { uploadImageFromUrl } from '@/app/lib/imageStorage';
+import dotenv from 'dotenv';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);
 }
 
-// Explicitly load dotenv in development
+// Initialize environment variables in development
 if (process.env.NODE_ENV === 'development') {
-  try {
-    require('dotenv').config();
-    console.log('[Image API] Loaded .env file in development mode');
-  } catch (e) {
-    console.warn('[Image API] Failed to load dotenv:', e);
-  }
+  dotenv.config();
+  console.log('[Image API] Loaded .env file in development mode');
 }
 
 const imageRequestSchema = z.object({

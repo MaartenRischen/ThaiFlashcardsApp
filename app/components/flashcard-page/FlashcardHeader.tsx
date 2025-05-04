@@ -66,6 +66,7 @@ export function FlashcardHeader({
             key={activeSetId}
             width={640}
             height={360}
+            unoptimized={true}
             style={{ objectFit: 'contain', objectPosition: 'center' }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;

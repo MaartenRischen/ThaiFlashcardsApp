@@ -118,7 +118,7 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
 
   // Prepare data for Prisma, mapping SetMetaData to Prisma's FlashcardSetCreateInput
   // Note: Prisma handles id, createdAt, updatedAt automatically
-  const dataToInsert: Omit<FlashcardSet, 'id' | 'createdAt' | 'updatedAt'> = {
+  const dataToInsert = {
     userId: userId,
     name: newSetData.name,
     cleverTitle: newSetData.cleverTitle || null,
@@ -132,7 +132,7 @@ export async function addSetMetaData(userId: string, newSetData: Omit<SetMetaDat
     llmBrand: newSetData.llmBrand || null,
     llmModel: newSetData.llmModel || null,
     shareId: null, // Assuming shareId is optional or generated elsewhere/later
-  };
+  } as const;
 
   console.log(`Inserting SetMetaData into DB via Prisma for userId: ${userId}`, dataToInsert);
 

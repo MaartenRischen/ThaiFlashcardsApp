@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
 import { uploadImageFromUrl, initializeStorage } from '@/app/lib/imageStorage';
+import dotenv from 'dotenv';
 
 // Explicitly load dotenv in development
 if (process.env.NODE_ENV === 'development') {
-  try {
-    require('dotenv').config();
-    console.log('Test Storage: Loaded .env file in development mode');
-  } catch (e) {
-    console.warn('Test Storage: Failed to load dotenv:', e);
-  }
+  dotenv.config();
+  console.log('Test Storage: Loaded .env file in development mode');
 }
 
 export async function GET() {

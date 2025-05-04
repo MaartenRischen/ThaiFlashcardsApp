@@ -19,28 +19,87 @@ export async function generateImage(prompt: string): Promise<string | null> {
       return null;
     }
 
-    // Using the JSON API format instead of FormData (based on the test script)
-    console.log('[IDEOGRAM DEBUG] Using JSON API format for Ideogram');
+    // Using the latest Ideogram v3 API format with multipart form
+    console.log('[IDEOGRAM DEBUG] Using Ideogram v3 API with multipart/form-data');
     
-    const requestBody = {
-      image_request: {
-        prompt: prompt,
-        style_type: "DESIGN",
-        resolution: "RESOLUTION_1312_736",
-        negative_prompt: "CRITICAL: Absolutely NO text, NO words, NO letters, NO numbers, NO writing, NO signage, NO captions, NO subtitles, NO labels, NO logos, NO watermarks, NO symbols, NO characters, NO alphabets, NO numerals, NO digits, NO writing of any kind, NO visible language, NO English, NO Thai, NO hidden text, NO hidden letters, NO hidden numbers, NO text in the background, NO text on objects, NO text anywhere in the image.",
-        seed: Math.floor(Math.random() * 1000000)
-      }
-    };
-
-    console.log('[IDEOGRAM DEBUG] Request body:', JSON.stringify(requestBody).substring(0, 200) + '...');
+    // Prepare form data for the request - works in both browser and Node.js
+    const formData = new FormData();
     
-    const response = await fetch('https://api.ideogram.ai/generate', {
+    // Strengthen the main prompt to be explicit about no text and focus on visual elements
+    const enhancedPrompt = `VISUAL ONLY - NO TEXT ALLOWED: ${prompt}\n\nCRITICAL REQUIREMENTS FOR IMAGE GENERATION:\n1. Create a purely visual representation with absolutely NO text, letters, numbers, or writing of any kind.\n2. Focus on visual storytelling through images, colors, and scenes only.\n3. Use symbolic and pictorial elements to convey meaning.\n4. Avoid anything that could be interpreted as text or writing.\n5. Create clean, text-free compositions that tell the story through imagery alone.`;
+    formData.append('prompt', enhancedPrompt);
+    
+    // Core configuration with optimized settings to prevent text
+    formData.append('style_type', 'GENERAL');
+    formData.append('rendering_speed', 'TURBO');
+    formData.append('resolution', '1344x768');
+    formData.append('magic_prompt', 'OFF'); // Prevent automatic prompt enhancement that might add text
+    formData.append('seed', Math.floor(Math.random() * 1000000).toString()); // Use random seed for variety
+    formData.append('cfg_scale', '20'); // Higher CFG scale for stronger adherence to prompt requirements
+    formData.append('steps', '30'); // More steps for better control
+    formData.append('sampler', 'DDIM'); // More precise sampler
+    
+    // Expanded and reorganized negative prompt with stronger emphasis and additional patterns
+    const negativePrompt = [
+      // ABSOLUTE PROHIBITIONS (strongest negative weights)
+      "(text:1.5), (writing:1.5), (letters:1.5), (numbers:1.5), (words:1.5), (captions:1.5), (labels:1.5)",
+      
+      // Core text elements (with weights)
+      "(typography:1.4), (fonts:1.4), (alphabets:1.4), (characters:1.4), (scripts:1.4), (numerals:1.4)",
+      
+      // Communication elements
+      "speech bubbles, thought bubbles, dialogue boxes, subtitles, watermarks, signatures",
+      
+      // Digital/UI elements
+      "user interface, menu text, buttons with text, screen text, digital displays",
+      
+      // Environmental text
+      "signs, banners, billboards, posters, nameplates, street signs, building text",
+      
+      // Commercial/Product text
+      "logos, brand names, product labels, price tags, barcodes, QR codes",
+      
+      // Document elements
+      "pages with text, books, newspapers, documents, certificates, forms",
+      
+      // Time/Date elements
+      "clocks with numbers, calendars, dates, timestamps, numerical indicators",
+      
+      // Educational elements
+      "blackboards, whiteboards, charts with text, diagrams with labels",
+      
+      // Artistic/Decorative text
+      "calligraphy, handwriting, text patterns, letter-like designs, text art",
+      
+      // Hidden/Subtle text
+      "disguised text, text within patterns, text in backgrounds, subtle writing",
+      
+      // Meta text
+      "watermarks, signatures, artist names, copyright text, metadata",
+      
+      // Comprehensive exclusions
+      "any text, all text, every kind of text, writing in any form, letters of any type, numbers in any style",
+      
+      // Additional strong negatives for text-like patterns
+      "anything resembling text, patterns that look like writing, shapes that could be letters",
+      
+      // Cultural text elements
+      "hieroglyphics, symbols, pictographs, ideographs, ancient writing",
+      
+      // Strongest possible catch-all (with maximum weight)
+      "(any form of visible language or writing:1.6), (anything that could be interpreted as text:1.6)"
+    ].join(", ");
+    
+    formData.append('negative_prompt', negativePrompt);
+    
+    // Use the latest API version
+    const response = await fetch('https://api.ideogram.ai/v1/ideogram-v3/generate', {
       method: 'POST',
       headers: {
         'Api-Key': apiKey,
-        'Content-Type': 'application/json',
+        // Content-Type is set automatically by FormData
       },
-      body: JSON.stringify(requestBody),
+      body: formData,
     });
 
     console.log(`[IDEOGRAM DEBUG] Response status: ${response.status}`);
@@ -61,6 +120,7 @@ export async function generateImage(prompt: string): Promise<string | null> {
       return null;
     }
     
+    // Access URL via the updated data structure for v3 API
     const imageUrl = data?.data?.[0]?.url;
     if (imageUrl) {
       console.log('[IDEOGRAM SUCCESS] Image generated successfully, URL:', imageUrl);

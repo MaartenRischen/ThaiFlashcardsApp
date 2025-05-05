@@ -93,6 +93,10 @@ export default function RootLayout({
                    */}
                 </main>
                 <FeedbackFooterClient />
+                {/* Copyright Notice */}
+                <div className="w-full text-center text-xs text-gray-600 py-3 bg-[#181818]">
+                  Copyright (c) 2025 Maarten Rischen. All rights reserved.
+                </div>
               </FeedbackProvider>
             </SetProvider>
           </Providers>

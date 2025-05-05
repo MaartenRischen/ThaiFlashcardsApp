@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUser } from "@clerk/nextjs";
-import Link from 'next/link';
 
 export function WelcomeStep({ onNext }: { onNext: () => void }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const { isSignedIn } = useUser();
+
+  useEffect(() => {
+    console.log('[WelcomeStep] isSignedIn:', isSignedIn);
+  }, [isSignedIn]);
 
   return (
     <div className="flex flex-col items-center text-center space-y-6">
@@ -48,15 +51,7 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
         {!isSignedIn && (
           <div className="bg-[#2C1810] border-2 border-[#8B4513] rounded-lg p-4">
             <p className="text-[#FFA07A] text-sm leading-relaxed">
-              👋 You can explore the Set Wizard, but to save your custom sets you&apos;ll need to{' '}
-              <Link href="/login" className="text-[#FFB6C1] hover:text-[#FFC0CB] underline font-medium">
-                log in
-              </Link>
-              {' '}or{' '}
-              <Link href="/register" className="text-[#FFB6C1] hover:text-[#FFC0CB] underline font-medium">
-                register
-              </Link>
-              {' '}first.
+              👋 You can explore the Set Wizard and User Gallery freely. Please note that saving custom sets requires you to be logged in.
             </p>
           </div>
         )}

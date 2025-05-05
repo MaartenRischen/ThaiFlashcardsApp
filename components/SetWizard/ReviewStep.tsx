@@ -42,34 +42,34 @@ export function ReviewStep({ state, onConfirm, onBack, onCardCountChange }: {
             <h4 className="text-sm font-medium text-white">Selected Topic</h4>
             <span className="text-xs text-gray-500">What you&apos;ll learn</span>
           </div>
-          {state.selectedTopic ? (
-            <div className="flex items-center gap-2">
-              <span className={`w-1.5 h-1.5 rounded-full ${state.selectedTopic.type === 'weird' ? 'bg-purple-400' : 'bg-blue-400'}`}></span>
-              <span className="text-gray-300 text-sm">{selectedTopicDisplay}</span> 
-              <span className="text-xs text-gray-500">({topicTypeDisplay})</span>
-            </div>
-          ) : (
-            <span className="text-gray-400 text-sm italic">No topic selected</span>
-          )}
+            {state.selectedTopic ? (
+              <div className="flex items-center gap-2">
+                <span className={`w-1.5 h-1.5 rounded-full ${state.selectedTopic.type === 'weird' ? 'bg-purple-400' : 'bg-blue-400'}`}></span>
+                <span className="text-gray-300 text-sm">{selectedTopicDisplay}</span> 
+                <span className="text-xs text-gray-500">({topicTypeDisplay})</span>
+              </div>
+            ) : (
+              <span className="text-gray-400 text-sm italic">No topic selected</span>
+            )}
         </div>
         
         {/* Card Count Dropdown Section */}
         <div className="bg-[#1e1e1e]/80 rounded-lg p-4 border border-[#2C2C2C]">
           <div className="flex justify-between items-baseline mb-2">
             <h4 className="text-sm font-medium text-white">Set Size</h4>
-            <span className="text-xs text-gray-500">Number of cards</span>
+             <span className="text-xs text-gray-500">Number of cards</span>
           </div>
-          <select
-            value={state.cardCount} 
-            onChange={(e) => onCardCountChange(parseInt(e.target.value, 10))}
+            <select
+              value={state.cardCount} 
+              onChange={(e) => onCardCountChange(parseInt(e.target.value, 10))}
             className="w-full bg-[#2C2C2C] border border-[#404040] text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2"
-          >
-            {cardOptions.map(count => (
-              <option key={count} value={count}>
-                {count} Cards
-              </option>
-            ))}
-          </select>
+            >
+              {cardOptions.map(count => (
+                <option key={count} value={count}>
+                  {count} Cards
+                </option>
+              ))}
+            </select>
         </div>
 
         {/* Learning Style Section */}

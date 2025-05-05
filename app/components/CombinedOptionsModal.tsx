@@ -506,17 +506,16 @@ export function SetManagerModal({ isOpen, onClose }: {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: set.id,
           title: set.cleverTitle || set.name,
-          description: set.specificTopics || '',
+          description: set.specificTopics || '', 
           phrases: phrases || [],
-          author: author, // Use the author name from the modal
-          imageUrl: set.imageUrl || '',
+          author: author,
+          imageUrl: set.imageUrl || '', 
           cardCount: phrases.length,
-          llmBrand: set.llmBrand || '',
-          llmModel: set.llmModel || '',
-          toneLevel: set.toneLevel,
-          specificTopics: set.specificTopics,
+          llmBrand: set.llmBrand || '', 
+          llmModel: set.llmModel || '', 
+          seriousnessLevel: set.seriousnessLevel, 
+          specificTopics: set.specificTopics, 
         }),
       });
       if (!res.ok) {

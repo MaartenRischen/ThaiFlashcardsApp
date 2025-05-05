@@ -560,6 +560,7 @@ export async function publishSetToGallery(publishedSet: {
 
 // Fetch all published sets (metadata only)
 export async function getAllPublishedSets() {
+  // Select only fields confirmed to exist and not involved in the name conflict
   const publishedSets = await prisma.publishedSet.findMany({
     select: {
       id: true,
@@ -570,17 +571,22 @@ export async function getAllPublishedSets() {
       author: true,
       llmBrand: true,
       llmModel: true,
-      seriousnessLevel: true,
-      proficiencyLevel: true,
+      // seriousnessLevel: true, // Removed
+      // proficiencyLevel: true, // Removed (or level with @ts-ignore)
       specificTopics: true,
       publishedAt: true,
     },
+    orderBy: { 
+      publishedAt: 'desc'
+    }
   });
+  // No mapping needed now
   return publishedSets || [];
 }
 
 // Fetch a single published set by ID (full data)
 export async function getPublishedSetById(id: string) {
+  // Select only fields confirmed to exist and not involved in the name conflict
   const publishedSet = await prisma.publishedSet.findUnique({
     where: {
       id: id,
@@ -594,13 +600,15 @@ export async function getPublishedSetById(id: string) {
       author: true,
       llmBrand: true,
       llmModel: true,
-      seriousnessLevel: true,
+      // seriousnessLevel: true, // Removed
+      // proficiencyLevel: true, // Removed (or level with @ts-ignore)
       specificTopics: true,
       publishedAt: true,
-      phrases: true,
+      phrases: true, // Keep phrases for viewing/importing
     },
   });
-  return publishedSet;
+  // No mapping needed now
+  return publishedSet; // Return null if set not found automatically by findUnique
 }
 
 // Delete a published set from the gallery

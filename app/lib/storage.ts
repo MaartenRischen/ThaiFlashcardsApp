@@ -535,25 +535,27 @@ export async function publishSetToGallery(publishedSet: {
   llmBrand?: string;
   llmModel?: string;
   seriousnessLevel?: number;
-  proficiencyLevel?: string;
   specificTopics?: string;
   phrases: Phrase[];
 }) {
+  const dataToSave = {
+    title: publishedSet.title,
+    description: publishedSet.description,
+    imageUrl: publishedSet.imageUrl,
+    cardCount: publishedSet.cardCount,
+    author: publishedSet.author,
+    llmBrand: publishedSet.llmBrand,
+    llmModel: publishedSet.llmModel,
+    seriousnessLevel: publishedSet.seriousnessLevel,
+    specificTopics: publishedSet.specificTopics,
+    phrases: publishedSet.phrases as unknown as Prisma.InputJsonValue,
+    publishedAt: new Date().toISOString(),
+  };
+
+  console.log("--- DEBUG: Data being passed to prisma.publishedSet.create ---", JSON.stringify(dataToSave, null, 2));
+
   const createdPublishedSet = await prisma.publishedSet.create({
-    data: {
-      title: publishedSet.title,
-      description: publishedSet.description,
-      imageUrl: publishedSet.imageUrl,
-      cardCount: publishedSet.cardCount,
-      author: publishedSet.author,
-      llmBrand: publishedSet.llmBrand,
-      llmModel: publishedSet.llmModel,
-      seriousnessLevel: publishedSet.seriousnessLevel,
-      proficiencyLevel: publishedSet.proficiencyLevel,
-      specificTopics: publishedSet.specificTopics,
-      phrases: publishedSet.phrases as unknown as Prisma.InputJsonValue,
-      publishedAt: new Date().toISOString(),
-    }
+    data: dataToSave
   });
   return createdPublishedSet;
 }
@@ -571,8 +573,6 @@ export async function getAllPublishedSets() {
       author: true,
       llmBrand: true,
       llmModel: true,
-      // seriousnessLevel: true, // Removed
-      // proficiencyLevel: true, // Removed (or level with @ts-ignore)
       specificTopics: true,
       publishedAt: true,
     },
@@ -600,8 +600,6 @@ export async function getPublishedSetById(id: string) {
       author: true,
       llmBrand: true,
       llmModel: true,
-      // seriousnessLevel: true, // Removed
-      // proficiencyLevel: true, // Removed (or level with @ts-ignore)
       specificTopics: true,
       publishedAt: true,
       phrases: true, // Keep phrases for viewing/importing

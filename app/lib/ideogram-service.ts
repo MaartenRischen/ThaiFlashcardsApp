@@ -40,7 +40,7 @@ export async function generateImage(prompt: string): Promise<string | null> {
     console.log(`[IDEOGRAM DEBUG] Using rendering speed: ${renderingSpeed}`);
     
     // Strengthen the main prompt to be explicit about no text and focus on visual elements
-    const enhancedPrompt = `VISUAL ONLY - NO TEXT ALLOWED: ${prompt}\n\nCRITICAL REQUIREMENTS FOR IMAGE GENERATION:\n1. Create a purely visual representation with absolutely NO text, letters, numbers, or writing of any kind.\n2. Focus on visual storytelling through images, colors, and scenes only.\n3. Use symbolic and pictorial elements to convey meaning.\n4. Avoid anything that could be interpreted as text or writing.\n5. Create clean, text-free compositions that tell the story through imagery alone.`;
+    const enhancedPrompt = `VISUAL ONLY - NO TEXT ALLOWED: ${prompt}\n\nCRITICAL REQUIREMENTS FOR IMAGE GENERATION:\n1. Create a purely visual representation with absolutely NO text, letters, or writing of any kind.\n2. Focus on visual storytelling through images, colors, and scenes only.\n3. Use symbolic and pictorial elements to convey meaning.\n4. Avoid anything that could be interpreted as text or writing.\n5. Create clean, text-free compositions that tell the story through imagery alone.`;
     formData.append('prompt', enhancedPrompt);
     
     // Core configuration with optimized settings to prevent text
@@ -51,36 +51,33 @@ export async function generateImage(prompt: string): Promise<string | null> {
     formData.append('seed', Math.floor(Math.random() * 1000000).toString()); // Use random seed for variety
     formData.append('cfg_scale', '20'); // Higher CFG scale for stronger adherence to prompt requirements
     formData.append('steps', '30'); // More steps for better control
-    formData.append('sampler', 'DDIM'); // More precise sampler
+    formData.append('sampler', 'DDIM');
     
-    // Expanded and reorganized negative prompt with stronger emphasis and additional patterns
+    // Updated negative prompts to allow numbers while maintaining strict text prevention
     const negativePrompt = [
-      // ABSOLUTE PROHIBITIONS (strongest negative weights)
-      "(text:1.5), (writing:1.5), (letters:1.5), (numbers:1.5), (words:1.5), (captions:1.5), (labels:1.5)",
+      // ABSOLUTE PROHIBITIONS (core text elements)
+      "(text:1.5), (writing:1.5), (letters:1.5), (words:1.5), (captions:1.5), (labels:1.5)",
       
-      // Core text elements (with weights)
-      "(typography:1.4), (fonts:1.4), (alphabets:1.4), (characters:1.4), (scripts:1.4), (numerals:1.4)",
+      // Typography elements
+      "(typography:1.4), (fonts:1.4), (alphabets:1.4), (characters:1.4), (scripts:1.4)",
       
       // Communication elements
       "speech bubbles, thought bubbles, dialogue boxes, subtitles, watermarks, signatures",
       
       // Digital/UI elements
-      "user interface, menu text, buttons with text, screen text, digital displays",
+      "user interface, menu text, buttons with text, screen text, digital text displays",
       
       // Environmental text
-      "signs, banners, billboards, posters, nameplates, street signs, building text",
+      "signs with text, banners with text, billboards with text, posters with text, nameplates with text",
       
       // Commercial/Product text
-      "logos, brand names, product labels, price tags, barcodes, QR codes",
+      "logos, brand names, product labels, barcodes, QR codes",
       
       // Document elements
       "pages with text, books, newspapers, documents, certificates, forms",
       
-      // Time/Date elements
-      "clocks with numbers, calendars, dates, timestamps, numerical indicators",
-      
       // Educational elements
-      "blackboards, whiteboards, charts with text, diagrams with labels",
+      "blackboards with text, whiteboards with text, charts with text, diagrams with labels",
       
       // Artistic/Decorative text
       "calligraphy, handwriting, text patterns, letter-like designs, text art",
@@ -91,16 +88,10 @@ export async function generateImage(prompt: string): Promise<string | null> {
       // Meta text
       "watermarks, signatures, artist names, copyright text, metadata",
       
-      // Comprehensive exclusions
-      "any text, all text, every kind of text, writing in any form, letters of any type, numbers in any style",
-      
-      // Additional strong negatives for text-like patterns
-      "anything resembling text, patterns that look like writing, shapes that could be letters",
-      
       // Cultural text elements
-      "hieroglyphics, symbols, pictographs, ideographs, ancient writing",
+      "hieroglyphics, written symbols, pictographs, ideographs, ancient writing",
       
-      // Strongest possible catch-all (with maximum weight)
+      // Comprehensive text exclusions
       "(any form of visible language or writing:1.6), (anything that could be interpreted as text:1.6)"
     ].join(", ");
     

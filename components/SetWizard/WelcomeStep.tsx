@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useUser } from "@clerk/nextjs";
-import Link from 'next/link';
 
 export function WelcomeStep({ onNext }: { onNext: () => void }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -49,13 +48,9 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
           <div className="bg-[#2C1810] border-2 border-[#8B4513] rounded-lg p-4">
             <p className="text-[#FFA07A] text-sm leading-relaxed">
               👋 You can explore the Set Wizard, but to save your custom sets you&apos;ll need to{' '}
-              <Link href="/sign-in" className="text-[#FFB6C1] hover:text-[#FFC0CB] underline font-medium">
-                log in
-              </Link>
+              <span className="text-[#FFB6C1] font-medium">log in</span>
               {' '}or{' '}
-              <Link href="/sign-up" className="text-[#FFB6C1] hover:text-[#FFC0CB] underline font-medium">
-                register
-              </Link>
+              <span className="text-[#FFB6C1] font-medium">register</span>
               {' '}first.
             </p>
           </div>

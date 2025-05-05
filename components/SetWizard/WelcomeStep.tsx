@@ -47,11 +47,7 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
         {!isSignedIn && (
           <div className="bg-[#2C1810] border-2 border-[#8B4513] rounded-lg p-4">
             <p className="text-[#FFA07A] text-sm leading-relaxed">
-              👋 You can explore the Set Wizard, but to save your custom sets you&apos;ll need to{' '}
-              <span className="text-[#FFB6C1] font-medium">log in</span>
-              {' '}or{' '}
-              <span className="text-[#FFB6C1] font-medium">register</span>
-              {' '}first.
+              👋 You can explore the Set Wizard, but to save your custom sets you&apos;ll need to log in or register first.
             </p>
           </div>
         )}

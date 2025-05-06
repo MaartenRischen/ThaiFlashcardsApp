@@ -3,7 +3,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useSet } from '@/app/context/SetContext';
 import { Phrase } from '@/app/lib/set-generator';
 import GallerySetCard from './GallerySetCard';
-import { GalleryHorizontal, Loader2 } from 'lucide-react';
+import { GalleryHorizontal, Loader2, Info } from 'lucide-react';
 // Import a modal component (we'll create this next)
 import CardViewerModal from './CardViewerModal';
 
@@ -53,23 +53,11 @@ export default function GalleryPage() {
   // --- Search/Filter State ---
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'Newest' | 'Oldest' | 'Most Cards' | 'Highest Rated'>('Newest');
-  const [proficiencyFilter, setProficiencyFilter] = useState<string>('All');
   const [authorFilter, setAuthorFilter] = useState<string>('All');
 
   // --- Filtering Logic ---
   const sortOptions = ['Newest', 'Oldest', 'Most Cards', 'Highest Rated'];
   
-  // Move proficiencyLevels into useMemo
-  const proficiencyLevels = useMemo(() => [
-    'All',
-    'Complete Beginner',
-    'Basic Understanding',
-    'Intermediate',
-    'Advanced',
-    'Native/Fluent',
-    'God Mode'
-  ], []); // Empty dependency array since this never changes
-
   // Get unique authors from sets
   const authors = useMemo(() => {
     const uniqueAuthors = new Set(sets.map(set => set.author || 'Anonymous').filter(Boolean));
@@ -81,30 +69,6 @@ export default function GalleryPage() {
   }, [sets]);
 
   const filteredSets = useMemo(() => {
-    // Move mapProficiencyLevel inside useMemo
-    const mapProficiencyLevel = (level: string | undefined): string => {
-      if (!level) return 'Complete Beginner';
-      
-      const normalizedLevel = level.toLowerCase().trim();
-      
-      // Direct matches
-      if (proficiencyLevels.some(l => l.toLowerCase() === normalizedLevel)) {
-        return level;
-      }
-
-      // Mapping logic for non-standard values
-      if (normalizedLevel.includes('beginner') || normalizedLevel.includes('basic')) {
-        return normalizedLevel.includes('complete') ? 'Complete Beginner' : 'Basic Understanding';
-      }
-      if (normalizedLevel.includes('intermediate')) return 'Intermediate';
-      if (normalizedLevel.includes('advanced')) return 'Advanced';
-      if (normalizedLevel.includes('native') || normalizedLevel.includes('fluent')) return 'Native/Fluent';
-      if (normalizedLevel.includes('god')) return 'God Mode';
-
-      // Default to Complete Beginner if no match
-      return 'Complete Beginner';
-    };
-
     let filtered = sets;
 
     // Text search
@@ -114,13 +78,6 @@ export default function GalleryPage() {
         set.title?.toLowerCase().includes(s) ||
         set.description?.toLowerCase().includes(s) ||
         set.specificTopics?.toLowerCase().includes(s)
-      );
-    }
-
-    // Proficiency filter
-    if (proficiencyFilter !== 'All') {
-      filtered = filtered.filter(set => 
-        mapProficiencyLevel(set.proficiencyLevel) === proficiencyFilter
       );
     }
 
@@ -149,7 +106,7 @@ export default function GalleryPage() {
     });
 
     return filtered;
-  }, [sets, search, sortOrder, proficiencyFilter, authorFilter, proficiencyLevels]);
+  }, [sets, search, sortOrder, authorFilter]);
 
   useEffect(() => {
     setLoading(true);
@@ -297,15 +254,6 @@ export default function GalleryPage() {
             ))}
           </select>
           <select
-            value={proficiencyFilter}
-            onChange={(e) => setProficiencyFilter(e.target.value)}
-            className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm w-full sm:w-auto"
-          >
-            {proficiencyLevels.map(level => (
-              <option key={level} value={level}>{level}</option>
-            ))}
-          </select>
-          <select
             value={authorFilter}
             onChange={(e) => setAuthorFilter(e.target.value)}
             className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm w-full sm:w-auto"
@@ -319,6 +267,15 @@ export default function GalleryPage() {
       <p className="text-sm text-indigo-200 mb-6 -mt-4">
         Browse and import sets created by the Donkey Bridge community
       </p>
+      {/* Added Note - Enhanced */}
+      <div className="p-3 border border-gray-700 rounded-md flex items-start gap-2 mb-6 bg-gray-800/20">
+        <Info className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
+        <p className="text-sm text-gray-400">
+          Notes: <br />
+          - Advanced search and sorting mechanisms are in development. <br />
+          - At the moment it is impossible to view proficiency level and &quot;ridiculousness&quot; level for every gallery set, that&apos;ll be fixed in the next update.
+        </p>
+      </div>
       {error && (
         <div className="p-3 bg-red-900/20 border border-red-700/30 rounded-md text-red-400 text-sm mb-4">
           {error}

@@ -6,6 +6,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/health',  // Add health check route
+  '/health',      // Add root health check route
   '/api/share/(.*)', // Public share endpoints if you have any
   '/api/gallery/(.*)' // Public gallery endpoints if you have any
 ]);

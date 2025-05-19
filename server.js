@@ -1,52 +1,32 @@
 // Custom server.js wrapper for standalone Next.js server
-const http = require('http');
-const { join } = require('path');
+const { createServer } = require('http');
 const { parse } = require('url');
-const fs = require('fs');
+const next = require('next');
 
-// Get Next.js server path from standalone output
-const nextServerPath = join(__dirname, 'server.js');
+const dev = process.env.NODE_ENV !== 'production';
+const hostname = 'localhost';
+const port = process.env.PORT || 8080;
 
-// Log startup details
-console.log('Starting custom standalone server');
-console.log(`Node version: ${process.version}`);
-console.log(`Server path: ${nextServerPath}`);
-console.log(`PORT env: ${process.env.PORT || '8080 (default)'}`);
+// when using middleware `hostname` and `port` must be provided below
+const app = next({ dev, hostname, port });
+const handle = app.getRequestHandler();
 
-// Create a simple health check handler
-const healthCheck = (req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('OK');
-};
-
-try {
-  // Import the Next.js server
-  const next = require('next');
-  const app = next({ dev: false, dir: __dirname });
-  const handle = app.getRequestHandler();
-
-  app.prepare().then(() => {
-    const server = http.createServer((req, res) => {
+app.prepare().then(() => {
+  createServer(async (req, res) => {
+    try {
       const parsedUrl = parse(req.url, true);
-      const { pathname } = parsedUrl;
-
-      // Handle health check endpoints
-      if (pathname === '/health.txt' || pathname === '/health' || pathname === '/api/health') {
-        healthCheck(req, res);
-        return;
-      }
-
-      // Let Next.js handle all other routes
-      handle(req, res, parsedUrl);
+      await handle(req, res, parsedUrl);
+    } catch (err) {
+      console.error('Error occurred handling', req.url, err);
+      res.statusCode = 500;
+      res.end('Internal Server Error');
+    }
+  })
+    .once('error', (err) => {
+      console.error(err);
+      process.exit(1);
+    })
+    .listen(port, () => {
+      console.log(`> Ready on http://${hostname}:${port}`);
     });
-
-    const port = process.env.PORT || 8080;
-    server.listen(port, (err) => {
-      if (err) throw err;
-      console.log(`> Ready on port ${port}`);
-    });
-  });
-} catch (error) {
-  console.error('Failed to start server:', error);
-  process.exit(1);
-} 
+}); 

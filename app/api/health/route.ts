@@ -9,11 +9,5 @@ export const fetchCache = 'force-no-store';
 export const revalidate = 0;
 
 export async function GET() {
-  try {
-    // Return a simple response
-    return NextResponse.json({ status: 'ok', timestamp: new Date().toISOString() });
-  } catch (error) {
-    console.error('Health check error:', error);
-    return NextResponse.json({ status: 'error' }, { status: 500 });
-  }
+  return NextResponse.json({ status: 'ok' });
 } 

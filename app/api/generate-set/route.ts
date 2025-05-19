@@ -10,7 +10,7 @@ import { generateImage } from '@/app/lib/ideogram-service';
 import { uploadImageFromUrl } from '../../lib/imageStorage';
 import { getToneLabel } from '@/app/lib/utils';
 import dotenv from 'dotenv';
-// import { prisma } from "@/app/lib/prisma"; // Removed unused import
+import { prisma } from "@/app/lib/prisma"; // Ensure prisma is imported
 // import { uploadImageFromUrl } from '../../lib/imageStorage'; // Removed unused import
 
 // Initialize environment variables in development
@@ -76,6 +76,19 @@ export async function POST(request: Request) {
     }
     userId = authResult.userId;
     console.log(`API Route: Authentication successful for userId: ${userId}`);
+
+    // Ensure user exists in your DB before proceeding
+    try {
+      await prisma.user.upsert({
+        where: { id: userId },
+        update: {},
+        create: { id: userId }, // Only use id, as other user details are not directly on authResult here
+      });
+      console.log(`API Route /api/generate-set: Ensured user exists: ${userId}`);
+    } catch (userError) {
+      console.error(`API Route /api/generate-set: Failed to ensure user ${userId} exists:`, userError);
+      return NextResponse.json({ error: 'Failed to process user data for set generation' }, { status: 500 });
+    }
 
     const requestBody = await request.json();
     const { preferences, totalCount } = requestBody;

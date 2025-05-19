@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 
+// Force dynamic responses and edge runtime
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
+// Prevent response caching
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 export async function GET() {
-  // This is a root-level health check endpoint for Railway
-  console.log("Root health check endpoint hit successfully."); 
-  return NextResponse.json({ status: 'ok' }, { status: 200 });
+  return NextResponse.json({ status: 'ok' });
 } 

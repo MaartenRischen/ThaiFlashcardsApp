@@ -7,7 +7,7 @@
     "postinstall": "",
     "prebuild": "prisma generate --schema=./prisma/schema.prisma",
     "build": "next build",
-    "start": "node .next/standalone/server.js -p ${PORT:-3000}",
+    "start": "next start -p ${PORT:-3000}",
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",

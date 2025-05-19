@@ -8,7 +8,8 @@ const isPublicRoute = createRouteMatcher([
   '/health',      // Root health check page
   '/api/health',  // API health check (keeping for backwards compatibility)
   '/api/share/(.*)', // Public share endpoints
-  '/api/gallery/(.*)' // Public gallery endpoints
+  '/api/gallery/(.*)', // Public gallery endpoints
+  '/api/generate-set(.*)' // TEMPORARILY PUBLIC FOR DIAGNOSTICS
 ]);
 
 // This example protects all routes including api/trpc routes

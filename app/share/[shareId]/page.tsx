@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@clerk/nextjs';
 import { ExampleSentence } from '../../lib/set-generator';
 
 interface Phrase {
@@ -26,7 +26,7 @@ interface SharedSet {
 
 export default function ShareSetPage({ params }: { params: { shareId: string } }) {
   const shareId = params.shareId;
-  const { data: session } = useSession();
+  const { userId, isSignedIn } = useAuth();
 
   const [setData, setSetData] = useState<SharedSet | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,7 +87,7 @@ export default function ShareSetPage({ params }: { params: { shareId: string } }
           </div>
         ))}
       </div>
-      {session && !imported && (
+      {isSignedIn && !imported && (
         <button
           onClick={handleImport}
           className="neumorphic-button text-green-400 px-4 py-2"

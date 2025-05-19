@@ -14,61 +14,20 @@ datasource db {
   directUrl = env("DIRECT_DATABASE_URL") // Direct connection URL for migrations
 }
 
-// -------------------------------------
-// NextAuth.js Models (Required for Prisma Adapter)
-// -------------------------------------
-
-// model Account {
-//   id                String  @id @default(cuid())
-//   userId            String
-//   type              String
-//   provider          String
-//   providerAccountId String
-//   refresh_token     String? @db.Text
-//   access_token      String? @db.Text
-//   expires_at        Int?
-//   token_type        String?
-//   scope             String?
-//   id_token          String? @db.Text
-//   session_state     String?
-//
-//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-//
-//   @@unique([provider, providerAccountId])
-// }
-//
-// model Session {
-//   id           String   @id @default(cuid())
-//   sessionToken String   @unique
-//   userId       String
-//   expires      DateTime
-//   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-// }
-
 model User {
-  id            String    @id // Use Clerk ID as primary key (already String)
+  id            String    @id // Use Clerk ID as primary key
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  // REMOVED: password      String? // Clerk handles passwords
-  // REMOVED: supabaseAuthUserId String? @unique // No longer needed if Clerk is primary
-  // REMOVED: accounts      Account[] // Assumes Clerk handles external accounts
-  // REMOVED: sessions      Session[] // Clerk handles sessions
 
   // Application-specific relations
   flashcardSets   FlashcardSet[]
   userSetProgress UserSetProgress[]
 }
 
-// REMOVED: VerificationToken, Session, Account models (Assuming Clerk handles these)
-
-// -------------------------------------
-// Application-Specific Models
-// -------------------------------------
-
 model FlashcardSet {
-  id             String   @id @default(cuid()) // Keep internal CUID for set ID
+  id             String   @id @default(cuid())
   userId         String   // Foreign key referencing User.id (Clerk User ID)
   name           String   
   cleverTitle    String?  
@@ -85,7 +44,6 @@ model FlashcardSet {
   updatedAt      DateTime @updatedAt
   shareId        String?  @unique 
 
-  // Corrected Relation: References User.id (Clerk User ID)
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   phrases Phrase[] 
   progress UserSetProgress[] 
@@ -102,7 +60,6 @@ model Phrase {
   thaiFeminine    String
   pronunciation   String
   mnemonic        String?
-  // Example sentences could be JSON or a separate related table if needed often
   examplesJson    Json?    @db.JsonB // Store examples array as JSON
 
   flashcardSet FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
@@ -110,15 +67,13 @@ model Phrase {
   @@index([setId])
 }
 
-// Stores user-specific progress for a particular set
 model UserSetProgress {
-  id             String   @id @default(cuid()) // Keep internal CUID for progress ID
+  id             String   @id @default(cuid())
   userId         String   // Foreign key referencing User.id (Clerk User ID)
   setId          String   
   progressData   Json     @db.JsonB 
   lastAccessedAt DateTime @default(now()) @updatedAt
 
-  // Corrected Relation: References User.id (Clerk User ID)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   set  FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
 
@@ -126,10 +81,6 @@ model UserSetProgress {
   @@index([userId])
   @@index([setId])
 }
-
-// -------------------------------------
-// Gallery Model
-// -------------------------------------
 
 model PublishedSet {
   id             String   @id @default(cuid())
@@ -145,10 +96,6 @@ model PublishedSet {
   specificTopics String?
   phrases        Json     @db.JsonB // Store the Phrase[] array directly as JSONB
   publishedAt    DateTime @default(now())
-
-  // Optional: Link back to the original set/user if needed for reference, but keep data separate
-  // originalSetId String?
-  // originalUserId String?
 
   @@index([publishedAt])
 }

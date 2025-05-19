@@ -1,48 +1,41 @@
 import { prisma } from "@/app/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/app/lib/auth";
+import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 
 // Get progress for a specific set
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth();
-    
-    if (!session || !session.user) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
     }
-    
     // Get set ID from query params
     const url = new URL(req.url);
     const setId = url.searchParams.get('setId');
-    
     if (!setId) {
       return NextResponse.json(
         { error: "Missing setId parameter" },
         { status: 400 }
       );
     }
-    
     // Find the progress record
     const progress = await prisma.userSetProgress.findUnique({
       where: {
         userId_setId: {
-          userId: session.user.id,
+          userId: userId,
           setId: setId
         }
       }
     });
-    
     if (!progress) {
       // Return empty progress if not found (new user/set)
       return NextResponse.json({ progressData: {} });
     }
-    
     return NextResponse.json({ progressData: progress.progressData });
-    
   } catch (error) {
     console.error("Error fetching user progress:", error);
     return NextResponse.json(
@@ -68,17 +61,14 @@ const progressSchema = z.object({
 // Save progress for a specific set
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-    
-    if (!session || !session.user) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
     }
-    
     const body = await req.json();
-    
     // Validate input
     const result = progressSchema.safeParse(body);
     if (!result.success) {
@@ -87,14 +77,12 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    
     const { setId, progressData } = result.data;
-    
     // Upsert the progress record (create if not exists, update if exists)
     const updatedProgress = await prisma.userSetProgress.upsert({
       where: {
         userId_setId: {
-          userId: session.user.id,
+          userId: userId,
           setId: setId
         }
       },
@@ -103,18 +91,16 @@ export async function POST(req: NextRequest) {
         lastAccessedAt: new Date()
       },
       create: {
-        userId: session.user.id,
+        userId: userId,
         setId: setId,
         progressData: progressData,
         lastAccessedAt: new Date()
       }
     });
-    
     return NextResponse.json({
       message: "Progress saved successfully",
       progress: updatedProgress
     });
-    
   } catch (error) {
     console.error("Error saving user progress:", error);
     return NextResponse.json(

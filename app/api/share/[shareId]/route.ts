@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/prisma';
-import { auth } from '@/app/lib/auth';
+import { auth } from '@clerk/nextjs/server';
 import { randomUUID } from 'crypto';
 import { Prisma } from '@prisma/client';
 
@@ -35,8 +35,8 @@ export async function GET(req: NextRequest, { params }: { params: { shareId: str
 // POST /api/share/[shareId] (authenticated) – imports the shared set into caller's account
 export async function POST(req: NextRequest, { params }: { params: { shareId: string } }) {
   try {
-    const session = await auth();
-    if (!session || !session.user) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest, { params }: { params: { shareId: st
       prisma.flashcardSet.create({
         data: {
           id: newSetId,
-          userId: session.user.id,
+          userId: userId,
           name: original.name,
           cleverTitle: original.cleverTitle,
           level: original.level,

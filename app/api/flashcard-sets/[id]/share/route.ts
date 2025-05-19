@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/app/lib/auth';
+import { auth } from '@clerk/nextjs/server';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/app/lib/prisma';
 
@@ -7,8 +7,8 @@ import { prisma } from '@/app/lib/prisma';
 // Generates (or returns existing) shareId for the owner of a set and saves it to DB
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await auth();
-    if (!session || !session.user) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       },
     });
 
-    if (!set || set.userId !== session.user.id) {
+    if (!set || set.userId !== userId) {
       return NextResponse.json({ error: 'Set not found or not owned by user' }, { status: 404 });
     }
 

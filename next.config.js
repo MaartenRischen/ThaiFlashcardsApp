@@ -22,7 +22,7 @@ const nextConfig = {
   },
   // Remove GitHub Pages specific settings
   basePath: '',
-  trailingSlash: true,
+  // trailingSlash: true, // Temporarily remove to see if it resolves API 404s
   webpack: (config) => {
     return config;
   },

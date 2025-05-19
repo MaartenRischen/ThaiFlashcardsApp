@@ -2,7 +2,6 @@ import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { SetProvider } from './context/SetContext'
-import { Providers } from './providers'
 import Navbar from './components/Navbar'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { ClerkProvider } from '@clerk/nextjs'
@@ -74,29 +73,11 @@ export default function RootLayout({
         <body className={inter.className}>
           <Toaster richColors position="top-left" duration={5000} />
           <Tooltip.Provider>
-          <Providers>
             <SetProvider>
               <FeedbackProvider>
                 <Navbar />
                 <main className="main-content min-h-screen relative">
                   {children}
-                  {/* Temporary Dev Buttons */}
-                  {/* 
-                  <div className="fixed bottom-4 left-4 flex gap-2 opacity-50 hover:opacity-100 transition-opacity">
-                    <a 
-                      href="/test-variations" 
-                      className="px-3 py-1 bg-purple-900/50 hover:bg-purple-800/50 text-purple-200 text-xs rounded-full border border-purple-700/30"
-                    >
-                      Test Variations
-                    </a>
-                    <a 
-                      href="/generation_logic_visualization.html" 
-                      className="px-3 py-1 bg-blue-900/50 hover:bg-blue-800/50 text-blue-200 text-xs rounded-full border border-blue-700/30"
-                    >
-                      Logic Visualization
-                    </a>
-                  </div>
-                   */}
                 </main>
                 <FeedbackFooterClient />
                 {/* Copyright Notice */}
@@ -105,7 +86,6 @@ export default function RootLayout({
                 </div>
               </FeedbackProvider>
             </SetProvider>
-          </Providers>
           </Tooltip.Provider>
         </body>
       </html>

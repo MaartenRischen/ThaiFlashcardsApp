@@ -5,10 +5,10 @@ const isPublicRoute = createRouteMatcher([
   '/',
   '/sign-in(.*)',
   '/sign-up(.*)',
-  '/api/health',  // Add health check route
-  '/health',      // Add root health check route
-  '/api/share/(.*)', // Public share endpoints if you have any
-  '/api/gallery/(.*)' // Public gallery endpoints if you have any
+  '/health',      // Root health check page
+  '/api/health',  // API health check (keeping for backwards compatibility)
+  '/api/share/(.*)', // Public share endpoints
+  '/api/gallery/(.*)' // Public gallery endpoints
 ]);
 
 // This example protects all routes including api/trpc routes

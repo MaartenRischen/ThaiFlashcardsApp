@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useUser } from "@clerk/nextjs";
 
+// Trigger new Railway deployment
 export function WelcomeStep({ onNext }: { onNext: () => void }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const { isSignedIn } = useUser();

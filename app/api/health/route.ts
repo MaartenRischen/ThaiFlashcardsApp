@@ -1,8 +1,21 @@
 import { NextResponse } from 'next/server';
 
-export async function GET() {
-  // This endpoint simply returns a 200 OK status to indicate the server is running.
-  // You could add more complex checks here later if needed (e.g., DB connection).
-  console.log("Health check endpoint hit successfully."); // Optional: Log successful checks
-  return NextResponse.json({ status: 'ok' }, { status: 200 });
+export function GET() {
+  // Simple health check endpoint that returns immediately
+  return new NextResponse(
+    JSON.stringify({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV
+    }),
+    {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET',
+        'Cache-Control': 'no-store'
+      }
+    }
+  );
 } 

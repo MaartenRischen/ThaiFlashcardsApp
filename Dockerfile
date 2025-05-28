@@ -60,11 +60,18 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Create the directory structure that's expected
+RUN mkdir -p .next/standalone
+
+# Copy public folder
 COPY --from=builder /app/public ./public
 
-# Automatically leverage output traces to reduce image size
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+# Copy standalone build to the expected location
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone/. ./.next/standalone/
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Also copy server.js to the root as a fallback
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone/server.js ./server.js
 
 USER nextjs
 
@@ -74,8 +81,5 @@ ENV HOSTNAME "0.0.0.0"
 
 EXPOSE 3000
 
-# Copy debug script
-COPY --chown=nextjs:nodejs server-debug.js ./
-
-# Temporarily use debug script to diagnose issues
-CMD ["node", "server-debug.js"] 
+# Remove debug script and use the correct server path
+CMD ["node", ".next/standalone/server.js"] 

@@ -10,8 +10,17 @@ if (!secret) {
   console.warn("Warning: NEXTAUTH_SECRET not set. This is required for JWT encryption.");
 }
 
+// Create a resilient adapter that doesn't fail during startup
+let adapter;
+try {
+  adapter = PrismaAdapter(prisma);
+} catch (error) {
+  console.warn("Failed to create Prisma adapter, using fallback:", error);
+  adapter = undefined; // NextAuth will work without an adapter in JWT mode
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter,
   session: {
     strategy: "jwt",  // Changed back to "jwt" - required for Credentials provider
     maxAge: 30 * 24 * 60 * 60, // 30 days

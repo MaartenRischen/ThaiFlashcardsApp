@@ -11,19 +11,24 @@ console.log('Admin Environment check:', {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable for admin client');
-  throw new Error('Missing Supabase admin environment variables');
-}
+// Create a fallback admin client if environment variables are missing
+let supabaseAdmin: ReturnType<typeof createClient> | null = null;
 
-if (!supabaseServiceRoleKey) {
-  console.error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
-  throw new Error('Missing Supabase admin environment variables');
-}
-
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  console.warn('Missing Supabase admin environment variables - admin features will be disabled');
+  supabaseAdmin = null;
+} else {
+  try {
+    supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+  } catch (error) {
+    console.warn('Failed to create Supabase admin client:', error);
+    supabaseAdmin = null;
   }
-}); 
+}
+
+export { supabaseAdmin }; 

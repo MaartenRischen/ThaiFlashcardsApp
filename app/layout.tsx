@@ -7,9 +7,9 @@ import Navbar from './components/Navbar'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from "sonner"
-import { initializeApp } from './lib/init'
 import { FeedbackFooterClient } from "./components/FeedbackFooterClient";
 import { FeedbackProvider } from "./context/FeedbackContext";
+import { AppInitializer } from "./components/AppInitializer";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -34,9 +34,6 @@ export const metadata: Metadata = {
     telephone: false
   }
 }
-
-// Initialize the app
-initializeApp().catch(console.error);
 
 export default function RootLayout({
   children,
@@ -71,6 +68,7 @@ export default function RootLayout({
           <Providers>
             <SetProvider>
               <FeedbackProvider>
+                <AppInitializer />
                 <Navbar />
                 <main className="main-content min-h-screen relative">
                   {children}

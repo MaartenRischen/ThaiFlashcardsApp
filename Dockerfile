@@ -74,4 +74,8 @@ ENV HOSTNAME "0.0.0.0"
 
 EXPOSE 3000
 
-CMD ["node", "server.js"] 
+# Copy debug script
+COPY --chown=nextjs:nodejs server-debug.js ./
+
+# Temporarily use debug script to diagnose issues
+CMD ["node", "server-debug.js"] 

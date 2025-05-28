@@ -15,6 +15,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/env-check', // Environment check endpoint
   '/public-sets(.*)', // Public sets page
   '/share/(.*)', // Share pages
+  '/clerk-debug', // Debug page
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

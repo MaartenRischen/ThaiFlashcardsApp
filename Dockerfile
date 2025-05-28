@@ -63,12 +63,12 @@ RUN adduser --system --uid 1001 nextjs
 # Copy public folder
 COPY --from=builder /app/public ./public
 
-# IMPORTANT: For standalone builds, we need to copy files in the correct structure
-# Copy the standalone folder contents (not the folder itself)
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone/. ./
+# IMPORTANT: Keep the standalone structure that Railway expects
+# Copy the entire .next directory including the standalone subdirectory
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 
-# Copy static files separately (they're not included in standalone)
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Debug: List files to verify structure
+RUN ls -la /app/ && echo "---" && ls -la /app/.next/ || true
 
 USER nextjs
 
@@ -78,5 +78,5 @@ ENV HOSTNAME "0.0.0.0"
 
 EXPOSE 3000
 
-# The standalone build creates server.js in the root
-CMD ["node", "server.js"] 
+# Railway expects the server.js to be in .next/standalone/
+CMD ["node", ".next/standalone/server.js"] 

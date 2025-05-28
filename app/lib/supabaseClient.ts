@@ -11,14 +11,20 @@ console.log('Environment check:', {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
-  throw new Error('Missing Supabase environment variables');
+// Create a fallback client if environment variables are missing
+// This prevents the app from crashing during startup
+let supabase: ReturnType<typeof createClient> | null = null;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn('Missing Supabase environment variables - Supabase features will be disabled');
+  supabase = null;
+} else {
+  try {
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  } catch (error) {
+    console.warn('Failed to create Supabase client:', error);
+    supabase = null;
+  }
 }
 
-if (!supabaseAnonKey) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable');
-  throw new Error('Missing Supabase environment variables');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey); 
+export { supabase }; 

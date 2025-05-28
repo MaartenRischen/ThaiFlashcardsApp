@@ -204,6 +204,11 @@ export async function uploadImageFromUrl(imageUrl: string, setId: string): Promi
       }
 
       // Regular upload (if admin failed or isn't available)
+      if (!supabase) {
+        console.error('[UPLOAD ERROR] Supabase client not available');
+        return imageUrl; // Return original URL as fallback
+      }
+      
       const { data, error: uploadError } = await supabase.storage
         .from(BUCKET_NAME)
         .upload(filePath, imageBlob, {
@@ -228,6 +233,11 @@ export async function uploadImageFromUrl(imageUrl: string, setId: string): Promi
       console.log('[UPLOAD DEBUG] Image successfully uploaded to Supabase:', data?.path);
 
       // Get the public URL
+      if (!supabase) {
+        console.error('[UPLOAD ERROR] Supabase client not available for public URL');
+        return imageUrl; // Return original URL as fallback
+      }
+      
       const { data: { publicUrl } } = supabase.storage
         .from(BUCKET_NAME)
         .getPublicUrl(filePath);
@@ -287,6 +297,11 @@ export async function deleteImage(setId: string): Promise<boolean> {
     }
 
     // Regular client as fallback
+    if (!supabase) {
+      console.error('Supabase client not available for deletion');
+      return false;
+    }
+    
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
       .list(setId);
@@ -371,6 +386,11 @@ export function getOptimizedImageUrl(
   // If this is a local path that should be optimized
   if (shouldOptimize(filePath)) {
     // Use Supabase SDK to get an optimized URL
+    if (!supabase) {
+      console.warn('Supabase client not available for image optimization');
+      return filePath; // Return original path as fallback
+    }
+    
     const { data } = supabase.storage
       .from(BUCKET_NAME)
       .getPublicUrl(filePath, {
@@ -386,6 +406,11 @@ export function getOptimizedImageUrl(
   }
   
   // For all other paths, return the regular public URL without transformations
+  if (!supabase) {
+    console.warn('Supabase client not available for public URL');
+    return filePath; // Return original path as fallback
+  }
+  
   const { data } = supabase.storage
     .from(BUCKET_NAME)
     .getPublicUrl(filePath);

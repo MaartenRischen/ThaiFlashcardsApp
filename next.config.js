@@ -23,7 +23,7 @@ const nextConfig = {
   },
   // Remove GitHub Pages specific settings
   basePath: '',
-  trailingSlash: true,
+  trailingSlash: false, // Changed to false to fix health check issues
   webpack: (config) => {
     return config;
   },

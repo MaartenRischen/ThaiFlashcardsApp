@@ -1059,18 +1059,6 @@ export default function ThaiFlashcards() {
         onOpenSetWizard={() => setShowSetWizardModal(true)}
       />
 
-      {/* Development Update Log */}
-      <div className="bg-yellow-600/20 border border-yellow-500/50 text-yellow-300 px-4 py-2 mx-4 mt-2 rounded-lg text-sm">
-        <div className="flex items-center justify-between mb-1">
-          <span className="font-semibold">📝 Latest Update</span>
-          <span className="text-xs opacity-75">{new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</span>
-        </div>
-        <div className="text-xs">
-          ✅ Established Cursor → GitHub → Railway deployment workflow<br/>
-          🔧 Added persistent update log for tracking development changes
-        </div>
-      </div>
-
       {/* Show testGenResult for debugging - Refined conditional and type guards */}
       {typeof testGenResult === 'object' && testGenResult !== null && (
         <div className="max-w-2xl mx-auto bg-gray-900 text-gray-200 p-4 mt-4 rounded shadow overflow-x-auto text-xs">
@@ -1345,6 +1333,18 @@ export default function ThaiFlashcards() {
               </div> // This closing div might be the issue or misplaced
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Development Update Log */}
+      <div className="bg-yellow-600/20 border border-yellow-500/50 text-yellow-300 px-4 py-2 mx-4 mt-4 rounded-lg text-sm">
+        <div className="flex items-center justify-between mb-1">
+          <span className="font-semibold">📝 Latest Update</span>
+          <span className="text-xs opacity-75">{new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</span>
+        </div>
+        <div className="text-xs">
+          🔧 Moved update log below flashcard for better UX<br/>
+          🚀 Switched to main production branch (donkeybridge.world) for Clerk auth compatibility
         </div>
       </div>
 

@@ -1059,6 +1059,11 @@ export default function ThaiFlashcards() {
         onOpenSetWizard={() => setShowSetWizardModal(true)}
       />
 
+      {/* Dev Note - Testing deployment workflow */}
+      <div className="bg-yellow-600/20 border border-yellow-500/50 text-yellow-300 px-4 py-2 mx-4 mt-2 rounded-lg text-sm text-center">
+        🚀 Dev Note: Testing Cursor → GitHub → Railway deployment workflow - {new Date().toLocaleTimeString()}
+      </div>
+
       {/* Show testGenResult for debugging - Refined conditional and type guards */}
       {typeof testGenResult === 'object' && testGenResult !== null && (
         <div className="max-w-2xl mx-auto bg-gray-900 text-gray-200 p-4 mt-4 rounded shadow overflow-x-auto text-xs">

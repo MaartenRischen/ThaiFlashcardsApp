@@ -5,7 +5,7 @@ interface LoaderParams {
   quality?: number;
 }
 
-const getSupabaseProjectId = (): string => {
+const _getSupabaseProjectId = (): string => {
   // Try to get project ID from environment variable
   if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID) {
     return process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID;

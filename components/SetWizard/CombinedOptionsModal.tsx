@@ -108,14 +108,14 @@ export function SetManagerModal({ isOpen, onClose }: {
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { availableSets, switchSet, activeSetId, deleteSet } = useSet();
-  const [publishingSetId, setPublishingSetId] = useState<string | null>(null);
-  const [cardsModalSetId, setCardsModalSetId] = useState<string | null>(null);
-  const [cardsModalPhrases, setCardsModalPhrases] = useState<Phrase[]>([]);
-  const [cardsModalProgress, setCardsModalProgress] = useState<Record<number, PhraseProgressData>>({});
-  const [cardsModalLoading, setCardsModalLoading] = useState(false);
-  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
-  const [setBeingPublished, setSetBeingPublished] = useState<SetMetaData | null>(null);
+  const { availableSets, switchSet, activeSetId, deleteSet: _deleteSet } = useSet();
+  const [publishingSetId, _setPublishingSetId] = useState<string | null>(null);
+  const [_cardsModalSetId, setCardsModalSetId] = useState<string | null>(null);
+  const [_cardsModalPhrases, setCardsModalPhrases] = useState<Phrase[]>([]);
+  const [_cardsModalProgress, setCardsModalProgress] = useState<Record<number, PhraseProgressData>>({});
+  const [_cardsModalLoading, setCardsModalLoading] = useState(false);
+  const [_isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [_setBeingPublished, setSetBeingPublished] = useState<SetMetaData | null>(null);
 
   const handleImportClick = () => {
     // ... implementation ...

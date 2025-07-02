@@ -26,7 +26,7 @@ interface SharedSet {
 
 export default function ShareSetPage({ params }: { params: { shareId: string } }) {
   const shareId = params.shareId;
-  const { userId, isSignedIn } = useAuth();
+  const { userId: _userId, isSignedIn } = useAuth();
 
   const [setData, setSetData] = useState<SharedSet | null>(null);
   const [loading, setLoading] = useState(true);

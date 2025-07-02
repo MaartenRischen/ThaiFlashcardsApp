@@ -1,15 +1,18 @@
-// Custom server.js wrapper for standalone Next.js server
+// Simple server wrapper for Railway deployment
 const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = 'localhost';
-const port = process.env.PORT || 8080;
+const hostname = '0.0.0.0';
+const port = parseInt(process.env.PORT || '3000', 10);
 
-// when using middleware `hostname` and `port` must be provided below
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
+
+console.log(`Starting Next.js server...`);
+console.log(`Environment: ${process.env.NODE_ENV}`);
+console.log(`Port: ${port}`);
 
 app.prepare().then(() => {
   createServer(async (req, res) => {
@@ -19,14 +22,18 @@ app.prepare().then(() => {
     } catch (err) {
       console.error('Error occurred handling', req.url, err);
       res.statusCode = 500;
-      res.end('Internal Server Error');
+      res.end('internal server error');
     }
   })
     .once('error', (err) => {
-      console.error(err);
+      console.error('Server error:', err);
       process.exit(1);
     })
-    .listen(port, () => {
+    .listen(port, (err) => {
+      if (err) throw err;
       console.log(`> Ready on http://${hostname}:${port}`);
     });
+}).catch((err) => {
+  console.error('Failed to start Next.js:', err);
+  process.exit(1);
 }); 

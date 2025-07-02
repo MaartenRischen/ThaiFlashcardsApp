@@ -5,23 +5,24 @@ const isPublicRoute = createRouteMatcher([
   '/',
   '/sign-in(.*)',
   '/sign-up(.*)',
-  '/health',      // Root health check page
-  '/api/health',  // API health check
+  '/login(.*)',
+  '/register(.*)',
+  '/forgot-password(.*)',
+  '/reset-password(.*)',
   '/api/share/(.*)', // Public share endpoints
-  '/api/gallery/(.*)' // Public gallery endpoints
+  '/api/public-sets(.*)', // Public sets API
+  '/api/health', // Health check endpoint
+  '/api/env-check', // Environment check endpoint
+  '/public-sets(.*)', // Public sets page
+  '/share/(.*)', // Share pages
+  '/clerk-debug', // Debug page
 ]);
 
-// This example protects all routes including api/trpc routes
-// Please edit this to allow other routes to be public as needed.
-// See https://clerk.com/docs/references/nextjs/auth-middleware for more information about configuring your middleware
 export default clerkMiddleware(async (auth, req) => {
-  if (isPublicRoute(req)) {
-    return; // Allow public routes to pass through
+  // Skip auth for public routes
+  if (!isPublicRoute(req)) {
+    await auth.protect();
   }
-  // For all other routes, protect them.
-  // auth.protect() will handle unauthenticated users, 
-  // typically redirecting to sign-in or returning 401/403 for API routes.
-  await auth.protect(); 
 });
 
 export const config = {

@@ -1343,8 +1343,9 @@ export default function ThaiFlashcards() {
           <span className="text-xs opacity-75">{new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</span>
         </div>
         <div className="text-xs">
-          🔧 Moved update log below flashcard for better UX<br/>
-          🚀 Switched to main production branch (donkeybridge.world) for Clerk auth compatibility
+          🔧 Fixed Railway deployment build errors (removed NextAuth conflicts)<br/>
+          🐛 Resolved ESLint warnings blocking production deployment<br/>
+          🚀 Production deployment now active on donkeybridge.world
         </div>
       </div>
 

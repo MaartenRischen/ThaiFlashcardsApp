@@ -14,12 +14,22 @@ export async function POST(req: NextRequest) {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const prompt = `
-      Based on the user's topic for a Thai language flashcard set, generate 2-3 short, open-ended questions to gather more context.
-      The questions should help personalize the flashcards.
+      Generate 2-3 short, open-ended questions to gather personal context about the user's specific situation for a Thai language flashcard set.
       The user's topic is: "${topic}"
+
+      Guidelines for questions:
+      - Focus on the specific situation, setting, or personal context
+      - Ask about preferences, goals, or specific details that would make the flashcards more relevant
+      - DO NOT ask about Thai language proficiency level (this is already known)
+      - DO NOT ask about general language learning goals
+      - Questions should help personalize vocabulary and phrases for their exact situation
+      
+      Example for topic "meeting my new neighbors":
+      - "Are you living in a house or apartment building?"
+      - "What would you like to discuss with your neighbors? (e.g., local recommendations, shared facilities)"
       
       Return the questions as a JSON object with a "questions" key, which is an array of strings.
-      For example: {"questions": ["Who are you meeting?", "What is your relationship with them?"]}
+      For example: {"questions": ["Question 1?", "Question 2?"]}
     `;
 
     const result = await model.generateContent(prompt);
@@ -29,7 +39,6 @@ export async function POST(req: NextRequest) {
     // Clean the response to ensure it's valid JSON
     const jsonString = text.replace(/```json|```/g, '').trim();
     const generated = JSON.parse(jsonString);
-
 
     return NextResponse.json(generated);
   } catch (error) {

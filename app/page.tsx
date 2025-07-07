@@ -1345,7 +1345,8 @@ export default function ThaiFlashcards() {
         <div className="text-xs">
           🔧 Fixed Railway deployment build errors (removed NextAuth conflicts)<br/>
           🐛 Resolved ESLint warnings blocking production deployment<br/>
-          🚀 Production deployment now active on donkeybridge.world
+          🚀 Production deployment now active on donkeybridge.world<br/>
+          ✅ Test deployment pipeline.
         </div>
       </div>
 

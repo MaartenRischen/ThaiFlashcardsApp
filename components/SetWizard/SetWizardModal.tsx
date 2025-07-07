@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { WelcomeStep } from './WelcomeStep';
 import { ProficiencyStep } from './ProficiencyStep';
 import { ScenarioStep } from './ScenarioStep';
+import { ContextStep } from './ContextStep';
 import { ToneStep } from './ToneStep';
 import { ReviewStep } from './ReviewStep';
 import { GenerationStep } from './GenerationStep';
@@ -23,6 +24,7 @@ export interface SetWizardState {
     type: 'scenario' | 'goal' | 'weird'; 
     value: string; 
   } | null;
+  additionalContext: string;
   tone: number;
   cardCount: number;
 }
@@ -115,6 +117,7 @@ export function SetWizardModal({ onComplete, onClose }: {
       levelEstimate: 'Intermediate',
     },
     selectedTopic: null,
+    additionalContext: '',
     tone: 1, // Default to serious & practical
     cardCount: 10, // Default to 10 cards
   });
@@ -161,14 +164,23 @@ export function SetWizardModal({ onComplete, onClose }: {
       }}
       onBack={() => setStep(1)}
     />,
+    <ContextStep
+      key="context"
+      topic={state.selectedTopic?.value || ''}
+      onNext={({ additionalContext }) => {
+        setState(prev => ({ ...prev, additionalContext }));
+        setStep(4);
+      }}
+      onBack={() => setStep(2)}
+    />,
     <ToneStep
       key="tone"
       toneLevel={state.tone}
       onNext={(toneLevel) => {
         setState(prev => ({ ...prev, tone: toneLevel }));
-        setStep(4);
+        setStep(5);
       }}
-      onBack={() => setStep(2)}
+      onBack={() => setStep(3)}
     />,
     <ReviewStep
       key="review"
@@ -176,7 +188,7 @@ export function SetWizardModal({ onComplete, onClose }: {
       onConfirm={() => {
         onComplete(state);
       }}
-      onBack={() => setStep(3)}
+      onBack={() => setStep(4)}
       onCardCountChange={handleCardCountChange}
     />,
     <GenerationStep
@@ -185,7 +197,7 @@ export function SetWizardModal({ onComplete, onClose }: {
       onComplete={() => {
         onComplete(state);
       }}
-      onBack={() => setStep(4)}
+      onBack={() => setStep(5)}
     />
   ];
 

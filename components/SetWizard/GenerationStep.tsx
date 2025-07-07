@@ -44,7 +44,8 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
         level: state.proficiency.levelEstimate,
         specificTopics,
         toneLevel: state.tone,
-        topicsToDiscuss
+        topicsToDiscuss,
+        additionalContext: state.additionalContext,
       };
 
       console.log(`SetWizard Completion: Calling /api/generate-set with preferences:`, preferences, `count:`, totalCount);

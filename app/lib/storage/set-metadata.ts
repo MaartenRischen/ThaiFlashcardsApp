@@ -1,7 +1,7 @@
 import { prisma } from '@/app/lib/prisma';
 import { FlashcardSet } from '@prisma/client';
 import { SetMetaData } from './types';
-import { mapDatabaseToStorage, getErrorMessage } from './utils';
+import { mapDatabaseToStorage } from './utils';
 import { deleteImage } from '../imageStorage';
 
 // --- Set MetaData Management ---

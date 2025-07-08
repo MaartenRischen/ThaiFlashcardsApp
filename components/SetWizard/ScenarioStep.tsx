@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { formatSetTitle } from '@/app/lib/utils';
 
 // --- Data Structure for Scenarios by Level --- (Sentence Case)
 const scenariosByLevel: Record<string, string[]> = {
@@ -391,8 +392,13 @@ export function ScenarioStep({ selectedTopic: initialSelectedTopic, proficiencyL
   };
 
   const handleNext = () => {
-    // Pass the currently selected topic (which could be null if nothing is selected)
-    onNext({ selectedTopic: selected });
+    // Format the title before passing it to the next step
+    if (selected) {
+      const formattedValue = formatSetTitle(selected.value);
+      onNext({ selectedTopic: { ...selected, value: formattedValue } });
+    } else {
+      onNext({ selectedTopic: null });
+    }
   };
 
   // --- UI ---

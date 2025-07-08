@@ -17,6 +17,31 @@
   --accent-color: #BB86FC;
 }
 
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1F1F1F;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #505050;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #404040 #1F1F1F;
+}
+
 @layer base {
   body {
     @apply bg-[#121212] text-[#E0E0E0];
@@ -60,13 +85,25 @@
 
   /* SRS Buttons */
   .neumorphic-button {
-    @apply px-4 py-2 bg-[#3C3C3C] text-[#E0E0E0] rounded-full transition-all border border-[#404040];
+    @apply px-4 py-2 bg-[#3C3C3C] text-[#E0E0E0] rounded-full transition-all duration-200 border border-[#404040];
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
   .neumorphic-button:hover {
-    @apply bg-[#4C4C4C];
+    @apply bg-[#4C4C4C] border-[#505050];
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  .neumorphic-button:active {
+    @apply bg-[#444444] border-[#484848];
     transform: translateY(1px);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.4);
+  }
+
+  .neumorphic-button:disabled {
+    @apply opacity-50 cursor-not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 
   .neumorphic-button.wrong {

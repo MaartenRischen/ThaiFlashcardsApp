@@ -60,55 +60,48 @@ export function formatSetTitle(title: string): string {
     'grammer': 'grammar',
   };
 
-  // Words that should be lowercase (unless at start of title)
-  const lowercaseWords = new Set([
-    'a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'in',
-    'of', 'on', 'or', 'the', 'to', 'with'
-  ]);
+  // Words that should be lowercase (unless at start)
+  const lowercaseWords = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'in', 'of', 'on', 'or', 'the', 'to', 'with'];
 
-  // Words that should always be capitalized
-  const alwaysCapitalize = new Set([
-    'thai', 'thailand', 'bangkok', 'buddhist', 'buddha', 'english',
-    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
-    'january', 'february', 'march', 'april', 'may', 'june', 'july',
-    'august', 'september', 'october', 'november', 'december'
-  ]);
-
-  // Clean up the title
-  let cleanTitle = title
+  // Clean and normalize the title
+  const cleanTitle = title
     .trim()
-    // Replace multiple spaces/newlines with single space
-    .replace(/\s+/g, ' ')
-    // Remove any double punctuation
-    .replace(/[.!?]+(?=[.!?])/g, '')
-    // Ensure proper spacing after punctuation
-    .replace(/([.!?,])(\w)/g, '$1 $2')
-    // Remove any trailing punctuation
-    .replace(/[.!?,]+$/, '')
-    // Truncate to 100 characters if too long (at word boundary)
-    .replace(/^(.{100}[^\s]*).*/, '$1');
+    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+    .toLowerCase();
 
-  // Split into words and process each
-  let words = cleanTitle.toLowerCase().split(' ');
-  words = words.map((word, index) => {
-    // Check for spelling corrections first
-    let processedWord = word.toLowerCase();
-    if (spellingCorrections[processedWord]) {
-      return spellingCorrections[processedWord];
+  // Apply spelling corrections
+  const correctedTitle = cleanTitle.split(' ').map(word => {
+    return spellingCorrections[word] || word;
+  }).join(' ');
+
+  // Apply title case with special rules
+  const titleCased = correctedTitle.split(' ').map((word, index) => {
+    // Always capitalize first and last word
+    if (index === 0) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
     }
 
-    // Always capitalize certain words
-    if (alwaysCapitalize.has(processedWord)) {
-      return processedWord.charAt(0).toUpperCase() + processedWord.slice(1);
+    // Check for special words that should be capitalized
+    const specialWords = ['thai', 'thailand', 'bangkok', 'buddhist', 'buddha'];
+    if (specialWords.includes(word)) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
     }
 
-    // For other words, follow title case rules
-    if (index === 0 || !lowercaseWords.has(processedWord)) {
-      return processedWord.charAt(0).toUpperCase() + processedWord.slice(1);
+    // Keep connecting words lowercase unless they're at the start
+    if (lowercaseWords.includes(word)) {
+      return word;
     }
 
+    // Capitalize other words
+    const processedWord = word.charAt(0).toUpperCase() + word.slice(1);
     return processedWord;
-  });
+  }).join(' ');
 
-  return words.join(' ');
+  // Truncate if too long (at word boundary)
+  if (titleCased.length > 100) {
+    const truncated = titleCased.slice(0, 97).trim();
+    return truncated.slice(0, truncated.lastIndexOf(' ')) + '...';
+  }
+
+  return titleCased;
 } 

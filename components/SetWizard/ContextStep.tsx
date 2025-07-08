@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
 interface ContextStepProps {
   topic: string;
@@ -66,8 +67,8 @@ export function ContextStep({ topic, onNext, onBack }: ContextStepProps) {
         </p>
 
         {isLoading && (
-          <div className="flex justify-center items-center p-8">
-            <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
+          <div className="flex flex-col justify-center items-center p-8 space-y-3">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
             <p className="text-gray-400">Generating questions...</p>
           </div>
         )}

@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Button } from '../ui/button';
-import { Phrase } from '@/app/lib/set-generator';
 import { SetWizardState } from './SetWizardModal';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { GenerationProgress } from '@/app/components/GenerationProgress';
 
 interface GenerationStepProps {
@@ -13,14 +12,12 @@ interface GenerationStepProps {
 
 export function GenerationStep({ state, onComplete, onBack }: GenerationStepProps) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedPhrases, setGeneratedPhrases] = useState<Phrase[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const generatePhrases = useCallback(async () => {
     try {
       setIsGenerating(true);
       setError(null);
-      setGeneratedPhrases([]);
 
       // Use the single selected topic from the state
       const selectedTopicValue = state.selectedTopic?.value;
@@ -95,7 +92,7 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
             </div>
             <h3 className="text-xl font-semibold text-[#60A5FA]">Creating Your Custom Set</h3>
             <p className="text-gray-400 text-sm max-w-md">
-              We're crafting personalized flashcards based on your preferences. This usually takes about 2 minutes.
+              We&apos;re crafting personalized flashcards based on your preferences. This usually takes about 2 minutes.
             </p>
           </div>
         ) : error ? (

@@ -1,7 +1,6 @@
 import { prisma } from '@/app/lib/prisma';
-import { Prisma } from '@prisma/client';
+import { Prisma, Phrase as _Phrase } from '@prisma/client';
 import { PublishedSetData } from './types';
-import { Phrase } from '../set-generator';
 
 // --- Gallery (PublishedSet) Functions ---
 

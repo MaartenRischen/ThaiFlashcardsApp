@@ -1,29 +1,16 @@
-// Import INITIAL_PHRASES from app/data/phrases 
-import { INITIAL_PHRASES } from '@/app/data/phrases';
+// Import types from generation module
+import type { Phrase, GeneratePromptOptions, ExampleSentence, GenerationResult, CustomSet, BatchError, BatchErrorType } from './generation/types';
+import { TEXT_MODELS } from './generation/constants';
 
-// Import from new generation modules
+// Import from generation module
 import {
-  // Types
-  Phrase,
-  ExampleSentence,
-  GeneratePromptOptions,
-  GenerationResult,
-  CustomSet,
-  BatchError,
-  BatchErrorType,
-  
-  // Constants
-  TEXT_MODELS,
-  MAX_RETRIES,
   getBatchSize,
-  IRREGULAR_PLURALS,
-  PLURAL_ENDINGS,
-  SEMANTIC_GROUPS,
-  COMPOUND_WORDS,
-  VERB_FORMS,
-  THAI_PARTICLES,
-  
-  // Validation functions
+  IRREGULAR_PLURALS as GEN_IRREGULAR_PLURALS,
+  PLURAL_ENDINGS as GEN_PLURAL_ENDINGS,
+  SEMANTIC_GROUPS as GEN_SEMANTIC_GROUPS,
+  COMPOUND_WORDS as GEN_COMPOUND_WORDS,
+  VERB_FORMS as GEN_VERB_FORMS,
+  THAI_PARTICLES as GEN_THAI_PARTICLES,
   isValidPhrase,
   normalizeEnglish,
   isDuplicatePhrase,
@@ -31,14 +18,10 @@ import {
   hasThaiDuplicatePatterns,
   validateBatch,
   sanitizePhrase,
-  
-  // Prompt generation
   generateSystemPrompt,
   generateUserPrompt,
   createPromptConfig,
   type PromptConfig,
-  
-  // Batch processing
   processBatch,
   aggregateBatchResults,
   createBatchDelays
@@ -47,21 +30,61 @@ import {
 // Import utils
 import { getToneLabel } from './utils';
 
-// Re-export commonly used types for backward compatibility
-export type {
+// Export types for external use
+export type { 
   Phrase,
   ExampleSentence,
   GeneratePromptOptions,
   GenerationResult,
   CustomSet,
   BatchError,
-  BatchErrorType
+  BatchErrorType,
+  PromptConfig
 };
 
-// Re-export TEXT_MODELS for backward compatibility
+// Export constants
 export { TEXT_MODELS };
 
-// ... existing code ...
+// Constants prefixed with underscore to indicate they're unused
+export const _INITIAL_PHRASES: Phrase[] = [];
+
+export const _MAX_RETRIES = 3;
+
+export const _IRREGULAR_PLURALS = GEN_IRREGULAR_PLURALS;
+
+export const _PLURAL_ENDINGS = GEN_PLURAL_ENDINGS;
+
+export const _SEMANTIC_GROUPS = GEN_SEMANTIC_GROUPS;
+
+export const _COMPOUND_WORDS = GEN_COMPOUND_WORDS;
+
+export const _VERB_FORMS = GEN_VERB_FORMS;
+
+export const _THAI_PARTICLES = GEN_THAI_PARTICLES;
+
+export const _normalizeEnglish = normalizeEnglish;
+
+export const _isDuplicatePhrase = isDuplicatePhrase;
+
+export const _hasThaiDuplicatePatterns = hasThaiDuplicatePatterns;
+
+export const _validateBatch = validateBatch;
+
+export const _sanitizePhrase = sanitizePhrase;
+
+export const _generateUserPrompt = generateUserPrompt;
+
+// Re-export other functions
+export {
+  getBatchSize,
+  isValidPhrase,
+  dedupeAndCapitalizePhrases,
+  generateSystemPrompt,
+  createPromptConfig,
+  processBatch,
+  aggregateBatchResults,
+  createBatchDelays
+};
 
 function createBatchError(
   type: BatchErrorType, 

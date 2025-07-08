@@ -228,7 +228,7 @@ export function SetWizardModal({ onComplete, onClose }: {
               <h2 className="text-lg font-medium text-[#60A5FA] w-full text-center">Make Your Own Cards</h2>
             </div>
             {showProgressStepper && <ProgressStepper step={step} totalSteps={totalSteps} />}
-            <div className="max-h-[75vh] overflow-y-auto pr-1">
+            <div className="max-h-[75vh] overflow-y-auto scrollbar-hide">
               {steps[step]}
             </div>
           </div>

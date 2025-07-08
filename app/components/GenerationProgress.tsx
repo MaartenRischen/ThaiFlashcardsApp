@@ -3,10 +3,10 @@ import { Loader2 } from 'lucide-react';
 
 interface GenerationProgressProps {
   isGenerating: boolean;
+  progress: number;
 }
 
-export function GenerationProgress({ isGenerating }: GenerationProgressProps) {
-  const [progress, setProgress] = useState(0);
+export function GenerationProgress({ isGenerating, progress }: GenerationProgressProps) {
   const [currentStep, setCurrentStep] = useState(0);
   
   const steps = [
@@ -20,21 +20,9 @@ export function GenerationProgress({ isGenerating }: GenerationProgressProps) {
 
   useEffect(() => {
     if (!isGenerating) {
-      setProgress(0);
       setCurrentStep(0);
       return;
     }
-
-    // Simulate progress
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 0.5;
-      });
-    }, 1000);
 
     // Update steps
     const stepInterval = setInterval(() => {
@@ -42,7 +30,6 @@ export function GenerationProgress({ isGenerating }: GenerationProgressProps) {
     }, 5000);
 
     return () => {
-      clearInterval(interval);
       clearInterval(stepInterval);
     };
   }, [isGenerating, steps.length]);

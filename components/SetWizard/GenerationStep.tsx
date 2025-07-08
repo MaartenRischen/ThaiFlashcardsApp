@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Button } from '../ui/button';
 import { Phrase } from '@/app/lib/set-generator';
 import { SetWizardState } from './SetWizardModal';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
+import { GenerationProgress } from '@/app/components/GenerationProgress';
 
 interface GenerationStepProps {
   state: SetWizardState;
@@ -66,12 +67,8 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
         throw new Error(result.error || `API request failed with status ${response.status}`);
       }
 
-      // Assuming the API response contains the generated phrases if successful
-      // We might not need to display them here, as the main page handles completion
-      // setGeneratedPhrases(result.phrases || []); 
       console.log("GenerationStep: API call successful, triggering onComplete.");
-
-      onComplete(); // Trigger completion
+      onComplete();
 
     } catch (err) {
       console.error("Error in GenerationStep generatePhrases:", err);
@@ -86,46 +83,38 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
   }, [generatePhrases]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        {/* Removed Progress component as setProgress is unused */}
-        {/* <Progress value={progress} className="flex-1" /> */}
-        {isGenerating && (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        )}
+    <>
+      <GenerationProgress isGenerating={isGenerating} />
+      
+      <div className="flex flex-col items-center justify-center min-h-[300px] space-y-6 p-4">
+        {isGenerating ? (
+          <div className="text-center space-y-4">
+            <div className="relative">
+              <div className="absolute -inset-4 bg-blue-500/20 rounded-full blur-xl animate-pulse" />
+              <Sparkles className="w-12 h-12 text-blue-400 animate-bounce" />
+            </div>
+            <h3 className="text-xl font-semibold text-[#60A5FA]">Creating Your Custom Set</h3>
+            <p className="text-gray-400 text-sm max-w-md">
+              We're crafting personalized flashcards based on your preferences. This usually takes about 2 minutes.
+            </p>
+          </div>
+        ) : error ? (
+          <div className="text-center space-y-4">
+            <div className="text-red-500 bg-red-500/10 p-4 rounded-lg">
+              <h3 className="font-semibold mb-2">Generation Error</h3>
+              <p className="text-sm">{error}</p>
+            </div>
+            <div className="flex gap-2 justify-center">
+              <Button variant="outline" onClick={onBack}>
+                Back
+              </Button>
+              <Button onClick={generatePhrases}>
+                Try Again
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </div>
-
-      {error && (
-        <div className="text-red-500">{error}</div>
-      )}
-
-      <div className="space-y-2">
-        <h3 className="font-semibold">Generating your custom flashcards...</h3>
-        <ul className="space-y-1">
-          {generatedPhrases.map((phrase, index) => (
-            <li key={index} className="text-sm">
-              <div className="text-blue-400">{phrase.thai}</div>
-              <div className="text-gray-400">{phrase.english}</div>
-              {phrase.mnemonic && (
-                <div className="text-yellow-600 text-xs italic">
-                  Mnemonic: {phrase.mnemonic}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {error && (
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onBack}>
-            Back
-          </Button>
-          <Button onClick={generatePhrases}>
-            Try Again
-          </Button>
-        </div>
-      )}
-    </div>
+    </>
   );
 } 

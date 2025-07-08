@@ -8,7 +8,7 @@ import * as storage from '@/app/lib/storage';
 import { SetMetaData } from '@/app/lib/storage';
 import { generateImage } from '@/app/lib/ideogram-service';
 import { uploadImageFromUrl } from '../../lib/imageStorage';
-import { getToneLabel } from '@/app/lib/utils';
+import { getToneLabel, formatSetTitle } from '@/app/lib/utils';
 import dotenv from 'dotenv';
 import { prisma } from "@/app/lib/prisma"; // Ensure prisma is imported
 // import { uploadImageFromUrl } from '../../lib/imageStorage'; // Removed unused import
@@ -137,8 +137,8 @@ export async function POST(request: Request) {
 
     // Only proceed with database operations for non-test requests
     const setData: Omit<SetMetaData, 'id' | 'createdAt' | 'phraseCount' | 'isFullyLearned'> = {
-      name: generationResult.cleverTitle || 'Custom Set',
-      cleverTitle: generationResult.cleverTitle,
+      name: formatSetTitle(preferences.specificTopics),
+      cleverTitle: undefined,
       level: preferences.level,
       goals: [],
       specificTopics: preferences.specificTopics,

@@ -13,14 +13,13 @@ interface GenerationStepProps {
 export function GenerationStep({ state, onComplete, onBack }: GenerationStepProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState(0);
 
   const generatePhrases = useCallback(async () => {
     try {
       setIsGenerating(true);
       setError(null);
-      setProgress(0);
 
+      // Use the single selected topic from the state
       const selectedTopicValue = state.selectedTopic?.value;
 
       if (!selectedTopicValue) {
@@ -29,12 +28,16 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
         return;
       }
       
+      // Use the single topic value for both title/discussion and content generation
       const topicsToDiscuss = selectedTopicValue;
       const specificTopics = selectedTopicValue;
+
+      // FIXED: Use the cardCount from the state
       const totalCount = state.cardCount;
       
       console.log(`Generating set with ${totalCount} cards for topic: ${specificTopics}`);
 
+      // Generate the set
       const preferences = {
         level: state.proficiency.levelEstimate,
         specificTopics,
@@ -45,31 +48,24 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
 
       console.log(`SetWizard Completion: Calling /api/generate-set with preferences:`, preferences, `count:`, totalCount);
 
-      // Create an EventSource for SSE
-      const eventSource = new EventSource(`/api/generate-set?${new URLSearchParams({
-        preferences: JSON.stringify(preferences),
-        totalCount: totalCount.toString()
-      })}`);
-
-      // Handle progress events
-      eventSource.onmessage = (event: MessageEvent) => {
-        const data = JSON.parse(event.data);
-        setProgress(Math.round((data.completed / data.total) * 100));
-      };
-
-      // Handle completion
-      eventSource.addEventListener('complete', (event: MessageEvent) => {
-        const data = JSON.parse(event.data);
-        console.log("GenerationStep: API call successful, triggering onComplete.");
-        eventSource.close();
-        onComplete();
+      // Call the API route instead of generateCustomSet directly
+      const response = await fetch('/api/generate-set', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ preferences, totalCount }),
+        credentials: 'include',
       });
 
-      // Handle errors
-      eventSource.onerror = (event: Event) => {
-        eventSource.close();
-        throw new Error('Generation failed');
-      };
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || `API request failed with status ${response.status}`);
+      }
+
+      console.log("GenerationStep: API call successful, triggering onComplete.");
+      onComplete();
 
     } catch (err) {
       console.error("Error in GenerationStep generatePhrases:", err);
@@ -85,7 +81,7 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
 
   return (
     <>
-      <GenerationProgress isGenerating={isGenerating} progress={progress} />
+      <GenerationProgress isGenerating={isGenerating} />
       
       <div className="flex flex-col items-center justify-center min-h-[300px] space-y-6 p-4">
         {isGenerating ? (

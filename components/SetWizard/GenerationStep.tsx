@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { GenerationProgress } from '@/app/components/GenerationProgress';
 import { getToneLabel } from '@/app/lib/utils';
 import { SetMetaData } from '@/app/lib/storage';
+import { SetWizardState } from './SetWizardModal';
 
 interface GenerationStepProps {
-  state: any;
+  state: SetWizardState;
   onComplete: () => void;
   onBack: () => void;
   onClose: () => void;

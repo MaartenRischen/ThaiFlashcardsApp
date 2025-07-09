@@ -1395,7 +1395,7 @@ export default function ThaiFlashcards() {
 
       {/* Render the Set Wizard Modal */}
       {showSetWizardModal && (
-        <SetWizardModal 
+        <SetWizardModal
           onClose={() => setShowSetWizardModal(false)}
           onComplete={async (wizardState: SetWizardState) => { // wizardState uses the new structure
             console.log('SetWizardModal onComplete fired', wizardState);
@@ -1482,6 +1482,7 @@ export default function ThaiFlashcards() {
               });
             }
           }}
+          onOpenSetManager={() => setIsManagementModalOpen(true)}
         />
       )}
 

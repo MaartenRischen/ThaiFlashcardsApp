@@ -3,23 +3,33 @@ import { Button } from '../ui/button';
 import { SetWizardState } from './SetWizardModal';
 import { Sparkles } from 'lucide-react';
 import { GenerationProgress } from '@/app/components/GenerationProgress';
+import { useSet } from '@/app/context/SetContext';
+import { SetMetaData } from '@/app/lib/storage';
+import { getToneLabel } from '@/app/lib/utils';
 
 interface GenerationStepProps {
   state: SetWizardState;
   onComplete: () => void;
   onBack: () => void;
+  onClose: () => void;
+  onOpenSetManager: () => void;
 }
 
-export function GenerationStep({ state, onComplete, onBack }: GenerationStepProps) {
+// Helper to convert PascalCase level to lowercase
+function getLowerCaseLevel(level: string): SetMetaData['level'] {
+  return level.toLowerCase().replace(/ /g, ' ') as SetMetaData['level'];
+}
+
+export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetManager }: GenerationStepProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setAvailableSets } = useSet();
 
   const generatePhrases = useCallback(async () => {
     try {
       setIsGenerating(true);
       setError(null);
 
-      // Use the single selected topic from the state
       const selectedTopicValue = state.selectedTopic?.value;
 
       if (!selectedTopicValue) {
@@ -28,16 +38,12 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
         return;
       }
       
-      // Use the single topic value for both title/discussion and content generation
       const topicsToDiscuss = selectedTopicValue;
       const specificTopics = selectedTopicValue;
-
-      // FIXED: Use the cardCount from the state
       const totalCount = state.cardCount;
       
       console.log(`Generating set with ${totalCount} cards for topic: ${specificTopics}`);
 
-      // Generate the set
       const preferences = {
         level: state.proficiency.levelEstimate,
         specificTopics,
@@ -46,9 +52,27 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
         additionalContext: state.additionalContext,
       };
 
+      // Add placeholder set to the list
+      const placeholderSet: SetMetaData = {
+        id: 'generating',
+        name: `${specificTopics} (Generating...)`,
+        createdAt: new Date().toISOString(),
+        phraseCount: totalCount,
+        source: 'generated',
+        isFullyLearned: false,
+        level: getLowerCaseLevel(preferences.level),
+        specificTopics: preferences.specificTopics,
+        seriousnessLevel: preferences.toneLevel,
+        toneLevel: getToneLabel(preferences.toneLevel),
+      };
+      setAvailableSets(sets => [...sets, placeholderSet]);
+
+      // Close wizard and open My Sets modal
+      onClose();
+      onOpenSetManager();
+
       console.log(`SetWizard Completion: Calling /api/generate-set with preferences:`, preferences, `count:`, totalCount);
 
-      // Call the API route instead of generateCustomSet directly
       const response = await fetch('/api/generate-set', {
         method: 'POST',
         headers: {
@@ -64,16 +88,25 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
         throw new Error(result.error || `API request failed with status ${response.status}`);
       }
 
+      // Remove placeholder and add real set
+      setAvailableSets(sets => {
+        const filtered = sets.filter(s => s.id !== 'generating');
+        return [...filtered, result.newSetMetaData];
+      });
+
       console.log("GenerationStep: API call successful, triggering onComplete.");
       onComplete();
 
     } catch (err) {
       console.error("Error in GenerationStep generatePhrases:", err);
       setError(err instanceof Error ? err.message : 'An error occurred during generation');
+      
+      // Remove placeholder on error
+      setAvailableSets(sets => sets.filter(s => s.id !== 'generating'));
     } finally {
       setIsGenerating(false);
     }
-  }, [state, onComplete]);
+  }, [state, onComplete, onClose, onOpenSetManager, setAvailableSets]);
 
   useEffect(() => {
     generatePhrases();

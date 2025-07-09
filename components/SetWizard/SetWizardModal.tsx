@@ -106,9 +106,10 @@ function ProgressStepper({ step, totalSteps }: { step: number; totalSteps: numbe
   );
 }
 
-export function SetWizardModal({ onComplete, onClose }: { 
+export function SetWizardModal({ onComplete, onClose, onOpenSetManager }: { 
   onComplete: (state: SetWizardState) => void, 
-  onClose: () => void 
+  onClose: () => void,
+  onOpenSetManager: () => void
 }) {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<SetWizardState>({
@@ -198,6 +199,8 @@ export function SetWizardModal({ onComplete, onClose }: {
         onComplete(state);
       }}
       onBack={() => setStep(5)}
+      onClose={onClose}
+      onOpenSetManager={onOpenSetManager}
     />
   ];
 

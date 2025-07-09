@@ -13,6 +13,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/public-sets(.*)', // Public sets API
   '/api/health', // Health check endpoint
   '/api/env-check', // Environment check endpoint
+  '/api/generate-placeholder-image', // Placeholder image generation endpoint
   '/public-sets(.*)', // Public sets page
   '/share/(.*)', // Share pages
   '/clerk-debug', // Debug page

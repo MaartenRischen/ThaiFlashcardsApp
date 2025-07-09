@@ -1,14 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Button } from '../ui/button';
-import { SetWizardState } from './SetWizardModal';
-import { Sparkles } from 'lucide-react';
-import { GenerationProgress } from '@/app/components/GenerationProgress';
+import { useState, useCallback, useEffect } from 'react';
 import { useSet } from '@/app/context/SetContext';
-import { SetMetaData } from '@/app/lib/storage';
+import { Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { GenerationProgress } from '@/app/components/GenerationProgress';
 import { getToneLabel } from '@/app/lib/utils';
+import { SetMetaData } from '@/app/lib/storage';
 
 interface GenerationStepProps {
-  state: SetWizardState;
+  state: any;
   onComplete: () => void;
   onBack: () => void;
   onClose: () => void;
@@ -19,6 +18,9 @@ interface GenerationStepProps {
 function getLowerCaseLevel(level: string): SetMetaData['level'] {
   return level.toLowerCase().replace(/ /g, ' ') as SetMetaData['level'];
 }
+
+// Placeholder image URL - will be generated on first use
+let placeholderImageUrl: string | null = null;
 
 export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetManager }: GenerationStepProps) {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -52,6 +54,19 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
         additionalContext: state.additionalContext,
       };
 
+      // Get or generate placeholder image URL
+      if (!placeholderImageUrl) {
+        try {
+          const response = await fetch('/api/generate-placeholder-image');
+          if (response.ok) {
+            const data = await response.json();
+            placeholderImageUrl = data.imageUrl;
+          }
+        } catch (error) {
+          console.error('Failed to get placeholder image:', error);
+        }
+      }
+
       // Add placeholder set to the list
       const placeholderSet: SetMetaData = {
         id: 'generating',
@@ -64,6 +79,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
         specificTopics: preferences.specificTopics,
         seriousnessLevel: preferences.toneLevel,
         toneLevel: getToneLabel(preferences.toneLevel),
+        imageUrl: placeholderImageUrl || undefined
       };
       setAvailableSets(sets => [...sets, placeholderSet]);
 

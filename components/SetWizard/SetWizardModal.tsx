@@ -187,7 +187,7 @@ export function SetWizardModal({ onComplete, onClose, onOpenSetManager }: {
       key="review"
       state={state}
       onConfirm={() => {
-        onComplete(state);
+        setStep(6);
       }}
       onBack={() => setStep(4)}
       onCardCountChange={handleCardCountChange}

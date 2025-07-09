@@ -21,7 +21,6 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
       setError(null);
       setProgress(0);
 
-      // Use the single selected topic from the state
       const selectedTopicValue = state.selectedTopic?.value;
 
       if (!selectedTopicValue) {
@@ -30,16 +29,12 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
         return;
       }
       
-      // Use the single topic value for both title/discussion and content generation
       const topicsToDiscuss = selectedTopicValue;
       const specificTopics = selectedTopicValue;
-
-      // FIXED: Use the cardCount from the state
       const totalCount = state.cardCount;
       
       console.log(`Generating set with ${totalCount} cards for topic: ${specificTopics}`);
 
-      // Generate the set
       const preferences = {
         level: state.proficiency.levelEstimate,
         specificTopics,
@@ -50,42 +45,32 @@ export function GenerationStep({ state, onComplete, onBack }: GenerationStepProp
 
       console.log(`SetWizard Completion: Calling /api/generate-set with preferences:`, preferences, `count:`, totalCount);
 
-      const response = await fetch('/api/generate-set', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ preferences, totalCount }),
-        credentials: 'include',
+      // Create an EventSource for SSE
+      const eventSource = new EventSource(`/api/generate-set?${new URLSearchParams({
+        preferences: JSON.stringify(preferences),
+        totalCount: totalCount.toString()
+      })}`);
+
+      // Handle progress events
+      eventSource.onmessage = (event: MessageEvent) => {
+        const data = JSON.parse(event.data);
+        setProgress(Math.round((data.completed / data.total) * 100));
+      };
+
+      // Handle completion
+      eventSource.addEventListener('complete', (event: MessageEvent) => {
+        const data = JSON.parse(event.data);
+        console.log("GenerationStep: API call successful, triggering onComplete.");
+        eventSource.close();
+        onComplete();
       });
 
-      if (!response.body) {
-        throw new Error("Streaming response not available");
-      }
+      // Handle errors
+      eventSource.onerror = (event: Event) => {
+        eventSource.close();
+        throw new Error('Generation failed');
+      };
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n\n');
-
-        for (const line of lines) {
-          if (line.startsWith('event: progress')) {
-            const data = JSON.parse(line.split('data: ')[1]);
-            setProgress(Math.round((data.completed / data.total) * 100));
-          } else if (line.startsWith('event: complete')) {
-            console.log("GenerationStep: API call successful, triggering onComplete.");
-            onComplete();
-          } else if (line.startsWith('event: error')) {
-            const data = JSON.parse(line.split('data: ')[1]);
-            throw new Error(data.error);
-          }
-        }
-      }
     } catch (err) {
       console.error("Error in GenerationStep generatePhrases:", err);
       setError(err instanceof Error ? err.message : 'An error occurred during generation');

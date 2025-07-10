@@ -11,30 +11,20 @@ import _Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
-
-// --- Type Definitions ---
-type ProficiencyLevelString = 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode';
-
-interface ProficiencyValue {
-  levelEstimate: ProficiencyLevelString;
-  canDoSelections: string[];
-}
-
-interface Topic {
-  value: string;
-  label: string;
-  emoji: string;
-  type: 'scenario' | 'goal' | 'weird';
-}
-
-type Tone = number;
+import { SetWizardState, convertSelectedTopicToTopic, ProficiencyValue, Topic } from './types';
 
 // Wizard state interface
 export interface SetWizardState {
+  selectedTopic: {
+    id: string;
+    title: string;
+    description: string;
+    label: string;
+    emoji: string;
+  } | null;
   proficiency: ProficiencyValue;
-  selectedTopic: Topic | null;
   additionalContext: string;
-  tone: Tone;
+  tone: number;
   cardCount: number;
 }
 
@@ -73,7 +63,10 @@ function renderStep(
         selectedTopic={state.selectedTopic}
         proficiencyLevelEstimate={state.proficiency.levelEstimate}
         onNext={(data) => {
-          setState(prev => ({ ...prev, selectedTopic: data.selectedTopic }));
+          setState(prev => ({
+            ...prev,
+            selectedTopic: convertSelectedTopicToTopic(data.selectedTopic)
+          }));
           setCurrentStep(3);
         }}
         onBack={() => setCurrentStep(1)}

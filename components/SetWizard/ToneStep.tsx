@@ -32,10 +32,11 @@ export function ToneStep({ toneLevel, onNext, onBack }: {
   onBack: () => void
 }) {
   const [currentToneLevel, setCurrentToneLevel] = useState(toneLevel);
-  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    const handleTouchEnd = () => setIsDragging(false);
+    const handleTouchEnd = () => {
+      // setIsDragging(false); // This line is removed
+    };
     document.addEventListener('touchend', handleTouchEnd);
     return () => document.removeEventListener('touchend', handleTouchEnd);
   }, []);
@@ -110,10 +111,18 @@ export function ToneStep({ toneLevel, onNext, onBack }: {
             max="10"
             value={safeToneLevel}
             onChange={(e) => setCurrentToneLevel(parseInt(e.target.value))}
-            onTouchStart={() => setIsDragging(true)}
-            onTouchEnd={() => setIsDragging(false)}
-            onMouseDown={() => setIsDragging(true)}
-            onMouseUp={() => setIsDragging(false)}
+            onTouchStart={() => {
+              // setIsDragging(true); // This line is removed
+            }}
+            onTouchEnd={() => {
+              // setIsDragging(false); // This line is removed
+            }}
+            onMouseDown={() => {
+              // setIsDragging(true); // This line is removed
+            }}
+            onMouseUp={() => {
+              // setIsDragging(false); // This line is removed
+            }}
             className="w-full h-4 rounded-full appearance-none cursor-pointer bg-gray-800
               [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-8 [&::-webkit-slider-thumb]:h-8 
               [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-r 

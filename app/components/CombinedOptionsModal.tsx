@@ -360,9 +360,10 @@ function scrollToBottom(containerRef: React.RefObject<HTMLDivElement>) {
 }
 
 // --- SetManagerModal: Only Set Management ---
-export function SetManagerModal({ isOpen, onClose }: {
+export function SetManagerModal({ isOpen, onClose, highlightSetId }: {
   isOpen: boolean;
   onClose: () => void;
+  highlightSetId: string | null;
 }) {
   const { availableSets, switchSet, activeSetId, deleteSet } = useSet();
   const { user } = useUser(); // Get user data
@@ -375,6 +376,7 @@ export function SetManagerModal({ isOpen, onClose }: {
   const [publishingSetId, setPublishingSetId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const setListRef = useRef<HTMLDivElement>(null);
+  const highlightedSetRef = useRef<HTMLDivElement>(null);
   
   // --- State for Publish Confirmation Modal ---
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
@@ -394,6 +396,20 @@ export function SetManagerModal({ isOpen, onClose }: {
       scrollToBottom(setListRef);
     }
   }, [availableSets]);
+
+  useEffect(() => {
+    if (highlightSetId && isOpen) {
+      const timer = setTimeout(() => {
+        if (highlightedSetRef.current) {
+          highlightedSetRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+          });
+        }
+      }, 100); // Small delay for rendering
+      return () => clearTimeout(timer);
+    }
+  }, [highlightSetId, isOpen, availableSets]);
 
   if (!isOpen) return null;
 
@@ -564,6 +580,8 @@ export function SetManagerModal({ isOpen, onClose }: {
         {/* Set list container - add ref here */}
         <div ref={setListRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto py-4 px-1 max-h-[calc(85vh-150px)]">
           {availableSets.map(set => {
+            const isHighlighted = set.id === highlightSetId || (highlightSetId === 'generating' && set.id === 'generating');
+            const isSelected = activeSetId === set.id || isHighlighted;
             const isDefault = set.id === 'default';
             const checked = selected.includes(set.id);
             // Set image logic
@@ -578,7 +596,10 @@ export function SetManagerModal({ isOpen, onClose }: {
             return (
               <div
                 key={set.id}
-                className="relative bg-gray-900 rounded-xl p-3 flex flex-col shadow-lg border border-gray-800 cursor-pointer hover:ring-2 hover:ring-[#A9C4FC] transition"
+                ref={isHighlighted ? highlightedSetRef : null}
+                className={`relative bg-gray-900 rounded-xl p-3 flex flex-col shadow-lg border border-gray-800 cursor-pointer hover:ring-2 hover:ring-[#A9C4FC] transition neumorphic-card-static
+                ${isSelected ? 'neumorphic-card-active' : ''}
+                ${selected.includes(set.id) ? 'ring-2 ring-blue-500' : ''}`}
                 onClick={async () => {
                   if (set.id !== activeSetId) {
                     await switchSet(set.id);

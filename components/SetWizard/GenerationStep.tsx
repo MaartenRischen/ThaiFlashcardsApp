@@ -9,10 +9,10 @@ import { SetWizardState } from './SetWizardModal';
 
 interface GenerationStepProps {
   state: SetWizardState;
-  onComplete: () => void;
+  onComplete: (newSetId: string) => void;
   onBack: () => void;
   onClose: () => void;
-  onOpenSetManager: () => void;
+  onOpenSetManager: (setToSelect?: string) => void;
 }
 
 // Helper to convert PascalCase level to lowercase
@@ -86,7 +86,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
 
       // Close wizard and open My Sets modal
       onClose();
-      onOpenSetManager();
+      onOpenSetManager('generating');
 
       console.log(`SetWizard Completion: Calling /api/generate-set with preferences:`, preferences, `count:`, totalCount);
 
@@ -112,7 +112,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
       });
 
       console.log("GenerationStep: API call successful, triggering onComplete.");
-      onComplete();
+      onComplete(result.newSetMetaData.id);
 
     } catch (err) {
       console.error("Error in GenerationStep generatePhrases:", err);

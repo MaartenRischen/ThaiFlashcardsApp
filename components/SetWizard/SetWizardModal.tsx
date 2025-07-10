@@ -29,6 +29,12 @@ export interface SetWizardState {
   cardCount: number;
 }
 
+interface SetWizardModalProps {
+  onClose: () => void;
+  onComplete: (newSetId?: string) => void;
+  onOpenSetManager: (setToSelect?: string) => void;
+}
+
 // Image Preloader Component
 function ImagePreloader() {
   return (
@@ -106,11 +112,7 @@ function ProgressStepper({ step, totalSteps }: { step: number; totalSteps: numbe
   );
 }
 
-export function SetWizardModal({ onComplete, onClose, onOpenSetManager }: { 
-  onComplete: (state: SetWizardState) => void, 
-  onClose: () => void,
-  onOpenSetManager: () => void
-}) {
+export function SetWizardModal({ onClose, onComplete, onOpenSetManager }: SetWizardModalProps) {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<SetWizardState>({
     proficiency: {
@@ -135,6 +137,13 @@ export function SetWizardModal({ onComplete, onClose, onOpenSetManager }: {
   // Handler for card count changes
   const handleCardCountChange = (newCount: number) => {
     setState(prev => ({ ...prev, cardCount: newCount }));
+  };
+
+  const handleComplete = () => {
+    // This is now primarily handled by GenerationStep
+    console.log("SetWizardModal handleComplete triggered.");
+    onComplete();
+    onClose();
   };
 
   const steps = [
@@ -196,7 +205,8 @@ export function SetWizardModal({ onComplete, onClose, onOpenSetManager }: {
       key="generation"
       state={state}
       onComplete={() => {
-        onComplete(state);
+        onComplete();
+        onClose();
       }}
       onBack={() => setStep(5)}
       onClose={onClose}

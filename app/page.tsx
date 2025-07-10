@@ -263,6 +263,7 @@ export default function ThaiFlashcards() {
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [totalDueToday, setTotalDueToday] = useState<number>(0);
   const [reviewsCompletedToday, setReviewsCompletedToday] = useState<number>(0);
+  const [highlightSetId, setHighlightSetId] = useState<string | null>(null);
   // === End reintroduced state variables ===
 
   // --- NEW: Ref for dark mode timeout ---
@@ -1398,11 +1399,18 @@ export default function ThaiFlashcards() {
       {showSetWizardModal && (
         <SetWizardModal
           onClose={() => setShowSetWizardModal(false)}
-          onComplete={async (wizardState: SetWizardState) => {
-            // Let GenerationStep handle everything
-            console.log('SetWizardModal onComplete fired', wizardState);
+          onComplete={(newSetId?: string) => {
+            console.log('SetWizardModal onComplete fired, new set:', newSetId);
+            if (newSetId) {
+              setHighlightSetId(newSetId);
+            }
           }}
-          onOpenSetManager={() => setIsManagementModalOpen(true)}
+          onOpenSetManager={(setToSelect?: string) => {
+            setIsManagementModalOpen(true);
+            if (setToSelect) {
+              setHighlightSetId(setToSelect);
+            }
+          }}
         />
       )}
 
@@ -1421,7 +1429,11 @@ export default function ThaiFlashcards() {
       />
       <SetManagerModal
         isOpen={isManagementModalOpen}
-        onClose={() => setIsManagementModalOpen(false)}
+        onClose={() => {
+          setIsManagementModalOpen(false);
+          setHighlightSetId(null); // Clear highlight when closing
+        }}
+        highlightSetId={highlightSetId}
       />
       {/* --- End of Combined Settings Modal --- */}
 

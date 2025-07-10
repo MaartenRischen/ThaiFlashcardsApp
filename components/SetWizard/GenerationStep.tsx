@@ -34,7 +34,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
       setIsGenerating(true);
       setError(null);
 
-      const selectedTopicValue = state.selectedTopic?.value;
+      const selectedTopicValue = state.selectedTopic?.title;
 
       if (!selectedTopicValue) {
         setError('No topic selected to generate.');
@@ -176,7 +176,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">Topic:</span>
-                  <span className="text-[#E0E0E0] font-medium">{state.selectedTopic?.value || 'Custom'}</span>
+                  <span className="text-[#E0E0E0] font-medium">{state.selectedTopic?.title || 'Custom'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">Level:</span>

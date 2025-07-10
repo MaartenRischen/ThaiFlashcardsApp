@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import _Head from 'next/head';
 import { WelcomeStep } from './WelcomeStep';
 import { ProficiencyStep } from './ProficiencyStep';
 import { ScenarioStep } from './ScenarioStep';
@@ -7,26 +6,10 @@ import { ContextStep } from './ContextStep';
 import { ToneStep } from './ToneStep';
 import { ReviewStep } from './ReviewStep';
 import { GenerationStep } from './GenerationStep';
-import _Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { SetWizardState, convertSelectedTopicToTopic, ProficiencyValue, Topic } from './types';
-
-// Wizard state interface
-export interface SetWizardState {
-  selectedTopic: {
-    id: string;
-    title: string;
-    description: string;
-    label: string;
-    emoji: string;
-  } | null;
-  proficiency: ProficiencyValue;
-  additionalContext: string;
-  tone: number;
-  cardCount: number;
-}
+import { SetWizardState } from './types';
 
 interface SetWizardModalProps {
   onClose: () => void;
@@ -65,7 +48,7 @@ function renderStep(
         onNext={(data) => {
           setState(prev => ({
             ...prev,
-            selectedTopic: convertSelectedTopicToTopic(data.selectedTopic)
+            selectedTopic: data.selectedTopic
           }));
           setCurrentStep(3);
         }}

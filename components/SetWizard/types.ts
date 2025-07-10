@@ -5,19 +5,20 @@ export interface ProficiencyValue {
   canDoSelections: string[];
 }
 
-export interface Topic {
-  value: string;
-  label: string;
-  emoji: string;
-}
-
 export interface SelectedTopic {
   type: 'scenario' | 'goal' | 'weird';
   value: string;
 }
 
+export interface Topic {
+  type: 'scenario' | 'goal' | 'weird';
+  value: string;
+  label: string;
+  emoji: string;
+}
+
 export interface SetWizardState {
-  selectedTopic: Topic | null;
+  selectedTopic: SelectedTopic | null;
   proficiency: ProficiencyValue;
   additionalContext: string;
   tone: number;
@@ -28,7 +29,16 @@ export const convertSelectedTopicToTopic = (selectedTopic: SelectedTopic | null)
   if (!selectedTopic) return null;
   return {
     value: selectedTopic.value,
+    type: selectedTopic.type,
     label: selectedTopic.value,
     emoji: '📝'
+  };
+};
+
+export const convertTopicToSelectedTopic = (topic: Topic | null): SelectedTopic | null => {
+  if (!topic) return null;
+  return {
+    value: topic.value,
+    type: topic.type
   };
 }; 

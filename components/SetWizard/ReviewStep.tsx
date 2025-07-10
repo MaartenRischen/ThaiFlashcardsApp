@@ -37,7 +37,7 @@ export function ReviewStep({ state, onConfirm, onBack, onCardCountChange }: Revi
     {
       icon: <Target className="w-4 h-4" />,
       label: 'Topic',
-      value: state.selectedTopic?.value || 'Not selected',
+      value: state.selectedTopic?.title || 'Not selected',
       color: 'text-blue-400'
     },
     {

@@ -603,6 +603,15 @@ export function SetManagerModal({ isOpen, onClose }: {
                       }
                     }}
                   />
+                  {/* Text overlay for generating sets */}
+                  {set.id === 'generating' && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-red-500 mb-2">Generating...</div>
+                        <div className="text-lg text-white">About 2 mins</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 {/* Set Name */}
                 <h3 className="text-base font-medium text-gray-200 group-hover:text-white transition-colors line-clamp-3" title={set.name}>{

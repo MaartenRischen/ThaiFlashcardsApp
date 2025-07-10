@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
+import Image from 'next/image';
+import { Slider } from '@/components/ui/slider';
 
 // Define the specific proficiency level type
 type ProficiencyLevel = {
@@ -9,6 +11,7 @@ type ProficiencyLevel = {
   description: string;
   example: string;
   emoji: string;
+  imageIndex: number;
 };
 
 type ProficiencyLevelString = 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode';
@@ -20,42 +23,48 @@ const proficiencyLevels: ProficiencyLevel[] = [
     label: 'Complete Beginner',
     description: 'Single words and two-word combinations only',
     example: 'ลา บนสะพาน (donkey on bridge)',
-    emoji: '🌱'
+    emoji: '🌱',
+    imageIndex: 1
   },
   {
     value: 'Basic Understanding',
     label: 'Basic Understanding',
     description: 'Short phrases with 2-4 words',
     example: 'ลาเดินบนสะพาน (donkey walks on bridge)',
-    emoji: '🌿'
+    emoji: '🌿',
+    imageIndex: 2
   },
   {
     value: 'Intermediate',
     label: 'Intermediate',
     description: 'Medium-length sentences with 4-7 words',
     example: 'ลาตัวนี้กำลังเดินข้ามสะพาน (This donkey is crossing the bridge)',
-    emoji: '🌳'
+    emoji: '🌳',
+    imageIndex: 3
   },
   {
     value: 'Advanced',
     label: 'Advanced',
     description: 'Complex sentences with 7-12 words',
     example: 'ลาตัวนี้ชอบเดินเล่นบนสะพานไม้ทุกๆเช้า (This donkey likes to walk on the wooden bridge every morning)',
-    emoji: '🏔️'
+    emoji: '🏔️',
+    imageIndex: 4
   },
   {
     value: 'Native/Fluent',
     label: 'Native/Fluent',
     description: 'Natural, idiomatic Thai of any appropriate length',
     example: 'ทุกครั้งที่เห็นลาเดินอยู่บนสะพาน มันดูมีความสุขมากที่ได้ชมวิวสวยๆ (Every time I see the donkey on the bridge, it looks so happy enjoying the beautiful view)',
-    emoji: '🌟'
+    emoji: '🌟',
+    imageIndex: 5
   },
   {
     value: 'God Mode',
     label: 'God Mode',
     description: 'Sophisticated, elaborate Thai with literary/academic language',
     example: 'Heeyyy donkey dude! You good on that bridge duude?\n\nเฮ้ยยย ไอ้หนุ่มลา! สบายดีบนสะพานนั้นปะเพื่อน นน?\n\nheyyy ai noom laa! sa-baai dee bon sa-paan nan pa puean?\n\nThink "ai noom" for "dude" and stretch "pueaan" like "duuude" - super casual!',
-    emoji: '⚡'
+    emoji: '⚡',
+    imageIndex: 6
   }
 ];
 
@@ -87,6 +96,10 @@ export function ProficiencyStep({
 }) {
   const [levelEstimate, setLevelEstimate] = useState<ProficiencyLevelString>(value.levelEstimate);
   const [canDoSelections, setCanDoSelections] = useState<string[]>(value.canDoSelections);
+  const [sliderValue, setSliderValue] = useState(() => {
+    const index = proficiencyLevels.findIndex(level => level.value === value.levelEstimate);
+    return [index + 1];
+  });
 
   const toggleCanDo = (option: string) => {
     setCanDoSelections(prev => 
@@ -95,6 +108,15 @@ export function ProficiencyStep({
         : [...prev, option]
     );
   };
+
+  const handleSliderChange = (newValue: number[]) => {
+    const levelIndex = newValue[0] - 1;
+    const newLevel = proficiencyLevels[levelIndex].value;
+    setSliderValue(newValue);
+    setLevelEstimate(newLevel);
+  };
+
+  const currentLevel = proficiencyLevels.find(level => level.value === levelEstimate);
 
   const handleNext = () => {
     onNext({
@@ -114,41 +136,38 @@ export function ProficiencyStep({
         </p>
       </div>
 
-      {/* Level Selection Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        {proficiencyLevels.map((level, index) => (
-          <motion.button
-            key={level.value}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            onClick={() => setLevelEstimate(level.value)}
-            className={`
-              relative p-4 rounded-xl transition-all duration-200
-              ${levelEstimate === level.value 
-                ? 'neumorphic-card-active border-2 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]' 
-                : 'neumorphic-card-static hover:scale-[1.02]'
-              }
-            `}
-          >
-            <div className="text-2xl mb-2">{level.emoji}</div>
-            <div className={`font-medium ${levelEstimate === level.value ? 'text-blue-400' : 'text-[#E0E0E0]'}`}>
-              {level.label}
+      {/* Level Selection with Image and Slider */}
+      <div className="space-y-6">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl neumorphic">
+          <Image
+            src={`/images/level/${currentLevel?.imageIndex}.png`}
+            alt={currentLevel?.label || ''}
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+        
+        <div className="space-y-4">
+          <div className="text-center">
+            <div className="text-2xl mb-2">{currentLevel?.emoji}</div>
+            <div className="font-medium text-blue-400">
+              {currentLevel?.label}
             </div>
-            <div className="text-xs text-gray-400 mt-1">
-              {level.description}
+            <div className="text-sm text-gray-400 mt-1">
+              {currentLevel?.description}
             </div>
-            {levelEstimate === level.value && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center"
-              >
-                <Check className="w-4 h-4 text-white" />
-              </motion.div>
-            )}
-          </motion.button>
-        ))}
+          </div>
+
+          <Slider
+            value={sliderValue}
+            onValueChange={handleSliderChange}
+            max={6}
+            min={1}
+            step={1}
+            className="w-full"
+          />
+        </div>
       </div>
 
       {/* Can Do Section */}

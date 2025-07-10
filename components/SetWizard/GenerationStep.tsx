@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSet } from '@/app/context/SetContext';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GenerationProgress } from '@/app/components/GenerationProgress';
 import { getToneLabel } from '@/app/lib/utils';
 import { SetMetaData } from '@/app/lib/storage';
 import { SetWizardState } from './SetWizardModal';
+import { motion } from 'framer-motion';
 
 interface GenerationStepProps {
   state: SetWizardState;
@@ -133,33 +134,96 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
     <>
       <GenerationProgress isGenerating={isGenerating} />
       
-      <div className="flex flex-col items-center justify-center min-h-[300px] space-y-6 p-4">
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
         {isGenerating ? (
-          <div className="text-center space-y-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center space-y-6"
+          >
             <div className="relative">
-              <div className="absolute -inset-4 bg-blue-500/20 rounded-full blur-xl animate-pulse" />
-              <Sparkles className="w-12 h-12 text-blue-400 animate-bounce" />
+              <motion.div 
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 180, 360]
+                }}
+                transition={{ 
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="absolute -inset-8 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-2xl"
+              />
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <Sparkles className="w-16 h-16 text-blue-400 relative" />
+              </motion.div>
             </div>
-            <h3 className="text-xl font-semibold text-[#60A5FA]">Creating Your Custom Set</h3>
-            <p className="text-gray-400 text-sm max-w-md">
-              We&apos;re crafting personalized flashcards based on your preferences. This usually takes about 2 minutes.
-            </p>
-          </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold text-[#E0E0E0]">
+                Creating Your Custom Set
+              </h3>
+              <p className="text-gray-400 max-w-md">
+                We're crafting {state.cardCount} personalized flashcards based on your preferences. 
+                This usually takes about 2 minutes.
+              </p>
+            </div>
+
+            <div className="neumorphic p-4 rounded-xl max-w-sm mx-auto">
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Topic:</span>
+                  <span className="text-[#E0E0E0] font-medium">{state.selectedTopic?.value || 'Custom'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Level:</span>
+                  <span className="text-[#E0E0E0] font-medium">{state.proficiency.levelEstimate}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Style:</span>
+                  <span className="text-[#E0E0E0] font-medium">{getToneLabel(state.tone)}</span>
+                </div>
+              </div>
+            </div>
+
+            <motion.div
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="text-sm text-gray-400"
+            >
+              Your set will appear in "My Sets" when ready...
+            </motion.div>
+          </motion.div>
         ) : error ? (
-          <div className="text-center space-y-4">
-            <div className="text-red-500 bg-red-500/10 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2">Generation Error</h3>
-              <p className="text-sm">{error}</p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center space-y-4 max-w-md"
+          >
+            <div className="neumorphic p-6 rounded-xl bg-red-500/10 border border-red-500/20">
+              <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <h3 className="font-semibold text-[#E0E0E0] mb-2">Generation Error</h3>
+              <p className="text-sm text-gray-400">{error}</p>
             </div>
-            <div className="flex gap-2 justify-center">
-              <Button variant="outline" onClick={onBack}>
+            <div className="flex gap-3 justify-center">
+              <Button 
+                variant="outline" 
+                onClick={onBack}
+                className="neumorphic-button text-gray-400"
+              >
                 Back
               </Button>
-              <Button onClick={generatePhrases}>
+              <Button 
+                onClick={generatePhrases}
+                className="neumorphic-button text-blue-400"
+              >
                 Try Again
               </Button>
             </div>
-          </div>
+          </motion.div>
         ) : null}
       </div>
     </>

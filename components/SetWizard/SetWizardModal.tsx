@@ -8,24 +8,32 @@ import { ToneStep } from './ToneStep';
 import { ReviewStep } from './ReviewStep';
 import { GenerationStep } from './GenerationStep';
 import Image from 'next/image';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { motion } from 'framer-motion';
 
-// Import the specific type (adjust path if needed, or redefine here)
-// Assuming ProficiencyLevelString is defined/exported in ProficiencyStep
-// If not, redefine it here:
+// --- Type Definitions ---
 type ProficiencyLevelString = 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode';
+
+interface ProficiencyValue {
+  levelEstimate: ProficiencyLevelString;
+  canDoSelections: string[];
+}
+
+interface Topic {
+  value: string;
+  label: string;
+  emoji: string;
+  type: 'scenario' | 'goal' | 'weird';
+}
+
+type Tone = number;
 
 // Wizard state interface
 export interface SetWizardState {
-  proficiency: {
-    canDoSelections: string[];
-    levelEstimate: ProficiencyLevelString;
-  };
-  selectedTopic: { 
-    type: 'scenario' | 'goal' | 'weird'; 
-    value: string; 
-  } | null;
+  proficiency: ProficiencyValue;
+  selectedTopic: Topic | null;
   additionalContext: string;
-  tone: number;
+  tone: Tone;
   cardCount: number;
 }
 
@@ -95,26 +103,81 @@ function ImagePreloader() {
   );
 }
 
-function ProgressStepper({ step, totalSteps }: { step: number; totalSteps: number }) {
-  return (
-    <div className="mb-4">
-      <div className="relative h-0.5 bg-gray-800 rounded-full overflow-hidden">
-        <div 
-          className="absolute h-full bg-blue-600/90 rounded-full transition-all duration-300"
-          style={{ width: `${(step / (totalSteps - 1)) * 100}%` }}
-        />
-      </div>
-      <div className="flex justify-between mt-1.5 text-xs">
-        <span className="text-gray-500">Start</span>
-        <span className="text-gray-500">Review</span>
-      </div>
-    </div>
-  );
+function renderStep(
+  step: number,
+  state: SetWizardState,
+  setState: React.Dispatch<React.SetStateAction<SetWizardState>>,
+  onClose: () => void,
+  onComplete: (newSetId?: string) => void,
+  onOpenSetManager: (setToSelect?: string) => void,
+  setCurrentStep: (step: number) => void
+) {
+  switch (step) {
+    case 0:
+      return <WelcomeStep onNext={() => setCurrentStep(1)} />;
+    case 1:
+      return <ProficiencyStep 
+        value={state.proficiency} 
+        onNext={(proficiency) => {
+          setState(prev => ({ ...prev, proficiency }));
+          setCurrentStep(2);
+        }}
+        onBack={onClose}
+      />;
+    case 2:
+      return <ScenarioStep
+        selectedTopic={state.selectedTopic}
+        proficiencyLevelEstimate={state.proficiency.levelEstimate}
+        onNext={(data) => {
+          setState(prev => ({ ...prev, selectedTopic: data.selectedTopic }));
+          setCurrentStep(3);
+        }}
+        onBack={() => setCurrentStep(1)}
+      />;
+    case 3:
+      return <ContextStep
+        topic={state.selectedTopic?.value || ''}
+        onNext={({ additionalContext }) => {
+          setState(prev => ({ ...prev, additionalContext }));
+          setCurrentStep(4);
+        }}
+        onBack={() => setCurrentStep(2)}
+      />;
+    case 4:
+      return <ToneStep
+        toneLevel={state.tone}
+        onNext={(toneLevel) => {
+          setState(prev => ({ ...prev, tone: toneLevel }));
+          setCurrentStep(5);
+        }}
+        onBack={() => setCurrentStep(3)}
+      />;
+    case 5:
+      return <ReviewStep
+        state={state}
+        onConfirm={() => setCurrentStep(6)}
+        onBack={() => setCurrentStep(4)}
+        onCardCountChange={(count) => setState(prev => ({...prev, cardCount: count}))}
+      />;
+    case 6:
+      return <GenerationStep
+        state={state}
+        onComplete={(newSetId) => {
+          onComplete(newSetId);
+          onClose();
+        }}
+        onBack={() => setCurrentStep(5)}
+        onClose={onClose}
+        onOpenSetManager={onOpenSetManager}
+      />;
+    default:
+      return null;
+  }
 }
 
 export function SetWizardModal({ onClose, onComplete, onOpenSetManager }: SetWizardModalProps) {
-  const [step, setStep] = useState(0);
-  const [state, setState] = useState<SetWizardState>({
+  const [currentStep, setCurrentStep] = useState(0);
+  const [wizardState, setWizardState] = useState<SetWizardState>({
     proficiency: {
       canDoSelections: [],
       levelEstimate: 'Intermediate',
@@ -125,128 +188,43 @@ export function SetWizardModal({ onClose, onComplete, onOpenSetManager }: SetWiz
     cardCount: 10, // Default to 10 cards
   });
 
-  // Show close button for all steps except generation (6)
-  const showCloseButton = step < 6;
-  
-  // Show progress stepper for all steps except generation (6)
-  const showProgressStepper = step < 6;
-  
-  // Set modal width based on step
-  const modalWidth = step === 6 ? "max-w-3xl" : "max-w-2xl";
-
-  // Handler for card count changes
-  const handleCardCountChange = (newCount: number) => {
-    setState(prev => ({ ...prev, cardCount: newCount }));
-  };
-
-  const handleComplete = () => {
-    // This is now primarily handled by GenerationStep
-    console.log("SetWizardModal handleComplete triggered.");
-    onComplete();
-    onClose();
-  };
-
-  const steps = [
-    <WelcomeStep
-      key="welcome"
-      onNext={() => setStep(1)}
-    />,
-    <ProficiencyStep
-      key="proficiency"
-      value={state.proficiency}
-      onNext={(proficiency) => {
-        setState(prev => ({ ...prev, proficiency }));
-        setStep(2);
-      }}
-      onBack={onClose}
-    />,
-    <ScenarioStep
-      key="scenario"
-      selectedTopic={state.selectedTopic}
-      proficiencyLevelEstimate={state.proficiency.levelEstimate}
-      onNext={(data) => {
-        setState(prev => ({ 
-          ...prev, 
-          selectedTopic: data.selectedTopic, 
-        }));
-        
-        setStep(3);
-      }}
-      onBack={() => setStep(1)}
-    />,
-    <ContextStep
-      key="context"
-      topic={state.selectedTopic?.value || ''}
-      onNext={({ additionalContext }) => {
-        setState(prev => ({ ...prev, additionalContext }));
-        setStep(4);
-      }}
-      onBack={() => setStep(2)}
-    />,
-    <ToneStep
-      key="tone"
-      toneLevel={state.tone}
-      onNext={(toneLevel) => {
-        setState(prev => ({ ...prev, tone: toneLevel }));
-        setStep(5);
-      }}
-      onBack={() => setStep(3)}
-    />,
-    <ReviewStep
-      key="review"
-      state={state}
-      onConfirm={() => {
-        setStep(6);
-      }}
-      onBack={() => setStep(4)}
-      onCardCountChange={handleCardCountChange}
-    />,
-    <GenerationStep
-      key="generation"
-      state={state}
-      onComplete={() => {
-        onComplete();
-        onClose();
-      }}
-      onBack={() => setStep(5)}
-      onClose={onClose}
-      onOpenSetManager={onOpenSetManager}
-    />
-  ];
-
-  const totalSteps = steps.length - 1;
+  const totalSteps = 7;
 
   return (
-    <>
-      <Head>
-        {/* Preload the welcome step GIF */}
-        <link rel="preload" href="/images/gifs/setwizardgif2.gif" as="image" />
-      </Head>
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <ImagePreloader />
-        <div className={`${modalWidth} w-full bg-[#1F1F1F] rounded-lg overflow-hidden shadow-xl border border-[#404040]`}>
-          <div className="p-5 space-y-4">
-            <div className="flex justify-between items-center relative">
-              {/* Close button on the right */}
-              {showCloseButton && (
-                <button 
-                  onClick={onClose}
-                  className="absolute right-0 w-6 h-6 flex items-center justify-center rounded-full bg-[#2C2C2C] hover:bg-[#3C3C3C] transition-colors text-[#BDBDBD]"
-                  aria-label="Close"
-                >
-                  <span className="text-sm">&times;</span>
-                </button>
-              )}
-              {/* Centered heading */}
-              <h2 className="text-lg font-medium text-[#60A5FA] w-full text-center">Make Your Own Cards</h2>
-            </div>
-            {showProgressStepper && <ProgressStepper step={step} totalSteps={totalSteps} />}
-            <div className="max-h-[75vh] overflow-y-auto scrollbar-hide">
-              {steps[step]}
-            </div>
-          </div>
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="neumorphic max-w-2xl w-full bg-[#1f1f1f] border-[#333] text-white">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-center text-[#E0E0E0]">
+            Create a New Flashcard Set
+          </DialogTitle>
+          <DialogDescription className="text-center text-gray-400">
+            Follow the steps to generate a personalized set.
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Progress Indicator */}
+        <div className="flex justify-center space-x-4 my-6">
+          {Array.from({ length: totalSteps }).map((_, index) => (
+            <div
+              key={index}
+              className={`w-4 h-4 rounded-full transition-all duration-300
+                ${currentStep === index ? 'bg-blue-500 scale-125 shadow-[0_0_10px_2px] shadow-blue-500/50' : 'bg-gray-600'}`}
+            />
+          ))}
         </div>
-      </div>
-    </>
+
+        <div className="min-h-[400px]">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.3 }}
+          >
+            {renderStep(currentStep, wizardState, setWizardState, onClose, onComplete, onOpenSetManager, setCurrentStep)}
+          </motion.div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 } 

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donkey Bridge - Set Generation Logic</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        h1, h2, h3 { color: #1a1a1a; }
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .sub-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .note {
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #004085;
+        }
+        .code {
+            background-color: #2d2d2d;
+            color: #f1f1f1;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            white-space: pre;
+            font-size: 0.9em;
+            margin: 10px 0;
+        }
+        .highlight { font-weight: bold; color: #0056b3; }
+        .error { color: #dc3545; font-weight: bold; }
+        .success { color: #28a745; font-weight: bold; }
+        li { margin-bottom: 5px; }
+        code { background-color: #eee; padding: 2px 5px; border-radius: 3px; font-family: monospace;}
+        .mapping-table th, .mapping-table td { padding: 6px 10px; border: 1px solid #ddd; }
+        .mapping-table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        .mapping-table th { background: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <h1>Donkey Bridge: Set Generation Logic (Linguistic & Prompt Focus)</h1>
+
+    <div class="section">
+        <h2>1. Overview: From User Input to Flashcard Set</h2>
+        <div class="note">
+            The heart of Donkey Bridge is the transformation of user intent into a linguistically rich, ultra-personalized Thai flashcard set. This page explains how your choices become LLM prompts, how those prompts are crafted, and how the results are reflected in the app UI.
+        </div>
+        <ol>
+            <li>User configures a set in the Set Wizard (proficiency, topic, tone, card count).</li>
+            <li>The app constructs a detailed LLM prompt encoding all linguistic rules and user intent.</li>
+            <li>The LLM returns a JSON array of phrases, each with fields for Thai, English, pronunciation, mnemonic, and examples.</li>
+            <li>The app validates, cleans, and stores the results, then displays them in the UI.</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h2>2. User Input → Prompt Construction</h2>
+        <div class="sub-section">
+            <h3>2.1. User Choices</h3>
+            <ul>
+                <li><b>Proficiency Level:</b> Affects phrase complexity, grammar, and vocabulary.</li>
+                <li><b>Topic/Goal:</b> The main subject for all generated phrases (single string, e.g., "Ordering vegetarian food").</li>
+                <li><b>Tone (1-10):</b> Controls creativity/chaos (mapped to LLM temperature and prompt instructions).</li>
+                <li><b>Card Count:</b> Number of phrases to generate (5, 10, 15, or 20).</li>
+            </ul>
+        </div>
+        <div class="sub-section">
+            <h3>2.2. Prompt Structure & Linguistic Rules</h3>
+            <p>The prompt sent to the LLM is a carefully engineered instruction set. It encodes:</p>
+            <ul>
+                <li><b>Proficiency:</b> "Generate phrases suitable for a [level] Thai learner."</li>
+                <li><b>Topic:</b> "All phrases must be directly relevant to: '[topic]'."</li>
+                <li><b>Tone:</b> "If tone is high, allow more humor, creativity, and surrealism. If low, keep practical and realistic."</li>
+                <li><b>Politeness:</b> "Add the correct polite particle (ครับ/ค่ะ) unless the phrase is a question or already ends with one."</li>
+                <li><b>Gender:</b> "Use gender-appropriate pronouns and endings as needed."</li>
+                <li><b>Mnemonic:</b> "For each phrase, provide a creative mnemonic (memory aid) in English, never just a translation."</li>
+                <li><b>Examples:</b> "For each phrase, provide at least one example sentence in Thai, with English translation and pronunciation."</li>
+                <li><b>Output Format:</b> "Return a JSON array of objects with fields: english, thai, pronunciation, mnemonic, examples[]."</li>
+                <li><b>Title:</b> "Suggest a clever, short set title related to the topic."</li>
+                <li><b>Constraints:</b> "No English in the Thai field, no Thai in the English field, no empty fields, no duplicates."</li>
+            </ul>
+            <div class="note">The prompt is dynamically constructed from the user's choices and always includes all relevant linguistic rules.</div>
+        </div>
+        <div class="sub-section">
+            <h3>2.3. Prompt Example (Annotated)</h3>
+            <div class="code">Generate 10 Thai flashcard phrases for a <b>[Intermediate]</b> learner about <b>[Ordering vegetarian food]</b>.
+- Each phrase must be directly relevant to the topic.
+- Use practical, real-world language.
+- <b>Tone: 2 (Serious & practical)</b> — keep phrases realistic and useful.
+- Add the correct polite particle (ครับ/ค่ะ) unless inappropriate.
+- Use gender-appropriate pronouns.
+- For each phrase, provide:
+    - English translation
+    - Thai phrase
+    - Pronunciation (Latin script)
+    - A creative mnemonic (memory aid) in English
+    - At least one example sentence (Thai, English, pronunciation)
+- Output as a JSON array of objects with fields: english, thai, pronunciation, mnemonic, examples[]
+- Suggest a clever, short set title related to the topic.
+- No English in Thai, no Thai in English, no empty fields, no duplicates.
+</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>3. LLM Response → App Data & UI Mapping</h2>
+        <div class="sub-section">
+            <h3>3.1. Expected LLM Output</h3>
+            <div class="code">[
+  {
+    "english": "Can I have the vegetarian menu?",
+    "thai": "ขอเมนูมังสวิรัติได้ไหมครับ",
+    "pronunciation": "kho menu mang-sa-wi-rat dai mai krap",
+    "mnemonic": "Imagine a menu with only vegetables and a monk (mang) serving it.",
+    "examples": [
+      {
+        "thai": "ขอเมนูมังสวิรัติด้วยครับ",
+        "english": "Please give me the vegetarian menu, too.",
+        "pronunciation": "kho menu mang-sa-wi-rat duay krap"
+      }
+    ]
+  },
+  ...
+]</div>
+        </div>
+        <div class="sub-section">
+            <h3>3.2. Validation & Cleaning</h3>
+            <ul>
+                <li>Each phrase is checked for required fields, type, and non-empty values.</li>
+                <li>Politeness and gender are checked and fixed if needed.</li>
+                <li>Mnemonics are checked for creativity (not just translation).</li>
+                <li>Examples are checked for completeness and relevance.</li>
+                <li>Fallbacks: If the LLM output is incomplete, fallback phrases are added from a static list.</li>
+            </ul>
+        </div>
+        <div class="sub-section">
+            <h3>3.3. UI Mapping Table</h3>
+            <table class="mapping-table">
+                <tr><th>LLM Output Field</th><th>UI Location</th></tr>
+                <tr><td>english</td><td>Card front, search, set list</td></tr>
+                <tr><td>thai</td><td>Card back, answer, In Context</td></tr>
+                <tr><td>pronunciation</td><td>Card back, audio, In Context</td></tr>
+                <tr><td>mnemonic</td><td>Hint, editable mnemonic field</td></tr>
+                <tr><td>examples[]</td><td>In Context section, audio, cycling examples</td></tr>
+                <tr><td>cleverTitle</td><td>Set cover, gallery, image prompt</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>4. Image Generation Logic</h2>
+        <div class="note">
+            The set cover image is generated by Ideogram v3 API using a structured prompt based on the set title/topic. <b>Tone does not affect the image.</b>
+        </div>
+        <ul>
+            <li><b>API Configuration:</b>
+                <ul>
+                    <li>Uses Ideogram v3 API endpoint</li>
+                    <li>Resolution: 1344x768 (16:9 aspect ratio)</li>
+                    <li>Style Type: GENERAL</li>
+                    <li>Rendering Speed: TURBO</li>
+                </ul>
+            </li>
+            <li><b>Prompt Structure:</b>
+                <ul>
+                    <li>Main Focus: Visual representation of the topic</li>
+                    <li>Mandatory Elements: Friendly donkey and bridge that naturally interact with the topic</li>
+                    <li>Style: Vibrant, friendly colors and clean cartoon style</li>
+                    <li>Composition: Balanced 16:9 landscape composition</li>
+                    <li>Quality: High detail and clean lines</li>
+                </ul>
+            </li>
+            <li><b>Text Prohibition:</b> Comprehensive negative prompt that forbids:
+                <ul>
+                    <li>Text, letters, numbers, or writing of any kind</li>
+                    <li>Signs, labels, logos, or watermarks</li>
+                    <li>Hidden or subtle text elements</li>
+                    <li>Text-like patterns or shapes</li>
+                    <li>Text in any language, style, size, color, position, or context</li>
+                </ul>
+            </li>
+            <li><b>Error Handling:</b>
+                <ul>
+                    <li>If generation succeeds: Image is uploaded to Supabase storage</li>
+                    <li>If upload fails: Original Ideogram URL is used directly</li>
+                    <li>If generation fails: imageUrl is set to null, frontend handles fallback display</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>5. Code & Data Flow (for Developers)</h2>
+        <ol>
+            <li>User completes Set Wizard → <code>POST /api/generate-set</code></li>
+            <li>API validates input and authentication (Clerk)</li>
+            <li>Calls <code>generateCustomSet</code> (set-generator.ts) which:
+                <ul>
+                    <li>Calculates optimal batch size based on model</li>
+                    <li>Constructs prompts with buildGenerationPrompt</li>
+                    <li>Makes API calls to OpenRouter for text generation</li>
+                    <li>Handles retries and model fallbacks if needed</li>
+                    <li>Deduplicates and validates phrases</li>
+                </ul>
+            </li>
+            <li>Image generation process:
+                <ul>
+                    <li>Constructs detailed image prompt with topic and constraints</li>
+                    <li>Calls Ideogram v3 API via ideogram-service.ts</li>
+                    <li>Uploads successful image to Supabase storage</li>
+                </ul>
+            </li>
+            <li>Set metadata and phrases are saved to the database</li>
+            <li>Response includes:
+                <ul>
+                    <li>Generated phrases with examples</li>
+                    <li>Set metadata (title, level, topics)</li>
+                    <li>Image URL (Supabase or Ideogram)</li>
+                    <li>Generation metadata (LLM brand, model, temperature)</li>
+                </ul>
+            </li>
+            <li>UI updates to display the new set with all components</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h2>6. Error Handling & Fallbacks</h2>
+        <ul>
+            <li>Text Generation:
+                <ul>
+                    <li>Multiple retries with different OpenRouter models</li>
+                    <li>Fallback to static phrase list if all retries fail</li>
+                    <li>Partial success: Combines generated and fallback phrases</li>
+                </ul>
+            </li>
+            <li>Image Generation:
+                <ul>
+                    <li>Detailed error logging with timestamps</li>
+                    <li>Fallback to original Ideogram URL if upload fails</li>
+                    <li>Frontend handles null imageUrl with default images</li>
+                </ul>
+            </li>
+            <li>All errors are logged with:
+                <ul>
+                    <li>Timestamps and batch information</li>
+                    <li>Error type classification</li>
+                    <li>User-friendly error messages</li>
+                    <li>Detailed debug information for development</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+</body>
+</html> 

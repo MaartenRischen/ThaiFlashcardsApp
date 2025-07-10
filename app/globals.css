@@ -159,6 +159,38 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
+  /* Neumorphic Card States */
+  .neumorphic-card-static {
+    @apply bg-[#2C2C2C] rounded-lg border border-[#404040] transition-all duration-200;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .neumorphic-card-static:hover {
+    @apply bg-[#323232] border-[#505050];
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  }
+
+  .neumorphic-card-active {
+    @apply bg-[#3C3C3C] rounded-lg border border-[#505050];
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 0 8px rgba(187, 134, 252, 0.2);
+  }
+
+  /* Neumorphic Inset (for image containers) */
+  .neumorphic-inset {
+    @apply bg-[#1F1F1F] border border-[#333333];
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  /* Hide scrollbar for specific containers */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Input Styles */
   .neumorphic-input {
     @apply w-full px-4 py-2 bg-[#3C3C3C] text-[#E0E0E0] rounded-lg border border-[#404040] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-transparent;

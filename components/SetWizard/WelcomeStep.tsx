@@ -1,71 +1,61 @@
-import React, { useState } from 'react';
-import { useUser } from "@clerk/nextjs";
+import React from 'react';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { Sparkles } from 'lucide-react';
 
-// Trigger new Railway deployment
 export function WelcomeStep({ onNext }: { onNext: () => void }) {
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const { isSignedIn } = useUser();
-
   return (
-    <div className="flex flex-col items-center text-center space-y-6">
-      {/* Image with decorative background */}
-      <div className="relative w-[300px] h-[210px] mb-6">
-        {/* Gradient background circle */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/30 via-blue-400/20 to-blue-600/10 rounded-2xl blur-md"></div>
-        
-        {/* Subtle animated glow effect */}
-        <div className="absolute inset-0 bg-blue-400/10 rounded-2xl animate-pulse"></div>
-        
-        {/* Loading text */}
-        {!isImageLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center text-blue-400">
-            Cute gif loading...
-          </div>
-        )}
-        
-        {/* Image container */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/gifs/setwizardgif2.gif"
-            alt="Set Wizard Introduction"
-            width={285}
-            height={195}
-            className={`object-contain z-10 transition-opacity duration-300 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
-            onLoad={() => setIsImageLoaded(true)}
-            style={{ maxWidth: '100%', maxHeight: '100%', display: 'block' }}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-4 max-w-md">
-        <div className="bg-[#1F1F1F] border border-blue-900/30 rounded-lg p-3">
-          <p className="text-blue-100 text-sm leading-relaxed">
-            Let&apos;s personalize your Thai learning journey! Answer a few quick questions to create your perfect flashcard set.
-          </p>
+    <div className="space-y-6 px-4">
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="text-center space-y-4"
+      >
+        <div className="relative inline-block">
+          <div className="absolute -inset-4 bg-blue-500/20 rounded-full blur-xl animate-pulse" />
+          <Sparkles className="w-16 h-16 text-blue-400 relative" />
         </div>
         
-        {!isSignedIn && (
-          <div className="bg-[#2C1810] border-2 border-[#8B4513] rounded-lg p-4">
-            <p className="text-[#FFA07A] text-sm leading-relaxed">
-              👋 You can explore the Set Wizard, but to save your custom sets you&apos;ll need to log in or register first.
-            </p>
-          </div>
-        )}
+        <h3 className="text-2xl font-bold text-[#E0E0E0]">
+          Welcome to the Set Creator!
+        </h3>
         
-        <p className="text-xs text-gray-500 italic">
-          You can skip this and use the default set or import public sets anytime.
+        <p className="text-gray-400 max-w-md mx-auto">
+          Let's create a personalized flashcard set tailored to your learning needs. 
+          This will only take a few minutes.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="flex justify-center pt-3 w-full">
+      <motion.div 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        className="relative w-full max-w-sm mx-auto aspect-square rounded-xl overflow-hidden neumorphic"
+      >
+        <Image
+          src="/images/gifs/setwizardgif2.gif"
+          alt="Set creation wizard animation"
+          fill
+          className="object-cover"
+          priority
+        />
+      </motion.div>
+
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+        className="flex justify-center pt-4"
+      >
         <button
           onClick={onNext}
-          className="neumorphic-button text-blue-400 px-8"
+          className="neumorphic-button text-blue-400 px-8 py-3 text-lg font-medium
+            hover:scale-105 transition-all duration-200"
         >
-          Let&apos;s Go!
+          Let's Get Started
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 } 

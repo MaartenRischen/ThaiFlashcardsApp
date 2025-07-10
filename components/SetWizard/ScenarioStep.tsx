@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Check, Target, Sparkles, Zap } from 'lucide-react';
 import { formatSetTitle } from '@/app/lib/utils';
 
 // --- Data Structure for Scenarios by Level --- (Sentence Case)
@@ -338,52 +340,47 @@ interface ScenarioStepProps {
 }
 
 // --- Update Component Signature & State ---
-export function ScenarioStep({ selectedTopic: initialSelectedTopic, proficiencyLevelEstimate, onNext, onBack }: ScenarioStepProps) {
-  const [selected, setSelected] = useState<SelectedTopic | null>(initialSelectedTopic);
+export function ScenarioStep({ 
+  selectedTopic, 
+  proficiencyLevelEstimate, 
+  onNext, 
+  onBack 
+}: { 
+  selectedTopic: SelectedTopic | null,
+  proficiencyLevelEstimate: string,
+  onNext: (data: { selectedTopic: SelectedTopic | null }) => void,
+  onBack: () => void
+}) {
+  const [selected, setSelected] = useState<SelectedTopic | null>(selectedTopic);
   const [customInput, setCustomInput] = useState(
-    initialSelectedTopic?.type === 'goal' ? initialSelectedTopic.value : ''
-  ); // Initialize custom input if the initial topic is a goal
+    selectedTopic?.type === 'goal' ? selectedTopic.value : ''
+  );
 
-  // --- Get Level-Appropriate Scenarios ---
+  // Get Level-Appropriate Scenarios
   const levelKey = proficiencyLevelMap[proficiencyLevelEstimate?.toLowerCase()] || "Complete Beginner";
-  const levelScenarios = useMemo(() => scenariosByLevel[levelKey] || scenariosByLevel["Complete Beginner"], [levelKey]);
-  // --- End Get Level-Appropriate Scenarios ---
+  const levelScenarios = scenariosByLevel[levelKey] || scenariosByLevel["Complete Beginner"];
 
   const [weirdScenarios, setWeirdScenarios] = useState<string[]>([]);
 
   useEffect(() => {
-    // Only pick new weird scenarios if not already set
     if (weirdScenarios.length === 0) {
-      // Exclude level scenarios as well when picking weird ones
       const picked = getRandomWeirdScenarios(2, levelScenarios); 
       setWeirdScenarios(picked);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [levelScenarios]); // Depend on levelScenarios so weird ones change if level changes back/forth
-
-  // Combine level scenarios and weird scenarios for display
-  // const allDisplayScenarios = useMemo(() => {
-  //   // Combine premade and weird scenarios into one list for display
-  //   const premade = PREMADE_SCENARIOS.map(s => ({ ...s, type: 'premade' as const }));
-  //   const weird = weirdScenarios.map(s => ({ ...s, type: 'weird' as const }));
-  //   return [...premade, ...weird];
-  // }, [weirdScenarios]);
+  }, [levelScenarios, weirdScenarios.length]);
 
   const handleSelect = (type: 'scenario' | 'weird', value: string) => {
-    // If selecting the same one, deselect it
     if (selected && selected.type === type && selected.value === value) {
       setSelected(null);
     } else {
-      // Otherwise, select the new one
       setSelected({ type, value });
-      setCustomInput(''); // Clear custom input when selecting a scenario
+      setCustomInput('');
     }
   };
 
   const handleCustomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setCustomInput(value);
-    // Select the custom goal if there is input, deselect if empty
     if (value.trim()) {
       setSelected({ type: 'goal', value: value.trim() });
     } else if (selected?.type === 'goal') {
@@ -392,7 +389,6 @@ export function ScenarioStep({ selectedTopic: initialSelectedTopic, proficiencyL
   };
 
   const handleNext = () => {
-    // Format the title before passing it to the next step
     if (selected) {
       const formattedValue = formatSetTitle(selected.value);
       onNext({ selectedTopic: { ...selected, value: formattedValue } });
@@ -401,93 +397,140 @@ export function ScenarioStep({ selectedTopic: initialSelectedTopic, proficiencyL
     }
   };
 
-  // --- UI ---
   return (
-    <div className="space-y-4 px-1">
-      <div className="space-y-2.5 text-center">
-        <h3 className="text-base font-medium text-white">
-          What do you want to be able to do in Thai?
+    <div className="space-y-6">
+      <div className="text-center space-y-2">
+        <h3 className="text-xl font-semibold text-[#E0E0E0]">
+          What would you like to learn?
         </h3>
-        {/* <p className="text-xs text-gray-400">Choose one or more scenarios that interest you.</p> */}
+        <p className="text-sm text-gray-400">
+          Choose a topic that interests you
+        </p>
       </div>
 
       {/* Custom Goal Input */}
-      <div className="bg-[#1e1e1e]/50 rounded-lg p-4">
-        <label htmlFor="custom-goal-input" className="block text-sm font-medium text-gray-300 mb-1.5">
-          1. Define a Custom Goal (Recommended!)
-        </label>
+      <div className="neumorphic p-4 rounded-xl space-y-3">
+        <div className="flex items-center gap-2">
+          <Target className="w-4 h-4 text-blue-400" />
+          <label htmlFor="custom-goal" className="text-sm font-medium text-blue-400">
+            Define Your Own Goal (Recommended!)
+          </label>
+        </div>
         <input
-          id="custom-goal-input"
+          id="custom-goal"
           type="text"
           value={customInput}
           onChange={handleCustomInputChange}
           placeholder="e.g., Talk about my holiday plans"
-          className={`w-full bg-gray-900/50 border rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-            selected?.type === 'goal' ? 'border-blue-500' : 'border-gray-700'
+          className={`neumorphic-input w-full ${
+            selected?.type === 'goal' ? 'ring-2 ring-blue-500' : ''
           }`}
         />
-         <p className="text-xs text-gray-400 mt-1.5">Enter your own learning goal here. Selecting this will deselect any scenario below.</p>
+        <p className="text-xs text-gray-400">
+          Enter your specific learning goal for a personalized experience
+        </p>
       </div>
 
-      <div className="text-center text-sm text-gray-400 pt-1">
-        {selected?.type !== 'goal' ? 'Or Choose ONE Scenario:' : 'Or Choose ONE Scenario (deselects custom goal):'}
-      </div>
-
-      {/* Scenario Grid - MAP ONLY OVER levelScenarios */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {levelScenarios.map(scenario => {
-          // Check if this scenario is selected (must be type 'scenario')
-          const isSelected = selected?.type === 'scenario' && selected.value === scenario; 
-          return (
-            <button
+      {/* Level-Appropriate Scenarios */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-blue-400" />
+          <h4 className="text-sm font-medium text-blue-400">
+            Or Choose a Scenario
+          </h4>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {levelScenarios.map((scenario, index) => (
+            <motion.button
               key={scenario}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
               onClick={() => handleSelect('scenario', scenario)}
-              className={`rounded-lg p-3 text-left transition-all border-2 text-sm ${isSelected
-                  ? 'bg-blue-600/90 text-white border-blue-500 shadow-md'
-                  : 'bg-blue-900/30 text-blue-300 border-blue-600/30 hover:bg-blue-800/40'
-              }`}
+              className={`
+                relative p-3 rounded-xl text-left transition-all duration-200
+                ${selected?.type === 'scenario' && selected.value === scenario
+                  ? 'neumorphic-card-active border-2 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]' 
+                  : 'neumorphic-card-static hover:scale-[1.02]'
+                }
+              `}
             >
-              {scenario}
-            </button>
-          );
-        })}
-      </div>
-      
-      {/* Weird Scenario Grid - MAP OVER weirdScenarios (no change needed here) */}
-      <div className="text-center text-sm text-gray-400 pt-2">
-         Or Be Weird:
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {weirdScenarios.map(scenario => {
-           // Check if this scenario is selected (must be type 'weird')
-           const isSelected = selected?.type === 'weird' && selected.value === scenario; 
-           return (
-             <button
-               key={scenario}
-               onClick={() => handleSelect('weird', scenario)}
-               className={`rounded-lg p-3 text-left transition-all border-2 text-sm ${isSelected
-                   ? 'bg-purple-600/90 text-white border-purple-500 shadow-md' // Weird uses purple
-                   : 'bg-purple-900/30 text-purple-300 border-purple-600/30 hover:bg-purple-800/40'
-               }`}
-             >
-               {scenario}
-             </button>
-           );
-        })}
+              <span className={`text-sm ${
+                selected?.type === 'scenario' && selected.value === scenario
+                  ? 'text-blue-400' : 'text-[#E0E0E0]'
+              }`}>
+                {scenario}
+              </span>
+              {selected?.type === 'scenario' && selected.value === scenario && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center"
+                >
+                  <Check className="w-3 h-3 text-white" />
+                </motion.div>
+              )}
+            </motion.button>
+          ))}
+        </div>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex justify-between pt-3">
+      {/* Weird Scenarios */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Zap className="w-4 h-4 text-purple-400" />
+          <h4 className="text-sm font-medium text-purple-400">
+            Or Be Weird
+          </h4>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {weirdScenarios.map((scenario, index) => (
+            <motion.button
+              key={scenario}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + index * 0.05 }}
+              onClick={() => handleSelect('weird', scenario)}
+              className={`
+                relative p-3 rounded-xl text-left transition-all duration-200
+                ${selected?.type === 'weird' && selected.value === scenario
+                  ? 'neumorphic-card-active border-2 border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.3)]' 
+                  : 'neumorphic-card-static hover:scale-[1.02]'
+                }
+              `}
+            >
+              <span className={`text-sm ${
+                selected?.type === 'weird' && selected.value === scenario
+                  ? 'text-purple-400' : 'text-[#E0E0E0]'
+              }`}>
+                {scenario}
+              </span>
+              {selected?.type === 'weird' && selected.value === scenario && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute top-2 right-2 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center"
+                >
+                  <Check className="w-3 h-3 text-white" />
+                </motion.div>
+              )}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex justify-between pt-4">
         <button
           onClick={onBack}
-          className="neumorphic-button text-blue-400"
+          className="neumorphic-button text-gray-400"
         >
           Back
         </button>
         <button
-          className="neumorphic-button text-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleNext}
-          disabled={!selected} // Disable Next if nothing is selected
+          disabled={!selected}
+          className={`neumorphic-button ${selected ? 'text-blue-400' : 'text-gray-600 opacity-50'}`}
         >
           Next
         </button>

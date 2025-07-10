@@ -1,0 +1,1 @@
+-- This migration is a no-op because the columns already exist in the database.

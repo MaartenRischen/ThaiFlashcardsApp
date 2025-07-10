@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // Connection pooled URL for queries
+  directUrl = env("DIRECT_DATABASE_URL") // Direct connection URL for migrations
+}
+
+model User {
+  id            String    @id // Use Clerk ID as primary key
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+
+  // Application-specific relations
+  flashcardSets   FlashcardSet[]
+  userSetProgress UserSetProgress[]
+}
+
+model FlashcardSet {
+  id             String   @id @default(cuid())
+  userId         String   // Foreign key referencing User.id (Clerk User ID)
+  name           String   
+  cleverTitle    String?  
+  level          String?  
+  goals          String[] 
+  specificTopics String?
+  source         String   
+  imageUrl       String?  
+  seriousnessLevel Int?   
+  toneLevel      Int?    
+  llmBrand       String?  
+  llmModel       String?  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  shareId        String?  @unique 
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phrases Phrase[] 
+  progress UserSetProgress[] 
+
+  @@index([userId])
+}
+
+model Phrase {
+  id              String   @id @default(cuid())
+  setId           String   // Foreign key to FlashcardSet
+  english         String
+  thai            String
+  thaiMasculine   String
+  thaiFeminine    String
+  pronunciation   String
+  mnemonic        String?
+  examplesJson    Json?    @db.JsonB // Store examples array as JSON
+
+  flashcardSet FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@index([setId])
+}
+
+model UserSetProgress {
+  id             String   @id @default(cuid())
+  userId         String   // Foreign key referencing User.id (Clerk User ID)
+  setId          String   
+  progressData   Json     @db.JsonB 
+  lastAccessedAt DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  set  FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, setId]) 
+  @@index([userId])
+  @@index([setId])
+}
+
+model PublishedSet {
+  id             String   @id @default(cuid())
+  title          String   // Use title for public display
+  description    String?
+  imageUrl       String?
+  cardCount      Int
+  author         String   // Store author name (e.g., user's name or "Anonymous")
+  llmBrand       String?
+  llmModel       String?
+  seriousnessLevel Int?
+  proficiencyLevel String?
+  specificTopics String?
+  phrases        Json     @db.JsonB // Store the Phrase[] array directly as JSONB
+  publishedAt    DateTime @default(now())
+
+  @@index([publishedAt])
+}

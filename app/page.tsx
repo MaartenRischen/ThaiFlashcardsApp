@@ -1347,11 +1347,11 @@ export default function ThaiFlashcards() {
           <span className="text-xs opacity-75">{new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</span>
         </div>
         <div className="text-xs">
-          🎨 Added custom placeholder image with donkey illustration during set generation<br/>
-          🔄 Improved set generation UX with auto-scrolling to new sets<br/>
-          ⚡️ Simplified set wizard with pre-set questions for faster generation<br/>
-          💬 Added "Anything else?" field for additional context in set wizard<br/>
-          🖼️ Added text overlay showing generation time estimate
+          🎨 Complete Set Wizard UI overhaul with neumorphic design<br/>
+          ✨ Added animations and transitions throughout wizard steps<br/>
+          🎯 Improved visual hierarchy with consistent spacing and typography<br/>
+          🌈 Enhanced slider design with gradient colors for tone selection<br/>
+          📱 Better mobile responsiveness with improved touch interactions
         </div>
       </div>
 

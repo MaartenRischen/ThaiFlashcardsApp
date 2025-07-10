@@ -7,7 +7,7 @@ import { ContextStep } from './ContextStep';
 import { ToneStep } from './ToneStep';
 import { ReviewStep } from './ReviewStep';
 import { GenerationStep } from './GenerationStep';
-import Image from 'next/image';
+import _Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Switch } from "@/app/components/ui/switch"; // Assuming path for Switch
 import { useSet } from '@/app/context/SetContext';
 import Image from 'next/image';
@@ -9,6 +9,7 @@ import type { PhraseProgressData } from '@/app/lib/storage';
 import type { SetMetaData } from '@/app/lib/storage';
 import { useUser } from '@clerk/nextjs'; // Add Clerk hook
 import PublishConfirmationModal from './PublishConfirmationModal';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface CombinedOptionsModalProps {
   isOpen: boolean;
@@ -348,6 +349,16 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
   );
 }
 
+// Add this helper function at the top level
+function scrollToBottom(containerRef: React.RefObject<HTMLDivElement>) {
+  if (containerRef.current) {
+    containerRef.current.scrollTo({
+      top: containerRef.current.scrollHeight,
+      behavior: 'smooth'
+    });
+  }
+}
+
 // --- SetManagerModal: Only Set Management ---
 export function SetManagerModal({ isOpen, onClose }: {
   isOpen: boolean;
@@ -363,6 +374,7 @@ export function SetManagerModal({ isOpen, onClose }: {
   const [cardsModalLoading, setCardsModalLoading] = useState(false);
   const [publishingSetId, setPublishingSetId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const setListRef = useRef<HTMLDivElement>(null);
   
   // --- State for Publish Confirmation Modal ---
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
@@ -374,6 +386,14 @@ export function SetManagerModal({ isOpen, onClose }: {
       setUserId(localStorage.getItem('userId'));
     }
   }, []);
+
+  // Auto-scroll when a new set is being generated
+  useEffect(() => {
+    const hasGeneratingSet = availableSets.some(set => set.id === 'generating');
+    if (hasGeneratingSet) {
+      scrollToBottom(setListRef);
+    }
+  }, [availableSets]);
 
   if (!isOpen) return null;
 
@@ -532,26 +552,17 @@ export function SetManagerModal({ isOpen, onClose }: {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" onClick={onClose}>
-      <div className="neumorphic max-w-5xl w-full p-6 bg-[#1f1f1f] max-h-[90vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
-        <div className="flex justify-between items-center mb-6 flex-shrink-0">
-          <h2 className="text-xl font-bold text-[#E0E0E0]">My Sets</h2>
-          <button onClick={onClose} className="text-[#BDBDBD] hover:text-[#E0E0E0] text-2xl">&times;</button>
-        </div>
-        <div className="flex justify-end gap-2 mb-4">
-          <button 
-            className="neumorphic-button text-sm px-4 py-2 text-red-400" 
-            disabled={selected.length === 0 || bulkLoading} 
-            onClick={handleBulkDelete}
-            title="Delete Selected Sets"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-            </svg>
-          </button>
-        </div>
-        {/* Set Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-5xl bg-[#1f1f1f] border-[#333] text-white">
+        <DialogHeader>
+          <DialogTitle>My Sets</DialogTitle>
+          <DialogDescription>
+            Manage your flashcard sets
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Set list container - add ref here */}
+        <div ref={setListRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto py-4 px-1 max-h-[calc(85vh-150px)]">
           {availableSets.map(set => {
             const isDefault = set.id === 'default';
             const checked = selected.includes(set.id);
@@ -769,7 +780,7 @@ export function SetManagerModal({ isOpen, onClose }: {
             isPublishing={publishingSetId === setBeingPublished.id} // Pass loading state
           />
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 } 

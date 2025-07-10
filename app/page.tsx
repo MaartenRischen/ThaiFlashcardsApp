@@ -1346,10 +1346,11 @@ export default function ThaiFlashcards() {
           <span className="text-xs opacity-75">{new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</span>
         </div>
         <div className="text-xs">
-          🔧 Fixed Railway deployment build errors (removed NextAuth conflicts)<br/>
-          🐛 Resolved ESLint warnings blocking production deployment<br/>
-          🚀 Production deployment now active on donkeybridge.world<br/>
-          ✅ Test deployment pipeline.
+          🎨 Added custom placeholder image with donkey illustration during set generation<br/>
+          🔄 Improved set generation UX with auto-scrolling to new sets<br/>
+          ⚡️ Simplified set wizard with pre-set questions for faster generation<br/>
+          💬 Added "Anything else?" field for additional context in set wizard<br/>
+          🖼️ Added text overlay showing generation time estimate
         </div>
       </div>
 

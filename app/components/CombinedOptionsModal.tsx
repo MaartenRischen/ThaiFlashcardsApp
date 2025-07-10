@@ -414,7 +414,7 @@ export function SetManagerModal({ isOpen, onClose, highlightSetId }: {
   if (!isOpen) return null;
 
   // Bulk actions
-  const handleBulkDelete = async () => {
+  const _handleBulkDelete = async () => {
     if (selected.length === 0) return;
     const setsToDelete = availableSets.filter(set => selected.includes(set.id) && set.id !== 'default');
     if (setsToDelete.length === 0) return;

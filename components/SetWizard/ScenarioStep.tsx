@@ -332,7 +332,7 @@ interface SelectedTopic {
 }
 
 // --- Update Props Interface ---
-interface ScenarioStepProps {
+interface _ScenarioStepProps {
   selectedTopic: SelectedTopic | null; // Use the new type
   proficiencyLevelEstimate: string;
   onNext: (data: { selectedTopic: SelectedTopic | null }) => void; // Update onNext prop type

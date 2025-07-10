@@ -164,7 +164,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
             
             <div className="space-y-2">
               <h3 className="text-2xl font-bold text-[#E0E0E0]">
-                Creating Your Custom Set
+                Let&apos;s create your personalized Thai flashcard set!
               </h3>
               <p className="text-gray-400 max-w-md">
                 We're crafting {state.cardCount} personalized flashcards based on your preferences. 
@@ -194,7 +194,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
               transition={{ duration: 2, repeat: Infinity }}
               className="text-sm text-gray-400"
             >
-              Your set will appear in "My Sets" when ready...
+              &quot;Generating...&quot;
             </motion.div>
           </motion.div>
         ) : error ? (

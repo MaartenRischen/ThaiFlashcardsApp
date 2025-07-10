@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Head from 'next/head';
+import _Head from 'next/head';
 import { WelcomeStep } from './WelcomeStep';
 import { ProficiencyStep } from './ProficiencyStep';
 import { ScenarioStep } from './ScenarioStep';
@@ -10,6 +10,7 @@ import { GenerationStep } from './GenerationStep';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 
 // --- Type Definitions ---
 type ProficiencyLevelString = 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode';
@@ -44,64 +45,7 @@ interface SetWizardModalProps {
 }
 
 // Image Preloader Component
-function ImagePreloader() {
-  return (
-    <div className="hidden">
-      {/* Proficiency level images - 1125x633 */}
-      {[...Array(6)].map((_, i) => (
-        <Image
-          key={`level-${i + 1}`}
-          src={`/images/level/${i + 1}.png`}
-          alt=""
-          width={1125}
-          height={633}
-          priority
-          loading="eager"
-          fetchPriority="high"
-          unoptimized
-        />
-      ))}
-      {/* Tone step images - 1125x633 */}
-      {[...Array(10)].map((_, i) => (
-        <Image
-          key={`level2-${i + 1}`}
-          src={`/images/level2/${i + 1}.png`}
-          alt=""
-          width={1125}
-          height={633}
-          priority
-          loading="eager"
-          fetchPriority="high"
-          unoptimized
-        />
-      ))}
-      {/* Welcome step donkey image */}
-      <Image
-        key="donkey"
-        src="/images/donkeycards.png"
-        alt=""
-        width={1125}
-        height={633}
-        priority
-        loading="eager"
-        fetchPriority="high"
-        unoptimized
-      />
-      {/* Default set logo */}
-      <Image
-        key="default-set"
-        src="/images/default-set-logo.png"
-        alt=""
-        width={1125}
-        height={633}
-        priority
-        loading="eager"
-        fetchPriority="high"
-        unoptimized
-      />
-    </div>
-  );
-}
+const _ImagePreloader = dynamic(() => import('./ImagePreloader'), { ssr: false });
 
 function renderStep(
   step: number,

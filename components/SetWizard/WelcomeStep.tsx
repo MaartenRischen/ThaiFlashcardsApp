@@ -22,7 +22,7 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
         </h3>
         
         <p className="text-gray-400 max-w-md mx-auto">
-          Let's create a personalized flashcard set tailored to your learning needs. 
+          Let&apos;s create your personalized Thai flashcard set! 
           This will only take a few minutes.
         </p>
       </motion.div>

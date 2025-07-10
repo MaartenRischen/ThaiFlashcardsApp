@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, Sparkles, Target, Palette, Hash } from 'lucide-react';
-import { SetWizardState } from './SetWizardModal';
+import { SetWizardState } from './types';
 
 interface ReviewStepProps {
   state: SetWizardState;
@@ -37,7 +37,7 @@ export function ReviewStep({ state, onConfirm, onBack, onCardCountChange }: Revi
     {
       icon: <Target className="w-4 h-4" />,
       label: 'Topic',
-      value: state.selectedTopic?.title || 'Not selected',
+      value: state.selectedTopic?.value || 'Not selected',
       color: 'text-blue-400'
     },
     {

@@ -1,9 +1,0 @@
-node_modules/
-.next/
-out/
-ios/
-public/
-scripts/
-src/
-types/
-*.config.js 

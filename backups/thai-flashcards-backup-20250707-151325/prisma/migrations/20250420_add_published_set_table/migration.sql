@@ -1,1 +1,0 @@
--- This migration is a no-op because the table already exists in the database.

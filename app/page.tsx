@@ -1399,17 +1399,12 @@ export default function ThaiFlashcards() {
       {/* Render the Set Wizard Modal */}
       {showSetWizardModal && (
         <SetWizardModal
+          isOpen={showSetWizardModal}
           onClose={() => setShowSetWizardModal(false)}
-          onComplete={(newSetId?: string) => {
+          onComplete={(newSetId: string) => {
             console.log('SetWizardModal onComplete fired, new set:', newSetId);
             if (newSetId) {
               setHighlightSetId(newSetId);
-            }
-          }}
-          onOpenSetManager={(setToSelect?: string) => {
-            setIsManagementModalOpen(true);
-            if (setToSelect) {
-              setHighlightSetId(setToSelect);
             }
           }}
         />

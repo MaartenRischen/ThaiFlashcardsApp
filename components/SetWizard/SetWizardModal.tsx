@@ -6,7 +6,7 @@ import { ProficiencyStep } from './ProficiencyStep';
 import { ToneStep } from './ToneStep';
 import { GenerationStep } from './GenerationStep';
 import { ReviewStep } from './ReviewStep';
-import { SetWizardState, ProficiencyLevelString, SelectedTopic } from './types';
+import { SetWizardState, ProficiencyLevelString } from './types';
 
 interface GeneratedSet {
   id: string;
@@ -124,13 +124,13 @@ export function SetWizardModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onComplete: (set: GeneratedSet) => void;
+  onComplete: (newSetId: string) => void;
 }) {
   const [currentStep, setCurrentStep] = React.useState(0);
   const [topic, setTopic] = React.useState('');
   const [proficiencyLevel, setProficiencyLevel] = React.useState<ProficiencyLevelString>('Complete Beginner');
   const [toneLevel, setToneLevel] = React.useState(5);
-  const [generatedSet, setGeneratedSet] = React.useState<GeneratedSet | null>(null);
+  const [_generatedSet, _setGeneratedSet] = React.useState<GeneratedSet | null>(null);
   const [cardCount, setCardCount] = React.useState(10);
 
   const wizardState: SetWizardState = {
@@ -200,8 +200,7 @@ export function SetWizardModal({
       component: GenerationStep,
       props: {
         state: wizardState,
-        onComplete: (newSetId: string) => {
-          // TODO: Fetch the generated set data using newSetId
+        onComplete: (_newSetId: string) => {
           setCurrentStep(5);
         },
         onBack: () => setCurrentStep(3),
@@ -217,10 +216,8 @@ export function SetWizardModal({
       props: {
         state: wizardState,
         onConfirm: () => {
-          if (generatedSet) {
-            onComplete(generatedSet);
-            onClose();
-          }
+          onComplete(topic); // Pass the topic as the set ID for now
+          onClose();
         },
         onBack: () => setCurrentStep(4),
         onCardCountChange: setCardCount,

@@ -11,10 +11,6 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
         transition={{ duration: 0.5 }}
         className="text-center space-y-4"
       >
-        <h3 className="text-2xl font-bold text-[#E0E0E0]">
-          Welcome to the Set Creator!
-        </h3>
-        
         <p className="text-gray-400 max-w-md mx-auto">
           Let&apos;s create your personalized Thai flashcard set! 
           This will only take a few minutes.

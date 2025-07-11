@@ -72,11 +72,11 @@ const getLevelColor = (index: number): string => {
 };
 
 export function ProficiencyStep({ 
-  value, 
+  _value: _unused, // Explicitly mark as unused
   onNext, 
   onBack 
 }: { 
-  value: ProficiencyValue,
+  _value: ProficiencyValue | string,
   onNext: (value: ProficiencyValue) => void,
   onBack: () => void
 }) {

@@ -1,7 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
 
 export function WelcomeStep({ onNext }: { onNext: () => void }) {
   return (
@@ -12,11 +11,6 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
         transition={{ duration: 0.5 }}
         className="text-center space-y-4"
       >
-        <div className="relative inline-block">
-          <div className="absolute -inset-4 bg-blue-500/20 rounded-full blur-xl animate-pulse" />
-          <Sparkles className="w-16 h-16 text-blue-400 relative" />
-        </div>
-        
         <h3 className="text-2xl font-bold text-[#E0E0E0]">
           Welcome to the Set Creator!
         </h3>
@@ -31,8 +25,9 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="relative w-full max-w-sm mx-auto aspect-square rounded-xl overflow-hidden neumorphic"
+        className="relative w-full max-w-[280px] h-[160px] mx-auto rounded-xl overflow-hidden neumorphic"
       >
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10" />
         <Image
           src="/images/gifs/setwizardgif2.gif"
           alt="Set creation wizard animation"
@@ -40,6 +35,7 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
           className="object-cover"
           priority
         />
+        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/40 to-transparent z-10" />
       </motion.div>
 
       <motion.div
@@ -51,7 +47,9 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
         <button
           onClick={onNext}
           className="neumorphic-button text-blue-400 px-8 py-3 text-lg font-medium
-            hover:scale-105 transition-all duration-200"
+            hover:scale-105 transition-all duration-200
+            bg-gradient-to-r from-blue-500/10 to-purple-500/10
+            hover:from-blue-500/20 hover:to-purple-500/20"
         >
           Let's Get Started
         </button>

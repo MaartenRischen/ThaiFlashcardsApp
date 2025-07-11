@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
+
+// Image Preloader Component
+const ImagePreloader = dynamic(() => import('./ImagePreloader'), { ssr: false });
 
 type ProficiencyLevelString = 'Complete Beginner' | 'Basic Understanding' | 'Intermediate' | 'Advanced' | 'Native/Fluent' | 'God Mode';
 
@@ -92,6 +96,7 @@ export function ProficiencyStep({
 
   return (
     <div className="space-y-6">
+      <ImagePreloader />
       <div className="text-center space-y-2">
         <h3 className="text-xl font-semibold text-[#E0E0E0]">
           What's your current Thai level?

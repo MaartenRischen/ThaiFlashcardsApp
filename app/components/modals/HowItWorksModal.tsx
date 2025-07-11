@@ -1,6 +1,6 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Plus, Grid, Layers, GalleryHorizontal, Bookmark } from 'lucide-react';
+import { Plus, Grid, Layers, GalleryHorizontal, Bookmark, Settings, HelpCircle } from 'lucide-react';
 
 interface HowItWorksModalProps {
   isOpen: boolean;
@@ -12,7 +12,7 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-auto" onClick={onClose}>
-      <div className="neumorphic max-w-lg w-full p-6 bg-[#1f1f1f]" onClick={e => e.stopPropagation()}>
+      <div className="neumorphic max-w-2xl w-full p-6 bg-[#1f1f1f]" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-[#A9C4FC]">How Donkey Bridge Works</h2>
           <button
@@ -24,222 +24,306 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
         </div>
 
         <Accordion type="single" collapsible className="w-full space-y-2 text-gray-300 text-sm max-h-[70vh] overflow-y-auto pr-2">
-          {/* Set Wizard (with glow) - now at the top */}
+          {/* Set Wizard - Updated for 7 steps */}
           <AccordionItem value="item-0" className="border-[#333]">
             <AccordionTrigger className="text-lg font-semibold text-[#22c55e] hover:no-underline py-3 shadow-[0_0_20px_10px_rgba(34,197,94,0.15)]" style={{ textShadow: '0 0 8px #22c55e, 0 0 16px #22c55e' }}>
-              Set Wizard
+              Set Wizard (7 Steps)
             </AccordionTrigger>
             <AccordionContent className="pb-4 space-y-3 text-gray-300 text-sm">
-              <p>The Set Wizard helps you create personalized Thai vocabulary sets. Access it by tapping the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-green-400"><Plus className="w-4 h-4" /></span> button at the bottom of the screen.</p>
+              <p>The Set Wizard guides you through creating personalized Thai vocabulary sets with AI-generated content. Access it by tapping the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-green-400"><Plus className="w-4 h-4" /></span> button at the bottom of the screen.</p>
               <div className="space-y-3">
-                {/* Step 1: Welcome */}
+                {/* Step 0: Welcome */}
                 <div className="p-3 border border-[#333] rounded-md">
-                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 1: Welcome</h4>
-                  <p>Get a quick intro and preview of what the Set Wizard will help you do.</p>
+                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 0: Welcome</h4>
+                  <p>Introduction with an animated preview of the creation process. No data collected - just sets expectations for the journey ahead.</p>
                 </div>
-                {/* Step 2: Set Your Proficiency */}
+                {/* Step 1: Proficiency Level */}
                 <div className="p-3 border border-[#333] rounded-md">
-                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 2: Set Your Proficiency</h4>
-                  <p>Choose your Thai language level from:</p>
+                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 1: Thai Proficiency Level</h4>
+                  <p>Choose your Thai language level using an interactive slider with visual images:</p>
                   <ul className="pl-4 space-y-1 list-disc list-inside">
-                    <li>Complete Beginner (single words, basic nouns)</li>
-                    <li>Basic Understanding (short phrases, everyday needs)</li>
-                    <li>Intermediate (medium-length sentences, common situations)</li>
-                    <li>Advanced (complex sentences, nuanced vocabulary)</li>
-                    <li>Native/Fluent (natural, idiomatic Thai)</li>
-                    <li>God Mode (sophisticated, advanced Thai)</li>
+                    <li><b>Complete Beginner:</b> Single words and two-word combinations</li>
+                    <li><b>Basic Understanding:</b> Short phrases (2-4 words) for daily needs</li>
+                    <li><b>Intermediate:</b> Medium sentences (4-7 words) for common situations</li>
+                    <li><b>Advanced:</b> Complex sentences (7-12 words) with nuanced vocabulary</li>
+                    <li><b>Native/Fluent:</b> Natural, idiomatic Thai of any length</li>
+                    <li><b>God Mode:</b> Sophisticated, elaborate Thai with literary language</li>
                   </ul>
+                  <p className="mt-2 text-xs text-blue-300">✨ New: Visual slider with level images that preload for instant transitions!</p>
                 </div>
-                {/* Step 3: Choose Topics & Goals */}
+                {/* Step 2: Topic Selection */}
                 <div className="p-3 border border-[#333] rounded-md">
-                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 3: Choose Topics & Goals</h4>
-                  <p>Select from preset scenarios or enter custom topics:</p>
+                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 2: Topic Selection</h4>
+                  <p>Choose what you want to learn about with three options:</p>
                   <ul className="pl-4 space-y-1 list-disc list-inside">
-                    <li>Choose from common scenarios (travel, shopping, dining)</li>
-                    <li>Enter specific topics (e.g., {'"hiking equipment,"'} {'"vegetarian food"'})</li>
-                    <li>Describe specific goals (e.g., {'"ordering coffee at a café"'})</li>
+                    <li><b>Custom Goal:</b> Enter your specific learning objective (recommended)</li>
+                    <li><b>Level-Appropriate Scenarios:</b> Choose from curated topics matching your proficiency</li>
+                    <li><b>Weird Options:</b> Creative, unusual scenarios for memorable learning</li>
                   </ul>
-                  <p className="mt-1 text-xs">The more specific your topics, the more focused your vocabulary set will be.</p>
+                  <p className="mt-1 text-xs">The more specific your topic, the more focused and useful your flashcards will be.</p>
                 </div>
-                {/* Step 4: Select Content Style (Tone) */}
+                {/* Step 3: Context Refinement */}
                 <div className="p-3 border border-[#333] rounded-md">
-                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 4: Select Content Style</h4>
-                  <p>Adjust the tone slider to control the style of generated content.</p>
-                  <p className="mt-2 text-xs">Lower settings create practical, textbook-like content. Higher settings make the generated phrases more creative, funny, and sometimes surreal—but also less useful for real-world situations. The label above the slider changes as you move it!</p>
+                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 3: Context Refinement</h4>
+                  <p>Answer structured questions to refine your topic:</p>
+                  <ul className="pl-4 space-y-1 list-disc list-inside">
+                    <li>What specific aspects would you like to focus on?</li>
+                    <li>Are there particular challenges you want to address?</li>
+                    <li>Any additional context or preferences?</li>
+                  </ul>
+                  <p className="mt-1 text-xs">This step helps the AI understand exactly what kind of vocabulary you need.</p>
+                </div>
+                {/* Step 4: Learning Style (Tone) */}
+                <div className="p-3 border border-[#333] rounded-md">
+                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 4: Learning Style</h4>
+                  <p>Adjust the tone slider (1-10) to control content style with visual previews:</p>
+                  <ul className="pl-4 space-y-1 list-disc list-inside">
+                    <li><b>1-2:</b> Textbook realism, serious & practical</li>
+                    <li><b>3-4:</b> Somewhat funny, like your "funny" uncle</li>
+                    <li><b>5-6:</b> Actually funny, but getting less practical</li>
+                    <li><b>7-8:</b> Definitely too much, proceed with caution</li>
+                    <li><b>9-10:</b> Glitched donkey mode - pure chaos!</li>
+                  </ul>
+                  <p className="mt-2 text-xs text-blue-300">✨ New: Interactive slider with images showing different tone levels!</p>
                 </div>
                 {/* Step 5: Review & Card Count */}
                 <div className="p-3 border border-[#333] rounded-md">
-                                      <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 5: Review & Card Count</h4>
-                    <p>Review your choices and select how many cards you want in your set (5, 10, 15, or 20). When you&apos;re ready, continue to generate your set.</p>
-                </div>
-                {/* Step 6: Generate & Wait */}
-                <div className="p-3 border border-[#333] rounded-md">
-                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 6: Generate & Wait</h4>
-                  <p>After clicking the {'"Generate Set"'} button:</p>
+                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 5: Review & Card Count</h4>
+                  <p>Review all your choices and adjust the number of cards:</p>
                   <ul className="pl-4 space-y-1 list-disc list-inside">
-                    <li>The system will create 5-20 unique flashcards (depending on your selection)</li>
-                    <li>Generation typically takes 1-2 minutes</li>
-                    <li>A custom image for your set cover will be created</li>
-                    <li>You&apos;ll receive a notification when your set is ready</li>
+                    <li>See a summary of your level, topic, tone, and card count</li>
+                    <li>Adjust card count from 5 to 30 cards using +/- buttons</li>
+                    <li>Recommended: 10-20 cards for optimal learning</li>
                   </ul>
-                                      <p className="mt-1 text-xs">Find your new set in the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-blue-400"><Grid className="w-4 h-4" /></span> {'"My Sets"'} view after generation is complete.</p>
+                  <p className="mt-1 text-xs">Perfect time to make final adjustments before generation begins.</p>
+                </div>
+                {/* Step 6: Generation */}
+                <div className="p-3 border border-[#333] rounded-md">
+                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Step 6: AI Generation</h4>
+                  <p>Watch as your personalized set is created:</p>
+                  <ul className="pl-4 space-y-1 list-disc list-inside">
+                    <li>Advanced AI generates unique phrases with gendered variations</li>
+                    <li>Custom set image created using AI art generation</li>
+                    <li>Real-time progress updates during 1-2 minute process</li>
+                    <li>Automatic fallback to multiple AI models if needed</li>
+                  </ul>
+                  <p className="mt-2 text-xs text-blue-300">✨ New: Multi-model AI system with intelligent batch processing!</p>
+                  <p className="mt-1 text-xs">Your new set automatically appears in <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-blue-400"><Grid className="w-4 h-4" /></span> "My Sets" when complete.</p>
                 </div>
               </div>
             </AccordionContent>
           </AccordionItem>
-          {/* Card & Study Features (with Progress Tracking) */}
+
+          {/* Enhanced Card & Study Features */}
           <AccordionItem value="item-1" className="border-[#333]">
             <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
-              Card & Study Features
+              Enhanced Card & Study Features
             </AccordionTrigger>
             <AccordionContent className="pb-4 space-y-3 text-gray-300 text-sm">
-              <p>Each flashcard includes multiple tools to enhance your learning and make it more personal and effective:</p>
+              <p>Each flashcard includes advanced features for personalized learning:</p>
               <div className="space-y-3">
-                {/* Mnemonics explanation */}
+                {/* Gendered Speech */}
                 <div>
-                  <span className="text-[#A9C4FC] font-semibold">Mnemonics (Donkey Bridges):</span>
-                  <p className="mt-1">A mnemonic is a memory aid—a creative phrase, story, or image that helps you remember a word or concept. In Donkey Bridge, you can view, edit, or create your own mnemonic for each card. The app&apos;s name comes from the German term {'"Eselsbrücke"'} (donkey bridge), which means a memory trick or shortcut. Use mnemonics to make vocabulary stick!</p>
+                  <span className="text-[#A9C4FC] font-semibold">Gendered Speech Variations:</span>
+                  <p className="mt-1">Every phrase includes both masculine and feminine variations with appropriate particles (ครับ/ค่ะ) and pronouns. Toggle between them to learn proper gendered speech patterns in Thai.</p>
                 </div>
-                {/* Gender switch */}
+                {/* Mnemonics */}
                 <div>
-                  <span className="text-[#A9C4FC] font-semibold">Gender Switch:</span>
-                  <p className="mt-1">Toggle between male ({'"krap"'}) and female ({'"ka"'}) speech patterns. This changes the polite particles and sometimes the pronouns in Thai phrases and audio, so you can learn to speak appropriately for your gender or preference.</p>
+                  <span className="text-[#A9C4FC] font-semibold">AI-Generated Mnemonics:</span>
+                  <p className="mt-1">Each card comes with a creative memory aid generated by AI. These "donkey bridges" (from German "Eselsbrücke") help you remember vocabulary through visual associations and wordplay. Edit them to make them more personal!</p>
                 </div>
-                {/* Politeness switch */}
+                {/* Enhanced Examples */}
                 <div>
-                  <span className="text-[#A9C4FC] font-semibold">Politeness Switch:</span>
-                  <p className="mt-1">Turn polite mode on or off. When enabled, polite particles (ครับ/ค่ะ) are added to the end of phrases, as is common in Thai conversation. Turn it off for more casual speech.</p>
-                </div>
-                {/* In Context */}
-                <div>
-                  <span className="text-[#A9C4FC] font-semibold">In Context:</span>
-                  <p className="mt-1">See each word or phrase used in a real sentence. The {'"In Context"'} section shows example sentences, their pronunciation, and translation. You can cycle through different examples and play audio to hear them spoken aloud.</p>
-                </div>
-                {/* Other features */}
-                <div>
-                  <span className="text-[#A9C4FC] font-semibold">Other Features:</span>
+                  <span className="text-[#A9C4FC] font-semibold">Rich Example Sentences:</span>
+                  <p className="mt-1">Multiple contextual examples for each phrase, complete with:</p>
                   <ul className="pl-4 space-y-1 list-disc list-inside">
-                    <li><b>Show Answer:</b> Reveals the Thai translation, pronunciation, and examples.</li>
-                    <li><b>Show Hint:</b> Displays a mnemonic aid before revealing the answer.</li>
-                    <li><b>Text-to-speech:</b> Hear proper Thai pronunciation for words and example sentences.</li>
-                    <li><b>Edit mnemonics:</b> Personalize your memory aids for each card.</li>
-                    <li><b>Progress Tracking:</b> Track your learning status for each card (Unseen, Wrong, Correct, Easy).</li>
-                    <li><b>Reset Progress:</b> Reset your progress for individual cards or entire sets if you want to start over.</li>
+                    <li>Thai script with gendered variations</li>
+                    <li>Phonetic pronunciation guides</li>
+                    <li>English translations</li>
+                    <li>Audio playback for proper pronunciation</li>
+                  </ul>
+                </div>
+                {/* Smart Controls */}
+                <div>
+                  <span className="text-[#A9C4FC] font-semibold">Smart Study Controls:</span>
+                  <ul className="pl-4 space-y-1 list-disc list-inside">
+                    <li><b>Gender Switch:</b> Toggle between masculine/feminine speech patterns</li>
+                    <li><b>Politeness Mode:</b> Add or remove polite particles</li>
+                    <li><b>Show Hint:</b> See mnemonic before revealing answer</li>
+                    <li><b>Audio Playback:</b> Hear native-like Thai pronunciation</li>
+                    <li><b>Progress Tracking:</b> Advanced SRS (Spaced Repetition System)</li>
                   </ul>
                 </div>
               </div>
-              {/* Progress Tracking content moved here */}
+              
+              {/* Progress System */}
               <div className="mt-6">
-                <h4 className="text-[#A9C4FC] font-semibold mb-2">Progress Tracking</h4>
-                <p>Monitor your learning journey:</p>
+                <h4 className="text-[#A9C4FC] font-semibold mb-2">Advanced Progress System</h4>
+                <p>Intelligent learning progress with multiple tracking methods:</p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <span>The</span>
-                                            <span className="text-[#A9C4FC] font-semibold">&apos;Current&apos;</span>
+                    <span>Access via</span>
                     <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-[#2563EB]"><Layers className="w-4 h-4" /></span>
-                    <span>view shows the status of each card</span>
+                    <span className="text-[#A9C4FC] font-semibold">"Current"</span>
+                    <span>button to see detailed card status</span>
                   </div>
                   <ul className="pl-4 space-y-1 list-disc list-inside">
-                    <li>Cards are color-coded by status: Unseen, Wrong, Correct, or Easy</li>
-                    <li>Progress bars indicate how much of a set you&apos;ve learned</li>
-                    <li>The system automatically prioritizes cards needing review</li>
-                    <li>Your learning data is saved automatically between sessions</li>
+                    <li><b>Color-coded Status:</b> Unseen (gray), Wrong (red), Correct (yellow), Easy (green)</li>
+                    <li><b>Spaced Repetition:</b> Cards reappear based on your performance</li>
+                    <li><b>Progress Visualization:</b> Bars show completion percentage</li>
+                    <li><b>Automatic Prioritization:</b> Difficult cards appear more frequently</li>
+                    <li><b>Persistent Storage:</b> Progress saved across sessions</li>
                   </ul>
                 </div>
               </div>
             </AccordionContent>
           </AccordionItem>
-          {/* Publishing & Importing Sets */}
+
+          {/* Navigation & App Structure */}
           <AccordionItem value="item-2" className="border-[#333]">
             <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
-              Publishing & Importing Sets
+              Navigation & App Structure
             </AccordionTrigger>
             <AccordionContent className="pb-4 space-y-3 text-gray-300 text-sm">
-              <p>Share your custom sets with others or import sets created by the community:</p>
+              <p>Understanding the app's main interface and navigation:</p>
               <div className="space-y-3">
                 <div className="p-3 border border-[#333] rounded-md">
-                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Finding Your Sets</h4>
-                                      <p>Access your sets by tapping the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-blue-400"><Grid className="w-4 h-4" /></span> {'"My Sets"'} button in the bottom navigation bar.</p>
-                  <p className="mt-2">Your custom sets and any imported sets will appear in this view, organized by creation date.</p>
+                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Bottom Navigation Bar</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-[#2563EB]"><Layers className="w-4 h-4" /></span>
+                      <span><b>Current:</b> View progress and status of cards in active set</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-blue-400"><Grid className="w-4 h-4" /></span>
+                      <span><b>My Sets:</b> Manage your flashcard collections</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-green-400"><Plus className="w-4 h-4" /></span>
+                      <span><b>Create:</b> Launch the Set Wizard to make new sets</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-purple-400"><GalleryHorizontal className="w-4 h-4" /></span>
+                      <span><b>Gallery:</b> Browse and import community sets</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-gray-400"><Settings className="w-4 h-4" /></span>
+                      <span><b>Settings:</b> Configure app preferences</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-gray-400"><HelpCircle className="w-4 h-4" /></span>
+                      <span><b>Help:</b> Access this guide (you're here now!)</span>
+                    </div>
+                  </div>
                 </div>
                 <div className="p-3 border border-[#333] rounded-md">
-                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Publishing to Gallery</h4>
-                  <p>To share a set with the community:</p>
-                  <ol className="pl-4 space-y-1 list-decimal list-inside">
-                    <li>Open the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-blue-400"><Grid className="w-4 h-4" /></span> {'"My Sets"'} view</li>
-                    <li>Long-press on the set you want to share</li>
-                    <li>Select {'"Publish to Gallery"'} from the menu</li>
-                    <li>Add optional tags and a description</li>
-                    <li>Tap {'"Publish"'} to make your set available to others</li>
-                  </ol>
-                  <p className="mt-1 text-xs">Published sets can&apos;t be edited, but you can unpublish them at any time.</p>
-                </div>
-                <div className="p-3 border border-[#333] rounded-md">
-                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Browsing the Gallery</h4>
-                  <p>To explore sets created by other users:</p>
-                  <ol className="pl-4 space-y-1 list-decimal list-inside">
-                    <li>Tap the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-purple-400"><GalleryHorizontal className="w-4 h-4" /></span> {'"Gallery"'} button in the bottom navigation</li>
-                    <li>Browse featured sets or use the search bar to find specific content</li>
-                    <li>Filter sets by proficiency level, topic, or popularity</li>
-                    <li>Tap on any set to view details and preview cards</li>
-                  </ol>
-                </div>
-                <div className="p-3 border border-[#333] rounded-md">
-                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Importing Sets</h4>
-                  <p>To add a set from the gallery to your collection:</p>
-                  <ol className="pl-4 space-y-1 list-decimal list-inside">
-                    <li>Find a set you want to study in the Gallery</li>
-                    <li>Tap the <span className="text-blue-400 font-bold">+ Add to My Sets</span> button</li>
-                    <li>The set will be copied to your collection</li>
-                    <li>Access it anytime from your <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-blue-400"><Grid className="w-4 h-4" /></span> {'"My Sets"'} view</li>
-                  </ol>
-                  <p className="mt-2">You can also export and import sets as JSON files using the <span className="bg-[#252525] text-xs px-2 py-1 rounded">⋮</span> menu in the {'"My Sets"'} view.</p>
-                </div>
-                <div className="p-3 border border-[#333] rounded-md">
-                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Rating & Favorites</h4>
-                  <p>Help the community by rating sets you&apos;ve imported:</p>
+                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Set Management</h4>
+                  <p>From the "My Sets" view, you can:</p>
                   <ul className="pl-4 space-y-1 list-disc list-inside">
-                    <li>Rate sets with 1-5 stars based on quality and usefulness</li>
-                    <li>Bookmark favorite sets by tapping the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-yellow-400"><Bookmark className="w-4 h-4" /></span> icon</li>
-                    <li>Leave comments to help others decide if a set is right for them</li>
+                    <li>Switch between different flashcard sets</li>
+                    <li>View set metadata (level, topic, card count)</li>
+                    <li>Export sets as JSON files</li>
+                    <li>Import sets from files</li>
+                    <li>Delete sets you no longer need</li>
+                    <li>See AI-generated set cover images</li>
                   </ul>
                 </div>
               </div>
             </AccordionContent>
           </AccordionItem>
-          {/* App & Language Logic For Nerds */}
+
+          {/* Community Features */}
           <AccordionItem value="item-3" className="border-[#333]">
             <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
-              App & Language Logic For Nerds
+              Community Features
+            </AccordionTrigger>
+            <AccordionContent className="pb-4 space-y-3 text-gray-300 text-sm">
+              <p>Share your creations and learn from others:</p>
+              <div className="space-y-3">
+                <div className="p-3 border border-[#333] rounded-md">
+                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Publishing Sets</h4>
+                  <p>Share your custom sets with the community:</p>
+                  <ol className="pl-4 space-y-1 list-decimal list-inside">
+                    <li>Go to "My Sets" and find the set you want to share</li>
+                    <li>Long-press or use the menu to select "Publish to Gallery"</li>
+                    <li>Add tags and description to help others find your set</li>
+                    <li>Your set becomes available to all users</li>
+                  </ol>
+                  <p className="mt-2 text-xs">Published sets are read-only but can be unpublished anytime.</p>
+                </div>
+                <div className="p-3 border border-[#333] rounded-md">
+                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Gallery Browsing</h4>
+                  <p>Discover sets created by other learners:</p>
+                  <ul className="pl-4 space-y-1 list-disc list-inside">
+                    <li>Browse featured sets or search by topic</li>
+                    <li>Filter by proficiency level and popularity</li>
+                    <li>Preview cards before importing</li>
+                    <li>Rate and bookmark useful sets</li>
+                  </ul>
+                </div>
+                <div className="p-3 border border-[#333] rounded-md">
+                  <h4 className="text-[#A9C4FC] font-semibold mb-2">Importing & Rating</h4>
+                  <p>Add community sets to your collection:</p>
+                  <ul className="pl-4 space-y-1 list-disc list-inside">
+                    <li>Tap "Add to My Sets" to import any gallery set</li>
+                    <li>Rate sets with 1-5 stars to help others</li>
+                    <li>Bookmark favorites with the <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-yellow-400"><Bookmark className="w-4 h-4" /></span> icon</li>
+                    <li>Leave comments for feedback</li>
+                  </ul>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Technical Details */}
+          <AccordionItem value="item-4" className="border-[#333]">
+            <AccordionTrigger className="text-lg font-semibold text-[#A9C4FC] hover:no-underline py-3">
+              Technical Details & Advanced Features
             </AccordionTrigger>
             <AccordionContent className="pb-4 text-gray-300 text-sm">
-              <p>
-                For those interested in the technical details, the generation and validation logic is visualized here:
-              </p>
-              <p className="mt-2">
-                <a 
-                  href="/generation_logic_visualization.html" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 underline"
-                >
-                  View Detailed Generation Logic Visualization (Opens in new tab)
-                </a>
-              </p>
-              
-              <p className="mt-4">
-                You can also experiment with different generation parameters (like proficiency and tone) and see example outputs on the test variations page:
-              </p>
-              <p className="mt-2">
-                <a 
-                  href="/test-variations" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 underline"
-                >
-                  Go to Test Variations Page (Opens in new tab)
-                </a>
-              </p>
+              <p>For those interested in the technical implementation:</p>
+              <div className="space-y-3">
+                <div>
+                  <span className="text-[#A9C4FC] font-semibold">AI Generation System:</span>
+                  <ul className="pl-4 space-y-1 list-disc list-inside">
+                    <li>Multi-model approach with Gemini 2.5 Flash (primary)</li>
+                    <li>Automatic fallback to GPT-4, Claude, and other models</li>
+                    <li>Intelligent batch processing for efficiency</li>
+                    <li>Comprehensive validation and error handling</li>
+                  </ul>
+                </div>
+                <div>
+                  <span className="text-[#A9C4FC] font-semibold">Image Generation:</span>
+                  <ul className="pl-4 space-y-1 list-disc list-inside">
+                    <li>Ideogram v3 API for custom set covers</li>
+                    <li>Structured prompts ensuring no text in images</li>
+                    <li>Automatic upload to cloud storage</li>
+                  </ul>
+                </div>
+                <div>
+                  <span className="text-[#A9C4FC] font-semibold">Development Resources:</span>
+                  <p className="mt-2">
+                    <a 
+                      href="/generation_logic_visualization.html" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 underline"
+                    >
+                      📊 Complete Architecture Documentation
+                    </a>
+                  </p>
+                  <p className="mt-2">
+                    <a 
+                      href="/test-variations" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 underline"
+                    >
+                      🧪 Test Generation Parameters
+                    </a>
+                  </p>
+                </div>
+              </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>

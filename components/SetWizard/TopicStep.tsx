@@ -1,250 +1,136 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-export type ScenarioKey = 
-  | 'Ordering Food & Drinks'
-  | 'Travel & Directions'
-  | 'Shopping'
-  | 'Making Small Talk'
-  | 'Business Meetings'
-  | 'Daily Routines'
-  | 'Emergencies'
-  | 'Teaching juggling to a centipede'
-  | 'Explaining emojis to Shakespeare'
-  | 'Analyzing social & political issues in Thailand'
-  | 'Understanding Thai literature & arts'
-  | 'Advanced workplace & business communication'
-  | 'Exploring Thai history & belief systems'
-  | 'Understanding idioms & colloquialisms'
-  | 'Discussing hypothetical situations & speculation'
-  | 'Debating & persuasion'
-  | 'Understanding regional dialects & variations (awareness)';
-
-export const defaultTopics: Record<ScenarioKey, string[]> = {
-  'Ordering Food & Drinks': [
-    'Restaurant Basics',
-    'Drinks & Beverages',
-    'Thai Dishes',
-    'Dietary Preferences',
-    'Street Food'
-  ],
-  'Travel & Directions': [
-    'Transportation',
-    'Locations & Places',
-    'Asking for Directions',
-    'Tourist Attractions',
-    'Accommodation'
-  ],
-  'Shopping': [
-    'Numbers & Prices',
-    'Clothing & Sizes',
-    'Bargaining',
-    'Shopping Venues',
-    'Products & Items'
-  ],
-  'Making Small Talk': [
-    'Greetings & Farewells',
-    'Weather',
-    'Hobbies & Interests',
-    'Family',
-    'Work & Study'
-  ],
-  'Business Meetings': [
-    'Formal Greetings',
-    'Scheduling',
-    'Presentations',
-    'Business Terms',
-    'Office Environment'
-  ],
-  'Daily Routines': [
-    'Time & Schedule',
-    'Activities',
-    'Household',
-    'Health & Wellness',
-    'Social Life'
-  ],
-  'Emergencies': [
-    'Medical Terms',
-    'Emergency Services',
-    'Health Issues',
-    'Safety & Security',
-    'Asking for Help'
-  ],
-  'Teaching juggling to a centipede': [
-    'Body Parts',
-    'Movement & Actions',
-    'Numbers & Counting',
-    'Teaching Instructions',
-    'Circus & Performance'
-  ],
-  'Explaining emojis to Shakespeare': [
-    'Emotions & Feelings',
-    'Modern Technology',
-    'Literary Terms',
-    'Communication Methods',
-    'Cultural Differences'
-  ],
-  'Analyzing social & political issues in Thailand': [
-    'Current Events',
-    'Political Terms',
-    'Social Issues',
-    'Public Policy',
-    'Media & News'
-  ],
-  'Understanding Thai literature & arts': [
-    'Literary Terms',
-    'Art Forms',
-    'Cultural Expressions',
-    'Historical Context',
-    'Artistic Techniques'
-  ],
-  'Advanced workplace & business communication': [
-    'Professional Terms',
-    'Business Etiquette',
-    'Negotiation Skills',
-    'Corporate Culture',
-    'Management Concepts'
-  ],
-  'Exploring Thai history & belief systems': [
-    'Historical Events',
-    'Religious Terms',
-    'Cultural Traditions',
-    'Philosophical Concepts',
-    'Spiritual Practices'
-  ],
-  'Understanding idioms & colloquialisms': [
-    'Common Idioms',
-    'Slang Terms',
-    'Regional Expressions',
-    'Cultural Context',
-    'Informal Speech'
-  ],
-  'Discussing hypothetical situations & speculation': [
-    'Conditional Terms',
-    'Future Scenarios',
-    'Probability',
-    'Cause & Effect',
-    'Abstract Concepts'
-  ],
-  'Debating & persuasion': [
-    'Argument Structure',
-    'Logical Terms',
-    'Persuasive Language',
-    'Debate Format',
-    'Opinion Expression'
-  ],
-  'Understanding regional dialects & variations (awareness)': [
-    'Regional Terms',
-    'Dialect Features',
-    'Local Expressions',
-    'Pronunciation Variations',
-    'Cultural Context'
-  ]
-};
-
-export function TopicStep({ value, scenarios, onNext, onBack }: { 
-  value: string[], 
-  scenarios: string[],
-  onNext: (topics: string[]) => void,
+export function TopicStep({ 
+  value,
+  onNext,
+  onBack 
+}: { 
+  value: string,
+  onNext: (value: string) => void,
   onBack: () => void
 }) {
-  const [selectedTopics, setSelectedTopics] = useState<string[]>(value || []);
-  const [customTopic, setCustomTopic] = useState('');
-
-  const relevantTopics = scenarios.reduce((acc, scenario) => {
-    if (scenario in defaultTopics) {
-      acc.push(...defaultTopics[scenario as ScenarioKey]);
-    }
-    return acc;
-  }, [] as string[]);
-
-  const uniqueTopics = Array.from(new Set(relevantTopics));
-
-  const toggleTopic = (topic: string) => {
-    setSelectedTopics(prev =>
-      prev.includes(topic)
-        ? prev.filter(t => t !== topic)
-        : [...prev, topic]
-    );
-  };
-
-  const addCustomTopic = () => {
-    if (customTopic.trim() && !selectedTopics.includes(customTopic.trim())) {
-      setSelectedTopics(prev => [...prev, customTopic.trim()]);
-      setCustomTopic('');
-    }
-  };
-
-  const handleNext = () => {
-    onNext(selectedTopics);
-  };
-
   return (
-    <div className="space-y-5 px-2">
-      <div className="space-y-2.5">
-        <h3 className="text-base font-medium text-white">
-          Choose Your Learning Topics
+    <div className="space-y-6">
+      <div className="text-center space-y-2">
+        <h3 className="text-xl font-semibold text-[#E0E0E0]">
+          What would you like to learn?
         </h3>
-        <p className="text-xs text-gray-400">
-          Select specific topics you&apos;d like to focus on within your chosen scenarios.
+        <p className="text-sm text-gray-400">
+          Choose a topic that interests you
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {[...uniqueTopics, ...selectedTopics.filter(topic => !uniqueTopics.includes(topic))].map(topic => (
-          <button
-            key={topic}
-            onClick={() => toggleTopic(topic)}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              toggleTopic(topic);
-            }}
-            className={`
-              text-left px-3 py-2 rounded-full text-xs transition-all
-              ${selectedTopics.includes(topic)
-                ? 'bg-blue-600/90 text-white shadow-sm'
-                : 'bg-[#1e1e1e] text-gray-300 hover:bg-[#2a2a2a]'}
-              active:bg-blue-600/90 active:text-white
-              touch-none select-none
-            `}
-          >
-            {topic}
-          </button>
-        ))}
+      {/* Custom Goal Input */}
+      <div className="neumorphic p-4 rounded-xl space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-blue-400 text-2xl">◎</span>
+          <span className="text-blue-400">Define Your Own Goal (Recommended!)</span>
+        </div>
+        <input
+          type="text"
+          placeholder="e.g., Talk about my holiday plans"
+          value={value}
+          onChange={(e) => onNext(e.target.value)}
+          className="w-full bg-transparent text-gray-300 placeholder-gray-600 focus:outline-none"
+        />
+        <p className="text-xs text-gray-500">
+          Enter your specific learning goal for a personalized experience
+        </p>
       </div>
 
-      <div className="space-y-2.5">
-        <h4 className="text-sm font-medium text-white">
-          Add Custom Topic
-        </h4>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={customTopic}
-            onChange={(e) => setCustomTopic(e.target.value)}
-            placeholder="Enter a custom topic..."
-            className="flex-1 bg-[#1e1e1e] border border-gray-800 rounded-full px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
+      {/* Scenarios Section */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-blue-400 text-xl">✨</span>
+          <span className="text-blue-400">Or Choose a Scenario</span>
+        </div>
+        
+        {/* Scrollable container for scenarios */}
+        <div className="max-h-[300px] overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
           <button
-            onClick={addCustomTopic}
-            disabled={!customTopic.trim()}
-            className={`rounded-full ${!customTopic.trim() ? 'bg-blue-600/50 cursor-not-allowed' : 'bg-blue-600/90 hover:bg-blue-600'} text-white px-3 py-1.5 text-xs`}
+            onClick={() => onNext("Essential greetings & leave-takings (polite)")}
+            className="w-full text-left p-4 rounded-xl neumorphic hover:bg-gray-800/30 transition-colors"
           >
-            Add
+            Essential greetings & leave-takings (polite)
+          </button>
+          <button
+            onClick={() => onNext("Introducing yourself (simple)")}
+            className="w-full text-left p-4 rounded-xl neumorphic hover:bg-gray-800/30 transition-colors"
+          >
+            Introducing yourself (simple)
+          </button>
+          <button
+            onClick={() => onNext("Basic numbers (1-100 & zero)")}
+            className="w-full text-left p-4 rounded-xl neumorphic hover:bg-gray-800/30 transition-colors"
+          >
+            Basic numbers (1-100 & zero)
+          </button>
+          <button
+            onClick={() => onNext("Identifying common objects (classroom/home)")}
+            className="w-full text-left p-4 rounded-xl neumorphic hover:bg-gray-800/30 transition-colors"
+          >
+            Identifying common objects (classroom/home)
+          </button>
+          <button
+            onClick={() => onNext("Basic question words & simple answers")}
+            className="w-full text-left p-4 rounded-xl neumorphic hover:bg-gray-800/30 transition-colors"
+          >
+            Basic question words & simple answers
+          </button>
+          <button
+            onClick={() => onNext('Saying "Thank You" & "Sorry/Excuse Me" (polite)')}
+            className="w-full text-left p-4 rounded-xl neumorphic hover:bg-gray-800/30 transition-colors"
+          >
+            Saying "Thank You" & "Sorry/Excuse Me" (polite)
+          </button>
+          <button
+            onClick={() => onNext("Basic colors")}
+            className="w-full text-left p-4 rounded-xl neumorphic hover:bg-gray-800/30 transition-colors"
+          >
+            Basic colors
+          </button>
+          <button
+            onClick={() => onNext("Simple commands & requests (polite)")}
+            className="w-full text-left p-4 rounded-xl neumorphic hover:bg-gray-800/30 transition-colors"
+          >
+            Simple commands & requests (polite)
           </button>
         </div>
       </div>
 
-      <div className="flex justify-between pt-3">
+      {/* Weird Section */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-purple-400 text-xl">⚡</span>
+          <span className="text-purple-400">Or Be Weird</span>
+        </div>
+        <div className="space-y-2">
+          <button
+            onClick={() => onNext("Hosting a silent auction for thoughts")}
+            className="w-full text-left p-4 rounded-xl neumorphic hover:bg-gray-800/30 transition-colors"
+          >
+            Hosting a silent auction for thoughts
+          </button>
+          <button
+            onClick={() => onNext("Teaching meditation to a caffeine molecule")}
+            className="w-full text-left p-4 rounded-xl neumorphic hover:bg-gray-800/30 transition-colors"
+          >
+            Teaching meditation to a caffeine molecule
+          </button>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex justify-between pt-4">
         <button
           onClick={onBack}
-          className="rounded-full bg-[#1e1e1e] hover:bg-[#2a2a2a] text-gray-400 px-4 py-1.5 text-xs"
+          className="neumorphic-button text-gray-400"
         >
           Back
         </button>
         <button
-          className={`rounded-full ${selectedTopics.length === 0 ? 'bg-blue-600/50 cursor-not-allowed' : 'bg-blue-600/90 hover:bg-blue-600'} text-white px-4 py-1.5 text-xs`}
-          onClick={handleNext}
-          disabled={selectedTopics.length === 0}
+          onClick={() => onNext(value)}
+          className="neumorphic-button text-blue-400"
         >
           Next
         </button>

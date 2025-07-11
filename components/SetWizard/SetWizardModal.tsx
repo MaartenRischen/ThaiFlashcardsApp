@@ -1,150 +1,156 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Dialog } from '@/components/ui/dialog';
 import { WelcomeStep } from './WelcomeStep';
+import { TopicStep } from './TopicStep';
 import { ProficiencyStep } from './ProficiencyStep';
-import { ScenarioStep } from './ScenarioStep';
-import { ContextStep } from './ContextStep';
 import { ToneStep } from './ToneStep';
-import { ReviewStep } from './ReviewStep';
 import { GenerationStep } from './GenerationStep';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { motion } from 'framer-motion';
-import dynamic from 'next/dynamic';
-import { SetWizardState } from './types';
+import { ReviewStep } from './ReviewStep';
 
-interface SetWizardModalProps {
+export function SetWizardModal({
+  isOpen,
+  onClose,
+  onComplete,
+}: {
+  isOpen: boolean;
   onClose: () => void;
-  onComplete: (newSetId?: string) => void;
-  onOpenSetManager: (setToSelect?: string) => void;
-}
+  onComplete: (set: any) => void;
+}) {
+  const [currentStep, setCurrentStep] = React.useState(0);
+  const [topic, setTopic] = React.useState('');
+  const [proficiencyLevel, setProficiencyLevel] = React.useState('');
+  const [toneLevel, setToneLevel] = React.useState(5);
+  const [generatedSet, setGeneratedSet] = React.useState<any>(null);
 
-// Image Preloader Component
-const _ImagePreloader = dynamic(() => import('./ImagePreloader'), { ssr: false });
-
-function renderStep(
-  step: number,
-  state: SetWizardState,
-  setState: React.Dispatch<React.SetStateAction<SetWizardState>>,
-  onClose: () => void,
-  onComplete: (newSetId?: string) => void,
-  onOpenSetManager: (setToSelect?: string) => void,
-  setCurrentStep: (step: number) => void
-) {
-  switch (step) {
-    case 0:
-      return <WelcomeStep onNext={() => setCurrentStep(1)} />;
-    case 1:
-      return <ProficiencyStep 
-        value={state.proficiency} 
-        onNext={(proficiency) => {
-          setState(prev => ({ ...prev, proficiency }));
-          setCurrentStep(2);
-        }}
-        onBack={onClose}
-      />;
-    case 2:
-      return <ScenarioStep
-        selectedTopic={state.selectedTopic}
-        proficiencyLevelEstimate={state.proficiency.levelEstimate}
-        onNext={(data) => {
-          setState(prev => ({
-            ...prev,
-            selectedTopic: data.selectedTopic
-          }));
-          setCurrentStep(3);
-        }}
-        onBack={() => setCurrentStep(1)}
-      />;
-    case 3:
-      return <ContextStep
-        topic={state.selectedTopic?.value || ''}
-        onNext={({ additionalContext }) => {
-          setState(prev => ({ ...prev, additionalContext }));
-          setCurrentStep(4);
-        }}
-        onBack={() => setCurrentStep(2)}
-      />;
-    case 4:
-      return <ToneStep
-        toneLevel={state.tone}
-        onNext={(toneLevel) => {
-          setState(prev => ({ ...prev, tone: toneLevel }));
-          setCurrentStep(5);
-        }}
-        onBack={() => setCurrentStep(3)}
-      />;
-    case 5:
-      return <ReviewStep
-        state={state}
-        onConfirm={() => setCurrentStep(6)}
-        onBack={() => setCurrentStep(4)}
-        onCardCountChange={(count) => setState(prev => ({...prev, cardCount: count}))}
-      />;
-    case 6:
-      return <GenerationStep
-        state={state}
-        onComplete={(newSetId) => {
-          onComplete(newSetId);
-          onClose();
-        }}
-        onBack={() => setCurrentStep(5)}
-        onClose={onClose}
-        onOpenSetManager={onOpenSetManager}
-      />;
-    default:
-      return null;
-  }
-}
-
-export function SetWizardModal({ onClose, onComplete, onOpenSetManager }: SetWizardModalProps) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [wizardState, setWizardState] = useState<SetWizardState>({
-    proficiency: {
-      canDoSelections: [],
-      levelEstimate: 'Intermediate',
+  const steps = [
+    {
+      title: 'Create a New Flashcard Set',
+      subtitle: 'Follow the steps to generate a personalized set.',
+      component: WelcomeStep,
+      props: {
+        onNext: () => setCurrentStep(1),
+      },
     },
-    selectedTopic: null,
-    additionalContext: '',
-    tone: 1, // Default to serious & practical
-    cardCount: 10, // Default to 10 cards
-  });
+    {
+      title: 'What would you like to learn?',
+      subtitle: 'Choose a topic that interests you',
+      component: TopicStep,
+      props: {
+        value: topic,
+        onNext: (value: string) => {
+          setTopic(value);
+          setCurrentStep(2);
+        },
+        onBack: () => setCurrentStep(0),
+      },
+    },
+    {
+      title: "What's your current Thai level?",
+      subtitle: 'This helps us create content that matches your abilities',
+      component: ProficiencyStep,
+      props: {
+        value: proficiencyLevel,
+        onNext: (value: string) => {
+          setProficiencyLevel(value);
+          setCurrentStep(3);
+        },
+        onBack: () => setCurrentStep(1),
+      },
+    },
+    {
+      title: 'Choose Your Learning Style',
+      subtitle: 'Select how you want your phrases to sound',
+      component: ToneStep,
+      props: {
+        value: toneLevel,
+        onNext: (value: number) => {
+          setToneLevel(value);
+          setCurrentStep(4);
+        },
+        onBack: () => setCurrentStep(2),
+      },
+    },
+    {
+      title: 'Generating Your Set',
+      subtitle: 'Please wait while we create your personalized flashcards',
+      component: GenerationStep,
+      props: {
+        topic,
+        proficiencyLevel,
+        toneLevel,
+        onComplete: (set: any) => {
+          setGeneratedSet(set);
+          setCurrentStep(5);
+        },
+        onBack: () => setCurrentStep(3),
+      },
+    },
+    {
+      title: 'Review Your Set',
+      subtitle: 'Check out your new flashcards',
+      component: ReviewStep,
+      props: {
+        set: generatedSet,
+        onComplete: (set: any) => {
+          onComplete(set);
+          onClose();
+        },
+        onBack: () => setCurrentStep(4),
+      },
+    },
+  ];
 
-  const totalSteps = 7;
+  const currentStepData = steps[currentStep];
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="neumorphic max-w-2xl w-full bg-[#1f1f1f] border-[#333] text-white">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center text-[#E0E0E0]">
-            Create a New Flashcard Set
-          </DialogTitle>
-          <DialogDescription className="text-center text-gray-400">
-            Follow the steps to generate a personalized set.
-          </DialogDescription>
-        </DialogHeader>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => !open && onClose()}
+    >
+      <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-[#121212] w-full max-w-lg rounded-2xl shadow-xl">
+          {/* Header */}
+          <div className="p-6 pb-0">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-semibold text-[#E0E0E0]">
+                  {currentStepData.title}
+                </h2>
+                <p className="text-sm text-gray-400">
+                  {currentStepData.subtitle}
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
 
-        {/* Progress Indicator */}
-        <div className="flex justify-center space-x-4 my-6">
-          {Array.from({ length: totalSteps }).map((_, index) => (
-            <div
-              key={index}
-              className={`w-4 h-4 rounded-full transition-all duration-300
-                ${currentStep === index ? 'bg-blue-500 scale-125 shadow-[0_0_10px_2px] shadow-blue-500/50' : 'bg-gray-600'}`}
-            />
-          ))}
-        </div>
+            {/* Progress Dots */}
+            <div className="flex justify-center gap-2 mt-4">
+              {steps.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-2 h-2 rounded-full transition-colors ${
+                    index === currentStep
+                      ? 'bg-blue-500'
+                      : index < currentStep
+                      ? 'bg-blue-800'
+                      : 'bg-gray-800'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
 
-        <div className="min-h-[400px]">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.3 }}
-          >
-            {renderStep(currentStep, wizardState, setWizardState, onClose, onComplete, onOpenSetManager, setCurrentStep)}
-          </motion.div>
+          {/* Content Area - Fixed height with scrolling */}
+          <div className="p-6 max-h-[calc(90vh-200px)] overflow-y-auto">
+            {React.createElement(currentStepData.component, currentStepData.props)}
+          </div>
         </div>
-      </DialogContent>
+      </div>
     </Dialog>
   );
 } 

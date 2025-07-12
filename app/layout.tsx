@@ -6,8 +6,6 @@ import Navbar from './components/Navbar'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from "sonner"
-import { FeedbackFooterClient } from "./components/FeedbackFooterClient";
-import { FeedbackProvider } from "./context/FeedbackContext";
 import { AppInitializer } from "./components/AppInitializer";
 
 const inter = Inter({ subsets: ['latin'] })
@@ -71,18 +69,15 @@ export default function RootLayout({
           <Toaster richColors position="top-left" duration={5000} />
           <Tooltip.Provider>
             <SetProvider>
-              <FeedbackProvider>
                 <AppInitializer />
                 <Navbar />
                 <main className="main-content min-h-screen relative">
                   {children}
                 </main>
-                <FeedbackFooterClient />
                 {/* Copyright Notice */}
                 <div className="w-full text-center text-xs text-gray-600 py-3 bg-[#181818]">
                   Copyright (c) 2025 Maarten Rischen. All rights reserved.
                 </div>
-              </FeedbackProvider>
             </SetProvider>
           </Tooltip.Provider>
         </body>

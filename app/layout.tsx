@@ -7,7 +7,6 @@ import Navbar from './components/Navbar'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from "sonner"
-import { initializeApp } from './lib/init'
 import { FeedbackFooterClient } from "./components/FeedbackFooterClient";
 import { FeedbackProvider } from "./context/FeedbackContext";
 
@@ -34,9 +33,6 @@ export const metadata: Metadata = {
     telephone: false
   }
 }
-
-// Initialize the app
-initializeApp().catch(console.error);
 
 export default function RootLayout({
   children,

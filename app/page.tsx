@@ -1341,20 +1341,7 @@ export default function ThaiFlashcards() {
         </div>
       </div>
 
-      {/* Development Update Log */}
-      <div className="bg-yellow-600/20 border border-yellow-500/50 text-yellow-300 px-4 py-2 mx-4 mt-4 rounded-lg text-sm">
-        <div className="flex items-center justify-between mb-1">
-          <span className="font-semibold">📝 Latest Update</span>
-          <span className="text-xs opacity-75">{new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</span>
-        </div>
-        <div className="text-xs">
-          🎨 Complete Set Wizard UI overhaul with neumorphic design<br/>
-          ✨ Added animations and transitions throughout wizard steps<br/>
-          🎯 Improved visual hierarchy with consistent spacing and typography<br/>
-          🌈 Enhanced slider design with gradient colors for tone selection<br/>
-          📱 Better mobile responsiveness with improved touch interactions
-        </div>
-      </div>
+
 
       {/* Settings Button, Modals, Admin Button, Version Indicator */}
 

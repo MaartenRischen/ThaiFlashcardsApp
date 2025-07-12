@@ -32,7 +32,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useFeedback } from './context/FeedbackContext';
 import { getToneLabel } from '@/app/lib/utils'; // Import getToneLabel
 import { HowItWorksModal } from './components/modals/HowItWorksModal';
 import { ProgressModal } from './components/modals/ProgressModal';

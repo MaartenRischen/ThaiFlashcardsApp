@@ -88,7 +88,10 @@ USER nextjs
 
 EXPOSE 3000
 
+# Railway sets PORT dynamically, so we need to handle it
 ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+
 # Set runtime environment variables (Railway will override these)
 ENV NEXT_PUBLIC_SUPABASE_URL=""
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=""
@@ -103,4 +106,5 @@ ENV OPENROUTER_API_KEY=""
 ENV IDEOGRAM_API_KEY=""
 ENV DATABASE_URL=""
 
+# Use node directly and bind to 0.0.0.0 to accept external connections
 CMD ["node", "server.js"] 

@@ -98,7 +98,6 @@ export default function GalleryPage() {
         case 'Most Cards':
           return (b.cardCount || 0) - (a.cardCount || 0);
         case 'Highest Rated':
-          // TODO: Implement rating system
           return 0;
         default:
           return 0;

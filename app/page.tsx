@@ -980,22 +980,14 @@ export default function ThaiFlashcards() {
 
       const result = await response.json();
 
-      // Add logging here:
-      console.log("[page.tsx onComplete] Full result from /api/generate-set:", JSON.stringify(result, null, 2));
-      console.log("[page.tsx onComplete] result.phrases:", JSON.stringify(result.phrases?.slice(0,2), null, 2)); // Log first 2
-
       if (!response.ok) {
-        // Log the detailed error from the API response
-        console.error("API Error Response:", result);
         throw new Error(result.error || `API request failed with status ${response.status}`);
       }
 
       if (result.newSetMetaData && result.newSetMetaData.id) {
-        console.log('handleTestGeneration: API route returned newSetId:', result.newSetMetaData.id);
         // Refresh sets in context
         await refreshSets();
         await switchSet(result.newSetMetaData.id);
-        console.log('handleTestGeneration: Successfully requested switch to new set', result.newSetMetaData.id);
         toast.success('Test set generated and saved successfully!', {
           duration: 5000
         });
@@ -1010,7 +1002,6 @@ export default function ThaiFlashcards() {
       } else if (typeof error === 'string') {
         errorMessage = error;
       }
-      console.error('handleTestGeneration: Error calling API route:', error);
       setTestGenResult({ error: errorMessage }); // Display error if needed
       toast.error(`Error generating test set: ${errorMessage}`, {
         duration: 5000
@@ -1037,41 +1028,6 @@ export default function ThaiFlashcards() {
         onOpenSetWizard={() => setShowSetWizardModal(true)}
       />
 
-      {/* Show testGenResult for debugging - Refined conditional and type guards */}
-      {typeof testGenResult === 'object' && testGenResult !== null && (
-        <div className="max-w-2xl mx-auto bg-gray-900 text-gray-200 p-4 mt-4 rounded shadow overflow-x-auto text-xs">
-          <pre>{JSON.stringify(testGenResult, null, 2)}</pre>
-          {/* Safely access phrases with type guards */}
-          {'phrases' in testGenResult && Array.isArray(testGenResult.phrases) &&
-            testGenResult.phrases.map((phrase: unknown, idx: number) => {
-              // Type guard for phrase structure needed for image rendering
-              if (typeof phrase === 'object' && phrase !== null && 'imageUrl' in phrase && typeof phrase.imageUrl === 'string' && 'english' in phrase) {
-                const imageUrl = phrase.imageUrl; // Extract to satisfy TS
-                const englishText = (phrase as { english?: unknown }).english;
-                const altText = typeof englishText === 'string' ? englishText : 'Generated image';
-
-                return (
-                  <div key={idx} className="my-2">
-                    <div className="font-bold text-blue-300">{typeof englishText === 'string' ? englishText : 'N/A'}</div>
-                    {/* Use Next/Image */}
-                    <div style={{ position: 'relative', width: '100%', maxWidth: '200px', height: '200px' }}> {/* Example wrapper */}
-                      <Image
-                        src={imageUrl} // Use extracted variable
-                        alt={altText} // Use calculated alt text
-                        fill // Use fill and let the container control size
-                        style={{ objectFit: 'contain' }} // Adjust objectFit as needed
-                        className="rounded shadow"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
-                      />
-                    </div>
-                  </div>
-                );
-              }
-              return null; // Don't render if phrase structure is wrong
-            })}
-        </div>
-      )}
-
       {/* Main Content - Centered Flashcard */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         {/* Remove perspective */} 
@@ -1087,7 +1043,6 @@ export default function ThaiFlashcards() {
                 <div className="text-center mb-4 w-full px-4">
                   <button 
                     onClick={() => {
-                      console.log('Toggling showMnemonicHint from:', showMnemonicHint);
                       setShowMnemonicHint(!showMnemonicHint);
                     }}
                     className="text-xs text-blue-400 hover:text-blue-300 underline mb-2"
@@ -1096,13 +1051,7 @@ export default function ThaiFlashcards() {
                   </button>
                   {showMnemonicHint && (
                     <div className="text-sm text-gray-400 p-2 border border-gray-600 rounded bg-gray-800 max-h-24 overflow-y-auto">
-                      {((): React.ReactNode => { // Immediately invoked function expression (IIFE) to allow logging
-                        const userMnemonic = mnemonics[index];
-                        const defaultMnemonic = phrases[index]?.mnemonic;
-                        const hintToShow = userMnemonic ?? defaultMnemonic ?? 'No hint available';
-                        console.log(`Rendering hint: user='${userMnemonic}', default='${defaultMnemonic}', showing='${hintToShow}'`);
-                        return hintToShow;
-                      })()}
+                      {mnemonics[index] ?? phrases[index]?.mnemonic ?? 'No hint available'}
                     </div>
                   )}
                 </div>
@@ -1290,7 +1239,6 @@ export default function ThaiFlashcards() {
                             event.stopPropagation();
                             if (randomSentence) {
                               const textToSpeak = getThaiWithGender(randomSentence, isMale, isPoliteMode);
-                              console.log("Play Context - Text to Speak:", textToSpeak);
                               speak(textToSpeak, false, isMale);
                             }
                           }}
@@ -1533,20 +1481,6 @@ export default function ThaiFlashcards() {
                       View Detailed Generation Logic Visualization (Opens in new tab)
                     </a>
                   </p>
-                  
-                  <p className="mt-4">
-                    You can also experiment with different generation parameters (like proficiency and tone) and see example outputs on the test variations page:
-                  </p>
-                  <p className="mt-2">
-                    <a 
-                      href="/test-variations" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-300 underline"
-                    >
-                      Go to Test Variations Page (Opens in new tab)
-                    </a>
-                  </p>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -1570,7 +1504,6 @@ export default function ThaiFlashcards() {
 
             <div className="space-y-2">
               {phrases.map((phrase, i) => {
-                console.log(`Vocabulary List: Rendering item ${i}`); // Log inside map
                 // Get the status of the card
                 const status = getCardStatus(i);
                 const { color, label } = getStatusInfo(status as CardStatus);
@@ -1625,11 +1558,9 @@ export default function ThaiFlashcards() {
         <SetWizardModal 
           onClose={() => setShowSetWizardModal(false)}
           onComplete={async (wizardState: SetWizardState) => { // wizardState uses the new structure
-            console.log('SetWizardModal onComplete fired', wizardState);
             setShowSetWizardModal(false);
             
             if (!wizardState.selectedTopic) {
-              console.error("Cannot generate set: No topic selected.");
               toast.error('Set creation failed: No topic was selected.', {
                 duration: 5000
               });
@@ -1647,8 +1578,6 @@ export default function ThaiFlashcards() {
             
             // Use the single selected topic value
             const singleTopic = wizardState.selectedTopic.value;
-            
-            console.log(`Generating set with ${totalCount} cards for topic: ${singleTopic}`);
 
             // Prepare preferences for the API call
             const preferences = {
@@ -1657,8 +1586,6 @@ export default function ThaiFlashcards() {
               toneLevel: wizardState.tone,
               topicsToDiscuss: singleTopic // Also use single topic here for consistency
             };
-            
-            console.log("[page.tsx onComplete] Calling /api/generate-set with:", { preferences, totalCount });
 
             try {
               const response = await fetch('/api/generate-set', {
@@ -1672,14 +1599,11 @@ export default function ThaiFlashcards() {
 
               const result = await response.json();
 
-              console.log("[page.tsx onComplete] Full result from /api/generate-set:", JSON.stringify(result, null, 2));
-
               if (!response.ok) {
                 throw new Error(result.error || `API request failed with status ${response.status}`);
               }
 
               if (result.newSetMetaData && result.newSetMetaData.id) {
-                console.log("Set generated by backend with ID:", result.newSetMetaData.id);
                 // Add the new set to availableSets but don't switch to it
                 setAvailableSets(prev => [...prev, result.newSetMetaData]);
                 
@@ -1699,7 +1623,6 @@ export default function ThaiFlashcards() {
               } else if (typeof err === 'string') {
                 errorMessage = err;
               }
-              console.error('Error calling API route /api/generate-set:', err);
               
               // Update the toast to error
               toast.error('Failed to generate your custom set', {

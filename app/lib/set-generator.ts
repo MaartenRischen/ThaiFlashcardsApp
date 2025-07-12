@@ -1310,7 +1310,6 @@ export async function generateOpenRouterBatch(
       if (performSemanticCheck === 'strict') {
         // Placeholder for actual semantic check logic
         // For now, we assume it passes if basic validation passed.
-        // TODO: Implement actual semantic validation (e.g., keyword checks, LLM call?)
         const isSemanticallyValid = true; // Replace with actual check
         if (!isSemanticallyValid) {
           validationErrors.push(`Failed semantic check (Tone ${tone}): ${JSON.stringify(phraseData).substring(0, 100)}...`);

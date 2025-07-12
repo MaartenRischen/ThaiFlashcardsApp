@@ -40,8 +40,6 @@ const nextConfig = {
     NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL,
     NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL,
   },
-  // Enable standalone output for Docker deployment
-  output: 'standalone',
 }
 
 module.exports = nextConfig 

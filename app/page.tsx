@@ -192,9 +192,6 @@ export default function ThaiFlashcards() {
     setAvailableSets,
   } = useSet();
   
-  // Log activeSetProgress whenever the component renders
-  console.log("ThaiFlashcards Rendering - ActiveSetProgress:", JSON.stringify(activeSetProgress));
-  
   // Derive current set name from context instead of using state
   const currentSetName = useMemo(() => {
     const activeSet = availableSets.find(set => set.id === activeSetId);
@@ -269,8 +266,6 @@ export default function ThaiFlashcards() {
   const prevShowAnswerRef = React.useRef(false);
   // Add a ref for the card back
   const cardBackRef = useRef<HTMLDivElement>(null);
-
-  console.log("ThaiFlashcards: Component rendering/re-rendering. randomSentence:", randomSentence); // DEBUG
 
   // Load voices when component mounts
   useEffect(() => {

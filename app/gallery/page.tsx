@@ -266,15 +266,7 @@ export default function GalleryPage() {
       <p className="text-sm text-indigo-200 mb-6 -mt-4">
         Browse and import sets created by the Donkey Bridge community
       </p>
-      {/* Added Note - Enhanced */}
-      <div className="p-3 border border-gray-700 rounded-md flex items-start gap-2 mb-6 bg-gray-800/20">
-        <Info className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
-        <p className="text-sm text-gray-400">
-          Notes: <br />
-          - Advanced search and sorting mechanisms are in development. <br />
-          - At the moment it is impossible to view proficiency level and &quot;ridiculousness&quot; level for every gallery set, that&apos;ll be fixed in the next update.
-        </p>
-      </div>
+
       {error && (
         <div className="p-3 bg-red-900/20 border border-red-700/30 rounded-md text-red-400 text-sm mb-4">
           {error}

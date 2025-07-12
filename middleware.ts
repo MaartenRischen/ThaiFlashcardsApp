@@ -5,6 +5,7 @@ const isPublicRoute = createRouteMatcher([
   '/',
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/api/health', // Health check endpoint for Railway
   '/api/share/(.*)', // Public share endpoints if you have any
   '/api/gallery/(.*)' // Public gallery endpoints if you have any
 ]);

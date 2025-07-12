@@ -273,8 +273,6 @@ export default function ThaiFlashcards() {
       const voices = window.speechSynthesis.getVoices();
       if (voices.length > 0) {
         setVoicesLoaded(true);
-        console.log('Voices loaded:', voices.length);
-        console.log('Thai voices:', voices.filter(v => v.lang.includes('th')).length);
       }
     }
 
@@ -316,12 +314,11 @@ export default function ThaiFlashcards() {
       await ttsService.speak({
         text,
         genderValue: isMale,
-        onStart: () => console.log('Speech started'),
-        onEnd: () => { if (isWord) setIsPlayingWord(false); else setIsPlayingContext(false); console.log('Speech ended'); },
-        onError: (error) => { if (isWord) setIsPlayingWord(false); else setIsPlayingContext(false); console.error('TTS error:', error); }
+        onStart: () => {},
+        onEnd: () => { if (isWord) setIsPlayingWord(false); else setIsPlayingContext(false); },
+        onError: (error) => { if (isWord) setIsPlayingWord(false); else setIsPlayingContext(false); }
       });
     } catch (error) {
-      console.error('Error calling ttsService.speak:', error);
       if (isWord) {
         setIsPlayingWord(false);
       } else {
@@ -502,12 +499,10 @@ export default function ThaiFlashcards() {
   const updateMnemonics = (cardIndex: number, newMnemonic: string) => {
     const updated = { ...mnemonics, [cardIndex]: newMnemonic };
     setMnemonics(updated);
-    // TODO: Decide if mnemonics should be per-set in storage/context
     localStorage.setItem('mnemonics', JSON.stringify(updated));
   };
 
   const resetCurrentMnemonic = () => {
-    // TODO: Get default mnemonic from Phrase definition if available?
     const { [index]: _, ...rest } = mnemonics;
     setMnemonics(rest);
     localStorage.setItem('mnemonics', JSON.stringify(rest));
@@ -574,14 +569,12 @@ export default function ThaiFlashcards() {
       }
       setRandomSentence(nextExampleData);
     } catch (error) {
-      console.error('Error generating random phrase:', error);
       setRandomSentence(null);
     }
   };
 
   // Helper function to get status color and label
   const getStatusInfo = (status: CardStatus): { color: string, label: string } => {
-    console.log(`getStatusInfo called with status: ${status}`); // Log input status
     switch(status) {
       case 'unseen':
         return { color: 'bg-gray-700 text-gray-300', label: 'Unseen' };
@@ -592,7 +585,6 @@ export default function ThaiFlashcards() {
       case 'reviewed': // Changed from 'easy'/'good' to 'reviewed'
         return { color: 'bg-green-500 text-white', label: 'Learned' }; // Label it 'Learned' for simplicity
       default:
-        console.warn(`getStatusInfo: Unknown status '${status}'`);
         return { color: 'bg-gray-700 text-gray-300', label: 'Unknown' }; // Default fallback
     }
   };
@@ -665,7 +657,7 @@ export default function ThaiFlashcards() {
       try {
         setMnemonics(JSON.parse(savedMnemonics));
       } catch (error) {
-        console.error('Error loading mnemonics:', error);
+        // Silently ignore parsing errors
       }
     }
   }, []);
@@ -766,7 +758,6 @@ export default function ThaiFlashcards() {
             toast.error(`Import failed: ${message}`, {
               duration: 5000
             });
-            console.error('Import error:', error);
           }
         };
         reader.readAsText(file);
@@ -787,7 +778,6 @@ export default function ThaiFlashcards() {
 
   // --- NEW: useEffect to reset state when the active set changes --- 
   useEffect(() => {
-    console.log(`Active set changed to: ${activeSetId}. Resetting component state.`);
     // Reset card index and UI state
     setIndex(0);
     setActiveCardsIndex(0);
@@ -826,25 +816,21 @@ export default function ThaiFlashcards() {
   useEffect(() => {
     const hasSeen = localStorage.getItem('hasSeenTutorial_v1');
     if (!hasSeen) {
-      console.log("Starting tutorial...");
       setTutorialStep(1); // Start tutorial
     }
   }, []);
 
   // Tutorial Handlers
   const handleTutorialNext = () => {
-    console.log(`Tutorial: Advancing from step ${tutorialStep}`);
     setTutorialStep(prev => prev + 1);
   };
 
   const handleTutorialSkip = () => {
-    console.log("Tutorial: Skipping");
     localStorage.setItem('hasSeenTutorial_v1', 'true');
     setTutorialStep(0); // End tutorial
   };
 
   const handleTutorialFinish = () => {
-    console.log("Tutorial: Finishing");
     localStorage.setItem('hasSeenTutorial_v1', 'true');
     setTutorialStep(0); // End tutorial
   };
@@ -901,7 +887,6 @@ export default function ThaiFlashcards() {
 
       // Set a timeout to revert after 1 second
       darkModeTimeoutRef.current = setTimeout(() => {
-        console.log("Reverting fake dark mode automatically.");
         setIsDarkMode(false); // Set state back to false
         document.documentElement.classList.remove('fake-dark-mode-active');
         localStorage.setItem('darkMode', 'false'); // Update storage
@@ -983,8 +968,6 @@ export default function ThaiFlashcards() {
       topicsToDiscuss: undefined,
     };
     
-    console.log('handleTestGeneration: Calling API route /api/generate-set');
-
     try {
       const response = await fetch('/api/generate-set', {
         method: 'POST',

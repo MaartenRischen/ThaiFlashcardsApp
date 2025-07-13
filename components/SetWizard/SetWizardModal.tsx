@@ -176,6 +176,19 @@ export function SetWizardModal({
     mnemonic?: string;
   }>>([]);
 
+  // Reset state when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setCurrentStep(0);
+      setMode('auto');
+      setTopic('');
+      setProficiencyLevel('Complete Beginner');
+      setToneLevel(5);
+      setCardCount(10);
+      setManualPhrases([]);
+    }
+  }, [isOpen]);
+
   const wizardState: SetWizardState = {
     mode,
     selectedTopic: { type: 'goal', value: topic },
@@ -206,8 +219,8 @@ export function SetWizardModal({
         props: {
           onSelectMode: (selectedMode: 'auto' | 'manual') => {
             setMode(selectedMode);
-            // Auto mode goes to topic selection (step 2), manual mode goes to manual input (last position)
-            setCurrentStep(selectedMode === 'auto' ? 2 : baseSteps.length + 5);
+            // Auto mode goes to topic selection (step 2), manual mode goes to manual input (step 2)
+            setCurrentStep(2);
           },
           onBack: () => setCurrentStep(0),
         },
@@ -314,6 +327,13 @@ export function SetWizardModal({
   }, [mode, topic, proficiencyLevel, toneLevel, wizardState, onComplete, onClose]);
 
   const currentStepData = steps[currentStep];
+  
+  // Safety check to prevent undefined errors
+  if (!currentStepData) {
+    console.error(`Invalid step index: ${currentStep}, steps length: ${steps.length}`);
+    setCurrentStep(0);
+    return null;
+  }
 
   return (
     <Dialog

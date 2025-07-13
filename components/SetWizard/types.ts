@@ -18,11 +18,18 @@ export interface Topic {
 }
 
 export interface SetWizardState {
+  mode?: 'auto' | 'manual';
   selectedTopic: SelectedTopic | null;
   proficiency: ProficiencyValue;
   additionalContext: string;
   tone: number;
   cardCount: number;
+  manualPhrases?: Array<{
+    english: string;
+    thai: string;
+    pronunciation: string;
+    mnemonic?: string;
+  }>;
 }
 
 export const convertSelectedTopicToTopic = (selectedTopic: SelectedTopic | null): Topic | null => {

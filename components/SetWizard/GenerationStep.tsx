@@ -34,6 +34,75 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
       setIsGenerating(true);
       setError(null);
 
+      // Handle manual mode
+      if (state.mode === 'manual' && state.manualPhrases) {
+        const manualSetName = 'Manual Flashcard Set';
+        const totalCount = state.manualPhrases.length;
+        
+        console.log(`Creating manual set with ${totalCount} cards`);
+
+        // Add placeholder set
+        const placeholderSet: SetMetaData = {
+          id: 'generating',
+          name: `${manualSetName} (Saving...)`,
+          createdAt: new Date().toISOString(),
+          phraseCount: totalCount,
+          source: 'manual',
+          isFullyLearned: false,
+          level: 'intermediate',
+          specificTopics: manualSetName,
+          seriousnessLevel: 5,
+          toneLevel: 'Balanced',
+          imageUrl: undefined
+        };
+        setAvailableSets(sets => [...sets, placeholderSet]);
+
+        // Close wizard and open My Sets modal
+        onClose();
+        onOpenSetManager('generating');
+
+        // Call API to save manual phrases
+        const response = await fetch('/api/flashcard-sets', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: manualSetName,
+            phrases: state.manualPhrases,
+            source: 'manual'
+          }),
+          credentials: 'include',
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || `API request failed with status ${response.status}`);
+        }
+
+        // Remove placeholder and add real set
+        setAvailableSets(sets => {
+          const filtered = sets.filter(s => s.id !== 'generating');
+          const newSet: SetMetaData = {
+            ...result,
+            phraseCount: totalCount,
+            source: 'manual',
+            isFullyLearned: false,
+            level: 'intermediate',
+            specificTopics: manualSetName,
+            seriousnessLevel: 5,
+            toneLevel: 'Balanced'
+          };
+          return [...filtered, newSet];
+        });
+
+        console.log("GenerationStep: Manual set created successfully.");
+        onComplete(result.id);
+        return;
+      }
+
+      // Auto mode logic
       const selectedTopicValue = state.selectedTopic?.value;
 
       if (!selectedTopicValue) {
@@ -164,30 +233,48 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
             
             <div className="space-y-2">
               <h3 className="text-2xl font-bold text-[#E0E0E0]">
-                Let&apos;s create your personalized Thai flashcard set!
+                {state.mode === 'manual' 
+                  ? 'Saving your custom flashcard set!' 
+                  : 'Let&apos;s create your personalized Thai flashcard set!'}
               </h3>
               <p className="text-gray-400 max-w-md">
-                We're crafting {state.cardCount} personalized flashcards based on your preferences. 
-                This usually takes about 2 minutes.
+                {state.mode === 'manual'
+                  ? `We're saving your ${state.manualPhrases?.length || 0} custom flashcards.`
+                  : `We're crafting ${state.cardCount} personalized flashcards based on your preferences. This usually takes about 2 minutes.`}
               </p>
             </div>
 
-            <div className="neumorphic p-4 rounded-xl max-w-sm mx-auto">
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Topic:</span>
-                  <span className="text-[#E0E0E0] font-medium">{state.selectedTopic?.value || 'Custom'}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Level:</span>
-                  <span className="text-[#E0E0E0] font-medium">{state.proficiency.levelEstimate}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Style:</span>
-                  <span className="text-[#E0E0E0] font-medium">{getToneLabel(state.tone)}</span>
+            {state.mode === 'manual' ? (
+              <div className="neumorphic p-4 rounded-xl max-w-sm mx-auto">
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Mode:</span>
+                    <span className="text-[#E0E0E0] font-medium">Manual Input</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Cards:</span>
+                    <span className="text-[#E0E0E0] font-medium">{state.manualPhrases?.length || 0}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="neumorphic p-4 rounded-xl max-w-sm mx-auto">
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Topic:</span>
+                    <span className="text-[#E0E0E0] font-medium">{state.selectedTopic?.value || 'Custom'}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Level:</span>
+                    <span className="text-[#E0E0E0] font-medium">{state.proficiency.levelEstimate}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Style:</span>
+                    <span className="text-[#E0E0E0] font-medium">{getToneLabel(state.tone)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <motion.div
               animate={{ opacity: [0.5, 1, 0.5] }}

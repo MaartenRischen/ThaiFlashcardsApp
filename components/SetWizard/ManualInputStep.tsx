@@ -10,6 +10,7 @@ interface ManualInputStepProps {
 export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
   const [phrases, setPhrases] = useState<string[]>(['']);
   const [showError, setShowError] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const addPhrase = () => {
     setPhrases([...phrases, '']);
@@ -27,7 +28,7 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
     setPhrases(updatedPhrases);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     // Filter out empty phrases and trim whitespace
     const validPhrases = phrases
       .map(p => p.trim())
@@ -38,8 +39,111 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
       return;
     }
     
+    setIsProcessing(true);
+    
+    // Perform spell check and correction
+    const correctedPhrases = await spellCheckPhrases(validPhrases);
+    
     setShowError(false);
-    onNext(validPhrases);
+    setIsProcessing(false);
+    console.log('ManualInputStep sending corrected phrases:', correctedPhrases);
+    onNext(correctedPhrases);
+  };
+  
+  // Simple spell check function (can be enhanced with a proper spell check API)
+  const spellCheckPhrases = async (phrases: string[]): Promise<string[]> => {
+    // Common corrections
+    const corrections: Record<string, string> = {
+      'teh': 'the',
+      'adn': 'and',
+      'taht': 'that',
+      'wiht': 'with',
+      'recieve': 'receive',
+      'beleive': 'believe',
+      'occured': 'occurred',
+      'untill': 'until',
+      'wich': 'which',
+      'thier': 'their',
+      'alot': 'a lot',
+      'definately': 'definitely',
+      'seperate': 'separate',
+      'ocurr': 'occur',
+      'accomodate': 'accommodate',
+      'acheive': 'achieve',
+      'adress': 'address',
+      'calender': 'calendar',
+      'collegue': 'colleague',
+      'concious': 'conscious',
+      'dissapear': 'disappear',
+      'existance': 'existence',
+      'foriegn': 'foreign',
+      'fourty': 'forty',
+      'goverment': 'government',
+      'harrass': 'harass',
+      'independant': 'independent',
+      'knowlege': 'knowledge',
+      'lisence': 'license',
+      'mispell': 'misspell',
+      'neccessary': 'necessary',
+      'noticable': 'noticeable',
+      'occassion': 'occasion',
+      'occurence': 'occurrence',
+      'persistant': 'persistent',
+      'preceed': 'precede',
+      'priviledge': 'privilege',
+      'pronounciation': 'pronunciation',
+      'reccomend': 'recommend',
+      'rythm': 'rhythm',
+      'sieze': 'seize',
+      'suprise': 'surprise',
+      'tommorow': 'tomorrow',
+      'tounge': 'tongue',
+      'truely': 'truly',
+      'vaccuum': 'vacuum',
+      'weird': 'weird',
+      'whereever': 'wherever'
+    };
+    
+    return phrases.map(phrase => {
+      let corrected = phrase;
+      
+      // Apply corrections word by word
+      const words = corrected.split(' ');
+      const correctedWords = words.map(word => {
+        const lowerWord = word.toLowerCase();
+        const punctuation = word.match(/[.,!?;:]$/)?.[0] || '';
+        const cleanWord = lowerWord.replace(/[.,!?;:]$/, '');
+        
+        if (corrections[cleanWord]) {
+          // Preserve original capitalization
+          const correctedWord = corrections[cleanWord];
+          if (word[0] === word[0].toUpperCase()) {
+            return correctedWord.charAt(0).toUpperCase() + correctedWord.slice(1) + punctuation;
+          }
+          return correctedWord + punctuation;
+        }
+        return word;
+      });
+      
+      corrected = correctedWords.join(' ');
+      
+      // Capitalize first letter of sentence
+      corrected = corrected.charAt(0).toUpperCase() + corrected.slice(1);
+      
+      // Fix common grammar issues
+      corrected = corrected
+        .replace(/\s+/g, ' ') // Multiple spaces to single space
+        .replace(/\s+([.,!?;:])/g, '$1') // Remove space before punctuation
+        .replace(/([.,!?;:])\s*$/g, '$1') // Ensure punctuation at end
+        .trim();
+      
+      // Add period if no ending punctuation
+      if (!/[.!?]$/.test(corrected)) {
+        corrected += '.';
+      }
+      
+      return corrected;
+    });
   };
 
   return (
@@ -134,8 +238,9 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
         <button
           onClick={handleNext}
           className="neumorphic-button text-blue-400"
+          disabled={isProcessing}
         >
-          Generate Set
+          {isProcessing ? 'Checking Spelling...' : 'Continue'}
         </button>
       </div>
     </div>

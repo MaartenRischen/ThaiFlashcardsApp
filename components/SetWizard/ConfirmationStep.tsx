@@ -11,6 +11,8 @@ interface ConfirmationStepProps {
 }
 
 export function ConfirmationStep({ phrases, onConfirm, onBack }: ConfirmationStepProps) {
+  console.log('ConfirmationStep rendered with phrases:', phrases);
+  
   return (
     <div className="relative h-full flex flex-col">
       <motion.div

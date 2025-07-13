@@ -300,6 +300,7 @@ export function SetWizardModal({
           component: ManualInputStep,
           props: {
             onNext: (phrases) => {
+              console.log('SetWizardModal received phrases from ManualInputStep:', phrases);
               setManualPhrases(phrases);
               setCurrentStep(3);
             },
@@ -409,6 +410,8 @@ export function SetWizardModal({
                   return <GenerationStep {...currentStepData.props} />;
                 case 'review':
                   return <ReviewStep {...currentStepData.props} />;
+                case 'confirmation':
+                  return <ConfirmationStep {...currentStepData.props} />;
               }
             })()}
           </div>

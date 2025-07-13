@@ -61,6 +61,25 @@ function getErrorMessage(error: unknown): string {
   return 'Set generation failed.';
 }
 
+function createImageGenerationPrompt(topicDescription: string): string {
+  return `Create a cute cartoon style illustration with these STRICT REQUIREMENTS:
+1. MAIN FOCUS: Create a purely visual representation of "${topicDescription}" without ANY text or writing.
+2. MANDATORY ELEMENTS: Include a friendly donkey AND a bridge that naturally interact with the main topic.
+3. STYLE: Use vibrant, friendly colors and a clean cartoon style.
+4. CRITICAL TEXT PROHIBITION: The image MUST NOT contain ANY:
+   - Text, letters, numbers, or writing of any kind
+   - Signs, labels, logos, or watermarks
+   - Hidden or subtle text elements
+   - Text-like patterns or shapes
+5. NO OTHER CREATURES: The image MUST NOT contain:
+   - Any animals other than donkeys
+   - No humans, people, or human figures
+   - No other living creatures (birds, insects, etc.)
+   - Only donkeys are allowed as living beings
+6. COMPOSITION: Create a balanced 16:9 landscape composition.
+7. QUALITY: Focus on high detail and clean lines.`;
+}
+
 async function handleManualMode(userId: string, englishPhrases: string[], preferences: {
   level: string;
   specificTopics: string;
@@ -155,7 +174,8 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
     // Generate image for the set
     let imageUrl: string | undefined;
     try {
-      const imagePrompt = `Thai language learning flashcards for: ${title}`;
+      const imagePrompt = createImageGenerationPrompt(title);
+      console.log(`API Route: Generating image for manual set with prompt:`, imagePrompt);
       const generatedImageUrl = await generateImage(imagePrompt);
       
       if (generatedImageUrl) {
@@ -400,18 +420,7 @@ export async function POST(request: Request) {
       ].join(' ');
       
       // Construct the main prompt with corrected requirements
-      const imagePrompt = 
-        `Create a cute cartoon style illustration with these STRICT REQUIREMENTS:\n` +
-        `1. MAIN FOCUS: Create a purely visual representation of "${topicDescription}" without ANY text or writing.\n` +
-        `2. MANDATORY ELEMENTS: Include a friendly donkey AND a bridge that naturally interact with the main topic.\n` +
-        `3. STYLE: Use vibrant, friendly colors and a clean cartoon style.\n` +
-        `4. CRITICAL TEXT PROHIBITION: The image MUST NOT contain ANY:\n` +
-        `   - Text, letters, numbers, or writing of any kind\n` +
-        `   - Signs, labels, logos, or watermarks\n` +
-        `   - Hidden or subtle text elements\n` +
-        `   - Text-like patterns or shapes\n` +
-        `5. COMPOSITION: Create a balanced 16:9 landscape composition.\n` +
-        `6. QUALITY: Focus on high detail and clean lines.`;
+      const imagePrompt = createImageGenerationPrompt(topicDescription);
 
       console.log(`API Route: Generating image with FINAL prompt:`, imagePrompt);
       console.log(`API Route: Starting Ideogram API call...`);

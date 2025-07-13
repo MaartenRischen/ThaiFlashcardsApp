@@ -12,9 +12,7 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
   const [showError, setShowError] = useState(false);
 
   const addPhrase = () => {
-    if (phrases.length < 20) {
-      setPhrases([...phrases, '']);
-    }
+    setPhrases([...phrases, '']);
   };
 
   const removePhrase = (index: number) => {
@@ -35,7 +33,7 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
       .map(p => p.trim())
       .filter(p => p.length > 0);
     
-    if (validPhrases.length < 10) {
+    if (validPhrases.length === 0) {
       setShowError(true);
       return;
     }
@@ -56,7 +54,7 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
           Add Your Phrases
         </h3>
         <p className="text-sm text-gray-400">
-          Enter 10-20 English words or phrases you want to learn. We'll handle the Thai translations.
+          Enter English words or phrases you want to learn. We'll handle the Thai translations.
         </p>
       </motion.div>
 
@@ -68,7 +66,7 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
         >
           <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
           <p className="text-sm text-red-400">
-            Please add at least 10 words or phrases.
+            Please add at least one word or phrase.
           </p>
         </motion.div>
       )}
@@ -109,19 +107,17 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
         ))}
       </div>
 
-      {phrases.length < 20 && (
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          onClick={addPhrase}
-          className="w-full p-3 rounded-lg border border-dashed border-gray-600 
-            hover:border-blue-500/50 transition-colors duration-200 
-            flex items-center justify-center gap-2 text-gray-400 hover:text-blue-400"
-        >
-          <Plus className="w-4 h-4" />
-          <span className="text-sm">Add Another Phrase</span>
-        </motion.button>
-      )}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        onClick={addPhrase}
+        className="w-full p-3 rounded-lg border border-dashed border-gray-600 
+          hover:border-blue-500/50 transition-colors duration-200 
+          flex items-center justify-center gap-2 text-gray-400 hover:text-blue-400"
+      >
+        <Plus className="w-4 h-4" />
+        <span className="text-sm">Add Another Phrase</span>
+      </motion.button>
 
       <div className="flex justify-between items-center pt-4">
         <button
@@ -132,7 +128,7 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
         </button>
         
         <div className="text-sm text-gray-400">
-          {phrases.filter(p => p.trim()).length} of 10-20 phrases
+          {phrases.filter(p => p.trim()).length} phrase{phrases.filter(p => p.trim()).length !== 1 ? 's' : ''}
         </div>
         
         <button

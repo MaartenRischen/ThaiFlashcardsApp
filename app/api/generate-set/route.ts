@@ -78,30 +78,72 @@ async function handleManualMode(userId: string, englishPhrases: string[], prefer
     const title = await generateSmartTitle(cleanedPhrases);
     
     // Create a custom prompt for translating the manual phrases
-    const manualPrompt = `You are creating Thai language flashcards. The user has provided these English phrases that they want to learn in Thai:
+    const manualPrompt = `Generate EXACTLY ${cleanedPhrases.length} Thai vocabulary items for the following English phrases:
 
 ${cleanedPhrases.map((p, i) => `${i + 1}. ${p}`).join('\n')}
 
-For each phrase:
-1. Provide an accurate Thai translation
-2. Include both masculine and feminine versions where applicable
-3. Create a clear pronunciation guide
-4. Generate a memorable mnemonic
-5. Add 2-3 contextual example sentences
+For each phrase, provide:
+1. Accurate Thai translation with Thai script
+2. Both masculine (ครับ) and feminine (ค่ะ/คะ) versions
+3. Clear romanized pronunciation guide
+4. Creative mnemonic linking sound/meaning
+5. Two example sentences showing usage
 
-Please maintain the exact order and create flashcards for ALL provided phrases.`;
+### REQUIRED OUTPUT FORMAT:
+Return a JSON object with this EXACT structure:
+{
+  "phrases": [
+    {
+      "english": "English phrase/word",
+      "thai": "Thai translation in Thai script",
+      "thaiMasculine": "Thai with masculine forms/particles",
+      "thaiFeminine": "Thai with feminine forms/particles", 
+      "pronunciation": "Phonetic pronunciation (romanized)",
+      "mnemonic": "Creative memory aid linking sound/meaning",
+      "examples": [
+        {
+          "thai": "Complete Thai sentence using the phrase",
+          "thaiMasculine": "Same sentence with masculine forms",
+          "thaiFeminine": "Same sentence with feminine forms",
+          "pronunciation": "Full sentence pronunciation", 
+          "translation": "English translation of the example"
+        },
+        {
+          "thai": "Another Thai sentence using the phrase",
+          "thaiMasculine": "Same sentence with masculine forms",
+          "thaiFeminine": "Same sentence with feminine forms",
+          "pronunciation": "Full sentence pronunciation", 
+          "translation": "English translation of the example"
+        }
+      ]
+    }
+    // ... remaining phrases
+  ],
+  "cleverTitle": "${title}"
+}
+
+CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same order as provided. The response must be valid JSON with no additional text.`;
 
     // Use the batch generation with the manual prompt
-    const { phrases, error } = await generateOpenRouterBatch(
+    console.log("API Route: Calling generateOpenRouterBatch for manual mode...");
+    const result = await generateOpenRouterBatch(
       manualPrompt,
       ['anthropic/claude-3.5-sonnet', 'openai/gpt-4o'],
       0,
       preferences.toneLevel
     );
+    
+    console.log("API Route: OpenRouter batch result:", {
+      phrasesCount: result.phrases?.length || 0,
+      hasError: !!result.error,
+      errorMessage: result.error?.message
+    });
 
-    if (error || !phrases || phrases.length === 0) {
-      throw new Error(error?.message || "Failed to generate flashcards from manual input");
+    if (result.error || !result.phrases || result.phrases.length === 0) {
+      throw new Error(result.error?.message || "Failed to generate flashcards from manual input");
     }
+    
+    const { phrases } = result;
 
     const generationResult: GenerationResult = {
       phrases,

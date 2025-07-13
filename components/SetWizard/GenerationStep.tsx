@@ -188,6 +188,12 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
 
     } catch (err) {
       console.error("Error in GenerationStep generatePhrases:", err);
+      console.error("Full error details:", {
+        error: err,
+        state: state,
+        mode: state.mode,
+        manualPhrases: state.manualPhrases
+      });
       setError(err instanceof Error ? err.message : 'An error occurred during generation');
       
       // Remove placeholder on error

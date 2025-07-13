@@ -335,7 +335,7 @@ export function SetWizardModal({
         },
       ];
     }
-  }, [mode, topic, proficiencyLevel, toneLevel, wizardState, onComplete, onClose]);
+  }, [mode, topic, proficiencyLevel, toneLevel, wizardState, onComplete, onClose, manualPhrases]);
 
   const currentStepData = steps[currentStep];
   

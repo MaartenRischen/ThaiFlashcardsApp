@@ -30,6 +30,8 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
   const { setAvailableSets } = useSet();
 
   const generatePhrases = useCallback(async () => {
+    const startTime = Date.now();
+    
     try {
       setIsGenerating(true);
       setError(null);
@@ -100,7 +102,15 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
         });
 
         console.log("GenerationStep: Manual set processed successfully.");
-        onComplete(result.newSetMetaData.id);
+        
+        // Add a minimum display time of 3 seconds
+        const MIN_DISPLAY_TIME = 3000;
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, MIN_DISPLAY_TIME - elapsedTime);
+        
+        setTimeout(() => {
+          onComplete(result.newSetMetaData.id);
+        }, remainingTime);
         return;
       }
 
@@ -184,7 +194,15 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
       });
 
       console.log("GenerationStep: API call successful, triggering onComplete.");
-      onComplete(result.newSetMetaData.id);
+      
+      // Add a minimum display time of 3 seconds
+      const MIN_DISPLAY_TIME = 3000;
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, MIN_DISPLAY_TIME - elapsedTime);
+      
+      setTimeout(() => {
+        onComplete(result.newSetMetaData.id);
+      }, remainingTime);
 
     } catch (err) {
       console.error("Error in GenerationStep generatePhrases:", err);

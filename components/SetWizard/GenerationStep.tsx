@@ -229,7 +229,10 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
   }, [state, onComplete, onClose, onOpenSetManager, setAvailableSets, hasStartedGeneration, isGenerating]);
 
   useEffect(() => {
-    generatePhrases();
+    // Only generate if we haven't started yet
+    if (!hasStartedGeneration && !isGenerating) {
+      generatePhrases();
+    }
     
     // Cleanup function to reset state when component unmounts
     return () => {
@@ -237,7 +240,8 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
       setIsGenerating(false);
       setError(null);
     };
-  }, [generatePhrases]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array - only run once on mount
 
   return (
     <>

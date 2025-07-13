@@ -56,21 +56,11 @@ interface ModeSelectionStepData extends BaseStep {
 interface ManualInputStepData extends BaseStep {
   type: 'manualInput';
   component: React.ComponentType<{
-    onNext: (phrases: Array<{
-      english: string;
-      thai: string;
-      pronunciation: string;
-      mnemonic?: string;
-    }>) => void;
+    onNext: (phrases: string[]) => void;
     onBack: () => void;
   }>;
   props: {
-    onNext: (phrases: Array<{
-      english: string;
-      thai: string;
-      pronunciation: string;
-      mnemonic?: string;
-    }>) => void;
+    onNext: (phrases: string[]) => void;
     onBack: () => void;
   };
 }
@@ -169,12 +159,7 @@ export function SetWizardModal({
   const [toneLevel, setToneLevel] = React.useState(5);
   const [_generatedSet, _setGeneratedSet] = React.useState<GeneratedSet | null>(null);
   const [cardCount, setCardCount] = React.useState(10);
-  const [manualPhrases, setManualPhrases] = React.useState<Array<{
-    english: string;
-    thai: string;
-    pronunciation: string;
-    mnemonic?: string;
-  }>>([]);
+  const [manualPhrases, setManualPhrases] = React.useState<string[]>([]);
 
   // Reset state when modal opens
   React.useEffect(() => {

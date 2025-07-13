@@ -24,12 +24,7 @@ export interface SetWizardState {
   additionalContext: string;
   tone: number;
   cardCount: number;
-  manualPhrases?: Array<{
-    english: string;
-    thai: string;
-    pronunciation: string;
-    mnemonic?: string;
-  }>;
+  manualPhrases?: string[];
 }
 
 export const convertSelectedTopicToTopic = (selectedTopic: SelectedTopic | null): Topic | null => {

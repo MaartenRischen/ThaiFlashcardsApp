@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { 
   generateCustomSet, 
   GenerationResult,
+  generateOpenRouterBatch
 } from '@/app/lib/set-generator'; 
 import * as storage from '@/app/lib/storage';
 import { SetMetaData } from '@/app/lib/storage';
@@ -60,6 +61,140 @@ function getErrorMessage(error: unknown): string {
   return 'Set generation failed.';
 }
 
+async function handleManualMode(userId: string, englishPhrases: string[], preferences: any) {
+  console.log("API Route: Processing manual input phrases");
+  
+  try {
+    // Clean up and spell-check the English phrases
+    const cleanedPhrases = englishPhrases.map(phrase => phrase.trim()).filter(p => p.length > 0);
+    
+    // Generate a smart title based on the phrases
+    const title = await generateSmartTitle(cleanedPhrases);
+    
+    // Create a custom prompt for translating the manual phrases
+    const manualPrompt = `You are creating Thai language flashcards. The user has provided these English phrases that they want to learn in Thai:
+
+${cleanedPhrases.map((p, i) => `${i + 1}. ${p}`).join('\n')}
+
+For each phrase:
+1. Provide an accurate Thai translation
+2. Include both masculine and feminine versions where applicable
+3. Create a clear pronunciation guide
+4. Generate a memorable mnemonic
+5. Add 2-3 contextual example sentences
+
+Please maintain the exact order and create flashcards for ALL provided phrases.`;
+
+    // Use the batch generation with the manual prompt
+    const { phrases, error } = await generateOpenRouterBatch(
+      manualPrompt,
+      ['anthropic/claude-3.5-sonnet', 'openai/gpt-4o'],
+      0,
+      preferences.toneLevel
+    );
+
+    if (error || !phrases || phrases.length === 0) {
+      throw new Error(error?.message || "Failed to generate flashcards from manual input");
+    }
+
+    const generationResult: GenerationResult = {
+      phrases,
+      cleverTitle: title,
+      llmBrand: 'OpenRouter',
+      llmModel: 'claude-3.5-sonnet'
+    };
+
+    // Generate image for the set
+    let imageUrl: string | undefined;
+    try {
+      const imagePrompt = `Thai language learning flashcards for: ${title}`;
+      const generatedImageUrl = await generateImage(imagePrompt);
+      
+      if (generatedImageUrl) {
+        const uploadedImageUrl = await uploadImageFromUrl(generatedImageUrl, userId);
+        if (uploadedImageUrl) {
+          imageUrl = uploadedImageUrl;
+        }
+      }
+    } catch (imageError) {
+      console.error("Failed to generate image for manual set:", imageError);
+    }
+
+    // Save the set
+    const newSetMetaData: SetMetaData = {
+      id: '', // Will be set after creation
+      name: formatSetTitle(title),
+      createdAt: new Date().toISOString(),
+      phraseCount: generationResult.phrases.length,
+      source: 'manual',
+      isFullyLearned: false,
+      level: 'intermediate',
+      specificTopics: title,
+      seriousnessLevel: preferences.toneLevel,
+      toneLevel: getToneLabel(preferences.toneLevel),
+      imageUrl: imageUrl || null,
+      llmBrand: generationResult.llmBrand,
+      llmModel: generationResult.llmModel
+    };
+
+    // Add the set metadata
+    const createdSet = await storage.addSetMetaData(userId, newSetMetaData);
+    if (!createdSet) {
+      throw new Error('Failed to create set metadata');
+    }
+    
+    newSetMetaData.id = createdSet.id;
+    
+    // Save the phrases
+    const contentSaved = await storage.saveSetContent(createdSet.id, generationResult.phrases);
+    if (!contentSaved) {
+      // Cleanup on failure
+      await storage.deleteSetMetaData(createdSet.id);
+      throw new Error('Failed to save set content');
+    }
+
+    console.log(`API Route: Manual set created successfully with ID: ${createdSet.id}`);
+    
+    return NextResponse.json({
+      success: true,
+      newSetMetaData,
+      phrases: generationResult.phrases
+    });
+  } catch (error) {
+    console.error("API Route: Error in handleManualMode:", error);
+    return NextResponse.json(
+      { error: getErrorMessage(error) },
+      { status: 500 }
+    );
+  }
+}
+
+async function generateSmartTitle(phrases: string[]): Promise<string> {
+  // Simple title generation based on common themes
+  const words = phrases.join(' ').toLowerCase().split(/\s+/);
+  const commonWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for']);
+  
+  // Count word frequencies
+  const wordFreq = new Map<string, number>();
+  words.forEach(word => {
+    if (!commonWords.has(word) && word.length > 2) {
+      wordFreq.set(word, (wordFreq.get(word) || 0) + 1);
+    }
+  });
+  
+  // Get most common words
+  const sortedWords = Array.from(wordFreq.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([word]) => word);
+  
+  if (sortedWords.length > 0) {
+    return sortedWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' & ');
+  }
+  
+  return 'Custom Vocabulary Set';
+}
+
 export async function POST(request: Request) {
   console.log("API Route: /api/generate-set received POST request");
   
@@ -91,8 +226,24 @@ export async function POST(request: Request) {
     }
 
     const requestBody = await request.json();
-    const { preferences, totalCount } = requestBody;
+    const { preferences, totalCount, mode, englishPhrases } = requestBody;
     isTestRequest = !!requestBody.isTestRequest; // Convert to boolean
+
+    // Handle manual mode
+    if (mode === 'manual' && englishPhrases) {
+      console.log(`API Route: Processing manual mode with ${englishPhrases.length} phrases`);
+      
+      // Create preferences for manual mode
+      const manualPreferences = {
+        level: 'Intermediate',
+        specificTopics: 'Custom Vocabulary',
+        toneLevel: 5,
+        topicsToDiscuss: 'User-provided vocabulary',
+        additionalContext: `Translate and create flashcards for these English phrases: ${englishPhrases.join(', ')}`
+      };
+
+      return handleManualMode(userId, englishPhrases, manualPreferences);
+    }
 
     if (!preferences || !totalCount) {
       console.error("API Route: Missing required parameters (preferences or totalCount).");

@@ -36,24 +36,36 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
 
       // Handle manual mode
       if (state.mode === 'manual' && state.manualPhrases) {
-        const manualSetName = 'Manual Flashcard Set';
         const totalCount = state.manualPhrases.length;
         
-        console.log(`Creating manual set with ${totalCount} cards`);
+        console.log(`Processing manual input with ${totalCount} phrases`);
+
+        // Get or generate placeholder image URL
+        if (!placeholderImageUrl) {
+          try {
+            const response = await fetch('/api/generate-placeholder-image');
+            if (response.ok) {
+              const data = await response.json();
+              placeholderImageUrl = data.imageUrl;
+            }
+          } catch (error) {
+            console.error('Failed to get placeholder image:', error);
+          }
+        }
 
         // Add placeholder set
         const placeholderSet: SetMetaData = {
           id: 'generating',
-          name: `${manualSetName} (Saving...)`,
+          name: `Custom Set (Processing...)`,
           createdAt: new Date().toISOString(),
           phraseCount: totalCount,
           source: 'manual',
           isFullyLearned: false,
           level: 'intermediate',
-          specificTopics: manualSetName,
+          specificTopics: 'Custom Vocabulary',
           seriousnessLevel: 5,
           toneLevel: 'Balanced',
-          imageUrl: undefined
+          imageUrl: placeholderImageUrl || undefined
         };
         setAvailableSets(sets => [...sets, placeholderSet]);
 
@@ -61,16 +73,16 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
         onClose();
         onOpenSetManager('generating');
 
-        // Call API to save manual phrases
-        const response = await fetch('/api/flashcard-sets', {
+        // Call API to process manual phrases
+        const response = await fetch('/api/generate-set', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            name: manualSetName,
-            phrases: state.manualPhrases,
-            source: 'manual'
+            mode: 'manual',
+            englishPhrases: state.manualPhrases,
+            totalCount
           }),
           credentials: 'include',
         });
@@ -84,21 +96,11 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
         // Remove placeholder and add real set
         setAvailableSets(sets => {
           const filtered = sets.filter(s => s.id !== 'generating');
-          const newSet: SetMetaData = {
-            ...result,
-            phraseCount: totalCount,
-            source: 'manual',
-            isFullyLearned: false,
-            level: 'intermediate',
-            specificTopics: manualSetName,
-            seriousnessLevel: 5,
-            toneLevel: 'Balanced'
-          };
-          return [...filtered, newSet];
+          return [...filtered, result.newSetMetaData];
         });
 
-        console.log("GenerationStep: Manual set created successfully.");
-        onComplete(result.id);
+        console.log("GenerationStep: Manual set processed successfully.");
+        onComplete(result.newSetMetaData.id);
         return;
       }
 

@@ -1,28 +1,19 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, AlertCircle } from 'lucide-react';
-
-interface ManualPhrase {
-  english: string;
-  thai: string;
-  pronunciation: string;
-  mnemonic?: string;
-}
+import { Plus, Trash2, AlertCircle, Wand2 } from 'lucide-react';
 
 interface ManualInputStepProps {
-  onNext: (phrases: ManualPhrase[]) => void;
+  onNext: (phrases: string[]) => void;
   onBack: () => void;
 }
 
 export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
-  const [phrases, setPhrases] = useState<ManualPhrase[]>([
-    { english: '', thai: '', pronunciation: '', mnemonic: '' }
-  ]);
+  const [phrases, setPhrases] = useState<string[]>(['']);
   const [showError, setShowError] = useState(false);
 
   const addPhrase = () => {
     if (phrases.length < 20) {
-      setPhrases([...phrases, { english: '', thai: '', pronunciation: '', mnemonic: '' }]);
+      setPhrases([...phrases, '']);
     }
   };
 
@@ -32,15 +23,17 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
     }
   };
 
-  const updatePhrase = (index: number, field: keyof ManualPhrase, value: string) => {
+  const updatePhrase = (index: number, value: string) => {
     const updatedPhrases = [...phrases];
-    updatedPhrases[index] = { ...updatedPhrases[index], [field]: value };
+    updatedPhrases[index] = value;
     setPhrases(updatedPhrases);
   };
 
   const handleNext = () => {
-    // Validate that at least 10 phrases have content
-    const validPhrases = phrases.filter(p => p.english.trim() && p.thai.trim());
+    // Filter out empty phrases and trim whitespace
+    const validPhrases = phrases
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
     
     if (validPhrases.length < 10) {
       setShowError(true);
@@ -63,7 +56,7 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
           Add Your Phrases
         </h3>
         <p className="text-sm text-gray-400">
-          Enter 10-20 phrases you want to learn. English and Thai are required.
+          Enter 10-20 English words or phrases you want to learn. We'll handle the Thai translations.
         </p>
       </motion.div>
 
@@ -75,7 +68,7 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
         >
           <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
           <p className="text-sm text-red-400">
-            Please add at least 10 phrases with both English and Thai text.
+            Please add at least 10 words or phrases.
           </p>
         </motion.div>
       )}
@@ -103,47 +96,15 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
               )}
             </div>
 
-            <div className="grid grid-cols-1 gap-3">
-              <input
-                type="text"
-                placeholder="English phrase"
-                value={phrase.english}
-                onChange={(e) => updatePhrase(index, 'english', e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-gray-900/50 border border-gray-700 
-                  text-white placeholder-gray-500 focus:outline-none focus:ring-2 
-                  focus:ring-blue-500/50 text-sm"
-              />
-              
-              <input
-                type="text"
-                placeholder="Thai phrase (ภาษาไทย)"
-                value={phrase.thai}
-                onChange={(e) => updatePhrase(index, 'thai', e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-gray-900/50 border border-gray-700 
-                  text-white placeholder-gray-500 focus:outline-none focus:ring-2 
-                  focus:ring-blue-500/50 text-sm"
-              />
-              
-              <input
-                type="text"
-                placeholder="Pronunciation (optional)"
-                value={phrase.pronunciation}
-                onChange={(e) => updatePhrase(index, 'pronunciation', e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-gray-900/50 border border-gray-700 
-                  text-white placeholder-gray-500 focus:outline-none focus:ring-2 
-                  focus:ring-blue-500/50 text-sm"
-              />
-              
-              <input
-                type="text"
-                placeholder="Mnemonic hint (optional)"
-                value={phrase.mnemonic}
-                onChange={(e) => updatePhrase(index, 'mnemonic', e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-gray-900/50 border border-gray-700 
-                  text-white placeholder-gray-500 focus:outline-none focus:ring-2 
-                  focus:ring-blue-500/50 text-sm"
-              />
-            </div>
+            <input
+              type="text"
+              placeholder="Enter an English word or phrase"
+              value={phrase}
+              onChange={(e) => updatePhrase(index, e.target.value)}
+              className="w-full px-3 py-2 rounded-lg bg-gray-900/50 border border-gray-700 
+                text-white placeholder-gray-500 focus:outline-none focus:ring-2 
+                focus:ring-blue-500/50 text-sm"
+            />
           </motion.div>
         ))}
       </div>
@@ -171,7 +132,7 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
         </button>
         
         <div className="text-sm text-gray-400">
-          {phrases.filter(p => p.english.trim() && p.thai.trim()).length} of 10-20 phrases
+          {phrases.filter(p => p.trim()).length} of 10-20 phrases
         </div>
         
         <button

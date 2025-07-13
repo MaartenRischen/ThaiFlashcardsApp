@@ -51,112 +51,38 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
     onNext(correctedPhrases, corrections);
   };
   
-  // Simple spell check function (can be enhanced with a proper spell check API)
+  // Use AI for spell checking and grammar correction
   const spellCheckPhrases = async (phrases: string[]): Promise<{
     correctedPhrases: string[],
     corrections: Array<{original: string, corrected: string}>
   }> => {
-    // Common corrections
-    const corrections: Record<string, string> = {
-      'teh': 'the',
-      'adn': 'and',
-      'taht': 'that',
-      'wiht': 'with',
-      'recieve': 'receive',
-      'beleive': 'believe',
-      'occured': 'occurred',
-      'untill': 'until',
-      'wich': 'which',
-      'thier': 'their',
-      'alot': 'a lot',
-      'definately': 'definitely',
-      'seperate': 'separate',
-      'ocurr': 'occur',
-      'accomodate': 'accommodate',
-      'acheive': 'achieve',
-      'adress': 'address',
-      'calender': 'calendar',
-      'collegue': 'colleague',
-      'concious': 'conscious',
-      'dissapear': 'disappear',
-      'existance': 'existence',
-      'foriegn': 'foreign',
-      'fourty': 'forty',
-      'goverment': 'government',
-      'harrass': 'harass',
-      'independant': 'independent',
-      'knowlege': 'knowledge',
-      'lisence': 'license',
-      'mispell': 'misspell',
-      'neccessary': 'necessary',
-      'noticable': 'noticeable',
-      'occassion': 'occasion',
-      'occurence': 'occurrence',
-      'persistant': 'persistent',
-      'preceed': 'precede',
-      'priviledge': 'privilege',
-      'pronounciation': 'pronunciation',
-      'reccomend': 'recommend',
-      'rythm': 'rhythm',
-      'sieze': 'seize',
-      'suprise': 'surprise',
-      'tommorow': 'tomorrow',
-      'tounge': 'tongue',
-      'truely': 'truly',
-      'vaccuum': 'vacuum',
-      'weird': 'weird',
-      'whereever': 'wherever'
-    };
-    
-    const allCorrections: Array<{original: string, corrected: string}> = [];
-    
-    const correctedPhrases = phrases.map(phrase => {
-      let corrected = phrase;
-      
-      // Apply corrections word by word
-      const words = corrected.split(' ');
-      const correctedWords = words.map(word => {
-        const lowerWord = word.toLowerCase();
-        const punctuation = word.match(/[.,!?;:]$/)?.[0] || '';
-        const cleanWord = lowerWord.replace(/[.,!?;:]$/, '');
-        
-        if (corrections[cleanWord]) {
-          // Preserve original capitalization
-          const correctedWord = corrections[cleanWord];
-          if (word[0] === word[0].toUpperCase()) {
-            return correctedWord.charAt(0).toUpperCase() + correctedWord.slice(1) + punctuation;
-          }
-          return correctedWord + punctuation;
-        }
-        return word;
+    try {
+      // Call our API endpoint to use OpenRouter for spell checking
+      const response = await fetch('/api/spellcheck', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phrases }),
       });
-      
-      corrected = correctedWords.join(' ');
-      
-      // Capitalize first letter of sentence
-      corrected = corrected.charAt(0).toUpperCase() + corrected.slice(1);
-      
-      // Fix common grammar issues
-      corrected = corrected
-        .replace(/\s+/g, ' ') // Multiple spaces to single space
-        .replace(/\s+([.,!?;:])/g, '$1') // Remove space before punctuation
-        .replace(/([.,!?;:])\s*$/g, '$1') // Ensure punctuation at end
-        .trim();
-      
-      // Add period if no ending punctuation
-      if (!/[.!?]$/.test(corrected)) {
-        corrected += '.';
+
+      if (!response.ok) {
+        throw new Error('Spell check API failed');
       }
-      
-      // Track if correction was made
-      if (corrected !== phrase) {
-        allCorrections.push({ original: phrase, corrected });
-      }
-      
-      return corrected;
-    });
-    
-    return { correctedPhrases, corrections: allCorrections };
+
+      const data = await response.json();
+      return {
+        correctedPhrases: data.correctedPhrases,
+        corrections: data.corrections
+      };
+    } catch (error) {
+      console.error('Spell check failed:', error);
+      // If API fails, return original phrases
+      return {
+        correctedPhrases: phrases,
+        corrections: []
+      };
+    }
   };
 
   return (

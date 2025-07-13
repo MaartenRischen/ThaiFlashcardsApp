@@ -27,12 +27,20 @@ let placeholderImageUrl: string | null = null;
 export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetManager }: GenerationStepProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasStartedGeneration, setHasStartedGeneration] = useState(false);
   const { setAvailableSets } = useSet();
 
   const generatePhrases = useCallback(async () => {
+    // Prevent multiple generations
+    if (hasStartedGeneration || isGenerating) {
+      console.log('Generation already in progress or completed, skipping...');
+      return;
+    }
+    
     const startTime = Date.now();
     
     try {
+      setHasStartedGeneration(true);
       setIsGenerating(true);
       setError(null);
 
@@ -218,10 +226,17 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
     } finally {
       setIsGenerating(false);
     }
-  }, [state, onComplete, onClose, onOpenSetManager, setAvailableSets]);
+  }, [state, onComplete, onClose, onOpenSetManager, setAvailableSets, hasStartedGeneration, isGenerating]);
 
   useEffect(() => {
     generatePhrases();
+    
+    // Cleanup function to reset state when component unmounts
+    return () => {
+      setHasStartedGeneration(false);
+      setIsGenerating(false);
+      setError(null);
+    };
   }, [generatePhrases]);
 
   return (

@@ -61,7 +61,13 @@ function getErrorMessage(error: unknown): string {
   return 'Set generation failed.';
 }
 
-async function handleManualMode(userId: string, englishPhrases: string[], preferences: any) {
+async function handleManualMode(userId: string, englishPhrases: string[], preferences: {
+  level: string;
+  specificTopics: string;
+  toneLevel: number;
+  topicsToDiscuss: string;
+  additionalContext: string;
+}) {
   console.log("API Route: Processing manual input phrases");
   
   try {

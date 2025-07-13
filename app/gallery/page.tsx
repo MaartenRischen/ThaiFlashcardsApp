@@ -3,7 +3,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useSet } from '@/app/context/SetContext';
 import { Phrase } from '@/app/lib/set-generator';
 import GallerySetCard from './GallerySetCard';
-import { GalleryHorizontal, Loader2, Info } from 'lucide-react';
+import { GalleryHorizontal, Loader2 } from 'lucide-react';
 // Import a modal component (we'll create this next)
 import CardViewerModal from './CardViewerModal';
 

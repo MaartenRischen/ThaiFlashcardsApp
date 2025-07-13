@@ -174,7 +174,7 @@ export function SetWizardModal({
     }
   }, [isOpen]);
 
-  const wizardState: SetWizardState = {
+  const wizardState: SetWizardState = React.useMemo(() => ({
     mode,
     selectedTopic: { type: 'goal', value: topic },
     proficiency: { levelEstimate: proficiencyLevel, canDoSelections: [] },
@@ -182,7 +182,7 @@ export function SetWizardModal({
     cardCount,
     additionalContext: '',
     manualPhrases
-  };
+  }), [mode, topic, proficiencyLevel, toneLevel, cardCount, manualPhrases]);
 
   // Build steps array based on mode
   const steps: StepData[] = React.useMemo(() => {

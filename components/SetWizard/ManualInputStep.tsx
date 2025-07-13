@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, AlertCircle, Wand2 } from 'lucide-react';
+import { Plus, Trash2, AlertCircle } from 'lucide-react';
 
 interface ManualInputStepProps {
   onNext: (phrases: string[]) => void;

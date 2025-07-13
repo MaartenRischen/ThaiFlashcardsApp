@@ -658,11 +658,13 @@ export function SetManagerModal({ isOpen, onClose, highlightSetId }: {
                   </div>
                 )}
                 
-                {/* ADDED: Proficiency and Tone Level */}
-                <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">
-                  {set.level && <span>Level: <span className="font-medium text-[#A9C4FC]">{set.level}</span></span>}
-                  {set.toneLevel !== undefined && set.toneLevel !== null && <span>Tone Level: <span className="font-medium text-[#A9C4FC]">{set.toneLevel}</span></span>}
-                </div>
+                {/* ADDED: Proficiency and Tone Level - Hide for manual sets */}
+                {set.source !== 'manual' && (
+                  <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">
+                    {set.level && <span>Level: <span className="font-medium text-[#A9C4FC]">{set.level}</span></span>}
+                    {set.toneLevel !== undefined && set.toneLevel !== null && <span>Tone Level: <span className="font-medium text-[#A9C4FC]">{set.toneLevel}</span></span>}
+                  </div>
+                )}
                 
                 {/* Phrase Count - moved lower */}
                 <p className="text-xs text-gray-400 mt-0.5">{set.phraseCount} cards</p>

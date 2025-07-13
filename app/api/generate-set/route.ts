@@ -218,29 +218,66 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
 }
 
 async function generateSmartTitle(phrases: string[]): Promise<string> {
-  // Simple title generation based on common themes
+  // Analyze phrases to find common themes
   const words = phrases.join(' ').toLowerCase().split(/\s+/);
-  const commonWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for']);
+  const commonWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'me', 'him', 'us', 'them']);
   
   // Count word frequencies
   const wordFreq = new Map<string, number>();
   words.forEach(word => {
-    if (!commonWords.has(word) && word.length > 2) {
-      wordFreq.set(word, (wordFreq.get(word) || 0) + 1);
+    const cleanWord = word.replace(/[^a-z]/g, ''); // Remove punctuation
+    if (!commonWords.has(cleanWord) && cleanWord.length > 2) {
+      wordFreq.set(cleanWord, (wordFreq.get(cleanWord) || 0) + 1);
     }
   });
   
-  // Get most common words
+  // Look for category keywords
+  const categories: Record<string, string[]> = {
+    'Food & Dining': ['food', 'eat', 'drink', 'restaurant', 'meal', 'breakfast', 'lunch', 'dinner', 'hungry', 'thirsty', 'delicious', 'taste', 'cook', 'kitchen', 'chef'],
+    'Travel & Transport': ['travel', 'trip', 'hotel', 'airport', 'train', 'bus', 'taxi', 'flight', 'ticket', 'destination', 'vacation', 'tourist', 'luggage', 'passport'],
+    'Shopping': ['buy', 'shop', 'store', 'price', 'cost', 'expensive', 'cheap', 'money', 'pay', 'purchase', 'sell', 'market', 'mall'],
+    'Greetings & Politeness': ['hello', 'goodbye', 'thank', 'please', 'sorry', 'excuse', 'welcome', 'meet', 'nice', 'morning', 'evening', 'night'],
+    'Family & Relationships': ['family', 'mother', 'father', 'sister', 'brother', 'parent', 'child', 'friend', 'husband', 'wife', 'love', 'marry'],
+    'Work & Business': ['work', 'job', 'office', 'meeting', 'business', 'company', 'boss', 'employee', 'colleague', 'salary', 'career'],
+    'Health & Medical': ['doctor', 'hospital', 'sick', 'health', 'medicine', 'pain', 'hurt', 'emergency', 'clinic', 'nurse', 'patient'],
+    'Education': ['school', 'study', 'learn', 'teacher', 'student', 'class', 'lesson', 'homework', 'exam', 'university', 'education'],
+    'Daily Activities': ['wake', 'sleep', 'shower', 'brush', 'dress', 'daily', 'routine', 'morning', 'evening', 'today', 'tomorrow'],
+    'Weather & Time': ['weather', 'rain', 'sun', 'hot', 'cold', 'time', 'hour', 'minute', 'day', 'week', 'month', 'year', 'season']
+  };
+  
+  // Check which category has the most matches
+  let bestCategory = '';
+  let bestScore = 0;
+  
+  for (const [category, keywords] of Object.entries(categories)) {
+    let score = 0;
+    keywords.forEach(keyword => {
+      if (wordFreq.has(keyword)) {
+        score += wordFreq.get(keyword) || 0;
+      }
+    });
+    if (score > bestScore) {
+      bestScore = score;
+      bestCategory = category;
+    }
+  }
+  
+  if (bestCategory) {
+    return `Manual Set: ${bestCategory}`;
+  }
+  
+  // Fallback: Get most common words
   const sortedWords = Array.from(wordFreq.entries())
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
+    .slice(0, 2)
     .map(([word]) => word);
   
   if (sortedWords.length > 0) {
-    return sortedWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' & ');
+    const topic = sortedWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' & ');
+    return `Manual Set: ${topic}`;
   }
   
-  return 'Custom Vocabulary Set';
+  return 'Manual Set: Custom Vocabulary';
 }
 
 export async function POST(request: Request) {

@@ -3,6 +3,7 @@ import { Dialog } from '@/components/ui/dialog';
 import { WelcomeStep } from './WelcomeStep';
 import { ModeSelectionStep } from './ModeSelectionStep';
 import { ManualInputStep } from './ManualInputStep';
+import { ConfirmationStep } from './ConfirmationStep';
 import { TopicStep } from './TopicStep';
 import { ProficiencyStep } from './ProficiencyStep';
 import { ToneStep } from './ToneStep';
@@ -141,7 +142,21 @@ interface ReviewStepData extends BaseStep {
   };
 }
 
-type StepData = WelcomeStepData | ModeSelectionStepData | ManualInputStepData | TopicStepData | ProficiencyStepData | ToneStepData | GenerationStepData | ReviewStepData;
+interface ConfirmationStepData extends BaseStep {
+  type: 'confirmation';
+  component: React.ComponentType<{
+    phrases: string[];
+    onConfirm: () => void;
+    onBack: () => void;
+  }>;
+  props: {
+    phrases: string[];
+    onConfirm: () => void;
+    onBack: () => void;
+  };
+}
+
+type StepData = WelcomeStepData | ModeSelectionStepData | ManualInputStepData | TopicStepData | ProficiencyStepData | ToneStepData | GenerationStepData | ReviewStepData | ConfirmationStepData;
 
 export function SetWizardModal({
   isOpen,
@@ -292,6 +307,17 @@ export function SetWizardModal({
           },
         },
         {
+          type: 'confirmation',
+          title: 'Confirm Your Phrases',
+          subtitle: 'Review before generating flashcards',
+          component: ConfirmationStep,
+          props: {
+            phrases: manualPhrases,
+            onConfirm: () => setCurrentStep(4),
+            onBack: () => setCurrentStep(2),
+          },
+        },
+        {
           type: 'generation',
           title: 'Creating Your Set',
           subtitle: 'Please wait while we save your flashcards',
@@ -302,7 +328,7 @@ export function SetWizardModal({
               onComplete(newSetId);
               onClose();
             },
-            onBack: () => setCurrentStep(2),
+            onBack: () => setCurrentStep(3),
             onClose,
             onOpenSetManager: () => {}, // TODO: Implement set manager opening
           },

@@ -57,11 +57,11 @@ interface ModeSelectionStepData extends BaseStep {
 interface ManualInputStepData extends BaseStep {
   type: 'manualInput';
   component: React.ComponentType<{
-    onNext: (phrases: string[]) => void;
+    onNext: (phrases: string[], corrections?: Array<{original: string, corrected: string}>) => void;
     onBack: () => void;
   }>;
   props: {
-    onNext: (phrases: string[]) => void;
+    onNext: (phrases: string[], corrections?: Array<{original: string, corrected: string}>) => void;
     onBack: () => void;
   };
 }
@@ -146,11 +146,13 @@ interface ConfirmationStepData extends BaseStep {
   type: 'confirmation';
   component: React.ComponentType<{
     phrases: string[];
+    corrections?: Array<{original: string, corrected: string}>;
     onConfirm: () => void;
     onBack: () => void;
   }>;
   props: {
     phrases: string[];
+    corrections?: Array<{original: string, corrected: string}>;
     onConfirm: () => void;
     onBack: () => void;
   };
@@ -175,6 +177,7 @@ export function SetWizardModal({
   const [_generatedSet, _setGeneratedSet] = React.useState<GeneratedSet | null>(null);
   const [cardCount, setCardCount] = React.useState(10);
   const [manualPhrases, setManualPhrases] = React.useState<string[]>([]);
+  const [manualCorrections, setManualCorrections] = React.useState<Array<{original: string, corrected: string}>>([]);
 
   // Reset state when modal opens
   React.useEffect(() => {
@@ -186,6 +189,7 @@ export function SetWizardModal({
       setToneLevel(5);
       setCardCount(10);
       setManualPhrases([]);
+      setManualCorrections([]);
     }
   }, [isOpen]);
 
@@ -299,9 +303,11 @@ export function SetWizardModal({
           subtitle: 'Enter the phrases you want to learn',
           component: ManualInputStep,
           props: {
-            onNext: (phrases) => {
+            onNext: (phrases, corrections) => {
               console.log('SetWizardModal received phrases from ManualInputStep:', phrases);
+              console.log('SetWizardModal received corrections:', corrections);
               setManualPhrases(phrases);
+              setManualCorrections(corrections || []);
               setCurrentStep(3);
             },
             onBack: () => setCurrentStep(1),
@@ -314,6 +320,7 @@ export function SetWizardModal({
           component: ConfirmationStep,
           props: {
             phrases: manualPhrases,
+            corrections: manualCorrections,
             onConfirm: () => setCurrentStep(4),
             onBack: () => setCurrentStep(2),
           },
@@ -336,7 +343,7 @@ export function SetWizardModal({
         },
       ];
     }
-  }, [mode, topic, proficiencyLevel, toneLevel, wizardState, onComplete, onClose, manualPhrases]);
+  }, [mode, topic, proficiencyLevel, toneLevel, wizardState, onComplete, onClose, manualPhrases, manualCorrections]);
 
   const currentStepData = steps[currentStep];
   

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Plus, Trash2, AlertCircle } from 'lucide-react';
 
 interface ManualInputStepProps {
-  onNext: (phrases: string[]) => void;
+  onNext: (phrases: string[], corrections?: Array<{original: string, corrected: string}>) => void;
   onBack: () => void;
 }
 
@@ -42,16 +42,20 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
     setIsProcessing(true);
     
     // Perform spell check and correction
-    const correctedPhrases = await spellCheckPhrases(validPhrases);
+    const { correctedPhrases, corrections } = await spellCheckPhrases(validPhrases);
     
     setShowError(false);
     setIsProcessing(false);
     console.log('ManualInputStep sending corrected phrases:', correctedPhrases);
-    onNext(correctedPhrases);
+    console.log('Corrections made:', corrections);
+    onNext(correctedPhrases, corrections);
   };
   
   // Simple spell check function (can be enhanced with a proper spell check API)
-  const spellCheckPhrases = async (phrases: string[]): Promise<string[]> => {
+  const spellCheckPhrases = async (phrases: string[]): Promise<{
+    correctedPhrases: string[],
+    corrections: Array<{original: string, corrected: string}>
+  }> => {
     // Common corrections
     const corrections: Record<string, string> = {
       'teh': 'the',
@@ -104,7 +108,9 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
       'whereever': 'wherever'
     };
     
-    return phrases.map(phrase => {
+    const allCorrections: Array<{original: string, corrected: string}> = [];
+    
+    const correctedPhrases = phrases.map(phrase => {
       let corrected = phrase;
       
       // Apply corrections word by word
@@ -142,8 +148,15 @@ export function ManualInputStep({ onNext, onBack }: ManualInputStepProps) {
         corrected += '.';
       }
       
+      // Track if correction was made
+      if (corrected !== phrase) {
+        allCorrections.push({ original: phrase, corrected });
+      }
+      
       return corrected;
     });
+    
+    return { correctedPhrases, corrections: allCorrections };
   };
 
   return (

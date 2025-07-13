@@ -6,12 +6,19 @@ import { ChevronLeft, Sparkles, AlertCircle } from 'lucide-react';
 
 interface ConfirmationStepProps {
   phrases: string[];
+  corrections?: Array<{original: string, corrected: string}>;
   onConfirm: () => void;
   onBack: () => void;
 }
 
-export function ConfirmationStep({ phrases, onConfirm, onBack }: ConfirmationStepProps) {
+export function ConfirmationStep({ phrases, corrections, onConfirm, onBack }: ConfirmationStepProps) {
   console.log('ConfirmationStep rendered with phrases:', phrases);
+  console.log('Corrections:', corrections);
+  
+  // Create a map for quick lookup of corrections
+  const correctionMap = new Map(
+    corrections?.map(c => [c.corrected, c.original]) || []
+  );
   
   return (
     <div className="relative h-full flex flex-col">
@@ -34,6 +41,11 @@ export function ConfirmationStep({ phrases, onConfirm, onBack }: ConfirmationSte
             <AlertCircle className="w-4 h-4" />
             <span className="text-sm font-medium">
               {phrases.length} phrase{phrases.length !== 1 ? 's' : ''} will be translated
+              {corrections && corrections.length > 0 && (
+                <span className="text-yellow-500 ml-2">
+                  ({corrections.length} corrected)
+                </span>
+              )}
             </span>
           </div>
           
@@ -49,9 +61,16 @@ export function ConfirmationStep({ phrases, onConfirm, onBack }: ConfirmationSte
                 <span className="text-xs text-gray-500 font-mono w-6">
                   {(index + 1).toString().padStart(2, '0')}
                 </span>
-                <span className="text-sm text-gray-200 flex-1">
-                  {phrase}
-                </span>
+                <div className="flex-1">
+                  <span className="text-sm text-gray-200">
+                    {phrase}
+                  </span>
+                  {correctionMap.has(phrase) && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      <span className="text-yellow-500">✓ Corrected from:</span> {correctionMap.get(phrase)}
+                    </div>
+                  )}
+                </div>
               </motion.div>
             ))}
           </div>

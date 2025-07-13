@@ -239,8 +239,9 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
 
 async function generateSmartTitle(phrases: string[]): Promise<string> {
   // Analyze phrases to find common themes
-  const words = phrases.join(' ').toLowerCase().split(/\s+/);
-  const commonWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'me', 'him', 'us', 'them']);
+  const allText = phrases.join(' ').toLowerCase();
+  const words = allText.split(/\s+/);
+  const commonWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'me', 'him', 'us', 'them', 'this', 'that', 'these', 'those', 'what', 'where', 'when', 'why', 'how', 'much', 'many']);
   
   // Count word frequencies
   const wordFreq = new Map<string, number>();
@@ -251,44 +252,57 @@ async function generateSmartTitle(phrases: string[]): Promise<string> {
     }
   });
   
-  // Look for category keywords
+  // Look for category keywords - EXPANDED with more relevant terms
   const categories: Record<string, string[]> = {
-    'Food & Dining': ['food', 'eat', 'drink', 'restaurant', 'meal', 'breakfast', 'lunch', 'dinner', 'hungry', 'thirsty', 'delicious', 'taste', 'cook', 'kitchen', 'chef'],
-    'Travel & Transport': ['travel', 'trip', 'hotel', 'airport', 'train', 'bus', 'taxi', 'flight', 'ticket', 'destination', 'vacation', 'tourist', 'luggage', 'passport'],
-    'Shopping': ['buy', 'shop', 'store', 'price', 'cost', 'expensive', 'cheap', 'money', 'pay', 'purchase', 'sell', 'market', 'mall'],
-    'Greetings & Politeness': ['hello', 'goodbye', 'thank', 'please', 'sorry', 'excuse', 'welcome', 'meet', 'nice', 'morning', 'evening', 'night'],
-    'Family & Relationships': ['family', 'mother', 'father', 'sister', 'brother', 'parent', 'child', 'friend', 'husband', 'wife', 'love', 'marry'],
-    'Work & Business': ['work', 'job', 'office', 'meeting', 'business', 'company', 'boss', 'employee', 'colleague', 'salary', 'career'],
-    'Health & Medical': ['doctor', 'hospital', 'sick', 'health', 'medicine', 'pain', 'hurt', 'emergency', 'clinic', 'nurse', 'patient'],
-    'Education': ['school', 'study', 'learn', 'teacher', 'student', 'class', 'lesson', 'homework', 'exam', 'university', 'education'],
-    'Daily Activities': ['wake', 'sleep', 'shower', 'brush', 'dress', 'daily', 'routine', 'morning', 'evening', 'today', 'tomorrow'],
-    'Weather & Time': ['weather', 'rain', 'sun', 'hot', 'cold', 'time', 'hour', 'minute', 'day', 'week', 'month', 'year', 'season']
+    'Gym & Fitness': ['gym', 'fitness', 'workout', 'exercise', 'membership', 'squat', 'rack', 'weight', 'lift', 'train', 'training', 'muscle', 'cardio', 'equipment', 'machine', 'bench', 'dumbbell', 'barbell', 'previous', 'join', 'pass', 'passes', 'day'],
+    'Food & Dining': ['food', 'eat', 'drink', 'restaurant', 'meal', 'breakfast', 'lunch', 'dinner', 'hungry', 'thirsty', 'delicious', 'taste', 'cook', 'kitchen', 'chef', 'menu', 'order', 'table', 'waiter'],
+    'Travel & Transport': ['travel', 'trip', 'hotel', 'airport', 'train', 'bus', 'taxi', 'flight', 'ticket', 'destination', 'vacation', 'tourist', 'luggage', 'passport', 'journey', 'tour', 'visit'],
+    'Shopping': ['buy', 'shop', 'store', 'price', 'cost', 'expensive', 'cheap', 'money', 'pay', 'purchase', 'sell', 'market', 'mall', 'discount', 'sale', 'item'],
+    'Greetings & Politeness': ['hello', 'goodbye', 'thank', 'please', 'sorry', 'excuse', 'welcome', 'meet', 'nice', 'morning', 'evening', 'night', 'greet'],
+    'Family & Relationships': ['family', 'mother', 'father', 'sister', 'brother', 'parent', 'child', 'friend', 'husband', 'wife', 'love', 'marry', 'relative', 'son', 'daughter'],
+    'Work & Business': ['work', 'job', 'office', 'meeting', 'business', 'company', 'boss', 'employee', 'colleague', 'salary', 'career', 'project', 'deadline', 'task'],
+    'Health & Medical': ['doctor', 'hospital', 'sick', 'health', 'medicine', 'pain', 'hurt', 'emergency', 'clinic', 'nurse', 'patient', 'appointment', 'treatment', 'symptom'],
+    'Education': ['school', 'study', 'learn', 'teacher', 'student', 'class', 'lesson', 'homework', 'exam', 'university', 'education', 'course', 'subject', 'test'],
+    'Daily Activities': ['wake', 'sleep', 'shower', 'brush', 'dress', 'daily', 'routine', 'morning', 'evening', 'today', 'tomorrow', 'schedule', 'activity'],
+    'Sports & Recreation': ['sport', 'play', 'game', 'team', 'match', 'score', 'win', 'lose', 'competition', 'tournament', 'player', 'coach', 'practice'],
+    'Technology': ['computer', 'phone', 'internet', 'app', 'website', 'email', 'password', 'download', 'upload', 'software', 'device', 'screen', 'click'],
+    'Weather & Time': ['weather', 'rain', 'sun', 'hot', 'cold', 'time', 'hour', 'minute', 'day', 'week', 'month', 'year', 'season', 'temperature']
   };
   
-  // Check which category has the most matches
+  // Check which category has the most matches - with weighted scoring
   let bestCategory = '';
   let bestScore = 0;
   
   for (const [category, keywords] of Object.entries(categories)) {
     let score = 0;
     keywords.forEach(keyword => {
-      if (wordFreq.has(keyword)) {
-        score += wordFreq.get(keyword) || 0;
-      }
+      // Check both exact word match and if the keyword appears within larger words
+      const exactCount = wordFreq.get(keyword) || 0;
+      const partialCount = words.filter(w => w.includes(keyword)).length;
+      score += exactCount * 2 + partialCount; // Exact matches worth more
     });
+    
+    // Also check if category keywords appear in the original phrases
+    const categoryMatches = phrases.filter(phrase => 
+      keywords.some(keyword => phrase.toLowerCase().includes(keyword))
+    ).length;
+    score += categoryMatches * 3; // Phrase-level matches worth even more
+    
     if (score > bestScore) {
       bestScore = score;
       bestCategory = category;
     }
   }
   
-  if (bestCategory) {
+  // If we found a good category match, use it
+  if (bestCategory && bestScore >= 3) {
     return `Manual Set: ${bestCategory}`;
   }
   
-  // Fallback: Get most common words
+  // Otherwise, try to create a title from the most common meaningful words
   const sortedWords = Array.from(wordFreq.entries())
     .sort((a, b) => b[1] - a[1])
+    .filter(([word]) => word.length > 3) // Filter out very short words
     .slice(0, 2)
     .map(([word]) => word);
   

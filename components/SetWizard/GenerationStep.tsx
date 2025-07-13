@@ -71,8 +71,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
         };
         setAvailableSets(sets => [...sets, placeholderSet]);
 
-        // Close wizard and open My Sets modal
-        onClose();
+        // Open My Sets modal with placeholder
         onOpenSetManager('generating');
 
         // Call API to process manual phrases

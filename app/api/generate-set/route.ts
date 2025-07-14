@@ -238,80 +238,68 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
 }
 
 async function generateSmartTitle(phrases: string[]): Promise<string> {
-  // Analyze phrases to find common themes
-  const allText = phrases.join(' ').toLowerCase();
-  const words = allText.split(/\s+/);
-  const commonWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'me', 'him', 'us', 'them', 'this', 'that', 'these', 'those', 'what', 'where', 'when', 'why', 'how', 'much', 'many']);
-  
-  // Count word frequencies
-  const wordFreq = new Map<string, number>();
-  words.forEach(word => {
-    const cleanWord = word.replace(/[^a-z]/g, ''); // Remove punctuation
-    if (!commonWords.has(cleanWord) && cleanWord.length > 2) {
-      wordFreq.set(cleanWord, (wordFreq.get(cleanWord) || 0) + 1);
-    }
-  });
-  
-  // Look for category keywords - EXPANDED with more relevant terms
-  const categories: Record<string, string[]> = {
-    'Gym & Fitness': ['gym', 'fitness', 'workout', 'exercise', 'membership', 'squat', 'rack', 'weight', 'lift', 'train', 'training', 'muscle', 'cardio', 'equipment', 'machine', 'bench', 'dumbbell', 'barbell', 'previous', 'join', 'pass', 'passes', 'day'],
-    'Food & Dining': ['food', 'eat', 'drink', 'restaurant', 'meal', 'breakfast', 'lunch', 'dinner', 'hungry', 'thirsty', 'delicious', 'taste', 'cook', 'kitchen', 'chef', 'menu', 'order', 'table', 'waiter'],
-    'Travel & Transport': ['travel', 'trip', 'hotel', 'airport', 'train', 'bus', 'taxi', 'flight', 'ticket', 'destination', 'vacation', 'tourist', 'luggage', 'passport', 'journey', 'tour', 'visit'],
-    'Shopping': ['buy', 'shop', 'store', 'price', 'cost', 'expensive', 'cheap', 'money', 'pay', 'purchase', 'sell', 'market', 'mall', 'discount', 'sale', 'item'],
-    'Greetings & Politeness': ['hello', 'goodbye', 'thank', 'please', 'sorry', 'excuse', 'welcome', 'meet', 'nice', 'morning', 'evening', 'night', 'greet'],
-    'Family & Relationships': ['family', 'mother', 'father', 'sister', 'brother', 'parent', 'child', 'friend', 'husband', 'wife', 'love', 'marry', 'relative', 'son', 'daughter'],
-    'Work & Business': ['work', 'job', 'office', 'meeting', 'business', 'company', 'boss', 'employee', 'colleague', 'salary', 'career', 'project', 'deadline', 'task'],
-    'Health & Medical': ['doctor', 'hospital', 'sick', 'health', 'medicine', 'pain', 'hurt', 'emergency', 'clinic', 'nurse', 'patient', 'appointment', 'treatment', 'symptom'],
-    'Education': ['school', 'study', 'learn', 'teacher', 'student', 'class', 'lesson', 'homework', 'exam', 'university', 'education', 'course', 'subject', 'test'],
-    'Daily Activities': ['wake', 'sleep', 'shower', 'brush', 'dress', 'daily', 'routine', 'morning', 'evening', 'today', 'tomorrow', 'schedule', 'activity'],
-    'Sports & Recreation': ['sport', 'play', 'game', 'team', 'match', 'score', 'win', 'lose', 'competition', 'tournament', 'player', 'coach', 'practice'],
-    'Technology': ['computer', 'phone', 'internet', 'app', 'website', 'email', 'password', 'download', 'upload', 'software', 'device', 'screen', 'click'],
-    'Weather & Time': ['weather', 'rain', 'sun', 'hot', 'cold', 'time', 'hour', 'minute', 'day', 'week', 'month', 'year', 'season', 'temperature']
-  };
-  
-  // Check which category has the most matches - with weighted scoring
-  let bestCategory = '';
-  let bestScore = 0;
-  
-  for (const [category, keywords] of Object.entries(categories)) {
-    let score = 0;
-    keywords.forEach(keyword => {
-      // Check both exact word match and if the keyword appears within larger words
-      const exactCount = wordFreq.get(keyword) || 0;
-      const partialCount = words.filter(w => w.includes(keyword)).length;
-      score += exactCount * 2 + partialCount; // Exact matches worth more
+  try {
+    const prompt = `Analyze these English phrases and create a short, descriptive title (2-4 words) that captures their main theme:
+
+Phrases:
+${phrases.map((p, i) => `${i + 1}. ${p}`).join('\n')}
+
+Requirements:
+- Create a title that accurately reflects the content
+- Use 2-4 words maximum
+- Make it specific and descriptive
+- Use title case (capitalize main words)
+- Do NOT include generic words like "Set", "Manual", "Custom", "Vocabulary"
+- Focus on the actual topic/theme of the phrases
+
+Examples of good titles:
+- "Dog Care Essentials" (for phrases about dogs)
+- "Gym Membership Guide" (for phrases about joining a gym)
+- "Thai Street Food" (for phrases about local food)
+- "Family Conversations" (for phrases about family)
+
+Return ONLY the title, nothing else.`;
+
+    // Call OpenRouter API directly for simple text generation
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://donkeybridge.world',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'anthropic/claude-3.5-sonnet',
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 50
+      })
     });
-    
-    // Also check if category keywords appear in the original phrases
-    const categoryMatches = phrases.filter(phrase => 
-      keywords.some(keyword => phrase.toLowerCase().includes(keyword))
-    ).length;
-    score += categoryMatches * 3; // Phrase-level matches worth even more
-    
-    if (score > bestScore) {
-      bestScore = score;
-      bestCategory = category;
+
+    if (!response.ok) {
+      console.error('OpenRouter API error:', response.status);
+      return 'Custom Vocabulary';
     }
+
+    const data = await response.json();
+    const title = data.choices?.[0]?.message?.content?.trim().replace(/^["']|["']$/g, '').trim();
+
+    if (!title || title.length > 50 || title.split(' ').length > 6) {
+      console.warn('Generated title invalid, using fallback');
+      return 'Custom Vocabulary';
+    }
+
+    console.log(`Generated smart title: "${title}" for phrases:`, phrases.slice(0, 3));
+    return title;
+  } catch (error) {
+    console.error('Error generating smart title:', error);
+    return 'Custom Vocabulary';
   }
-  
-  // If we found a good category match, use it
-  if (bestCategory && bestScore >= 3) {
-    return `Manual Set: ${bestCategory}`;
-  }
-  
-  // Otherwise, try to create a title from the most common meaningful words
-  const sortedWords = Array.from(wordFreq.entries())
-    .sort((a, b) => b[1] - a[1])
-    .filter(([word]) => word.length > 3) // Filter out very short words
-    .slice(0, 2)
-    .map(([word]) => word);
-  
-  if (sortedWords.length > 0) {
-    const topic = sortedWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' & ');
-    return `Manual Set: ${topic}`;
-  }
-  
-  return 'Manual Set: Custom Vocabulary';
 }
 
 export async function POST(request: Request) {

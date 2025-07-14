@@ -204,8 +204,8 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
 
       console.log("GenerationStep: API call successful, triggering onComplete.");
       
-      // Add a minimum display time of 3 seconds
-      const MIN_DISPLAY_TIME = 3000;
+      // Add a minimum display time - longer for better UX
+      const MIN_DISPLAY_TIME = state.mode === 'manual' ? 5000 : 8000; // 5s for manual, 8s for auto
       const elapsedTime = Date.now() - startTime;
       const remainingTime = Math.max(0, MIN_DISPLAY_TIME - elapsedTime);
       
@@ -253,7 +253,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
 
   return (
     <>
-      <GenerationProgress isGenerating={isGenerating} mode={state.mode === 'auto' ? 'automatic' : state.mode} />
+      <GenerationProgress isGenerating={isGenerating || (!generationComplete && hasStartedGeneration)} mode={state.mode === 'auto' ? 'automatic' : state.mode} />
       
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
         {isGenerating ? (

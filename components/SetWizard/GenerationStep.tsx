@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import { Sparkles, CheckCircle, XCircle } from 'lucide-react'
 import { SetWizardState } from './types'
 import { Button } from '@/components/ui/button'
@@ -16,6 +17,7 @@ interface GenerationStepProps {
 }
 
 export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetManager }: GenerationStepProps) {
+  const router = useRouter()
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState<'generating' | 'success' | 'error'>('generating')
   const [errorMessage, setErrorMessage] = useState('')
@@ -51,59 +53,41 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
           setProgress(currentProgress)
         }, 200)
 
-        // Log the request body
-        const requestBody = state.mode === 'manual' 
-          ? {
-              mode: 'manual',
-              englishPhrases: state.manualPhrases || []
-            }
-          : {
-              preferences: {
-                level: state.proficiency.levelEstimate,
-                specificTopics: state.selectedTopic?.value || '',
-                toneLevel: state.tone,
-                topicsToDiscuss: state.selectedTopic?.value || '',
-                additionalContext: state.additionalContext || ''
-              },
-              totalCount: state.cardCount
-            }
-
-        console.log('[GenerationStep] Request body:', requestBody)
-
         // Make API call
         const response = await fetch('/api/generate-set', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify(
+            state.mode === 'manual' 
+              ? {
+                  mode: 'manual',
+                  englishPhrases: state.manualPhrases || []
+                }
+              : {
+                  preferences: {
+                    level: state.proficiency.levelEstimate,
+                    specificTopics: state.selectedTopic?.value || '',
+                    toneLevel: state.tone,
+                    topicsToDiscuss: state.selectedTopic?.value || '',
+                    additionalContext: state.additionalContext || ''
+                  },
+                  totalCount: state.cardCount
+                }
+          ),
         })
 
-        console.log('[GenerationStep] Response status:', response.status)
-        
-        if (!response.ok) {
-          const errorText = await response.text()
-          console.error('[GenerationStep] Error response:', errorText)
-          clearInterval(progressInterval)
-          
-          let errorData
-          try {
-            errorData = JSON.parse(errorText)
-          } catch {
-            errorData = { error: errorText }
-          }
-          
-          throw new Error(errorData.error || `Failed to generate set (${response.status})`)
-        }
-
         const data = await response.json()
-        console.log('[GenerationStep] Success response:', data)
         clearInterval(progressInterval)
 
         if (!isMountedRef.current) return
 
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to generate set')
+        }
+
         // Success! Extract the set ID
         const setId = data.setId || data.newSetMetaData?.id || data.newSetId
         if (!setId) {
-          console.error('[GenerationStep] Response data:', data)
           throw new Error('No set ID returned from API')
         }
 
@@ -114,8 +98,8 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
         // Show success screen for 2 seconds minimum
         setTimeout(() => {
           if (!isMountedRef.current) return
-          console.log('[GenerationStep] Calling onComplete with setId:', setId)
-          // Don't redirect - just call onComplete which will open the SetManagerModal
+          console.log('[GenerationStep] Redirecting to:', `/flashcard-sets/${setId}`)
+          router.push(`/flashcard-sets/${setId}`)
           onComplete(setId)
         }, 2000)
 
@@ -245,7 +229,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
               : `Created ${state.cardCount} flashcards`}
           </p>
           <p className="text-sm text-gray-500 animate-pulse">
-            Opening your new set...
+            Redirecting to your new set...
           </p>
         </motion.div>
       </div>

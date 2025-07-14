@@ -28,6 +28,8 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasStartedGeneration, setHasStartedGeneration] = useState(false);
+  const [generationComplete, setGenerationComplete] = useState(false);
+  const [generatedSetId, setGeneratedSetId] = useState<string | null>(null);
   const { setAvailableSets } = useSet();
 
   const generatePhrases = useCallback(async () => {
@@ -208,9 +210,11 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
       const remainingTime = Math.max(0, MIN_DISPLAY_TIME - elapsedTime);
       
       setTimeout(() => {
+        // Store the new set ID for later use
+        setGeneratedSetId(result.newSetMetaData.id);
+        setIsGenerating(false);
+        setGenerationComplete(true);
         onComplete(result.newSetMetaData.id);
-        // Automatically open My Sets modal with the new set
-        onOpenSetManager(result.newSetMetaData.id);
       }, remainingTime);
 
     } catch (err) {
@@ -241,6 +245,8 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
       setHasStartedGeneration(false);
       setIsGenerating(false);
       setError(null);
+      setGenerationComplete(false);
+      setGeneratedSetId(null);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array - only run once on mount
@@ -332,6 +338,54 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
             >
               &quot;Generating...&quot;
             </motion.div>
+          </motion.div>
+        ) : generationComplete ? (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center space-y-6"
+          >
+            <div className="relative">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", duration: 0.5 }}
+              >
+                <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto">
+                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </motion.div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold text-[#E0E0E0]">
+                Your flashcard set is ready!
+              </h3>
+              <p className="text-gray-400">
+                {state.mode === 'manual'
+                  ? `Successfully created ${state.manualPhrases?.length || 0} flashcards.`
+                  : `Successfully created ${state.cardCount} flashcards.`}
+              </p>
+            </div>
+
+            <div className="flex gap-3 justify-center">
+              <Button 
+                onClick={() => {
+                  if (generatedSetId) {
+                    onOpenSetManager(generatedSetId);
+                  }
+                }}
+                className="neumorphic-button text-blue-400"
+              >
+                View My Sets
+              </Button>
+            </div>
+            
+            <p className="text-sm text-gray-500 italic">
+              Click the X above or "View My Sets" to continue
+            </p>
           </motion.div>
         ) : error ? (
           <motion.div 

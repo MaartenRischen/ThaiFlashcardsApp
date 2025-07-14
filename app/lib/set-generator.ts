@@ -109,9 +109,9 @@ export async function generateCustomSet(
 ): Promise<GenerationResult> {
   console.log(`[generateCustomSet] Starting generation for ${totalCount} phrases`);
   
-  const allPhrases: Phrase[] = [];
+    const allPhrases: Phrase[] = [];
   const aggregatedErrors: BatchError[] = [];
-  let cleverTitle: string | undefined;
+    let cleverTitle: string | undefined;
   let llmBrand: string | undefined;
   let llmModel: string | undefined;
   let successfulModel: string | undefined;
@@ -132,7 +132,7 @@ export async function generateCustomSet(
       : batchSize;
       
     const config = createPromptConfig(primaryModel, {
-      ...preferences,
+          ...preferences,
       count: phraseCount,
       existingPhrases: allPhrases.map(p => p.english)
     });
@@ -189,8 +189,8 @@ export async function generateCustomSet(
       
       // Update progress
       if (onProgressUpdate) {
-        onProgressUpdate({
-          completed: allPhrases.length,
+        onProgressUpdate({ 
+          completed: allPhrases.length, 
           total: totalCount,
           latestPhrases: aggregated.phrases
         });
@@ -225,9 +225,9 @@ export async function generateCustomSet(
   console.log(`[generateCustomSet] Generation complete. Generated ${dedupedPhrases.length} unique phrases`);
   
   return {
-    phrases: dedupedPhrases,
-    cleverTitle,
-    aggregatedErrors,
+      phrases: dedupedPhrases,
+      cleverTitle,
+      aggregatedErrors,
     llmBrand,
     llmModel,
     temperature: temperatureUsed,
@@ -291,8 +291,8 @@ export async function generateSingleFlashcard(
   targetEnglishMeaning?: string
 ): Promise<{ phrase: Phrase | null, error?: BatchError }> {
   const promptOptions: GeneratePromptOptions = {
-    ...preferences,
-    count: 1,
+      ...preferences,
+      count: 1,
     specificTopics: targetEnglishMeaning || preferences.specificTopics
   };
   
@@ -311,15 +311,15 @@ export async function generateSingleFlashcard(
       );
       
       if (result.phrases && result.phrases.length > 0) {
-        return { phrase: result.phrases[0] };
-      }
+          return { phrase: result.phrases[0] };
+        }
     } catch (error) {
       console.error(`[generateSingleFlashcard] Model ${model} failed:`, error);
     }
   }
   
-  return {
-    phrase: null,
+    return { 
+      phrase: null, 
          error: createBatchError(
        'API_ERROR',
        'All models failed to generate flashcard',
@@ -396,7 +396,7 @@ export async function generateOpenRouterBatch(
   batchIndex: number,
   toneLevel?: number
 ): Promise<{phrases: Phrase[], cleverTitle?: string, error?: BatchError, temperature?: number}> {
-  const temperature = getTemperatureFromToneLevel(toneLevel);
+    const temperature = getTemperatureFromToneLevel(toneLevel);
   
   try {
     console.log(`[Batch ${batchIndex}] Calling OpenRouter API...`);
@@ -427,7 +427,7 @@ export async function generateOpenRouterBatch(
     
     console.log(`[Batch ${batchIndex}] Validated ${validPhrases.length}/${parsedData.phrases.length} phrases`);
     
-    return {
+        return {
       phrases: validPhrases,
       cleverTitle: parsedData.cleverTitle,
       temperature
@@ -440,8 +440,8 @@ export async function generateOpenRouterBatch(
       { batchIndex, models }
     );
     
-    return {
-      phrases: [],
+        return {
+            phrases: [],
       error: batchError,
       temperature
     };

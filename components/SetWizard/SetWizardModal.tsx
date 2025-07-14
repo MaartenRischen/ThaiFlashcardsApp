@@ -173,7 +173,7 @@ export function SetWizardModal({
   const [mode, setMode] = React.useState<'auto' | 'manual'>('auto');
   const [topic, setTopic] = React.useState('');
   const [proficiencyLevel, setProficiencyLevel] = React.useState<ProficiencyLevelString>('Complete Beginner');
-  const [toneLevel, setToneLevel] = React.useState(5);
+  const [toneLevel, setToneLevel] = React.useState(1);
   const [_generatedSet, _setGeneratedSet] = React.useState<GeneratedSet | null>(null);
   const [cardCount, setCardCount] = React.useState(10);
   const [manualPhrases, setManualPhrases] = React.useState<string[]>([]);
@@ -186,7 +186,7 @@ export function SetWizardModal({
       setMode('auto');
       setTopic('');
       setProficiencyLevel('Complete Beginner');
-      setToneLevel(5);
+      setToneLevel(1);
       setCardCount(10);
       setManualPhrases([]);
       setManualCorrections([]);

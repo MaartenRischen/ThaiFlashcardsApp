@@ -414,7 +414,7 @@ export function SetManagerModal({ isOpen, onClose, highlightSetId }: {
   if (!isOpen) return null;
 
   // Bulk actions
-  const _handleBulkDelete = async () => {
+  const handleBulkDelete = async () => {
     if (selected.length === 0) return;
     const setsToDelete = availableSets.filter(set => selected.includes(set.id) && set.id !== 'default');
     if (setsToDelete.length === 0) return;
@@ -712,11 +712,37 @@ export function SetManagerModal({ isOpen, onClose, highlightSetId }: {
             );
           })}
         </div>
-        <div className="flex gap-4 mt-6 text-xs text-gray-400 justify-end">
-          <span>Total Sets: {totalSets}</span>
-          <span>Total Cards: {totalCards}</span>
-          <span>Learned: {totalLearned}</span>
-          <span>Due Today: {dueToday}</span>
+        {/* Bulk Actions */}
+        <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-700">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSelected(availableSets.filter(s => s.id !== 'default').map(s => s.id))}
+              className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded-md transition"
+              disabled={bulkLoading}
+            >
+              Select All
+            </button>
+            <button
+              onClick={() => setSelected([])}
+              className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded-md transition"
+              disabled={bulkLoading || selected.length === 0}
+            >
+              Clear Selection
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              className="px-3 py-1.5 text-xs bg-red-600 hover:bg-red-700 text-white rounded-md transition disabled:opacity-50"
+              disabled={bulkLoading || selected.length === 0}
+            >
+              Delete Selected ({selected.length})
+            </button>
+          </div>
+          <div className="flex gap-4 text-xs text-gray-400">
+            <span>Total Sets: {totalSets}</span>
+            <span>Total Cards: {totalCards}</span>
+            <span>Learned: {totalLearned}</span>
+            <span>Due Today: {dueToday}</span>
+          </div>
         </div>
         {/* Cards Modal */}
         {cardsModalSetId && (

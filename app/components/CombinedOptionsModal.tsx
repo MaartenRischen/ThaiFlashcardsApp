@@ -713,25 +713,25 @@ export function SetManagerModal({ isOpen, onClose, highlightSetId }: {
           })}
         </div>
         {/* Bulk Actions */}
-        <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-700">
+        <div className="flex justify-between items-center mt-4 pt-4 border-t border-[#333]">
           <div className="flex gap-2">
             <button
               onClick={() => setSelected(availableSets.filter(s => s.id !== 'default').map(s => s.id))}
-              className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded-md transition"
+              className="neumorphic-button px-3 py-1.5 text-xs text-[#A9C4FC] disabled:opacity-50"
               disabled={bulkLoading}
             >
               Select All
             </button>
             <button
               onClick={() => setSelected([])}
-              className="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded-md transition"
+              className="neumorphic-button px-3 py-1.5 text-xs text-[#A9C4FC] disabled:opacity-50"
               disabled={bulkLoading || selected.length === 0}
             >
               Clear Selection
             </button>
             <button
               onClick={handleBulkDelete}
-              className="px-3 py-1.5 text-xs bg-red-600 hover:bg-red-700 text-white rounded-md transition disabled:opacity-50"
+              className="neumorphic-button px-3 py-1.5 text-xs text-red-400 disabled:opacity-50"
               disabled={bulkLoading || selected.length === 0}
             >
               Delete Selected ({selected.length})

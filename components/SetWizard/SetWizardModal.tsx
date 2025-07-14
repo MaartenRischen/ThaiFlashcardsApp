@@ -338,7 +338,11 @@ export function SetWizardModal({
             },
             onBack: () => setCurrentStep(3),
             onClose,
-            onOpenSetManager: () => {}, // TODO: Implement set manager opening
+            onOpenSetManager: (setToSelect?: string) => {
+              // Close wizard and open set manager with the new set highlighted
+              onClose();
+              onComplete(setToSelect || '');
+            },
           },
         },
       ];
@@ -373,7 +377,15 @@ export function SetWizardModal({
                 </p>
               </div>
               <button
-                onClick={onClose}
+                onClick={() => {
+                  if (currentStepData.type === 'generation') {
+                    // For generation step, open My Sets modal
+                    onClose();
+                    onComplete('generating'); // Special ID to indicate generation in progress
+                  } else {
+                    onClose();
+                  }
+                }}
                 className="text-gray-400 hover:text-gray-300"
               >
                 ✕

@@ -209,6 +209,8 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
       
       setTimeout(() => {
         onComplete(result.newSetMetaData.id);
+        // Automatically open My Sets modal with the new set
+        onOpenSetManager(result.newSetMetaData.id);
       }, remainingTime);
 
     } catch (err) {
@@ -245,7 +247,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
 
   return (
     <>
-      <GenerationProgress isGenerating={isGenerating} />
+      <GenerationProgress isGenerating={isGenerating} mode={state.mode === 'auto' ? 'automatic' : state.mode} />
       
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
         {isGenerating ? (
@@ -279,12 +281,15 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
               <h3 className="text-2xl font-bold text-[#E0E0E0]">
                 {state.mode === 'manual' 
                   ? 'Saving your custom flashcard set!' 
-                  : 'Let&apos;s create your personalized Thai flashcard set!'}
+                  : 'Creating your personalized flashcard set!'}
               </h3>
               <p className="text-gray-400 max-w-md">
                 {state.mode === 'manual'
                   ? `We're saving your ${state.manualPhrases?.length || 0} custom flashcards.`
                   : `We're crafting ${state.cardCount} personalized flashcards based on your preferences. This usually takes about 2 minutes.`}
+              </p>
+              <p className="text-sm text-gray-500 italic mt-2">
+                You can click away and the process will continue in the background.
               </p>
             </div>
 

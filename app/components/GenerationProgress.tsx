@@ -3,13 +3,21 @@ import { Loader2 } from 'lucide-react';
 
 interface GenerationProgressProps {
   isGenerating: boolean;
+  mode?: 'manual' | 'automatic';
 }
 
-export function GenerationProgress({ isGenerating }: GenerationProgressProps) {
+export function GenerationProgress({ isGenerating, mode = 'automatic' }: GenerationProgressProps) {
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   
-  const steps = [
+  const steps = mode === 'manual' ? [
+    'Processing your phrases...',
+    'Translating to Thai...',
+    'Adding pronunciations...',
+    'Creating mnemonics...',
+    'Generating set image...',
+    'Finalizing your set...'
+  ] : [
     'Analyzing your preferences...',
     'Crafting Thai phrases...',
     'Adding mnemonics...',

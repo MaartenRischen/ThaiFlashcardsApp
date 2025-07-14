@@ -1391,6 +1391,8 @@ export default function ThaiFlashcards() {
             console.log('SetWizardModal onComplete fired, new set:', newSetId);
             if (newSetId) {
               setHighlightSetId(newSetId);
+              // Open My Sets modal to show the new set
+              setIsManagementModalOpen(true);
             }
           }}
         />

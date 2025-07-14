@@ -61,109 +61,61 @@ function getErrorMessage(error: unknown): string {
   return 'Set generation failed.';
 }
 
-function createImageGenerationPrompt(topicDescription: string, phrases?: string[]): string {
-  // Analyze phrases to extract key visual elements
+async function createImageGenerationPrompt(topicDescription: string, phrases?: string[]): Promise<string> {
   let contextualElements = '';
   
+  // If we have phrases, use AI to analyze them and suggest visual elements
   if (phrases && phrases.length > 0) {
-    // Join first few phrases for context
-    const samplePhrases = phrases.slice(0, 5).join(' ').toLowerCase();
-    
-    // Extract visual elements based on common themes
-    const visualElements: string[] = [];
-    
-    // Crypto/Finance
-    if (samplePhrases.includes('crypto') || samplePhrases.includes('bitcoin') || samplePhrases.includes('market') || samplePhrases.includes('trading')) {
-      visualElements.push('floating Bitcoin and cryptocurrency symbols', 'chart patterns in the sky', 'golden coins');
-    }
-    
-    // Water/Drinking
-    if (samplePhrases.includes('water') || samplePhrases.includes('drink') || samplePhrases.includes('thirsty')) {
-      visualElements.push('donkey drinking from a stream', 'water flowing under the bridge', 'water splashes');
-    }
-    
-    // Greetings/Social
-    if (samplePhrases.includes('hello') || samplePhrases.includes('greet') || samplePhrases.includes('meet') || samplePhrases.includes('welcome')) {
-      visualElements.push('donkeys waving their hooves', 'friendly gestures', 'donkeys meeting on the bridge');
-    }
-    
-    // Technology/Problems
-    if (samplePhrases.includes('light') || samplePhrases.includes('electric') || samplePhrases.includes('problem') || samplePhrases.includes('fix')) {
-      visualElements.push('lightbulbs floating in the air', 'electrical sparks', 'donkey holding tools');
-    }
-    
-    // Food/Eating
-    if (samplePhrases.includes('food') || samplePhrases.includes('eat') || samplePhrases.includes('hungry') || samplePhrases.includes('restaurant')) {
-      visualElements.push('food items on picnic blanket', 'donkey eating hay', 'fruits and vegetables');
-    }
-    
-    // Travel/Transport
-    if (samplePhrases.includes('travel') || samplePhrases.includes('airport') || samplePhrases.includes('flight') || samplePhrases.includes('trip')) {
-      visualElements.push('luggage and suitcases', 'airplane in the sky', 'donkey with travel gear');
-    }
-    
-    // Shopping
-    if (samplePhrases.includes('buy') || samplePhrases.includes('shop') || samplePhrases.includes('store') || samplePhrases.includes('price')) {
-      visualElements.push('shopping bags', 'market stalls near bridge', 'donkey with cart full of goods');
-    }
-    
-    // Exercise/Gym
-    if (samplePhrases.includes('gym') || samplePhrases.includes('exercise') || samplePhrases.includes('workout') || samplePhrases.includes('fitness')) {
-      visualElements.push('dumbbells and weights', 'donkey doing stretches', 'exercise equipment outdoors');
-    }
-    
-    // Weather
-    if (samplePhrases.includes('rain') || samplePhrases.includes('sun') || samplePhrases.includes('weather') || samplePhrases.includes('hot') || samplePhrases.includes('cold')) {
-      visualElements.push('weather elements like sun, clouds, rain', 'donkey with umbrella', 'seasonal elements');
-    }
-    
-    // Education/Learning
-    if (samplePhrases.includes('study') || samplePhrases.includes('learn') || samplePhrases.includes('school') || samplePhrases.includes('teach')) {
-      visualElements.push('floating books', 'donkey wearing glasses', 'pencils and notebooks scattered around');
-    }
-    
-    // Health/Medical
-    if (samplePhrases.includes('doctor') || samplePhrases.includes('sick') || samplePhrases.includes('health') || samplePhrases.includes('hospital')) {
-      visualElements.push('medical cross symbol', 'first aid kit', 'donkey with stethoscope around neck');
-    }
-    
-    // Time
-    if (samplePhrases.includes('time') || samplePhrases.includes('clock') || samplePhrases.includes('hour') || samplePhrases.includes('late')) {
-      visualElements.push('clock floating in sky', 'sundial near bridge', 'donkey checking pocket watch');
-    }
-    
-    // Animals/Pets
-    if (samplePhrases.includes('dog') || samplePhrases.includes('cat') || samplePhrases.includes('pet') || samplePhrases.includes('animal')) {
-      visualElements.push('pet toys and accessories', 'food bowls', 'donkey playing with pet toys', 'paw prints on the ground');
-    }
-    
-    // Family/Relationships
-    if (samplePhrases.includes('family') || samplePhrases.includes('mother') || samplePhrases.includes('father') || samplePhrases.includes('brother') || samplePhrases.includes('sister')) {
-      visualElements.push('family of donkeys together', 'baby donkey with parent donkeys', 'heart shapes floating');
-    }
-    
-    // Work/Office
-    if (samplePhrases.includes('work') || samplePhrases.includes('office') || samplePhrases.includes('job') || samplePhrases.includes('meeting')) {
-      visualElements.push('briefcase', 'donkey wearing tie', 'desk and chair outdoors', 'laptop computer');
-    }
-    
-    // Sports
-    if (samplePhrases.includes('sport') || samplePhrases.includes('ball') || samplePhrases.includes('game') || samplePhrases.includes('play')) {
-      visualElements.push('sports balls', 'donkey kicking soccer ball', 'goal posts', 'sports equipment');
-    }
-    
-    // Music/Entertainment
-    if (samplePhrases.includes('music') || samplePhrases.includes('sing') || samplePhrases.includes('dance') || samplePhrases.includes('concert')) {
-      visualElements.push('musical notes floating', 'donkey with guitar', 'drums and instruments', 'stage lights');
-    }
-    
-    // Nature/Environment
-    if (samplePhrases.includes('tree') || samplePhrases.includes('flower') || samplePhrases.includes('garden') || samplePhrases.includes('nature')) {
-      visualElements.push('blooming flowers', 'trees with fruits', 'donkey smelling flowers', 'butterflies (as decorative elements, not creatures)');
-    }
-    
-    if (visualElements.length > 0) {
-      contextualElements = `\n8. CONTEXTUAL ELEMENTS: Include these specific visual elements that represent the topic: ${visualElements.join(', ')}.`;
+    try {
+      const phraseSample = phrases.slice(0, 5).join(', ');
+      
+      const analysisPrompt = `Analyze these phrases and suggest 3-5 specific visual elements that would represent this topic in an illustration. The illustration will feature cartoon donkeys and a bridge.
+
+Topic: "${topicDescription}"
+Sample phrases: "${phraseSample}"
+
+Requirements:
+- Suggest concrete, visual objects or actions (not abstract concepts)
+- Elements should be things that can be drawn/illustrated
+- Consider how donkeys could interact with these elements
+- Elements can be floating, held by donkeys, or part of the environment
+- Be creative - objects can appear in unusual ways (e.g., floating, oversized, etc.)
+
+Return ONLY a comma-separated list of visual elements, nothing else.
+Example format: "floating bitcoin symbols, chart patterns in sky, golden coins scattered on ground"`;
+
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'HTTP-Referer': 'https://donkeybridge.world',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'anthropic/claude-3.5-sonnet',
+          messages: [
+            {
+              role: 'user',
+              content: analysisPrompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 150
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const visualElements = data.choices?.[0]?.message?.content?.trim();
+        
+        if (visualElements) {
+          contextualElements = `\n8. CONTEXTUAL ELEMENTS: Include these specific visual elements that represent the topic: ${visualElements}.`;
+          console.log(`AI-generated visual elements for "${topicDescription}": ${visualElements}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error generating contextual elements:', error);
+      // Continue without contextual elements if AI analysis fails
     }
   }
   
@@ -280,7 +232,7 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
     // Generate image for the set
     let imageUrl: string | undefined;
     try {
-      const imagePrompt = createImageGenerationPrompt(title, englishPhrases);
+      const imagePrompt = await createImageGenerationPrompt(title, englishPhrases);
       console.log(`API Route: Generating image for manual set with prompt:`, imagePrompt);
       const generatedImageUrl = await generateImage(imagePrompt);
       
@@ -531,7 +483,7 @@ export async function POST(request: Request) {
       const englishPhrases = generationResult.phrases.map(p => p.english);
       
       // Construct the main prompt with corrected requirements
-      const imagePrompt = createImageGenerationPrompt(topicDescription, englishPhrases);
+      const imagePrompt = await createImageGenerationPrompt(topicDescription, englishPhrases);
 
       console.log(`API Route: Generating image with FINAL prompt:`, imagePrompt);
       console.log(`API Route: Starting Ideogram API call...`);

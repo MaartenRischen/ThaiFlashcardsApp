@@ -1,430 +1,280 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useSet } from '@/app/context/SetContext';
-import { Sparkles, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { GenerationProgress } from '@/app/components/GenerationProgress';
-import { getToneLabel } from '@/app/lib/utils';
-import { SetMetaData } from '@/app/lib/storage';
-import { SetWizardState } from './types';
-import { motion } from 'framer-motion';
+'use client'
+
+import { useEffect, useState, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
+import { Sparkles, CheckCircle, XCircle } from 'lucide-react'
+import { SetWizardState } from './types'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
 
 interface GenerationStepProps {
-  state: SetWizardState;
-  onComplete: (newSetId: string) => void;
-  onBack: () => void;
-  onClose: () => void;
-  onOpenSetManager: (setToSelect?: string) => void;
+  state: SetWizardState
+  onComplete: (newSetId: string) => void
+  onBack: () => void
+  onClose: () => void
+  onOpenSetManager: (setToSelect?: string) => void
 }
-
-// Helper to convert PascalCase level to lowercase
-function getLowerCaseLevel(level: string): SetMetaData['level'] {
-  return level.toLowerCase().replace(/ /g, ' ') as SetMetaData['level'];
-}
-
-// Placeholder image URL - will be generated on first use
-let placeholderImageUrl: string | null = null;
 
 export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetManager }: GenerationStepProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [hasStartedGeneration, setHasStartedGeneration] = useState(false);
-  const [generationComplete, setGenerationComplete] = useState(false);
-  const [generatedSetId, setGeneratedSetId] = useState<string | null>(null);
-  const { setAvailableSets } = useSet();
-
-  const generatePhrases = useCallback(async () => {
-    // Prevent multiple generations
-    if (hasStartedGeneration || isGenerating) {
-      console.log('Generation already in progress or completed, skipping...');
-      return;
-    }
-    
-    const startTime = Date.now();
-    
-    try {
-      setHasStartedGeneration(true);
-      setIsGenerating(true);
-      setError(null);
-
-      // Handle manual mode
-      if (state.mode === 'manual' && state.manualPhrases) {
-        const totalCount = state.manualPhrases.length;
-        
-        console.log(`Processing manual input with ${totalCount} phrases`);
-
-        // Get or generate placeholder image URL
-        if (!placeholderImageUrl) {
-          try {
-            const response = await fetch('/api/generate-placeholder-image');
-            if (response.ok) {
-              const data = await response.json();
-              placeholderImageUrl = data.imageUrl;
-            }
-          } catch (error) {
-            console.error('Failed to get placeholder image:', error);
-          }
-        }
-
-        // Add placeholder set
-        const placeholderSet: SetMetaData = {
-          id: 'generating',
-          name: `Custom Set (Processing...)`,
-          createdAt: new Date().toISOString(),
-          phraseCount: totalCount,
-          source: 'manual',
-          isFullyLearned: false,
-          level: 'intermediate',
-          specificTopics: 'Custom Vocabulary',
-          seriousnessLevel: 5,
-          toneLevel: 'Balanced',
-          imageUrl: placeholderImageUrl || undefined
-        };
-        setAvailableSets(sets => [...sets, placeholderSet]);
-
-        // Open My Sets modal with placeholder
-        onOpenSetManager('generating');
-
-        // Call API to process manual phrases
-        const response = await fetch('/api/generate-set', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            mode: 'manual',
-            englishPhrases: state.manualPhrases,
-            totalCount
-          }),
-          credentials: 'include',
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error || `API request failed with status ${response.status}`);
-        }
-
-        // Remove placeholder and add real set
-        setAvailableSets(sets => {
-          const filtered = sets.filter(s => s.id !== 'generating');
-          return [...filtered, result.newSetMetaData];
-        });
-
-        console.log("GenerationStep: Manual set processed successfully.");
-        
-        // Add a minimum display time of 3 seconds
-        const MIN_DISPLAY_TIME = 3000;
-        const elapsedTime = Date.now() - startTime;
-        const remainingTime = Math.max(0, MIN_DISPLAY_TIME - elapsedTime);
-        
-        setTimeout(() => {
-          onComplete(result.newSetMetaData.id);
-        }, remainingTime);
-        return;
-      }
-
-      // Auto mode logic
-      const selectedTopicValue = state.selectedTopic?.value;
-
-      if (!selectedTopicValue) {
-        setError('No topic selected to generate.');
-        setIsGenerating(false);
-        return;
-      }
-      
-      const topicsToDiscuss = selectedTopicValue;
-      const specificTopics = selectedTopicValue;
-      const totalCount = state.cardCount;
-      
-      console.log(`Generating set with ${totalCount} cards for topic: ${specificTopics}`);
-
-      const preferences = {
-        level: state.proficiency.levelEstimate,
-        specificTopics,
-        toneLevel: state.tone,
-        topicsToDiscuss,
-        additionalContext: state.additionalContext,
-      };
-
-      // Get or generate placeholder image URL
-      if (!placeholderImageUrl) {
-        try {
-          const response = await fetch('/api/generate-placeholder-image');
-          if (response.ok) {
-            const data = await response.json();
-            placeholderImageUrl = data.imageUrl;
-          }
-        } catch (error) {
-          console.error('Failed to get placeholder image:', error);
-        }
-      }
-
-      // Add placeholder set to the list
-      const placeholderSet: SetMetaData = {
-        id: 'generating',
-        name: `${specificTopics} (Generating...)`,
-        createdAt: new Date().toISOString(),
-        phraseCount: totalCount,
-        source: 'generated',
-        isFullyLearned: false,
-        level: getLowerCaseLevel(preferences.level),
-        specificTopics: preferences.specificTopics,
-        seriousnessLevel: preferences.toneLevel,
-        toneLevel: getToneLabel(preferences.toneLevel),
-        imageUrl: placeholderImageUrl || undefined
-      };
-      setAvailableSets(sets => [...sets, placeholderSet]);
-
-      // Close wizard and open My Sets modal
-      onClose();
-      onOpenSetManager('generating');
-
-      console.log(`SetWizard Completion: Calling /api/generate-set with preferences:`, preferences, `count:`, totalCount);
-
-      const response = await fetch('/api/generate-set', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ preferences, totalCount }),
-        credentials: 'include',
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || `API request failed with status ${response.status}`);
-      }
-
-      // Remove placeholder and add real set
-      setAvailableSets(sets => {
-        const filtered = sets.filter(s => s.id !== 'generating');
-        return [...filtered, result.newSetMetaData];
-      });
-
-      console.log("GenerationStep: API call successful, waiting for minimum display time.");
-      
-      // Store the result for later use
-      setGeneratedSetId(result.newSetMetaData.id);
-      
-      // Add a minimum display time - longer for better UX
-      const MIN_DISPLAY_TIME = state.mode === 'manual' ? 5000 : 8000; // 5s for manual, 8s for auto
-      const elapsedTime = Date.now() - startTime;
-      const remainingTime = Math.max(0, MIN_DISPLAY_TIME - elapsedTime);
-      
-      console.log(`GenerationStep: Elapsed time: ${elapsedTime}ms, remaining time: ${remainingTime}ms`);
-      
-      // Keep showing the generation screen for the minimum time
-      setTimeout(() => {
-        setIsGenerating(false);
-        setGenerationComplete(true);
-        onComplete(result.newSetMetaData.id);
-      }, remainingTime);
-
-    } catch (err) {
-      console.error("Error in GenerationStep generatePhrases:", err);
-      console.error("Full error details:", {
-        error: err,
-        state: state,
-        mode: state.mode,
-        manualPhrases: state.manualPhrases
-      });
-      setError(err instanceof Error ? err.message : 'An error occurred during generation');
-      
-      // Remove placeholder on error
-      setAvailableSets(sets => sets.filter(s => s.id !== 'generating'));
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [state, onComplete, onClose, onOpenSetManager, setAvailableSets, hasStartedGeneration, isGenerating]);
+  const router = useRouter()
+  const [progress, setProgress] = useState(0)
+  const [status, setStatus] = useState<'generating' | 'success' | 'error'>('generating')
+  const [errorMessage, setErrorMessage] = useState('')
+  const [newSetId, setNewSetId] = useState<string | null>(null)
+  const hasStartedRef = useRef(false)
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
-    // Only generate if we haven't started yet
-    if (!hasStartedGeneration && !isGenerating) {
-      // Small delay to ensure UI renders first
-      const timer = setTimeout(() => {
-        generatePhrases();
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    }
-    
-    // Cleanup function to reset state when component unmounts
+    // Track component mount status
+    isMountedRef.current = true
     return () => {
-      setHasStartedGeneration(false);
-      setIsGenerating(false);
-      setError(null);
-      setGenerationComplete(false);
-      setGeneratedSetId(null);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array - only run once on mount
+      isMountedRef.current = false
+    }
+  }, [])
 
-  return (
-    <>
-      <GenerationProgress isGenerating={isGenerating || (!generationComplete && hasStartedGeneration)} mode={state.mode === 'auto' ? 'automatic' : state.mode} />
-      
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
-        {isGenerating ? (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center space-y-6"
+  useEffect(() => {
+    // Prevent multiple generations
+    if (hasStartedRef.current) return
+    hasStartedRef.current = true
+
+    console.log('[GenerationStep] Starting generation with state:', state)
+
+    const generateSet = async () => {
+      try {
+        // Start progress animation
+        let currentProgress = 0
+        const progressInterval = setInterval(() => {
+          if (!isMountedRef.current) {
+            clearInterval(progressInterval)
+            return
+          }
+          currentProgress = Math.min(currentProgress + 5, 90)
+          setProgress(currentProgress)
+        }, 200)
+
+        // Make API call
+        const response = await fetch('/api/generate-set', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(
+            state.mode === 'manual' 
+              ? {
+                  mode: 'manual',
+                  englishPhrases: state.manualPhrases || []
+                }
+              : {
+                  preferences: {
+                    level: state.proficiency.levelEstimate,
+                    specificTopics: state.selectedTopic?.value || '',
+                    toneLevel: state.tone,
+                    topicsToDiscuss: state.selectedTopic?.value || '',
+                    additionalContext: state.additionalContext || ''
+                  },
+                  totalCount: state.cardCount
+                }
+          ),
+        })
+
+        const data = await response.json()
+        clearInterval(progressInterval)
+
+        if (!isMountedRef.current) return
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to generate set')
+        }
+
+        // Success! Extract the set ID
+        const setId = data.setId || data.newSetMetaData?.id || data.newSetId
+        if (!setId) {
+          throw new Error('No set ID returned from API')
+        }
+
+        setProgress(100)
+        setNewSetId(setId)
+        setStatus('success')
+
+        // Show success screen for 2 seconds minimum
+        setTimeout(() => {
+          if (!isMountedRef.current) return
+          console.log('[GenerationStep] Redirecting to:', `/flashcard-sets/${setId}`)
+          router.push(`/flashcard-sets/${setId}`)
+          onComplete(setId)
+        }, 2000)
+
+      } catch (error) {
+        if (!isMountedRef.current) return
+        console.error('[GenerationStep] Error:', error)
+        setStatus('error')
+        setErrorMessage(error instanceof Error ? error.message : 'An unexpected error occurred')
+        setProgress(0)
+      }
+    }
+
+    // Small delay to ensure UI renders first
+    setTimeout(generateSet, 100)
+  }, []) // Empty deps - only run once
+
+  // Render loading screen
+  if (status === 'generating') {
+    return (
+      <div className="space-y-6">
+        <Progress value={progress} className="w-full h-2" />
+        
+        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="relative"
           >
-            <div className="relative">
-              <motion.div 
-                animate={{ 
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 180, 360]
-                }}
-                transition={{ 
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="absolute -inset-8 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-2xl"
-              />
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              >
-                <Sparkles className="w-16 h-16 text-blue-400 relative" />
-              </motion.div>
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-[#E0E0E0]">
-                {state.mode === 'manual' 
-                  ? 'Saving your custom flashcard set!' 
-                  : 'Creating your personalized flashcard set!'}
-              </h3>
-              <p className="text-gray-400 max-w-md">
-                {state.mode === 'manual'
-                  ? `We're saving your ${state.manualPhrases?.length || 0} custom flashcards.`
-                  : `We're crafting ${state.cardCount} personalized flashcards based on your preferences. This usually takes about 2 minutes.`}
-              </p>
-              <p className="text-sm text-gray-500 italic mt-2">
-                You can click away and the process will continue in the background.
-              </p>
-            </div>
+            <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-xl" />
+            <Sparkles className="w-20 h-20 text-blue-400 relative z-10" />
+          </motion.div>
+          
+          <div className="text-center space-y-3">
+            <h3 className="text-2xl font-bold text-[#E0E0E0]">
+              {state.mode === 'manual' 
+                ? 'Processing your phrases...' 
+                : 'Generating your flashcard set...'}
+            </h3>
+            <p className="text-gray-400 max-w-md mx-auto">
+              {state.mode === 'manual'
+                ? `We're creating ${state.manualPhrases?.length || 0} flashcards with Thai translations and mnemonics.`
+                : `We're crafting ${state.cardCount} personalized flashcards just for you.`}
+            </p>
+            <p className="text-sm text-gray-500 italic">
+              This usually takes 30-60 seconds...
+            </p>
+          </div>
 
-            {state.mode === 'manual' ? (
-              <div className="neumorphic p-4 rounded-xl max-w-sm mx-auto">
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between">
+          <div className="neumorphic p-6 rounded-xl">
+            <div className="space-y-3 text-sm">
+              {state.mode === 'manual' ? (
+                <>
+                  <div className="flex items-center justify-between gap-8">
                     <span className="text-gray-400">Mode:</span>
                     <span className="text-[#E0E0E0] font-medium">Manual Input</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Cards:</span>
+                  <div className="flex items-center justify-between gap-8">
+                    <span className="text-gray-400">Phrases:</span>
                     <span className="text-[#E0E0E0] font-medium">{state.manualPhrases?.length || 0}</span>
                   </div>
-                </div>
-              </div>
-            ) : (
-              <div className="neumorphic p-4 rounded-xl max-w-sm mx-auto">
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between">
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between gap-8">
                     <span className="text-gray-400">Topic:</span>
                     <span className="text-[#E0E0E0] font-medium">{state.selectedTopic?.value || 'Custom'}</span>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-8">
                     <span className="text-gray-400">Level:</span>
                     <span className="text-[#E0E0E0] font-medium">{state.proficiency.levelEstimate}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Style:</span>
-                    <span className="text-[#E0E0E0] font-medium">{getToneLabel(state.tone)}</span>
+                  <div className="flex items-center justify-between gap-8">
+                    <span className="text-gray-400">Cards:</span>
+                    <span className="text-[#E0E0E0] font-medium">{state.cardCount}</span>
                   </div>
-                </div>
-              </div>
-            )}
+                </>
+              )}
+            </div>
+          </div>
 
-            <motion.div
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="text-sm text-gray-400"
-            >
-              &quot;Generating...&quot;
-            </motion.div>
-          </motion.div>
-        ) : generationComplete ? (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center space-y-6"
-          >
-            <div className="relative">
+          <motion.div className="flex space-x-2">
+            {[0, 1, 2].map((i) => (
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", duration: 0.5 }}
-              >
-                <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto">
-                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              </motion.div>
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-[#E0E0E0]">
-                Your flashcard set is ready!
-              </h3>
-              <p className="text-gray-400">
-                {state.mode === 'manual'
-                  ? `Successfully created ${state.manualPhrases?.length || 0} flashcards.`
-                  : `Successfully created ${state.cardCount} flashcards.`}
-              </p>
-            </div>
-
-            <div className="flex gap-3 justify-center">
-              <Button 
-                onClick={() => {
-                  if (generatedSetId) {
-                    onOpenSetManager(generatedSetId);
-                  }
+                key={i}
+                className="w-3 h-3 bg-blue-400 rounded-full"
+                animate={{ 
+                  y: [-5, 5, -5],
+                  opacity: [0.5, 1, 0.5]
                 }}
-                className="neumorphic-button text-blue-400"
-              >
-                View My Sets
-              </Button>
-            </div>
-            
-            <p className="text-sm text-gray-500 italic">
-              Click the X above or "View My Sets" to continue
-            </p>
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  delay: i * 0.2,
+                }}
+              />
+            ))}
           </motion.div>
-        ) : error ? (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center space-y-4 max-w-md"
-          >
-            <div className="neumorphic p-6 rounded-xl bg-red-500/10 border border-red-500/20">
-              <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-              <h3 className="font-semibold text-[#E0E0E0] mb-2">Generation Error</h3>
-              <p className="text-sm text-gray-400">{error}</p>
-            </div>
-            <div className="flex gap-3 justify-center">
-              <Button 
-                variant="outline" 
-                onClick={onBack}
-                className="neumorphic-button text-gray-400"
-              >
-                Back
-              </Button>
-              <Button 
-                onClick={generatePhrases}
-                className="neumorphic-button text-blue-400"
-              >
-                Try Again
-              </Button>
-            </div>
-          </motion.div>
-        ) : null}
+        </div>
       </div>
-    </>
-  );
+    )
+  }
+
+  // Render success screen
+  if (status === 'success') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+        >
+          <CheckCircle className="w-24 h-24 text-green-400" />
+        </motion.div>
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="text-center space-y-3"
+        >
+          <h3 className="text-2xl font-bold text-[#E0E0E0]">
+            Success! Your flashcards are ready!
+          </h3>
+          <p className="text-gray-400">
+            {state.mode === 'manual'
+              ? `Created ${state.manualPhrases?.length || 0} flashcards`
+              : `Created ${state.cardCount} flashcards`}
+          </p>
+          <p className="text-sm text-gray-500 animate-pulse">
+            Redirecting to your new set...
+          </p>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // Render error screen
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+      >
+        <XCircle className="w-20 h-20 text-red-400" />
+      </motion.div>
+      
+      <div className="text-center space-y-3">
+        <h3 className="text-xl font-bold text-[#E0E0E0]">
+          Generation Failed
+        </h3>
+        <p className="text-gray-400 max-w-md">
+          {errorMessage}
+        </p>
+      </div>
+
+      <div className="flex gap-3">
+        <Button 
+          onClick={onBack}
+          variant="ghost" 
+          className="text-gray-400"
+        >
+          Go Back
+        </Button>
+        <Button 
+          onClick={() => {
+            hasStartedRef.current = false
+            setStatus('generating')
+            setProgress(0)
+            setErrorMessage('')
+          }}
+          className="neumorphic-button text-blue-400"
+        >
+          Try Again
+        </Button>
+      </div>
+    </div>
+  )
 } 

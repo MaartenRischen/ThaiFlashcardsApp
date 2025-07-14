@@ -361,7 +361,15 @@ export function SetWizardModal({
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={(open) => !open && onClose()}
+      onOpenChange={(open) => {
+        // Prevent closing during generation
+        if (!open && currentStepData?.type === 'generation') {
+          return;
+        }
+        if (!open) {
+          onClose();
+        }
+      }}
     >
       <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-[#121212] w-full max-w-lg rounded-2xl shadow-xl">
@@ -379,14 +387,14 @@ export function SetWizardModal({
               <button
                 onClick={() => {
                   if (currentStepData.type === 'generation') {
-                    // For generation step, open My Sets modal
-                    onClose();
-                    onComplete('generating'); // Special ID to indicate generation in progress
-                  } else {
-                    onClose();
+                    // Don't allow closing during generation
+                    return;
                   }
+                  onClose();
                 }}
-                className="text-gray-400 hover:text-gray-300"
+                className={`text-gray-400 hover:text-gray-300 ${
+                  currentStepData.type === 'generation' ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 ✕
               </button>

@@ -285,7 +285,7 @@ export function SetWizardModal({
             state: wizardState,
             onComplete: (newSetId: string) => {
               onComplete(newSetId);
-              onClose();
+              // Don't close automatically - let the user see the success screen
             },
             onBack: () => setCurrentStep(4),
             onClose,
@@ -334,7 +334,7 @@ export function SetWizardModal({
             state: wizardState,
             onComplete: (newSetId: string) => {
               onComplete(newSetId);
-              onClose();
+              // Don't close automatically - let the user see the success screen
             },
             onBack: () => setCurrentStep(3),
             onClose,

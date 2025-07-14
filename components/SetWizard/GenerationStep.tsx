@@ -202,16 +202,20 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
         return [...filtered, result.newSetMetaData];
       });
 
-      console.log("GenerationStep: API call successful, triggering onComplete.");
+      console.log("GenerationStep: API call successful, waiting for minimum display time.");
+      
+      // Store the result for later use
+      setGeneratedSetId(result.newSetMetaData.id);
       
       // Add a minimum display time - longer for better UX
       const MIN_DISPLAY_TIME = state.mode === 'manual' ? 5000 : 8000; // 5s for manual, 8s for auto
       const elapsedTime = Date.now() - startTime;
       const remainingTime = Math.max(0, MIN_DISPLAY_TIME - elapsedTime);
       
+      console.log(`GenerationStep: Elapsed time: ${elapsedTime}ms, remaining time: ${remainingTime}ms`);
+      
+      // Keep showing the generation screen for the minimum time
       setTimeout(() => {
-        // Store the new set ID for later use
-        setGeneratedSetId(result.newSetMetaData.id);
         setIsGenerating(false);
         setGenerationComplete(true);
         onComplete(result.newSetMetaData.id);
@@ -237,7 +241,12 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
   useEffect(() => {
     // Only generate if we haven't started yet
     if (!hasStartedGeneration && !isGenerating) {
-      generatePhrases();
+      // Small delay to ensure UI renders first
+      const timer = setTimeout(() => {
+        generatePhrases();
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
     
     // Cleanup function to reset state when component unmounts

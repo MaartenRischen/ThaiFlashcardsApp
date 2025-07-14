@@ -61,10 +61,115 @@ function getErrorMessage(error: unknown): string {
   return 'Set generation failed.';
 }
 
-function createImageGenerationPrompt(topicDescription: string): string {
+function createImageGenerationPrompt(topicDescription: string, phrases?: string[]): string {
+  // Analyze phrases to extract key visual elements
+  let contextualElements = '';
+  
+  if (phrases && phrases.length > 0) {
+    // Join first few phrases for context
+    const samplePhrases = phrases.slice(0, 5).join(' ').toLowerCase();
+    
+    // Extract visual elements based on common themes
+    const visualElements: string[] = [];
+    
+    // Crypto/Finance
+    if (samplePhrases.includes('crypto') || samplePhrases.includes('bitcoin') || samplePhrases.includes('market') || samplePhrases.includes('trading')) {
+      visualElements.push('floating Bitcoin and cryptocurrency symbols', 'chart patterns in the sky', 'golden coins');
+    }
+    
+    // Water/Drinking
+    if (samplePhrases.includes('water') || samplePhrases.includes('drink') || samplePhrases.includes('thirsty')) {
+      visualElements.push('donkey drinking from a stream', 'water flowing under the bridge', 'water splashes');
+    }
+    
+    // Greetings/Social
+    if (samplePhrases.includes('hello') || samplePhrases.includes('greet') || samplePhrases.includes('meet') || samplePhrases.includes('welcome')) {
+      visualElements.push('donkeys waving their hooves', 'friendly gestures', 'donkeys meeting on the bridge');
+    }
+    
+    // Technology/Problems
+    if (samplePhrases.includes('light') || samplePhrases.includes('electric') || samplePhrases.includes('problem') || samplePhrases.includes('fix')) {
+      visualElements.push('lightbulbs floating in the air', 'electrical sparks', 'donkey holding tools');
+    }
+    
+    // Food/Eating
+    if (samplePhrases.includes('food') || samplePhrases.includes('eat') || samplePhrases.includes('hungry') || samplePhrases.includes('restaurant')) {
+      visualElements.push('food items on picnic blanket', 'donkey eating hay', 'fruits and vegetables');
+    }
+    
+    // Travel/Transport
+    if (samplePhrases.includes('travel') || samplePhrases.includes('airport') || samplePhrases.includes('flight') || samplePhrases.includes('trip')) {
+      visualElements.push('luggage and suitcases', 'airplane in the sky', 'donkey with travel gear');
+    }
+    
+    // Shopping
+    if (samplePhrases.includes('buy') || samplePhrases.includes('shop') || samplePhrases.includes('store') || samplePhrases.includes('price')) {
+      visualElements.push('shopping bags', 'market stalls near bridge', 'donkey with cart full of goods');
+    }
+    
+    // Exercise/Gym
+    if (samplePhrases.includes('gym') || samplePhrases.includes('exercise') || samplePhrases.includes('workout') || samplePhrases.includes('fitness')) {
+      visualElements.push('dumbbells and weights', 'donkey doing stretches', 'exercise equipment outdoors');
+    }
+    
+    // Weather
+    if (samplePhrases.includes('rain') || samplePhrases.includes('sun') || samplePhrases.includes('weather') || samplePhrases.includes('hot') || samplePhrases.includes('cold')) {
+      visualElements.push('weather elements like sun, clouds, rain', 'donkey with umbrella', 'seasonal elements');
+    }
+    
+    // Education/Learning
+    if (samplePhrases.includes('study') || samplePhrases.includes('learn') || samplePhrases.includes('school') || samplePhrases.includes('teach')) {
+      visualElements.push('floating books', 'donkey wearing glasses', 'pencils and notebooks scattered around');
+    }
+    
+    // Health/Medical
+    if (samplePhrases.includes('doctor') || samplePhrases.includes('sick') || samplePhrases.includes('health') || samplePhrases.includes('hospital')) {
+      visualElements.push('medical cross symbol', 'first aid kit', 'donkey with stethoscope around neck');
+    }
+    
+    // Time
+    if (samplePhrases.includes('time') || samplePhrases.includes('clock') || samplePhrases.includes('hour') || samplePhrases.includes('late')) {
+      visualElements.push('clock floating in sky', 'sundial near bridge', 'donkey checking pocket watch');
+    }
+    
+    // Animals/Pets
+    if (samplePhrases.includes('dog') || samplePhrases.includes('cat') || samplePhrases.includes('pet') || samplePhrases.includes('animal')) {
+      visualElements.push('pet toys and accessories', 'food bowls', 'donkey playing with pet toys', 'paw prints on the ground');
+    }
+    
+    // Family/Relationships
+    if (samplePhrases.includes('family') || samplePhrases.includes('mother') || samplePhrases.includes('father') || samplePhrases.includes('brother') || samplePhrases.includes('sister')) {
+      visualElements.push('family of donkeys together', 'baby donkey with parent donkeys', 'heart shapes floating');
+    }
+    
+    // Work/Office
+    if (samplePhrases.includes('work') || samplePhrases.includes('office') || samplePhrases.includes('job') || samplePhrases.includes('meeting')) {
+      visualElements.push('briefcase', 'donkey wearing tie', 'desk and chair outdoors', 'laptop computer');
+    }
+    
+    // Sports
+    if (samplePhrases.includes('sport') || samplePhrases.includes('ball') || samplePhrases.includes('game') || samplePhrases.includes('play')) {
+      visualElements.push('sports balls', 'donkey kicking soccer ball', 'goal posts', 'sports equipment');
+    }
+    
+    // Music/Entertainment
+    if (samplePhrases.includes('music') || samplePhrases.includes('sing') || samplePhrases.includes('dance') || samplePhrases.includes('concert')) {
+      visualElements.push('musical notes floating', 'donkey with guitar', 'drums and instruments', 'stage lights');
+    }
+    
+    // Nature/Environment
+    if (samplePhrases.includes('tree') || samplePhrases.includes('flower') || samplePhrases.includes('garden') || samplePhrases.includes('nature')) {
+      visualElements.push('blooming flowers', 'trees with fruits', 'donkey smelling flowers', 'butterflies (as decorative elements, not creatures)');
+    }
+    
+    if (visualElements.length > 0) {
+      contextualElements = `\n8. CONTEXTUAL ELEMENTS: Include these specific visual elements that represent the topic: ${visualElements.join(', ')}.`;
+    }
+  }
+  
   return `Create a cute cartoon style illustration with these STRICT REQUIREMENTS:
 1. MAIN FOCUS: Create a purely visual representation of "${topicDescription}" without ANY text or writing.
-2. MANDATORY ELEMENTS: Include a friendly donkey AND a bridge that naturally interact with the main topic.
+2. MANDATORY ELEMENTS: Include at least one friendly donkey AND a bridge (bridge can be in background if needed).
 3. STYLE: Use vibrant, friendly colors and a clean cartoon style.
 4. CRITICAL TEXT PROHIBITION: The image MUST NOT contain ANY:
    - Text, letters, numbers, or writing of any kind
@@ -76,8 +181,9 @@ function createImageGenerationPrompt(topicDescription: string): string {
    - No humans, people, or human figures
    - No other living creatures (birds, insects, etc.)
    - Only donkeys are allowed as living beings
-6. COMPOSITION: Create a balanced 16:9 landscape composition.
-7. QUALITY: Focus on high detail and clean lines.`;
+6. COMPOSITION: Create a balanced 16:9 landscape composition where the topic-specific elements are prominent.
+7. QUALITY: Focus on high detail and clean lines.${contextualElements}
+Remember: The bridge can be small or in the background if it helps better showcase the topic-specific elements.`;
 }
 
 async function handleManualMode(userId: string, englishPhrases: string[], preferences: {
@@ -174,7 +280,7 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
     // Generate image for the set
     let imageUrl: string | undefined;
     try {
-      const imagePrompt = createImageGenerationPrompt(title);
+      const imagePrompt = createImageGenerationPrompt(title, englishPhrases);
       console.log(`API Route: Generating image for manual set with prompt:`, imagePrompt);
       const generatedImageUrl = await generateImage(imagePrompt);
       
@@ -421,8 +527,11 @@ export async function POST(request: Request) {
         "NO text or writing on signs, banners, clothing, objects, or in the background."
       ].join(' ');
       
+      // Extract English phrases for context
+      const englishPhrases = generationResult.phrases.map(p => p.english);
+      
       // Construct the main prompt with corrected requirements
-      const imagePrompt = createImageGenerationPrompt(topicDescription);
+      const imagePrompt = createImageGenerationPrompt(topicDescription, englishPhrases);
 
       console.log(`API Route: Generating image with FINAL prompt:`, imagePrompt);
       console.log(`API Route: Starting Ideogram API call...`);

@@ -1,4 +1,4 @@
-import { elevenLabsTTS } from './elevenlabs-tts';
+import { azureTTS } from './azure-tts';
 
 // Define interfaces for parameters
 interface SpeakParams {
@@ -9,49 +9,28 @@ interface SpeakParams {
   onError?: (error: unknown) => void;
 }
 
-// TTS provider setting
-let useElevenLabs = true; // Default to ElevenLabs
-
 // --- Main TTS Service Object ---
 export const ttsService = {
-  
-  // Method to toggle TTS provider
-  setProvider: function(provider: 'elevenlabs' | 'browser') {
-    useElevenLabs = provider === 'elevenlabs';
-    console.log(`TTS provider set to: ${provider}`);
-  },
-  
-  // Get current provider
-  getProvider: function(): 'elevenlabs' | 'browser' {
-    return useElevenLabs ? 'elevenlabs' : 'browser';
-  },
   
   speak: async function({ text, genderValue, onStart, onEnd, onError }: SpeakParams): Promise<void> {
     // Stop any currently playing audio
     this.stop(); 
 
-    if (!useElevenLabs) {
-      // Use browser TTS directly if ElevenLabs is disabled
-      console.log('Using Browser TTS (ElevenLabs disabled)');
-      this._speakWithBrowserTTS({ text, genderValue, onStart, onEnd, onError });
-      return;
-    }
-
     try {
       // Call onStart callback
       onStart?.();
       
-      // Use ElevenLabs TTS
-      console.log('Using ElevenLabs TTS with', genderValue ? 'male' : 'female', 'voice');
-      await elevenLabsTTS.speak(text, genderValue);
+      // Use Azure TTS
+      console.log('Using Azure TTS with', genderValue ? 'male' : 'female', 'voice');
+      await azureTTS.speak(text, genderValue);
       
       // Call onEnd callback
       onEnd?.();
     } catch (error) {
-      console.error('TTS Error:', error);
+      console.error('Azure TTS Error:', error);
       
-      // Fallback to browser TTS if ElevenLabs fails
-      console.log('Falling back to Browser TTS due to error');
+      // Fallback to browser TTS if Azure fails
+      console.log('Falling back to Browser TTS due to Azure error');
       this._speakWithBrowserTTS({ text, genderValue, onStart: undefined, onEnd, onError });
     }
   },
@@ -60,9 +39,6 @@ export const ttsService = {
   _speakWithBrowserTTS: function({ text, genderValue, onStart: _onStart, onEnd, onError }: SpeakParams): void {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         console.log('Using Browser TTS');
-        
-        // Call onStart (if not already called)
-        // onStart might have been called already in the main speak function
         
         const voices = window.speechSynthesis.getVoices();
         if (voices.length === 0) {
@@ -128,8 +104,8 @@ export const ttsService = {
 
   // Function to explicitly stop any ongoing playback
   stop: function() {
-      // Stop ElevenLabs TTS
-      elevenLabsTTS.stop();
+      // Stop Azure TTS
+      azureTTS.stop();
 
       // Stop Browser TTS playback
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -138,5 +114,10 @@ export const ttsService = {
                window.speechSynthesis.cancel();
            }
       }
+  },
+  
+  // Method to set Azure credentials
+  setAzureCredentials: function(key: string, region: string) {
+    azureTTS.setCredentials(key, region);
   }
 }; 

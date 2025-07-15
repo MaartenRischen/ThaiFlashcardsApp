@@ -2,7 +2,6 @@
  * Text-to-speech utility for speaking Thai phrases
  */
 
-import { elevenLabsTTS } from './elevenlabs-tts';
 import { ttsService } from './tts-service';
 
 interface SpeakOptions {
@@ -13,7 +12,7 @@ interface SpeakOptions {
 }
 
 /**
- * Speaks the provided text using the configured TTS provider
+ * Speaks the provided text using Azure TTS with browser fallback
  * @param text - The text to speak
  * @param isContext - Whether this is a context example (longer phrase)
  * @param isMale - Whether to use a male voice if available
@@ -26,24 +25,14 @@ export async function speak(
   isMale: boolean = true,
   options: SpeakOptions = {}
 ): Promise<void> {
-  // Check if we should use ElevenLabs based on the service setting
-  const useElevenLabs = ttsService.getProvider() === 'elevenlabs';
-  
-  if (!useElevenLabs) {
-    // Use browser TTS directly if ElevenLabs is disabled
-    return speakWithBrowser(text, isContext, isMale, options);
-  }
-  
-  try {
-    // Use ElevenLabs TTS
-    console.log('Speaking with ElevenLabs TTS:', { text: text.substring(0, 50) + '...', isMale });
-    await elevenLabsTTS.speak(text, isMale);
-  } catch (error) {
-    console.error('ElevenLabs TTS failed, falling back to browser TTS:', error);
-    
-    // Fallback to browser TTS
-    return speakWithBrowser(text, isContext, isMale, options);
-  }
+  // Simply delegate to ttsService which handles Azure + fallback
+  return ttsService.speak({
+    text,
+    genderValue: isMale,
+    onStart: () => console.log('Speech started'),
+    onEnd: () => console.log('Speech ended'),
+    onError: (error) => console.error('Speech error:', error)
+  });
 }
 
 /**

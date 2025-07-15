@@ -1,0 +1,213 @@
+import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
+
+// Azure Speech Service configuration
+// TODO: Replace these with your actual Azure credentials
+const AZURE_SPEECH_KEY = 'YOUR_AZURE_SPEECH_KEY_HERE';
+const AZURE_SPEECH_REGION = 'YOUR_AZURE_REGION_HERE'; // e.g., 'southeastasia'
+
+// Thai voice options from Azure
+// See: https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=tts
+export const AZURE_THAI_VOICES = {
+  male: {
+    'Niwat': 'th-TH-NiwatNeural', // Thai male voice
+    'Achara': 'th-TH-AcharaNeural', // Thai female voice (for comparison)
+  },
+  female: {
+    'Premwadee': 'th-TH-PremwadeeNeural', // Thai female voice
+    'Achara': 'th-TH-AcharaNeural', // Another Thai female voice option
+  }
+};
+
+// Voice settings
+const DEFAULT_VOICES = {
+  male: 'th-TH-NiwatNeural',
+  female: 'th-TH-PremwadeeNeural'
+};
+
+interface AzureTTSOptions {
+  voiceName?: string;
+  rate?: number; // -50% to +50%
+  pitch?: number; // -50% to +50%
+  volume?: number; // 0 to 100
+}
+
+class AzureTTS {
+  private speechConfig: sdk.SpeechConfig | null = null;
+  private currentAudio: HTMLAudioElement | null = null;
+  private isInitialized: boolean = false;
+
+  constructor() {
+    this.initialize();
+  }
+
+  /**
+   * Initialize Azure Speech SDK
+   */
+  private initialize(): void {
+    try {
+      if (AZURE_SPEECH_KEY === 'YOUR_AZURE_SPEECH_KEY_HERE') {
+        console.error('Azure TTS: Please set your Azure Speech API key');
+        return;
+      }
+
+      this.speechConfig = sdk.SpeechConfig.fromSubscription(AZURE_SPEECH_KEY, AZURE_SPEECH_REGION);
+      
+      // Set speech synthesis output format
+      this.speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3;
+      
+      // Set default language
+      this.speechConfig.speechSynthesisLanguage = 'th-TH';
+      
+      this.isInitialized = true;
+      console.log('Azure TTS initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize Azure TTS:', error);
+    }
+  }
+
+  /**
+   * Set Azure credentials (for runtime configuration)
+   */
+  setCredentials(key: string, region: string): void {
+    AZURE_SPEECH_KEY !== key && console.log('Updating Azure Speech key');
+    AZURE_SPEECH_REGION !== region && console.log('Updating Azure Speech region');
+    
+    this.speechConfig = sdk.SpeechConfig.fromSubscription(key, region);
+    this.speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3;
+    this.speechConfig.speechSynthesisLanguage = 'th-TH';
+    this.isInitialized = true;
+  }
+
+  /**
+   * Converts text to speech using Azure
+   */
+  async speak(
+    text: string,
+    isMale: boolean = true,
+    options: AzureTTSOptions = {}
+  ): Promise<void> {
+    if (!this.isInitialized || !this.speechConfig) {
+      throw new Error('Azure TTS not initialized. Please set API credentials.');
+    }
+
+    try {
+      // Stop any currently playing audio
+      this.stop();
+
+      // Select voice based on gender
+      const voiceName = options.voiceName || (isMale ? DEFAULT_VOICES.male : DEFAULT_VOICES.female);
+      
+      console.log('Azure TTS - Speaking:', {
+        text: text.substring(0, 50) + '...',
+        voiceName,
+        isMale
+      });
+
+      // Create SSML for advanced control
+      const ssml = this.createSSML(text, voiceName, options);
+      
+      // Create synthesizer with audio output
+      const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
+      const synthesizer = new sdk.SpeechSynthesizer(this.speechConfig, audioConfig);
+
+      return new Promise((resolve, reject) => {
+        synthesizer.speakSsmlAsync(
+          ssml,
+          (result) => {
+            if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
+              console.log('Azure TTS synthesis completed');
+              resolve();
+            } else {
+              console.error('Azure TTS synthesis failed:', result.errorDetails);
+              reject(new Error(result.errorDetails));
+            }
+            synthesizer.close();
+          },
+          (error) => {
+            console.error('Azure TTS error:', error);
+            synthesizer.close();
+            reject(error);
+          }
+        );
+      });
+
+    } catch (error) {
+      console.error('Azure TTS Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create SSML for speech synthesis
+   */
+  private createSSML(text: string, voiceName: string, options: AzureTTSOptions): string {
+    const rate = options.rate !== undefined ? `${options.rate > 0 ? '+' : ''}${options.rate}%` : '+0%';
+    const pitch = options.pitch !== undefined ? `${options.pitch > 0 ? '+' : ''}${options.pitch}%` : '+0%';
+    const volume = options.volume !== undefined ? options.volume : 100;
+
+    return `
+      <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="th-TH">
+        <voice name="${voiceName}">
+          <prosody rate="${rate}" pitch="${pitch}" volume="${volume}">
+            ${this.escapeXML(text)}
+          </prosody>
+        </voice>
+      </speak>
+    `;
+  }
+
+  /**
+   * Escape XML special characters
+   */
+  private escapeXML(text: string): string {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  /**
+   * Stops any currently playing audio
+   */
+  stop(): void {
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio.currentTime = 0;
+      this.currentAudio = null;
+    }
+  }
+
+  /**
+   * Get list of available Thai voices
+   */
+  async getVoices(): Promise<string[]> {
+    // Azure doesn't provide a dynamic voice list API in the SDK
+    // Return our known Thai voices
+    return [
+      'th-TH-NiwatNeural',
+      'th-TH-PremwadeeNeural', 
+      'th-TH-AcharaNeural'
+    ];
+  }
+
+  /**
+   * Test if Azure TTS is properly configured
+   */
+  async testConnection(): Promise<boolean> {
+    try {
+      await this.speak('ทดสอบ', true, { voiceName: 'th-TH-NiwatNeural' });
+      return true;
+    } catch (error) {
+      console.error('Azure TTS test failed:', error);
+      return false;
+    }
+  }
+}
+
+// Export singleton instance
+export const azureTTS = new AzureTTS();
+
+// Export voice options
+export { DEFAULT_VOICES }; 

@@ -10,8 +10,6 @@ import type { SetMetaData } from '@/app/lib/storage';
 import { useUser } from '@clerk/nextjs'; // Add Clerk hook
 import PublishConfirmationModal from './PublishConfirmationModal';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ttsService } from '../lib/tts-service';
-import { elevenLabsTTS, ELEVENLABS_MODELS } from '../lib/elevenlabs-tts';
 
 interface CombinedOptionsModalProps {
   isOpen: boolean;
@@ -261,37 +259,16 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
   setAutoplay: (checked: boolean) => void;
 }) {
   const [useTurboRendering, setUseTurboRendering] = useState(true); // Default to TURBO
-  const [useElevenLabs, setUseElevenLabs] = useState(true);
-  const [selectedModel, setSelectedModel] = useState('eleven_multilingual_v2');
 
   useEffect(() => {
     // Load the rendering speed preference from localStorage
     const savedSpeed = localStorage.getItem('renderingSpeed');
     setUseTurboRendering(savedSpeed !== 'NORMAL');
-
-    // Load TTS provider preference
-    const currentProvider = ttsService.getProvider();
-    setUseElevenLabs(currentProvider === 'elevenlabs');
-    
-    // Get current model
-    if (currentProvider === 'elevenlabs') {
-      setSelectedModel(elevenLabsTTS.getModel());
-    }
   }, []);
 
   const handleRenderingSpeedChange = (checked: boolean) => {
     setUseTurboRendering(checked);
     localStorage.setItem('renderingSpeed', checked ? 'TURBO' : 'NORMAL');
-  };
-
-  const handleProviderToggle = (checked: boolean) => {
-    setUseElevenLabs(checked);
-    ttsService.setProvider(checked ? 'elevenlabs' : 'browser');
-  };
-  
-  const handleModelChange = (modelId: string) => {
-    setSelectedModel(modelId);
-    elevenLabsTTS.setModel(modelId);
   };
 
   const handleFactoryResetPreferences = () => {
@@ -356,32 +333,6 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
                 <Switch id="renderingSpeedToggle" checked={useTurboRendering} onCheckedChange={handleRenderingSpeedChange} />
                 <span className="text-sm font-medium text-[#BDBDBD]">Turbo</span>
               </div>
-              <label htmlFor="ttsProviderToggle" className="text-[#E0E0E0] flex items-center gap-2">
-                Voice Provider
-                <span className="text-xs text-[#BDBDBD] italic">(ElevenLabs = higher quality Thai voices)</span>
-              </label>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-[#BDBDBD]">Browser</span>
-                <Switch id="ttsProviderToggle" checked={useElevenLabs} onCheckedChange={handleProviderToggle} />
-                <span className="text-sm font-medium text-[#BDBDBD]">ElevenLabs</span>
-              </div>
-              {useElevenLabs && (
-                <>
-                  <label htmlFor="elevenLabsModel" className="text-[#E0E0E0]">
-                    Voice Model
-                  </label>
-                  <select
-                    id="elevenLabsModel"
-                    value={selectedModel}
-                    onChange={(e) => handleModelChange(e.target.value)}
-                    className="w-full p-2 bg-[#2a2a2a] border border-[#404040] rounded text-[#E0E0E0] text-sm"
-                  >
-                    {Object.entries(ELEVENLABS_MODELS).map(([id, name]) => (
-                      <option key={id} value={id} className="bg-[#2a2a2a]">{name}</option>
-                    ))}
-                  </select>
-                </>
-              )}
             </div>
           </section>
           <div className="mt-10 flex flex-col gap-2">

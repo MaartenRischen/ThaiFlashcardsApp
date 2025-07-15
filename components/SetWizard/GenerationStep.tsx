@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { useRouter } from 'next/navigation'
 import { Sparkles, CheckCircle, XCircle } from 'lucide-react'
 import { SetWizardState } from './types'
 import { Button } from '@/components/ui/button'
@@ -17,7 +16,6 @@ interface GenerationStepProps {
 }
 
 export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetManager }: GenerationStepProps) {
-  const router = useRouter()
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState<'generating' | 'success' | 'error'>('generating')
   const [errorMessage, setErrorMessage] = useState('')
@@ -95,12 +93,12 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
         setNewSetId(setId)
         setStatus('success')
 
-        // Show success screen for 2 seconds minimum
+        // Show success screen for 2 seconds, then close wizard and open My Sets
         setTimeout(() => {
           if (!isMountedRef.current) return
-          console.log('[GenerationStep] Redirecting to:', `/flashcard-sets/${setId}`)
-          router.push(`/flashcard-sets/${setId}`)
-          onComplete(setId)
+          console.log('[GenerationStep] Generation complete, opening My Sets with setId:', setId)
+          onClose() // Close the wizard
+          onComplete(setId) // This will open My Sets modal with the new set highlighted
         }, 2000)
 
       } catch (error) {
@@ -114,7 +112,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
 
     // Small delay to ensure UI renders first
     setTimeout(generateSet, 100)
-  }, []) // Empty deps - only run once
+  }, [state, onClose, onComplete]) // Add dependencies
 
   // Render loading screen
   if (status === 'generating') {
@@ -229,7 +227,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
               : `Created ${state.cardCount} flashcards`}
           </p>
           <p className="text-sm text-gray-500 animate-pulse">
-            Redirecting to your new set...
+            Opening My Sets...
           </p>
         </motion.div>
       </div>

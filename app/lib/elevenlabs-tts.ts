@@ -12,37 +12,35 @@ export const ELEVENLABS_MODELS = {
 };
 
 // Voice IDs for multilingual voices that work well with Thai
-// These voices support multiple languages including Thai
+// Note: These are pre-made voices from ElevenLabs that support multiple languages
 const VOICE_IDS = {
-  male: 'onwK4e9ZLuTAKqWW03F9', // Daniel - British-accented but works well for Thai
-  female: 'EXAVITQu4vr4xnSDxMaL', // Bella - Soft female voice, good for Thai
+  // Try using voices that are known to work better with Thai
+  male: 'pNInz6obpgDQGcFmaJgB', // Adam - pre-made voice
+  female: '21m00Tcm4TlvDq8ikWAM', // Rachel - pre-made voice
 };
 
-// Alternative multilingual voices that work well with Thai
+// Alternative multilingual voices that might work better with Thai
 const ALTERNATIVE_VOICES = {
   male: {
-    'Daniel': 'onwK4e9ZLuTAKqWW03F9', // British-accented male, good multilingual support
+    'Adam': 'pNInz6obpgDQGcFmaJgB', // Deep male voice
     'Antoni': 'ErXwobaYiN019PkySvjV', // Well-rounded male voice
     'Arnold': 'VR6AewLTigWG4xSOukaG', // Strong, assertive male voice
-    'Callum': 'N2lVS1w4EtoT3dr4eOWO', // Hoarse male voice
-    'Charlie': 'IKne3meq5aSn9XLyUdCD', // Casual male voice
-    'Clyde': '2EiwWnXFnvU5JabPnv8n', // War veteran voice
+    'Daniel': 'onwK4e9ZLuTAKqWW03F9', // British-accented male
     'Dave': 'CYw3kZ02Hs0563khs1Fj', // British male voice
     'Drew': '29vD33N1CtxCmqQRPOHJ', // Well-rounded male
     'Ethan': 'g5CIjZEefAph4nQFvHAz', // American male
-    'Fin': 'D38z5RcWu1voky8WS1ja', // Irish male
     'George': 'JBFqnCBsd6RMkjVDRZzb', // British male
+    'Josh': 'TxGEqnHWrfWFTfGW9XjX', // Young male voice
+    'Sam': 'yoZ06aMxZJJ28mfd3POQ', // Raspy male voice
   },
   female: {
-    'Bella': 'EXAVITQu4vr4xnSDxMaL', // Soft female voice, excellent for Thai
     'Rachel': '21m00Tcm4TlvDq8ikWAM', // Clear female voice
+    'Bella': 'EXAVITQu4vr4xnSDxMaL', // Soft female voice
     'Dorothy': 'ThT5KcBeYPX3keUQqHPh', // British female
     'Elli': 'MF3mGyEYCl7XYWbV9V6O', // American female
     'Emily': 'LcfcDJNUP1GQjkzn1xUU', // American female
     'Freya': 'jsCqWAovK2LkecY7zXl4', // American female
-    'Glinda': 'z9fAnlkpzviPz146aGWa', // American female witch
     'Grace': 'oWAxZDx7w5VEj9dCyTzz', // American Southern female
-    'Jessie': 't0jbNlBVZ17f02VDIeMI', // Raspy old female
     'Matilda': 'XrExE9yKIg1WjnnlVkGX', // American female
     'Nicole': 'piTKgcLEGmPE4e6mEKli', // Whispery female
     'Serena': 'pMsXgVXv3BLzUgSXRplE', // Middle-aged British female
@@ -146,6 +144,13 @@ class ElevenLabsTTS {
       // Select voice based on gender
       const voiceId = options.voiceId || (isMale ? VOICE_IDS.male : VOICE_IDS.female);
 
+      console.log('ElevenLabs TTS - Speaking:', {
+        text: text.substring(0, 50) + '...',
+        voiceId,
+        model: this.currentModel,
+        isMale
+      });
+
       // Make API request to ElevenLabs
       const response = await axios.post(
         `${ELEVENLABS_API_URL}/text-to-speech/${voiceId}`,
@@ -153,8 +158,8 @@ class ElevenLabsTTS {
           text,
           model_id: options.modelId || this.currentModel,
           voice_settings: {
-            stability: options.stability ?? 0.75, // Higher stability for Thai
-            similarity_boost: options.similarityBoost ?? 0.75,
+            stability: options.stability ?? 0.5, // Lower for more variation
+            similarity_boost: options.similarityBoost ?? 0.5, // Lower for more natural
             style: options.style ?? 0.0,
             use_speaker_boost: options.useSpeakerBoost ?? true,
           },

@@ -1,8 +1,10 @@
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 
 // Azure Speech Service configuration
-const AZURE_SPEECH_KEY = '6EmmOcEmx5PawFATQv90x4mJaFLCNL3kLY1pLwivCFTvFMt9zXxhJQQJ99BGACYeBjFXJ3w3AAAYACOGBGAn';
-const AZURE_SPEECH_REGION = 'eastus';
+// IMPORTANT: Update these values with your actual Azure Speech Service credentials
+// Get them from Azure Portal > Your Speech Resource > Keys and Endpoint
+const AZURE_SPEECH_KEY = 'CKUt0UglFFtkn96zA1lWcG1EUTS2Y4NAS6edR0QL6tcDBuVxrdYlJQQJ99BGACqBBLyXJ3w3AAAEACOGih5x';
+const AZURE_SPEECH_REGION = 'southeastasia'; // Make sure this matches your resource's region
 
 // Thai voice options from Azure
 // See: https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=tts
@@ -43,6 +45,10 @@ class AzureTTS {
    * Initialize Azure Speech SDK
    */
   private initialize(): void {
+    console.log('Azure TTS: Starting initialization...');
+    console.log('Azure TTS: Using region:', AZURE_SPEECH_REGION);
+    console.log('Azure TTS: Key length:', AZURE_SPEECH_KEY ? AZURE_SPEECH_KEY.length : 0);
+    
     try {
       this.speechConfig = sdk.SpeechConfig.fromSubscription(AZURE_SPEECH_KEY, AZURE_SPEECH_REGION);
       
@@ -77,11 +83,12 @@ class AzureTTS {
    */
   async speak(
     text: string,
-    isMale: boolean = true,
-    options: AzureTTSOptions = {}
+    options?: { voiceGender?: 'male' | 'female' }
   ): Promise<void> {
+    console.log('Azure TTS speak called with:', { text, options });
     if (!this.isInitialized || !this.speechConfig) {
-      throw new Error('Azure TTS not initialized. Please set API credentials.');
+      console.error('Azure TTS not initialized, throwing error to trigger fallback');
+      throw new Error('Azure TTS not initialized');
     }
 
     try {
@@ -89,36 +96,46 @@ class AzureTTS {
       this.stop();
 
       // Select voice based on gender
-      const voiceName = options.voiceName || (isMale ? DEFAULT_VOICES.male : DEFAULT_VOICES.female);
+      const voiceName = options?.voiceGender === 'female' ? DEFAULT_VOICES.female : DEFAULT_VOICES.male;
       
       console.log('Azure TTS - Speaking:', {
         text: text.substring(0, 50) + '...',
         voiceName,
-        isMale
+        gender: options?.voiceGender || 'male'
       });
 
       // Create SSML for advanced control
-      const ssml = this.createSSML(text, voiceName, options);
+      const ssml = this.createSSML(text, voiceName, {});
+      console.log('Azure TTS SSML:', ssml);
       
       // Create synthesizer with audio output
       const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
       const synthesizer = new sdk.SpeechSynthesizer(this.speechConfig, audioConfig);
+      console.log('Azure TTS: Synthesizer created, starting speech...');
 
       return new Promise((resolve, reject) => {
         synthesizer.speakSsmlAsync(
           ssml,
           (result) => {
+            console.log('Azure TTS success result:', {
+              reason: result.reason,
+              reasonString: sdk.ResultReason[result.reason],
+              errorDetails: result.errorDetails
+            });
             if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-              console.log('Azure TTS synthesis completed');
+              console.log('Azure TTS synthesis completed successfully');
               resolve();
             } else {
-              console.error('Azure TTS synthesis failed:', result.errorDetails);
-              reject(new Error(result.errorDetails));
+              console.error('Azure TTS synthesis failed:', {
+                reason: sdk.ResultReason[result.reason],
+                errorDetails: result.errorDetails
+              });
+              reject(new Error(result.errorDetails || 'Azure TTS synthesis failed'));
             }
             synthesizer.close();
           },
           (error) => {
-            console.error('Azure TTS error:', error);
+            console.error('Azure TTS error callback:', error);
             synthesizer.close();
             reject(error);
           }
@@ -191,7 +208,7 @@ class AzureTTS {
    */
   async testConnection(): Promise<boolean> {
     try {
-      await this.speak('ทดสอบ', true, { voiceName: 'th-TH-NiwatNeural' });
+      await this.speak('ทดสอบ', { voiceGender: 'male' });
       return true;
     } catch (error) {
       console.error('Azure TTS test failed:', error);

@@ -21,8 +21,9 @@ export const ttsService = {
       onStart?.();
       
       // Use Azure TTS
-      console.log('Using Azure TTS with', genderValue ? 'male' : 'female', 'voice');
-      await azureTTS.speak(text, genderValue);
+      const voiceGender = genderValue ? 'male' : 'female';
+      console.log('Using Azure TTS with', voiceGender, 'voice');
+      await azureTTS.speak(text, { voiceGender });
       
       // Call onEnd callback
       onEnd?.();

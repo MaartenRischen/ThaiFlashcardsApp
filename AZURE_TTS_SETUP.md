@@ -1,4 +1,4 @@
-# Azure Text-to-Speech Setup Guide
+# Azure TTS Setup Guide
 
 ## Quick Setup
 
@@ -32,13 +32,48 @@ Azure provides these native Thai voices:
 - **Female**: Premwadee (th-TH-PremwadeeNeural) - Natural Thai female voice
 - **Alternative**: Achara (th-TH-AcharaNeural) - Another Thai female voice
 
+## Usage
+
+Once configured, the app will automatically use Azure TTS for all voice synthesis. The service will:
+- Use male voice (Niwat) when gender toggle is set to male
+- Use female voice (Premwadee) when gender toggle is set to female
+- Fall back to browser TTS if Azure TTS fails
+
 ## Troubleshooting
 
-If voices don't work:
-1. Check the browser console for errors
-2. Verify your API key and region are correct
-3. Make sure your Azure Speech Service is active
-4. Check if you have quota remaining
+### Verifying Your Azure Credentials
+
+If you're getting authentication errors, verify your credentials:
+
+1. **Test your API key**:
+   ```bash
+   curl -X POST "https://YOUR_REGION.api.cognitive.microsoft.com/sts/v1.0/issueToken" \
+     -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY" \
+     -H "Content-type: application/x-www-form-urlencoded" \
+     -H "Content-Length: 0"
+   ```
+   
+   Replace `YOUR_REGION` with your region (e.g., `eastus`) and `YOUR_API_KEY` with your key.
+   
+   If successful, you'll receive a token. If not, you'll see an error message.
+
+2. **Common issues**:
+   - **401 Error**: Invalid API key or wrong region
+   - **403 Error**: Subscription expired or quota exceeded
+   - **WebSocket 1006 Error**: Usually indicates authentication failure
+
+3. **Verify your region**: Make sure the region in your code matches the region where your Azure Speech resource was created.
+
+### Getting Your Azure Credentials
+
+1. Go to [Azure Portal](https://portal.azure.com)
+2. Navigate to your Speech Service resource
+3. Click on "Keys and Endpoint" in the left sidebar
+4. You'll see:
+   - **Location/Region**: This is your region (e.g., "East US" = "eastus")
+   - **KEY 1** or **KEY 2**: Either key will work
+
+Make sure to use the exact region identifier (lowercase, no spaces) that matches your resource location.
 
 ## Benefits over ElevenLabs
 

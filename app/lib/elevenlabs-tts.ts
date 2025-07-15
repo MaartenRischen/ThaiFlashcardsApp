@@ -4,34 +4,42 @@ import axios from 'axios';
 const ELEVENLABS_API_KEY = 'sk_f0ac632fde79f0d958d394e8fb21e6b9cf2f882843059fc1';
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1';
 
-// Voice IDs for Thai-suitable voices
-// You can explore more voices at https://elevenlabs.io/voice-library
-const VOICE_IDS = {
-  male: 'pNInz6obpgDQGcFmaJgB', // Adam - Deep, clear male voice
-  female: '21m00Tcm4TlvDq8ikWAM', // Rachel - Clear female voice
+// Available models
+export const ELEVENLABS_MODELS = {
+  'eleven_multilingual_v2': 'Multilingual v2 (Best quality for Thai)',
+  'eleven_turbo_v2_5': 'Turbo v2.5 (Faster, good quality)',
+  'eleven_monolingual_v1': 'English v1 (English only)',
 };
 
-// Alternative voice options (if you want to try different ones)
+// Voice IDs for multilingual voices that work well with Thai
+// These voices support multiple languages including Thai
+const VOICE_IDS = {
+  male: 'onwK4e9ZLuTAKqWW03F9', // Daniel - British-accented but works well for Thai
+  female: 'EXAVITQu4vr4xnSDxMaL', // Bella - Soft female voice, good for Thai
+};
+
+// Alternative multilingual voices that work well with Thai
 const ALTERNATIVE_VOICES = {
   male: {
+    'Daniel': 'onwK4e9ZLuTAKqWW03F9', // British-accented male, good multilingual support
     'Antoni': 'ErXwobaYiN019PkySvjV', // Well-rounded male voice
     'Arnold': 'VR6AewLTigWG4xSOukaG', // Strong, assertive male voice
     'Callum': 'N2lVS1w4EtoT3dr4eOWO', // Hoarse male voice
     'Charlie': 'IKne3meq5aSn9XLyUdCD', // Casual male voice
     'Clyde': '2EiwWnXFnvU5JabPnv8n', // War veteran voice
-    'Daniel': 'onwK4e9ZLuTAKqWW03F9', // British-accented male
     'Dave': 'CYw3kZ02Hs0563khs1Fj', // British male voice
     'Drew': '29vD33N1CtxCmqQRPOHJ', // Well-rounded male
     'Ethan': 'g5CIjZEefAph4nQFvHAz', // American male
     'Fin': 'D38z5RcWu1voky8WS1ja', // Irish male
-    'Freya': 'jsCqWAovK2LkecY7zXl4', // American female
     'George': 'JBFqnCBsd6RMkjVDRZzb', // British male
   },
   female: {
-    'Bella': 'EXAVITQu4vr4xnSDxMaL', // Soft female voice
+    'Bella': 'EXAVITQu4vr4xnSDxMaL', // Soft female voice, excellent for Thai
+    'Rachel': '21m00Tcm4TlvDq8ikWAM', // Clear female voice
     'Dorothy': 'ThT5KcBeYPX3keUQqHPh', // British female
     'Elli': 'MF3mGyEYCl7XYWbV9V6O', // American female
     'Emily': 'LcfcDJNUP1GQjkzn1xUU', // American female
+    'Freya': 'jsCqWAovK2LkecY7zXl4', // American female
     'Glinda': 'z9fAnlkpzviPz146aGWa', // American female witch
     'Grace': 'oWAxZDx7w5VEj9dCyTzz', // American Southern female
     'Jessie': 't0jbNlBVZ17f02VDIeMI', // Raspy old female
@@ -104,6 +112,24 @@ interface SubscriptionInfo {
 class ElevenLabsTTS {
   private audioQueue: HTMLAudioElement[] = [];
   private currentAudio: HTMLAudioElement | null = null;
+  private currentModel: string = 'eleven_multilingual_v2';
+
+  /**
+   * Sets the model to use for TTS
+   */
+  setModel(modelId: string): void {
+    if (modelId in ELEVENLABS_MODELS) {
+      this.currentModel = modelId;
+      console.log(`ElevenLabs model set to: ${modelId}`);
+    }
+  }
+
+  /**
+   * Gets the current model
+   */
+  getModel(): string {
+    return this.currentModel;
+  }
 
   /**
    * Converts text to speech using ElevenLabs API
@@ -125,9 +151,9 @@ class ElevenLabsTTS {
         `${ELEVENLABS_API_URL}/text-to-speech/${voiceId}`,
         {
           text,
-          model_id: options.modelId || 'eleven_multilingual_v2', // Best for Thai
+          model_id: options.modelId || this.currentModel,
           voice_settings: {
-            stability: options.stability ?? 0.5,
+            stability: options.stability ?? 0.75, // Higher stability for Thai
             similarity_boost: options.similarityBoost ?? 0.75,
             style: options.style ?? 0.0,
             use_speaker_boost: options.useSpeakerBoost ?? true,

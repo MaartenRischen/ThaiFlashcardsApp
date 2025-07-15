@@ -157,10 +157,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
           <Volume2 />
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px] bg-[#2a2a2a] border-[#404040] text-[#e0e0e0]">
+      <DialogContent className="sm:max-w-[525px] bg-[#1f1f1f] border-[#404040] text-[#E0E0E0]">
         <DialogHeader>
-          <DialogTitle className="text-[#e0e0e0] text-xl font-semibold">Generate Audio Lesson</DialogTitle>
-          <DialogDescription className="text-[#a0a0a0]">
+          <DialogTitle className="text-[#E0E0E0] text-xl font-semibold">Generate Audio Lesson</DialogTitle>
+          <DialogDescription className="text-[#BDBDBD]">
             Create an audio lesson for "{setName}" with {phraseCount} phrases.
             Estimated duration: ~{estimatedDuration} minutes.
           </DialogDescription>
@@ -169,14 +169,14 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
         <div className="grid gap-6 py-4">
           {/* Mode Selection */}
           <div className="grid gap-3">
-            <Label className="text-[#e0e0e0] font-medium">Lesson Style</Label>
+            <Label className="text-[#E0E0E0] font-medium">Lesson Style</Label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setLessonMode('pimsleur')}
-                className={`flex items-center justify-start gap-3 px-4 py-3 rounded-xl transition-all shadow-lg ${
+                className={`flex items-center justify-start gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   lessonMode === 'pimsleur' 
-                    ? 'bg-[#f59e0b] text-white shadow-[0_4px_15px_rgba(245,158,11,0.3)] border border-[#f59e0b]' 
-                    : 'bg-[#3a3a3a] text-[#e0e0e0] border border-[#505050] hover:bg-[#404040] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.3),inset_-2px_-2px_5px_rgba(255,255,255,0.1)]'
+                    ? 'bg-[#A9C4FC] text-[#121212] border border-[#A9C4FC]' 
+                    : 'bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] hover:bg-[#4C4C4C]'
                 }`}
               >
                 <Brain className="w-5 h-5" />
@@ -187,10 +187,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
               </button>
               <button
                 onClick={() => setLessonMode('simple')}
-                className={`flex items-center justify-start gap-3 px-4 py-3 rounded-xl transition-all shadow-lg ${
+                className={`flex items-center justify-start gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   lessonMode === 'simple' 
-                    ? 'bg-[#f59e0b] text-white shadow-[0_4px_15px_rgba(245,158,11,0.3)] border border-[#f59e0b]' 
-                    : 'bg-[#3a3a3a] text-[#e0e0e0] border border-[#505050] hover:bg-[#404040] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.3),inset_-2px_-2px_5px_rgba(255,255,255,0.1)]'
+                    ? 'bg-[#A9C4FC] text-[#121212] border border-[#A9C4FC]' 
+                    : 'bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] hover:bg-[#4C4C4C]'
                 }`}
               >
                 <Repeat className="w-5 h-5" />
@@ -203,7 +203,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
           </div>
           {/* Voice Selection */}
           <div className="grid gap-3">
-            <Label htmlFor="voice" className="text-[#e0e0e0] font-medium">Voice Gender</Label>
+            <Label htmlFor="voice" className="text-[#E0E0E0] font-medium">Voice Gender</Label>
             <Select
               value={lessonMode === 'pimsleur' ? config.voiceGender : simpleConfig.voiceGender}
               onValueChange={(value) => {
@@ -214,18 +214,18 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
                 }
               }}
             >
-              <SelectTrigger id="voice" className="bg-[#3a3a3a] border-[#505050] text-[#e0e0e0] rounded-xl shadow-[inset_2px_2px_5px_rgba(0,0,0,0.3),inset_-2px_-2px_5px_rgba(255,255,255,0.1)]">
+              <SelectTrigger id="voice" className="bg-[#3C3C3C] border-[#404040] text-[#E0E0E0] rounded-lg">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#3a3a3a] border-[#505050] text-[#e0e0e0]">
-                <SelectItem value="female" className="text-[#e0e0e0] hover:bg-[#404040]">Female (Premwadee)</SelectItem>
-                <SelectItem value="male" className="text-[#e0e0e0] hover:bg-[#404040]">Male (Niwat)</SelectItem>
+              <SelectContent className="bg-[#3C3C3C] border-[#404040] text-[#E0E0E0]">
+                <SelectItem value="female" className="text-[#E0E0E0] hover:bg-[#4C4C4C]">Female (Premwadee)</SelectItem>
+                <SelectItem value="male" className="text-[#E0E0E0] hover:bg-[#4C4C4C]">Male (Niwat)</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Basic Settings Info */}
-          <div className="text-sm text-[#a0a0a0] space-y-2 bg-[#333333] p-4 rounded-xl border border-[#505050]">
+          <div className="text-sm text-[#BDBDBD] space-y-2 bg-[#2C2C2C] p-4 rounded-lg border border-[#404040]">
             {lessonMode === 'pimsleur' ? (
               <>
                 <p>• Practice pause: {(config.pauseDurationMs?.forPractice || 3000) / 1000}s</p>
@@ -244,12 +244,12 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
           {showAdvanced && lessonMode === 'pimsleur' && (
             <>
               {/* Pause Durations */}
-              <div className="grid gap-4 pt-4 border-t border-[#505050]">
-                <h4 className="text-sm font-medium text-[#e0e0e0]">Pause Durations</h4>
+              <div className="grid gap-4 pt-4 border-t border-[#404040]">
+                <h4 className="text-sm font-medium text-[#A9C4FC]">Pause Durations</h4>
                 
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="practice-pause" className="text-xs text-[#a0a0a0]">
+                    <Label htmlFor="practice-pause" className="text-xs text-[#BDBDBD]">
                       Practice Pause: {(config.pauseDurationMs?.forPractice || 3000) / 1000}s
                     </Label>
                   </div>
@@ -271,7 +271,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
 
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="answer-pause" className="text-xs text-[#a0a0a0]">
+                    <Label htmlFor="answer-pause" className="text-xs text-[#BDBDBD]">
                       Before Answer: {(config.pauseDurationMs?.beforeAnswer || 2000) / 1000}s
                     </Label>
                   </div>
@@ -294,11 +294,11 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
 
               {/* Repetitions */}
               <div className="grid gap-4">
-                <h4 className="text-sm font-medium text-[#e0e0e0]">Repetitions</h4>
+                <h4 className="text-sm font-medium text-[#A9C4FC]">Repetitions</h4>
                 
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="intro-reps" className="text-xs text-[#a0a0a0]">
+                    <Label htmlFor="intro-reps" className="text-xs text-[#BDBDBD]">
                       Introduction: {config.repetitions?.introduction || 2}x
                     </Label>
                   </div>
@@ -320,7 +320,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
 
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="practice-reps" className="text-xs text-[#a0a0a0]">
+                    <Label htmlFor="practice-reps" className="text-xs text-[#BDBDBD]">
                       Practice: {config.repetitions?.practice || 3}x
                     </Label>
                   </div>
@@ -345,9 +345,9 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
           
           {/* Advanced Settings for Simple Mode */}
           {showAdvanced && lessonMode === 'simple' && (
-            <div className="grid gap-4 pt-4 border-t border-[#505050]">
+            <div className="grid gap-4 pt-4 border-t border-[#404040]">
               <div className="grid gap-2">
-                <Label htmlFor="simple-reps" className="text-xs text-[#a0a0a0]">
+                <Label htmlFor="simple-reps" className="text-xs text-[#BDBDBD]">
                   Repetitions per phrase: {simpleConfig.repetitions}x
                 </Label>
                 <Slider
@@ -364,7 +364,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
               </div>
               
               <div className="grid gap-2">
-                <Label htmlFor="loops" className="text-xs text-[#a0a0a0]">
+                <Label htmlFor="loops" className="text-xs text-[#BDBDBD]">
                   Total loops: {simpleConfig.loops}x
                 </Label>
                 <Slider
@@ -381,7 +381,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
               </div>
               
               <div className="grid gap-2">
-                <Label htmlFor="pause-between" className="text-xs text-[#a0a0a0]">
+                <Label htmlFor="pause-between" className="text-xs text-[#BDBDBD]">
                   Pause between phrases: {(simpleConfig.pauseBetweenPhrases || 2000) / 1000}s
                 </Label>
                 <Slider
@@ -402,16 +402,16 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
 
         {/* Audio Player Section */}
         {audioUrl && (
-          <div className="border border-[#505050] rounded-xl p-4 space-y-3 bg-[#333333] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.3),inset_-2px_-2px_5px_rgba(255,255,255,0.1)]">
+          <div className="border border-[#404040] rounded-lg p-4 space-y-3 bg-[#2C2C2C]">
             <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-[#e0e0e0] flex items-center gap-2">
-                <FileAudio className="w-4 h-4 text-[#f59e0b]" />
+              <div className="text-sm font-medium text-[#E0E0E0] flex items-center gap-2">
+                <FileAudio className="w-4 h-4 text-[#A9C4FC]" />
                 Audio Lesson Ready
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={handlePlay}
-                  className="flex items-center gap-2 px-3 py-2 bg-[#f59e0b] text-white rounded-lg hover:bg-[#e08e00] transition-colors shadow-lg"
+                  className="flex items-center gap-2 px-3 py-2 bg-[#A9C4FC] text-[#121212] rounded-lg hover:bg-[#BB86FC] transition-colors"
                 >
                   {isPlaying ? (
                     <>
@@ -427,7 +427,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
                 </button>
                 <button
                   onClick={handleDownload}
-                  className="flex items-center gap-2 px-3 py-2 bg-[#3a3a3a] text-[#e0e0e0] border border-[#505050] rounded-lg hover:bg-[#404040] transition-colors shadow-[inset_2px_2px_5px_rgba(0,0,0,0.3),inset_-2px_-2px_5px_rgba(255,255,255,0.1)]"
+                  className="flex items-center gap-2 px-3 py-2 bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] rounded-lg hover:bg-[#4C4C4C] transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   Download
@@ -447,7 +447,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
         <div className="flex justify-between items-center pt-4">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 px-3 py-2 bg-[#3a3a3a] text-[#e0e0e0] border border-[#505050] rounded-lg hover:bg-[#404040] transition-colors shadow-[inset_2px_2px_5px_rgba(0,0,0,0.3),inset_-2px_-2px_5px_rgba(255,255,255,0.1)]"
+            className="flex items-center gap-2 px-3 py-2 bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] rounded-lg hover:bg-[#4C4C4C] transition-colors"
           >
             <Settings2 className="w-4 h-4" />
             {showAdvanced ? 'Hide' : 'Show'} Advanced
@@ -456,10 +456,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
           <button 
             onClick={handleGenerate} 
             disabled={isGenerating}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all shadow-lg ${
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
               isGenerating 
                 ? 'bg-[#666666] text-[#999999] cursor-not-allowed' 
-                : 'bg-[#f59e0b] text-white hover:bg-[#e08e00] shadow-[0_4px_15px_rgba(245,158,11,0.3)]'
+                : 'bg-[#A9C4FC] text-[#121212] hover:bg-[#BB86FC]'
             }`}
           >
             {isGenerating ? (

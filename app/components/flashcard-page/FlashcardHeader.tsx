@@ -1,8 +1,9 @@
 import React from 'react';
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
-import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal } from 'lucide-react';
+import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal, Volume2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { AudioLessonDownload } from '../AudioLessonDownload';
 
 // Update props for combined settings modal
 interface FlashcardHeaderProps {
@@ -161,6 +162,17 @@ export function FlashcardHeader({
           </div>
           {/* Divider */}
           <div className="h-12 w-px bg-[#404040]/50 mx-1" />
+          {/* Audio Lesson */}
+          {activeSet && activeSet.id !== 'default' && (
+            <div className="flex flex-col items-center">
+              <AudioLessonDownload 
+                setId={activeSet.id}
+                setName={activeSet.name}
+                phraseCount={activeSet.phraseCount}
+              />
+              <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Audio</span>
+            </div>
+          )}
           {/* Settings */}
           <div className="flex flex-col items-center">
             <button

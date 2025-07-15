@@ -2,7 +2,9 @@ import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { SetProvider } from './context/SetContext'
+import { GenerationProvider } from './context/GenerationContext'
 import Navbar from './components/Navbar'
+import { GenerationStatusBar } from './components/GenerationStatusBar'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from "sonner"
@@ -69,7 +71,9 @@ export default function RootLayout({
           <Toaster richColors position="top-left" duration={5000} />
           <Tooltip.Provider>
             <SetProvider>
+              <GenerationProvider>
                 <AppInitializer />
+                <GenerationStatusBar />
                 <Navbar />
                 <main className="main-content min-h-screen relative">
                   {children}
@@ -78,6 +82,7 @@ export default function RootLayout({
                 <div className="w-full text-center text-xs text-gray-600 py-3 bg-[#181818]">
                   Copyright (c) 2025 Maarten Rischen. All rights reserved.
                 </div>
+              </GenerationProvider>
             </SetProvider>
           </Tooltip.Provider>
         </body>

@@ -31,6 +31,7 @@ interface AudioLessonDownloadProps {
 export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLessonDownloadProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [config, setConfig] = useState<Partial<AudioLessonConfig>>({
     voiceGender: 'female',
     pauseDurationMs: {
@@ -131,113 +132,124 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
             </Select>
           </div>
 
-          {/* Pause Durations */}
-          <div className="grid gap-4">
-            <h4 className="text-sm font-medium">Pause Durations</h4>
-            
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="practice-pause" className="text-xs">
-                  Practice Pause: {(config.pauseDurationMs?.forPractice || 3000) / 1000}s
-                </Label>
-              </div>
-              <Slider
-                id="practice-pause"
-                min={1000}
-                max={5000}
-                step={500}
-                value={[config.pauseDurationMs?.forPractice || 3000]}
-                onValueChange={(value) => setConfig({
-                  ...config,
-                  pauseDurationMs: {
-                    ...config.pauseDurationMs!,
-                    forPractice: value[0],
-                  },
-                })}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="answer-pause" className="text-xs">
-                  Before Answer: {(config.pauseDurationMs?.beforeAnswer || 2000) / 1000}s
-                </Label>
-              </div>
-              <Slider
-                id="answer-pause"
-                min={1000}
-                max={4000}
-                step={500}
-                value={[config.pauseDurationMs?.beforeAnswer || 2000]}
-                onValueChange={(value) => setConfig({
-                  ...config,
-                  pauseDurationMs: {
-                    ...config.pauseDurationMs!,
-                    beforeAnswer: value[0],
-                  },
-                })}
-              />
-            </div>
+          {/* Basic Settings Info */}
+          <div className="text-sm text-gray-600 space-y-1">
+            <p>• Practice pause: {(config.pauseDurationMs?.forPractice || 3000) / 1000}s</p>
+            <p>• Repetitions: {config.repetitions?.practice || 3} times per phrase</p>
           </div>
 
-          {/* Repetitions */}
-          <div className="grid gap-4">
-            <h4 className="text-sm font-medium">Repetitions</h4>
-            
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="intro-reps" className="text-xs">
-                  Introduction: {config.repetitions?.introduction || 2}x
-                </Label>
-              </div>
-              <Slider
-                id="intro-reps"
-                min={1}
-                max={4}
-                step={1}
-                value={[config.repetitions?.introduction || 2]}
-                onValueChange={(value) => setConfig({
-                  ...config,
-                  repetitions: {
-                    ...config.repetitions!,
-                    introduction: value[0],
-                  },
-                })}
-              />
-            </div>
+          {/* Advanced Settings - Collapsible */}
+          {showAdvanced && (
+            <>
+              {/* Pause Durations */}
+              <div className="grid gap-4 pt-4 border-t">
+                <h4 className="text-sm font-medium">Pause Durations</h4>
+                
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="practice-pause" className="text-xs">
+                      Practice Pause: {(config.pauseDurationMs?.forPractice || 3000) / 1000}s
+                    </Label>
+                  </div>
+                  <Slider
+                    id="practice-pause"
+                    min={1000}
+                    max={5000}
+                    step={500}
+                    value={[config.pauseDurationMs?.forPractice || 3000]}
+                    onValueChange={(value) => setConfig({
+                      ...config,
+                      pauseDurationMs: {
+                        ...config.pauseDurationMs!,
+                        forPractice: value[0],
+                      },
+                    })}
+                  />
+                </div>
 
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="practice-reps" className="text-xs">
-                  Practice: {config.repetitions?.practice || 3}x
-                </Label>
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="answer-pause" className="text-xs">
+                      Before Answer: {(config.pauseDurationMs?.beforeAnswer || 2000) / 1000}s
+                    </Label>
+                  </div>
+                  <Slider
+                    id="answer-pause"
+                    min={1000}
+                    max={4000}
+                    step={500}
+                    value={[config.pauseDurationMs?.beforeAnswer || 2000]}
+                    onValueChange={(value) => setConfig({
+                      ...config,
+                      pauseDurationMs: {
+                        ...config.pauseDurationMs!,
+                        beforeAnswer: value[0],
+                      },
+                    })}
+                  />
+                </div>
               </div>
-              <Slider
-                id="practice-reps"
-                min={1}
-                max={5}
-                step={1}
-                value={[config.repetitions?.practice || 3]}
-                onValueChange={(value) => setConfig({
-                  ...config,
-                  repetitions: {
-                    ...config.repetitions!,
-                    practice: value[0],
-                  },
-                })}
-              />
-            </div>
-          </div>
+
+              {/* Repetitions */}
+              <div className="grid gap-4">
+                <h4 className="text-sm font-medium">Repetitions</h4>
+                
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="intro-reps" className="text-xs">
+                      Introduction: {config.repetitions?.introduction || 2}x
+                    </Label>
+                  </div>
+                  <Slider
+                    id="intro-reps"
+                    min={1}
+                    max={4}
+                    step={1}
+                    value={[config.repetitions?.introduction || 2]}
+                    onValueChange={(value) => setConfig({
+                      ...config,
+                      repetitions: {
+                        ...config.repetitions!,
+                        introduction: value[0],
+                      },
+                    })}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="practice-reps" className="text-xs">
+                      Practice: {config.repetitions?.practice || 3}x
+                    </Label>
+                  </div>
+                  <Slider
+                    id="practice-reps"
+                    min={1}
+                    max={5}
+                    step={1}
+                    value={[config.repetitions?.practice || 3]}
+                    onValueChange={(value) => setConfig({
+                      ...config,
+                      repetitions: {
+                        ...config.repetitions!,
+                        practice: value[0],
+                      },
+                    })}
+                  />
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="flex justify-between items-center">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowSettings(!showSettings)}
+            onClick={() => setShowAdvanced(!showAdvanced)}
           >
             <Settings2 className="w-4 h-4 mr-2" />
-            Advanced
+            {showAdvanced ? 'Hide' : 'Show'} Advanced
           </Button>
 
           <Button 

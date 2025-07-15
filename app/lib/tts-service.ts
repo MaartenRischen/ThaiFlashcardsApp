@@ -1,5 +1,4 @@
-// Remove AWS imports
-// import { PollyClient, SynthesizeSpeechCommand, SynthesizeSpeechCommandInput, LanguageCode, VoiceId, Engine } from "@aws-sdk/client-polly";
+import { elevenLabsTTS } from './elevenlabs-tts';
 
 // Define interfaces for parameters
 interface SpeakParams {
@@ -10,91 +9,64 @@ interface SpeakParams {
   onError?: (error: unknown) => void;
 }
 
-// Remove AWS-related state variables
-// let pollyClient: PollyClient | null = null;
-// let audioContext: AudioContext | null = null;
-// let currentAudioSource: AudioBufferSourceNode | null = null; // To manage playback cancellation
-// let isAwsInitializedInternal = false; // Internal flag for initialization status
-
-// Remove AWS initialization function
-/*
-function initAwsPollyV3(): boolean {
-  // ... implementation removed ...
-}
-*/
-
-// Remove AudioContext function
-/*
-function getAudioContext(): AudioContext | null {
-    // ... implementation removed ...
-}
-*/
+// TTS provider setting
+let useElevenLabs = true; // Default to ElevenLabs
 
 // --- Main TTS Service Object ---
 export const ttsService = {
   
-  // Remove initialize method
-  /*
-  initialize: function() {
-    if (!isAwsInitializedInternal) { 
-        isAwsInitializedInternal = initAwsPollyV3(); // Use V3 initializer
-    }
+  // Method to toggle TTS provider
+  setProvider: function(provider: 'elevenlabs' | 'browser') {
+    useElevenLabs = provider === 'elevenlabs';
+    console.log(`TTS provider set to: ${provider}`);
   },
-  */
-
+  
+  // Get current provider
+  getProvider: function(): 'elevenlabs' | 'browser' {
+    return useElevenLabs ? 'elevenlabs' : 'browser';
+  },
+  
   speak: async function({ text, genderValue, onStart, onEnd, onError }: SpeakParams): Promise<void> {
-    // Remove initialize call
-    // this.initialize(); 
-    
-    // Remove AudioContext logic
-    // const localAudioContext = getAudioContext();
-    
-    // Stop any currently playing audio (from this service)
+    // Stop any currently playing audio
     this.stop(); 
 
-    // Remove AudioContext resume logic
-    /*
-    if (localAudioContext && localAudioContext.state === 'suspended') {
-        try {
-            await localAudioContext.resume();
-        } catch (resumeError) {
-            console.error('Failed to resume AudioContext:', resumeError);
-            // Proceed anyway, playback might still work or fail later
-        }
+    if (!useElevenLabs) {
+      // Use browser TTS directly if ElevenLabs is disabled
+      console.log('Using Browser TTS (ElevenLabs disabled)');
+      this._speakWithBrowserTTS({ text, genderValue, onStart, onEnd, onError });
+      return;
     }
-    */
 
-    // Remove entire AWS Polly attempt block
-    /*
-    if (isAwsInitializedInternal && pollyClient && localAudioContext) {
-      // ... AWS Polly try/catch block removed ...
-    } else {
-      // --- Browser TTS Fallback (if AWS not initialized) ---
-      console.log('AWS not initialized or AudioContext not available. Using Browser TTS.');
+    try {
+      // Call onStart callback
+      onStart?.();
+      
+      // Use ElevenLabs TTS
+      console.log('Using ElevenLabs TTS with', genderValue ? 'male' : 'female', 'voice');
+      await elevenLabsTTS.speak(text, genderValue);
+      
+      // Call onEnd callback
+      onEnd?.();
+    } catch (error) {
+      console.error('TTS Error:', error);
+      
+      // Fallback to browser TTS if ElevenLabs fails
+      console.log('Falling back to Browser TTS due to error');
       this._speakWithBrowserTTS({ text, genderValue, onStart, onEnd, onError });
     }
-    */
-
-    // Directly call the Browser TTS method
-    console.log('Using Browser TTS.'); // Simplified log message
-    this._speakWithBrowserTTS({ text, genderValue, onStart, onEnd, onError });
-
   },
 
-  // --- Helper function for Browser TTS --- 
+  // --- Helper function for Browser TTS (fallback) --- 
   _speakWithBrowserTTS: function({ text, genderValue, onStart, onEnd, onError }: SpeakParams): void {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        // console.log('Using Browser TTS.'); // Log moved to parent speak function
+        console.log('Using Browser TTS');
         
-        // Call onStart directly (no AWS check needed)
-        // if (!isAwsInitializedInternal) { 
-            onStart?.(); 
-        // }
-
+        // Call onStart (if not already called)
+        // onStart might have been called already in the main speak function
+        
         const voices = window.speechSynthesis.getVoices();
         if (voices.length === 0) {
             console.warn("Browser voices not loaded yet, attempting to speak anyway...");
-            // Consider adding a small delay and retry for voices?
         }
 
         const utterance = new SpeechSynthesisUtterance(text);
@@ -106,7 +78,7 @@ export const ttsService = {
             targetVoice = thaiVoices.find(v => v.name.toLowerCase().includes('male') || v.name.includes('Niwat') || v.name.includes('Kritt'));
         }
         if (!targetVoice && !genderValue) { // Check genderValue (false for Female)
-            targetVoice = thaiVoices.find(v => v.name.toLowerCase().includes('female') || v.name.includes('Patchara') || v.name.includes('Ayutthaya') || v.name.includes('Kanya')); // Added Kanya
+            targetVoice = thaiVoices.find(v => v.name.toLowerCase().includes('female') || v.name.includes('Patchara') || v.name.includes('Ayutthaya') || v.name.includes('Kanya'));
         }
         if (!targetVoice && thaiVoices.length > 0) { 
             console.warn('Specific gender voice not found, using first available Thai voice.');
@@ -122,8 +94,8 @@ export const ttsService = {
              utterance.lang = 'th-TH'; 
         }
 
-        // *** Set pitch based on genderValue ***
-        if (genderValue) { // Check genderValue (true for Male)
+        // Set pitch based on genderValue (for browser TTS fallback)
+        if (genderValue) { // Male voice
             utterance.pitch = 0.25; // Two octaves lower
             utterance.rate = 0.95;
             console.log(`Applied pitch: ${utterance.pitch.toFixed(2)}, rate: ${utterance.rate.toFixed(2)} for male voice.`);
@@ -135,11 +107,11 @@ export const ttsService = {
         
         utterance.onend = () => {
             console.log('Browser TTS playback finished.');
-            onEnd?.(); // Call original onEnd callback
+            onEnd?.();
         };
         utterance.onerror = (event) => {
             console.error('Browser TTS Error:', event.error);
-            onError?.(event.error); // Call original onError callback
+            onError?.(event.error);
         };
 
         // Cancel any previous speech and speak the new utterance
@@ -154,22 +126,10 @@ export const ttsService = {
     }
   },
 
-  // Function to explicitly stop any ongoing playback initiated by this service
+  // Function to explicitly stop any ongoing playback
   stop: function() {
-      // Remove AWS Polly stop logic
-      /*
-      if (currentAudioSource) {
-          try {
-            console.log("Attempting to stop AWS Polly playback.");
-            currentAudioSource.onended = null; // Prevent onEnd callback if manually stopped
-            currentAudioSource.stop();
-          } catch(e) {
-              // Ignore errors if already stopped or node is invalid
-              // console.warn("Error stopping Polly source:", e);
-          }
-          currentAudioSource = null; // Clear the reference
-      }
-      */
+      // Stop ElevenLabs TTS
+      elevenLabsTTS.stop();
 
       // Stop Browser TTS playback
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {

@@ -2,6 +2,9 @@
  * Text-to-speech utility for speaking Thai phrases
  */
 
+import { elevenLabsTTS } from './elevenlabs-tts';
+import { ttsService } from './tts-service';
+
 interface SpeakOptions {
   rate?: number;
   pitch?: number;
@@ -10,18 +13,47 @@ interface SpeakOptions {
 }
 
 /**
- * Speaks the provided text using the browser's Speech Synthesis API
+ * Speaks the provided text using the configured TTS provider
  * @param text - The text to speak
  * @param isContext - Whether this is a context example (longer phrase)
  * @param isMale - Whether to use a male voice if available
- * @param options - Additional speech synthesis options
+ * @param options - Additional speech synthesis options (used only for browser fallback)
  * @returns Promise that resolves when speech is complete or rejects on error
  */
-export function speak(
+export async function speak(
   text: string, 
   isContext: boolean = false, 
   isMale: boolean = true,
   options: SpeakOptions = {}
+): Promise<void> {
+  // Check if we should use ElevenLabs based on the service setting
+  const useElevenLabs = ttsService.getProvider() === 'elevenlabs';
+  
+  if (!useElevenLabs) {
+    // Use browser TTS directly if ElevenLabs is disabled
+    return speakWithBrowser(text, isContext, isMale, options);
+  }
+  
+  try {
+    // Use ElevenLabs TTS
+    console.log('Speaking with ElevenLabs TTS:', { text: text.substring(0, 50) + '...', isMale });
+    await elevenLabsTTS.speak(text, isMale);
+  } catch (error) {
+    console.error('ElevenLabs TTS failed, falling back to browser TTS:', error);
+    
+    // Fallback to browser TTS
+    return speakWithBrowser(text, isContext, isMale, options);
+  }
+}
+
+/**
+ * Browser TTS implementation
+ */
+function speakWithBrowser(
+  text: string,
+  isContext: boolean,
+  isMale: boolean,
+  options: SpeakOptions
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     if (!window.speechSynthesis) {
@@ -59,6 +91,12 @@ export function speak(
           
           utterance.voice = genderVoices.length > 0 ? genderVoices[0] : thaiVoices[0];
         }
+      }
+      
+      // Apply pitch adjustment for male voices (browser TTS)
+      if (isMale) {
+        utterance.pitch = 0.25; // Two octaves lower
+        utterance.rate = 0.95;
       }
       
       // Events

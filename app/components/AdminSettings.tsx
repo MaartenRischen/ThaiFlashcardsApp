@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Switch } from "@/app/components/ui/switch";
 import { ttsService } from '../lib/tts-service';
+import { elevenLabsTTS } from '../lib/elevenlabs-tts';
 
 interface AdminSettingsProps {
   isOpen: boolean;
@@ -8,157 +9,163 @@ interface AdminSettingsProps {
 }
 
 const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
-  const [apiKey, setApiKey] = useState('');
-  const [provider, setProvider] = useState('browser');
-  const [testVoice, setTestVoice] = useState('');
+  const [useElevenLabs, setUseElevenLabs] = useState(true);
+  const [testText, setTestText] = useState('สวัสดีครับ ผมกำลังทดสอบเสียง');
   const [isMale, setIsMale] = useState(true);
   const [isTesting, setIsTesting] = useState(false);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
   
   useEffect(() => {
-    // Load API key from localStorage (if you still want to use it for Google as a fallback/option?)
-    // Or potentially adapt this for AWS keys if needed, though .env.local is better.
-    const savedApiKey = localStorage.getItem('ttsApiKey') || ''; 
-    setApiKey(savedApiKey);
+    // Get current TTS provider setting
+    const currentProvider = ttsService.getProvider();
+    setUseElevenLabs(currentProvider === 'elevenlabs');
     
-    // Determine provider based on AWS initialization status (or localStorage if needed)
-    // This logic might need refinement based on how you want to manage providers now
-    const awsInitialized = process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID && process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY;
-    setProvider(awsInitialized ? 'awsPolly' : 'browser');
-    
-    // Remove call to loadVoices
-    // loadVoices();
+    // Fetch subscription info if using ElevenLabs
+    if (currentProvider === 'elevenlabs') {
+      fetchSubscriptionInfo();
+    }
   }, [isOpen]);
   
-  // Remove loadVoices function
-  // const loadVoices = async () => { ... };
-  
-  const handleSave = () => {
-    // This save logic likely needs adjustment if primarily using AWS via .env.local
-    // Maybe remove the API key field if not used for Google anymore?
-    if (apiKey) {
-      localStorage.setItem('ttsApiKey', apiKey);
+  const fetchSubscriptionInfo = async () => {
+    try {
+      const info = await elevenLabsTTS.getSubscriptionInfo();
+      setSubscriptionInfo(info);
+    } catch (error) {
+      console.error('Failed to fetch subscription info:', error);
     }
-    // No page reload needed if using .env.local for AWS
-    // window.location.reload();
-    onClose();
   };
   
-  // Remove provider change handler (controlled by AWS env vars primarily now)
-  // const handleProviderChange = (checked: boolean) => { ... };
+  const handleProviderToggle = (checked: boolean) => {
+    setUseElevenLabs(checked);
+    ttsService.setProvider(checked ? 'elevenlabs' : 'browser');
+  };
   
   const handleTestVoice = async () => {
     if (!ttsService) {
-      alert('TTS Service not available');
+      console.error('TTS service not initialized');
       return;
     }
+    
+    setIsTesting(true);
+    
     try {
-      setIsTesting(true);
-      // Use genderValue: isMale for the test call (true is male, false is female)
       await ttsService.speak({
-        text: testVoice || 'สวัสดีครับ ทดสอบเสียง', // Default Thai test phrase
-        genderValue: isMale, // Use genderValue matching the isMale state
-        onEnd: () => setIsTesting(false),
-        onError: (err: unknown) => {
-          console.error("TTS Test Error:", err);
-          const message =
-            typeof err === "object" && err && "message" in err && typeof (err as { message?: unknown }).message === "string"
-              ? (err as { message: string }).message
-              : String(err);
-          alert(`TTS Test Error: ${message}`);
+        text: testText,
+        genderValue: isMale,
+        onStart: () => console.log('Test voice started'),
+        onEnd: () => {
+          console.log('Test voice ended');
+          setIsTesting(false);
+        },
+        onError: (error) => {
+          console.error('Test voice error:', error);
           setIsTesting(false);
         }
       });
-    } catch (error: unknown) {
-      console.error("TTS Test Error:", error);
-      let message = 'Unknown error';
-      if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
-        message = (error as { message: string }).message;
-      } else {
-        message = String(error);
-      }
-      alert(`TTS Test Error: ${message}`);
+    } catch (error) {
+      console.error('Test voice error:', error);
       setIsTesting(false);
     }
   };
-  
+
   if (!isOpen) return null;
-  
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="neumorphic max-w-md w-full p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">TTS Admin Settings</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <h2 className="text-xl font-bold mb-4">Admin Settings</h2>
+        
+        {/* TTS Provider Toggle */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium">
+              Text-to-Speech Provider
+            </label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">Browser</span>
+              <Switch
+                checked={useElevenLabs}
+                onCheckedChange={handleProviderToggle}
+              />
+              <span className="text-sm text-gray-500">ElevenLabs</span>
+            </div>
+          </div>
+          
+          {useElevenLabs && subscriptionInfo && (
+            <div className="mt-2 p-3 bg-blue-50 rounded text-sm">
+              <p className="font-medium">ElevenLabs Usage:</p>
+              <p>
+                {subscriptionInfo.character_count.toLocaleString()} / {subscriptionInfo.character_limit.toLocaleString()} characters
+              </p>
+              <p className="text-xs text-gray-600 mt-1">
+                ({Math.round((subscriptionInfo.character_count / subscriptionInfo.character_limit) * 100)}% used)
+              </p>
+            </div>
+          )}
+          
+          {!useElevenLabs && (
+            <div className="mt-2 p-3 bg-yellow-50 rounded text-sm">
+              <p className="text-yellow-800">
+                Using browser TTS with pitch adjustment for male voices.
+              </p>
+            </div>
+          )}
+        </div>
+        
+        {/* Voice Test Section */}
+        <div className="mb-6">
+          <h3 className="text-sm font-medium mb-2">Test Voice</h3>
+          
+          <input
+            type="text"
+            value={testText}
+            onChange={(e) => setTestText(e.target.value)}
+            className="w-full p-2 border rounded mb-2"
+            placeholder="Enter test text..."
+          />
+          
+          <div className="flex items-center space-x-4 mb-2">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                checked={isMale}
+                onChange={() => setIsMale(true)}
+                className="mr-1"
+              />
+              <span className="text-sm">Male</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                checked={!isMale}
+                onChange={() => setIsMale(false)}
+                className="mr-1"
+              />
+              <span className="text-sm">Female</span>
+            </label>
+          </div>
+          
           <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white"
+            onClick={handleTestVoice}
+            disabled={isTesting || !testText}
+            className={`px-4 py-2 rounded text-sm ${
+              isTesting || !testText
+                ? 'bg-gray-300 cursor-not-allowed'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+            }`}
           >
-            ✕
+            {isTesting ? 'Testing...' : 'Test Voice'}
           </button>
         </div>
         
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Google Cloud TTS API Key
-            </label>
-            <input
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="neumorphic-input w-full p-2 rounded-sm"
-              placeholder="Paste your Google Cloud API key here"
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              Get a key from <a href="https://cloud.google.com/text-to-speech" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Google Cloud Console</a>
-            </p>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <span>Use Premium TTS (AWS)</span>
-            <Switch 
-              checked={provider === 'awsPolly'}
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Test Voice
-            </label>
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                value={testVoice}
-                onChange={(e) => setTestVoice(e.target.value)}
-                className="neumorphic-input flex-1 p-2 rounded-sm"
-                placeholder="Enter Thai text to test"
-              />
-              <button
-                onClick={handleTestVoice}
-                disabled={isTesting}
-                className="neumorphic-button"
-              >
-                {isTesting ? 'Testing...' : 'Test'}
-              </button>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-300 text-sm">♀</span>
-              <Switch checked={isMale} onCheckedChange={setIsMale} />
-              <span className="text-gray-300 text-sm">♂</span>
-            </div>
-            <span className="text-xs text-gray-400">Test with {isMale ? 'Male' : 'Female'} voice</span>
-          </div>
-          
-          <div className="text-center mt-6">
-            <button
-              onClick={handleSave}
-              className="neumorphic-button text-blue-400 px-6 py-2"
-            >
-              Save Settings
-            </button>
-          </div>
+        {/* Buttons */}
+        <div className="flex justify-end space-x-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>

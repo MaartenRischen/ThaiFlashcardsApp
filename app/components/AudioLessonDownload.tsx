@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Volume2, Settings2, Loader2, Brain, Repeat } from 'lucide-react';
+import { Download, Volume2, Settings2, Loader2, Brain, Repeat, Play, Pause, FileAudio } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,7 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { AudioLessonConfig } from '../lib/audio-lesson-generator';
 import { SimpleAudioLessonConfig } from '../lib/audio-lesson-generator-simple';
+import { toast } from 'sonner';
 
 interface AudioLessonDownloadProps {
   setId: string;
@@ -34,6 +35,9 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
   const [showSettings, setShowSettings] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple'>('pimsleur');
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [config, setConfig] = useState<Partial<AudioLessonConfig>>({
     voiceGender: 'female',
     pauseDurationMs: {
@@ -57,7 +61,14 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
     loops: 3,
   });
 
-  const handleDownload = async () => {
+  const handleGenerate = async () => {
+    // Clear previous audio if regenerating
+    if (audioUrl) {
+      window.URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+      setIsPlaying(false);
+    }
+    
     setIsGenerating(true);
     try {
       const response = await fetch(`/api/flashcard-sets/${setId}/audio-lesson`, {
@@ -78,25 +89,51 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
       // Get the blob from the response
       const blob = await response.blob();
       
-      // Create download link
+      // Create object URL for in-app playback
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `${setName.replace(/[^a-z0-9]/gi, '_')}_lesson.wav`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      setShowSettings(false);
+      setAudioUrl(url);
+      
+      toast.success('Audio lesson generated successfully!');
     } catch (error) {
-      console.error('Error downloading audio lesson:', error);
-      alert('Failed to generate audio lesson. Please try again.');
+      console.error('Error generating audio lesson:', error);
+      toast.error('Failed to generate audio lesson');
     } finally {
       setIsGenerating(false);
     }
   };
+
+  const handlePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleDownload = () => {
+    if (audioUrl) {
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = audioUrl;
+      a.download = `${setName.replace(/[^a-z0-9]/gi, '_')}_${lessonMode}_lesson.wav`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      toast.success('Audio lesson downloaded!');
+    }
+  };
+
+  // Cleanup audio URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (audioUrl) {
+        window.URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [audioUrl]);
 
   const estimatedDuration = Math.round(
     lessonMode === 'pimsleur' 
@@ -144,8 +181,8 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
               >
                 <Brain className="w-4 h-4" />
                 <div className="text-left">
-                  <div className="font-medium">Pimsleur Style</div>
-                  <div className="text-xs opacity-80">Interactive learning</div>
+                  <div className="font-medium">Guided Lesson</div>
+                  <div className="text-xs opacity-80">For interactive learning</div>
                 </div>
               </button>
               <button
@@ -363,6 +400,49 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
           )}
         </div>
 
+        {/* Audio Player Section */}
+        {audioUrl && (
+          <div className="border rounded-lg p-4 space-y-3 bg-secondary/20">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium">Audio Lesson Ready</div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handlePlay}
+                >
+                  {isPlaying ? (
+                    <>
+                      <Pause className="w-4 h-4 mr-2" />
+                      Pause
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4 mr-2" />
+                      Play
+                    </>
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleDownload}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
+                </Button>
+              </div>
+            </div>
+            <audio
+              ref={audioRef}
+              src={audioUrl}
+              onEnded={() => setIsPlaying(false)}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+            />
+          </div>
+        )}
+
         <div className="flex justify-between items-center">
           <Button
             variant="outline"
@@ -374,7 +454,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
           </Button>
 
           <Button 
-            onClick={handleDownload} 
+            onClick={handleGenerate} 
             disabled={isGenerating}
           >
             {isGenerating ? (
@@ -382,10 +462,15 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Generating...
               </>
+            ) : audioUrl ? (
+              <>
+                <FileAudio className="w-4 h-4 mr-2" />
+                Regenerate Lesson
+              </>
             ) : (
               <>
-                <Download className="w-4 h-4 mr-2" />
-                Download Lesson
+                <FileAudio className="w-4 h-4 mr-2" />
+                Generate Lesson
               </>
             )}
           </Button>

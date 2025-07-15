@@ -1,9 +1,8 @@
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 
 // Azure Speech Service configuration
-// TODO: Replace these with your actual Azure credentials
-const AZURE_SPEECH_KEY = 'YOUR_AZURE_SPEECH_KEY_HERE';
-const AZURE_SPEECH_REGION = 'YOUR_AZURE_REGION_HERE'; // e.g., 'southeastasia'
+const AZURE_SPEECH_KEY = '6EmmOcEmx5PawFATQv90x4mJaFLCNL3kLY1pLwivCFTvFMt9zXxhJQQJ99BGACYeBjFXJ3w3AAAYACOGBGAn';
+const AZURE_SPEECH_REGION = 'eastus';
 
 // Thai voice options from Azure
 // See: https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=tts
@@ -45,11 +44,6 @@ class AzureTTS {
    */
   private initialize(): void {
     try {
-      if (AZURE_SPEECH_KEY === 'YOUR_AZURE_SPEECH_KEY_HERE') {
-        console.error('Azure TTS: Please set your Azure Speech API key');
-        return;
-      }
-
       this.speechConfig = sdk.SpeechConfig.fromSubscription(AZURE_SPEECH_KEY, AZURE_SPEECH_REGION);
       
       // Set speech synthesis output format

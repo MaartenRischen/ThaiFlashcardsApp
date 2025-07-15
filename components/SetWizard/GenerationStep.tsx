@@ -118,7 +118,19 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
   if (status === 'generating') {
     return (
       <div className="space-y-6">
-        <Progress value={progress} className="w-full h-2" />
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-400">
+              {progress < 20 ? 'Initializing...' :
+               progress < 40 ? 'Connecting to AI...' :
+               progress < 60 ? 'Generating translations...' :
+               progress < 80 ? 'Creating mnemonics...' :
+               'Finalizing your set...'}
+            </span>
+            <span className="text-gray-400">{Math.round(progress)}%</span>
+          </div>
+          <Progress value={progress} className="w-full h-2" />
+        </div>
         
         <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
           <motion.div

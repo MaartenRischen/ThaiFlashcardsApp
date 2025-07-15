@@ -32,7 +32,7 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
     // Close the wizard immediately so user can continue using the app
     setTimeout(() => {
       onClose()
-    }, 500) // Small delay to show the initial loading state
+    }, 4000) // Show loading state for 4 seconds before closing
 
     // Start the actual generation
     const generateSet = async () => {
@@ -126,13 +126,15 @@ export function GenerationStep({ state, onComplete, onBack, onClose, onOpenSetMa
       
       <div className="text-center space-y-3">
         <h3 className="text-2xl font-bold text-[#E0E0E0]">
-          Starting generation...
+          {state.mode === 'manual' 
+            ? 'Processing your phrases...'
+            : 'Generating your flashcard set...'}
         </h3>
         <p className="text-gray-400">
-          You can now close this window and continue using the app.
+          You can close this window and continue using the app.
         </p>
         <p className="text-sm text-gray-500 italic">
-          We'll notify you when your set is ready!
+          We'll notify you when your {state.mode === 'manual' ? 'custom' : 'personalized'} set is ready!
         </p>
       </div>
     </div>

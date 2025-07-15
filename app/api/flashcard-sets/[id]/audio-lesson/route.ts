@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/prisma';
 import { AudioLessonGenerator } from '@/app/lib/audio-lesson-generator';
+import { SimpleAudioLessonGenerator } from '@/app/lib/audio-lesson-generator-simple';
 import { auth } from '@clerk/nextjs/server';
 
 export async function POST(
@@ -29,19 +30,24 @@ export async function POST(
     }
 
     // Get configuration from request body
-    const config = await request.json();
+    const { mode, config } = await request.json();
     
-    // Generate audio lesson
-    const generator = new AudioLessonGenerator(config);
-    const audioBuffer = await generator.generateLesson(
-      flashcardSet.phrases.map(phrase => ({
-        thai: phrase.thai,
-        english: phrase.english,
-        thaiMasculine: phrase.thaiMasculine || undefined,
-        thaiFeminine: phrase.thaiFeminine || undefined
-      })),
-      flashcardSet.name
-    );
+    // Generate audio lesson based on mode
+    let audioBuffer: ArrayBuffer;
+    const phrases = flashcardSet.phrases.map(phrase => ({
+      thai: phrase.thai,
+      english: phrase.english,
+      thaiMasculine: phrase.thaiMasculine || undefined,
+      thaiFeminine: phrase.thaiFeminine || undefined
+    }));
+    
+    if (mode === 'simple') {
+      const generator = new SimpleAudioLessonGenerator(config);
+      audioBuffer = await generator.generateSimpleLesson(phrases, flashcardSet.name);
+    } else {
+      const generator = new AudioLessonGenerator(config);
+      audioBuffer = await generator.generateLesson(phrases, flashcardSet.name);
+    }
 
     // Return audio file
     return new NextResponse(audioBuffer, {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Volume2, Settings2, Loader2 } from 'lucide-react';
+import { Download, Volume2, Settings2, Loader2, Brain, Repeat } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,7 @@ import {
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { AudioLessonConfig } from '../lib/audio-lesson-generator';
+import { SimpleAudioLessonConfig } from '../lib/audio-lesson-generator-simple';
 
 interface AudioLessonDownloadProps {
   setId: string;
@@ -32,6 +33,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple'>('pimsleur');
   const [config, setConfig] = useState<Partial<AudioLessonConfig>>({
     voiceGender: 'female',
     pauseDurationMs: {
@@ -46,6 +48,14 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
       review: 2,
     },
   });
+  
+  const [simpleConfig, setSimpleConfig] = useState<Partial<SimpleAudioLessonConfig>>({
+    voiceGender: 'female',
+    repetitions: 3,
+    pauseBetweenRepetitions: 1000,
+    pauseBetweenPhrases: 2000,
+    loops: 3,
+  });
 
   const handleDownload = async () => {
     setIsGenerating(true);
@@ -55,7 +65,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(config),
+        body: JSON.stringify({
+          mode: lessonMode,
+          config: lessonMode === 'pimsleur' ? config : simpleConfig,
+        }),
       });
 
       if (!response.ok) {
@@ -86,9 +99,11 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
   };
 
   const estimatedDuration = Math.round(
-    (phraseCount * 30 + // Rough estimate: 30 seconds per phrase
-    phraseCount * (config.pauseDurationMs?.forPractice || 3000) / 1000 +
-    120) / 60 // Plus intro/outro
+    lessonMode === 'pimsleur' 
+      ? (phraseCount * 30 + // Rough estimate: 30 seconds per phrase
+         phraseCount * (config.pauseDurationMs?.forPractice || 3000) / 1000 +
+         120) / 60 // Plus intro/outro
+      : (phraseCount * (simpleConfig.repetitions || 3) * 5 * (simpleConfig.loops || 3)) / 60 // Simple mode estimate
   );
 
   return (
@@ -109,18 +124,52 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
         <DialogHeader>
           <DialogTitle>Generate Audio Lesson</DialogTitle>
           <DialogDescription>
-            Create a Pimsleur-style audio lesson for "{setName}" with {phraseCount} phrases.
+            Create an audio lesson for "{setName}" with {phraseCount} phrases.
             Estimated duration: ~{estimatedDuration} minutes.
           </DialogDescription>
         </DialogHeader>
         
         <div className="grid gap-6 py-4">
+          {/* Mode Selection */}
+          <div className="grid gap-3">
+            <Label>Lesson Style</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant={lessonMode === 'pimsleur' ? 'default' : 'outline'}
+                onClick={() => setLessonMode('pimsleur')}
+                className="justify-start gap-2"
+              >
+                <Brain className="w-4 h-4" />
+                <div className="text-left">
+                  <div className="font-medium">Pimsleur Style</div>
+                  <div className="text-xs opacity-80">Interactive learning</div>
+                </div>
+              </Button>
+              <Button
+                variant={lessonMode === 'simple' ? 'default' : 'outline'}
+                onClick={() => setLessonMode('simple')}
+                className="justify-start gap-2"
+              >
+                <Repeat className="w-4 h-4" />
+                <div className="text-left">
+                  <div className="font-medium">Repetition Mode</div>
+                  <div className="text-xs opacity-80">For sleep learning</div>
+                </div>
+              </Button>
+            </div>
+          </div>
           {/* Voice Selection */}
           <div className="grid gap-2">
             <Label htmlFor="voice">Voice Gender</Label>
             <Select
-              value={config.voiceGender}
-              onValueChange={(value) => setConfig({ ...config, voiceGender: value as 'male' | 'female' })}
+              value={lessonMode === 'pimsleur' ? config.voiceGender : simpleConfig.voiceGender}
+              onValueChange={(value) => {
+                if (lessonMode === 'pimsleur') {
+                  setConfig({ ...config, voiceGender: value as 'male' | 'female' });
+                } else {
+                  setSimpleConfig({ ...simpleConfig, voiceGender: value as 'male' | 'female' });
+                }
+              }}
             >
               <SelectTrigger id="voice">
                 <SelectValue />
@@ -134,12 +183,22 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
 
           {/* Basic Settings Info */}
           <div className="text-sm text-gray-600 space-y-1">
-            <p>• Practice pause: {(config.pauseDurationMs?.forPractice || 3000) / 1000}s</p>
-            <p>• Repetitions: {config.repetitions?.practice || 3} times per phrase</p>
+            {lessonMode === 'pimsleur' ? (
+              <>
+                <p>• Practice pause: {(config.pauseDurationMs?.forPractice || 3000) / 1000}s</p>
+                <p>• Repetitions: {config.repetitions?.practice || 3} times per phrase</p>
+              </>
+            ) : (
+              <>
+                <p>• Repetitions per phrase: {simpleConfig.repetitions || 3}x</p>
+                <p>• Total loops: {simpleConfig.loops || 3}x through all phrases</p>
+                <p>• Perfect for passive listening or sleep learning</p>
+              </>
+            )}
           </div>
 
           {/* Advanced Settings - Collapsible */}
-          {showAdvanced && (
+          {showAdvanced && lessonMode === 'pimsleur' && (
             <>
               {/* Pause Durations */}
               <div className="grid gap-4 pt-4 border-t">
@@ -239,6 +298,62 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
                 </div>
               </div>
             </>
+          )}
+          
+          {/* Advanced Settings for Simple Mode */}
+          {showAdvanced && lessonMode === 'simple' && (
+            <div className="grid gap-4 pt-4 border-t">
+              <div className="grid gap-2">
+                <Label htmlFor="simple-reps" className="text-xs">
+                  Repetitions per phrase: {simpleConfig.repetitions}x
+                </Label>
+                <Slider
+                  id="simple-reps"
+                  min={1}
+                  max={5}
+                  step={1}
+                  value={[simpleConfig.repetitions || 3]}
+                  onValueChange={(value) => setSimpleConfig({
+                    ...simpleConfig,
+                    repetitions: value[0],
+                  })}
+                />
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="loops" className="text-xs">
+                  Total loops: {simpleConfig.loops}x
+                </Label>
+                <Slider
+                  id="loops"
+                  min={1}
+                  max={10}
+                  step={1}
+                  value={[simpleConfig.loops || 3]}
+                  onValueChange={(value) => setSimpleConfig({
+                    ...simpleConfig,
+                    loops: value[0],
+                  })}
+                />
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="pause-between" className="text-xs">
+                  Pause between phrases: {(simpleConfig.pauseBetweenPhrases || 2000) / 1000}s
+                </Label>
+                <Slider
+                  id="pause-between"
+                  min={500}
+                  max={3000}
+                  step={500}
+                  value={[simpleConfig.pauseBetweenPhrases || 2000]}
+                  onValueChange={(value) => setSimpleConfig({
+                    ...simpleConfig,
+                    pauseBetweenPhrases: value[0],
+                  })}
+                />
+              </div>
+            </div>
           )}
         </div>
 

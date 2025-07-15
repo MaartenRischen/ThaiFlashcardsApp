@@ -52,12 +52,12 @@ export const ttsService = {
       
       // Fallback to browser TTS if ElevenLabs fails
       console.log('Falling back to Browser TTS due to error');
-      this._speakWithBrowserTTS({ text, genderValue, onStart, onEnd, onError });
+      this._speakWithBrowserTTS({ text, genderValue, onStart: undefined, onEnd, onError });
     }
   },
 
   // --- Helper function for Browser TTS (fallback) --- 
-  _speakWithBrowserTTS: function({ text, genderValue, onStart, onEnd, onError }: SpeakParams): void {
+  _speakWithBrowserTTS: function({ text, genderValue, onStart: _onStart, onEnd, onError }: SpeakParams): void {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         console.log('Using Browser TTS');
         

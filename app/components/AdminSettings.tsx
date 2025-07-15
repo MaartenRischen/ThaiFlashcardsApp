@@ -8,12 +8,17 @@ interface AdminSettingsProps {
   onClose: () => void;
 }
 
+interface SubscriptionInfo {
+  character_count: number;
+  character_limit: number;
+}
+
 const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
   const [useElevenLabs, setUseElevenLabs] = useState(true);
   const [testText, setTestText] = useState('สวัสดีครับ ผมกำลังทดสอบเสียง');
   const [isMale, setIsMale] = useState(true);
   const [isTesting, setIsTesting] = useState(false);
-  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null);
   
   useEffect(() => {
     // Get current TTS provider setting

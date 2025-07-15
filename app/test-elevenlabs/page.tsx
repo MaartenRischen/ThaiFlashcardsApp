@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { elevenLabsTTS, VOICE_IDS, ALTERNATIVE_VOICES } from '../lib/elevenlabs-tts';
+import { elevenLabsTTS, ALTERNATIVE_VOICES } from '../lib/elevenlabs-tts';
 
 export default function TestElevenLabs() {
   const [text, setText] = useState('สวัสดีครับ ผมชื่อสมชาย');
@@ -41,7 +41,11 @@ export default function TestElevenLabs() {
     try {
       const info = await elevenLabsTTS.getSubscriptionInfo();
       console.log('Subscription info:', info);
-      alert(`Character count: ${info.character_count}/${info.character_limit}. Check console for full details.`);
+      if (info) {
+        alert(`Character count: ${info.character_count}/${info.character_limit}. Check console for full details.`);
+      } else {
+        alert('Failed to fetch subscription info');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch subscription info');
     }

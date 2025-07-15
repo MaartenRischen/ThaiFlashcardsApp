@@ -50,6 +50,57 @@ interface ElevenLabsTTSOptions {
   useSpeakerBoost?: boolean;
 }
 
+interface Voice {
+  voice_id: string;
+  name: string;
+  samples: null;
+  category: string;
+  fine_tuning: {
+    model_id: string;
+    is_allowed_to_fine_tune: boolean;
+    fine_tuning_requested: boolean;
+    finetuning_state: string;
+    verification_attempts: null;
+    verification_failures: string[];
+    verification_attempts_count: number;
+    slice_ids: null;
+    manual_verification: null;
+    manual_verification_requested: boolean;
+  };
+  labels: Record<string, string>;
+  description: null;
+  preview_url: string;
+  available_for_tiers: string[];
+  settings: null;
+  sharing: null;
+  high_quality_base_model_ids: string[];
+}
+
+interface SubscriptionInfo {
+  tier: string;
+  character_count: number;
+  character_limit: number;
+  can_extend_character_limit: boolean;
+  allowed_to_extend_character_limit: boolean;
+  next_character_count_reset_unix: number;
+  voice_limit: number;
+  max_voice_add_edits: number;
+  voice_add_edit_counter: number;
+  professional_voice_limit: number;
+  can_extend_voice_limit: boolean;
+  can_use_instant_voice_cloning: boolean;
+  can_use_professional_voice_cloning: boolean;
+  currency: string;
+  status: string;
+  billing_period: string;
+  character_refresh_period: string;
+  next_invoice: {
+    amount_due_cents: number;
+    next_payment_attempt_unix: number;
+  };
+  has_open_invoices: boolean;
+}
+
 class ElevenLabsTTS {
   private audioQueue: HTMLAudioElement[] = [];
   private currentAudio: HTMLAudioElement | null = null;
@@ -147,9 +198,9 @@ class ElevenLabsTTS {
   /**
    * Gets available voices from ElevenLabs
    */
-  async getVoices(): Promise<any[]> {
+  async getVoices(): Promise<Voice[]> {
     try {
-      const response = await axios.get(`${ELEVENLABS_API_URL}/voices`, {
+      const response = await axios.get<{ voices: Voice[] }>(`${ELEVENLABS_API_URL}/voices`, {
         headers: {
           'xi-api-key': ELEVENLABS_API_KEY,
         },
@@ -164,9 +215,9 @@ class ElevenLabsTTS {
   /**
    * Gets user subscription info (useful for checking limits)
    */
-  async getSubscriptionInfo(): Promise<any> {
+  async getSubscriptionInfo(): Promise<SubscriptionInfo | null> {
     try {
-      const response = await axios.get(`${ELEVENLABS_API_URL}/user/subscription`, {
+      const response = await axios.get<SubscriptionInfo>(`${ELEVENLABS_API_URL}/user/subscription`, {
         headers: {
           'xi-api-key': ELEVENLABS_API_KEY,
         },

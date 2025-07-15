@@ -1,56 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Switch } from "@/app/components/ui/switch";
 import { ttsService } from '../lib/tts-service';
-import { elevenLabsTTS, ELEVENLABS_MODELS } from '../lib/elevenlabs-tts';
 
 interface AdminSettingsProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface SubscriptionInfo {
-  character_count: number;
-  character_limit: number;
-}
-
 const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
-  const [useElevenLabs, setUseElevenLabs] = useState(true);
-  const [selectedModel, setSelectedModel] = useState('eleven_multilingual_v2');
   const [testText, setTestText] = useState('สวัสดีครับ ผมกำลังทดสอบเสียง');
   const [isMale, setIsMale] = useState(true);
   const [isTesting, setIsTesting] = useState(false);
-  const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null);
-  
-  useEffect(() => {
-    // Get current TTS provider setting
-    const currentProvider = ttsService.getProvider();
-    setUseElevenLabs(currentProvider === 'elevenlabs');
-    
-    // Get current model
-    if (currentProvider === 'elevenlabs') {
-      setSelectedModel(elevenLabsTTS.getModel());
-      fetchSubscriptionInfo();
-    }
-  }, [isOpen]);
-  
-  const fetchSubscriptionInfo = async () => {
-    try {
-      const info = await elevenLabsTTS.getSubscriptionInfo();
-      setSubscriptionInfo(info);
-    } catch (error) {
-      console.error('Failed to fetch subscription info:', error);
-    }
-  };
-  
-  const handleProviderToggle = (checked: boolean) => {
-    setUseElevenLabs(checked);
-    ttsService.setProvider(checked ? 'elevenlabs' : 'browser');
-  };
-  
-  const handleModelChange = (modelId: string) => {
-    setSelectedModel(modelId);
-    elevenLabsTTS.setModel(modelId);
-  };
+  const [showInstructions, setShowInstructions] = useState(false);
   
   const handleTestVoice = async () => {
     if (!ttsService) {
@@ -87,60 +48,31 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
       <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">Admin Settings</h2>
         
-        {/* TTS Provider Toggle */}
+        {/* TTS Info */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium">
-              Text-to-Speech Provider
-            </label>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500">Browser</span>
-              <Switch
-                checked={useElevenLabs}
-                onCheckedChange={handleProviderToggle}
-              />
-              <span className="text-sm text-gray-500">ElevenLabs</span>
-            </div>
+          <div className="p-3 bg-blue-50 rounded">
+            <p className="font-medium text-sm">Voice Provider: Microsoft Azure</p>
+            <p className="text-xs text-gray-600 mt-1">
+              Using native Thai voices for authentic pronunciation
+            </p>
           </div>
           
-          {useElevenLabs && (
-            <>
-              {/* Model Selection */}
-              <div className="mt-4 mb-3">
-                <label className="block text-sm font-medium mb-2">
-                  ElevenLabs Model
-                </label>
-                <select
-                  value={selectedModel}
-                  onChange={(e) => handleModelChange(e.target.value)}
-                  className="w-full p-2 border rounded text-sm"
-                >
-                  {Object.entries(ELEVENLABS_MODELS).map(([id, name]) => (
-                    <option key={id} value={id}>{name}</option>
-                  ))}
-                </select>
-              </div>
-              
-              {/* Usage Info */}
-              {subscriptionInfo && (
-                <div className="mt-2 p-3 bg-blue-50 rounded text-sm">
-                  <p className="font-medium">ElevenLabs Usage:</p>
-                  <p>
-                    {subscriptionInfo.character_count.toLocaleString()} / {subscriptionInfo.character_limit.toLocaleString()} characters
-                  </p>
-                  <p className="text-xs text-gray-600 mt-1">
-                    ({Math.round((subscriptionInfo.character_count / subscriptionInfo.character_limit) * 100)}% used)
-                  </p>
-                </div>
-              )}
-            </>
-          )}
+          <button
+            onClick={() => setShowInstructions(!showInstructions)}
+            className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+          >
+            {showInstructions ? 'Hide' : 'Show'} Azure Setup Instructions
+          </button>
           
-          {!useElevenLabs && (
-            <div className="mt-2 p-3 bg-yellow-50 rounded text-sm">
-              <p className="text-yellow-800">
-                Using browser TTS with pitch adjustment for male voices.
-              </p>
+          {showInstructions && (
+            <div className="mt-2 p-3 bg-gray-50 rounded text-xs">
+              <p className="font-medium mb-1">To enable Azure TTS:</p>
+              <ol className="list-decimal list-inside space-y-1 text-gray-600">
+                <li>Get Azure Speech Service credentials</li>
+                <li>Edit app/lib/azure-tts.ts</li>
+                <li>Replace AZURE_SPEECH_KEY and AZURE_SPEECH_REGION</li>
+                <li>Restart the application</li>
+              </ol>
             </div>
           )}
         </div>
@@ -165,7 +97,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
                 onChange={() => setIsMale(true)}
                 className="mr-1"
               />
-              <span className="text-sm">Male</span>
+              <span className="text-sm">Male (Niwat)</span>
             </label>
             <label className="flex items-center">
               <input
@@ -174,7 +106,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
                 onChange={() => setIsMale(false)}
                 className="mr-1"
               />
-              <span className="text-sm">Female</span>
+              <span className="text-sm">Female (Premwadee)</span>
             </label>
           </div>
           
@@ -191,17 +123,16 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
         
-        {/* Voice Tips */}
-        {useElevenLabs && (
-          <div className="mb-4 p-3 bg-gray-50 rounded text-xs">
-            <p className="font-medium mb-1">Thai Pronunciation Tips:</p>
-            <ul className="list-disc list-inside space-y-1 text-gray-600">
-              <li>Daniel (male) and Bella (female) work well for Thai</li>
-              <li>Multilingual v2 model provides best Thai quality</li>
-              <li>Turbo v2.5 is faster but may have slight quality reduction</li>
-            </ul>
-          </div>
-        )}
+        {/* Voice Info */}
+        <div className="mb-4 p-3 bg-gray-50 rounded text-xs">
+          <p className="font-medium mb-1">Thai Voice Information:</p>
+          <ul className="list-disc list-inside space-y-1 text-gray-600">
+            <li>Male: Niwat - Natural Thai male voice</li>
+            <li>Female: Premwadee - Natural Thai female voice</li>
+            <li>Alternative: Achara - Another Thai female option</li>
+            <li>Fallback: Browser TTS if Azure unavailable</li>
+          </ul>
+        </div>
         
         {/* Buttons */}
         <div className="flex justify-end space-x-2">

@@ -4,6 +4,7 @@ import { azureTTS } from './azure-tts';
 interface SpeakParams {
   text: string;
   genderValue: boolean; // Use boolean for gender value: true for Male, false for Female
+  rate?: number; // Speech rate adjustment (-50% to +50%)
   onStart?: () => void;
   onEnd?: () => void;
   onError?: (error: unknown) => void;
@@ -12,7 +13,7 @@ interface SpeakParams {
 // --- Main TTS Service Object ---
 export const ttsService = {
   
-  speak: async function({ text, genderValue, onStart, onEnd, onError }: SpeakParams): Promise<void> {
+  speak: async function({ text, genderValue, rate, onStart, onEnd, onError }: SpeakParams): Promise<void> {
     // Stop any currently playing audio
     this.stop(); 
 
@@ -22,8 +23,8 @@ export const ttsService = {
       
       // Use Azure TTS
       const voiceGender = genderValue ? 'male' : 'female';
-      console.log('Using Azure TTS with', voiceGender, 'voice');
-      await azureTTS.speak(text, { voiceGender });
+      console.log('Using Azure TTS with', voiceGender, 'voice', rate ? `at ${rate}% rate` : '');
+      await azureTTS.speak(text, { voiceGender, rate });
       
       // Call onEnd callback
       onEnd?.();
@@ -32,12 +33,12 @@ export const ttsService = {
       
       // Fallback to browser TTS if Azure fails
       console.log('Falling back to Browser TTS due to Azure error');
-      this._speakWithBrowserTTS({ text, genderValue, onStart: undefined, onEnd, onError });
+      this._speakWithBrowserTTS({ text, genderValue, rate, onStart: undefined, onEnd, onError });
     }
   },
 
   // --- Helper function for Browser TTS (fallback) --- 
-  _speakWithBrowserTTS: function({ text, genderValue, onStart: _onStart, onEnd, onError }: SpeakParams): void {
+  _speakWithBrowserTTS: function({ text, genderValue, rate, onStart: _onStart, onEnd, onError }: SpeakParams): void {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         console.log('Using Browser TTS');
         
@@ -74,11 +75,11 @@ export const ttsService = {
         // Set pitch based on genderValue (for browser TTS fallback)
         if (genderValue) { // Male voice
             utterance.pitch = 0.25; // Two octaves lower
-            utterance.rate = 0.95;
+            utterance.rate = rate ? (100 + rate) / 100 : 0.95;
             console.log(`Applied pitch: ${utterance.pitch.toFixed(2)}, rate: ${utterance.rate.toFixed(2)} for male voice.`);
         } else { // Female voice
             utterance.pitch = 1.0; // Default pitch
-            utterance.rate = 1.0;
+            utterance.rate = rate ? (100 + rate) / 100 : 1.0;
             console.log(`Applied pitch: ${utterance.pitch.toFixed(2)}, rate: ${utterance.rate.toFixed(2)} for female voice.`);
         }
         

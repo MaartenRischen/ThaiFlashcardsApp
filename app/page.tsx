@@ -319,12 +319,13 @@ export default function ThaiFlashcards() {
   }, [activeCards]);
 
   // Update the speak helper function definition in page.tsx
-  const speak = async (text: string, isWord: boolean = true, isMale: boolean) => {
+  const speak = async (text: string, isWord: boolean = true, isMale: boolean, rate?: number) => {
     if (isWord) setIsPlayingWord(true); else setIsPlayingContext(true);
     try {
       await ttsService.speak({
         text,
         genderValue: isMale,
+        rate,
         onStart: () => console.log('Speech started'),
         onEnd: () => { if (isWord) setIsPlayingWord(false); else setIsPlayingContext(false); console.log('Speech ended'); },
         onError: (error) => { if (isWord) setIsPlayingWord(false); else setIsPlayingContext(false); console.error('TTS error:', error); }
@@ -342,7 +343,7 @@ export default function ThaiFlashcards() {
   // Auto-play useEffect - Restore call to getThaiWithGender with isPoliteMode
   useEffect(() => {
     if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlayingWord && !isPlayingContext && voicesLoaded) {
-      speak(getThaiWithGender(phrases[index], isMale, isPoliteMode), true, isMale);
+      speak(getThaiWithGender(phrases[index], isMale, isPoliteMode), true, isMale); // Normal speed for autoplay
     }
     prevShowAnswerRef.current = showAnswer;
   }, [showAnswer, autoplay, phrases, index, isPlayingWord, isPlayingContext, voicesLoaded, isMale, isPoliteMode]);
@@ -375,7 +376,7 @@ export default function ThaiFlashcards() {
   // Trigger autoplay when gender or politeness is toggled (if card back is showing)
   useEffect(() => {
     if (showAnswer && voicesLoaded && !isPlayingWord && !isPlayingContext) {
-      speak(getThaiWithGender(phrases[index], isMale, isPoliteMode), true, isMale);
+      speak(getThaiWithGender(phrases[index], isMale, isPoliteMode), true, isMale); // Normal speed
     }
   }, [isMale, isPoliteMode]);
 
@@ -1177,8 +1178,9 @@ export default function ThaiFlashcards() {
                     <div className="text-3xl md:text-4xl font-extrabold mb-2 text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
                       {getThaiWithGender(phrases[index], isMale, isPoliteMode)}
                     </div>
-                    {/* Pronunciation button */}
-                    <div className="flex justify-center mb-4">
+                    {/* Pronunciation buttons - Normal and Slow speed */}
+                    <div className="flex justify-center gap-3 mb-4">
+                      {/* Normal speed button */}
                       <button
                         onClick={(event) => {
                           event.stopPropagation();
@@ -1186,11 +1188,34 @@ export default function ThaiFlashcards() {
                           speak(textToSpeak, true, isMale);
                         }}
                         disabled={isPlayingWord || isPlayingContext}
-                        className="neumorphic-button text-blue-400 flex items-center gap-2 px-4 py-2"
+                        className="neumorphic-button text-blue-400 flex items-center gap-2 px-3 py-2"
+                        title="Play at normal speed"
                       >
-                        <Volume2 className="w-5 h-5" />
-                        {isPlayingWord ? 'Playing...' : `"${getGenderedPronunciation(phrases[index], isMale, isPoliteMode) || ''}"`}
+                        <Volume2 className="w-4 h-4" />
+                        <span className="text-sm">Normal</span>
                       </button>
+                      
+                      {/* Slow speed button */}
+                      <button
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          const textToSpeak = getThaiWithGender(phrases[index], isMale, isPoliteMode);
+                          speak(textToSpeak, true, isMale, -30); // 30% slower
+                        }}
+                        disabled={isPlayingWord || isPlayingContext}
+                        className="neumorphic-button text-green-400 flex items-center gap-2 px-3 py-2"
+                        title="Play at slow speed"
+                      >
+                        <Volume2 className="w-4 h-4" />
+                        <span className="text-sm">Slow</span>
+                      </button>
+                    </div>
+                    
+                    {/* Pronunciation text display */}
+                    <div className="text-center mb-2">
+                      <span className="text-gray-400 text-sm italic">
+                        "{getGenderedPronunciation(phrases[index], isMale, isPoliteMode) || ''}"
+                      </span>
                     </div>
                     {/* English translation in blue, in parentheses */}
                     {phrases[index]?.english && (
@@ -1317,7 +1342,7 @@ export default function ThaiFlashcards() {
                             if (randomSentence) {
                               const textToSpeak = getThaiWithGender(randomSentence, isMale, isPoliteMode);
                               console.log("Play Context - Text to Speak:", textToSpeak);
-                              speak(textToSpeak, false, isMale);
+                              speak(textToSpeak, false, isMale); // Normal speed for context
                             }
                           }}
                           disabled={isPlayingWord || isPlayingContext || !randomSentence}

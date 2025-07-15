@@ -83,7 +83,7 @@ class AzureTTS {
    */
   async speak(
     text: string,
-    options?: { voiceGender?: 'male' | 'female' }
+    options?: { voiceGender?: 'male' | 'female'; rate?: number }
   ): Promise<void> {
     console.log('Azure TTS speak called with:', { text, options });
     if (!this.isInitialized || !this.speechConfig) {
@@ -101,11 +101,12 @@ class AzureTTS {
       console.log('Azure TTS - Speaking:', {
         text: text.substring(0, 50) + '...',
         voiceName,
-        gender: options?.voiceGender || 'male'
+        gender: options?.voiceGender || 'male',
+        rate: options?.rate
       });
 
       // Create SSML for advanced control
-      const ssml = this.createSSML(text, voiceName, {});
+      const ssml = this.createSSML(text, voiceName, { rate: options?.rate });
       console.log('Azure TTS SSML:', ssml);
       
       // Create synthesizer with audio output

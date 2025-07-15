@@ -134,28 +134,34 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
           <div className="grid gap-3">
             <Label>Lesson Style</Label>
             <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant={lessonMode === 'pimsleur' ? 'default' : 'outline'}
+              <button
                 onClick={() => setLessonMode('pimsleur')}
-                className="justify-start gap-2"
+                className={`flex items-center justify-start gap-2 px-4 py-2 rounded-md transition-all ${
+                  lessonMode === 'pimsleur' 
+                    ? 'bg-primary text-primary-foreground border-2 border-primary' 
+                    : 'bg-background border-2 border-input hover:bg-accent hover:text-accent-foreground'
+                }`}
               >
                 <Brain className="w-4 h-4" />
                 <div className="text-left">
                   <div className="font-medium">Pimsleur Style</div>
                   <div className="text-xs opacity-80">Interactive learning</div>
                 </div>
-              </Button>
-              <Button
-                variant={lessonMode === 'simple' ? 'default' : 'outline'}
+              </button>
+              <button
                 onClick={() => setLessonMode('simple')}
-                className="justify-start gap-2"
+                className={`flex items-center justify-start gap-2 px-4 py-2 rounded-md transition-all ${
+                  lessonMode === 'simple' 
+                    ? 'bg-primary text-primary-foreground border-2 border-primary' 
+                    : 'bg-background border-2 border-input hover:bg-accent hover:text-accent-foreground'
+                }`}
               >
                 <Repeat className="w-4 h-4" />
                 <div className="text-left">
                   <div className="font-medium">Repetition Mode</div>
                   <div className="text-xs opacity-80">For sleep learning</div>
                 </div>
-              </Button>
+              </button>
             </div>
           </div>
           {/* Voice Selection */}

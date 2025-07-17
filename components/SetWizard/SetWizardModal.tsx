@@ -362,10 +362,7 @@ export function SetWizardModal({
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
-        // Prevent closing during generation
-        if (!open && currentStepData?.type === 'generation') {
-          return;
-        }
+        // Allow closing even during generation - the generation will continue in background
         if (!open) {
           onClose();
         }
@@ -386,15 +383,10 @@ export function SetWizardModal({
               </div>
               <button
                 onClick={() => {
-                  if (currentStepData.type === 'generation') {
-                    // Don't allow closing during generation
-                    return;
-                  }
+                  // Allow closing during generation - generation continues in background
                   onClose();
                 }}
-                className={`text-gray-400 hover:text-gray-300 ${
-                  currentStepData.type === 'generation' ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className="text-gray-400 hover:text-gray-300"
               >
                 ✕
               </button>

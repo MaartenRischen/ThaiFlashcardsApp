@@ -49,7 +49,7 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
                     <li><b>Native/Fluent:</b> Natural, idiomatic Thai of any length</li>
                     <li><b>God Mode:</b> Sophisticated, elaborate Thai with literary language</li>
                   </ul>
-                  <p className="mt-2 text-xs text-blue-300">✨ New: Visual slider with level images that preload for instant transitions!</p>
+                  <p className="mt-2 text-xs text-blue-300">New: Visual slider with level images that preload for instant transitions!</p>
                 </div>
                 {/* Step 2: Topic Selection */}
                 <div className="p-3 border border-[#333] rounded-md">
@@ -84,7 +84,7 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
                     <li><b>7-8:</b> Definitely too much, proceed with caution</li>
                     <li><b>9-10:</b> Glitched donkey mode - pure chaos!</li>
                   </ul>
-                  <p className="mt-2 text-xs text-blue-300">✨ New: Interactive slider with images showing different tone levels!</p>
+                  <p className="mt-2 text-xs text-blue-300">New: Interactive slider with images showing different tone levels!</p>
                 </div>
                 {/* Step 5: Review & Card Count */}
                 <div className="p-3 border border-[#333] rounded-md">
@@ -107,7 +107,7 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
                     <li>Real-time progress updates during 1-2 minute process</li>
                     <li>Automatic fallback to multiple AI models if needed</li>
                   </ul>
-                  <p className="mt-2 text-xs text-blue-300">✨ New: Multi-model AI system with intelligent batch processing!</p>
+                  <p className="mt-2 text-xs text-blue-300">New: Multi-model AI system with intelligent batch processing!</p>
                   <p className="mt-1 text-xs">Your new set automatically appears in <span className="inline-flex items-center justify-center bg-[#3C3C3C] p-1 rounded-xl text-blue-400"><Grid className="w-4 h-4" /></span> "My Sets" when complete.</p>
                 </div>
               </div>

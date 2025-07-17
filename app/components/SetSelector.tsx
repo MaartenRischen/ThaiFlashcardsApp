@@ -33,7 +33,7 @@ export const SetSelector = () => {
             {availableSets.map(set => (
               <option key={set.id} value={set.id} className="text-center">
                 {/* NEW: Prepend emoji if isFullyLearned is true */}
-                {set.isFullyLearned ? '🏆 ' : ''}{set.cleverTitle || set.name}
+                {set.cleverTitle || set.name}
               </option>
             ))}
           </select>

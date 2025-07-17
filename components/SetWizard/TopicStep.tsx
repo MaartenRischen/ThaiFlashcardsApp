@@ -41,7 +41,6 @@ export function TopicStep({
       {/* Scenarios Section */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-blue-400 text-xl">✨</span>
           <span className="text-blue-400">Or Choose a Scenario</span>
         </div>
         
@@ -101,7 +100,6 @@ export function TopicStep({
       {/* Weird Section */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-purple-400 text-xl">⚡</span>
           <span className="text-purple-400">Or Be Weird</span>
         </div>
         <div className="space-y-2">

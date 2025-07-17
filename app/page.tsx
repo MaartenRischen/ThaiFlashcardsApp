@@ -1242,7 +1242,7 @@ export default function ThaiFlashcards() {
                           </div>
                           <div className="flex justify-between items-center mt-2">
                             <button onClick={handleTutorialSkip} className="text-xs text-red-400 hover:underline">Skip Tutorial</button>
-                            <button onClick={handleTutorialNext} className="text-sm neumorphic-button px-3 py-1">Next →</button>
+                            <button onClick={handleTutorialNext} className="text-sm neumorphic-button px-3 py-1">Next</button>
                           </div>
                         </div>
                       </PopoverContent>
@@ -1334,7 +1334,7 @@ export default function ThaiFlashcards() {
                           className="neumorphic-button text-blue-400 px-4"
                           aria-label="Previous example"
                     >
-                          ←
+                          Prev
                     </button>
                     <button 
                           onClick={(event) => {
@@ -1355,7 +1355,7 @@ export default function ThaiFlashcards() {
                           className="neumorphic-button text-blue-400 px-4"
                           aria-label="Next example"
                     >
-                          →
+                          Next
                     </button>
                   </div>
                 </div> {/* End Context Section */} 

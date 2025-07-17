@@ -337,10 +337,10 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
           </section>
           <div className="mt-10 flex flex-col gap-2">
             <button onClick={handleFactoryResetPreferences} className="w-full border border-[#A9C4FC] text-[#A9C4FC] rounded py-2 text-sm font-semibold hover:bg-[#A9C4FC] hover:text-[#121212] transition flex items-center justify-center gap-2 bg-transparent">
-              <span aria-hidden="true">⚠️</span> Factory Reset (Preferences)
+              Factory Reset (Preferences)
             </button>
             <button onClick={handleFactoryResetFull} className="w-full border border-red-400 text-red-400 rounded py-2 text-sm font-semibold hover:bg-red-400 hover:text-[#121212] transition flex items-center justify-center gap-2 bg-transparent">
-              <span aria-hidden="true">⚠️</span> Factory Reset (Full App + Sets)
+              Factory Reset (Full App + Sets)
             </button>
           </div>
         </div>

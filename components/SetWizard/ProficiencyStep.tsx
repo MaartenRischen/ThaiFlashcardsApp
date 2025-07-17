@@ -45,21 +45,21 @@ const proficiencyLevels: Array<{
     value: 'Advanced',
     label: 'Advanced',
     description: 'Complex sentences with 7-12 words',
-    emoji: '🏔️',
+    emoji: '',
     imageIndex: 4
   },
   {
     value: 'Native/Fluent',
     label: 'Native/Fluent',
     description: 'Natural, idiomatic Thai of any appropriate length',
-    emoji: '🌟',
+    emoji: '',
     imageIndex: 5
   },
   {
     value: 'God Mode',
     label: 'God Mode',
     description: 'Sophisticated, elaborate Thai with literary/academic language',
-    emoji: '⚡',
+    emoji: '',
     imageIndex: 6
   }
 ];

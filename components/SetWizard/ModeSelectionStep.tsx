@@ -109,7 +109,7 @@ export function ModeSelectionStep({ onSelectMode, onBack }: ModeSelectionStepPro
           onClick={onBack}
           className="text-sm text-gray-400 hover:text-gray-300 transition-colors duration-200"
         >
-          ← Back
+          Back
         </button>
       </motion.div>
     </div>

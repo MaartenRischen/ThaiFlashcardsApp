@@ -88,7 +88,7 @@ export function ToneStep({ toneLevel, onNext, onBack }: {
             <p className="text-xs text-gray-400">Getting less practical...</p>
           )}
           {safeToneLevel >= 7 && (
-            <p className="text-xs text-red-400">⚠️ Proceed with caution</p>
+            <p className="text-xs text-red-400">Proceed with caution</p>
           )}
         </div>
 

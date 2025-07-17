@@ -484,7 +484,7 @@ export default function TestVariations() {
                 onClick={toggleSortDirection}
                 className="px-2 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm whitespace-nowrap"
               >
-                {sortDirection === 'asc' ? '↑ Asc' : '↓ Desc'}
+                {sortDirection === 'asc' ? 'Asc' : 'Desc'}
               </button>
             </div>
 

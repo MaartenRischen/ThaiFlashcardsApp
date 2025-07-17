@@ -93,7 +93,7 @@ export function FlashcardDisplay({
               }}
               aria-label="Previous card"
             >
-              ← Prev
+              Prev
             </button>
             
             <button 
@@ -103,7 +103,7 @@ export function FlashcardDisplay({
               }}
               aria-label="Next card"
             >
-              Next →
+              Next
             </button>
           </div>
           

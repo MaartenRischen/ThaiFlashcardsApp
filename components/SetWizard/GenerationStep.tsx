@@ -22,7 +22,7 @@ export function GenerationStep({
   onOpenSetManager: _onOpenSetManager
 }: GenerationStepProps) {
   const { startGeneration, updateProgress, completeGeneration, failGeneration } = useGeneration();
-  const { addSet, refreshSets } = useSet();
+  const { addSet: _addSet, refreshSets } = useSet();
   const [hasStarted, setHasStarted] = useState(false);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 

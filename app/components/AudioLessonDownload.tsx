@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Download, Volume2, Settings2, Loader2, Brain, Repeat, Play, Pause, FileAudio } from 'lucide-react';
 import {
   Dialog,

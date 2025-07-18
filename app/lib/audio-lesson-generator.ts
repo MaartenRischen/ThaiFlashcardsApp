@@ -181,7 +181,7 @@ export class AudioLessonGenerator {
   // Practice phase with active recall
   private async practicePhrase(
     card: { thai: string; english: string; thaiMasculine?: string; thaiFeminine?: string },
-    number: number
+    _number: number
   ) {
     // Prompt in English
     await this.addSegment({

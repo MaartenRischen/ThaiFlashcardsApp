@@ -32,7 +32,9 @@ interface FullGallerySet extends GallerySet {
 interface DisplaySet extends Omit<GallerySet, 'phrases' | 'createdAt'> {
   id: string;
   createdAt: Date; // Keep as Date object for sorting
+  publishedAt: string; // Required for GallerySetCard
   phraseCount: number;
+  cardCount: number; // Make cardCount required
   generationMeta?: { imageUrl?: string | null } | null; 
   userId: string;
 }
@@ -120,6 +122,7 @@ export default function GalleryPage() {
         const mapped = data.map((set: GallerySet & { publishedAt?: string | Date; phraseCount?: number }) => ({
           ...set,
           createdAt: set.publishedAt || set.createdAt,
+          publishedAt: String(set.publishedAt || set.createdAt || new Date().toISOString()), // Ensure publishedAt is always a string
           cardCount: set.cardCount ?? set.phraseCount ?? 0,
         }));
         setSets(mapped);

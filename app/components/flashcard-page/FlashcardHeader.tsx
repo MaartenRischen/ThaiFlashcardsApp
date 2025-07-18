@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
-import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal, Volume2 } from 'lucide-react';
+import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { AudioLessonDownload } from '../AudioLessonDownload';

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Switch } from "@/app/components/ui/switch";
 import { ttsService } from '../lib/tts-service';
 
 interface AdminSettingsProps {

@@ -107,9 +107,9 @@ export function breakdownThaiPhrase(
   const hasPoliteParticle = thai !== cleanThai;
   const politeParticle = thai.substring(cleanThai.length).trim();
   
-  // Try to find known words in the phrase
-  let remainingThai = cleanThai;
-  let foundWords: Array<{ word: string; info: { pronunciation: string; english: string }; position: number }> = [];
+  // Simple greedy approach - match longest sequences first
+  const remainingThai = thai;
+  const foundWords: Array<{ word: string; info: { pronunciation: string; english: string }; position: number }> = [];
   
   // Find all occurrences of known words
   for (const [word, info] of Object.entries(COMMON_THAI_WORDS)) {

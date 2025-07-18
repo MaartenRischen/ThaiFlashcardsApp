@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getPublishedSetById, deletePublishedSet } from '@/app/lib/storage';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { currentUser } from '@clerk/nextjs/server';
 // import { publishedSets } from '../route'; // REMOVED: Cannot import from other routes
 
 function getErrorMessage(error: unknown): string {

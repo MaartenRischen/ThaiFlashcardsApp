@@ -36,7 +36,6 @@ import { getToneLabel } from '@/app/lib/utils'; // Import getToneLabel
 import { HowItWorksModal } from './components/modals/HowItWorksModal';
 import { ProgressModal } from './components/modals/ProgressModal';
 import { CardsListModal } from './components/modals/CardsListModal';
-import { UserInfo } from './components/UserInfo'; // Add this import
 
 // Utility function to detect mobile devices
 const isMobileDevice = (): boolean => {
@@ -1456,8 +1455,6 @@ export default function ThaiFlashcards() {
         getCardStatus={getCardStatus}
       />
 
-      {/* Temporarily show user info for admin setup */}
-      <UserInfo />
     </main>
   );
 } 

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getPublishedSetById, deletePublishedSet } from '@/app/lib/storage';
-import { auth } from '@clerk/nextjs/server';
-import { isAdminUser } from '@/app/lib/constants';
+import { auth, currentUser } from '@clerk/nextjs/server';
 // import { publishedSets } from '../route'; // REMOVED: Cannot import from other routes
 
 function getErrorMessage(error: unknown): string {
@@ -31,11 +30,10 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { sessionClaims } = await auth();
-    console.log('API sessionClaims:', sessionClaims);
-    const userId = sessionClaims?.sub as string | undefined;
-    console.log('API userId for admin check:', userId);
-    const isAdmin = isAdminUser(userId);
+    const user = await currentUser();
+    console.log('API user email:', user?.emailAddresses?.[0]?.emailAddress);
+    const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+    const isAdmin = userEmail === 'maartenrischen@protonmail.com';
     if (!isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }

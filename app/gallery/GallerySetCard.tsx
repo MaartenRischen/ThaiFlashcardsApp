@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
 import { Trash2, BookOpen, Download, Layers } from 'lucide-react';
 import { getToneLabel } from '@/app/lib/utils';
-import { isAdminUser } from '@/app/lib/constants';
 
 // Define a more specific type for the set prop
 interface GallerySet {
@@ -36,8 +35,8 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
   const imgUrl = set.imageUrl || '/images/default-set-logo.png';
   const username = set.author && set.author.trim() !== '' ? set.author : 'Anonymous';
   const { user } = useUser();
-  const userId = user?.id;
-  const isAdmin = isAdminUser(userId);
+  const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+  const isAdmin = userEmail === 'maartenrischen@protonmail.com';
 
   const handleDelete = () => {
     if (window.confirm(`Are you sure you want to delete the set '${set.title}'? This cannot be undone.`)) {

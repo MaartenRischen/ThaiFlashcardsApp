@@ -40,63 +40,66 @@ const CardViewerModal: React.FC<CardViewerModalProps> = ({ set, isLoading, error
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
       onClick={handleBackgroundClick} // Close on background click
     >
-      <div className="bg-indigo-950 border border-indigo-800/50 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
+      <div className="neumorphic bg-[#2C2C2C] rounded-lg max-w-2xl w-full max-h-[80vh] flex flex-col">
         {/* Modal Header */}
-        <div className="flex justify-between items-center p-4 border-b border-indigo-800/50">
-          <h2 className="text-lg font-medium text-indigo-300 truncate pr-4">
+        <div className="flex justify-between items-center p-4 border-b border-[#404040]">
+          <h2 className="text-lg font-medium text-[#E0E0E0] truncate pr-4">
             {isLoading ? 'Loading Set...' : set?.title || 'View Cards'}
           </h2>
           <button 
             onClick={onClose} 
-            className="text-indigo-400 hover:text-indigo-200"
-            aria-label="Close modal"
+            className="text-[#BDBDBD] hover:text-[#E0E0E0] transition"
+            aria-label="Close"
           >
-            <X size={20} />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto flex-grow">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-40">
-              <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <div className="flex-1 overflow-y-auto p-4">
+          {isLoading && (
+            <div className="flex justify-center items-center h-32">
+              <Loader2 className="h-6 w-6 animate-spin text-[#BB86FC]" />
             </div>
-          ) : error ? (
-            <div className="p-3 bg-red-900/20 border border-red-700/30 rounded-md text-red-400 text-sm">
-              Error loading cards: {error}
+          )}
+          {error && (
+            <div className="text-red-400 text-center">
+              Error: {error}
             </div>
-          ) : set && set.phrases && set.phrases.length > 0 ? (
-            <ul className="space-y-3">
+          )}
+          {!isLoading && !error && set && (
+            <div className="space-y-3">
               {set.phrases.map((phrase, index) => (
-                <li key={index} className="bg-indigo-900/40 border border-indigo-700/30 rounded-md p-3">
-                  <p className="text-sm text-indigo-200 mb-1">
-                    <span className="font-semibold text-indigo-300">Thai:</span> {phrase.thai}
-                  </p>
-                  <p className="text-sm text-indigo-200">
-                    <span className="font-semibold text-indigo-300">English:</span> {phrase.english}
-                  </p>
-                  {phrase.pronunciation && (
-                     <p className="text-xs text-indigo-400/80 mt-1">
-                        <span className="font-semibold text-indigo-400">Pronunciation:</span> {phrase.pronunciation}
-                     </p> 
+                <div 
+                  key={index} 
+                  className="neumorphic rounded-lg p-3 flex flex-col space-y-1"
+                >
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-2xl font-bold text-[#E0E0E0]">{phrase.thai}</span>
+                    <span className="text-xs text-[#8B8B8B] ml-2">#{index + 1}</span>
+                  </div>
+                  <div className="text-sm text-[#BDBDBD] italic">{phrase.pronunciation}</div>
+                  <div className="text-base text-[#A9C4FC]">{phrase.english}</div>
+                  {phrase.mnemonic && (
+                    <div className="text-xs text-[#8B8B8B] mt-1 p-2 bg-[#1F1F1F] rounded border border-[#333333]">
+                      Hint: {phrase.mnemonic}
+                    </div>
                   )}
-                </li>
+                </div>
               ))}
-            </ul>
-          ) : (
-            <p className="text-indigo-400 text-center py-10">No cards found in this set.</p>
+            </div>
           )}
         </div>
 
-        {/* Modal Footer (Optional) */}
-        {/* <div className="p-4 border-t border-indigo-800/50 text-right">
+        {/* Modal Footer */}
+        <div className="p-4 border-t border-[#404040]">
           <button 
-            onClick={onClose}
-            className="neumorphic-button-secondary px-4 py-1.5 text-sm"
+            onClick={onClose} 
+            className="neumorphic-button w-full text-[#E0E0E0]"
           >
             Close
           </button>
-        </div> */}
+        </div>
       </div>
     </div>
   );

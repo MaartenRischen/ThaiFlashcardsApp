@@ -307,7 +307,7 @@ export default function GalleryPage() {
   return (
     <div className="max-w-6xl mx-auto p-6">
       {isAdmin && selectedSets.size > 0 && (
-        <div className="mb-4 p-3 bg-red-900/10 border border-red-800/30 rounded-lg flex items-center justify-between">
+        <div className="mb-4 p-3 neumorphic rounded-lg flex items-center justify-between bg-red-900/10 border-red-800/30">
           <span className="text-sm text-red-400">
             {selectedSets.size} set{selectedSets.size > 1 ? 's' : ''} selected
           </span>
@@ -321,7 +321,7 @@ export default function GalleryPage() {
             <button
               onClick={handleBulkDelete}
               disabled={isDeletingBulk}
-              className="px-4 py-1.5 text-sm bg-red-900/30 border border-red-800/50 text-red-400 hover:bg-red-900/40 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="neumorphic-button px-4 py-1.5 text-sm text-red-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isDeletingBulk ? (
                 <>
@@ -339,38 +339,48 @@ export default function GalleryPage() {
         </div>
       )}
       
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
-        <h1 className="text-2xl font-semibold text-indigo-100">Gallery</h1>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-          {isAdmin && filteredSets.length > 0 && (
-            <button
-              onClick={handleSelectAll}
-              className="neumorphic-button rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-200 hover:bg-[#2a2a4a] transition"
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search sets..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="neumorphic-input w-full mb-4"
+        />
+        
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h1 className="text-2xl font-semibold text-[#E0E0E0]">Gallery</h1>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            {isAdmin && filteredSets.length > 0 && (
+              <button
+                onClick={handleSelectAll}
+                className="neumorphic-button rounded-xl px-4 py-2 text-sm bg-[#3C3C3C] border border-[#404040] text-[#E0E0E0] hover:bg-[#4C4C4C] transition"
+              >
+                {selectedSets.size === filteredSets.length ? 'Deselect All' : 'Select All'}
+              </button>
+            )}
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
+              className="neumorphic-input rounded-xl px-4 py-2 text-sm bg-[#3C3C3C] border border-[#404040] text-[#E0E0E0] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition"
             >
-              {selectedSets.size === filteredSets.length ? 'Deselect All' : 'Select All'}
-            </button>
-          )}
-          <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
-            className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm w-full sm:w-auto"
-          >
-            {sortOptions.map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-          <select
-            value={authorFilter}
-            onChange={(e) => setAuthorFilter(e.target.value)}
-            className="neumorphic-select rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm w-full sm:w-auto"
-          >
-            {authors.map(author => (
-              <option key={author} value={author}>{author}</option>
-            ))}
-          </select>
+              {sortOptions.map(option => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+            <select
+              value={authorFilter}
+              onChange={(e) => setAuthorFilter(e.target.value)}
+              className="neumorphic-input rounded-xl px-4 py-2 text-sm bg-[#3C3C3C] border border-[#404040] text-[#E0E0E0] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition"
+            >
+              {authors.map(author => (
+                <option key={author} value={author}>{author}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
-      <p className="text-sm text-indigo-200 mb-6 -mt-4">
+      <p className="text-sm text-[#BDBDBD] mb-6 -mt-6">
         Browse and import sets created by the Donkey Bridge community
       </p>
 
@@ -381,15 +391,15 @@ export default function GalleryPage() {
       )}
       {loading ? (
         <div className="flex justify-center py-10">
-          <Loader2 className="h-6 w-6 animate-spin text-indigo-600/90" />
+          <Loader2 className="h-6 w-6 animate-spin text-[#BB86FC]" />
         </div>
       ) : filteredSets.length === 0 ? (
-        <div className="bg-indigo-900/30 rounded-lg border border-indigo-800/30 p-6 text-center">
+        <div className="neumorphic rounded-lg p-6 text-center">
           <div className="flex justify-center mb-4">
-            <GalleryHorizontal className="h-12 w-12 text-indigo-400/70" />
+            <GalleryHorizontal className="h-12 w-12 text-[#BDBDBD]" />
           </div>
-          <h3 className="text-base font-medium mb-2 text-indigo-400">No gallery sets found</h3>
-          <p className="text-sm text-indigo-300 mb-5">
+          <h3 className="text-base font-medium mb-2 text-[#E0E0E0]">No gallery sets found</h3>
+          <p className="text-sm text-[#BDBDBD] mb-5">
             No sets have been published to the gallery yet. You can publish your own sets from the My Sets page!
           </p>
         </div>

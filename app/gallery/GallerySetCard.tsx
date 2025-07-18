@@ -52,7 +52,7 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
   const isAdmin = userEmail === 'maartenrischen@protonmail.com';
 
   return (
-    <div className={`bg-indigo-900/30 rounded-lg border ${isSelected ? 'border-[#A9C4FC] ring-2 ring-[#A9C4FC]/50' : 'border-indigo-800/30'} p-3 flex flex-col relative transition-all`}>
+    <div className={`neumorphic rounded-lg ${isSelected ? 'ring-2 ring-[#BB86FC]' : ''} p-3 flex flex-col relative transition-all`}>
       {/* Selection checkbox for admin */}
       {showCheckbox && (
         <div className="absolute top-2 left-2 z-10">
@@ -60,7 +60,7 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
             type="checkbox"
             checked={isSelected}
             onChange={onToggleSelect}
-            className="w-4 h-4 text-[#A9C4FC] bg-[#232336] border-[#33335a] rounded focus:ring-[#A9C4FC] focus:ring-2"
+            className="w-4 h-4 text-[#BB86FC] bg-[#3C3C3C] border-[#404040] rounded focus:ring-[#BB86FC] focus:ring-2"
           />
         </div>
       )}
@@ -80,19 +80,21 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
         </button>
       )}
       
-      <Image
-        src={imgUrl}
-        alt={`${set.title} logo`}
-        width={100}
-        height={100}
-        className="w-full h-32 object-cover rounded-lg mb-3"
-      />
-      <h3 className="font-medium text-sm mb-1 text-indigo-100">{set.title}</h3>
+      <div className="relative w-full h-32 rounded-lg overflow-hidden mb-3 neumorphic-inset">
+        <Image
+          src={imgUrl}
+          alt={`${set.title} logo`}
+          fill
+          className="object-cover"
+        />
+      </div>
+      
+      <h3 className="font-medium text-sm mb-1 text-[#E0E0E0]">{set.title}</h3>
       {set.description && (
-        <p className="text-xs text-indigo-200 mb-2 line-clamp-2">{set.description}</p>
+        <p className="text-xs text-[#BDBDBD] mb-2 line-clamp-2">{set.description}</p>
       )}
       <div className="mt-auto">
-        <div className="text-xs text-indigo-300/90 space-y-1 mb-3">
+        <div className="text-xs text-[#BDBDBD] space-y-1 mb-3">
           <div className="flex items-center gap-1">
             {getToneLabel(set.seriousnessLevel)}
           </div>
@@ -104,7 +106,7 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
         <div className="flex gap-2">
           <button
             onClick={() => handleViewCards(set.id)}
-            className="flex-1 px-3 py-1.5 bg-indigo-700/30 hover:bg-indigo-700/40 text-indigo-200 rounded-md text-xs font-medium transition flex items-center justify-center gap-1 border border-indigo-600/30"
+            className="flex-1 neumorphic-button px-3 py-1.5 text-xs font-medium flex items-center justify-center gap-1"
           >
             <BookOpen className="h-3 w-3" />
             View
@@ -112,7 +114,7 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
           <button
             onClick={() => handleImport(set.id)}
             disabled={importingSetId === set.id || contextIsLoading}
-            className="flex-1 px-3 py-1.5 bg-[#A9C4FC]/20 hover:bg-[#A9C4FC]/30 text-[#A9C4FC] rounded-md text-xs font-medium transition flex items-center justify-center gap-1 border border-[#A9C4FC]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 neumorphic-button px-3 py-1.5 text-xs font-medium flex items-center justify-center gap-1 text-[#BB86FC] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {importingSetId === set.id ? (
               <span className="inline-block h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -122,7 +124,7 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
             {importingSetId === set.id ? 'Importing...' : 'Import'}
           </button>
         </div>
-        <div className="text-xs text-indigo-400 mt-2">
+        <div className="text-xs text-[#8B8B8B] mt-2">
           by {username}
         </div>
       </div>

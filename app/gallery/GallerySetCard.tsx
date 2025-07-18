@@ -1,8 +1,11 @@
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
 import { Trash2, BookOpen, Download, Layers } from 'lucide-react';
 import { getToneLabel } from '@/app/lib/utils';
+import { isAdminUser } from '@/app/lib/constants';
 
 // Define a more specific type for the set prop
 interface GallerySet {
@@ -10,21 +13,23 @@ interface GallerySet {
   title: string;
   description?: string;
   imageUrl?: string;
-  toneLevel?: number;
-  proficiencyLevel?: string;
-  createdAt?: string | Date;
-  timestamp?: string | Date;
+  cardCount: number;
   author?: string;
-  cardCount?: number;
+  llmBrand?: string;
+  llmModel?: string;
+  seriousnessLevel?: number;
+  proficiencyLevel?: string;
+  specificTopics?: string;
+  publishedAt: string;
 }
 
 interface GallerySetCardProps {
   set: GallerySet;
   importingSetId: string | null;
   contextIsLoading: boolean;
-  handleImport: (setId: string) => Promise<void>;
-  handleViewCards: (setId: string) => void;
-  onDelete?: (setId: string) => void;
+  handleImport: (id: string) => void;
+  handleViewCards: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, contextIsLoading, handleImport, handleViewCards, onDelete }) => {
@@ -32,7 +37,7 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
   const username = set.author && set.author.trim() !== '' ? set.author : 'Anonymous';
   const { user } = useUser();
   const userId = user?.id;
-  const isAdmin = userId === 'user_2w7FgmYkPXUKYesPpqgxeAF7C1h';
+  const isAdmin = isAdminUser(userId);
 
   const handleDelete = () => {
     if (window.confirm(`Are you sure you want to delete the set '${set.title}'? This cannot be undone.`)) {
@@ -82,10 +87,10 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
         <div className="text-xs text-blue-400/70 mb-1">
           User Set by: {username}
         </div>
-        {set.createdAt && (
+        {set.publishedAt && (
           <div className="text-xs text-gray-500 mb-1">
             {(() => {
-              const date = typeof set.createdAt === 'string' ? new Date(set.createdAt) : set.createdAt;
+              const date = typeof set.publishedAt === 'string' ? new Date(set.publishedAt) : set.publishedAt;
               return date ? date.toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
             })()}
           </div>
@@ -95,8 +100,8 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, co
           {set.proficiencyLevel && (
             <span>Level: <span className="font-medium text-[#A9C4FC]">{set.proficiencyLevel}</span></span>
           )}
-          {set.toneLevel !== undefined && (
-            <span>Tone: <span className="font-medium text-[#A9C4FC]">{getToneLabel(set.toneLevel)}</span></span>
+          {set.seriousnessLevel !== undefined && (
+            <span>Tone: <span className="font-medium text-[#A9C4FC]">{getToneLabel(set.seriousnessLevel)}</span></span>
           )}
         </div>
         

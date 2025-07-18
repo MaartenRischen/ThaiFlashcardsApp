@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { initializeStorage } from '@/app/lib/imageStorage';
 import { auth } from '@clerk/nextjs/server';
+import { isAdminUser } from '@/app/lib/constants';
 
 export async function POST() {
   const { userId } = await auth();
   
   // Only allow admin user
-  if (userId !== 'user_2w7FgmYkPXUKYesPpqgxeAF7C1h') {
+  if (!isAdminUser(userId)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

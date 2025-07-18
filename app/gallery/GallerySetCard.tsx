@@ -29,112 +29,101 @@ interface GallerySetCardProps {
   handleImport: (id: string) => void;
   handleViewCards: (id: string) => void;
   onDelete?: (id: string) => void;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
+  showCheckbox?: boolean;
 }
 
-const GallerySetCard: React.FC<GallerySetCardProps> = ({ set, importingSetId, contextIsLoading, handleImport, handleViewCards, onDelete }) => {
+const GallerySetCard: React.FC<GallerySetCardProps> = ({ 
+  set, 
+  importingSetId, 
+  contextIsLoading, 
+  handleImport, 
+  handleViewCards, 
+  onDelete,
+  isSelected = false,
+  onToggleSelect,
+  showCheckbox = false
+}) => {
   const imgUrl = set.imageUrl || '/images/default-set-logo.png';
   const username = set.author && set.author.trim() !== '' ? set.author : 'Anonymous';
   const { user } = useUser();
   const userEmail = user?.emailAddresses?.[0]?.emailAddress;
   const isAdmin = userEmail === 'maartenrischen@protonmail.com';
 
-  const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete the set '${set.title}'? This cannot be undone.`)) {
-      onDelete && onDelete(set.id);
-    }
-  };
-
   return (
-    <div className="relative bg-gray-900 rounded-xl p-3 flex flex-col shadow-lg border border-gray-800 cursor-pointer hover:ring-2 hover:ring-[#A9C4FC] transition">
-      {/* Set Image */}
-      <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-2 bg-[#2C2C2C]">
-        {set.imageUrl ? (
-          <Image
-            src={imgUrl}
-            alt={set.title}
-            className="object-contain"
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            unoptimized={true}
-            onError={(e) => {
-              const target = e.currentTarget as HTMLImageElement;
-              if (target.src !== '/images/default-set-logo.png') {
-                target.src = '/images/default-set-logo.png';
-              }
-            }}
+    <div className={`bg-indigo-900/30 rounded-lg border ${isSelected ? 'border-[#A9C4FC] ring-2 ring-[#A9C4FC]/50' : 'border-indigo-800/30'} p-3 flex flex-col relative transition-all`}>
+      {/* Selection checkbox for admin */}
+      {showCheckbox && (
+        <div className="absolute top-2 left-2 z-10">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={onToggleSelect}
+            className="w-4 h-4 text-[#A9C4FC] bg-[#232336] border-[#33335a] rounded focus:ring-[#A9C4FC] focus:ring-2"
           />
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <BookOpen className="h-10 w-10 text-gray-700" />
-          </div>
-        )}
-        {isAdmin && (
-          <button
-            className="absolute top-3 right-3 bg-red-700/80 hover:bg-red-800 text-white rounded-full p-1.5 z-10 shadow"
-            title="Delete set"
-            onClick={handleDelete}
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        )}
-      </div>
+        </div>
+      )}
       
-      <div className="flex-grow flex flex-col">
-        <h3 className="text-base font-medium text-gray-200 group-hover:text-white transition-colors line-clamp-3 mb-1" title={set.title}>
-          {set.title}
-        </h3>
-        <div className="text-xs text-blue-400/70 mb-1">
-          User Set by: {username}
+      {/* Delete button for admin */}
+      {isAdmin && onDelete && (
+        <button
+          onClick={() => {
+            if (window.confirm(`Are you sure you want to delete "${set.title}"? This action cannot be undone.`)) {
+              onDelete(set.id);
+            }
+          }}
+          className="absolute top-2 right-2 p-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-md transition-colors"
+          title="Delete set"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      )}
+      
+      <Image
+        src={imgUrl}
+        alt={`${set.title} logo`}
+        width={100}
+        height={100}
+        className="w-full h-32 object-cover rounded-lg mb-3"
+      />
+      <h3 className="font-medium text-sm mb-1 text-indigo-100">{set.title}</h3>
+      {set.description && (
+        <p className="text-xs text-indigo-200 mb-2 line-clamp-2">{set.description}</p>
+      )}
+      <div className="mt-auto">
+        <div className="text-xs text-indigo-300/90 space-y-1 mb-3">
+          <div className="flex items-center gap-1">
+            {getToneLabel(set.seriousnessLevel)}
+          </div>
+          <div className="flex items-center gap-1">
+            <Layers className="h-3 w-3" />
+            <span>{set.cardCount} cards</span>
+          </div>
         </div>
-        {set.publishedAt && (
-          <div className="text-xs text-gray-500 mb-1">
-            {(() => {
-              const date = typeof set.publishedAt === 'string' ? new Date(set.publishedAt) : set.publishedAt;
-              return date ? date.toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
-            })()}
-          </div>
-        )}
-
-        <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">
-          {set.proficiencyLevel && (
-            <span>Level: <span className="font-medium text-[#A9C4FC]">{set.proficiencyLevel}</span></span>
-          )}
-          {set.seriousnessLevel !== undefined && (
-            <span>Tone: <span className="font-medium text-[#A9C4FC]">{getToneLabel(set.seriousnessLevel)}</span></span>
-          )}
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleViewCards(set.id)}
+            className="flex-1 px-3 py-1.5 bg-indigo-700/30 hover:bg-indigo-700/40 text-indigo-200 rounded-md text-xs font-medium transition flex items-center justify-center gap-1 border border-indigo-600/30"
+          >
+            <BookOpen className="h-3 w-3" />
+            View
+          </button>
+          <button
+            onClick={() => handleImport(set.id)}
+            disabled={importingSetId === set.id || contextIsLoading}
+            className="flex-1 px-3 py-1.5 bg-[#A9C4FC]/20 hover:bg-[#A9C4FC]/30 text-[#A9C4FC] rounded-md text-xs font-medium transition flex items-center justify-center gap-1 border border-[#A9C4FC]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {importingSetId === set.id ? (
+              <span className="inline-block h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Download className="h-3 w-3" />
+            )}
+            {importingSetId === set.id ? 'Importing...' : 'Import'}
+          </button>
         </div>
-        
-        <p className="text-xs text-gray-400 mt-0.5">{set.cardCount || 0} cards</p>
-        
-        {/* Card Actions: Import and Cards icon buttons side by side */}
-        <div className="mt-auto flex justify-center gap-2">
-          <div className="flex flex-col items-center">
-            <button
-              onClick={() => handleViewCards(set.id)}
-              disabled={importingSetId === set.id || contextIsLoading}
-              className="p-2.5 rounded-full bg-gray-700 hover:bg-gray-800 text-white transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-              title="View Cards"
-            >
-              <Layers className="w-4 h-4" />
-            </button>
-            <span className="text-xs text-gray-400 mt-1">View Cards</span>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <button
-              onClick={() => handleImport(set.id)}
-              disabled={importingSetId === set.id || contextIsLoading}
-              className="p-2.5 rounded-full bg-gray-700 hover:bg-gray-800 text-white transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Import Set"
-            >
-              {importingSetId === set.id ? (
-                <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
-              ) : (
-                <Download className="w-4 h-4" />
-              )}
-            </button>
-            <span className="text-xs text-gray-400 mt-1">Import</span>
-          </div>
+        <div className="text-xs text-indigo-400 mt-2">
+          by {username}
         </div>
       </div>
     </div>

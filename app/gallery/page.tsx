@@ -3,7 +3,8 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useSet } from '@/app/context/SetContext';
 import { Phrase } from '@/app/lib/set-generator';
 import GallerySetCard from './GallerySetCard';
-import { GalleryHorizontal, Loader2 } from 'lucide-react';
+import { GalleryHorizontal, Loader2, Trash2 } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
 // Import a modal component (we'll create this next)
 import CardViewerModal from './CardViewerModal';
 
@@ -51,6 +52,13 @@ export default function GalleryPage() {
   const [isCardViewerOpen, setIsCardViewerOpen] = useState(false);
   const [cardViewLoading, setCardViewLoading] = useState(false);
   const [cardViewError, setCardViewError] = useState<string | null>(null);
+
+  // --- State for Bulk Delete ---
+  const [selectedSets, setSelectedSets] = useState<Set<string>>(new Set());
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
+  const { user } = useUser();
+  const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+  const isAdmin = userEmail === 'maartenrischen@protonmail.com';
 
   // --- Search/Filter State ---
   const [search, setSearch] = useState('');
@@ -109,7 +117,8 @@ export default function GalleryPage() {
     return filtered;
   }, [sets, search, sortOrder, authorFilter]);
 
-  useEffect(() => {
+  // Function to fetch gallery sets
+  const fetchSets = () => {
     setLoading(true);
     setError(null);
     fetch('/api/gallery')
@@ -132,6 +141,10 @@ export default function GalleryPage() {
         setError(err.message || 'Unknown error');
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchSets();
   }, []);
 
   const handleImport = async (setId: string) => {
@@ -225,6 +238,65 @@ export default function GalleryPage() {
     }
   };
 
+  const handleToggleSelect = (setId: string) => {
+    setSelectedSets(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(setId)) {
+        newSet.delete(setId);
+      } else {
+        newSet.add(setId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedSets.size === filteredSets.length) {
+      setSelectedSets(new Set());
+    } else {
+      setSelectedSets(new Set(filteredSets.map(s => s.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedSets.size === 0) return;
+
+    const confirmation = window.confirm(`Are you sure you want to delete ${selectedSets.size} set(s)? This action cannot be undone.`);
+    if (!confirmation) return;
+
+    setIsDeletingBulk(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const setId of Array.from(selectedSets)) {
+      try {
+        const response = await fetch(`/api/gallery/${setId}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch (error) {
+        console.error(`Error deleting set ${setId}:`, error);
+        failCount++;
+      }
+    }
+
+    // Refresh the sets list
+    fetchSets();
+    setSelectedSets(new Set());
+    setIsDeletingBulk(false);
+
+    if (failCount > 0) {
+      alert(`Deleted ${successCount} set(s) successfully. ${failCount} set(s) failed to delete.`);
+    } else {
+      alert(`Successfully deleted ${successCount} set(s).`);
+    }
+  };
+
   // --- Function to close the modal ---
   const handleCloseCardViewer = () => {
     setIsCardViewerOpen(false);
@@ -233,19 +305,51 @@ export default function GalleryPage() {
   };
 
   return (
-    <div className="container max-w-5xl py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-xl font-medium text-indigo-400">User Gallery</h1>
-        
-        {/* Search and Filter Controls */}
-        <div className="flex flex-col gap-2 w-full sm:flex-row sm:items-center sm:gap-2">
-          <input
-            type="text"
-            placeholder="Search sets..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="neumorphic-input rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-100 placeholder-indigo-400/60 focus:outline-none focus:ring-2 focus:ring-[#A9C4FC] focus:border-[#A9C4FC] transition shadow-sm w-full sm:w-auto"
-          />
+    <div className="max-w-6xl mx-auto p-6">
+      {isAdmin && selectedSets.size > 0 && (
+        <div className="mb-4 p-3 bg-red-900/10 border border-red-800/30 rounded-lg flex items-center justify-between">
+          <span className="text-sm text-red-400">
+            {selectedSets.size} set{selectedSets.size > 1 ? 's' : ''} selected
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSelectedSets(new Set())}
+              className="px-3 py-1.5 text-sm text-red-400/70 hover:text-red-400 transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              disabled={isDeletingBulk}
+              className="px-4 py-1.5 text-sm bg-red-900/30 border border-red-800/50 text-red-400 hover:bg-red-900/40 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isDeletingBulk ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4" />
+                  Delete Selected
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+      
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+        <h1 className="text-2xl font-semibold text-indigo-100">Gallery</h1>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          {isAdmin && filteredSets.length > 0 && (
+            <button
+              onClick={handleSelectAll}
+              className="neumorphic-button rounded-xl px-4 py-2 text-sm bg-[#232336] border border-[#33335a] text-indigo-200 hover:bg-[#2a2a4a] transition"
+            >
+              {selectedSets.size === filteredSets.length ? 'Deselect All' : 'Select All'}
+            </button>
+          )}
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
@@ -300,6 +404,9 @@ export default function GalleryPage() {
               handleImport={handleImport}
               handleViewCards={handleViewCards}
               onDelete={handleDelete}
+              isSelected={selectedSets.has(set.id)}
+              onToggleSelect={isAdmin ? () => handleToggleSelect(set.id) : undefined}
+              showCheckbox={isAdmin}
             />
           ))}
         </div>

@@ -77,10 +77,7 @@ export class SimpleAudioLessonGenerator {
           );
           this.audioSegments.push(englishAudio);
           
-          // 1 second pause
-          this.audioSegments.push(this.azureTTS.createSilence(1000));
-          
-          // 2. Thai translation
+          // 2. Thai translation (no pause)
           const thaiAudio = await this.azureTTS.synthesizeToBuffer(
             thaiText,
             'thai',
@@ -88,10 +85,7 @@ export class SimpleAudioLessonGenerator {
           );
           this.audioSegments.push(thaiAudio);
           
-          // 1 second pause
-          this.audioSegments.push(this.azureTTS.createSilence(1000));
-          
-          // 3. Optional mnemonic
+          // 3. Optional mnemonic (no pause)
           if (this.config.includeMnemonics && card.mnemonic) {
             const mnemonicAudio = await this.azureTTS.synthesizeToBuffer(
               card.mnemonic,
@@ -99,27 +93,20 @@ export class SimpleAudioLessonGenerator {
               this.config.voiceGender
             );
             this.audioSegments.push(mnemonicAudio);
-            
-            // 1 second pause after mnemonic
-            this.audioSegments.push(this.azureTTS.createSilence(1000));
           }
           
-          // 4. Repetition pattern: English -> Thai -> English -> Thai
+          // 4. Repetition pattern: English -> Thai -> English -> Thai (no pauses)
           // First repetition: English
           this.audioSegments.push(englishAudio);
-          this.audioSegments.push(this.azureTTS.createSilence(1000));
           
           // First repetition: Thai
           this.audioSegments.push(thaiAudio);
-          this.audioSegments.push(this.azureTTS.createSilence(1000));
           
           // Second repetition: English
           this.audioSegments.push(englishAudio);
-          this.audioSegments.push(this.azureTTS.createSilence(1000));
           
           // Second repetition: Thai
           this.audioSegments.push(thaiAudio);
-          this.audioSegments.push(this.azureTTS.createSilence(1000));
           
           // Pause between different phrases
           if (i < flashcards.length - 1) {

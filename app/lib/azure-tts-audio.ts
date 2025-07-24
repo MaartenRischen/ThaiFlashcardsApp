@@ -47,21 +47,29 @@ export class AzureTTSAudio {
         voiceName = voiceGender === 'male' ? ENGLISH_VOICES.male : ENGLISH_VOICES.female;
       }
 
-      // Convert speed to percentage format for SSML (1.0 = 100%)
-      const speedPercent = Math.round(validSpeed * 100);
+      // Convert speed to prosody rate format for SSML
+      // Azure expects rate as relative percentage (e.g., "-50%", "+20%") or named values
+      let rateValue: string;
+      if (validSpeed === 1.0) {
+        rateValue = 'medium'; // Use named value for normal speed
+      } else {
+        // Calculate percentage change from normal speed
+        const percentageChange = Math.round((validSpeed - 1.0) * 100);
+        rateValue = percentageChange >= 0 ? `+${percentageChange}%` : `${percentageChange}%`;
+      }
 
       // Create SSML with prosody element for speed control
       const ssml = `
         <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="${language === 'thai' ? 'th-TH' : 'en-US'}">
           <voice name="${voiceName}">
-            <prosody rate="${speedPercent}%">
+            <prosody rate="${rateValue}">
               ${this.escapeXml(text)}
             </prosody>
           </voice>
         </speak>
       `;
 
-      console.log(`Synthesizing ${language} audio with ${voiceGender} voice at ${speedPercent}% speed (${validSpeed}x):`, text.substring(0, 50) + '...');
+      console.log(`Synthesizing ${language} audio with ${voiceGender} voice at rate="${rateValue}" (${validSpeed}x):`, text.substring(0, 50) + '...');
       console.log('SSML:', ssml.trim());
 
       // Create synthesizer with no audio output (we'll get the data directly)

@@ -110,7 +110,7 @@ export class SimpleAudioLessonGenerator {
             this.audioSegments.push(mnemonicAudio);
           }
           
-          // 4. Repetition pattern: English -> Thai (repeated based on phraseRepetitions)
+          // 4. Repetition pattern: English -> Thai -> Thai -> Thai -> English -> Thai
           const repetitions = this.config.phraseRepetitions || 2;
           const speedVariations = [0.8, 1.0, 1.2, 0.9, 1.1]; // Speed variations for mix mode
           
@@ -122,7 +122,9 @@ export class SimpleAudioLessonGenerator {
               currentSpeed = baseSpeed * speedVariations[rep % speedVariations.length];
             }
             
-            // English at current speed
+            // Pattern: English -> Thai -> Thai -> Thai -> English -> Thai
+            
+            // 1. English
             const englishRepAudio = await this.azureTTS.synthesizeToBuffer(
               card.english,
               'english',
@@ -131,14 +133,50 @@ export class SimpleAudioLessonGenerator {
             );
             this.audioSegments.push(englishRepAudio);
             
-            // Thai at current speed
-            const thaiRepAudio = await this.azureTTS.synthesizeToBuffer(
+            // 2. Thai (first)
+            const thaiRepAudio1 = await this.azureTTS.synthesizeToBuffer(
               thaiText,
               'thai',
               this.config.voiceGender,
               currentSpeed
             );
-            this.audioSegments.push(thaiRepAudio);
+            this.audioSegments.push(thaiRepAudio1);
+            
+            // 3. Thai (second)
+            const thaiRepAudio2 = await this.azureTTS.synthesizeToBuffer(
+              thaiText,
+              'thai',
+              this.config.voiceGender,
+              currentSpeed
+            );
+            this.audioSegments.push(thaiRepAudio2);
+            
+            // 4. Thai (third)
+            const thaiRepAudio3 = await this.azureTTS.synthesizeToBuffer(
+              thaiText,
+              'thai',
+              this.config.voiceGender,
+              currentSpeed
+            );
+            this.audioSegments.push(thaiRepAudio3);
+            
+            // 5. English (again)
+            const englishRepAudio2 = await this.azureTTS.synthesizeToBuffer(
+              card.english,
+              'english',
+              this.config.voiceGender,
+              currentSpeed
+            );
+            this.audioSegments.push(englishRepAudio2);
+            
+            // 6. Thai (fourth)
+            const thaiRepAudio4 = await this.azureTTS.synthesizeToBuffer(
+              thaiText,
+              'thai',
+              this.config.voiceGender,
+              currentSpeed
+            );
+            this.audioSegments.push(thaiRepAudio4);
           }
           
           // Pause between different phrases

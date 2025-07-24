@@ -63,6 +63,11 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
   const handleGenerate = async () => {
     // Clear previous audio if regenerating
     if (audioUrl) {
+      // Stop audio if playing
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
       window.URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
       setIsPlaying(false);
@@ -273,6 +278,22 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
                   step={1}
                   value={[simpleConfig.phraseRepetitions || 2]}
                   onValueChange={(value) => setSimpleConfig({ ...simpleConfig, phraseRepetitions: value[0] })}
+                  className="[&_[role=slider]]:bg-[#A9C4FC]"
+                />
+              </div>
+
+              {/* Total Loops */}
+              <div className="grid gap-2">
+                <Label htmlFor="loops" className="text-[#E0E0E0] text-sm">
+                  Total Loops: {simpleConfig.loops || 3}x
+                </Label>
+                <Slider
+                  id="loops"
+                  min={1}
+                  max={10}
+                  step={1}
+                  value={[simpleConfig.loops || 3]}
+                  onValueChange={(value) => setSimpleConfig({ ...simpleConfig, loops: value[0] })}
                   className="[&_[role=slider]]:bg-[#A9C4FC]"
                 />
               </div>
@@ -504,6 +525,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
               </div>
             </div>
             <audio
+              key={audioUrl}  // Force re-render when URL changes
               ref={audioRef}
               src={audioUrl}
               onEnded={() => setIsPlaying(false)}

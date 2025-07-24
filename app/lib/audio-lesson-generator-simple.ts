@@ -53,15 +53,15 @@ export class SimpleAudioLessonGenerator {
     this.audioSegments = [];
 
     try {
-      // Simple intro
-      const introText = `${setName}. Listen and repeat.`;
-      const introAudio = await this.azureTTS.synthesizeToBuffer(
-        introText,
-        'english',
-        this.config.voiceGender
-      );
-      this.audioSegments.push(introAudio);
-      this.audioSegments.push(this.azureTTS.createSilence(2000));
+      // Simple intro - REMOVED
+      // const introText = `${setName}. Listen and repeat.`;
+      // const introAudio = await this.azureTTS.synthesizeToBuffer(
+      //   introText,
+      //   'english',
+      //   this.config.voiceGender
+      // );
+      // this.audioSegments.push(introAudio);
+      // this.audioSegments.push(this.azureTTS.createSilence(2000));
 
       // Main loop - repeat the entire set multiple times
       for (let loop = 0; loop < this.config.loops; loop++) {

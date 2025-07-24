@@ -79,6 +79,7 @@ export class SimpleAudioLessonGenerator {
           
           // Get speed for initial parts (always normal speed for first occurrence)
           const baseSpeed = this.config.speed || 1.0;
+          console.log('Using base speed:', baseSpeed);
           
           // 1. English meaning
           const englishAudio = await this.azureTTS.synthesizeToBuffer(

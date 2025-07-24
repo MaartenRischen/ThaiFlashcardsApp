@@ -58,6 +58,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
     pauseBetweenRepetitions: 1000,
     pauseBetweenPhrases: 2000,
     loops: 3,
+    phraseRepetitions: 2,
+    speed: 1.0,  // Add initial speed value
+    mixSpeed: false,
+    includeMnemonics: false,
   });
 
   const handleGenerate = async () => {

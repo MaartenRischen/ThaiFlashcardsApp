@@ -33,6 +33,12 @@ export class AzureTTSAudio {
     speed: number = 1.0  // Add speed parameter (0.5 = half speed, 1 = normal, 2 = double speed)
   ): Promise<ArrayBuffer> {
     return new Promise((resolve, reject) => {
+      // Validate and clamp speed to reasonable range
+      const validSpeed = Math.max(0.5, Math.min(2.0, speed || 1.0));
+      if (validSpeed !== speed) {
+        console.warn(`Speed ${speed} was clamped to ${validSpeed}`);
+      }
+      
       // Select appropriate voice
       let voiceName: string;
       if (language === 'thai') {
@@ -42,7 +48,7 @@ export class AzureTTSAudio {
       }
 
       // Convert speed to percentage format for SSML (1.0 = 100%)
-      const speedPercent = Math.round(speed * 100);
+      const speedPercent = Math.round(validSpeed * 100);
 
       // Create SSML with prosody element for speed control
       const ssml = `
@@ -55,7 +61,7 @@ export class AzureTTSAudio {
         </speak>
       `;
 
-      console.log(`Synthesizing ${language} audio with ${voiceGender} voice at ${speedPercent}% speed (${speed}x):`, text.substring(0, 50) + '...');
+      console.log(`Synthesizing ${language} audio with ${voiceGender} voice at ${speedPercent}% speed (${validSpeed}x):`, text.substring(0, 50) + '...');
       console.log('SSML:', ssml.trim());
 
       // Create synthesizer with no audio output (we'll get the data directly)

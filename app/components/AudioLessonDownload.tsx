@@ -235,9 +235,26 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
                 <p>• Repetitions per phrase: {simpleConfig.repetitions || 3}x</p>
                 <p>• Total loops: {simpleConfig.loops || 3}x through all phrases</p>
                 <p>• Perfect for passive listening or sleep learning</p>
+                {simpleConfig.includeMnemonics && <p>• Mnemonics included</p>}
               </>
             )}
           </div>
+
+          {/* Include Mnemonics Option for Repetition Mode */}
+          {lessonMode === 'simple' && (
+            <div className="flex items-center space-x-2 mt-4">
+              <input
+                type="checkbox"
+                id="include-mnemonics"
+                checked={simpleConfig.includeMnemonics || false}
+                onChange={(e) => setSimpleConfig({ ...simpleConfig, includeMnemonics: e.target.checked })}
+                className="w-4 h-4 text-[#A9C4FC] bg-[#3C3C3C] border-[#404040] rounded focus:ring-[#A9C4FC] focus:ring-2"
+              />
+              <Label htmlFor="include-mnemonics" className="text-[#E0E0E0] cursor-pointer">
+                Include mnemonics in audio
+              </Label>
+            </div>
+          )}
 
           {/* Advanced Settings - Collapsible */}
           {showAdvanced && lessonMode === 'pimsleur' && (

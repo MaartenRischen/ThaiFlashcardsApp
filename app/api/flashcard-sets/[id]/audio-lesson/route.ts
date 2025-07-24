@@ -38,7 +38,8 @@ export async function POST(
       thai: phrase.thai,
       english: phrase.english,
       thaiMasculine: phrase.thaiMasculine || undefined,
-      thaiFeminine: phrase.thaiFeminine || undefined
+      thaiFeminine: phrase.thaiFeminine || undefined,
+      mnemonic: phrase.mnemonic || undefined  // Add mnemonic data
     }));
     
     if (mode === 'simple') {

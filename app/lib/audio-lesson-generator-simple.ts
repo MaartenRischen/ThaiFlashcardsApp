@@ -8,6 +8,7 @@ export interface SimpleAudioLessonConfig {
   pauseBetweenRepetitions: number; // ms between repetitions
   pauseBetweenPhrases: number; // ms between different phrases
   loops: number; // How many times to loop through all phrases
+  includeMnemonics?: boolean; // Whether to include mnemonics in the audio
 }
 
 const DEFAULT_CONFIG: SimpleAudioLessonConfig = {
@@ -16,6 +17,7 @@ const DEFAULT_CONFIG: SimpleAudioLessonConfig = {
   pauseBetweenRepetitions: 1000,
   pauseBetweenPhrases: 2000,
   loops: 3,
+  includeMnemonics: false,
 };
 
 export class SimpleAudioLessonGenerator {
@@ -37,6 +39,7 @@ export class SimpleAudioLessonGenerator {
       english: string;
       thaiMasculine?: string;
       thaiFeminine?: string;
+      mnemonic?: string;
     }>,
     setName: string
   ): Promise<ArrayBuffer> {
@@ -64,34 +67,59 @@ export class SimpleAudioLessonGenerator {
           // Get the appropriate Thai text based on gender
           const thaiText = this.getThaiText(card);
           
-          // Repeat pattern: English - Thai (repeated N times)
-          for (let rep = 0; rep < this.config.repetitions; rep++) {
-            // English
-            const englishAudio = await this.azureTTS.synthesizeToBuffer(
-              card.english,
+          // New pattern: English meaning -> Thai translation -> (optional mnemonic) -> English/Thai repetitions
+          
+          // 1. English meaning
+          const englishAudio = await this.azureTTS.synthesizeToBuffer(
+            card.english,
+            'english',
+            this.config.voiceGender
+          );
+          this.audioSegments.push(englishAudio);
+          
+          // 1 second pause
+          this.audioSegments.push(this.azureTTS.createSilence(1000));
+          
+          // 2. Thai translation
+          const thaiAudio = await this.azureTTS.synthesizeToBuffer(
+            thaiText,
+            'thai',
+            this.config.voiceGender
+          );
+          this.audioSegments.push(thaiAudio);
+          
+          // 1 second pause
+          this.audioSegments.push(this.azureTTS.createSilence(1000));
+          
+          // 3. Optional mnemonic
+          if (this.config.includeMnemonics && card.mnemonic) {
+            const mnemonicAudio = await this.azureTTS.synthesizeToBuffer(
+              card.mnemonic,
               'english',
               this.config.voiceGender
             );
-            this.audioSegments.push(englishAudio);
+            this.audioSegments.push(mnemonicAudio);
             
-            // Small pause
-            this.audioSegments.push(this.azureTTS.createSilence(500));
-            
-            // Thai
-            const thaiAudio = await this.azureTTS.synthesizeToBuffer(
-              thaiText,
-              'thai',
-              this.config.voiceGender
-            );
-            this.audioSegments.push(thaiAudio);
-            
-            // Pause between repetitions
-            if (rep < this.config.repetitions - 1) {
-              this.audioSegments.push(
-                this.azureTTS.createSilence(this.config.pauseBetweenRepetitions)
-              );
-            }
+            // 1 second pause after mnemonic
+            this.audioSegments.push(this.azureTTS.createSilence(1000));
           }
+          
+          // 4. Repetition pattern: English -> Thai -> English -> Thai
+          // First repetition: English
+          this.audioSegments.push(englishAudio);
+          this.audioSegments.push(this.azureTTS.createSilence(1000));
+          
+          // First repetition: Thai
+          this.audioSegments.push(thaiAudio);
+          this.audioSegments.push(this.azureTTS.createSilence(1000));
+          
+          // Second repetition: English
+          this.audioSegments.push(englishAudio);
+          this.audioSegments.push(this.azureTTS.createSilence(1000));
+          
+          // Second repetition: Thai
+          this.audioSegments.push(thaiAudio);
+          this.audioSegments.push(this.azureTTS.createSilence(1000));
           
           // Pause between different phrases
           if (i < flashcards.length - 1) {

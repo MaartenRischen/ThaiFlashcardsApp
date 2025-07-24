@@ -29,7 +29,8 @@ export class AzureTTSAudio {
   async synthesizeToBuffer(
     text: string,
     language: 'thai' | 'english',
-    voiceGender: 'male' | 'female'
+    voiceGender: 'male' | 'female',
+    speed: number = 1.0  // Add speed parameter (0.5 = half speed, 1 = normal, 2 = double speed)
   ): Promise<ArrayBuffer> {
     return new Promise((resolve, reject) => {
       // Select appropriate voice
@@ -40,16 +41,21 @@ export class AzureTTSAudio {
         voiceName = voiceGender === 'male' ? ENGLISH_VOICES.male : ENGLISH_VOICES.female;
       }
 
-      // Create SSML
+      // Convert speed to percentage format for SSML (1.0 = 100%)
+      const speedPercent = Math.round(speed * 100);
+
+      // Create SSML with prosody element for speed control
       const ssml = `
         <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="${language === 'thai' ? 'th-TH' : 'en-US'}">
           <voice name="${voiceName}">
-            ${this.escapeXml(text)}
+            <prosody rate="${speedPercent}%">
+              ${this.escapeXml(text)}
+            </prosody>
           </voice>
         </speak>
       `;
 
-      console.log(`Synthesizing ${language} audio with ${voiceGender} voice:`, text.substring(0, 50) + '...');
+      console.log(`Synthesizing ${language} audio with ${voiceGender} voice at ${speedPercent}% speed:`, text.substring(0, 50) + '...');
 
       // Create synthesizer with no audio output (we'll get the data directly)
       const synthesizer = new sdk.SpeechSynthesizer(this.speechConfig, null);

@@ -9,6 +9,9 @@ export interface SimpleAudioLessonConfig {
   pauseBetweenPhrases: number; // ms between different phrases
   loops: number; // How many times to loop through all phrases
   includeMnemonics?: boolean; // Whether to include mnemonics in the audio
+  phraseRepetitions?: number; // How many times to repeat the English->Thai pattern
+  speed?: number; // Speed of audio (0.5 = half speed, 1 = normal, 2 = double speed)
+  mixSpeed?: boolean; // Whether to vary speed for each repetition
 }
 
 const DEFAULT_CONFIG: SimpleAudioLessonConfig = {
@@ -18,6 +21,9 @@ const DEFAULT_CONFIG: SimpleAudioLessonConfig = {
   pauseBetweenPhrases: 2000,
   loops: 3,
   includeMnemonics: false,
+  phraseRepetitions: 2, // Default to 2 repetitions of English->Thai
+  speed: 1.0, // Normal speed
+  mixSpeed: false,
 };
 
 export class SimpleAudioLessonGenerator {
@@ -69,11 +75,15 @@ export class SimpleAudioLessonGenerator {
           
           // New pattern: English meaning -> Thai translation -> (optional mnemonic) -> English/Thai repetitions
           
+          // Get speed for initial parts (always normal speed for first occurrence)
+          const baseSpeed = this.config.speed || 1.0;
+          
           // 1. English meaning
           const englishAudio = await this.azureTTS.synthesizeToBuffer(
             card.english,
             'english',
-            this.config.voiceGender
+            this.config.voiceGender,
+            baseSpeed
           );
           this.audioSegments.push(englishAudio);
           
@@ -81,7 +91,8 @@ export class SimpleAudioLessonGenerator {
           const thaiAudio = await this.azureTTS.synthesizeToBuffer(
             thaiText,
             'thai',
-            this.config.voiceGender
+            this.config.voiceGender,
+            baseSpeed
           );
           this.audioSegments.push(thaiAudio);
           
@@ -90,23 +101,42 @@ export class SimpleAudioLessonGenerator {
             const mnemonicAudio = await this.azureTTS.synthesizeToBuffer(
               card.mnemonic,
               'english',
-              this.config.voiceGender
+              this.config.voiceGender,
+              baseSpeed
             );
             this.audioSegments.push(mnemonicAudio);
           }
           
-          // 4. Repetition pattern: English -> Thai -> English -> Thai (no pauses)
-          // First repetition: English
-          this.audioSegments.push(englishAudio);
+          // 4. Repetition pattern: English -> Thai (repeated based on phraseRepetitions)
+          const repetitions = this.config.phraseRepetitions || 2;
+          const speedVariations = [0.8, 1.0, 1.2, 0.9, 1.1]; // Speed variations for mix mode
           
-          // First repetition: Thai
-          this.audioSegments.push(thaiAudio);
-          
-          // Second repetition: English
-          this.audioSegments.push(englishAudio);
-          
-          // Second repetition: Thai
-          this.audioSegments.push(thaiAudio);
+          for (let rep = 0; rep < repetitions; rep++) {
+            // Calculate speed for this repetition
+            let currentSpeed = baseSpeed;
+            if (this.config.mixSpeed) {
+              // Use different speeds for each repetition
+              currentSpeed = baseSpeed * speedVariations[rep % speedVariations.length];
+            }
+            
+            // English at current speed
+            const englishRepAudio = await this.azureTTS.synthesizeToBuffer(
+              card.english,
+              'english',
+              this.config.voiceGender,
+              currentSpeed
+            );
+            this.audioSegments.push(englishRepAudio);
+            
+            // Thai at current speed
+            const thaiRepAudio = await this.azureTTS.synthesizeToBuffer(
+              thaiText,
+              'thai',
+              this.config.voiceGender,
+              currentSpeed
+            );
+            this.audioSegments.push(thaiRepAudio);
+          }
           
           // Pause between different phrases
           if (i < flashcards.length - 1) {

@@ -232,7 +232,9 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
               </>
             ) : (
               <>
-                <p>• Repetitions per phrase: {simpleConfig.repetitions || 3}x</p>
+                <p>• Phrase repetitions: {simpleConfig.phraseRepetitions || 2}x</p>
+                <p>• Speed: {((simpleConfig.speed || 1) * 100).toFixed(0)}%</p>
+                {simpleConfig.mixSpeed && <p>• Speed variation enabled</p>}
                 <p>• Total loops: {simpleConfig.loops || 3}x through all phrases</p>
                 <p>• Perfect for passive listening or sleep learning</p>
                 {simpleConfig.includeMnemonics && <p>• Mnemonics included</p>}
@@ -253,6 +255,57 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
               <Label htmlFor="include-mnemonics" className="text-[#E0E0E0] cursor-pointer">
                 Include mnemonics in audio
               </Label>
+            </div>
+          )}
+
+          {/* Repetition Settings for Simple Mode */}
+          {lessonMode === 'simple' && (
+            <div className="mt-4 space-y-4">
+              {/* Phrase Repetitions */}
+              <div className="grid gap-2">
+                <Label htmlFor="phrase-repetitions" className="text-[#E0E0E0] text-sm">
+                  Phrase Repetitions: {simpleConfig.phraseRepetitions || 2}x
+                </Label>
+                <Slider
+                  id="phrase-repetitions"
+                  min={1}
+                  max={10}
+                  step={1}
+                  value={[simpleConfig.phraseRepetitions || 2]}
+                  onValueChange={(value) => setSimpleConfig({ ...simpleConfig, phraseRepetitions: value[0] })}
+                  className="[&_[role=slider]]:bg-[#A9C4FC]"
+                />
+              </div>
+
+              {/* Speed Control */}
+              <div className="grid gap-2">
+                <Label htmlFor="speed" className="text-[#E0E0E0] text-sm">
+                  Speed: {((simpleConfig.speed || 1) * 100).toFixed(0)}%
+                </Label>
+                <Slider
+                  id="speed"
+                  min={0.5}
+                  max={1.5}
+                  step={0.1}
+                  value={[simpleConfig.speed || 1]}
+                  onValueChange={(value) => setSimpleConfig({ ...simpleConfig, speed: value[0] })}
+                  className="[&_[role=slider]]:bg-[#A9C4FC]"
+                />
+              </div>
+
+              {/* Mix Speed Option */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="mix-speed"
+                  checked={simpleConfig.mixSpeed || false}
+                  onChange={(e) => setSimpleConfig({ ...simpleConfig, mixSpeed: e.target.checked })}
+                  className="w-4 h-4 text-[#A9C4FC] bg-[#3C3C3C] border-[#404040] rounded focus:ring-[#A9C4FC] focus:ring-2"
+                />
+                <Label htmlFor="mix-speed" className="text-[#E0E0E0] cursor-pointer">
+                  Mix speed (vary speed for each repetition)
+                </Label>
+              </div>
             </div>
           )}
 

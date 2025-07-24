@@ -75,10 +75,18 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
     
     setIsGenerating(true);
     try {
-      const response = await fetch(`/api/flashcard-sets/${setId}/audio-lesson`, {
+      // Debug logging
+      console.log('Generating audio with config:', {
+        mode: lessonMode,
+        config: lessonMode === 'pimsleur' ? config : simpleConfig,
+        speed: lessonMode === 'simple' ? simpleConfig.speed : 'N/A'
+      });
+      
+      const response = await fetch(`/api/flashcard-sets/${setId}/audio-lesson?t=${Date.now()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
         },
         body: JSON.stringify({
           mode: lessonMode,

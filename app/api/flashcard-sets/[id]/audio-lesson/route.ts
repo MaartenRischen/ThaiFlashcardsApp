@@ -32,6 +32,9 @@ export async function POST(
     // Get configuration from request body
     const { mode, config } = await request.json();
     
+    // Debug logging
+    console.log('Audio generation request:', { mode, config });
+    
     // Generate audio lesson based on mode
     let audioBuffer: ArrayBuffer;
     const phrases = flashcardSet.phrases.map(phrase => ({
@@ -50,12 +53,15 @@ export async function POST(
       audioBuffer = await generator.generateLesson(phrases, flashcardSet.name);
     }
 
-    // Return audio file
+    // Return audio file with cache-busting headers
     return new NextResponse(audioBuffer, {
       headers: {
         'Content-Type': 'audio/wav',
         'Content-Disposition': `attachment; filename="${flashcardSet.name.replace(/[^a-z0-9]/gi, '_')}_lesson.wav"`,
-        'Content-Length': audioBuffer.byteLength.toString()
+        'Content-Length': audioBuffer.byteLength.toString(),
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       }
     });
 

@@ -55,7 +55,8 @@ export class AzureTTSAudio {
         </speak>
       `;
 
-      console.log(`Synthesizing ${language} audio with ${voiceGender} voice at ${speedPercent}% speed:`, text.substring(0, 50) + '...');
+      console.log(`Synthesizing ${language} audio with ${voiceGender} voice at ${speedPercent}% speed (${speed}x):`, text.substring(0, 50) + '...');
+      console.log('SSML:', ssml.trim());
 
       // Create synthesizer with no audio output (we'll get the data directly)
       const synthesizer = new sdk.SpeechSynthesizer(this.speechConfig, null);

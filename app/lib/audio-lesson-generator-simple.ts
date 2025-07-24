@@ -50,6 +50,8 @@ export class SimpleAudioLessonGenerator {
     setName: string
   ): Promise<ArrayBuffer> {
     console.log('Starting simple audio lesson generation for:', setName);
+    console.log('Config:', this.config);
+    console.log('Speed setting:', this.config.speed);
     this.audioSegments = [];
 
     try {

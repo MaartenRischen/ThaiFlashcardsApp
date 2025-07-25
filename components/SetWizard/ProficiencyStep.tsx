@@ -80,7 +80,7 @@ export function ProficiencyStep({
   onNext: (value: ProficiencyValue) => void,
   onBack: () => void
 }) {
-  const [currentLevelIndex, setCurrentLevelIndex] = useState(0); // Always start at level 1
+  const [currentLevelIndex, setCurrentLevelIndex] = useState(1); // Default to Basic Understanding (index 1)
 
   const safeLevelIndex = Math.max(0, Math.min(5, currentLevelIndex));
   const currentLevel = proficiencyLevels[safeLevelIndex];

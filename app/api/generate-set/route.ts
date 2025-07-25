@@ -421,11 +421,17 @@ export async function POST(request: Request) {
     console.log(`API Route: Starting generation process for userId: ${userId}, count: ${totalCount}, isTest: ${isTestRequest}`);
     let generationResult: GenerationResult | null = null;
     const startTime = Date.now();
+    
+    // Ensure minimum card count for auto mode
+    const adjustedTotalCount = mode === 'auto' ? Math.max(5, totalCount) : totalCount;
+    if (adjustedTotalCount !== totalCount) {
+      console.log(`API Route: Adjusted card count from ${totalCount} to ${adjustedTotalCount} to meet minimum requirement`);
+    }
 
     try {
       generationResult = await generateCustomSet(
         preferences,
-        totalCount,
+        adjustedTotalCount,
         isTestRequest ? undefined : (progress) => {
           // Optional progress tracking for non-test requests
           console.log(`Generation progress: ${progress.completed}/${progress.total}`);
@@ -440,6 +446,12 @@ export async function POST(request: Request) {
     if (!generationResult || !generationResult.phrases || generationResult.phrases.length === 0) {
       console.error("API Route: No phrases generated.");
       throw new Error("No phrases were generated");
+    }
+    
+    // Ensure we have at least 5 phrases for auto mode
+    if (mode === 'auto' && generationResult.phrases.length < 5) {
+      console.error(`API Route: Only ${generationResult.phrases.length} phrases generated, minimum 5 required for auto mode`);
+      throw new Error(`Not enough phrases generated. Got ${generationResult.phrases.length}, minimum 5 required.`);
     }
 
     // For test requests, skip database operations and return the generated phrases directly

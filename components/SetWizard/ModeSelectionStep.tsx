@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, PenTool, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 
 interface ModeSelectionStepProps {
   onSelectMode: (mode: 'auto' | 'manual') => void;
@@ -59,8 +60,19 @@ export function ModeSelectionStep({ onSelectMode, onBack }: ModeSelectionStepPro
               </p>
             </div>
             
-            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-400 
-              transition-colors duration-300 flex-shrink-0 mt-3" />
+            <div className="flex items-center space-x-2">
+              <div className="w-20 h-20 relative flex-shrink-0">
+                <Image 
+                  src="/images/automode.png" 
+                  alt="Robot donkey writing notes" 
+                  width={80}
+                  height={80}
+                  className="object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                />
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-400 
+                transition-colors duration-300 flex-shrink-0" />
+            </div>
           </div>
         </motion.button>
 
@@ -93,8 +105,19 @@ export function ModeSelectionStep({ onSelectMode, onBack }: ModeSelectionStepPro
               </p>
             </div>
             
-            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-300 
-              transition-colors duration-300 flex-shrink-0 mt-3" />
+            <div className="flex items-center space-x-2">
+              <div className="w-20 h-20 relative flex-shrink-0">
+                <Image 
+                  src="/images/manualmode.png" 
+                  alt="Donkey writing notes" 
+                  width={80}
+                  height={80}
+                  className="object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                />
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-300 
+                transition-colors duration-300 flex-shrink-0" />
+            </div>
           </div>
         </motion.button>
       </div>

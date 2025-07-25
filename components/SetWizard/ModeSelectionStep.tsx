@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, PenTool, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
 interface ModeSelectionStepProps {
@@ -32,21 +32,16 @@ export function ModeSelectionStep({ onSelectMode, onBack }: ModeSelectionStepPro
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1, duration: 0.5 }}
           onClick={() => onSelectMode('auto')}
-          className="w-full p-6 rounded-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 
+          className="w-full p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 
             border border-blue-500/20 hover:border-blue-400/40 transition-all duration-300
             hover:shadow-lg hover:shadow-blue-500/20 group relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 
             opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
-          <div className="relative z-10 flex items-start space-x-4">
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-blue-500/20 
-              flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <Sparkles className="w-6 h-6 text-blue-400" />
-            </div>
-            
+          <div className="relative z-10 flex items-center space-x-4">
             <div className="flex-1 text-left space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
                 <h4 className="text-lg font-semibold text-[#E0E0E0]">
                   Auto Mode
                 </h4>
@@ -54,25 +49,24 @@ export function ModeSelectionStep({ onSelectMode, onBack }: ModeSelectionStepPro
                   Recommended
                 </span>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-400 pr-2">
                 Let AI generate personalized flashcards based on your topic, level, and preferences. 
                 Perfect for comprehensive learning.
               </p>
             </div>
             
-            <div className="flex items-center space-x-2">
-              <div className="w-20 h-20 relative flex-shrink-0">
-                <Image 
-                  src="/images/automode.png" 
-                  alt="Robot donkey writing notes" 
-                  width={80}
-                  height={80}
-                  className="object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-                />
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-400 
-                transition-colors duration-300 flex-shrink-0" />
+            <div className="flex-shrink-0 w-32 h-24 relative rounded-lg overflow-hidden bg-blue-500/10 
+              border border-blue-500/20 group-hover:border-blue-400/30 transition-all duration-300">
+              <Image 
+                src="/images/automode.png" 
+                alt="Robot donkey writing notes" 
+                fill
+                className="object-contain p-2 group-hover:scale-110 transition-transform duration-300"
+              />
             </div>
+            
+            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-400 
+              transition-colors duration-300 flex-shrink-0 ml-2" />
           </div>
         </motion.button>
 
@@ -82,42 +76,36 @@ export function ModeSelectionStep({ onSelectMode, onBack }: ModeSelectionStepPro
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
           onClick={() => onSelectMode('manual')}
-          className="w-full p-6 rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-700/30 
+          className="w-full p-4 rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-700/30 
             border border-gray-600/30 hover:border-gray-500/50 transition-all duration-300
             hover:shadow-lg hover:shadow-gray-500/10 group relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-gray-700/10 to-gray-600/10 
             opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
-          <div className="relative z-10 flex items-start space-x-4">
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gray-700/30 
-              flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <PenTool className="w-6 h-6 text-gray-400" />
-            </div>
-            
+          <div className="relative z-10 flex items-center space-x-4">
             <div className="flex-1 text-left space-y-2">
               <h4 className="text-lg font-semibold text-[#E0E0E0]">
                 Manual Mode
               </h4>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-400 pr-2">
                 Input your own specific words or phrases. Ideal when you have exact sentences 
                 you want to learn (10-20 cards).
               </p>
             </div>
             
-            <div className="flex items-center space-x-2">
-              <div className="w-20 h-20 relative flex-shrink-0">
-                <Image 
-                  src="/images/manualmode.png" 
-                  alt="Donkey writing notes" 
-                  width={80}
-                  height={80}
-                  className="object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-                />
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-300 
-                transition-colors duration-300 flex-shrink-0" />
+            <div className="flex-shrink-0 w-32 h-24 relative rounded-lg overflow-hidden bg-gray-700/20 
+              border border-gray-600/30 group-hover:border-gray-500/40 transition-all duration-300">
+              <Image 
+                src="/images/manualmode.png" 
+                alt="Donkey writing notes" 
+                fill
+                className="object-contain p-2 group-hover:scale-110 transition-transform duration-300"
+              />
             </div>
+            
+            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-300 
+              transition-colors duration-300 flex-shrink-0 ml-2" />
           </div>
         </motion.button>
       </div>

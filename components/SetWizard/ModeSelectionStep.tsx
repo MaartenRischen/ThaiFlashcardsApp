@@ -58,7 +58,7 @@ export function ModeSelectionStep({ onSelectMode, onBack }: ModeSelectionStepPro
             <div className="flex-shrink-0 w-32 h-24 relative rounded-lg overflow-hidden bg-blue-500/10 
               border border-blue-500/20 group-hover:border-blue-400/30 transition-all duration-300">
               <Image 
-                src="/images/automode.png" 
+                src="/images/automode2.png" 
                 alt="Robot donkey writing notes" 
                 fill
                 className="object-contain p-2 group-hover:scale-110 transition-transform duration-300"

@@ -2,8 +2,8 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { useAuth } from '@clerk/nextjs'; // <-- Import useAuth from Clerk
-import { INITIAL_PHRASES } from '@/app/data/phrases';
-import { Phrase } from '@/app/lib/set-generator';
+import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases';
+import { getDefaultSetsForUnauthenticatedUsers, getDefaultSetContent } from '@/app/lib/seed-default-sets';
 import { SetMetaData, SetProgress } from '@/app/lib/storage';
 
 interface SetContextProps {
@@ -69,7 +69,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       return;
     }
-    if (!userId && id !== DEFAULT_SET_ID) {
+    if (!userId && id !== DEFAULT_SET_ID && !id?.startsWith('default-')) {
         console.warn(`SetContext: loadSetData called for non-default set ${id} but userId is not available.`);
         setActiveSetId(DEFAULT_SET_ID);
         setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
@@ -88,14 +88,10 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       // Fetch progress via API
-      console.log(`SetContext: Fetching progress via API for set ${id}, user ${userId}`);
-      const progressResponse = await fetch(`/api/flashcard-sets/${id}/progress`, { credentials: 'include' });
+      console.log(`SetContext: Fetching progress via API for set ${id}`);
+      const progressResponse = await fetch(`/api/user-progress?setId=${id}`, { credentials: 'include' });
       if (!progressResponse.ok) {
-        // Handle non-404 errors specifically if needed, otherwise just log
-        if (progressResponse.status !== 404) {
-           console.error(`SetContext: Error fetching progress API for set ${id}: ${progressResponse.statusText}`);
-        }
-        // If 404 or other error, proceed with empty progress
+        console.error(`SetContext: Error fetching progress API for set ${id}: ${progressResponse.statusText}`);
         fetchedProgress = {};
       } else {
         // FIX: Extract the inner progress object
@@ -105,10 +101,16 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       console.log(`SetContext: Progress fetched via API for set ${id}:`, fetchedProgress);
 
       // Fetch content
-      if (id === DEFAULT_SET_ID) {
+      if (id === DEFAULT_SET_ID || id?.startsWith('default-')) {
         // Load default content directly
-        console.log(`SetContext: Loading DEFAULT set content (${INITIAL_PHRASES.length} phrases)`);
-        fetchedContent = INITIAL_PHRASES;
+        const defaultContent = getDefaultSetContent(id);
+        if (defaultContent) {
+          console.log(`SetContext: Loading default set content for ${id} (${defaultContent.length} phrases)`);
+          fetchedContent = defaultContent;
+        } else {
+          console.error(`SetContext: No default content found for ${id}`);
+          fetchedContent = [];
+        }
       } else {
         // Fetch user-specific set content via API
         console.log(`SetContext: Fetching content via API for set ${id}`);
@@ -302,16 +304,17 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
           const userSets: SetMetaData[] = userSetsResponse.sets; // Extract the array
           
           // FIX: Combine default and user sets correctly
+          const allDefaultSets = getDefaultSetsForUnauthenticatedUsers();
           const combinedSets = [
-            DEFAULT_SET_METADATA,
-            ...userSets.filter(set => set.id !== DEFAULT_SET_ID)
+            ...allDefaultSets,
+            ...userSets.filter(set => !set.id.startsWith('default'))
           ];
           setAvailableSets(combinedSets); 
           console.log(`SetContext: Loaded ${userSets.length} user-specific sets via API. Total available: ${combinedSets.length}`);
 
         } catch (error) {
           console.error("SetContext: Error loading initial user data via API:", error);
-          setAvailableSets([DEFAULT_SET_METADATA]); // Fallback to default only
+          setAvailableSets(getDefaultSetsForUnauthenticatedUsers()); // Fallback to all default sets
         } finally {
           setIsLoading(false);
           setSetsHaveLoaded(true);
@@ -319,7 +322,8 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
         }
       } else { // User is unauthenticated (userId is null)
         console.log("SetContext: User unauthenticated (Clerk userId is null). Clearing user data and showing default set.");
-        setAvailableSets([DEFAULT_SET_METADATA]);
+        const defaultSets = getDefaultSetsForUnauthenticatedUsers();
+        setAvailableSets(defaultSets);
         setActiveSetId(DEFAULT_SET_ID);
         setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
         setActiveSetProgress({});

@@ -439,34 +439,48 @@ export function SetManagerModal({ isOpen, onClose, highlightSetId }: {
     setCardsModalSetId(set.id);
     setCardsModalLoading(true);
     try {
-      // Fetch content via API
-      const contentResponse = await fetch(`/api/flashcard-sets/${set.id}/content`, {
-        credentials: 'include'
-      });
-      
-      if (!contentResponse.ok) {
-        throw new Error(`Failed to fetch content: ${contentResponse.status}`);
-      }
-      
-      const phrases = await contentResponse.json();
-      
-      // Fetch progress via API if user is logged in
-      if (userId) {
-        const progressResponse = await fetch(`/api/flashcard-sets/${set.id}/progress`, {
+      // Check if it's a default set
+      if (set.id === 'default' || set.id.startsWith('default-')) {
+        // Import the getDefaultSetContent function at the top of the file
+        const { getDefaultSetContent } = await import('@/app/lib/seed-default-sets');
+        const defaultContent = getDefaultSetContent(set.id);
+        
+        if (defaultContent) {
+          setCardsModalPhrases(defaultContent);
+          setCardsModalProgress({});
+        } else {
+          throw new Error('Default set content not found');
+        }
+      } else {
+        // Fetch content via API for non-default sets
+        const contentResponse = await fetch(`/api/flashcard-sets/${set.id}/content`, {
           credentials: 'include'
         });
         
-        if (!progressResponse.ok) {
-          throw new Error(`Failed to fetch progress: ${progressResponse.status}`);
+        if (!contentResponse.ok) {
+          throw new Error(`Failed to fetch content: ${contentResponse.status}`);
         }
         
-        const progressData = await progressResponse.json();
-        setCardsModalProgress(progressData.progress || {});
-      } else {
-        setCardsModalProgress({});
+        const phrases = await contentResponse.json();
+        
+        // Fetch progress via API if user is logged in
+        if (userId) {
+          const progressResponse = await fetch(`/api/flashcard-sets/${set.id}/progress`, {
+            credentials: 'include'
+          });
+          
+          if (!progressResponse.ok) {
+            throw new Error(`Failed to fetch progress: ${progressResponse.status}`);
+          }
+          
+          const progressData = await progressResponse.json();
+          setCardsModalProgress(progressData.progress || {});
+        } else {
+          setCardsModalProgress({});
+        }
+        
+        setCardsModalPhrases(phrases);
       }
-      
-      setCardsModalPhrases(phrases);
     } catch (error: unknown) {
       console.error('Error loading cards:', error instanceof Error ? error.message : String(error));
     } finally {

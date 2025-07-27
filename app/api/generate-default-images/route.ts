@@ -5,6 +5,10 @@ import fs from 'fs/promises';
 import path from 'path';
 import https from 'https';
 
+// Prevent static generation of this route
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // Image prompts for each default set
 const IMAGE_PROMPTS: Record<string, string> = {
   'numbers-1-10': "Create a cute, educational illustration showing Thai numbers 1 through 10 in a playful, colorful style. Include visual representations like counting on fingers, dice, or objects arranged in groups. Use bright, child-friendly colors. Make it look like a fun educational poster. NO TEXT, NO WRITTEN NUMBERS, NO DIGITS.",
@@ -46,7 +50,7 @@ async function downloadImage(url: string): Promise<Buffer> {
   });
 }
 
-export async function GET() {
+export async function POST() {
   console.log('Starting to generate images for default sets...');
   
   const results = [];

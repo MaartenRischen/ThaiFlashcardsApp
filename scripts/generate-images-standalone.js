@@ -69,6 +69,7 @@ Remember: The bridge can be small or in the background if it helps better showca
    - Signs, labels, logos, or watermarks
    - Hidden or subtle text elements
    - Text-like patterns or shapes
+   - NO calendar text, NO day names, NO abbreviations like MON/TUE/WED etc.
 5. NO OTHER CREATURES: The image MUST NOT contain:
    - Any animals other than donkeys
    - No humans, people, or human figures
@@ -76,8 +77,8 @@ Remember: The bridge can be small or in the background if it helps better showca
    - Only donkeys are allowed as living beings
 6. COMPOSITION: Create a balanced 16:9 landscape composition where the topic-specific elements are prominent.
 7. QUALITY: Focus on high detail and clean lines.
-8. CONTEXTUAL ELEMENTS: Include these specific visual elements that represent the topic: circular calendar wheel, sun and moon symbols, donkey doing different activities, weekly planner visual, seven stepping stones on bridge.
-Remember: The bridge can be small or in the background if it helps better showcase the topic-specific elements.`,
+8. CONTEXTUAL ELEMENTS: Include these specific visual elements that represent the topic: colorful wheel with seven sections (NO TEXT), sun and moon symbols, donkey doing different activities for each day, seven stepping stones on bridge, weekly routine symbols.
+Remember: The bridge can be small or in the background if it helps better showcase the topic-specific elements. ABSOLUTELY NO TEXT ON THE CALENDAR WHEEL.`,
   
   'family-members': `Create a cute cartoon style illustration with these STRICT REQUIREMENTS:
 1. MAIN FOCUS: Create a purely visual representation of "Family members - different generations" without ANY text or writing.
@@ -126,6 +127,7 @@ Remember: The bridge can be small or in the background if it helps better showca
    - Signs, labels, logos, or watermarks
    - Hidden or subtle text elements
    - Text-like patterns or shapes
+   - NO body part labels, NO anatomical text, NO medical terms
 5. NO OTHER CREATURES: The image MUST NOT contain:
    - Any animals other than donkeys
    - No humans, people, or human figures
@@ -133,8 +135,8 @@ Remember: The bridge can be small or in the background if it helps better showca
    - Only donkeys are allowed as living beings
 6. COMPOSITION: Create a balanced 16:9 landscape composition where the topic-specific elements are prominent.
 7. QUALITY: Focus on high detail and clean lines.
-8. CONTEXTUAL ELEMENTS: Include these specific visual elements that represent the topic: donkey in educational pose showing different body parts clearly, anatomical indicators, friendly donkey pointing to its ears/nose/hooves, educational diagram style, x-ray vision effect showing bones.
-Remember: The bridge can be small or in the background if it helps better showcase the topic-specific elements.`,
+8. CONTEXTUAL ELEMENTS: Include these specific visual elements that represent the topic: donkey in educational pose with clearly visible body parts, colorful arrows or indicators pointing to different parts (NO TEXT LABELS), friendly donkey showing ears/nose/hooves/tail clearly, simple anatomical highlighting with colors only.
+Remember: The bridge can be small or in the background if it helps better showcase the topic-specific elements. USE ONLY VISUAL INDICATORS, NO TEXT LABELS ON BODY PARTS.`,
   
   'weather-terms': `Create a cute cartoon style illustration with these STRICT REQUIREMENTS:
 1. MAIN FOCUS: Create a purely visual representation of "Weather conditions - sun, rain, storms, clouds" without ANY text or writing.
@@ -268,65 +270,76 @@ async function generateImage(prompt) {
   });
 }
 
-async function downloadImage(url, filepath) {
+async function downloadImage(url) {
   return new Promise((resolve, reject) => {
-    const file = fs.createWriteStream(filepath);
+    const chunks = [];
     
     https.get(url, (response) => {
-      response.pipe(file);
+      response.on('data', (chunk) => {
+        chunks.push(chunk);
+      });
       
-      file.on('finish', () => {
-        file.close();
-        resolve();
+      response.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        resolve(buffer);
+      });
+      
+      response.on('error', (err) => {
+        reject(err);
       });
     }).on('error', (err) => {
-      fs.unlink(filepath, () => {});
       reject(err);
     });
   });
 }
 
 async function main() {
-  console.log('Starting to generate images for default sets...');
-  console.log('API Key available:', !!process.env.IDEOGRAM_API_KEY);
-  
-  // Create directory if it doesn't exist
-  const imagesDir = path.join(__dirname, '..', 'public', 'images', 'defaults');
-  if (!fs.existsSync(imagesDir)) {
-    fs.mkdirSync(imagesDir, { recursive: true });
-    console.log('Created directory:', imagesDir);
-  }
-  
-  for (let i = 0; i < DEFAULT_SETS.length; i++) {
-    const set = DEFAULT_SETS[i];
+  console.log('Regenerating only the two images with text issues...');
+  console.log(`API Key available: ${Boolean(process.env.IDEOGRAM_API_KEY)}`);
+
+  // Only regenerate these two problematic images
+  const imagesToRegenerate = [
+    { index: 2, set: DEFAULT_SETS[2] }, // days-of-week (default-thailand-03.png)
+    { index: 5, set: DEFAULT_SETS[5] }  // body-parts (default-thailand-06.png)
+  ];
+
+  for (let i = 0; i < imagesToRegenerate.length; i++) {
+    const { index, set } = imagesToRegenerate[i];
+    
+    console.log(`\n[${i + 1}/2] Regenerating image for: ${set.name}`);
+    
     const prompt = IMAGE_PROMPTS[set.id];
-    
-    console.log(`\n[${i + 1}/${DEFAULT_SETS.length}] Generating image for: ${set.name}`);
-    
+    if (!prompt) {
+      console.error(`  No prompt found for ${set.id}`);
+      continue;
+    }
+
     try {
       const imageUrl = await generateImage(prompt);
       
-      // Download the image
-      const filename = `default-thailand-${(i + 1).toString().padStart(2, '0')}.png`;
-      const filepath = path.join(imagesDir, filename);
-      
-      console.log(`  Downloading image...`);
-      await downloadImage(imageUrl, filepath);
-      
-      console.log(`  ✓ Success! Saved as: ${filename}`);
-      
-      // Wait before next request
-      if (i < DEFAULT_SETS.length - 1) {
-        console.log(`  Waiting 3 seconds before next request...`);
-        await new Promise(resolve => setTimeout(resolve, 3000));
+      if (imageUrl) {
+        console.log('  Downloading image...');
+        const imageBuffer = await downloadImage(imageUrl);
+        
+        const filename = `default-thailand-${(index + 1).toString().padStart(2, '0')}.png`;
+        const filepath = path.join(__dirname, '..', 'public', 'images', 'defaults', filename);
+        
+        fs.writeFileSync(filepath, imageBuffer);
+        console.log(`  ✓ Success! Saved as: ${filename}`);
+        
+        if (i < imagesToRegenerate.length - 1) {
+          console.log('  Waiting 3 seconds before next request...');
+          await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+      } else {
+        console.error(`  Failed to generate image for ${set.name}`);
       }
-      
     } catch (error) {
-      console.error(`  ✗ Error: ${error.message}`);
+      console.error(`  Error generating image for ${set.name}:`, error.message);
     }
   }
-  
-  console.log('\n✅ Image generation complete!');
+
+  console.log('\n✅ Regeneration of problematic images complete!');
 }
 
 main().catch(console.error); 

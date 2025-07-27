@@ -2,11 +2,37 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { Progress } from '@/components/ui/progress'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Volume2 } from 'lucide-react'
 import { useGeneration } from '@/app/context/GenerationContext'
 
 export function GenerationStatusBar() {
   const { generationStatus } = useGeneration()
+
+  const getTitle = () => {
+    if (!generationStatus) return ''
+    
+    switch (generationStatus.mode) {
+      case 'audio-pimsleur':
+        return 'Creating guided audio lesson...'
+      case 'audio-simple':
+        return 'Creating repetition audio lesson...'
+      case 'manual':
+        return `Creating ${generationStatus.phraseCount} flashcards...`
+      case 'auto':
+      default:
+        return `Generating ${generationStatus.phraseCount} flashcards...`
+    }
+  }
+
+  const getIcon = () => {
+    if (!generationStatus) return <Sparkles className="w-5 h-5 text-blue-400" />
+    
+    if (generationStatus.mode.startsWith('audio-')) {
+      return <Volume2 className="w-5 h-5 text-green-400" />
+    }
+    
+    return <Sparkles className="w-5 h-5 text-blue-400" />
+  }
 
   return (
     <AnimatePresence>
@@ -23,14 +49,12 @@ export function GenerationStatusBar() {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               >
-                <Sparkles className="w-5 h-5 text-blue-400" />
+                {getIcon()}
               </motion.div>
               <div className="flex-1">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-sm font-medium text-[#E0E0E0]">
-                    {generationStatus.mode === 'manual' 
-                      ? `Creating ${generationStatus.phraseCount} flashcards...`
-                      : `Generating ${generationStatus.phraseCount} flashcards...`}
+                    {getTitle()}
                   </span>
                   <span className="text-xs text-gray-400">{Math.round(generationStatus.progress)}%</span>
                 </div>

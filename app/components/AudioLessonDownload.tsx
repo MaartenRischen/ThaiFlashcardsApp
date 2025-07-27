@@ -22,6 +22,7 @@ import { Label } from '@/components/ui/label';
 import { AudioLessonConfig } from '../lib/audio-lesson-generator';
 import { SimpleAudioLessonConfig } from '../lib/audio-lesson-generator-simple';
 import { toast } from 'sonner';
+import { useGeneration } from '@/app/context/GenerationContext';
 
 interface AudioLessonDownloadProps {
   setId: string;
@@ -64,6 +65,8 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
     includeMnemonics: false,
   });
 
+  const { startGeneration, updateProgress, completeGeneration, failGeneration } = useGeneration();
+
   const handleGenerate = async () => {
     // Clear previous audio if regenerating
     if (audioUrl) {
@@ -78,6 +81,40 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
     }
     
     setIsGenerating(true);
+    
+    // Start generation progress
+    const mode = lessonMode === 'pimsleur' ? 'audio-pimsleur' : 'audio-simple';
+    startGeneration(mode, 0); // We don't know phrase count here, so use 0
+    
+    // Audio generation steps
+    const audioSteps = lessonMode === 'pimsleur' ? [
+      'Preparing audio components...',
+      'Processing Thai pronunciations...',
+      'Creating guided segments...',
+      'Adding practice pauses...',
+      'Rendering final audio...'
+    ] : [
+      'Preparing audio components...',
+      'Processing Thai pronunciations...',
+      'Creating repetition patterns...',
+      'Applying speed settings...',
+      'Rendering final audio...'
+    ];
+    
+    let currentStep = 0;
+    let progress = 0;
+    
+    // Start progress simulation
+    const progressInterval = setInterval(() => {
+      progress += Math.random() * 15; // Increment by 0-15%
+      if (progress > 90) progress = 90; // Don't go to 100% until actually complete
+      
+      const stepIndex = Math.floor((progress / 90) * audioSteps.length);
+      const stepText = audioSteps[Math.min(stepIndex, audioSteps.length - 1)];
+      
+      updateProgress(progress, stepText);
+    }, 800);
+    
     try {
       // Debug logging
       console.log('Generating audio with config:', {
@@ -85,6 +122,8 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
         config: lessonMode === 'pimsleur' ? config : simpleConfig,
         speed: lessonMode === 'simple' ? simpleConfig.speed : 'N/A'
       });
+      
+      updateProgress(20, 'Contacting audio service...');
       
       const response = await fetch(`/api/flashcard-sets/${setId}/audio-lesson?t=${Date.now()}`, {
         method: 'POST',
@@ -102,18 +141,32 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
         throw new Error('Failed to generate audio lesson');
       }
 
+      updateProgress(80, 'Processing audio data...');
+
       // Get the blob from the response
       const blob = await response.blob();
+      
+      updateProgress(95, 'Finalizing audio lesson...');
       
       // Create object URL for in-app playback
       const url = window.URL.createObjectURL(blob);
       setAudioUrl(url);
       
+      updateProgress(100, 'Audio lesson ready!');
+      
+      // Complete generation after a short delay
+      setTimeout(() => {
+        completeGeneration();
+      }, 500);
+      
       toast.success('Audio lesson generated successfully!');
     } catch (error) {
       console.error('Error generating audio lesson:', error);
+      clearInterval(progressInterval);
+      failGeneration();
       toast.error('Failed to generate audio lesson');
     } finally {
+      clearInterval(progressInterval);
       setIsGenerating(false);
     }
   };

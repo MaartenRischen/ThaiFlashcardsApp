@@ -1,18 +1,20 @@
 'use client'
 
-import React, { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+
+type GenerationMode = 'auto' | 'manual' | 'audio-pimsleur' | 'audio-simple'
 
 interface GenerationStatus {
   isGenerating: boolean
   progress: number
   statusText: string
-  mode?: 'auto' | 'manual'
-  phraseCount?: number
+  mode: GenerationMode
+  phraseCount: number
 }
 
 interface GenerationContextType {
   generationStatus: GenerationStatus | null
-  startGeneration: (mode: 'auto' | 'manual', phraseCount: number) => void
+  startGeneration: (mode: GenerationMode, phraseCount: number) => void
   updateProgress: (progress: number, statusText: string) => void
   completeGeneration: () => void
   failGeneration: () => void
@@ -23,7 +25,7 @@ const GenerationContext = createContext<GenerationContextType | undefined>(undef
 export function GenerationProvider({ children }: { children: React.ReactNode }) {
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus | null>(null)
 
-  const startGeneration = useCallback((mode: 'auto' | 'manual', phraseCount: number) => {
+  const startGeneration = useCallback((mode: GenerationMode, phraseCount: number) => {
     setGenerationStatus({
       isGenerating: true,
       progress: 0,
@@ -60,8 +62,8 @@ export function GenerationProvider({ children }: { children: React.ReactNode }) 
 
 export function useGeneration() {
   const context = useContext(GenerationContext)
-  if (!context) {
-    throw new Error('useGeneration must be used within GenerationProvider')
+  if (context === undefined) {
+    throw new Error('useGeneration must be used within a GenerationProvider')
   }
   return context
 } 

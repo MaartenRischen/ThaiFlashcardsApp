@@ -119,7 +119,7 @@ Remember: The bridge can be small or in the background if it helps better showca
 Remember: The bridge can be small or in the background if it helps better showcase the topic-specific elements.`,
   
   'body-parts': `Create a cute cartoon style illustration with these STRICT REQUIREMENTS:
-1. MAIN FOCUS: Create a purely visual representation of "Body parts - educational anatomy" without ANY text or writing.
+1. MAIN FOCUS: Create a purely visual representation of "External body parts only - ears, nose, tail, hooves" without ANY text or writing.
 2. MANDATORY ELEMENTS: Include at least one friendly donkey AND a bridge (bridge can be in background if needed).
 3. STYLE: Use vibrant, friendly colors and a clean cartoon style.
 4. CRITICAL TEXT PROHIBITION: The image MUST NOT contain ANY:
@@ -135,8 +135,8 @@ Remember: The bridge can be small or in the background if it helps better showca
    - Only donkeys are allowed as living beings
 6. COMPOSITION: Create a balanced 16:9 landscape composition where the topic-specific elements are prominent.
 7. QUALITY: Focus on high detail and clean lines.
-8. CONTEXTUAL ELEMENTS: Include these specific visual elements that represent the topic: donkey in educational pose with clearly visible body parts, colorful arrows or indicators pointing to different parts (NO TEXT LABELS), friendly donkey showing ears/nose/hooves/tail clearly, simple anatomical highlighting with colors only.
-Remember: The bridge can be small or in the background if it helps better showcase the topic-specific elements. USE ONLY VISUAL INDICATORS, NO TEXT LABELS ON BODY PARTS.`,
+8. CONTEXTUAL ELEMENTS: Include these specific visual elements that represent the topic: donkey showing ONLY EXTERNAL body parts like ears, nose, tail, hooves, eyes, mouth - NO INTERNAL ANATOMY, NO ORGANS, NO BONES, NO X-RAY EFFECTS. Use colorful highlighting or gentle pointing gestures to indicate external features only.
+Remember: The bridge can be small or in the background if it helps better showcase the topic-specific elements. SHOW ONLY OUTER/EXTERNAL BODY PARTS - NO INTERNAL STRUCTURES.`,
   
   'weather-terms': `Create a cute cartoon style illustration with these STRICT REQUIREMENTS:
 1. MAIN FOCUS: Create a purely visual representation of "Weather conditions - sun, rain, storms, clouds" without ANY text or writing.
@@ -294,19 +294,18 @@ async function downloadImage(url) {
 }
 
 async function main() {
-  console.log('Regenerating only the two images with text issues...');
+  console.log('Regenerating only the Body Parts image to remove internal anatomy...');
   console.log(`API Key available: ${Boolean(process.env.IDEOGRAM_API_KEY)}`);
 
-  // Only regenerate these two problematic images
+  // Only regenerate the body parts image
   const imagesToRegenerate = [
-    { index: 2, set: DEFAULT_SETS[2] }, // days-of-week (default-thailand-03.png)
     { index: 5, set: DEFAULT_SETS[5] }  // body-parts (default-thailand-06.png)
   ];
 
   for (let i = 0; i < imagesToRegenerate.length; i++) {
     const { index, set } = imagesToRegenerate[i];
     
-    console.log(`\n[${i + 1}/2] Regenerating image for: ${set.name}`);
+    console.log(`\n[${i + 1}/1] Regenerating image for: ${set.name}`);
     
     const prompt = IMAGE_PROMPTS[set.id];
     if (!prompt) {
@@ -326,11 +325,6 @@ async function main() {
         
         fs.writeFileSync(filepath, imageBuffer);
         console.log(`  ✓ Success! Saved as: ${filename}`);
-        
-        if (i < imagesToRegenerate.length - 1) {
-          console.log('  Waiting 3 seconds before next request...');
-          await new Promise(resolve => setTimeout(resolve, 3000));
-        }
       } else {
         console.error(`  Failed to generate image for ${set.name}`);
       }
@@ -339,7 +333,7 @@ async function main() {
     }
   }
 
-  console.log('\n✅ Regeneration of problematic images complete!');
+  console.log('\n✅ Body Parts image regeneration complete!');
 }
 
 main().catch(console.error); 

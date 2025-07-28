@@ -260,21 +260,11 @@ export class SimpleAudioLessonGenerator {
       thaiText = card.thai;
     }
     
-    // Debug logging
-    console.log('getThaiText Debug:', {
-      originalText: thaiText,
-      includePolitenessParticles: this.config.includePolitenessParticles,
-      voiceGender: this.config.voiceGender
-    });
-    
     // Handle politeness particles
     if (this.config.includePolitenessParticles === false) {
       // Remove politeness particles if disabled
-      const beforeRemoval = thaiText;
       thaiText = thaiText.replace(/( krap| krub| ka| ค่ะ| ครับ)$/i, '');
-      console.log('Politeness particles DISABLED - removed from:', beforeRemoval, 'to:', thaiText);
     } else {
-      console.log('Politeness particles ENABLED - checking if we need to add...');
       // Add politeness particle if not present and configuration allows it (default behavior)
       const hasPoliteParticle = /( krap| krub| ka| ค่ะ| ครับ)$/i.test(thaiText);
       
@@ -286,16 +276,10 @@ export class SimpleAudioLessonGenerator {
           // Add appropriate politeness particle
           const particle = this.config.voiceGender === 'female' ? ' ka' : ' krap';
           thaiText += particle;
-          console.log('Added politeness particle:', particle, 'to:', thaiText);
-        } else {
-          console.log('Skipped adding particle to question:', thaiText);
         }
-      } else {
-        console.log('Already has politeness particle:', thaiText);
       }
     }
     
-    console.log('Final Thai text:', thaiText);
     return thaiText;
   }
 } 

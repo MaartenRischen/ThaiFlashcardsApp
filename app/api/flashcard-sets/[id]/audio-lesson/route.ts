@@ -3,7 +3,6 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/app/lib/prisma';
 import { AudioLessonGenerator } from '@/app/lib/audio-lesson-generator';
 import { SimpleAudioLessonGenerator } from '@/app/lib/audio-lesson-generator-simple';
-import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
 
 export async function POST(
   request: NextRequest,
@@ -12,125 +11,61 @@ export async function POST(
   try {
     const { userId } = await auth();
     
-    // Get configuration from request body
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    
     const { mode, config } = await request.json();
+    let phrases: Array<{
+      thai: string;
+      english: string;
+      thaiMasculine?: string;
+      thaiFeminine?: string;
+      mnemonic?: string;
+    }> = [];
+    let setName = '';
     
-    // Debug logging
-    console.log('Audio generation request:', { setId: params.id, mode, config });
-    console.log('Config details:', {
-      voiceGender: config?.voiceGender,
-      includePolitenessParticles: config?.includePolitenessParticles,
-      includeMnemonics: config?.includeMnemonics,
-      speed: config?.speed,
-      fullConfig: JSON.stringify(config, null, 2)
+    // Load the set from the database, whether it's a default set or user set
+    const flashcardSet = await prisma.flashcardSet.findFirst({
+      where: { 
+        id: params.id,
+        userId: userId
+      },
+      include: {
+        phrases: true
+      }
     });
-    
-    let phrases;
-    let setName;
-    
-    // Check if this is a default set
-    if (params.id === 'default' || params.id.startsWith('default-')) {
-      console.log('Audio generation: Loading default set content');
-      
-      // Load default set content
-      const defaultContent = getDefaultSetContent(params.id);
-      if (!defaultContent) {
-        console.error('Audio generation: Default set not found:', params.id);
-        return NextResponse.json({ error: 'Default set not found' }, { status: 404 });
-      }
-      
-      phrases = defaultContent.map(phrase => ({
-        thai: phrase.thai,
-        english: phrase.english,
-        thaiMasculine: phrase.thaiMasculine || undefined,
-        thaiFeminine: phrase.thaiFeminine || undefined,
-        mnemonic: phrase.mnemonic || undefined
-      }));
-      
-      // Get set name for default sets
-      if (params.id === 'default') {
-        setName = 'Default Set';
-      } else {
-        // Extract the set name from our default sets data
-        const setId = params.id.replace('default-', '');
-        const { DEFAULT_SETS } = await import('@/app/data/default-sets');
-        const defaultSet = DEFAULT_SETS.find(set => set.id === setId);
-        setName = defaultSet?.name || 'Default Set';
-      }
-      
-      console.log(`Audio generation: Loaded ${phrases.length} phrases for default set: ${setName}`);
-    } else {
-      // Regular user set - require authentication
-      if (!userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
 
-      // Get flashcard set from database
-      const flashcardSet = await prisma.flashcardSet.findFirst({
-        where: { 
-          id: params.id,
-          userId: userId
-        },
-        include: {
-          phrases: true
-        }
-      });
-
-      if (!flashcardSet) {
-        return NextResponse.json({ error: 'Flashcard set not found' }, { status: 404 });
-      }
-
-      phrases = flashcardSet.phrases.map(phrase => ({
-        thai: phrase.thai,
-        english: phrase.english,
-        thaiMasculine: phrase.thaiMasculine || undefined,
-        thaiFeminine: phrase.thaiFeminine || undefined,
-        mnemonic: phrase.mnemonic || undefined
-      }));
-      
-      setName = flashcardSet.name;
-      console.log(`Audio generation: Loaded ${phrases.length} phrases for user set: ${setName}`);
-      
-      // DEBUG: Show exactly what Thai text we have
-      console.log('🔍 CRITICAL DEBUG - Thai text from database:');
-      phrases.forEach((phrase, index) => {
-        console.log(`🔍 Phrase ${index + 1}:`);
-        console.log(`🔍   English: ${phrase.english}`);
-        console.log(`🔍   Thai: "${phrase.thai}"`);
-        console.log(`🔍   Thai Masculine: "${phrase.thaiMasculine}"`);
-        console.log(`🔍   Thai Feminine: "${phrase.thaiFeminine}"`);
-        console.log(`🔍   Has 'krub': ${phrase.thai?.includes('ครับ') || phrase.thai?.includes('krub')}`);
-        console.log(`🔍   Has 'ka': ${phrase.thai?.includes('ค่ะ') || phrase.thai?.includes('ka')}`);
-      });
+    if (!flashcardSet) {
+      return NextResponse.json({ error: 'Flashcard set not found' }, { status: 404 });
     }
+
+    phrases = flashcardSet.phrases.map(phrase => ({
+      thai: phrase.thai,
+      english: phrase.english,
+      thaiMasculine: phrase.thaiMasculine || undefined,
+      thaiFeminine: phrase.thaiFeminine || undefined,
+      mnemonic: phrase.mnemonic || undefined
+    }));
     
-    // Generate audio lesson based on mode - NO PROGRESS TRACKING
-    let audioBuffer: ArrayBuffer;
+    setName = flashcardSet.name;
+    console.log(`Audio generation: Loaded ${phrases.length} phrases for set: ${setName}`);
     
+    // Generate the audio lesson based on mode
     if (mode === 'simple') {
-      console.log('Creating SimpleAudioLessonGenerator...');
       const generator = new SimpleAudioLessonGenerator(config);
-      audioBuffer = await generator.generateSimpleLesson(phrases, setName);
+      const audioBuffer = await generator.generateSimpleLesson(phrases, setName);
+      return new Response(audioBuffer);
     } else {
-      console.log('Creating AudioLessonGenerator...');
       const generator = new AudioLessonGenerator(config);
-      audioBuffer = await generator.generateLesson(phrases, setName);
+      const audioBuffer = await generator.generateLesson(phrases, setName);
+      return new Response(audioBuffer);
     }
-
-    // Return audio file with cache-busting headers
-    return new NextResponse(audioBuffer, {
-      headers: {
-        'Content-Type': 'audio/wav',
-        'Content-Disposition': `attachment; filename="${setName.replace(/[^a-z0-9]/gi, '_')}_lesson.wav"`,
-        'Content-Length': audioBuffer.byteLength.toString(),
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
-    });
-
   } catch (error) {
-    console.error('Error generating audio lesson:', error);
+    console.error('Error in audio lesson generation:', error);
     return NextResponse.json(
       { error: 'Failed to generate audio lesson' },
       { status: 500 }

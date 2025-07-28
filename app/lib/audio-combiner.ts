@@ -48,6 +48,75 @@ export class AudioCombiner {
   }
 
   /**
+   * Combine multiple WAV audio buffers into a single WAV file with progress callback
+   * Assumes all inputs are 16kHz, 16-bit, mono WAV files
+   */
+  static combineWavBuffersWithProgress(
+    audioBuffers: ArrayBuffer[], 
+    progressCallback: (progress: number) => void
+  ): ArrayBuffer {
+    const sampleRate = 16000;
+    const bitsPerSample = 16;
+    const numChannels = 1;
+    
+    progressCallback(0);
+    
+    // Skip WAV headers (44 bytes) and extract raw PCM data
+    const pcmDataArrays: Int16Array[] = [];
+    let totalSamples = 0;
+
+    for (let i = 0; i < audioBuffers.length; i++) {
+      const buffer = audioBuffers[i];
+      if (buffer.byteLength === 0) continue;
+      
+      // Check if this is a WAV file (has RIFF header) or raw PCM
+      const view = new DataView(buffer);
+      let pcmData: Int16Array;
+      
+      if (buffer.byteLength > 44 && 
+          view.getUint32(0, false) === 0x52494646 && // "RIFF"
+          view.getUint32(8, false) === 0x57415645) { // "WAVE"
+        // This is a WAV file, skip header
+        pcmData = new Int16Array(buffer, 44);
+      } else {
+        // This is raw PCM data (like our silence buffers)
+        pcmData = new Int16Array(buffer);
+      }
+      
+      pcmDataArrays.push(pcmData);
+      totalSamples += pcmData.length;
+      
+      // Update progress for processing headers
+      const headerProgress = (i / audioBuffers.length) * 20; // 20% for header processing
+      progressCallback(headerProgress);
+    }
+
+    progressCallback(25);
+
+    // Create combined PCM data with progress tracking
+    const combinedPcm = new Int16Array(totalSamples);
+    let offset = 0;
+    
+    for (let i = 0; i < pcmDataArrays.length; i++) {
+      const pcmData = pcmDataArrays[i];
+      combinedPcm.set(pcmData, offset);
+      offset += pcmData.length;
+      
+      // Update progress for combining data
+      const combineProgress = 25 + ((i / pcmDataArrays.length) * 60); // 60% for combining
+      progressCallback(combineProgress);
+    }
+
+    progressCallback(90);
+
+    // Create WAV file with proper header
+    const wavBuffer = this.createWavFile(combinedPcm, sampleRate, bitsPerSample, numChannels);
+    
+    progressCallback(100);
+    return wavBuffer;
+  }
+
+  /**
    * Create a WAV file from PCM data
    */
   private static createWavFile(

@@ -18,6 +18,13 @@ export async function POST(
     
     // Debug logging
     console.log('Audio generation request:', { setId: params.id, mode, config });
+    console.log('Config details:', {
+      voiceGender: config?.voiceGender,
+      includePolitenessParticles: config?.includePolitenessParticles,
+      includeMnemonics: config?.includeMnemonics,
+      speed: config?.speed,
+      fullConfig: JSON.stringify(config, null, 2)
+    });
     
     let phrases;
     let setName;
@@ -86,14 +93,24 @@ export async function POST(
       console.log(`Audio generation: Loaded ${phrases.length} phrases for user set: ${setName}`);
     }
     
-    // Generate audio lesson based on mode
+    // Generate audio lesson based on mode with progress tracking
     let audioBuffer: ArrayBuffer;
     
     if (mode === 'simple') {
-      const generator = new SimpleAudioLessonGenerator(config);
+      // Create progress callback for simple mode
+      const progressCallback = (progress: number, message: string) => {
+        console.log(`Audio generation progress: ${Math.round(progress)}% - ${message}`);
+      };
+      
+      const generator = new SimpleAudioLessonGenerator(config, progressCallback);
       audioBuffer = await generator.generateSimpleLesson(phrases, setName);
     } else {
-      const generator = new AudioLessonGenerator(config);
+      // Create progress callback for pimsleur mode  
+      const progressCallback = (progress: number, message: string) => {
+        console.log(`Audio generation progress: ${Math.round(progress)}% - ${message}`);
+      };
+      
+      const generator = new AudioLessonGenerator(config, progressCallback);
       audioBuffer = await generator.generateLesson(phrases, setName);
     }
 

@@ -51,6 +51,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
       practice: 3,
       review: 2,
     },
+    includePolitenessParticles: true, // Always include for pimsleur mode
   });
   
   const [simpleConfig, setSimpleConfig] = useState<Partial<SimpleAudioLessonConfig>>({
@@ -87,44 +88,46 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
     const mode = lessonMode === 'pimsleur' ? 'audio-pimsleur' : 'audio-simple';
     startGeneration(mode, 0);
     
-    // Audio generation steps
-    const audioSteps = lessonMode === 'pimsleur' ? [
-      'Preparing audio components...',
-      'Processing Thai pronunciations...',
-      'Creating guided segments...',
-      'Adding practice pauses...',
-      'Rendering final audio...'
-    ] : [
-      'Preparing audio components...',
-      'Processing Thai pronunciations...',
-      'Creating repetition patterns...',
-      'Applying speed settings...',
-      'Rendering final audio...'
-    ];
-    
-    let currentStep = 0;
-    let progress = 0;
-    
-    // Start progress simulation
-    const progressInterval = setInterval(() => {
-      progress += Math.random() * 15; // Increment by 0-15%
-      if (progress > 90) progress = 90; // Don't go to 100% until actually complete
-      
-      const stepIndex = Math.floor((progress / 90) * audioSteps.length);
-      const stepText = audioSteps[Math.min(stepIndex, audioSteps.length - 1)];
-      
-      updateProgress(progress, stepText);
-    }, 800);
+    // Declare progressInterval outside try block
+    let progressInterval: NodeJS.Timeout | null = null;
     
     try {
       // Debug logging
-      console.log('Generating audio with config:', {
+      const configToSend = lessonMode === 'pimsleur' ? config : simpleConfig;
+      console.log('Frontend: Sending audio generation request with config:', {
         mode: lessonMode,
-        config: lessonMode === 'pimsleur' ? config : simpleConfig,
+        config: configToSend,
+        includePolitenessParticles: configToSend.includePolitenessParticles,
         speed: lessonMode === 'simple' ? simpleConfig.speed : 'N/A'
       });
       
-      updateProgress(20, 'Contacting audio service...');
+      // Start with initial progress
+      updateProgress(5, 'Contacting audio service...');
+      
+      // Create a more realistic progress tracker
+      let progress = 5;
+      progressInterval = setInterval(() => {
+        if (progress < 95) {
+          // Gradually increase progress, slowing down as we approach the end
+          const increment = Math.max(0.5, (95 - progress) * 0.02);
+          progress += increment;
+          
+          let message = 'Generating audio lesson...';
+          if (progress < 20) {
+            message = 'Initializing audio generation...';
+          } else if (progress < 40) {
+            message = 'Processing Thai pronunciations...';
+          } else if (progress < 70) {
+            message = lessonMode === 'pimsleur' ? 'Creating guided segments...' : 'Creating repetition patterns...';
+          } else if (progress < 90) {
+            message = lessonMode === 'pimsleur' ? 'Adding practice pauses...' : 'Applying speed settings...';
+          } else {
+            message = 'Finalizing audio lesson...';
+          }
+          
+          updateProgress(progress, message);
+        }
+      }, 200); // More frequent updates
       
       const response = await fetch(`/api/flashcard-sets/${setId}/audio-lesson?t=${Date.now()}`, {
         method: 'POST',
@@ -134,7 +137,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
         },
         body: JSON.stringify({
           mode: lessonMode,
-          config: lessonMode === 'pimsleur' ? config : simpleConfig,
+          config: configToSend,
         }),
       });
 
@@ -142,18 +145,17 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
         throw new Error('Failed to generate audio lesson');
       }
 
-      updateProgress(80, 'Processing audio data...');
+      if (progressInterval) clearInterval(progressInterval);
+      updateProgress(98, 'Processing audio data...');
 
       // Get the blob from the response
       const blob = await response.blob();
       
-      updateProgress(95, 'Finalizing audio lesson...');
+      updateProgress(100, 'Audio lesson ready!');
       
       // Create object URL for in-app playback
       const url = window.URL.createObjectURL(blob);
       setAudioUrl(url);
-      
-      updateProgress(100, 'Audio lesson ready!');
       
       // Complete generation after a short delay
       setTimeout(() => {
@@ -163,11 +165,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
       toast.success('Audio lesson generated successfully!');
     } catch (error) {
       console.error('Error generating audio lesson:', error);
-      clearInterval(progressInterval);
+      if (progressInterval) clearInterval(progressInterval);
       failGeneration();
       toast.error('Failed to generate audio lesson');
     } finally {
-      clearInterval(progressInterval);
       setIsGenerating(false);
     }
   };

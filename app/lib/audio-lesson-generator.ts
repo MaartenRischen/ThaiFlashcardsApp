@@ -1,6 +1,9 @@
 import { AzureTTSAudio } from './azure-tts-audio';
 import { AudioCombiner } from './audio-combiner';
 
+// Progress callback type
+export type ProgressCallback = (progress: number, message: string) => void;
+
 // Audio lesson configuration
 export interface AudioLessonConfig {
   voiceGender: 'male' | 'female';
@@ -48,10 +51,12 @@ export class AudioLessonGenerator {
   private audioSegments: ArrayBuffer[] = [];
   private sampleRate = 16000; // Azure TTS default
   private azureTTS: AzureTTSAudio;
+  private progressCallback?: ProgressCallback;
 
-  constructor(config: Partial<AudioLessonConfig> = {}) {
+  constructor(config: Partial<AudioLessonConfig> = {}, progressCallback?: ProgressCallback) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.azureTTS = new AzureTTSAudio();
+    this.progressCallback = progressCallback;
   }
 
   /**
@@ -109,20 +114,40 @@ export class AudioLessonGenerator {
     console.log('Starting audio lesson generation for:', setName);
     this.audioSegments = [];
 
+    // Calculate total operations for progress tracking
+    const totalPhases = 4; // Introduction, practice, review, outro
+    const totalPhrases = flashcards.length;
+    const introSegments = totalPhrases * (2 + this.config.repetitions.introduction * 2); // instruction + repetitions
+    const practiceSegments = totalPhrases * (1 + this.config.repetitions.practice * 3); // instruction + practice cycles
+    const reviewSegments = totalPhrases * (this.config.repetitions.review * 2); // review cycles
+    const totalSegments = introSegments + practiceSegments + reviewSegments + 4; // +4 for intro/outro instructions
+    let currentSegment = 0;
+
+    const updateProgress = (message: string) => {
+      const progress = Math.min(85, (currentSegment / totalSegments) * 85); // Reserve 15% for combining
+      this.progressCallback?.(progress, message);
+    };
+
     try {
+      updateProgress('Starting guided lesson generation...');
+
       // 1. Introduction
       await this.addSegment({
         type: 'instruction',
         text: `Welcome to your Thai language lesson: ${setName}. Listen carefully and repeat during the pauses.`,
         voice: 'english'
       });
+      currentSegment++;
 
       await this.addSilence(2000);
 
+      updateProgress('Creating introduction phase...');
       // 2. Introduction phase - present each phrase
       for (let i = 0; i < flashcards.length; i++) {
         const card = flashcards[i];
+        updateProgress(`Introducing phrase ${i + 1}/${flashcards.length}...`);
         await this.introducePhrase(card, i + 1);
+        currentSegment += 2 + this.config.repetitions.introduction * 2;
         
         if (i < flashcards.length - 1) {
           await this.addSilence(this.config.pauseDurationMs.betweenPhrases);
@@ -131,18 +156,22 @@ export class AudioLessonGenerator {
 
       await this.addSilence(3000);
 
+      updateProgress('Creating practice phase...');
       // 3. Practice phase - active recall
       await this.addSegment({
         type: 'instruction',
         text: "Now let's practice. Listen to the English and try to say it in Thai before you hear the answer.",
         voice: 'english'
       });
+      currentSegment++;
 
       await this.addSilence(2000);
 
       for (let i = 0; i < flashcards.length; i++) {
         const card = flashcards[i];
+        updateProgress(`Practice session ${i + 1}/${flashcards.length}...`);
         await this.practicePhrase(card, i + 1);
+        currentSegment += 1 + this.config.repetitions.practice * 3;
         
         if (i < flashcards.length - 1) {
           await this.addSilence(this.config.pauseDurationMs.betweenPhrases);
@@ -151,18 +180,22 @@ export class AudioLessonGenerator {
 
       await this.addSilence(3000);
 
+      updateProgress('Creating review phase...');
       // 4. Review phase - quick repetitions
       await this.addSegment({
         type: 'instruction',
         text: "Finally, let's review all phrases quickly.",
         voice: 'english'
       });
+      currentSegment++;
 
       await this.addSilence(2000);
 
       for (let i = 0; i < flashcards.length; i++) {
         const card = flashcards[i];
+        updateProgress(`Reviewing phrase ${i + 1}/${flashcards.length}...`);
         await this.reviewPhrase(card);
+        currentSegment += this.config.repetitions.review * 2;
         
         if (i < flashcards.length - 1) {
           await this.addSilence(1000);
@@ -170,15 +203,21 @@ export class AudioLessonGenerator {
       }
 
       // 5. Conclusion
+      updateProgress('Generating conclusion...');
       await this.addSilence(2000);
       await this.addSegment({
         type: 'instruction',
         text: "Great job! You've completed the lesson. Keep practicing!",
         voice: 'english'
       });
+      currentSegment++;
 
-      // Combine all audio segments
-      return AudioCombiner.combineWavBuffers(this.audioSegments);
+      // Combine all audio segments with progress tracking
+      updateProgress('Combining audio segments...');
+      return AudioCombiner.combineWavBuffersWithProgress(this.audioSegments, (combineProgress) => {
+        const totalProgress = 85 + (combineProgress * 15); // Combining takes final 15%
+        this.progressCallback?.(totalProgress, 'Rendering final audio...');
+      });
 
     } catch (error) {
       console.error('Error generating audio lesson:', error);

@@ -59,7 +59,7 @@ export function GenerationStatusBar() {
                 </div>
                 <p className="text-xs text-gray-400 mt-1">
                   {generationStatus.mode.startsWith('audio-') 
-                    ? 'This may take a few minutes. You can close the dialog and continue using the app.'
+                    ? 'Audio generation in progress. You can continue using the app while you wait.'
                     : 'Please wait...'}
                 </p>
               </div>

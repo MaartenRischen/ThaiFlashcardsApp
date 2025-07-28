@@ -51,7 +51,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
       practice: 3,
       review: 2,
     },
-    includePolitenessParticles: true, // Always include for pimsleur mode
+    includePolitenessParticles: false, // Default to NOT including politeness particles
   });
   
   const [simpleConfig, setSimpleConfig] = useState<Partial<SimpleAudioLessonConfig>>({
@@ -64,7 +64,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
     speed: 1.0,
     mixSpeed: false,
     includeMnemonics: false,
-    includePolitenessParticles: true, // New option for politeness particles
+    includePolitenessParticles: false, // Default to NOT including politeness particles
   });
 
   const { startGeneration, updateProgress, completeGeneration, failGeneration } = useGeneration();
@@ -88,46 +88,21 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
     const mode = lessonMode === 'pimsleur' ? 'audio-pimsleur' : 'audio-simple';
     startGeneration(mode, 0);
     
-    // Declare progressInterval outside try block
-    let progressInterval: NodeJS.Timeout | null = null;
-    
     try {
       // Debug logging
       const configToSend = lessonMode === 'pimsleur' ? config : simpleConfig;
-      console.log('Frontend: Sending audio generation request with config:', {
+      console.log('🚀 FRONTEND: Sending audio generation request');
+      console.log('🚀 Mode:', lessonMode);
+      console.log('🚀 Full config object being sent:', JSON.stringify(configToSend, null, 2));
+      console.log('🚀 Politeness particles setting:', configToSend.includePolitenessParticles);
+      console.log('🚀 Voice gender:', configToSend.voiceGender);
+      console.log('🚀 Request body:', JSON.stringify({
         mode: lessonMode,
         config: configToSend,
-        includePolitenessParticles: configToSend.includePolitenessParticles,
-        speed: lessonMode === 'simple' ? simpleConfig.speed : 'N/A'
-      });
+      }, null, 2));
       
       // Start with initial progress
       updateProgress(5, 'Contacting audio service...');
-      
-      // Create a more realistic progress tracker
-      let progress = 5;
-      progressInterval = setInterval(() => {
-        if (progress < 95) {
-          // Gradually increase progress, slowing down as we approach the end
-          const increment = Math.max(0.5, (95 - progress) * 0.02);
-          progress += increment;
-          
-          let message = 'Generating audio lesson...';
-          if (progress < 20) {
-            message = 'Initializing audio generation...';
-          } else if (progress < 40) {
-            message = 'Processing Thai pronunciations...';
-          } else if (progress < 70) {
-            message = lessonMode === 'pimsleur' ? 'Creating guided segments...' : 'Creating repetition patterns...';
-          } else if (progress < 90) {
-            message = lessonMode === 'pimsleur' ? 'Adding practice pauses...' : 'Applying speed settings...';
-          } else {
-            message = 'Finalizing audio lesson...';
-          }
-          
-          updateProgress(progress, message);
-        }
-      }, 200); // More frequent updates
       
       const response = await fetch(`/api/flashcard-sets/${setId}/audio-lesson?t=${Date.now()}`, {
         method: 'POST',
@@ -145,7 +120,6 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
         throw new Error('Failed to generate audio lesson');
       }
 
-      if (progressInterval) clearInterval(progressInterval);
       updateProgress(98, 'Processing audio data...');
 
       // Get the blob from the response
@@ -165,7 +139,6 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
       toast.success('Audio lesson generated successfully!');
     } catch (error) {
       console.error('Error generating audio lesson:', error);
-      if (progressInterval) clearInterval(progressInterval);
       failGeneration();
       toast.error('Failed to generate audio lesson');
     } finally {
@@ -321,18 +294,29 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
             <input
               type="checkbox"
               id="include-politeness"
-              checked={lessonMode === 'pimsleur' ? true : (simpleConfig.includePolitenessParticles || false)}
+              checked={lessonMode === 'pimsleur' ? (config.includePolitenessParticles || false) : (simpleConfig.includePolitenessParticles || false)}
               onChange={(e) => {
-                if (lessonMode === 'simple') {
-                  setSimpleConfig({ ...simpleConfig, includePolitenessParticles: e.target.checked });
+                console.log('🔧 POLITENESS CHECKBOX CHANGED:', {
+                  checked: e.target.checked,
+                  lessonMode,
+                  currentPimsleurConfig: config.includePolitenessParticles,
+                  currentSimpleConfig: simpleConfig.includePolitenessParticles
+                });
+                
+                if (lessonMode === 'pimsleur') {
+                  const newConfig = { ...config, includePolitenessParticles: e.target.checked };
+                  console.log('🔧 UPDATING PIMSLEUR CONFIG:', newConfig);
+                  setConfig(newConfig);
+                } else {
+                  const newConfig = { ...simpleConfig, includePolitenessParticles: e.target.checked };
+                  console.log('🔧 UPDATING SIMPLE CONFIG:', newConfig);
+                  setSimpleConfig(newConfig);
                 }
               }}
-              disabled={lessonMode === 'pimsleur'}
-              className="w-4 h-4 text-[#A9C4FC] bg-[#3C3C3C] border-[#404040] rounded focus:ring-[#A9C4FC] focus:ring-2 disabled:opacity-50"
+              className="w-4 h-4 text-[#A9C4FC] bg-[#3C3C3C] border-[#404040] rounded focus:ring-[#A9C4FC] focus:ring-2"
             />
             <Label htmlFor="include-politeness" className="text-[#E0E0E0] cursor-pointer">
               Include politeness particles ({(lessonMode === 'pimsleur' ? config.voiceGender : simpleConfig.voiceGender) === 'female' ? 'ka' : 'krub'})
-              {lessonMode === 'pimsleur' && <span className="text-xs text-[#BDBDBD] ml-2">(always included in guided lessons)</span>}
             </Label>
           </div>
 
@@ -596,6 +580,22 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
                 </button>
               </div>
             </div>
+            
+            {/* Download Warning */}
+            <div className="bg-[#2A2A2A] border border-[#555555] rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <div className="text-yellow-400 text-lg">⚠️</div>
+                <div className="text-sm text-[#E0E0E0]">
+                  <p className="font-medium mb-1">Important: Download your audio lesson</p>
+                  <p className="text-[#BDBDBD]">
+                    Please download the audio file before switching to another set. 
+                    Audio lessons are not saved in the app and will be lost when you navigate away.
+                    We recommend using your preferred audio player for the best listening experience.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
             <audio
               key={audioUrl}  // Force re-render when URL changes
               ref={audioRef}
@@ -611,7 +611,22 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
         {!audioUrl && (
           <div className="text-sm text-[#BDBDBD] bg-[#2C2C2C] p-3 rounded-lg border border-[#404040] mx-6 mb-4">
             <p className="mb-1">💡 <strong>Tip:</strong> Once generation starts, you can close this dialog and continue using the app.</p>
-            <p>The audio generation will continue in the background and you'll be notified when it's complete.</p>
+            <p className="mb-2">The audio generation will continue in the background and you'll be notified when it's complete.</p>
+            
+            {isGenerating && (
+              <div className="bg-[#2A2A2A] border border-[#555555] rounded-lg p-3 mt-3">
+                <div className="flex items-start gap-2">
+                  <div className="text-yellow-400 text-lg">⚠️</div>
+                  <div className="text-sm text-[#E0E0E0]">
+                    <p className="font-medium mb-1">Audio generation in progress</p>
+                    <p className="text-[#BDBDBD]">
+                      Switching to another flashcard set will cancel the current audio generation.
+                      Please wait for completion or cancel if you need to navigate elsewhere.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

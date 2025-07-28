@@ -35,7 +35,7 @@ const DEFAULT_CONFIG: AudioLessonConfig = {
     practice: 3,
     review: 2,
   },
-  includePolitenessParticles: true, // Default to including politeness particles
+  includePolitenessParticles: false, // Default to NOT including politeness particles
 };
 
 // Lesson segment types
@@ -57,6 +57,13 @@ export class AudioLessonGenerator {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.azureTTS = new AzureTTSAudio();
     this.progressCallback = progressCallback;
+    
+    // Debug logging
+    console.log('🔧 PIMSLEUR AUDIO GENERATOR CONSTRUCTOR');
+    console.log('🔧 Input config:', JSON.stringify(config, null, 2));
+    console.log('🔧 DEFAULT_CONFIG:', JSON.stringify(DEFAULT_CONFIG, null, 2));
+    console.log('🔧 Final merged config:', JSON.stringify(this.config, null, 2));
+    console.log('🔧 Politeness particles setting:', this.config.includePolitenessParticles);
   }
 
   /**
@@ -78,26 +85,49 @@ export class AudioLessonGenerator {
       thaiText = card.thai;
     }
     
+    // Debug logging
+    console.log('🔧 PIMSLEUR GET_THAI_TEXT DEBUG START');
+    console.log('🔧 Input card:', JSON.stringify(card, null, 2));
+    console.log('🔧 Selected base text:', thaiText);
+    console.log('🔧 Voice gender:', this.config.voiceGender);
+    console.log('🔧 Include politeness particles setting:', this.config.includePolitenessParticles);
+    console.log('🔧 Full config:', JSON.stringify(this.config, null, 2));
+    
     // Handle politeness particles
     if (this.config.includePolitenessParticles === false) {
+      console.log('🔧 POLITENESS PARTICLES DISABLED - removing particles');
       // Remove politeness particles if disabled
+      const beforeRemoval = thaiText;
       thaiText = thaiText.replace(/( krap| krub| ka| ค่ะ| ครับ)$/i, '');
+      console.log('🔧 Text before removal:', beforeRemoval);
+      console.log('🔧 Text after removal:', thaiText);
     } else {
+      console.log('🔧 POLITENESS PARTICLES ENABLED - checking if we need to add');
       // Add politeness particle if not present and configuration allows it (default behavior)
       const hasPoliteParticle = /( krap| krub| ka| ค่ะ| ครับ)$/i.test(thaiText);
+      console.log('🔧 Has existing politeness particle:', hasPoliteParticle);
       
       if (!hasPoliteParticle) {
         // Don't add particles to questions or certain phrases
         const isQuestion = /( ไหม| มั้ย| หรือ| อะไร| ทำไม| อย่างไร| ที่ไหน)$/i.test(thaiText);
+        console.log('🔧 Is question:', isQuestion);
         
         if (!isQuestion) {
           // Add appropriate politeness particle
           const particle = this.config.voiceGender === 'female' ? ' ka' : ' krap';
+          console.log('🔧 Adding particle:', particle);
           thaiText += particle;
+          console.log('🔧 Text after adding particle:', thaiText);
+        } else {
+          console.log('🔧 Skipping particle addition for question');
         }
+      } else {
+        console.log('🔧 Already has politeness particle, keeping as is');
       }
     }
     
+    console.log('🔧 FINAL THAI TEXT:', thaiText);
+    console.log('🔧 PIMSLEUR GET_THAI_TEXT DEBUG END');
     return thaiText;
   }
 

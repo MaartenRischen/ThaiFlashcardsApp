@@ -234,42 +234,32 @@ export class SimpleAudioLessonGenerator {
     
     // Debug logging
     console.log('🔧 GET_THAI_TEXT DEBUG START');
-    console.log('🔧 Input card:', JSON.stringify(card, null, 2));
-    console.log('🔧 Selected base text:', thaiText);
-    console.log('🔧 Voice gender:', this.config.voiceGender);
-    console.log('🔧 Include politeness particles setting:', this.config.includePolitenessParticles);
-    console.log('🔧 Full config:', JSON.stringify(this.config, null, 2));
+    console.log('🔧 Input text:', thaiText);
     
-    // Handle politeness particles
+    // FIRST: Strip any existing politeness particles
+    const beforeStrip = thaiText;
+    thaiText = thaiText.replace(/( krap| krub| ka| ค่ะ| ครับ)$/i, '');
+    if (beforeStrip !== thaiText) {
+      console.log('🔧 Stripped existing particles:', beforeStrip, '->', thaiText);
+    }
+    
+    // Handle politeness particles based on configuration
     if (this.config.includePolitenessParticles === false) {
-      console.log('🔧 POLITENESS PARTICLES DISABLED - removing particles');
-      // Remove politeness particles if disabled
-      const beforeRemoval = thaiText;
-      thaiText = thaiText.replace(/( krap| krub| ka| ค่ะ| ครับ)$/i, '');
-      console.log('🔧 Text before removal:', beforeRemoval);
-      console.log('🔧 Text after removal:', thaiText);
+      console.log('🔧 POLITENESS PARTICLES DISABLED - keeping text without particles:', thaiText);
     } else {
       console.log('🔧 POLITENESS PARTICLES ENABLED - checking if we need to add');
-      // Add politeness particle if not present and configuration allows it (default behavior)
-      const hasPoliteParticle = /( krap| krub| ka| ค่ะ| ครับ)$/i.test(thaiText);
-      console.log('🔧 Has existing politeness particle:', hasPoliteParticle);
+      // Don't add particles to questions or certain phrases
+      const isQuestion = /( ไหม| มั้ย| หรือ| อะไร| ทำไม| อย่างไร| ที่ไหน)$/i.test(thaiText);
+      console.log('🔧 Is question:', isQuestion);
       
-      if (!hasPoliteParticle) {
-        // Don't add particles to questions or certain phrases
-        const isQuestion = /( ไหม| มั้ย| หรือ| อะไร| ทำไม| อย่างไร| ที่ไหน)$/i.test(thaiText);
-        console.log('🔧 Is question:', isQuestion);
-        
-        if (!isQuestion) {
-          // Add appropriate politeness particle
-          const particle = this.config.voiceGender === 'female' ? ' ka' : ' krap';
-          console.log('🔧 Adding particle:', particle);
-          thaiText += particle;
-          console.log('🔧 Text after adding particle:', thaiText);
-        } else {
-          console.log('🔧 Skipping particle addition for question');
-        }
+      if (!isQuestion) {
+        // Add appropriate politeness particle
+        const particle = this.config.voiceGender === 'female' ? ' ka' : ' krap';
+        console.log('🔧 Adding particle:', particle);
+        thaiText += particle;
+        console.log('🔧 Text after adding particle:', thaiText);
       } else {
-        console.log('🔧 Already has politeness particle, keeping as is');
+        console.log('🔧 Skipping particle addition for question');
       }
     }
     

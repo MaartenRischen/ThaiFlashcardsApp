@@ -22,7 +22,7 @@ export function CardsListModal({
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={onClose}>
       <div className="bg-gray-900 rounded-xl p-4 max-w-md w-full max-h-[80vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
         <button className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl" onClick={onClose}>&times;</button>
-        <h3 className="text-lg font-bold text-blue-300 mb-3">Cards in Set</h3>
+        <h3 className="text-lg font-bold text-blue-300 mb-3">Cards in Current Set</h3>
         <div className="bg-[#1a1b26] rounded-lg overflow-hidden">
           {phrases.map((phrase, idx) => {
             const status = getCardStatus(idx);

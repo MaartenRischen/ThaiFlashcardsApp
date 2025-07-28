@@ -100,6 +100,7 @@ export function FlashcardHeader({
       {/* Navigation Buttons */}
       <div className="px-4 py-3 w-full bg-[#121212]">
         <div className="flex flex-row items-center w-full justify-between gap-x-3">
+          {/* === Set Management Category === */}
           {/* Create! */}
           <div className="flex flex-col items-center">
             <button
@@ -108,8 +109,8 @@ export function FlashcardHeader({
               style={{
                 boxShadow: '0 0 20px rgba(34, 197, 94, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
               }}
-              title="Create!"
-              aria-label="Create!"
+              title="Create new flashcard set"
+              aria-label="Create new flashcard set"
             >
               <Plus size={28} />
             </button>
@@ -123,16 +124,14 @@ export function FlashcardHeader({
               style={{
                 boxShadow: '0 0 20px rgba(187, 134, 252, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
               }}
-              title="User Gallery"
-              aria-label="User Gallery"
+              title="Browse community flashcard sets"
+              aria-label="Browse community flashcard sets"
             >
               <GalleryHorizontal />
             </button>
             <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Gallery</span>
           </div>
-          {/* Divider */}
-          <div className="h-12 w-px bg-[#404040]/50 mx-1" />
-          {/* Set Manager */}
+          {/* My Sets */}
           <div className="flex flex-col items-center">
             <button
               onClick={onOpenSetManager}
@@ -140,30 +139,33 @@ export function FlashcardHeader({
               style={{
                 boxShadow: '0 0 20px rgba(37, 99, 235, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
               }}
-              title="My Sets"
-              aria-label="My Sets"
+              title="Manage your flashcard sets"
+              aria-label="Manage your flashcard sets"
             >
               <Grid />
             </button>
             <span className="block text-xs text-[#BDBDBD] mt-1 text-center">My Sets</span>
           </div>
-          {/* Cards */}
+          
+          {/* Divider between categories */}
+          <div className="h-12 w-px bg-[#404040]/50 mx-1" />
+          
+          {/* === Current Set Actions Category === */}
+          {/* Cards in this set */}
           <div className="flex flex-col items-center">
             <button
               onClick={onOpenCards}
-              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#2563EB] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(37,99,235,0.15)] before:pointer-events-none"
+              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#f59e0b] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(245,158,11,0.15)] before:pointer-events-none"
               style={{
-                boxShadow: '0 0 20px rgba(37, 99, 235, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 0 20px rgba(245, 158, 11, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
               }}
-              title="Cards"
-              aria-label="Cards"
+              title="View all cards in current set"
+              aria-label="View all cards in current set"
             >
               <Layers />
             </button>
-            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Current</span>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Cards</span>
           </div>
-          {/* Divider */}
-          <div className="h-12 w-px bg-[#404040]/50 mx-1" />
           {/* Audio Lesson */}
           {activeSet && activeSet.id !== 'default' && (
             <div className="flex flex-col items-center">
@@ -176,13 +178,18 @@ export function FlashcardHeader({
               <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Audio</span>
             </div>
           )}
+          
+          {/* Divider between categories */}
+          <div className="h-12 w-px bg-[#404040]/50 mx-1" />
+          
+          {/* === App Controls Category === */}
           {/* Settings */}
           <div className="flex flex-col items-center">
             <button
               onClick={onOpenSettings}
               className="neumorphic-icon-button text-xl rounded-xl"
-              title="Settings"
-              aria-label="Settings"
+              title="App settings"
+              aria-label="App settings"
             >
               <Settings />
             </button>
@@ -193,8 +200,8 @@ export function FlashcardHeader({
             <button
               onClick={() => setShowHowItWorks(true)}
               className="neumorphic-icon-button text-xl rounded-xl"
-              title="Help"
-              aria-label="Help"
+              title="Help and tutorial"
+              aria-label="Help and tutorial"
             >
               <HelpCircle />
             </button>

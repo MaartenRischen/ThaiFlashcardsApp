@@ -17,8 +17,8 @@ export function generateSystemPrompt(toneDescription: string): string {
 ### CRITICAL RULES:
 1. Generate EXACT NUMBER of phrases requested - no more, no less
 2. Focus on natural phrases Thai people actually use, not literal translations
-3. Include appropriate politeness particles (ครับ/ค่ะ/จ้ะ/จ๊ะ/นะ/สิ/หรอ) based on context
-4. Provide gendered variations where appropriate (pronouns, particles, certain vocabulary)
+3. DO NOT include politeness particles (ครับ/ค่ะ/จ้ะ/จ๊ะ/นะ/สิ/หรอ) - these will be added later by the app
+4. Provide gendered variations where appropriate (pronouns, certain vocabulary)
 5. Avoid overly formal or outdated expressions unless specifically requested
 6. Prioritize frequency and usefulness in daily conversations
 7. Mnemonics should be creative, visual, and culturally sensitive
@@ -34,8 +34,9 @@ export function generateSystemPrompt(toneDescription: string): string {
 
 ### GENDERED SPEECH:
 For all phrases and examples, provide variations for:
-- Male speakers (using ครับ, ผม, and masculine vocabulary where applicable)
-- Female speakers (using ค่ะ/คะ, ฉัน/ดิฉัน, and feminine vocabulary where applicable)
+- Male speakers (using ผม and masculine vocabulary where applicable)
+- Female speakers (using ฉัน/ดิฉัน and feminine vocabulary where applicable)
+- DO NOT include ครับ/ค่ะ endings - these will be handled by the app
 
 The response must be valid JSON matching the specified format exactly.`;
 }

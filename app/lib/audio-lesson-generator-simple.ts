@@ -1,9 +1,6 @@
 import { AzureTTSAudio } from './azure-tts-audio';
 import { AudioCombiner } from './audio-combiner';
 
-// Progress callback type
-export type ProgressCallback = (progress: number, message: string) => void;
-
 // Simple audio lesson configuration
 export interface SimpleAudioLessonConfig {
   voiceGender: 'male' | 'female';
@@ -35,12 +32,10 @@ export class SimpleAudioLessonGenerator {
   private config: SimpleAudioLessonConfig;
   private audioSegments: ArrayBuffer[] = [];
   private azureTTS: AzureTTSAudio;
-  private progressCallback?: ProgressCallback;
 
-  constructor(config: Partial<SimpleAudioLessonConfig> = {}, progressCallback?: ProgressCallback) {
+  constructor(config: Partial<SimpleAudioLessonConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.azureTTS = new AzureTTSAudio();
-    this.progressCallback = progressCallback;
     
     // Debug logging
     console.log('🔧 SIMPLE AUDIO GENERATOR CONSTRUCTOR');
@@ -68,30 +63,14 @@ export class SimpleAudioLessonGenerator {
     console.log('Speed setting:', this.config.speed);
     this.audioSegments = [];
 
-    // Calculate total operations for progress tracking
-    const totalLoops = this.config.loops;
-    const phrasesPerLoop = flashcards.length;
-    const repetitionsPerPhrase = (this.config.phraseRepetitions || 2);
-    const segmentsPerPhrase = 2 + (this.config.includeMnemonics ? 1 : 0) + (repetitionsPerPhrase * 6); // English + Thai + optional mnemonic + repetitions
-    const totalSegments = (totalLoops * phrasesPerLoop * segmentsPerPhrase) + 2; // +2 for outro
-    let currentSegment = 0;
-
-    const updateProgress = (message: string) => {
-      const progress = Math.min(85, (currentSegment / totalSegments) * 85); // Reserve 15% for combining
-      this.progressCallback?.(progress, message);
-    };
-
     try {
-      updateProgress('Initializing audio generation...');
-
       // Main loop - repeat the entire set multiple times
       for (let loop = 0; loop < this.config.loops; loop++) {
         console.log(`Loop ${loop + 1} of ${this.config.loops}`);
-        updateProgress(`Processing loop ${loop + 1} of ${this.config.loops}...`);
         
         for (let i = 0; i < flashcards.length; i++) {
           const card = flashcards[i];
-          updateProgress(`Generating audio for phrase ${i + 1}/${flashcards.length} (loop ${loop + 1})...`);
+          console.log(`Generating audio for phrase ${i + 1}/${flashcards.length} (loop ${loop + 1})`);
           
           // Get the appropriate Thai text based on gender
           const thaiText = this.getThaiText(card);
@@ -110,7 +89,6 @@ export class SimpleAudioLessonGenerator {
             baseSpeed
           );
           this.audioSegments.push(englishAudio);
-          currentSegment++;
           
           // 2. Thai translation (no pause)
           const thaiAudio = await this.azureTTS.synthesizeToBuffer(
@@ -120,7 +98,6 @@ export class SimpleAudioLessonGenerator {
             baseSpeed
           );
           this.audioSegments.push(thaiAudio);
-          currentSegment++;
           
           // 3. Optional mnemonic (no pause)
           if (this.config.includeMnemonics && card.mnemonic) {
@@ -131,7 +108,6 @@ export class SimpleAudioLessonGenerator {
               baseSpeed
             );
             this.audioSegments.push(mnemonicAudio);
-            currentSegment++;
           }
           
           // 4. Repetition pattern: English -> Thai -> Thai -> Thai -> English -> Thai
@@ -156,7 +132,6 @@ export class SimpleAudioLessonGenerator {
               currentSpeed
             );
             this.audioSegments.push(englishRepAudio);
-            currentSegment++;
             
             // 2. Thai (first)
             const thaiRepAudio1 = await this.azureTTS.synthesizeToBuffer(
@@ -166,7 +141,6 @@ export class SimpleAudioLessonGenerator {
               currentSpeed
             );
             this.audioSegments.push(thaiRepAudio1);
-            currentSegment++;
             
             // 3. Thai (second)
             const thaiRepAudio2 = await this.azureTTS.synthesizeToBuffer(
@@ -176,7 +150,6 @@ export class SimpleAudioLessonGenerator {
               currentSpeed
             );
             this.audioSegments.push(thaiRepAudio2);
-            currentSegment++;
             
             // 4. Thai (third)
             const thaiRepAudio3 = await this.azureTTS.synthesizeToBuffer(
@@ -186,7 +159,6 @@ export class SimpleAudioLessonGenerator {
               currentSpeed
             );
             this.audioSegments.push(thaiRepAudio3);
-            currentSegment++;
             
             // 5. English (again)
             const englishRepAudio2 = await this.azureTTS.synthesizeToBuffer(
@@ -196,7 +168,6 @@ export class SimpleAudioLessonGenerator {
               currentSpeed
             );
             this.audioSegments.push(englishRepAudio2);
-            currentSegment++;
             
             // 6. Thai (fourth)
             const thaiRepAudio4 = await this.azureTTS.synthesizeToBuffer(
@@ -206,7 +177,6 @@ export class SimpleAudioLessonGenerator {
               currentSpeed
             );
             this.audioSegments.push(thaiRepAudio4);
-            currentSegment++;
           }
           
           // Pause between different phrases
@@ -223,7 +193,6 @@ export class SimpleAudioLessonGenerator {
         }
       }
 
-      updateProgress('Generating outro...');
       // Simple outro
       const outroText = "Good job. Sweet dreams.";
       const outroAudio = await this.azureTTS.synthesizeToBuffer(
@@ -233,14 +202,10 @@ export class SimpleAudioLessonGenerator {
       );
       this.audioSegments.push(this.azureTTS.createSilence(1000));
       this.audioSegments.push(outroAudio);
-      currentSegment += 2;
 
-      // Combine all segments with progress tracking
-      updateProgress('Combining audio segments...');
-      return AudioCombiner.combineWavBuffersWithProgress(this.audioSegments, (combineProgress) => {
-        const totalProgress = 85 + (combineProgress * 15); // Combining takes final 15%
-        this.progressCallback?.(totalProgress, 'Rendering final audio...');
-      });
+      // Combine all segments - NO PROGRESS TRACKING
+      console.log('Combining audio segments...');
+      return AudioCombiner.combineWavBuffers(this.audioSegments);
 
     } catch (error) {
       console.error('Error generating simple audio lesson:', error);

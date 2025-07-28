@@ -93,24 +93,16 @@ export async function POST(
       console.log(`Audio generation: Loaded ${phrases.length} phrases for user set: ${setName}`);
     }
     
-    // Generate audio lesson based on mode with progress tracking
+    // Generate audio lesson based on mode - NO PROGRESS TRACKING
     let audioBuffer: ArrayBuffer;
     
     if (mode === 'simple') {
-      // Create progress callback for simple mode
-      const progressCallback = (progress: number, message: string) => {
-        console.log(`Audio generation progress: ${Math.round(progress)}% - ${message}`);
-      };
-      
-      const generator = new SimpleAudioLessonGenerator(config, progressCallback);
+      console.log('Creating SimpleAudioLessonGenerator...');
+      const generator = new SimpleAudioLessonGenerator(config);
       audioBuffer = await generator.generateSimpleLesson(phrases, setName);
     } else {
-      // Create progress callback for pimsleur mode  
-      const progressCallback = (progress: number, message: string) => {
-        console.log(`Audio generation progress: ${Math.round(progress)}% - ${message}`);
-      };
-      
-      const generator = new AudioLessonGenerator(config, progressCallback);
+      console.log('Creating AudioLessonGenerator...');
+      const generator = new AudioLessonGenerator(config);
       audioBuffer = await generator.generateLesson(phrases, setName);
     }
 

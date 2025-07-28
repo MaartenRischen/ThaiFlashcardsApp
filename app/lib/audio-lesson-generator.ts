@@ -71,33 +71,44 @@ export class AudioLessonGenerator {
   }): string {
     let thaiText: string;
     
+    console.log('🔧 GET_THAI_TEXT CALLED WITH:', {
+      thai: card.thai,
+      thaiMasculine: card.thaiMasculine,
+      thaiFeminine: card.thaiFeminine
+    });
+    
     // First get the appropriate text based on gender
     if (this.config.voiceGender === 'male' && card.thaiMasculine) {
       thaiText = card.thaiMasculine;
+      console.log('🔧 Selected thaiMasculine:', thaiText);
     } else if (this.config.voiceGender === 'female' && card.thaiFeminine) {
       thaiText = card.thaiFeminine;
+      console.log('🔧 Selected thaiFeminine:', thaiText);
     } else {
       thaiText = card.thai;
+      console.log('🔧 Selected base thai:', thaiText);
     }
     
     // Debug logging
     console.log('🔧 GET_THAI_TEXT DEBUG START');
     console.log('🔧 Input text:', thaiText);
+    console.log('🔧 Config includePolitenessParticles:', this.config.includePolitenessParticles);
     
-    // FIRST: Strip any existing politeness particles
+    // FIRST: Strip any existing politeness particles - MORE COMPREHENSIVE REGEX
     const beforeStrip = thaiText;
-    thaiText = thaiText.replace(/( krap| krub| ka| ค่ะ| ครับ)$/i, '');
+    // Match krub/krap/ka in various forms, including Thai script
+    thaiText = thaiText.replace(/(\s*(krap|krub|khrap|khrub|ka|kha|ครับ|คร้าบ|คร๊าบ|คับ|ค่ะ|คะ|ค้า|ค๊ะ))$/gi, '');
     if (beforeStrip !== thaiText) {
       console.log('🔧 Stripped existing particles:', beforeStrip, '->', thaiText);
     }
     
     // Handle politeness particles based on configuration
     if (this.config.includePolitenessParticles === false) {
-      console.log('🔧 POLITENESS PARTICLES DISABLED - keeping text without particles:', thaiText);
+      console.log('🔧 POLITENESS PARTICLES DISABLED - returning text without particles:', thaiText);
     } else {
       console.log('🔧 POLITENESS PARTICLES ENABLED - checking if we need to add');
       // Don't add particles to questions or certain phrases
-      const isQuestion = /( ไหม| มั้ย| หรือ| อะไร| ทำไม| อย่างไร| ที่ไหน)$/i.test(thaiText);
+      const isQuestion = /(\s*(ไหม|มั้ย|หรือ|อะไร|ทำไม|อย่างไร|ที่ไหน|เหรอ|หรือเปล่า|รึเปล่า))$/i.test(thaiText);
       console.log('🔧 Is question:', isQuestion);
       
       if (!isQuestion) {
@@ -111,7 +122,7 @@ export class AudioLessonGenerator {
       }
     }
     
-    console.log('🔧 FINAL THAI TEXT:', thaiText);
+    console.log('🔧 FINAL THAI TEXT FOR TTS:', thaiText);
     console.log('🔧 GET_THAI_TEXT DEBUG END');
     return thaiText;
   }

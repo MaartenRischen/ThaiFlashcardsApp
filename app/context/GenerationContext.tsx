@@ -6,8 +6,6 @@ type GenerationMode = 'auto' | 'manual' | 'audio-pimsleur' | 'audio-simple'
 
 interface GenerationStatus {
   isGenerating: boolean
-  progress: number
-  statusText: string
   mode: GenerationMode
   phraseCount: number
 }
@@ -15,7 +13,6 @@ interface GenerationStatus {
 interface GenerationContextType {
   generationStatus: GenerationStatus | null
   startGeneration: (mode: GenerationMode, phraseCount: number) => void
-  updateProgress: (progress: number, statusText: string) => void
   completeGeneration: () => void
   failGeneration: () => void
 }
@@ -28,15 +25,9 @@ export function GenerationProvider({ children }: { children: React.ReactNode }) 
   const startGeneration = useCallback((mode: GenerationMode, phraseCount: number) => {
     setGenerationStatus({
       isGenerating: true,
-      progress: 0,
-      statusText: 'Initializing...',
       mode,
       phraseCount
     })
-  }, [])
-
-  const updateProgress = useCallback((progress: number, statusText: string) => {
-    setGenerationStatus(prev => prev ? { ...prev, progress, statusText } : null)
   }, [])
 
   const completeGeneration = useCallback(() => {
@@ -51,7 +42,6 @@ export function GenerationProvider({ children }: { children: React.ReactNode }) 
     <GenerationContext.Provider value={{
       generationStatus,
       startGeneration,
-      updateProgress,
       completeGeneration,
       failGeneration
     }}>

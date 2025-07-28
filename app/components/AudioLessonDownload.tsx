@@ -67,7 +67,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
     includePolitenessParticles: false, // Default to NOT including politeness particles
   });
 
-  const { startGeneration, updateProgress, completeGeneration, failGeneration } = useGeneration();
+  const { startGeneration, completeGeneration, failGeneration } = useGeneration();
 
   const handleGenerate = async () => {
     // Clear previous audio if regenerating
@@ -101,9 +101,6 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
         config: configToSend,
       }, null, 2));
       
-      // Start with initial progress
-      updateProgress(5, 'Contacting audio service...');
-      
       const response = await fetch(`/api/flashcard-sets/${setId}/audio-lesson?t=${Date.now()}`, {
         method: 'POST',
         headers: {
@@ -120,12 +117,8 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
         throw new Error('Failed to generate audio lesson');
       }
 
-      updateProgress(98, 'Processing audio data...');
-
       // Get the blob from the response
       const blob = await response.blob();
-      
-      updateProgress(100, 'Audio lesson ready!');
       
       // Create object URL for in-app playback
       const url = window.URL.createObjectURL(blob);

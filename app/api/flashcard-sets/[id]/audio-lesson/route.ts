@@ -91,6 +91,18 @@ export async function POST(
       
       setName = flashcardSet.name;
       console.log(`Audio generation: Loaded ${phrases.length} phrases for user set: ${setName}`);
+      
+      // DEBUG: Show exactly what Thai text we have
+      console.log('🔍 CRITICAL DEBUG - Thai text from database:');
+      phrases.forEach((phrase, index) => {
+        console.log(`🔍 Phrase ${index + 1}:`);
+        console.log(`🔍   English: ${phrase.english}`);
+        console.log(`🔍   Thai: "${phrase.thai}"`);
+        console.log(`🔍   Thai Masculine: "${phrase.thaiMasculine}"`);
+        console.log(`🔍   Thai Feminine: "${phrase.thaiFeminine}"`);
+        console.log(`🔍   Has 'krub': ${phrase.thai?.includes('ครับ') || phrase.thai?.includes('krub')}`);
+        console.log(`🔍   Has 'ka': ${phrase.thai?.includes('ค่ะ') || phrase.thai?.includes('ka')}`);
+      });
     }
     
     // Generate audio lesson based on mode - NO PROGRESS TRACKING

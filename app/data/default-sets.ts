@@ -19,22 +19,22 @@ export const DEFAULT_SETS: DefaultSet[] = [
       {
         english: "One",
         thai: "หนึ่ง",
-        thaiMasculine: "หนึ่งครับ",
-        thaiFeminine: "หนึ่งค่ะ",
+        thaiMasculine: "หนึ่ง",
+        thaiFeminine: "หนึ่ง",
         pronunciation: "nueng",
         mnemonic: "Think: 'Nung' - like 'one lung' breathing",
         examples: [
           {
             thai: "ขอกาแฟหนึ่งแก้ว",
-            thaiMasculine: "ขอกาแฟหนึ่งแก้วครับ",
-            thaiFeminine: "ขอกาแฟหนึ่งแก้วค่ะ",
+            thaiMasculine: "ขอกาแฟหนึ่งแก้ว",
+            thaiFeminine: "ขอกาแฟหนึ่งแก้ว",
             pronunciation: "khor ka-fae nueng gaew",
             translation: "One coffee please."
           },
           {
             thai: "มีหนึ่งอันเท่านั้น",
-            thaiMasculine: "มีหนึ่งอันเท่านั้นครับ",
-            thaiFeminine: "มีหนึ่งอันเท่านั้นค่ะ",
+            thaiMasculine: "มีหนึ่งอันเท่านั้น",
+            thaiFeminine: "มีหนึ่งอันเท่านั้น",
             pronunciation: "mee nueng an tao-nan",
             translation: "There is only one."
           }
@@ -43,22 +43,22 @@ export const DEFAULT_SETS: DefaultSet[] = [
       {
         english: "Two",
         thai: "สอง",
-        thaiMasculine: "สองครับ",
-        thaiFeminine: "สองค่ะ",
+        thaiMasculine: "สอง",
+        thaiFeminine: "สอง",
         pronunciation: "song",
         mnemonic: "Think: 'Song' - two people singing a song",
         examples: [
           {
             thai: "สองคนมาด้วยกัน",
-            thaiMasculine: "สองคนมาด้วยกันครับ",
-            thaiFeminine: "สองคนมาด้วยกันค่ะ",
+            thaiMasculine: "สองคนมาด้วยกัน",
+            thaiFeminine: "สองคนมาด้วยกัน",
             pronunciation: "song kon ma duay gan",
             translation: "Two people came together."
           },
           {
             thai: "ขอข้าวสองจาน",
-            thaiMasculine: "ขอข้าวสองจานครับ",
-            thaiFeminine: "ขอข้าวสองจานค่ะ",
+            thaiMasculine: "ขอข้าวสองจาน",
+            thaiFeminine: "ขอข้าวสองจาน",
             pronunciation: "khor khao song jaan",
             translation: "Two plates of rice please."
           }
@@ -67,22 +67,22 @@ export const DEFAULT_SETS: DefaultSet[] = [
       {
         english: "Three",
         thai: "สาม",
-        thaiMasculine: "สามครับ",
-        thaiFeminine: "สามค่ะ",
+        thaiMasculine: "สาม",
+        thaiFeminine: "สาม",
         pronunciation: "saam",
         mnemonic: "Think: 'Saam' - like 'Sam' has three letters",
         examples: [
           {
             thai: "สามวันแล้ว",
-            thaiMasculine: "สามวันแล้วครับ",
-            thaiFeminine: "สามวันแล้วค่ะ",
+            thaiMasculine: "สามวันแล้ว",
+            thaiFeminine: "สามวันแล้ว",
             pronunciation: "saam wan laew",
             translation: "Three days already."
           },
           {
             thai: "มีสามสีให้เลือก",
-            thaiMasculine: "มีสามสีให้เลือกครับ",
-            thaiFeminine: "มีสามสีให้เลือกค่ะ",
+            thaiMasculine: "มีสามสีให้เลือก",
+            thaiFeminine: "มีสามสีให้เลือก",
             pronunciation: "mee saam see hai lueak",
             translation: "There are three colors to choose from."
           }
@@ -91,22 +91,22 @@ export const DEFAULT_SETS: DefaultSet[] = [
       {
         english: "Four",
         thai: "สี่",
-        thaiMasculine: "สี่ครับ",
-        thaiFeminine: "สี่ค่ะ",
+        thaiMasculine: "สี่",
+        thaiFeminine: "สี่",
         pronunciation: "see",
         mnemonic: "Think: 'See' - I can see four things",
         examples: [
           {
             thai: "สี่โมงเย็น",
-            thaiMasculine: "สี่โมงเย็นครับ",
-            thaiFeminine: "สี่โมงเย็นค่ะ",
+            thaiMasculine: "สี่โมงเย็น",
+            thaiFeminine: "สี่โมงเย็น",
             pronunciation: "see mong yen",
             translation: "Four o'clock in the afternoon."
           },
           {
             thai: "มีสี่คนในครอบครัว",
-            thaiMasculine: "มีสี่คนในครอบครัวครับ",
-            thaiFeminine: "มีสี่คนในครอบครัวค่ะ",
+            thaiMasculine: "มีสี่คนในครอบครัว",
+            thaiFeminine: "มีสี่คนในครอบครัว",
             pronunciation: "mee see kon nai krob-krua",
             translation: "There are four people in the family."
           }
@@ -267,22 +267,22 @@ export const DEFAULT_SETS: DefaultSet[] = [
       {
         english: "Red",
         thai: "สีแดง",
-        thaiMasculine: "สีแดงครับ",
-        thaiFeminine: "สีแดงค่ะ",
+        thaiMasculine: "สีแดง",
+        thaiFeminine: "สีแดง",
         pronunciation: "see daeng",
         mnemonic: "Think: 'See dang' - danger is red",
         examples: [
           {
             thai: "รถสีแดง",
-            thaiMasculine: "รถสีแดงครับ",
-            thaiFeminine: "รถสีแดงค่ะ",
+            thaiMasculine: "รถสีแดง",
+            thaiFeminine: "รถสีแดง",
             pronunciation: "rot see daeng",
             translation: "Red car."
           },
           {
             thai: "ชอบสีแดง",
-            thaiMasculine: "ผมชอบสีแดงครับ",
-            thaiFeminine: "ฉันชอบสีแดงค่ะ",
+            thaiMasculine: "ผมชอบสีแดง",
+            thaiFeminine: "ฉันชอบสีแดง",
             pronunciation: "phom/chan chop see daeng",
             translation: "I like red."
           }

@@ -16,6 +16,7 @@ export interface AudioLessonConfig {
     practice: number;
     review: number;
   };
+  includePolitenessParticles?: boolean; // Whether to include politeness particles (ka/krub)
 }
 
 const DEFAULT_CONFIG: AudioLessonConfig = {
@@ -31,6 +32,7 @@ const DEFAULT_CONFIG: AudioLessonConfig = {
     practice: 3,
     review: 2,
   },
+  includePolitenessParticles: true, // Default to including politeness particles
 };
 
 // Lesson segment types
@@ -50,6 +52,48 @@ export class AudioLessonGenerator {
   constructor(config: Partial<AudioLessonConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.azureTTS = new AzureTTSAudio();
+  }
+
+  /**
+   * Get appropriate Thai text based on gender setting and politeness particle configuration
+   */
+  private getThaiText(card: { 
+    thai: string; 
+    thaiMasculine?: string; 
+    thaiFeminine?: string 
+  }): string {
+    let thaiText: string;
+    
+    // First get the appropriate text based on gender
+    if (this.config.voiceGender === 'male' && card.thaiMasculine) {
+      thaiText = card.thaiMasculine;
+    } else if (this.config.voiceGender === 'female' && card.thaiFeminine) {
+      thaiText = card.thaiFeminine;
+    } else {
+      thaiText = card.thai;
+    }
+    
+    // Handle politeness particles
+    if (this.config.includePolitenessParticles === false) {
+      // Remove politeness particles if disabled
+      thaiText = thaiText.replace(/( krap| krub| ka| ค่ะ| ครับ)$/i, '');
+    } else {
+      // Add politeness particle if not present and configuration allows it (default behavior)
+      const hasPoliteParticle = /( krap| krub| ka| ค่ะ| ครับ)$/i.test(thaiText);
+      
+      if (!hasPoliteParticle) {
+        // Don't add particles to questions or certain phrases
+        const isQuestion = /( ไหม| มั้ย| หรือ| อะไร| ทำไม| อย่างไร| ที่ไหน)$/i.test(thaiText);
+        
+        if (!isQuestion) {
+          // Add appropriate politeness particle
+          const particle = this.config.voiceGender === 'female' ? ' ka' : ' krap';
+          thaiText += particle;
+        }
+      }
+    }
+    
+    return thaiText;
   }
 
   // Generate a complete audio lesson for a flashcard set
@@ -105,32 +149,36 @@ export class AudioLessonGenerator {
         }
       }
 
-      // 4. Review phase - spaced repetition
       await this.addSilence(3000);
+
+      // 4. Review phase - quick repetitions
       await this.addSegment({
         type: 'instruction',
-        text: "Excellent work! Let's review what you've learned.",
+        text: "Finally, let's review all phrases quickly.",
         voice: 'english'
       });
 
       await this.addSilence(2000);
 
-      // Shuffle for review
-      const shuffled = [...flashcards].sort(() => Math.random() - 0.5);
-      for (const card of shuffled.slice(0, Math.min(5, shuffled.length))) {
+      for (let i = 0; i < flashcards.length; i++) {
+        const card = flashcards[i];
         await this.reviewPhrase(card);
-        await this.addSilence(this.config.pauseDurationMs.betweenPhrases);
+        
+        if (i < flashcards.length - 1) {
+          await this.addSilence(1000);
+        }
       }
 
-      // 5. Closing
+      // 5. Conclusion
+      await this.addSilence(2000);
       await this.addSegment({
         type: 'instruction',
-        text: "Great job! Practice these phrases throughout your day. See you next time!",
+        text: "Great job! You've completed the lesson. Keep practicing!",
         voice: 'english'
       });
 
-      // Combine all segments into final audio
-      return this.combineSegments();
+      // Combine all audio segments
+      return AudioCombiner.combineWavBuffers(this.audioSegments);
 
     } catch (error) {
       console.error('Error generating audio lesson:', error);
@@ -138,142 +186,144 @@ export class AudioLessonGenerator {
     }
   }
 
-  // Introduce a new phrase
-  private async introducePhrase(
-    card: { thai: string; english: string; thaiMasculine?: string; thaiFeminine?: string },
-    number: number
-  ) {
-    // Introduction
+  // Add instruction text and wait
+  private async addSegment(segment: LessonSegment): Promise<void> {
+    if (segment.type === 'instruction' && segment.text) {
+      const audioBuffer = await this.azureTTS.synthesizeToBuffer(
+        segment.text,
+        'english',
+        this.config.voiceGender
+      );
+      this.audioSegments.push(audioBuffer);
+      
+      if (segment.voice !== 'thai') {
+        await this.addSilence(this.config.pauseDurationMs.afterInstruction);
+      }
+    } else if (segment.type === 'thai' && segment.text) {
+      const audioBuffer = await this.azureTTS.synthesizeToBuffer(
+        segment.text,
+        'thai',
+        this.config.voiceGender
+      );
+      this.audioSegments.push(audioBuffer);
+    } else if (segment.type === 'english' && segment.text) {
+      const audioBuffer = await this.azureTTS.synthesizeToBuffer(
+        segment.text,
+        'english',
+        this.config.voiceGender
+      );
+      this.audioSegments.push(audioBuffer);
+    }
+  }
+
+  // Add silence buffer
+  private async addSilence(durationMs: number): Promise<void> {
+    const silenceBuffer = this.azureTTS.createSilence(durationMs);
+    this.audioSegments.push(silenceBuffer);
+  }
+
+  // Introduction phase: Present phrase multiple times
+  private async introducePhrase(card: {
+    thai: string;
+    english: string;
+    thaiMasculine?: string;
+    thaiFeminine?: string;
+  }, phraseNumber: number): Promise<void> {
+    
+    const thaiText = this.getThaiText(card);
+    
     await this.addSegment({
       type: 'instruction',
-      text: `Phrase ${number}: ${card.english}`,
+      text: `Phrase ${phraseNumber}.`,
       voice: 'english'
     });
 
-    await this.addSilence(this.config.pauseDurationMs.afterInstruction);
-
-    // Thai phrase (repeated)
-    const thaiText = this.getThaiText(card);
+    // Repeat the phrase introduction according to config
     for (let i = 0; i < this.config.repetitions.introduction; i++) {
       await this.addSegment({
-        type: 'thai',
-        text: thaiText,
-        voice: 'thai'
+        type: 'english',
+        text: card.english
       });
-
+      
+      await this.addSilence(500);
+      
+      await this.addSegment({
+        type: 'thai',
+        text: thaiText
+      });
+      
       if (i < this.config.repetitions.introduction - 1) {
         await this.addSilence(1000);
       }
     }
-
-    await this.addSilence(this.config.pauseDurationMs.afterInstruction);
-
-    // Instruction to repeat
-    await this.addSegment({
-      type: 'instruction',
-      text: "Now repeat:",
-      voice: 'english'
-    });
-
-    await this.addSilence(this.config.pauseDurationMs.forPractice);
   }
 
-  // Practice phase with active recall
-  private async practicePhrase(
-    card: { thai: string; english: string; thaiMasculine?: string; thaiFeminine?: string },
-    _number: number
-  ) {
-    // Prompt in English
+  // Practice phase: English -> pause -> Thai
+  private async practicePhrase(card: {
+    thai: string;
+    english: string;
+    thaiMasculine?: string;
+    thaiFeminine?: string;
+  }, phraseNumber: number): Promise<void> {
+    
+    const thaiText = this.getThaiText(card);
+    
     await this.addSegment({
       type: 'instruction',
-      text: `How do you say: ${card.english}?`,
+      text: `Practice ${phraseNumber}.`,
       voice: 'english'
     });
 
-    // Pause for user to think/speak
-    await this.addSilence(this.config.pauseDurationMs.beforeAnswer);
-
-    // Give the answer
-    const thaiText = this.getThaiText(card);
+    // Practice repetitions
     for (let i = 0; i < this.config.repetitions.practice; i++) {
       await this.addSegment({
-        type: 'thai',
-        text: thaiText,
-        voice: 'thai'
+        type: 'english',
+        text: card.english
       });
-
+      
+      // Practice pause - user tries to say it
+      await this.addSilence(this.config.pauseDurationMs.forPractice);
+      
+      // Answer pause
+      await this.addSilence(this.config.pauseDurationMs.beforeAnswer);
+      
+      await this.addSegment({
+        type: 'thai',
+        text: thaiText
+      });
+      
       if (i < this.config.repetitions.practice - 1) {
-        await this.addSilence(this.config.pauseDurationMs.forPractice);
+        await this.addSilence(1500);
       }
     }
   }
 
-  // Review phase
-  private async reviewPhrase(
-    card: { thai: string; english: string; thaiMasculine?: string; thaiFeminine?: string }
-  ) {
+  // Review phase: Quick repetitions
+  private async reviewPhrase(card: {
+    thai: string;
+    english: string;
+    thaiMasculine?: string;
+    thaiFeminine?: string;
+  }): Promise<void> {
+    
     const thaiText = this.getThaiText(card);
     
-    // Thai first
-    await this.addSegment({
-      type: 'thai',
-      text: thaiText,
-      voice: 'thai'
-    });
-
-    await this.addSilence(1000);
-
-    // English translation
-    await this.addSegment({
-      type: 'english',
-      text: card.english,
-      voice: 'english'
-    });
-  }
-
-  // Get appropriate Thai text based on gender setting
-  private getThaiText(card: { thai: string; thaiMasculine?: string; thaiFeminine?: string }): string {
-    if (this.config.voiceGender === 'male' && card.thaiMasculine) {
-      return card.thaiMasculine;
-    } else if (this.config.voiceGender === 'female' && card.thaiFeminine) {
-      return card.thaiFeminine;
+    for (let i = 0; i < this.config.repetitions.review; i++) {
+      await this.addSegment({
+        type: 'english',
+        text: card.english
+      });
+      
+      await this.addSilence(300);
+      
+      await this.addSegment({
+        type: 'thai',
+        text: thaiText
+      });
+      
+      if (i < this.config.repetitions.review - 1) {
+        await this.addSilence(800);
+      }
     }
-    return card.thai;
-  }
-
-  // Add a segment to the lesson
-  private async addSegment(segment: LessonSegment) {
-    if (segment.type === 'silence' && segment.durationMs) {
-      await this.addSilence(segment.durationMs);
-    } else if (segment.text) {
-      const audio = await this.synthesizeSpeech(segment.text, segment.voice || 'english');
-      this.audioSegments.push(audio);
-    }
-  }
-
-  // Add silence to the lesson
-  private async addSilence(durationMs: number) {
-    const silence = this.azureTTS.createSilence(durationMs, this.sampleRate);
-    this.audioSegments.push(silence);
-  }
-
-  // Synthesize speech using Azure TTS
-  private async synthesizeSpeech(text: string, voice: 'thai' | 'english'): Promise<ArrayBuffer> {
-    try {
-      const audioData = await this.azureTTS.synthesizeToBuffer(
-        text,
-        voice,
-        this.config.voiceGender
-      );
-      return audioData;
-    } catch (error) {
-      console.error(`Error synthesizing ${voice} speech:`, error);
-      throw error;
-    }
-  }
-
-  // Combine all audio segments into a single file
-  private combineSegments(): ArrayBuffer {
-    return AudioCombiner.combineWavBuffers(this.audioSegments);
   }
 } 

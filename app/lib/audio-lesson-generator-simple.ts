@@ -12,6 +12,7 @@ export interface SimpleAudioLessonConfig {
   phraseRepetitions?: number; // How many times to repeat the English->Thai pattern
   speed?: number; // Speed of audio (0.5 = half speed, 1 = normal, 2 = double speed)
   mixSpeed?: boolean; // Whether to vary speed for each repetition
+  includePolitenessParticles?: boolean; // Whether to include politeness particles (ka/krub)
 }
 
 const DEFAULT_CONFIG: SimpleAudioLessonConfig = {
@@ -24,6 +25,7 @@ const DEFAULT_CONFIG: SimpleAudioLessonConfig = {
   phraseRepetitions: 2, // Default to 2 repetitions of English->Thai
   speed: 1.0, // Normal speed
   mixSpeed: false,
+  includePolitenessParticles: true, // Default to including politeness particles
 };
 
 export class SimpleAudioLessonGenerator {
@@ -213,18 +215,44 @@ export class SimpleAudioLessonGenerator {
   }
 
   /**
-   * Get appropriate Thai text based on gender setting
+   * Get appropriate Thai text based on gender setting and politeness particle configuration
    */
   private getThaiText(card: { 
     thai: string; 
     thaiMasculine?: string; 
     thaiFeminine?: string 
   }): string {
+    let thaiText: string;
+    
+    // First get the appropriate text based on gender
     if (this.config.voiceGender === 'male' && card.thaiMasculine) {
-      return card.thaiMasculine;
+      thaiText = card.thaiMasculine;
     } else if (this.config.voiceGender === 'female' && card.thaiFeminine) {
-      return card.thaiFeminine;
+      thaiText = card.thaiFeminine;
+    } else {
+      thaiText = card.thai;
     }
-    return card.thai;
+    
+    // Handle politeness particles
+    if (this.config.includePolitenessParticles === false) {
+      // Remove politeness particles if disabled
+      thaiText = thaiText.replace(/( krap| krub| ka| ค่ะ| ครับ)$/i, '');
+    } else {
+      // Add politeness particle if not present and configuration allows it (default behavior)
+      const hasPoliteParticle = /( krap| krub| ka| ค่ะ| ครับ)$/i.test(thaiText);
+      
+      if (!hasPoliteParticle) {
+        // Don't add particles to questions or certain phrases
+        const isQuestion = /( ไหม| มั้ย| หรือ| อะไร| ทำไม| อย่างไร| ที่ไหน)$/i.test(thaiText);
+        
+        if (!isQuestion) {
+          // Add appropriate politeness particle
+          const particle = this.config.voiceGender === 'female' ? ' ka' : ' krap';
+          thaiText += particle;
+        }
+      }
+    }
+    
+    return thaiText;
   }
 } 

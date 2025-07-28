@@ -34,7 +34,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple'>('pimsleur');
+  const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple'>('simple');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -60,9 +60,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
     pauseBetweenPhrases: 2000,
     loops: 3,
     phraseRepetitions: 2,
-    speed: 1.0,  // Add initial speed value
+    speed: 1.0,
     mixSpeed: false,
     includeMnemonics: false,
+    includePolitenessParticles: true, // New option for politeness particles
   });
 
   const { startGeneration, updateProgress, completeGeneration, failGeneration } = useGeneration();
@@ -82,9 +83,9 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
     
     setIsGenerating(true);
     
-    // Start generation progress
+    // Start generation progress immediately
     const mode = lessonMode === 'pimsleur' ? 'audio-pimsleur' : 'audio-simple';
-    startGeneration(mode, 0); // We don't know phrase count here, so use 0
+    startGeneration(mode, 0);
     
     // Audio generation steps
     const audioSteps = lessonMode === 'pimsleur' ? [
@@ -226,8 +227,8 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
           <Volume2 />
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px] bg-[#1f1f1f] border-[#404040] text-[#E0E0E0]">
-        <DialogHeader>
+      <DialogContent className="w-[95vw] max-w-[525px] max-h-[90vh] bg-[#1f1f1f] border-[#404040] text-[#E0E0E0] overflow-y-auto">
+        <DialogHeader className="sticky top-0 bg-[#1f1f1f] pb-4 z-10">
           <DialogTitle className="text-[#E0E0E0] text-xl font-semibold">Generate Audio Lesson</DialogTitle>
           <DialogDescription className="text-[#BDBDBD]">
             Create an audio lesson for "{setName}" with {phraseCount} phrases.
@@ -235,11 +236,11 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-6 py-4">
+        <div className="grid gap-6 py-4 pb-6">
           {/* Mode Selection */}
           <div className="grid gap-3">
             <Label className="text-[#E0E0E0] font-medium">Lesson Style</Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 onClick={() => setLessonMode('pimsleur')}
                 className={`flex items-center justify-start gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -248,7 +249,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
                     : 'bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] hover:bg-[#4C4C4C]'
                 }`}
               >
-                <Brain className="w-5 h-5" />
+                <Brain className="w-5 h-5 flex-shrink-0" />
                 <div className="text-left">
                   <div className="font-medium">Guided Lesson</div>
                   <div className="text-xs opacity-80">For interactive learning</div>
@@ -262,7 +263,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
                     : 'bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] hover:bg-[#4C4C4C]'
                 }`}
               >
-                <Repeat className="w-5 h-5" />
+                <Repeat className="w-5 h-5 flex-shrink-0" />
                 <div className="text-left">
                   <div className="font-medium">Repetition Mode</div>
                   <div className="text-xs opacity-80">For sleep learning</div>
@@ -270,6 +271,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
               </button>
             </div>
           </div>
+
           {/* Voice Selection */}
           <div className="grid gap-3">
             <Label htmlFor="voice" className="text-[#E0E0E0] font-medium">Voice Gender</Label>
@@ -308,13 +310,34 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
                 <p>• Total loops: {simpleConfig.loops || 3}x through all phrases</p>
                 <p>• Perfect for passive listening or sleep learning</p>
                 {simpleConfig.includeMnemonics && <p>• Mnemonics included</p>}
+                {simpleConfig.includePolitenessParticles && <p>• Politeness particles included</p>}
               </>
             )}
           </div>
 
+          {/* Politeness Particles Option */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="include-politeness"
+              checked={lessonMode === 'pimsleur' ? true : (simpleConfig.includePolitenessParticles || false)}
+              onChange={(e) => {
+                if (lessonMode === 'simple') {
+                  setSimpleConfig({ ...simpleConfig, includePolitenessParticles: e.target.checked });
+                }
+              }}
+              disabled={lessonMode === 'pimsleur'}
+              className="w-4 h-4 text-[#A9C4FC] bg-[#3C3C3C] border-[#404040] rounded focus:ring-[#A9C4FC] focus:ring-2 disabled:opacity-50"
+            />
+            <Label htmlFor="include-politeness" className="text-[#E0E0E0] cursor-pointer">
+              Include politeness particles ({(lessonMode === 'pimsleur' ? config.voiceGender : simpleConfig.voiceGender) === 'female' ? 'ka' : 'krub'})
+              {lessonMode === 'pimsleur' && <span className="text-xs text-[#BDBDBD] ml-2">(always included in guided lessons)</span>}
+            </Label>
+          </div>
+
           {/* Include Mnemonics Option for Repetition Mode */}
           {lessonMode === 'simple' && (
-            <div className="flex items-center space-x-2 mt-4">
+            <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 id="include-mnemonics"
@@ -330,7 +353,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
 
           {/* Repetition Settings for Simple Mode */}
           {lessonMode === 'simple' && (
-            <div className="mt-4 space-y-4">
+            <div className="space-y-4">
               {/* Phrase Repetitions */}
               <div className="grid gap-2">
                 <Label htmlFor="phrase-repetitions" className="text-[#E0E0E0] text-sm">
@@ -519,23 +542,6 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
               </div>
               
               <div className="grid gap-2">
-                <Label htmlFor="loops" className="text-xs text-[#BDBDBD]">
-                  Total loops: {simpleConfig.loops}x
-                </Label>
-                <Slider
-                  id="loops"
-                  min={1}
-                  max={10}
-                  step={1}
-                  value={[simpleConfig.loops || 3]}
-                  onValueChange={(value) => setSimpleConfig({
-                    ...simpleConfig,
-                    loops: value[0],
-                  })}
-                />
-              </div>
-              
-              <div className="grid gap-2">
                 <Label htmlFor="pause-between" className="text-xs text-[#BDBDBD]">
                   Pause between phrases: {(simpleConfig.pauseBetweenPhrases || 2000) / 1000}s
                 </Label>
@@ -557,7 +563,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
 
         {/* Audio Player Section */}
         {audioUrl && (
-          <div className="border border-[#404040] rounded-lg p-4 space-y-3 bg-[#2C2C2C]">
+          <div className="border border-[#404040] rounded-lg p-4 space-y-3 bg-[#2C2C2C] mx-6 mb-4">
             <div className="flex items-center justify-between">
               <div className="text-sm font-medium text-[#E0E0E0] flex items-center gap-2">
                 <FileAudio className="w-4 h-4 text-[#A9C4FC]" />
@@ -600,10 +606,18 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
           </div>
         )}
 
-        <div className="flex justify-between items-center pt-4">
+        {/* Generation Info Message */}
+        {!audioUrl && (
+          <div className="text-sm text-[#BDBDBD] bg-[#2C2C2C] p-3 rounded-lg border border-[#404040] mx-6 mb-4">
+            <p className="mb-1">💡 <strong>Tip:</strong> Once generation starts, you can close this dialog and continue using the app.</p>
+            <p>The audio generation will continue in the background and you'll be notified when it's complete.</p>
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 px-6 pb-6 bg-[#1f1f1f] sticky bottom-0">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 px-3 py-2 bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] rounded-lg hover:bg-[#4C4C4C] transition-colors"
+            className="flex items-center gap-2 px-3 py-2 bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] rounded-lg hover:bg-[#4C4C4C] transition-colors order-2 sm:order-1"
           >
             <Settings2 className="w-4 h-4" />
             {showAdvanced ? 'Hide' : 'Show'} Advanced
@@ -612,7 +626,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
           <button 
             onClick={handleGenerate} 
             disabled={isGenerating}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all order-1 sm:order-2 w-full sm:w-auto ${
               isGenerating 
                 ? 'bg-[#666666] text-[#999999] cursor-not-allowed' 
                 : 'bg-[#A9C4FC] text-[#121212] hover:bg-[#BB86FC]'

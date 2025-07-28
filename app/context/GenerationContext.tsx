@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback } from 'react'
 
 type GenerationMode = 'auto' | 'manual' | 'audio-pimsleur' | 'audio-simple'
 

@@ -21,7 +21,7 @@ export function GenerationStep({
   onClose: _onClose,
   onOpenSetManager: _onOpenSetManager
 }: GenerationStepProps) {
-  const { startGeneration, updateProgress, completeGeneration, failGeneration } = useGeneration();
+  const { startGeneration, completeGeneration, failGeneration } = useGeneration();
   const { addSet: _addSet, refreshSets } = useSet();
   const [hasStarted, setHasStarted] = useState(false);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -43,7 +43,6 @@ export function GenerationStep({
       startGeneration(state.mode || 'auto', phraseCount);
       
       try {
-        updateProgress(10, 'Preparing generation...');
         
         // Start simulated progress updates
         let simulatedProgress = 10;
@@ -59,7 +58,7 @@ export function GenerationStep({
                 'Generating flashcards...'
               ];
               const messageIndex = Math.floor((simulatedProgress / 70) * messages.length);
-              updateProgress(simulatedProgress, messages[Math.min(messageIndex, messages.length - 1)]);
+              // updateProgress(simulatedProgress, messages[Math.min(messageIndex, messages.length - 1)]); // Removed updateProgress
             } else {
               const messages = [
                 'Contacting AI service...',
@@ -69,7 +68,7 @@ export function GenerationStep({
                 'Creating flashcards...'
               ];
               const messageIndex = Math.floor((simulatedProgress / 70) * messages.length);
-              updateProgress(simulatedProgress, messages[Math.min(messageIndex, messages.length - 1)]);
+              // updateProgress(simulatedProgress, messages[Math.min(messageIndex, messages.length - 1)]); // Removed updateProgress
             }
           }
         }, 1000);
@@ -107,12 +106,12 @@ export function GenerationStep({
             clearInterval(progressIntervalRef.current);
           }
           
-          updateProgress(80, 'Saving your flashcards...');
+          // updateProgress(80, 'Saving your flashcards...'); // Removed updateProgress
           
           // The API already created the set, so we just need to refresh and switch to it
           await refreshSets();
           
-          updateProgress(100, 'Complete!');
+          // updateProgress(100, 'Complete!'); // Removed updateProgress
           
           // Small delay to show completion
           await new Promise(resolve => setTimeout(resolve, 500));
@@ -161,17 +160,17 @@ export function GenerationStep({
             clearInterval(progressIntervalRef.current);
           }
           
-          updateProgress(70, 'AI is finalizing your flashcards...');
+          // updateProgress(70, 'AI is finalizing your flashcards...'); // Removed updateProgress
           
           const result = await response.json();
           console.log('GenerationStep: API result:', result);
           
-          updateProgress(80, 'Saving your flashcards...');
+          // updateProgress(80, 'Saving your flashcards...'); // Removed updateProgress
           
           // The API already created the set, so we just need to refresh and switch to it
           await refreshSets();
           
-          updateProgress(100, 'Complete!');
+          // updateProgress(100, 'Complete!'); // Removed updateProgress
           
           // Small delay to show completion
           await new Promise(resolve => setTimeout(resolve, 500));

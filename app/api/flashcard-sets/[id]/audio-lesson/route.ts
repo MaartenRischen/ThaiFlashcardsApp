@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/app/lib/prisma';
 import { AudioLessonGenerator } from '@/app/lib/audio-lesson-generator';
 import { SimpleAudioLessonGenerator } from '@/app/lib/audio-lesson-generator-simple';
-import { auth } from '@clerk/nextjs/server';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
-import { INITIAL_PHRASES } from '@/app/data/phrases';
 
 export async function POST(
   request: NextRequest,

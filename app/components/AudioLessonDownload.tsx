@@ -273,18 +273,18 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
           <div className="text-sm text-[#BDBDBD] space-y-2 bg-[#2C2C2C] p-4 rounded-lg border border-[#404040]">
             {lessonMode === 'pimsleur' ? (
               <>
-                <p>• Practice pause: {(config.pauseDurationMs?.forPractice || 3000) / 1000}s</p>
-                <p>• Repetitions: {config.repetitions?.practice || 3} times per phrase</p>
+                <p>• Practice time: {(config.pauseDurationMs?.forPractice || 3000) / 1000} seconds to repeat each word</p>
+                <p>• Each phrase will be repeated {config.repetitions?.practice || 3} times</p>
               </>
             ) : (
               <>
-                <p>• Phrase repetitions: {simpleConfig.phraseRepetitions || 2}x</p>
-                <p>• Speed: {((simpleConfig.speed || 1) * 100).toFixed(0)}%</p>
-                {simpleConfig.mixSpeed && <p>• Speed variation enabled</p>}
-                <p>• Total loops: {simpleConfig.loops || 3}x through all phrases</p>
+                <p>• Each phrase will be repeated {simpleConfig.phraseRepetitions || 2} times in a row</p>
+                <p>• Speaking speed: {((simpleConfig.speed || 1) * 100).toFixed(0)}% of normal speed</p>
+                {simpleConfig.mixSpeed && <p>• Speed will vary between repetitions for better learning</p>}
+                <p>• The entire set will be repeated {simpleConfig.loops || 3} times</p>
                 <p>• Perfect for passive listening or sleep learning</p>
-                {simpleConfig.includeMnemonics && <p>• Mnemonics included</p>}
-                {simpleConfig.includePolitenessParticles && <p>• Politeness particles included</p>}
+                {simpleConfig.includeMnemonics && <p>• Memory hints (mnemonics) will be included in the audio</p>}
+                {simpleConfig.includePolitenessParticles && <p>• Polite endings (ka/krub) will be added</p>}
               </>
             )}
           </div>
@@ -316,7 +316,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
               className="w-4 h-4 text-[#A9C4FC] bg-[#3C3C3C] border-[#404040] rounded focus:ring-[#A9C4FC] focus:ring-2"
             />
             <Label htmlFor="include-politeness" className="text-[#E0E0E0] cursor-pointer">
-              Include politeness particles ({(lessonMode === 'pimsleur' ? config.voiceGender : simpleConfig.voiceGender) === 'female' ? 'ka' : 'krub'})
+              Add polite endings ({(lessonMode === 'pimsleur' ? config.voiceGender : simpleConfig.voiceGender) === 'female' ? 'ka' : 'krub'}) to phrases
             </Label>
           </div>
 
@@ -331,7 +331,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                 className="w-4 h-4 text-[#A9C4FC] bg-[#3C3C3C] border-[#404040] rounded focus:ring-[#A9C4FC] focus:ring-2"
               />
               <Label htmlFor="include-mnemonics" className="text-[#E0E0E0] cursor-pointer">
-                Include mnemonics in audio
+                Include memory hints (mnemonics) in the audio
               </Label>
             </div>
           )}
@@ -342,7 +342,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
               {/* Phrase Repetitions */}
               <div className="grid gap-2">
                 <Label htmlFor="phrase-repetitions" className="text-[#E0E0E0] text-sm">
-                  Phrase Repetitions: {simpleConfig.phraseRepetitions || 2}x
+                  Number of times to repeat each phrase in a row: {simpleConfig.phraseRepetitions || 2}
                 </Label>
                 <Slider
                   id="phrase-repetitions"
@@ -358,7 +358,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
               {/* Total Loops */}
               <div className="grid gap-2">
                 <Label htmlFor="loops" className="text-[#E0E0E0] text-sm">
-                  Total Loops: {simpleConfig.loops || 3}x
+                  Number of times to repeat the entire set: {simpleConfig.loops || 3}
                 </Label>
                 <Slider
                   id="loops"
@@ -374,7 +374,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
               {/* Speed Control */}
               <div className="grid gap-2">
                 <Label htmlFor="speed" className="text-[#E0E0E0] text-sm">
-                  Speed: {((simpleConfig.speed || 1) * 100).toFixed(0)}%
+                  Speaking speed: {((simpleConfig.speed || 1) * 100).toFixed(0)}% of normal speed
                 </Label>
                 <Slider
                   id="speed"
@@ -397,7 +397,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                   className="w-4 h-4 text-[#A9C4FC] bg-[#3C3C3C] border-[#404040] rounded focus:ring-[#A9C4FC] focus:ring-2"
                 />
                 <Label htmlFor="mix-speed" className="text-[#E0E0E0] cursor-pointer">
-                  Mix speed (vary speed for each repetition)
+                  Vary the speaking speed between repetitions (helps with learning)
                 </Label>
               </div>
             </div>
@@ -413,7 +413,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="practice-pause" className="text-xs text-[#BDBDBD]">
-                      Practice Pause: {(config.pauseDurationMs?.forPractice || 3000) / 1000}s
+                      Time given to practice each word: {(config.pauseDurationMs?.forPractice || 3000) / 1000} seconds
                     </Label>
                   </div>
                   <Slider
@@ -435,7 +435,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="answer-pause" className="text-xs text-[#BDBDBD]">
-                      Before Answer: {(config.pauseDurationMs?.beforeAnswer || 2000) / 1000}s
+                      Time before showing the answer: {(config.pauseDurationMs?.beforeAnswer || 2000) / 1000} seconds
                     </Label>
                   </div>
                   <Slider
@@ -454,55 +454,6 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                   />
                 </div>
               </div>
-
-              {/* Repetitions */}
-              <div className="grid gap-4">
-                <h4 className="text-sm font-medium text-[#A9C4FC]">Repetitions</h4>
-                
-                <div className="grid gap-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="intro-reps" className="text-xs text-[#BDBDBD]">
-                      Introduction: {config.repetitions?.introduction || 2}x
-                    </Label>
-                  </div>
-                  <Slider
-                    id="intro-reps"
-                    min={1}
-                    max={4}
-                    step={1}
-                    value={[config.repetitions?.introduction || 2]}
-                    onValueChange={(value) => setConfig({
-                      ...config,
-                      repetitions: {
-                        ...config.repetitions!,
-                        introduction: value[0],
-                      },
-                    })}
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="practice-reps" className="text-xs text-[#BDBDBD]">
-                      Practice: {config.repetitions?.practice || 3}x
-                    </Label>
-                  </div>
-                  <Slider
-                    id="practice-reps"
-                    min={1}
-                    max={5}
-                    step={1}
-                    value={[config.repetitions?.practice || 3]}
-                    onValueChange={(value) => setConfig({
-                      ...config,
-                      repetitions: {
-                        ...config.repetitions!,
-                        practice: value[0],
-                      },
-                    })}
-                  />
-                </div>
-              </div>
             </>
           )}
           
@@ -510,25 +461,8 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
           {showAdvanced && lessonMode === 'simple' && (
             <div className="grid gap-4 pt-4 border-t border-[#404040]">
               <div className="grid gap-2">
-                <Label htmlFor="simple-reps" className="text-xs text-[#BDBDBD]">
-                  Repetitions per phrase: {simpleConfig.repetitions}x
-                </Label>
-                <Slider
-                  id="simple-reps"
-                  min={1}
-                  max={5}
-                  step={1}
-                  value={[simpleConfig.repetitions || 3]}
-                  onValueChange={(value) => setSimpleConfig({
-                    ...simpleConfig,
-                    repetitions: value[0],
-                  })}
-                />
-              </div>
-              
-              <div className="grid gap-2">
                 <Label htmlFor="pause-between" className="text-xs text-[#BDBDBD]">
-                  Pause between phrases: {(simpleConfig.pauseBetweenPhrases || 2000) / 1000}s
+                  Silence between phrases: {(simpleConfig.pauseBetweenPhrases || 2000) / 1000} seconds
                 </Label>
                 <Slider
                   id="pause-between"

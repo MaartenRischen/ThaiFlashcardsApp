@@ -130,7 +130,7 @@ interface MnemonicsListModalProps {
   isOpen: boolean;
   onClose: () => void;
   allPhrases: Phrase[];
-  userMnemonics: { [key: number]: string };
+  userMnemonics: {[setId: string]: {[phraseId: string]: string}};
   onReset: () => void;
 }
 
@@ -239,7 +239,8 @@ export default function ThaiFlashcards() {
   const [randomSentence, setRandomSentence] = useState<ExampleSentence | null>(null);
   const [voicesLoaded, setVoicesLoaded] = useState(false);
   const [showAdminSettings, setShowAdminSettings] = useState(false);
-  const [mnemonics, setMnemonics] = useState<{[key: number]: string}>({});
+  // Change mnemonic state to be per-set
+  const [mnemonics, setMnemonics] = useState<{[setId: string]: {[phraseId: string]: string}}>({});
   const [isPoliteMode, setIsPoliteMode] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('isPoliteMode');
@@ -508,23 +509,60 @@ export default function ThaiFlashcards() {
     }
   };
 
-  // Function to update mnemonics
-  const updateMnemonics = (cardIndex: number, newMnemonic: string) => {
-    const updated = { ...mnemonics, [cardIndex]: newMnemonic };
+  // Update mnemonic loading to be per-set
+  useEffect(() => {
+    const savedMnemonics = localStorage.getItem('mnemonics-v2');
+    if (savedMnemonics) {
+      try {
+        setMnemonics(JSON.parse(savedMnemonics));
+      } catch (error) {
+        console.error('Error loading mnemonics:', error);
+      }
+    }
+  }, []);
+
+  // Function to update mnemonics - now per set and phrase
+  const updateMnemonics = (phraseIndex: number, newMnemonic: string) => {
+    if (!activeSetId || phraseIndex === undefined) return;
+    
+    const phraseKey = `${phraseIndex}`;
+    const updated = {
+      ...mnemonics,
+      [activeSetId]: {
+        ...(mnemonics[activeSetId] || {}),
+        [phraseKey]: newMnemonic
+      }
+    };
     setMnemonics(updated);
-    // TODO: Decide if mnemonics should be per-set in storage/context
-    localStorage.setItem('mnemonics', JSON.stringify(updated));
+    localStorage.setItem('mnemonics-v2', JSON.stringify(updated));
   };
 
   const resetCurrentMnemonic = () => {
-    // TODO: Get default mnemonic from Phrase definition if available?
-    const { [index]: _, ...rest } = mnemonics;
-    setMnemonics(rest);
-    localStorage.setItem('mnemonics', JSON.stringify(rest));
+    if (!activeSetId) return;
+    
+    const phraseKey = `${index}`;
+    const updated = { ...mnemonics };
+    if (updated[activeSetId]) {
+      delete updated[activeSetId][phraseKey];
+      if (Object.keys(updated[activeSetId]).length === 0) {
+        delete updated[activeSetId];
+      }
+    }
+    setMnemonics(updated);
+    localStorage.setItem('mnemonics-v2', JSON.stringify(updated));
   };
 
   const handleMnemonicChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMnemonics(prev => ({ ...prev, [index]: e.target.value }));
+    if (!activeSetId) return;
+    
+    const phraseKey = `${index}`;
+    setMnemonics(prev => ({
+      ...prev,
+      [activeSetId]: {
+        ...(prev[activeSetId] || {}),
+        [phraseKey]: e.target.value
+      }
+    }));
   };
 
   // Function to reset all progress and mnemonics
@@ -532,7 +570,7 @@ export default function ThaiFlashcards() {
     if (confirm('Are you sure you want to reset all progress AND mnemonics? This cannot be undone.')) {
       updateSetProgress({}); 
       setMnemonics({});
-      localStorage.removeItem('mnemonics');
+      localStorage.removeItem('mnemonics-v2');
       setIndex(0);
       setShowAnswer(false);
       setRandomSentence(null);
@@ -669,16 +707,16 @@ export default function ThaiFlashcards() {
   };
 
   // Load mnemonics from localStorage
-  useEffect(() => {
-    const savedMnemonics = localStorage.getItem('mnemonics');
-    if (savedMnemonics) {
-      try {
-        setMnemonics(JSON.parse(savedMnemonics));
-      } catch (error) {
-        console.error('Error loading mnemonics:', error);
-      }
-    }
-  }, []);
+  // useEffect(() => {
+  //   const savedMnemonics = localStorage.getItem('mnemonics');
+  //   if (savedMnemonics) {
+  //     try {
+  //       setMnemonics(JSON.parse(savedMnemonics));
+  //     } catch (error) {
+  //       console.error('Error loading mnemonics:', error);
+  //     }
+  //   }
+  // }, []);
 
   // Function to reset current card
   const resetCard = () => {
@@ -689,9 +727,14 @@ export default function ThaiFlashcards() {
     
     // Clear mnemonic for this card
     const newMnemonics = { ...mnemonics };
-    delete newMnemonics[index];
+    if (activeSetId && newMnemonics[activeSetId]) {
+      delete newMnemonics[activeSetId][`${index}`];
+      if (Object.keys(newMnemonics[activeSetId]).length === 0) {
+        delete newMnemonics[activeSetId];
+      }
+    }
     setMnemonics(newMnemonics);
-    localStorage.setItem('mnemonics', JSON.stringify(newMnemonics));
+    localStorage.setItem('mnemonics-v2', JSON.stringify(newMnemonics));
     
     // Reset the card
     setShowAnswer(false);
@@ -1124,10 +1167,10 @@ export default function ThaiFlashcards() {
                   {showMnemonicHint && (
                     <div className="text-sm text-gray-400 p-2 border border-gray-600 rounded bg-gray-800 max-h-24 overflow-y-auto">
                       {((): React.ReactNode => { // Immediately invoked function expression (IIFE) to allow logging
-                        const userMnemonic = mnemonics[index];
+                        const userMnemonic = activeSetId ? mnemonics[activeSetId]?.[`${index}`] : undefined;
                         const defaultMnemonic = phrases[index]?.mnemonic;
                         const hintToShow = userMnemonic ?? defaultMnemonic ?? 'No hint available';
-                        console.log(`Rendering hint: user='${userMnemonic}', default='${defaultMnemonic}', showing='${hintToShow}'`);
+                        console.log(`Hint computation: userMnemonic="${userMnemonic}", defaultMnemonic="${defaultMnemonic}", hintToShow="${hintToShow}"`);
                         return hintToShow;
                       })()}
                     </div>
@@ -1303,12 +1346,12 @@ export default function ThaiFlashcards() {
                   
                   <textarea
                     value={(() => {
-                      const rawMnemonic = mnemonics[index] ?? phrases[index]?.mnemonic ?? '';
+                      const rawMnemonic = activeSetId ? (mnemonics[activeSetId]?.[`${index}`] ?? phrases[index]?.mnemonic ?? '') : (phrases[index]?.mnemonic ?? '');
                       // Replace Phom/Chan or Chan/Phom with correct gendered pronoun
                       return rawMnemonic.replace(/Phom\/Chan|Chan\/Phom/gi, isMale ? 'Phom' : 'Chan');
                     })()}
                     onChange={handleMnemonicChange}
-                    onBlur={() => updateMnemonics(index, mnemonics[index] ?? phrases[index]?.mnemonic ?? '')}
+                    onBlur={() => updateMnemonics(index, activeSetId ? (mnemonics[activeSetId]?.[`${index}`] ?? phrases[index]?.mnemonic ?? '') : (phrases[index]?.mnemonic ?? ''))}
                     placeholder="Create a memory aid to help remember this word..."
                     className="neumorphic-input w-full h-24 resize-none rounded-lg"
                   />

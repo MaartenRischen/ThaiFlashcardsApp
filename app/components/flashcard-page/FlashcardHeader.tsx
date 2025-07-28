@@ -12,6 +12,7 @@ interface FlashcardHeaderProps {
   onOpenSetManager: () => void;
   onOpenCards: () => void;
   onOpenSetWizard: () => void;
+  isMale: boolean;
 }
 
 export function FlashcardHeader({
@@ -20,6 +21,7 @@ export function FlashcardHeader({
   onOpenSetManager,
   onOpenCards,
   onOpenSetWizard,
+  isMale,
 }: FlashcardHeaderProps) {
   // Access the active set metadata to get the image URL
   const { availableSets, activeSetId } = useSet();
@@ -169,6 +171,7 @@ export function FlashcardHeader({
                 setId={activeSet.id}
                 setName={activeSet.name}
                 phraseCount={activeSet.phraseCount}
+                isMale={isMale}
               />
               <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Audio</span>
             </div>

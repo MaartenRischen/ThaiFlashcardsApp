@@ -28,9 +28,10 @@ interface AudioLessonDownloadProps {
   setId: string;
   setName: string;
   phraseCount: number;
+  isMale?: boolean;
 }
 
-export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLessonDownloadProps) {
+export function AudioLessonDownload({ setId, setName, phraseCount, isMale = false }: AudioLessonDownloadProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -39,7 +40,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [config, setConfig] = useState<Partial<AudioLessonConfig>>({
-    voiceGender: 'female',
+    voiceGender: isMale ? 'male' : 'female',
     pauseDurationMs: {
       afterInstruction: 1000,
       forPractice: 3000,
@@ -51,11 +52,11 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
       practice: 3,
       review: 2,
     },
-    includePolitenessParticles: false, // Default to NOT including politeness particles
+    includePolitenessParticles: false,
   });
   
   const [simpleConfig, setSimpleConfig] = useState<Partial<SimpleAudioLessonConfig>>({
-    voiceGender: 'female',
+    voiceGender: isMale ? 'male' : 'female',
     repetitions: 3,
     pauseBetweenRepetitions: 1000,
     pauseBetweenPhrases: 2000,
@@ -64,8 +65,14 @@ export function AudioLessonDownload({ setId, setName, phraseCount }: AudioLesson
     speed: 1.0,
     mixSpeed: false,
     includeMnemonics: false,
-    includePolitenessParticles: false, // Default to NOT including politeness particles
+    includePolitenessParticles: false,
   });
+
+  // Update voice gender when isMale prop changes
+  useEffect(() => {
+    setConfig(prev => ({ ...prev, voiceGender: isMale ? 'male' : 'female' }));
+    setSimpleConfig(prev => ({ ...prev, voiceGender: isMale ? 'male' : 'female' }));
+  }, [isMale]);
 
   const { startGeneration, completeGeneration, failGeneration } = useGeneration();
 

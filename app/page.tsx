@@ -1105,6 +1105,7 @@ export default function ThaiFlashcards() {
         onOpenCards={() => setShowCardsModal(true)}
         onOpenSetManager={() => setIsManagementModalOpen(true)}
         onOpenSetWizard={() => setShowSetWizardModal(true)}
+        isMale={isMale}
       />
 
       {/* Show testGenResult for debugging - Refined conditional and type guards */}

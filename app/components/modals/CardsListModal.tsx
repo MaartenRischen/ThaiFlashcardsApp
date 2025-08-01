@@ -13,13 +13,6 @@ interface CardsListModalProps {
   getCardStatus: (index: number) => string;
 }
 
-interface NewCardData {
-  english: string;
-  thai: string;
-  pronunciation: string;
-  mnemonic: string;
-}
-
 export function CardsListModal({
   isOpen,
   onClose,
@@ -31,14 +24,9 @@ export function CardsListModal({
   const [isEditMode, setIsEditMode] = useState(false);
   const [localPhrases, setLocalPhrases] = useState<Phrase[]>([]);
   const [showAddCard, setShowAddCard] = useState(false);
-  const [isSpellChecking, setIsSpellChecking] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [newCard, setNewCard] = useState<NewCardData>({
-    english: '',
-    thai: '',
-    pronunciation: '',
-    mnemonic: ''
-  });
+  const [newCardEnglish, setNewCardEnglish] = useState('');
 
   useEffect(() => {
     setLocalPhrases([...phrases]);
@@ -52,56 +40,65 @@ export function CardsListModal({
   };
 
   const handleAddCard = async () => {
-    if (!newCard.english || !newCard.thai) {
-      toast.error('Please fill in at least English and Thai fields');
+    if (!newCardEnglish.trim()) {
+      toast.error('Please enter an English word or phrase');
       return;
     }
 
-    // Spell check first
-    setIsSpellChecking(true);
+    setIsGenerating(true);
     try {
-      const response = await fetch('/api/spellcheck', {
+      // Step 1: Spell check the English phrase
+      const spellCheckResponse = await fetch('/api/spellcheck', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phrases: [{
-            english: newCard.english,
-            thai: newCard.thai,
-            thaiMasculine: newCard.thai,
-            thaiFeminine: newCard.thai,
-            pronunciation: newCard.pronunciation || newCard.thai,
-            mnemonic: newCard.mnemonic || undefined
-          }]
+          phrases: [newCardEnglish.trim()]
         })
       });
 
-      if (!response.ok) {
+      if (!spellCheckResponse.ok) {
         throw new Error('Spell check failed');
       }
 
-      const { correctedPhrases } = await response.json();
-      const correctedPhrase = correctedPhrases[0];
+      const { correctedPhrases } = await spellCheckResponse.json();
+      const correctedEnglish = correctedPhrases[0];
 
-      // Add the spell-checked phrase
-      const newPhrase: Phrase = {
-        english: correctedPhrase.english,
-        thai: correctedPhrase.thai,
-        thaiMasculine: correctedPhrase.thaiMasculine || correctedPhrase.thai,
-        thaiFeminine: correctedPhrase.thaiFeminine || correctedPhrase.thai,
-        pronunciation: correctedPhrase.pronunciation,
-        mnemonic: correctedPhrase.mnemonic,
-        examples: []
-      };
+      // Step 2: Generate Thai translation, pronunciation, and mnemonic
+      const generateResponse = await fetch('/api/generate-set', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'manual',
+          preferences: {
+            level: 'Beginner',
+            specificTopics: correctedEnglish,
+            manualPhrases: [correctedEnglish],
+            toneLevel: 5
+          },
+          test: false
+        })
+      });
 
+      if (!generateResponse.ok) {
+        throw new Error('Failed to generate translation');
+      }
+
+      const generationResult = await generateResponse.json();
+      if (!generationResult.phrases || generationResult.phrases.length === 0) {
+        throw new Error('No translation generated');
+      }
+
+      // Add the generated phrase to local phrases
+      const newPhrase = generationResult.phrases[0];
       setLocalPhrases([...localPhrases, newPhrase]);
-      setNewCard({ english: '', thai: '', pronunciation: '', mnemonic: '' });
+      setNewCardEnglish('');
       setShowAddCard(false);
       toast.success('Card added successfully');
     } catch (error) {
       console.error('Error adding card:', error);
       toast.error('Failed to add card');
     } finally {
-      setIsSpellChecking(false);
+      setIsGenerating(false);
     }
   };
 
@@ -133,7 +130,7 @@ export function CardsListModal({
     setLocalPhrases([...phrases]);
     setIsEditMode(false);
     setShowAddCard(false);
-    setNewCard({ english: '', thai: '', pronunciation: '', mnemonic: '' });
+    setNewCardEnglish('');
   };
 
   return (
@@ -248,71 +245,44 @@ export function CardsListModal({
               </button>
             )}
 
-            {/* New Card Form */}
+            {/* New Card Form - Now matching manual set creation */}
             {isEditMode && showAddCard && (
               <div className="p-4 bg-gray-800/50 border-t border-gray-700">
                 <h4 className="text-sm font-medium text-gray-300 mb-3">Add New Card</h4>
+                <p className="text-xs text-gray-400 mb-3">
+                  Enter an English word or phrase. We'll handle the Thai translation.
+                </p>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs text-gray-400">English *</label>
                     <input
                       type="text"
-                      value={newCard.english}
-                      onChange={(e) => setNewCard({ ...newCard, english: e.target.value })}
+                      value={newCardEnglish}
+                      onChange={(e) => setNewCardEnglish(e.target.value)}
                       className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
-                      placeholder="Enter English word or phrase"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-400">Thai *</label>
-                    <input
-                      type="text"
-                      value={newCard.thai}
-                      onChange={(e) => setNewCard({ ...newCard, thai: e.target.value })}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
-                      placeholder="Enter Thai translation"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-400">Pronunciation (optional)</label>
-                    <input
-                      type="text"
-                      value={newCard.pronunciation}
-                      onChange={(e) => setNewCard({ ...newCard, pronunciation: e.target.value })}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
-                      placeholder="Enter pronunciation guide"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-400">Mnemonic (optional)</label>
-                    <textarea
-                      value={newCard.mnemonic}
-                      onChange={(e) => setNewCard({ ...newCard, mnemonic: e.target.value })}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm resize-none"
-                      rows={2}
-                      placeholder="Enter memory aid"
+                      placeholder="Enter an English word or phrase"
+                      disabled={isGenerating}
                     />
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => {
                         setShowAddCard(false);
-                        setNewCard({ english: '', thai: '', pronunciation: '', mnemonic: '' });
+                        setNewCardEnglish('');
                       }}
                       className="flex-1 px-3 py-2 text-sm bg-gray-600 hover:bg-gray-700 rounded-lg"
-                      disabled={isSpellChecking}
+                      disabled={isGenerating}
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleAddCard}
                       className="flex-1 px-3 py-2 text-sm bg-green-600 hover:bg-green-700 rounded-lg flex items-center justify-center gap-2"
-                      disabled={isSpellChecking || !newCard.english || !newCard.thai}
+                      disabled={isGenerating || !newCardEnglish.trim()}
                     >
-                      {isSpellChecking ? (
+                      {isGenerating ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          Checking...
+                          Generating...
                         </>
                       ) : (
                         <>

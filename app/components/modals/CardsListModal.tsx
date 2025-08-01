@@ -25,11 +25,12 @@ export function CardsListModal({
   const [localPhrases, setLocalPhrases] = useState<Phrase[]>([]);
   const [showAddCard, setShowAddCard] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [newCardEnglish, setNewCardEnglish] = useState('');
 
   useEffect(() => {
     setLocalPhrases([...phrases]);
+    setHasUnsavedChanges(false);
   }, [phrases]);
 
   if (!isOpen) return null;
@@ -37,11 +38,17 @@ export function CardsListModal({
   const handleDeleteCard = (index: number) => {
     const updatedPhrases = localPhrases.filter((_, i) => i !== index);
     setLocalPhrases(updatedPhrases);
+    setHasUnsavedChanges(true);
   };
 
   const handleAddCard = async () => {
     if (!newCardEnglish.trim()) {
       toast.error('Please enter an English word or phrase');
+      return;
+    }
+
+    if (!activeSetId) {
+      toast.error('No active set selected');
       return;
     }
 
@@ -84,12 +91,20 @@ export function CardsListModal({
         throw new Error('No translation generated');
       }
 
-      // Add the generated phrase to local phrases
+      // Step 3: Immediately save the new card to the set
       const newPhrase = generationResult.phrases[0];
-      setLocalPhrases([...localPhrases, newPhrase]);
-      setNewCardEnglish('');
-      setShowAddCard(false);
-      toast.success('Card added successfully');
+      const updatedPhrases = [...localPhrases, newPhrase];
+      
+      const success = await saveSetContent(activeSetId, updatedPhrases);
+      if (success) {
+        setLocalPhrases(updatedPhrases);
+        await refreshSets();
+        setNewCardEnglish('');
+        setShowAddCard(false);
+        toast.success('Card added successfully');
+      } else {
+        throw new Error('Failed to save card');
+      }
     } catch (error) {
       console.error('Error adding card:', error);
       toast.error('Failed to add card');
@@ -104,21 +119,19 @@ export function CardsListModal({
       return;
     }
 
-    setIsSaving(true);
     try {
       const success = await saveSetContent(activeSetId, localPhrases);
       if (success) {
         await refreshSets();
         toast.success('Changes saved successfully');
         setIsEditMode(false);
+        setHasUnsavedChanges(false);
       } else {
         toast.error('Failed to save changes');
       }
     } catch (error) {
       console.error('Error saving changes:', error);
       toast.error('Failed to save changes');
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -127,10 +140,16 @@ export function CardsListModal({
     setIsEditMode(false);
     setShowAddCard(false);
     setNewCardEnglish('');
+    setHasUnsavedChanges(false);
+  };
+
+  const handleClose = () => {
+    // Allow closing even during generation
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={handleClose}>
       <div className="bg-gray-900 rounded-xl p-4 max-w-2xl w-full max-h-[85vh] overflow-hidden relative flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-bold text-blue-300">Cards in Current Set</h3>
@@ -148,26 +167,22 @@ export function CardsListModal({
                 <button
                   onClick={handleCancelEdit}
                   className="px-3 py-1 text-sm bg-gray-600 hover:bg-gray-700 rounded-lg flex items-center gap-2"
-                  disabled={isSaving}
                 >
                   <X className="w-4 h-4" />
                   Cancel
                 </button>
-                <button
-                  onClick={handleSaveChanges}
-                  className="px-3 py-1 text-sm bg-green-600 hover:bg-green-700 rounded-lg flex items-center gap-2"
-                  disabled={isSaving}
-                >
-                  {isSaving ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
+                {hasUnsavedChanges && (
+                  <button
+                    onClick={handleSaveChanges}
+                    className="px-3 py-1 text-sm bg-green-600 hover:bg-green-700 rounded-lg flex items-center gap-2"
+                  >
                     <Check className="w-4 h-4" />
-                  )}
-                  Save Changes
-                </button>
+                    Save Changes
+                  </button>
+                )}
               </>
             )}
-            <button className="text-gray-400 hover:text-white text-2xl ml-2" onClick={onClose}>&times;</button>
+            <button className="text-gray-400 hover:text-white text-2xl ml-2" onClick={handleClose}>&times;</button>
           </div>
         </div>
 
@@ -241,7 +256,7 @@ export function CardsListModal({
               </button>
             )}
 
-            {/* New Card Form - Now matching manual set creation */}
+            {/* New Card Form */}
             {isEditMode && showAddCard && (
               <div className="p-4 bg-gray-800/50 border-t border-gray-700">
                 <h4 className="text-sm font-medium text-gray-300 mb-3">Add New Card</h4>
@@ -294,10 +309,18 @@ export function CardsListModal({
           </div>
         </div>
 
-        {isEditMode && (
+        {isEditMode && !isGenerating && (
+          <div className="mt-3 p-3 bg-blue-900/20 rounded-lg border border-blue-700/50">
+            <p className="text-xs text-blue-400">
+              <strong>Tip:</strong> New cards are saved automatically. Use the delete button to remove unwanted cards.
+            </p>
+          </div>
+        )}
+
+        {isGenerating && (
           <div className="mt-3 p-3 bg-yellow-900/20 rounded-lg border border-yellow-700/50">
             <p className="text-xs text-yellow-400">
-              <strong>Note:</strong> Changes will be saved to the current set. For default sets, you can reset them to original state in Settings.
+              <strong>Generating card...</strong> You can close this window and the card will be added automatically.
             </p>
           </div>
         )}

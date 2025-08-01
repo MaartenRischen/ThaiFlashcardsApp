@@ -99,7 +99,7 @@ export async function POST(_request: Request) {
     console.log(`API Route /api/flashcard-sets POST: Metadata saved with ID: ${newMetaId}`);
 
     // 2. Save content
-    const contentSaved = await storage.saveSetContent(newMetaId, phrases);
+    const contentSaved = await storage.saveSetContentDirect(newMetaId, phrases);
     if (!contentSaved) throw new Error("Failed to save content.");
     console.log(`API Route /api/flashcard-sets POST: Content saved for set ID: ${newMetaId}`);
 

@@ -272,7 +272,7 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
     newSetMetaData.id = createdSet.id;
     
     // Save the phrases
-    const contentSaved = await storage.saveSetContent(createdSet.id, generationResult.phrases);
+    const contentSaved = await storage.saveSetContentDirect(createdSet.id, generationResult.phrases);
     if (!contentSaved) {
       // Cleanup on failure
       await storage.deleteSetMetaData(createdSet.id);
@@ -548,7 +548,7 @@ export async function POST(request: Request) {
     console.log(`API Route: Metadata saved with ID: ${newMetaId}`);
 
     // Save content
-    const contentSaved = await storage.saveSetContent(newMetaId, generationResult.phrases);
+    const contentSaved = await storage.saveSetContentDirect(newMetaId, generationResult.phrases);
     if (!contentSaved) throw new Error("Failed to save content");
     console.log(`API Route: Content saved for set ID: ${newMetaId}`);
 

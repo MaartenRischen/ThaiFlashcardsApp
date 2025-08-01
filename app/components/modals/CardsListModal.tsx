@@ -69,14 +69,10 @@ export function CardsListModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mode: 'manual',
-          preferences: {
-            level: 'Beginner',
-            specificTopics: correctedEnglish,
-            manualPhrases: [correctedEnglish],
-            toneLevel: 5
-          },
-          test: false
-        })
+          englishPhrases: [correctedEnglish],
+          totalCount: 1
+        }),
+        credentials: 'include'
       });
 
       if (!generateResponse.ok) {

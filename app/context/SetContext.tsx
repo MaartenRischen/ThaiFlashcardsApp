@@ -22,6 +22,7 @@ interface SetContextProps {
   exportSet: (id: string) => Promise<void>;
   renameSet: (id: string, newName: string) => Promise<void>;
   refreshSets: () => Promise<void>;
+  reloadActiveSet: () => Promise<void>;
   setAvailableSets: React.Dispatch<React.SetStateAction<SetMetaData[]>>;
 }
 
@@ -518,6 +519,16 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     setActiveSetId(id); // Triggers useEffect to load new set data
   }, [activeSetId]);
 
+  // --- reloadActiveSet (Force reload current set content) --- 
+  const reloadActiveSet = useCallback(async () => {
+    if (!activeSetId) {
+      console.warn('SetContext: Cannot reload active set - no active set ID');
+      return;
+    }
+    console.log(`SetContext: Force reloading active set ${activeSetId}`);
+    await loadSetData(activeSetId);
+  }, [activeSetId, loadSetData]);
+
   // --- Refactor exportSet --- 
   const exportSet = useCallback(async (id: string) => {
     if (!isLoaded) return;
@@ -650,6 +661,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       exportSet,
       renameSet,
       refreshSets,
+      reloadActiveSet,
       setAvailableSets
   }), [
     availableSets,
@@ -663,7 +675,8 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     deleteSet,
     exportSet,
     renameSet,
-    refreshSets
+    refreshSets,
+    reloadActiveSet
   ]);
 
   return (

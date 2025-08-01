@@ -20,7 +20,7 @@ export function CardsListModal({
   onSelectCard,
   getCardStatus
 }: CardsListModalProps) {
-  const { activeSetId, refreshSets } = useSet();
+  const { activeSetId, refreshSets, reloadActiveSet } = useSet();
   const [isEditMode, setIsEditMode] = useState(false);
   const [localPhrases, setLocalPhrases] = useState<Phrase[]>([]);
   const [showAddCard, setShowAddCard] = useState(false);
@@ -99,6 +99,7 @@ export function CardsListModal({
       if (success) {
         setLocalPhrases(updatedPhrases);
         await refreshSets();
+        await reloadActiveSet();
         setNewCardEnglish('');
         setShowAddCard(false);
         toast.success('Card added successfully');
@@ -123,6 +124,7 @@ export function CardsListModal({
       const success = await saveSetContent(activeSetId, localPhrases);
       if (success) {
         await refreshSets();
+        await reloadActiveSet();
         toast.success('Changes saved successfully');
         setIsEditMode(false);
         setHasUnsavedChanges(false);

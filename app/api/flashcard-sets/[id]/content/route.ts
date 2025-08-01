@@ -86,7 +86,7 @@ export async function POST(
     }
 
     console.log(`API Route /api/flashcard-sets/${setId}/content POST: Saving content for user: ${userId}, setId: ${setId}`);
-    const contentSaved = await storage.saveSetContent(setId, phrases);
+    const contentSaved = await storage.saveSetContentDirect(setId, phrases);
 
     if (!contentSaved) {
       throw new Error("Failed to save set content");

@@ -21,6 +21,7 @@ export {
 export {
   getSetContent,
   saveSetContent,
+  saveSetContentDirect,
   deleteSetContent
 } from './set-content';
 

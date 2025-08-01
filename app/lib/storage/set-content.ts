@@ -82,10 +82,10 @@ export async function getSetContent(id: string): Promise<Phrase[]> {
   }
 }
 
-// Save phrases for a specific set (replaces all existing phrases)
-export async function saveSetContent(setId: string, phrases: Phrase[]): Promise<boolean> {
+// Server-side function to save phrases directly using Prisma (for API routes)
+export async function saveSetContentDirect(setId: string, phrases: Phrase[]): Promise<boolean> {
   if (!setId || !phrases || phrases.length === 0) {
-    console.error("saveSetContent called without setId or with empty phrases array.");
+    console.error("saveSetContentDirect called without setId or with empty phrases array.");
     return false;
   }
 
@@ -130,6 +130,38 @@ export async function saveSetContent(setId: string, phrases: Phrase[]): Promise<
 
     console.log(`Successfully saved ${phrases.length} Phrases for setId: ${setId}`);
     return true;
+
+  } catch (error) {
+    console.error('Unexpected error in saveSetContentDirect:', error);
+    return false;
+  }
+}
+
+// Client-side function to save phrases via API call (for browser use)
+export async function saveSetContent(setId: string, phrases: Phrase[]): Promise<boolean> {
+  if (!setId || !phrases || phrases.length === 0) {
+    console.error("saveSetContent called without setId or with empty phrases array.");
+    return false;
+  }
+
+  try {
+    const response = await fetch(`/api/flashcard-sets/${setId}/content`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        phrases: phrases
+      }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to save set content: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.success === true;
 
   } catch (error) {
     console.error('Unexpected error in saveSetContent:', error);

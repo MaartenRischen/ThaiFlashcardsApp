@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Phrase } from '@/app/lib/set-generator';
+import { Trash2, Plus, Edit3, Check, X, Loader2 } from 'lucide-react';
+import { useSet } from '@/app/context/SetContext';
+import { saveSetContent } from '@/app/lib/storage/set-content';
+import { toast } from 'sonner';
 
 interface CardsListModalProps {
   isOpen: boolean;
@@ -9,6 +13,13 @@ interface CardsListModalProps {
   getCardStatus: (index: number) => string;
 }
 
+interface NewCardData {
+  english: string;
+  thai: string;
+  pronunciation: string;
+  mnemonic: string;
+}
+
 export function CardsListModal({
   isOpen,
   onClose,
@@ -16,60 +27,314 @@ export function CardsListModal({
   onSelectCard,
   getCardStatus
 }: CardsListModalProps) {
+  const { activeSetId, refreshSets } = useSet();
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [localPhrases, setLocalPhrases] = useState<Phrase[]>([]);
+  const [showAddCard, setShowAddCard] = useState(false);
+  const [isSpellChecking, setIsSpellChecking] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [newCard, setNewCard] = useState<NewCardData>({
+    english: '',
+    thai: '',
+    pronunciation: '',
+    mnemonic: ''
+  });
+
+  useEffect(() => {
+    setLocalPhrases([...phrases]);
+  }, [phrases]);
+
   if (!isOpen) return null;
+
+  const handleDeleteCard = (index: number) => {
+    const updatedPhrases = localPhrases.filter((_, i) => i !== index);
+    setLocalPhrases(updatedPhrases);
+  };
+
+  const handleAddCard = async () => {
+    if (!newCard.english || !newCard.thai) {
+      toast.error('Please fill in at least English and Thai fields');
+      return;
+    }
+
+    // Spell check first
+    setIsSpellChecking(true);
+    try {
+      const response = await fetch('/api/spellcheck', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phrases: [{
+            english: newCard.english,
+            thai: newCard.thai,
+            thaiMasculine: newCard.thai,
+            thaiFeminine: newCard.thai,
+            pronunciation: newCard.pronunciation || newCard.thai,
+            mnemonic: newCard.mnemonic || undefined
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Spell check failed');
+      }
+
+      const { correctedPhrases } = await response.json();
+      const correctedPhrase = correctedPhrases[0];
+
+      // Add the spell-checked phrase
+      const newPhrase: Phrase = {
+        english: correctedPhrase.english,
+        thai: correctedPhrase.thai,
+        thaiMasculine: correctedPhrase.thaiMasculine || correctedPhrase.thai,
+        thaiFeminine: correctedPhrase.thaiFeminine || correctedPhrase.thai,
+        pronunciation: correctedPhrase.pronunciation,
+        mnemonic: correctedPhrase.mnemonic,
+        examples: []
+      };
+
+      setLocalPhrases([...localPhrases, newPhrase]);
+      setNewCard({ english: '', thai: '', pronunciation: '', mnemonic: '' });
+      setShowAddCard(false);
+      toast.success('Card added successfully');
+    } catch (error) {
+      console.error('Error adding card:', error);
+      toast.error('Failed to add card');
+    } finally {
+      setIsSpellChecking(false);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!activeSetId) {
+      toast.error('No active set selected');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const success = await saveSetContent(activeSetId, localPhrases);
+      if (success) {
+        await refreshSets();
+        toast.success('Changes saved successfully');
+        setIsEditMode(false);
+      } else {
+        toast.error('Failed to save changes');
+      }
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      toast.error('Failed to save changes');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setLocalPhrases([...phrases]);
+    setIsEditMode(false);
+    setShowAddCard(false);
+    setNewCard({ english: '', thai: '', pronunciation: '', mnemonic: '' });
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-gray-900 rounded-xl p-4 max-w-md w-full max-h-[80vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
-        <button className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl" onClick={onClose}>&times;</button>
-        <h3 className="text-lg font-bold text-blue-300 mb-3">Cards in Current Set</h3>
-        <div className="bg-[#1a1b26] rounded-lg overflow-hidden">
-          {phrases.map((phrase, idx) => {
-            const status = getCardStatus(idx);
-            let color = '#6b7280';
-            let label = 'Unseen';
-            if (status === 'easy') { color = '#22c55e'; label = 'Easy'; }
-            else if (status === 'correct') { color = '#3b82f6'; label = 'Correct'; }
-            else if (status === 'wrong') { color = '#ef4444'; label = 'Wrong'; }
-            else if (status === 'unseen') { color = '#6b7280'; label = 'Unseen'; }
-            return (
-              <div
-                key={idx}
-                className="cursor-pointer border-b border-gray-700/50 last:border-b-0 hover:bg-[#1f2937]"
-                onClick={() => { onSelectCard(idx); onClose(); }}
+      <div className="bg-gray-900 rounded-xl p-4 max-w-2xl w-full max-h-[85vh] overflow-hidden relative flex flex-col" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-bold text-blue-300">Cards in Current Set</h3>
+          <div className="flex items-center gap-2">
+            {!isEditMode ? (
+              <button
+                onClick={() => setIsEditMode(true)}
+                className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2"
               >
-                <div className="flex p-4 items-center gap-3">
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <p className="text-[15px] text-white break-words" style={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      wordBreak: 'break-word',
-                      lineHeight: '1.4'
-                    }}>
-                      {phrase.english}
-                    </p>
-                    <p className="text-[13px] text-gray-400 mt-1 truncate">
-                      {phrase.thai}
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0 ml-2">
-                    <div
-                      className="px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap text-center"
-                      style={{
-                        backgroundColor: color,
-                        minWidth: '80px'
-                      }}
-                    >
-                      {label}
+                <Edit3 className="w-4 h-4" />
+                Edit Cards
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleCancelEdit}
+                  className="px-3 py-1 text-sm bg-gray-600 hover:bg-gray-700 rounded-lg flex items-center gap-2"
+                  disabled={isSaving}
+                >
+                  <X className="w-4 h-4" />
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveChanges}
+                  className="px-3 py-1 text-sm bg-green-600 hover:bg-green-700 rounded-lg flex items-center gap-2"
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Check className="w-4 h-4" />
+                  )}
+                  Save Changes
+                </button>
+              </>
+            )}
+            <button className="text-gray-400 hover:text-white text-2xl ml-2" onClick={onClose}>&times;</button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="bg-[#1a1b26] rounded-lg overflow-hidden">
+            {localPhrases.map((phrase, idx) => {
+              const status = getCardStatus(idx);
+              let color = '#6b7280';
+              let label = 'Unseen';
+              if (status === 'easy') { color = '#22c55e'; label = 'Easy'; }
+              else if (status === 'correct') { color = '#3b82f6'; label = 'Correct'; }
+              else if (status === 'wrong') { color = '#ef4444'; label = 'Wrong'; }
+              else if (status === 'unseen') { color = '#6b7280'; label = 'Unseen'; }
+              
+              return (
+                <div
+                  key={idx}
+                  className={`border-b border-gray-700/50 last:border-b-0 ${!isEditMode && 'cursor-pointer hover:bg-[#1f2937]'}`}
+                  onClick={() => !isEditMode && onSelectCard(idx) && onClose()}
+                >
+                  <div className="flex p-4 items-center gap-3">
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <p className="text-[15px] text-white break-words" style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
+                        lineHeight: '1.4'
+                      }}>
+                        {phrase.english}
+                      </p>
+                      <p className="text-[13px] text-gray-400 mt-1">
+                        {phrase.thai} • {phrase.pronunciation}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {!isEditMode && (
+                        <div
+                          className="px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap text-center"
+                          style={{
+                            backgroundColor: color,
+                            minWidth: '80px'
+                          }}
+                        >
+                          {label}
+                        </div>
+                      )}
+                      {isEditMode && (
+                        <button
+                          onClick={() => handleDeleteCard(idx)}
+                          className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
+              );
+            })}
+
+            {/* Add New Card Section */}
+            {isEditMode && !showAddCard && (
+              <button
+                onClick={() => setShowAddCard(true)}
+                className="w-full p-4 text-green-400 hover:text-green-300 hover:bg-green-900/20 flex items-center justify-center gap-2 border-t border-gray-700"
+              >
+                <Plus className="w-5 h-5" />
+                Add New Card
+              </button>
+            )}
+
+            {/* New Card Form */}
+            {isEditMode && showAddCard && (
+              <div className="p-4 bg-gray-800/50 border-t border-gray-700">
+                <h4 className="text-sm font-medium text-gray-300 mb-3">Add New Card</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-gray-400">English *</label>
+                    <input
+                      type="text"
+                      value={newCard.english}
+                      onChange={(e) => setNewCard({ ...newCard, english: e.target.value })}
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
+                      placeholder="Enter English word or phrase"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400">Thai *</label>
+                    <input
+                      type="text"
+                      value={newCard.thai}
+                      onChange={(e) => setNewCard({ ...newCard, thai: e.target.value })}
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
+                      placeholder="Enter Thai translation"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400">Pronunciation (optional)</label>
+                    <input
+                      type="text"
+                      value={newCard.pronunciation}
+                      onChange={(e) => setNewCard({ ...newCard, pronunciation: e.target.value })}
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
+                      placeholder="Enter pronunciation guide"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400">Mnemonic (optional)</label>
+                    <textarea
+                      value={newCard.mnemonic}
+                      onChange={(e) => setNewCard({ ...newCard, mnemonic: e.target.value })}
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm resize-none"
+                      rows={2}
+                      placeholder="Enter memory aid"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setShowAddCard(false);
+                        setNewCard({ english: '', thai: '', pronunciation: '', mnemonic: '' });
+                      }}
+                      className="flex-1 px-3 py-2 text-sm bg-gray-600 hover:bg-gray-700 rounded-lg"
+                      disabled={isSpellChecking}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleAddCard}
+                      className="flex-1 px-3 py-2 text-sm bg-green-600 hover:bg-green-700 rounded-lg flex items-center justify-center gap-2"
+                      disabled={isSpellChecking || !newCard.english || !newCard.thai}
+                    >
+                      {isSpellChecking ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Checking...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4" />
+                          Add Card
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
-            );
-          })}
+            )}
+          </div>
         </div>
+
+        {isEditMode && (
+          <div className="mt-3 p-3 bg-yellow-900/20 rounded-lg border border-yellow-700/50">
+            <p className="text-xs text-yellow-400">
+              <strong>Note:</strong> Changes will be saved to the current set. For default sets, you can reset them to original state in Settings.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

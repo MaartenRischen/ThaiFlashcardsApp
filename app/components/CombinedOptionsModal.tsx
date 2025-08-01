@@ -10,6 +10,11 @@ import type { SetMetaData } from '@/app/lib/storage';
 import { useUser } from '@clerk/nextjs'; // Add Clerk hook
 import PublishConfirmationModal from './PublishConfirmationModal';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { CheckIcon, ChevronRightIcon, Loader2, ChevronUpIcon, ChevronDownIcon, Trash2, Plus, Volume2, Pencil } from 'lucide-react';
+import clsx from 'clsx';
+import { DEFAULT_SETS } from '@/app/data/default-sets';
+import { saveSetContent } from '@/app/lib/storage/set-content';
+import { toast } from 'sonner';
 
 interface CombinedOptionsModalProps {
   isOpen: boolean;
@@ -259,6 +264,7 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
   setAutoplay: (checked: boolean) => void;
 }) {
   const [useTurboRendering, setUseTurboRendering] = useState(true); // Default to TURBO
+  const { refreshSets } = useSet();
 
   useEffect(() => {
     // Load the rendering speed preference from localStorage
@@ -269,6 +275,30 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
   const handleRenderingSpeedChange = (checked: boolean) => {
     setUseTurboRendering(checked);
     localStorage.setItem('renderingSpeed', checked ? 'TURBO' : 'NORMAL');
+  };
+
+  const handleResetDefaultSets = async () => {
+    if (!window.confirm('Are you sure you want to reset all default sets to their original state? This will overwrite any customizations you made to default sets.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/reset-default-sets', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reset default sets');
+      }
+
+      const result = await response.json();
+      await refreshSets();
+      toast.success(result.message || 'Default sets have been reset to original state');
+    } catch (error) {
+      console.error('Error resetting default sets:', error);
+      toast.error('Failed to reset default sets');
+    }
   };
 
   const handleFactoryResetPreferences = () => {
@@ -338,6 +368,9 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
           <div className="mt-10 flex flex-col gap-2">
             <button onClick={handleFactoryResetPreferences} className="w-full border border-[#A9C4FC] text-[#A9C4FC] rounded py-2 text-sm font-semibold hover:bg-[#A9C4FC] hover:text-[#121212] transition flex items-center justify-center gap-2 bg-transparent">
               Factory Reset (Preferences)
+            </button>
+            <button onClick={handleResetDefaultSets} className="w-full border border-yellow-400 text-yellow-400 rounded py-2 text-sm font-semibold hover:bg-yellow-400 hover:text-[#121212] transition flex items-center justify-center gap-2 bg-transparent">
+              Reset Default Sets to Original
             </button>
             <button onClick={handleFactoryResetFull} className="w-full border border-red-400 text-red-400 rounded py-2 text-sm font-semibold hover:bg-red-400 hover:text-[#121212] transition flex items-center justify-center gap-2 bg-transparent">
               Factory Reset (Full App + Sets)

@@ -36,6 +36,8 @@ Return a JSON object with this EXACT format:
 Only include items in "corrections" array if the phrase was actually changed. If no corrections were needed for a phrase, use the original in correctedPhrases but don't add it to corrections.`;
 
   try {
+    console.log('Spellcheck: Calling OpenRouter API with phrases:', phrases);
+    
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers,
@@ -52,13 +54,34 @@ Only include items in "corrections" array if the phrase was actually changed. If
       })
     });
 
+    console.log('Spellcheck: OpenRouter response status:', response.status);
+    console.log('Spellcheck: OpenRouter response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('Spellcheck: OpenRouter API Error Response:', errorText);
       throw new Error(`OpenRouter API Error (${response.status}): ${errorText}`);
     }
 
-    const data = await response.json();
+    const responseText = await response.text();
+    console.log('Spellcheck: Raw OpenRouter response:', responseText);
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Spellcheck: Failed to parse OpenRouter response as JSON:', parseError);
+      console.error('Spellcheck: Response that failed to parse:', responseText);
+      throw new Error(`Invalid JSON response from OpenRouter: ${responseText.substring(0, 200)}...`);
+    }
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Spellcheck: Unexpected OpenRouter response structure:', data);
+      throw new Error('Unexpected response structure from OpenRouter');
+    }
+
     const content = data.choices[0].message.content;
+    console.log('Spellcheck: AI response content:', content);
     
     // Parse the JSON response
     const cleanedContent = content
@@ -66,13 +89,24 @@ Only include items in "corrections" array if the phrase was actually changed. If
       .replace(/```\s*$/g, '')
       .trim();
     
-    const result = JSON.parse(cleanedContent);
+    console.log('Spellcheck: Cleaned content for parsing:', cleanedContent);
+    
+    let result;
+    try {
+      result = JSON.parse(cleanedContent);
+    } catch (parseError) {
+      console.error('Spellcheck: Failed to parse AI response as JSON:', parseError);
+      console.error('Spellcheck: Content that failed to parse:', cleanedContent);
+      throw new Error(`AI returned invalid JSON: ${cleanedContent.substring(0, 200)}...`);
+    }
     
     // Validate the response structure
     if (!result.correctedPhrases || !Array.isArray(result.correctedPhrases)) {
-      throw new Error('Invalid response format from AI');
+      console.error('Spellcheck: Invalid AI response structure:', result);
+      throw new Error('AI response missing correctedPhrases array');
     }
     
+    console.log('Spellcheck: Successfully processed response:', result);
     return {
       correctedPhrases: result.correctedPhrases,
       corrections: result.corrections || []
@@ -102,9 +136,18 @@ export async function POST(request: Request) {
     }
 
     // Call OpenRouter for spell checking
-    const result = await callOpenRouterForSpellCheck(phrases);
-    
-    return NextResponse.json(result);
+    try {
+      const result = await callOpenRouterForSpellCheck(phrases);
+      return NextResponse.json(result);
+    } catch (spellCheckError) {
+      console.error('Spellcheck failed, using original phrases as fallback:', spellCheckError);
+      // Fallback: return original phrases if spellcheck fails
+      return NextResponse.json({
+        correctedPhrases: phrases,
+        corrections: [],
+        fallback: true
+      });
+    }
     
   } catch (error) {
     console.error('Spell check API error:', error);

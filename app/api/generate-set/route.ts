@@ -144,7 +144,7 @@ async function handleManualMode(userId: string, englishPhrases: string[], prefer
   toneLevel: number;
   topicsToDiscuss: string;
   additionalContext: string;
-}) {
+}, isAddingToExistingSet: boolean = false) {
   console.log("API Route: Processing manual input phrases");
   
   try {
@@ -229,6 +229,15 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
       llmModel: 'claude-3.5-sonnet'
     };
 
+    // If we're adding to an existing set, just return the phrases
+    if (isAddingToExistingSet) {
+      console.log("API Route: Adding to existing set - returning phrases only");
+      return NextResponse.json({
+        phrases: generationResult.phrases
+      });
+    }
+
+    // Otherwise, create a new set
     // Generate image for the set
     let imageUrl: string | undefined;
     try {
@@ -398,6 +407,9 @@ export async function POST(request: Request) {
     if (mode === 'manual' && englishPhrases) {
       console.log(`API Route: Processing manual mode with ${englishPhrases.length} phrases`);
       
+      // Check if this is for adding to an existing set (single phrase) or creating a new set
+      const isAddingToExistingSet = englishPhrases.length === 1;
+      
       // Create preferences for manual mode
       const manualPreferences = {
         level: 'Intermediate',
@@ -407,7 +419,7 @@ export async function POST(request: Request) {
         additionalContext: `Translate and create flashcards for these English phrases: ${englishPhrases.join(', ')}`
       };
 
-      return handleManualMode(userId, englishPhrases, manualPreferences);
+      return handleManualMode(userId, englishPhrases, manualPreferences, isAddingToExistingSet);
     }
 
     if (!preferences || !totalCount) {

@@ -20,8 +20,18 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  const isPublic = isPublicRoute(req);
+  const url = req.url;
+  const pathname = new URL(url).pathname;
+  
+  // Log API route requests for debugging
+  if (pathname.startsWith('/api/')) {
+    console.log(`[MIDDLEWARE] API request: ${pathname}, isPublic: ${isPublic}`);
+  }
+  
   // Skip auth for public routes
-  if (!isPublicRoute(req)) {
+  if (!isPublic) {
+    console.log(`[MIDDLEWARE] Protecting route: ${pathname}`);
     await auth.protect();
   }
 });

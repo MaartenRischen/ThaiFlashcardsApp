@@ -52,9 +52,14 @@ export function CardsListModal({
       return;
     }
 
+    console.log('[ADD CARD] Starting card addition process...');
+    console.log('[ADD CARD] Active set ID:', activeSetId);
+    console.log('[ADD CARD] New card English:', newCardEnglish.trim());
+
     setIsGenerating(true);
     try {
       // Step 1: Spell check the English phrase
+      console.log('[ADD CARD] Step 1: Calling spellcheck API...');
       const spellCheckResponse = await fetch('/api/spellcheck', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -64,14 +69,22 @@ export function CardsListModal({
         credentials: 'include'
       });
 
+      console.log('[ADD CARD] Spellcheck response status:', spellCheckResponse.status);
+      console.log('[ADD CARD] Spellcheck response ok:', spellCheckResponse.ok);
+
       if (!spellCheckResponse.ok) {
+        const errorText = await spellCheckResponse.text();
+        console.error('[ADD CARD] Spellcheck error response:', errorText);
         throw new Error('Spell check failed');
       }
 
-      const { correctedPhrases } = await spellCheckResponse.json();
+      const spellCheckResult = await spellCheckResponse.json();
+      console.log('[ADD CARD] Spellcheck result:', spellCheckResult);
+      const { correctedPhrases } = spellCheckResult;
       const correctedEnglish = correctedPhrases[0];
 
       // Step 2: Generate Thai translation, pronunciation, and mnemonic
+      console.log('[ADD CARD] Step 2: Calling generate-set API...');
       const generateResponse = await fetch('/api/generate-set', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,32 +96,46 @@ export function CardsListModal({
         credentials: 'include'
       });
 
+      console.log('[ADD CARD] Generate response status:', generateResponse.status);
+      console.log('[ADD CARD] Generate response ok:', generateResponse.ok);
+
       if (!generateResponse.ok) {
+        const errorText = await generateResponse.text();
+        console.error('[ADD CARD] Generate error response:', errorText);
         throw new Error('Failed to generate translation');
       }
 
       const generationResult = await generateResponse.json();
+      console.log('[ADD CARD] Generation result:', generationResult);
+      
       if (!generationResult.phrases || generationResult.phrases.length === 0) {
         throw new Error('No translation generated');
       }
 
       // Step 3: Immediately save the new card to the set
+      console.log('[ADD CARD] Step 3: Saving card to set...');
       const newPhrase = generationResult.phrases[0];
       const updatedPhrases = [...localPhrases, newPhrase];
+      console.log('[ADD CARD] Updated phrases count:', updatedPhrases.length);
       
       const success = await saveSetContent(activeSetId, updatedPhrases);
+      console.log('[ADD CARD] Save success:', success);
+      
       if (success) {
         setLocalPhrases(updatedPhrases);
+        console.log('[ADD CARD] Calling refreshSets...');
         await refreshSets();
+        console.log('[ADD CARD] Calling reloadActiveSet...');
         await reloadActiveSet();
         setNewCardEnglish('');
         setShowAddCard(false);
+        console.log('[ADD CARD] Card addition completed successfully!');
         toast.success('Card added successfully');
       } else {
         throw new Error('Failed to save card');
       }
     } catch (error) {
-      console.error('Error adding card:', error);
+      console.error('[ADD CARD] Error adding card:', error);
       toast.error('Failed to add card');
     } finally {
       setIsGenerating(false);

@@ -103,14 +103,32 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
       // Fetch content
       if (id === DEFAULT_SET_ID || id?.startsWith('default-')) {
-        // Load default content directly
-        const defaultContent = getDefaultSetContent(id);
-        if (defaultContent) {
-          console.log(`SetContext: Loading default set content for ${id} (${defaultContent.length} phrases)`);
-          fetchedContent = defaultContent;
-        } else {
-          console.error(`SetContext: No default content found for ${id}`);
-          fetchedContent = [];
+        // For default sets, first try to load from database (in case user added custom cards)
+        try {
+          console.log(`SetContext: Trying to fetch default set ${id} from database first`);
+          const contentResponse = await fetch(`/api/flashcard-sets/${id}/content`, { credentials: 'include' });
+          if (contentResponse.ok) {
+            const dbContent = await contentResponse.json();
+            if (dbContent && dbContent.length > 0) {
+              console.log(`SetContext: Loading default set ${id} from database (${dbContent.length} phrases)`);
+              fetchedContent = dbContent;
+            } else {
+              throw new Error('Empty database content, fallback to default');
+            }
+          } else {
+            throw new Error('Database fetch failed, fallback to default');
+          }
+        } catch (error) {
+          console.log(`SetContext: Database fetch failed for default set ${id}, falling back to hardcoded content`);
+          // Fall back to default content
+          const defaultContent = getDefaultSetContent(id);
+          if (defaultContent) {
+            console.log(`SetContext: Loading default set content for ${id} (${defaultContent.length} phrases)`);
+            fetchedContent = defaultContent;
+          } else {
+            console.error(`SetContext: No default content found for ${id}`);
+            fetchedContent = [];
+          }
         }
       } else {
         // Fetch user-specific set content via API

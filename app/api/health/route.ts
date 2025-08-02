@@ -1,13 +1,7 @@
-export function GET() {
-  // Simple, synchronous health check that always works
-  console.log(`Health check called - PORT: ${process.env.PORT}, NODE_ENV: ${process.env.NODE_ENV}`);
-  return new Response('OK', { 
-    status: 200,
-    headers: {
-      'Content-Type': 'text/plain',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-    }
-  });
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  return NextResponse.json({ status: "healthy", timestamp: new Date().toISOString() });
 }
 
 export function POST() {

@@ -60,7 +60,8 @@ export function CardsListModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           phrases: [newCardEnglish.trim()]
-        })
+        }),
+        credentials: 'include'
       });
 
       if (!spellCheckResponse.ok) {

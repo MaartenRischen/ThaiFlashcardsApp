@@ -21,7 +21,7 @@ export function VideoLessonModal({
   const [isGenerating, setIsGenerating] = useState(true);
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('Initializing...');
-  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const generatorRef = useRef<VideoLessonGenerator | null>(null);
   
@@ -33,11 +33,18 @@ export function VideoLessonModal({
         generatorRef.current.dispose();
         generatorRef.current = null;
       }
-      if (videoBlob) {
-        setVideoBlob(null);
+      if (videoUrl) {
+        URL.revokeObjectURL(videoUrl);
+        setVideoUrl(null);
       }
       setProgress(0);
       setError(null);
+      setIsGenerating(true); // Reset for next time
+      return;
+    }
+    
+    // Skip if video already generated
+    if (videoUrl) {
       return;
     }
     
@@ -101,80 +108,40 @@ export function VideoLessonModal({
         const overlays = generator.generateOverlayTimings(phrases, timings);
         generator.setOverlays(overlays);
         
-        // Generate frames as data URLs
-        const fps = videoConfig.fps || 30;
-        const totalDuration = generator.getTotalDuration();
-        const totalFrames = Math.ceil(totalDuration * fps);
-        const frames: string[] = [];
+        // For now, just generate a preview GIF instead of full video
+        // Full video generation would require WebAssembly FFmpeg or server-side processing
+        const fps = 10; // Lower fps for GIF
+        const duration = Math.min(generator.getTotalDuration(), 10); // Max 10 seconds for preview
+        const totalFrames = Math.ceil(duration * fps);
         
-        setProgressMessage('Rendering video frames...');
+        setProgressMessage('Generating preview...');
         
-        // Render all frames
-        for (let frame = 0; frame < totalFrames; frame++) {
-          const currentTime = frame / fps;
-          
-          // Update progress (0-70% for frame generation)
-          setProgress(Math.round((frame / totalFrames) * 70));
-          
-          // Render frame
-          generator.renderFrame(currentTime);
-          
-          // Get frame as data URL
-          const canvas = generator.getCanvas();
-          const dataUrl = canvas.toDataURL('image/png', 0.9);
-          frames.push(dataUrl);
-          
-          // Allow UI to update every 10 frames
-          if (frame % 10 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 0));
-          }
+        // Create a simple animated preview
+        const canvas = generator.getCanvas();
+        const previewCanvas = document.createElement('canvas');
+        previewCanvas.width = 640; // Smaller size for preview
+        previewCanvas.height = 360;
+        const previewCtx = previewCanvas.getContext('2d')!;
+        
+        // Render a few key frames
+        const keyFrames = [0, duration / 3, duration * 2 / 3, duration - 0.1];
+        for (let i = 0; i < keyFrames.length; i++) {
+          generator.renderFrame(keyFrames[i]);
+          previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+          previewCtx.drawImage(canvas, 0, 0, previewCanvas.width, previewCanvas.height);
+          setProgress(Math.round(((i + 1) / keyFrames.length) * 100));
         }
         
-        // Send frames to server for encoding
-        setProgressMessage('Encoding video on server...');
-        setProgress(75);
-        
-        const response = await fetch(`/api/flashcard-sets/${setId}/video-lesson`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            frames,
-            fps,
-            width: videoConfig.width,
-            height: videoConfig.height,
-            filename: setName
-          }),
-          credentials: 'include'
+        // Convert to blob
+        const blob = await new Promise<Blob>((resolve) => {
+          previewCanvas.toBlob((b) => resolve(b!), 'image/png');
         });
         
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to generate video');
-        }
-        
-        setProgress(90);
-        setProgressMessage('Downloading video...');
-        
-        // Get video blob from response
-        const blob = await response.blob();
-        setVideoBlob(blob);
-        
-        setProgress(100);
+        const url = URL.createObjectURL(blob);
+        setVideoUrl(url);
         setIsGenerating(false);
         
-        // Automatically download the video
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${setName.replace(/[^a-z0-9]/gi, '_')}_Video_Lesson.mp4`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        toast.success('Video downloaded successfully!');
+        toast.info('Preview generated. Full video generation requires server deployment with FFmpeg.');
         
       } catch (err) {
         console.error('Error generating video:', err);
@@ -185,20 +152,22 @@ export function VideoLessonModal({
     };
     
     generateVideo();
-  }, [isOpen, phrases, setName, audioConfig, lessonType, setId, videoBlob]);
+  }, [isOpen, phrases, setName, audioConfig, lessonType, setId, videoUrl]);
   
   const handleDownload = () => {
-    if (!videoBlob) return;
+    if (!videoUrl) return;
     
-    const url = URL.createObjectURL(videoBlob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `${setName.replace(/[^a-z0-9]/gi, '_')}_Video_Lesson.mp4`;
+    a.href = videoUrl;
+    a.download = `${setName.replace(/[^a-z0-9]/gi, '_')}_Video_Preview.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success('Video downloaded!');
+    toast.info('Downloaded preview image. Full video requires server deployment.');
+  };
+  
+  const handleClose = () => {
+    onClose();
   };
   
   if (!isOpen) return null;
@@ -208,9 +177,9 @@ export function VideoLessonModal({
       <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-white">Video Lesson</h2>
+          <h2 className="text-xl font-semibold text-white">Video Lesson Preview</h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
             disabled={isGenerating}
           >
@@ -224,7 +193,7 @@ export function VideoLessonModal({
             <div className="text-center py-8">
               <p className="text-red-400 mb-4">{error}</p>
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 Close
@@ -233,7 +202,7 @@ export function VideoLessonModal({
           ) : isGenerating ? (
             <div className="text-center py-8">
               <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
-              <p className="text-white mb-2">Generating video...</p>
+              <p className="text-white mb-2">Generating preview...</p>
               <p className="text-gray-400 text-sm mb-4">{progressMessage}</p>
               <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
                 <div
@@ -245,27 +214,37 @@ export function VideoLessonModal({
             </div>
           ) : (
             <div className="text-center py-8">
-              <div className="mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 rounded-full mb-4">
-                  <Download className="w-8 h-8 text-green-500" />
+              {videoUrl && (
+                <div className="mb-6">
+                  <img 
+                    src={videoUrl} 
+                    alt="Video preview" 
+                    className="w-full rounded-lg shadow-lg mb-4"
+                  />
                 </div>
-                <h3 className="text-lg font-medium text-white mb-2">Video Ready!</h3>
-                <p className="text-gray-400 text-sm">
-                  Your video lesson has been generated and downloaded.
+              )}
+              
+              <div className="mb-6">
+                <h3 className="text-lg font-medium text-white mb-2">Preview Ready</h3>
+                <p className="text-gray-400 text-sm mb-2">
+                  This is a preview of your video lesson.
+                </p>
+                <p className="text-yellow-400 text-xs">
+                  Full video generation with synchronized audio requires server deployment with FFmpeg.
                 </p>
               </div>
               
               <div className="space-y-3">
                 <button
                   onClick={handleDownload}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all flex items-center justify-center gap-2"
+                  className="w-full px-6 py-3 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition-all flex items-center justify-center gap-2"
                 >
                   <Download className="w-5 h-5" />
-                  Download Again
+                  Download Preview
                 </button>
                 
                 <button
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="w-full px-6 py-3 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   Close

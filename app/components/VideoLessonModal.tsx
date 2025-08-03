@@ -49,7 +49,7 @@ export function VideoLessonModal({
         generatorRef.current.dispose();
         generatorRef.current = null;
       }
-      setVideoBlob(null);
+
       setProgress(0);
       setError(null);
       return;

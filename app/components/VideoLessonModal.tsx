@@ -2,14 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { X, Download, Loader2 } from 'lucide-react';
-// Import canvas-capture dynamically to avoid SSR issues
-import type { CanvasCapture as CanvasCaptureType } from 'canvas-capture';
-let CanvasCapture: typeof CanvasCaptureType | undefined;
-if (typeof window !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  CanvasCapture = (require('canvas-capture') as { CanvasCapture: typeof CanvasCaptureType }).CanvasCapture;
-}
-
 import { VideoLessonConfig, VideoLessonModalProps } from '@/app/lib/video/types';
 import { VideoLessonGenerator } from '@/app/lib/video/lesson-generator';
 import { VideoTimingExtractor } from '@/app/lib/video/timing-extractor';
@@ -25,31 +17,22 @@ export function VideoLessonModal({
 }: VideoLessonModalProps) {
   const [isGenerating, setIsGenerating] = useState(true);
   const [progress, setProgress] = useState(0);
-
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const generatorRef = useRef<VideoLessonGenerator | null>(null);
   
   // Generate video immediately when modal opens
   useEffect(() => {
-    // Video settings
-    const videoConfig: VideoLessonConfig = {
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      fontSize: 56,
-      backgroundColor: '#1a1a1a',
-      textColor: '#ffffff',
-      highlightColor: '#00ff88',
-      voiceGender: audioConfig.voiceGender || 'female',
-      includeMnemonics: audioConfig.includeMnemonics
-    };
     if (!isOpen) {
       // Cleanup when modal closes
       if (generatorRef.current) {
         generatorRef.current.dispose();
         generatorRef.current = null;
       }
-
+      if (videoUrl) {
+        URL.revokeObjectURL(videoUrl);
+        setVideoUrl(null);
+      }
       setProgress(0);
       setError(null);
       return;
@@ -61,9 +44,18 @@ export function VideoLessonModal({
       setError(null);
       
       try {
-        if (!CanvasCapture) {
-          throw new Error('Video generation is only available in the browser');
-        }
+        // Video settings
+        const videoConfig: VideoLessonConfig = {
+          width: 1920,
+          height: 1080,
+          fps: 30,
+          fontSize: 56,
+          backgroundColor: '#1a1a1a',
+          textColor: '#ffffff',
+          highlightColor: '#00ff88',
+          voiceGender: audioConfig.voiceGender || 'female',
+          includeMnemonics: audioConfig.includeMnemonics
+        };
         
         // Create video generator
         const generator = new VideoLessonGenerator(videoConfig);
@@ -103,69 +95,46 @@ export function VideoLessonModal({
         const overlays = generator.generateOverlayTimings(phrases, timings);
         generator.setOverlays(overlays);
         
-        // Initialize canvas-capture
-        const sourceCanvas = generator.getCanvas();
+        // Generate frames as images
+        const fps = videoConfig.fps || 30;
+        const totalDuration = generator.getTotalDuration();
+        const totalFrames = Math.ceil(totalDuration * fps);
+        const frames: Blob[] = [];
         
-        // Initialize CanvasCapture with the source canvas
-        await new Promise<void>((resolve, reject) => {
-          CanvasCapture!.init(sourceCanvas, {
-            verbose: false,
-            showRecDot: false,
-            showAlerts: false,
-            showDialogs: false
+        // Render all frames
+        for (let frame = 0; frame < totalFrames; frame++) {
+          const currentTime = frame / fps;
+          
+          // Update progress
+          setProgress(Math.round((frame / totalFrames) * 100));
+          
+          // Render frame
+          generator.renderFrame(currentTime);
+          
+          // Get frame as blob
+          const canvas = generator.getCanvas();
+          const blob = await new Promise<Blob>((resolve) => {
+            canvas.toBlob((blob) => {
+              resolve(blob!);
+            }, 'image/webp', 0.95);
           });
           
-          // Start recording
-          CanvasCapture!.beginVideoRecord({
-            format: 'mp4',
-            name: `${setName}_Video_Lesson`,
-            fps: videoConfig.fps || 30,
-            quality: 0.9,
-            onExportProgress: (prog: number) => {
-              setProgress(50 + Math.round(prog * 50)); // 50-100% for encoding
-            },
-            onExportFinish: () => {
-              // Video will be automatically downloaded by canvas-capture
-              setIsGenerating(false);
-              toast.success('Video generated successfully!');
-              resolve();
-            },
-            onError: (error: Error | unknown) => {
-              console.error('Video generation error:', error);
-              reject(error);
-            }
-          });
+          frames.push(blob);
           
-          // Render all frames
-          const fps = videoConfig.fps || 30;
-          const totalDuration = generator.getTotalDuration();
-          const totalFrames = Math.ceil(totalDuration * fps);
-          
-          // Render frames asynchronously
-          (async () => {
-            for (let frame = 0; frame < totalFrames; frame++) {
-              const currentTime = frame / fps;
-              
-              // Update progress (recording phase)
-              setProgress(Math.round((frame / totalFrames) * 50)); // 0-50% for recording
-              
-              // Render frame
-              generator.renderFrame(currentTime);
-              
-              // Record frame
-              CanvasCapture!.recordFrame();
-              
-              // Allow UI to update
-              if (frame % 30 === 0) {
-                await new Promise(resolve => setTimeout(resolve, 0));
-              }
-            }
-            
-            // Stop recording and export
-            setProgress(50); // Start export phase
-            CanvasCapture!.stopRecord();
-          })();
-        });
+          // Allow UI to update
+          if (frame % 30 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 0));
+          }
+        }
+        
+        // For now, just create a download of the first frame as a preview
+        // In a real implementation, you would send frames to a server to encode as video
+        // or use a WebAssembly video encoder
+        const previewUrl = URL.createObjectURL(frames[0]);
+        setVideoUrl(previewUrl);
+        
+        setIsGenerating(false);
+        toast.success('Video preview ready! Full video generation requires server-side encoding.');
         
       } catch (err) {
         console.error('Error generating video:', err);
@@ -178,7 +147,17 @@ export function VideoLessonModal({
     generateVideo();
   }, [isOpen, phrases, setName, audioConfig, lessonType]);
   
-  // Video is automatically downloaded by canvas-capture
+  const handleDownload = () => {
+    if (!videoUrl) return;
+    
+    const a = document.createElement('a');
+    a.href = videoUrl;
+    a.download = `${setName.replace(/[^a-z0-9]/gi, '_')}_Video_Preview.webp`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast.info('Downloaded preview frame. Full video generation requires server-side processing.');
+  };
   
   if (!isOpen) return null;
   
@@ -211,10 +190,7 @@ export function VideoLessonModal({
           ) : isGenerating ? (
             <div className="text-center py-8">
               <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
-              <p className="text-white mb-2">Generating video...</p>
-              <p className="text-gray-400 text-sm mb-4">
-                {progress < 50 ? 'Recording frames...' : 'Encoding video...'}
-              </p>
+              <p className="text-white mb-2">Generating video frames...</p>
               <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
                 <div
                   className="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-300"
@@ -226,21 +202,35 @@ export function VideoLessonModal({
           ) : (
             <div className="text-center py-8">
               <div className="mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 rounded-full mb-4">
-                  <Download className="w-8 h-8 text-green-500" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-500/20 rounded-full mb-4">
+                  <Download className="w-8 h-8 text-yellow-500" />
                 </div>
-                <h3 className="text-lg font-medium text-white mb-2">Video Ready!</h3>
-                <p className="text-gray-400 text-sm">
-                  Your video lesson has been generated with synchronized text overlays.
+                <h3 className="text-lg font-medium text-white mb-2">Preview Ready</h3>
+                <p className="text-gray-400 text-sm mb-2">
+                  Video frame generation complete.
+                </p>
+                <p className="text-yellow-400 text-xs">
+                  Note: Full video encoding requires server-side processing. 
+                  This feature is coming soon!
                 </p>
               </div>
               
-              <button
-                onClick={onClose}
-                className="w-full px-6 py-3 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                Close
-              </button>
+              <div className="space-y-3">
+                <button
+                  onClick={handleDownload}
+                  className="w-full px-6 py-3 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition-all flex items-center justify-center gap-2"
+                >
+                  <Download className="w-5 h-5" />
+                  Download Preview Frame
+                </button>
+                
+                <button
+                  onClick={onClose}
+                  className="w-full px-6 py-3 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           )}
         </div>

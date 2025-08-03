@@ -7,7 +7,7 @@ import { Phrase } from '@/app/types';
 import { VideoLessonGenerator, VideoLessonConfig } from '@/app/lib/video-lesson-generator';
 import { AudioTimingExtractor } from '@/app/lib/audio-timing-extractor';
 import { SimpleAudioLessonConfig } from '@/app/lib/audio-lesson-generator-simple';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface VideoLessonModalProps {
   isOpen: boolean;

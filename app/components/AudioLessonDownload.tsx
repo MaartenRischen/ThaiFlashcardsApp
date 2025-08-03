@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Download, Volume2, Settings2, Loader2, Brain, Repeat, Play, Pause, FileAudio, Video } from 'lucide-react';
+import { Download, Volume2, Settings2, Loader2, Brain, Repeat, Play, Pause, FileAudio } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,7 @@ import { AudioLessonConfig } from '../lib/audio-lesson-generator';
 import { SimpleAudioLessonConfig } from '../lib/audio-lesson-generator-simple';
 import { toast } from 'sonner';
 import { useGeneration } from '@/app/context/GenerationContext';
-import { VideoLessonModal } from './VideoLessonModal';
+import { AudioLessonPlayer } from './AudioLessonPlayer';
 import { useSet } from '@/app/context/SetContext';
 
 interface AudioLessonDownloadProps {
@@ -40,7 +40,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
   const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple'>('simple');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showPlayer, setShowPlayer] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { activeSetContent } = useSet();
   const [config, setConfig] = useState<Partial<AudioLessonConfig>>({
@@ -194,10 +194,11 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
   return (
     <>
     <Dialog open={showSettings} onOpenChange={(open) => {
-        console.log('Audio modal open state changed:', open);
         setShowSettings(open);
-        // Don't auto-close video modal when audio modal closes
-        // Let user manually close video modal
+        if (!open && showPlayer) {
+          // Keep player open when settings close
+          setShowPlayer(true);
+        }
       }}>
       <DialogTrigger asChild>
         <button
@@ -523,16 +524,15 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                   Download
                 </button>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log('Video button clicked, setting showVideoModal to true');
-                    setShowVideoModal(true);
+                  onClick={() => {
+                    setShowPlayer(true);
+                    setShowSettings(false);
                   }}
                   className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
-                  title="Generate video lesson with synchronized text"
+                  title="Open player with synchronized text"
                 >
-                  <Video className="w-4 h-4" />
-                  Video
+                  <Play className="w-4 h-4" />
+                  Play with Text
                 </button>
               </div>
             </div>
@@ -625,52 +625,41 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
       </DialogContent>
     </Dialog>
     
-    {/* Video Lesson Modal */}
-    {audioUrl && activeSetContent && activeSetContent.length > 0 && (
-      <VideoLessonModal
-        isOpen={showVideoModal}
-        onClose={() => {
-          console.log('VideoLessonModal onClose called, setting showVideoModal to false');
-          setShowVideoModal(false);
-        }}
-        phrases={activeSetContent}
-        setName={setName}
-        audioConfig={lessonMode === 'simple' ? simpleConfig as SimpleAudioLessonConfig : {
-          voiceGender: config.voiceGender || 'female',
-          repetitions: 3,
-          pauseBetweenRepetitions: 1000,
-          pauseBetweenPhrases: 1500,
-          speed: 1.0,
-          loops: 1,
-          phraseRepetitions: 2,
-          mixSpeed: false,
-          includeMnemonics: false,
-          includePolitenessParticles: config.includePolitenessParticles || false
-        } as SimpleAudioLessonConfig}
-        lessonType={lessonMode === 'pimsleur' ? 'structured' : 'simple'}
-      />
-    )}
-    {/* Debug info */}
-    {showVideoModal && (!audioUrl || !activeSetContent || activeSetContent.length === 0) && (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-        <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Cannot Generate Video</h2>
-          <div className="text-gray-300 space-y-2">
-            <p>Debug information:</p>
-            <ul className="list-disc list-inside">
-              <li>Audio URL: {audioUrl ? 'Available' : 'Not available'}</li>
-              <li>Active Set Content: {activeSetContent ? `${activeSetContent.length} phrases` : 'Not available'}</li>
-            </ul>
-            <p className="mt-4">Please ensure you have generated an audio lesson and the set content is loaded before trying to generate a video.</p>
+    {/* Audio Player Modal */}
+    {showPlayer && audioUrl && activeSetContent && activeSetContent.length > 0 && (
+      <Dialog open={showPlayer} onOpenChange={setShowPlayer}>
+        <DialogContent className="max-w-6xl w-[95vw] max-h-[90vh] bg-[#1f1f1f] border-[#404040] text-[#E0E0E0] overflow-y-auto p-0">
+          <DialogHeader className="px-6 py-4 border-b border-gray-800">
+            <DialogTitle className="text-[#E0E0E0] text-xl font-semibold">
+              Audio Lesson Player - {setName}
+            </DialogTitle>
+            <DialogDescription className="text-[#BDBDBD]">
+              Listen to your lesson with synchronized text display
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="p-6">
+            <AudioLessonPlayer
+              audioUrl={audioUrl}
+              phrases={activeSetContent}
+              setName={setName}
+              audioConfig={lessonMode === 'simple' ? simpleConfig as SimpleAudioLessonConfig : {
+                voiceGender: config.voiceGender || 'female',
+                repetitions: 3,
+                pauseBetweenRepetitions: 1000,
+                pauseBetweenPhrases: 1500,
+                speed: 1.0,
+                loops: 1,
+                phraseRepetitions: 2,
+                mixSpeed: false,
+                includeMnemonics: false,
+                includePolitenessParticles: config.includePolitenessParticles || false
+              } as SimpleAudioLessonConfig}
+              lessonType={lessonMode === 'pimsleur' ? 'structured' : 'simple'}
+            />
           </div>
-          <button
-            onClick={() => setShowVideoModal(false)}
-            className="mt-6 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
-          >
-            Close
-          </button>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
     )}
     </>
   );

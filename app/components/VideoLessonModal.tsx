@@ -116,8 +116,6 @@ export function VideoLessonModal({
             showDialogs: false
           });
           
-          let videoDataReceived = false;
-          
           // Start recording
           CanvasCapture!.beginVideoRecord({
             format: 'mp4',
@@ -127,12 +125,17 @@ export function VideoLessonModal({
             onExportProgress: (prog: number) => {
               setProgress(50 + Math.round(prog * 50)); // 50-100% for encoding
             },
-            onExportFinish: (blob: Blob) => {
-              videoDataReceived = true;
-              setVideoBlob(blob);
-              setIsGenerating(false);
-              toast.success('Video generated successfully!');
-              resolve();
+            onExportFinish: () => {
+              // Get the blob from CanvasCapture
+              const blob = CanvasCapture!.getLastCapture();
+              if (blob instanceof Blob) {
+                setVideoBlob(blob);
+                setIsGenerating(false);
+                toast.success('Video generated successfully!');
+                resolve();
+              } else {
+                reject(new Error('Failed to get video data'));
+              }
             },
             onError: (error: Error | unknown) => {
               console.error('Video generation error:', error);
@@ -180,7 +183,7 @@ export function VideoLessonModal({
     };
     
     generateVideo();
-  }, [isOpen, phrases, setName, audioConfig, lessonType]);
+  }, [isOpen, phrases, setName, audioConfig, lessonType, videoConfig]);
   
   const handleDownload = () => {
     if (!videoBlob) return;

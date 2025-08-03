@@ -217,7 +217,7 @@ export function VideoLessonModal({
       CanvasCapture.init(sourceCanvas, {
         verbose: false,
         showRecDot: false,
-        showAlerts: true,
+        showAlerts: false, // Disable alerts since we handle them with toast
         showDialogs: false
       });
       
@@ -231,7 +231,7 @@ export function VideoLessonModal({
           setProgress(Math.round(prog * 100));
         },
         onExportFinish: () => {
-          toast.success('Video generated successfully!');
+          toast.success('Video downloaded successfully!');
           setIsGenerating(false);
           setProgress(0);
         },
@@ -484,7 +484,14 @@ export function VideoLessonModal({
             Cancel
           </button>
           <button
-            onClick={generateVideo}
+            onClick={() => {
+              // Start preview if not already playing
+              if (!isPreviewPlaying) {
+                startPreview();
+              }
+              // Generate video
+              generateVideo();
+            }}
             disabled={isGenerating}
             className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >

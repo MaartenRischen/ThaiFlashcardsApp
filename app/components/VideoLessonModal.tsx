@@ -3,9 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Download, Settings, Play, Pause } from 'lucide-react';
 // Import canvas-capture dynamically to avoid SSR issues
-let CanvasCapture: any;
+import type { CanvasCapture as CanvasCaptureType } from 'canvas-capture';
+let CanvasCapture: typeof CanvasCaptureType | undefined;
 if (typeof window !== 'undefined') {
-  CanvasCapture = require('canvas-capture').CanvasCapture;
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  CanvasCapture = (require('canvas-capture') as { CanvasCapture: typeof CanvasCaptureType }).CanvasCapture;
 }
 import { Phrase } from '@/app/lib/generation/types';
 import { VideoLessonGenerator, VideoLessonConfig } from '@/app/lib/video-lesson-generator';
@@ -197,6 +199,10 @@ export function VideoLessonModal({
       // Initialize canvas-capture
       const sourceCanvas = generatorRef.current.getCanvas();
       
+      if (!CanvasCapture) {
+        throw new Error('Video generation is only available in the browser');
+      }
+
       // Initialize CanvasCapture with the source canvas
       CanvasCapture.init(sourceCanvas, {
         verbose: false,

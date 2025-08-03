@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Phrase } from '@/app/lib/set-generator';
-import { Trash2, Plus, Edit3, Check, X, Loader2, Volume2 } from 'lucide-react';
+import { Trash2, Plus, Edit3, Check, X, Loader2 } from 'lucide-react';
 import { useSet } from '@/app/context/SetContext';
 import { saveSetContent } from '@/app/lib/storage/set-content';
 import { toast } from 'sonner';
-import { ttsService } from '@/app/lib/tts-service';
 
 interface CardsListModalProps {
   isOpen: boolean;
@@ -12,8 +11,6 @@ interface CardsListModalProps {
   phrases: Phrase[];
   onSelectCard: (index: number) => void;
   getCardStatus: (index: number) => string;
-  isMale?: boolean;
-  isPoliteMode?: boolean;
 }
 
 export function CardsListModal({
@@ -21,9 +18,7 @@ export function CardsListModal({
   onClose,
   phrases,
   onSelectCard,
-  getCardStatus,
-  isMale = true,
-  isPoliteMode = true
+  getCardStatus
 }: CardsListModalProps) {
   const { activeSetId, refreshSets, reloadActiveSet } = useSet();
   const [isEditMode, setIsEditMode] = useState(false);
@@ -32,60 +27,6 @@ export function CardsListModal({
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [newCardEnglish, setNewCardEnglish] = useState('');
-  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
-
-  // Import getThaiWithGender function
-  const getThaiWithGender = (phrase: Phrase | null, isMale: boolean, isPoliteMode: boolean): string => {
-    if (!phrase) return '';
-    // Use gendered fields if present
-    let baseThai = phrase.thai;
-    if (isMale && phrase.thaiMasculine) baseThai = phrase.thaiMasculine;
-    else if (!isMale && phrase.thaiFeminine) baseThai = phrase.thaiFeminine;
-
-    // If Polite Mode is OFF, remove polite particles if present
-    if (!isPoliteMode) {
-      return baseThai.replace(/(ครับ|ค่ะ)$/g, '');
-    }
-
-    // Polite Mode is ON: Check endings and add particle if appropriate
-    const politeEndingsToAvoid = ['ไหม', 'อะไร', 'ไหน', 'เท่าไหร่', 'เหรอ', 'หรือ', 'ใช่ไหม', 'เมื่อไหร่', 'ทำไม', 'อย่างไร', 'ที่ไหน', 'ครับ', 'ค่ะ'];
-    const endsWithPoliteEnding = politeEndingsToAvoid.some(ending => baseThai.endsWith(ending));
-
-    if (!endsWithPoliteEnding) {
-      return isMale ? `${baseThai}ครับ` : `${baseThai}ค่ะ`;
-    }
-    return baseThai;
-  };
-
-  // Audio playback function
-  const playAudio = async (phrase: Phrase, index: number) => {
-    if (playingIndex === index) {
-      // If already playing this card, stop it
-      setPlayingIndex(null);
-      return;
-    }
-
-    setPlayingIndex(index);
-    try {
-      const thaiText = getThaiWithGender(phrase, isMale, isPoliteMode);
-      await ttsService.speak({
-        text: thaiText,
-        genderValue: isMale,
-        onStart: () => console.log('Audio started for card', index),
-        onEnd: () => {
-          setPlayingIndex(null);
-          console.log('Audio ended for card', index);
-        },
-        onError: (error) => {
-          setPlayingIndex(null);
-          console.error('TTS error for card', index, ':', error);
-        }
-      });
-    } catch (error) {
-      setPlayingIndex(null);
-      console.error('Error playing audio for card', index, ':', error);
-    }
-  };
 
   useEffect(() => {
     setLocalPhrases([...phrases]);
@@ -289,18 +230,11 @@ export function CardsListModal({
               return (
                 <div
                   key={idx}
-                  className={`border-b border-gray-700/50 last:border-b-0 ${!isEditMode && 'hover:bg-[#1f2937]'}`}
+                  className={`border-b border-gray-700/50 last:border-b-0 ${!isEditMode && 'cursor-pointer hover:bg-[#1f2937]'}`}
+                  onClick={() => !isEditMode && onSelectCard(idx) && onClose()}
                 >
                   <div className="flex p-4 items-center gap-3">
-                    <div 
-                      className={`flex-1 min-w-0 overflow-hidden ${!isEditMode && 'cursor-pointer'}`}
-                      onClick={() => {
-                        if (!isEditMode) {
-                          onSelectCard(idx);
-                          onClose();
-                        }
-                      }}
-                    >
+                    <div className="flex-1 min-w-0 overflow-hidden">
                       <p className="text-[15px] text-white break-words" style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
@@ -317,31 +251,15 @@ export function CardsListModal({
                     </div>
                     <div className="flex items-center gap-2">
                       {!isEditMode && (
-                        <>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              playAudio(phrase, idx);
-                            }}
-                            className={`p-2 rounded-lg transition-colors ${
-                              playingIndex === idx 
-                                ? 'text-blue-400 bg-blue-900/20' 
-                                : 'text-gray-400 hover:text-blue-400 hover:bg-blue-900/10'
-                            }`}
-                            title="Play pronunciation"
-                          >
-                            <Volume2 className="w-4 h-4" />
-                          </button>
-                          <div
-                            className="px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap text-center"
-                            style={{
-                              backgroundColor: color,
-                              minWidth: '80px'
-                            }}
-                          >
-                            {label}
-                          </div>
-                        </>
+                        <div
+                          className="px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap text-center"
+                          style={{
+                            backgroundColor: color,
+                            minWidth: '80px'
+                          }}
+                        >
+                          {label}
+                        </div>
                       )}
                       {isEditMode && (
                         <button

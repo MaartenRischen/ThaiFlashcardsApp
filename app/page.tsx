@@ -1497,8 +1497,6 @@ export default function ThaiFlashcards() {
         phrases={phrases}
         onSelectCard={(idx) => setIndex(idx)}
         getCardStatus={getCardStatus}
-        isMale={isMale}
-        isPoliteMode={isPoliteMode}
       />
 
     </main>

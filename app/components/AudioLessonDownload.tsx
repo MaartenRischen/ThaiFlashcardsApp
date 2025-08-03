@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Download, Volume2, Settings2, Loader2, Brain, Repeat, Play, Pause, FileAudio } from 'lucide-react';
+import { Download, Volume2, Settings2, Loader2, Brain, Repeat, Play, Pause, FileAudio, Video } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,8 @@ import { AudioLessonConfig } from '../lib/audio-lesson-generator';
 import { SimpleAudioLessonConfig } from '../lib/audio-lesson-generator-simple';
 import { toast } from 'sonner';
 import { useGeneration } from '@/app/context/GenerationContext';
+import { VideoLessonModal } from './VideoLessonModal';
+import { useSet } from '@/app/context/SetContext';
 
 interface AudioLessonDownloadProps {
   setId: string;
@@ -38,7 +40,9 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
   const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple'>('simple');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { activeSetContent } = useSet();
   const [config, setConfig] = useState<Partial<AudioLessonConfig>>({
     voiceGender: isMale ? 'male' : 'female',
     pauseDurationMs: {
@@ -188,6 +192,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
   );
 
   return (
+    <>
     <Dialog open={showSettings} onOpenChange={setShowSettings}>
       <DialogTrigger asChild>
         <button
@@ -512,6 +517,14 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                   <Download className="w-4 h-4" />
                   Download
                 </button>
+                <button
+                  onClick={() => setShowVideoModal(true)}
+                  className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
+                  title="Generate video lesson with synchronized text"
+                >
+                  <Video className="w-4 h-4" />
+                  Video
+                </button>
               </div>
             </div>
             
@@ -602,5 +615,29 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
         </div>
       </DialogContent>
     </Dialog>
+    
+    {/* Video Lesson Modal */}
+    {audioUrl && activeSetContent && (
+      <VideoLessonModal
+        isOpen={showVideoModal}
+        onClose={() => setShowVideoModal(false)}
+        phrases={activeSetContent}
+        setName={setName}
+        audioConfig={lessonMode === 'simple' ? simpleConfig as SimpleAudioLessonConfig : {
+          voiceGender: config.voiceGender || 'female',
+          repetitions: 3,
+          pauseBetweenRepetitions: 1000,
+          pauseBetweenPhrases: 1500,
+          speed: 1.0,
+          loops: 1,
+          phraseRepetitions: 2,
+          mixSpeed: false,
+          includeMnemonics: false,
+          includePolitenessParticles: config.includePolitenessParticles || false
+        } as SimpleAudioLessonConfig}
+        lessonType={lessonMode === 'pimsleur' ? 'structured' : 'simple'}
+      />
+    )}
+    </>
   );
 } 

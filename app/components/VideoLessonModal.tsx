@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Download, Settings, Play, Pause } from 'lucide-react';
 import { CanvasCapture } from 'canvas-capture';
-import { Phrase } from '@/app/types';
+import { Phrase } from '@/app/lib/types';
 import { VideoLessonGenerator, VideoLessonConfig } from '@/app/lib/video-lesson-generator';
 import { AudioTimingExtractor } from '@/app/lib/audio-timing-extractor';
 import { SimpleAudioLessonConfig } from '@/app/lib/audio-lesson-generator-simple';
@@ -35,7 +35,7 @@ export function VideoLessonModal({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | null>(null);
   const generatorRef = useRef<VideoLessonGenerator | null>(null);
-  const captureRef = useRef<ReturnType<typeof CanvasCapture.beginVideoRecord> | null>(null);
+
   
   // Video settings
   const [videoConfig, setVideoConfig] = useState<VideoLessonConfig>({
@@ -62,12 +62,10 @@ export function VideoLessonModal({
   }, [isOpen]);
   
   useEffect(() => {
-    if (isOpen && canvasRef.current) {
-      initializePreview();
-    }
-  }, [isOpen, phrases, videoConfig, initializePreview]);
-  
-  const initializePreview = () => {
+    if (!isOpen || !canvasRef.current) return;
+
+    // Initialize preview
+    const initializePreview = () => {
     // Create video generator
     const generator = new VideoLessonGenerator(videoConfig);
     generatorRef.current = generator;
@@ -113,6 +111,10 @@ export function VideoLessonModal({
       }
     }
   };
+    
+    // Call initialize
+    initializePreview();
+  }, [isOpen, phrases, videoConfig]);
   
   const startPreview = () => {
     if (!generatorRef.current) return;

@@ -1,12 +1,19 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Download, Loader2 } from 'lucide-react';
+import { X, Download, Settings, Play, Pause } from 'lucide-react';
+// Import canvas-capture dynamically to avoid SSR issues
+import type { CanvasCapture as CanvasCaptureType } from 'canvas-capture';
+let CanvasCapture: typeof CanvasCaptureType | undefined;
+if (typeof window !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  CanvasCapture = (require('canvas-capture') as { CanvasCapture: typeof CanvasCaptureType }).CanvasCapture;
+}
+
 import { VideoLessonConfig, VideoLessonModalProps } from '@/app/lib/video/types';
 import { VideoLessonGenerator } from '@/app/lib/video/lesson-generator';
 import { VideoTimingExtractor } from '@/app/lib/video/timing-extractor';
 import { toast } from 'sonner';
-import { useParams } from 'next/navigation';
 
 export function VideoLessonModal({
   isOpen,
@@ -16,172 +23,243 @@ export function VideoLessonModal({
   audioConfig,
   lessonType
 }: VideoLessonModalProps) {
-  const params = useParams();
-  const setId = params?.id as string || 'default';
-  const [isGenerating, setIsGenerating] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [progressMessage, setProgressMessage] = useState('Initializing...');
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+  const [previewTime, setPreviewTime] = useState(0);
+  
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number | null>(null);
   const generatorRef = useRef<VideoLessonGenerator | null>(null);
   
-  // Generate video immediately when modal opens
+  // Video settings
+  const videoConfig: VideoLessonConfig = {
+    width: 1920,
+    height: 1080,
+    fps: 30,
+    fontSize: 56,
+    backgroundColor: '#1a1a1a',
+    textColor: '#ffffff',
+    highlightColor: '#00ff88',
+    voiceGender: audioConfig.voiceGender || 'female',
+    includeMnemonics: audioConfig.includeMnemonics
+  };
+  
   useEffect(() => {
     if (!isOpen) {
       // Cleanup when modal closes
+      stopPreview();
       if (generatorRef.current) {
         generatorRef.current.dispose();
         generatorRef.current = null;
       }
-      if (videoUrl) {
-        URL.revokeObjectURL(videoUrl);
-        setVideoUrl(null);
-      }
-      setProgress(0);
-      setError(null);
-      setIsGenerating(true); // Reset for next time
-      return;
     }
-    
-    // Skip if video already generated
-    if (videoUrl) {
-      return;
-    }
-    
-    const generateVideo = async () => {
-      setIsGenerating(true);
-      setProgress(0);
-      setError(null);
+  }, [isOpen]);
+  
+  useEffect(() => {
+    if (!isOpen || !canvasRef.current) return;
+
+    // Initialize preview
+    const initializePreview = () => {
+      // Create video generator
+      const generator = new VideoLessonGenerator(videoConfig);
+      generatorRef.current = generator;
       
-      try {
-        // Video settings
-        const videoConfig: VideoLessonConfig = {
-          width: 1920,
-          height: 1080,
-          fps: 30,
-          fontSize: 56,
-          backgroundColor: '#1a1a1a',
-          textColor: '#ffffff',
-          highlightColor: '#00ff88',
-          voiceGender: audioConfig.voiceGender || 'female',
-          includeMnemonics: audioConfig.includeMnemonics
-        };
-        
-        // Create video generator
-        setProgressMessage('Setting up video generator...');
-        const generator = new VideoLessonGenerator(videoConfig);
-        generatorRef.current = generator;
-        
-        // Extract timing data
-        setProgressMessage('Extracting audio timings...');
-        const timingExtractor = new VideoTimingExtractor(
-          lessonType === 'simple' ? {
-            pauseBetweenPhrases: audioConfig.pauseBetweenPhrases || 1500,
-            speed: audioConfig.speed || 1.0,
-            loops: audioConfig.loops || 1,
-            phraseRepetitions: audioConfig.phraseRepetitions || 2,
-            includeMnemonics: audioConfig.includeMnemonics || false,
-            mixSpeed: false
-          } : {
-            pauseDurationMs: {
-              afterInstruction: 2000,
-              forPractice: 3000,
-              betweenPhrases: 1500,
-              beforeAnswer: 2000
-            },
-            repetitions: {
-              introduction: 2,
-              practice: 3,
-              review: 2
-            },
-            includeMnemonics: audioConfig.includeMnemonics || false,
-            speed: audioConfig.speed || 1.0
-          }
-        );
-        
-        const timings = lessonType === 'simple'
-          ? timingExtractor.extractSimpleLessonTimings(phrases.length)
-          : timingExtractor.extractGuidedLessonTimings(phrases.length);
-        
-        // Generate overlays
-        setProgressMessage('Preparing text overlays...');
-        const overlays = generator.generateOverlayTimings(phrases, timings);
-        generator.setOverlays(overlays);
-        
-        // For now, just generate a preview GIF instead of full video
-        // Full video generation would require WebAssembly FFmpeg or server-side processing
-        const fps = 10; // Lower fps for GIF
-        const duration = Math.min(generator.getTotalDuration(), 10); // Max 10 seconds for preview
-        const totalFrames = Math.ceil(duration * fps);
-        
-        setProgressMessage('Generating preview...');
-        
-        // Create a simple animated preview
-        const canvas = generator.getCanvas();
-        const previewCanvas = document.createElement('canvas');
-        previewCanvas.width = 640; // Smaller size for preview
-        previewCanvas.height = 360;
-        const previewCtx = previewCanvas.getContext('2d')!;
-        
-        // Render a few key frames
-        const keyFrames = [0, duration / 3, duration * 2 / 3, duration - 0.1];
-        for (let i = 0; i < keyFrames.length; i++) {
-          generator.renderFrame(keyFrames[i]);
-          previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-          previewCtx.drawImage(canvas, 0, 0, previewCanvas.width, previewCanvas.height);
-          setProgress(Math.round(((i + 1) / keyFrames.length) * 100));
+      // Extract timing data
+      const timingExtractor = new VideoTimingExtractor(
+        lessonType === 'simple' ? {
+          pauseBetweenPhrases: audioConfig.pauseBetweenPhrases || 1500,
+          speed: audioConfig.speed || 1.0,
+          loops: audioConfig.loops || 1,
+          phraseRepetitions: audioConfig.phraseRepetitions || 2,
+          includeMnemonics: audioConfig.includeMnemonics || false,
+          mixSpeed: false
+        } : {
+          pauseDurationMs: {
+            afterInstruction: 2000,
+            forPractice: 3000,
+            betweenPhrases: 1500,
+            beforeAnswer: 2000
+          },
+          repetitions: {
+            introduction: 2,
+            practice: 3,
+            review: 2
+          },
+          includeMnemonics: audioConfig.includeMnemonics || false,
+          speed: audioConfig.speed || 1.0
         }
-        
-        // Convert to blob
-        const blob = await new Promise<Blob>((resolve) => {
-          previewCanvas.toBlob((b) => resolve(b!), 'image/png');
-        });
-        
-        const url = URL.createObjectURL(blob);
-        setVideoUrl(url);
-        setIsGenerating(false);
-        
-        toast.info('Preview generated. Full video generation requires server deployment with FFmpeg.');
-        
-      } catch (err) {
-        console.error('Error generating video:', err);
-        setError(err instanceof Error ? err.message : 'Failed to generate video');
-        setIsGenerating(false);
-        toast.error('Failed to generate video');
+      );
+      
+      const timings = lessonType === 'simple'
+        ? timingExtractor.extractSimpleLessonTimings(phrases.length)
+        : timingExtractor.extractGuidedLessonTimings(phrases.length);
+      
+      // Generate overlays
+      const overlays = generator.generateOverlayTimings(phrases, timings);
+      generator.setOverlays(overlays);
+      
+      // Display preview canvas
+      if (canvasRef.current) {
+        const sourceCanvas = generator.getCanvas();
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) {
+          // Scale canvas to fit preview
+          const scale = Math.min(
+            canvasRef.current.width / sourceCanvas.width,
+            canvasRef.current.height / sourceCanvas.height
+          );
+          
+          const scaledWidth = sourceCanvas.width * scale;
+          const scaledHeight = sourceCanvas.height * scale;
+          const x = (canvasRef.current.width - scaledWidth) / 2;
+          const y = (canvasRef.current.height - scaledHeight) / 2;
+          
+          // Render initial frame
+          generator.renderFrame(0);
+          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          ctx.drawImage(sourceCanvas, x, y, scaledWidth, scaledHeight);
+        }
       }
     };
     
-    generateVideo();
-  }, [isOpen, phrases, setName, audioConfig, lessonType, setId, videoUrl]);
+    initializePreview();
+  }, [isOpen, phrases, videoConfig, audioConfig, lessonType]);
   
-  const handleDownload = () => {
-    if (!videoUrl) return;
+  const startPreview = () => {
+    if (!generatorRef.current) return;
     
-    const a = document.createElement('a');
-    a.href = videoUrl;
-    a.download = `${setName.replace(/[^a-z0-9]/gi, '_')}_Video_Preview.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    toast.info('Downloaded preview image. Full video requires server deployment.');
+    setIsPreviewPlaying(true);
+    const startTime = Date.now() - previewTime * 1000;
+    
+    const animate = () => {
+      if (!generatorRef.current || !canvasRef.current) return;
+      
+      const currentTime = (Date.now() - startTime) / 1000;
+      const totalDuration = generatorRef.current.getTotalDuration();
+      
+      if (currentTime >= totalDuration) {
+        // Loop preview
+        setPreviewTime(0);
+        startPreview();
+        return;
+      }
+      
+      setPreviewTime(currentTime);
+      
+      // Render frame
+      generatorRef.current.renderFrame(currentTime);
+      
+      // Copy to preview canvas
+      const sourceCanvas = generatorRef.current.getCanvas();
+      const ctx = canvasRef.current.getContext('2d');
+      if (ctx) {
+        const scale = Math.min(
+          canvasRef.current.width / sourceCanvas.width,
+          canvasRef.current.height / sourceCanvas.height
+        );
+        
+        const scaledWidth = sourceCanvas.width * scale;
+        const scaledHeight = sourceCanvas.height * scale;
+        const x = (canvasRef.current.width - scaledWidth) / 2;
+        const y = (canvasRef.current.height - scaledHeight) / 2;
+        
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        ctx.drawImage(sourceCanvas, x, y, scaledWidth, scaledHeight);
+      }
+      
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    
+    animate();
   };
   
-  const handleClose = () => {
-    onClose();
+  const stopPreview = () => {
+    setIsPreviewPlaying(false);
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+  };
+  
+  const generateVideo = async () => {
+    if (!generatorRef.current || !CanvasCapture) {
+      toast.error('Video generation not available');
+      return;
+    }
+    
+    setIsGenerating(true);
+    setProgress(0);
+    stopPreview();
+    
+    try {
+      const sourceCanvas = generatorRef.current.getCanvas();
+      
+      // Initialize CanvasCapture
+      CanvasCapture.init(sourceCanvas, {
+        verbose: false,
+        showRecDot: false,
+        showAlerts: false,
+        showDialogs: true, // Let it handle the download
+        ffmpegCoreWASMPath: 'https://unpkg.com/@ffmpeg/core@0.12.2/dist/umd/ffmpeg-core.js'
+      });
+      
+      // Configure recording
+      const fps = videoConfig.fps || 30;
+      const totalDuration = generatorRef.current.getTotalDuration();
+      const totalFrames = Math.ceil(totalDuration * fps);
+      
+      // Start recording
+      CanvasCapture.beginVideoRecord({
+        format: 'webm', // Use WebM format which is better supported
+        name: `${setName}_Video_Lesson`,
+        fps: fps,
+        quality: 0.92
+      });
+      
+      // Render all frames
+      for (let frame = 0; frame < totalFrames; frame++) {
+        const currentTime = frame / fps;
+        
+        // Update progress
+        setProgress(Math.round((frame / totalFrames) * 100));
+        
+        // Render frame
+        generatorRef.current.renderFrame(currentTime);
+        
+        // Record frame
+        CanvasCapture.recordFrame();
+        
+        // Allow UI to update
+        if (frame % 30 === 0) {
+          await new Promise(resolve => setTimeout(resolve, 0));
+        }
+      }
+      
+      // Stop recording and download
+      CanvasCapture.stopRecord();
+      
+      setIsGenerating(false);
+      toast.success('Video downloaded!');
+      
+    } catch (error) {
+      console.error('Error generating video:', error);
+      toast.error('Failed to generate video');
+      setIsGenerating(false);
+    }
   };
   
   if (!isOpen) return null;
   
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+      <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-white">Video Lesson Preview</h2>
+          <h2 className="text-xl font-semibold text-white">Video Lesson</h2>
           <button
-            onClick={handleClose}
+            onClick={onClose}
             className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-            disabled={isGenerating}
           >
             <X className="w-5 h-5 text-gray-400" />
           </button>
@@ -189,69 +267,74 @@ export function VideoLessonModal({
         
         {/* Content */}
         <div className="p-6">
-          {error ? (
-            <div className="text-center py-8">
-              <p className="text-red-400 mb-4">{error}</p>
-              <button
-                onClick={handleClose}
-                className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          ) : isGenerating ? (
-            <div className="text-center py-8">
-              <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
-              <p className="text-white mb-2">Generating preview...</p>
-              <p className="text-gray-400 text-sm mb-4">{progressMessage}</p>
-              <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
+          <div className="space-y-4">
+            {/* Preview */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-medium text-white">Preview</h3>
+                <button
+                  onClick={isPreviewPlaying ? stopPreview : startPreview}
+                  className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  {isPreviewPlaying ? (
+                    <Pause className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <Play className="w-5 h-5 text-gray-400" />
+                  )}
+                </button>
+              </div>
+              
+              <div className="bg-black rounded-lg overflow-hidden">
+                <canvas
+                  ref={canvasRef}
+                  width={854}
+                  height={480}
+                  className="w-full"
                 />
               </div>
-              <p className="text-gray-400 text-sm mt-2">{progress}%</p>
+              
+              {/* Preview time */}
+              <div className="mt-2 text-sm text-gray-400 text-center">
+                {Math.floor(previewTime / 60)}:{Math.floor(previewTime % 60).toString().padStart(2, '0')} / 
+                {generatorRef.current ? ` ${Math.floor(generatorRef.current.getTotalDuration() / 60)}:${Math.floor(generatorRef.current.getTotalDuration() % 60).toString().padStart(2, '0')}` : ' 0:00'}
+              </div>
             </div>
-          ) : (
-            <div className="text-center py-8">
-              {videoUrl && (
-                <div className="mb-6">
-                  <img 
-                    src={videoUrl} 
-                    alt="Video preview" 
-                    className="w-full rounded-lg shadow-lg mb-4"
+            
+            {/* Progress */}
+            {isGenerating && (
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-400">Generating video...</span>
+                  <span className="text-sm text-white">{progress}%</span>
+                </div>
+                <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-300"
+                    style={{ width: `${progress}%` }}
                   />
                 </div>
-              )}
-              
-              <div className="mb-6">
-                <h3 className="text-lg font-medium text-white mb-2">Preview Ready</h3>
-                <p className="text-gray-400 text-sm mb-2">
-                  This is a preview of your video lesson.
-                </p>
-                <p className="text-yellow-400 text-xs">
-                  Full video generation with synchronized audio requires server deployment with FFmpeg.
-                </p>
               </div>
-              
-              <div className="space-y-3">
-                <button
-                  onClick={handleDownload}
-                  className="w-full px-6 py-3 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition-all flex items-center justify-center gap-2"
-                >
-                  <Download className="w-5 h-5" />
-                  Download Preview
-                </button>
-                
-                <button
-                  onClick={handleClose}
-                  className="w-full px-6 py-3 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
+        </div>
+        
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-800 flex items-center justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+            disabled={isGenerating}
+          >
+            Close
+          </button>
+          <button
+            onClick={generateVideo}
+            disabled={isGenerating || !CanvasCapture}
+            className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <Download className="w-5 h-5" />
+            {isGenerating ? 'Generating...' : 'Download Video'}
+          </button>
         </div>
       </div>
     </div>

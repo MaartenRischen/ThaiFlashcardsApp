@@ -214,7 +214,7 @@ export function VideoLessonModal({
     console.log('generatorRef.current:', generatorRef.current);
     console.log('CanvasCapture:', CanvasCapture);
     console.log('isGenerating:', isGenerating);
-    console.log('showVideoModal:', showVideoModal);
+    console.log('isOpen:', isOpen);
     console.log('phrases:', phrases);
     
     if (!generatorRef.current || !CanvasCapture) {
@@ -336,7 +336,6 @@ export function VideoLessonModal({
   console.log('VideoLessonModal render', {
     isOpen,
     isGenerating,
-    showVideoModal: true,
     hasCanvas: !!canvasRef.current,
     hasGenerator: !!generatorRef.current,
     hasCanvasCapture: !!CanvasCapture,

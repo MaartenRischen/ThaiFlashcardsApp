@@ -48,6 +48,7 @@ export async function POST(
     // If it's a default set and not found, create it first
     if (isDefaultSet && !flashcardSet) {
       console.log('Default set not found in database, creating it...');
+      console.log('params.id:', params.id);
       
       // Get the default set content
       let defaultContent;
@@ -60,9 +61,14 @@ export async function POST(
         defaultSetName = 'Default Set';
       } else {
         const setId = params.id.replace('default-', '');
+        console.log('Looking for setId:', setId);
+        console.log('Available DEFAULT_SETS ids:', DEFAULT_SETS.map(s => s.id));
         const defaultSet = DEFAULT_SETS.find(set => set.id === setId);
+        console.log('Found defaultSet:', defaultSet ? defaultSet.name : 'NOT FOUND');
         if (!defaultSet) {
-          return NextResponse.json({ error: 'Default set template not found' }, { status: 404 });
+          return NextResponse.json({ 
+            error: `Default set template not found for id: ${setId}. Available sets: ${DEFAULT_SETS.map(s => s.id).join(', ')}` 
+          }, { status: 404 });
         }
         defaultContent = defaultSet.phrases;
         defaultSetName = defaultSet.name;

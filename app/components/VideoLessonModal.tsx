@@ -25,25 +25,24 @@ export function VideoLessonModal({
 }: VideoLessonModalProps) {
   const [isGenerating, setIsGenerating] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
+
   const [error, setError] = useState<string | null>(null);
   const generatorRef = useRef<VideoLessonGenerator | null>(null);
   
-  // Video settings
-  const videoConfig: VideoLessonConfig = {
-    width: 1920,
-    height: 1080,
-    fps: 30,
-    fontSize: 56,
-    backgroundColor: '#1a1a1a',
-    textColor: '#ffffff',
-    highlightColor: '#00ff88',
-    voiceGender: audioConfig.voiceGender || 'female',
-    includeMnemonics: audioConfig.includeMnemonics
-  };
-  
   // Generate video immediately when modal opens
   useEffect(() => {
+    // Video settings
+    const videoConfig: VideoLessonConfig = {
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      fontSize: 56,
+      backgroundColor: '#1a1a1a',
+      textColor: '#ffffff',
+      highlightColor: '#00ff88',
+      voiceGender: audioConfig.voiceGender || 'female',
+      includeMnemonics: audioConfig.includeMnemonics
+    };
     if (!isOpen) {
       // Cleanup when modal closes
       if (generatorRef.current) {
@@ -126,16 +125,10 @@ export function VideoLessonModal({
               setProgress(50 + Math.round(prog * 50)); // 50-100% for encoding
             },
             onExportFinish: () => {
-              // Get the blob from CanvasCapture
-              const blob = CanvasCapture!.getLastCapture();
-              if (blob instanceof Blob) {
-                setVideoBlob(blob);
-                setIsGenerating(false);
-                toast.success('Video generated successfully!');
-                resolve();
-              } else {
-                reject(new Error('Failed to get video data'));
-              }
+              // Video will be automatically downloaded by canvas-capture
+              setIsGenerating(false);
+              toast.success('Video generated successfully!');
+              resolve();
             },
             onError: (error: Error | unknown) => {
               console.error('Video generation error:', error);
@@ -183,22 +176,9 @@ export function VideoLessonModal({
     };
     
     generateVideo();
-  }, [isOpen, phrases, setName, audioConfig, lessonType, videoConfig]);
+  }, [isOpen, phrases, setName, audioConfig, lessonType]);
   
-  const handleDownload = () => {
-    if (!videoBlob) return;
-    
-    const url = URL.createObjectURL(videoBlob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = url;
-    a.download = `${setName.replace(/[^a-z0-9]/gi, '_')}_Video_Lesson.mp4`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success('Video downloaded!');
-  };
+  // Video is automatically downloaded by canvas-capture
   
   if (!isOpen) return null;
   
@@ -255,22 +235,12 @@ export function VideoLessonModal({
                 </p>
               </div>
               
-              <div className="space-y-3">
-                <button
-                  onClick={handleDownload}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all flex items-center justify-center gap-2"
-                >
-                  <Download className="w-5 h-5" />
-                  Download Video
-                </button>
-                
-                <button
-                  onClick={onClose}
-                  className="w-full px-6 py-3 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
+              <button
+                onClick={onClose}
+                className="w-full px-6 py-3 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Close
+              </button>
             </div>
           )}
         </div>

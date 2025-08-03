@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { X, Download, Settings, Play, Pause } from 'lucide-react';
-import { CanvasCapture } from 'canvas-capture';
+// Import canvas-capture dynamically to avoid SSR issues
+let CanvasCapture: any;
+if (typeof window !== 'undefined') {
+  CanvasCapture = require('canvas-capture').CanvasCapture;
+}
 import { Phrase } from '@/app/lib/generation/types';
 import { VideoLessonGenerator, VideoLessonConfig } from '@/app/lib/video-lesson-generator';
 import { AudioTimingExtractor } from '@/app/lib/audio-timing-extractor';

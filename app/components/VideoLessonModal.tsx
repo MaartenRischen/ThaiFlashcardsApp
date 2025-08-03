@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Download, Settings, Play, Pause } from 'lucide-react';
+import { X, Download, Play, Pause } from 'lucide-react';
 // Import canvas-capture dynamically to avoid SSR issues
 import type { CanvasCapture as CanvasCaptureType } from 'canvas-capture';
 let CanvasCapture: typeof CanvasCaptureType | undefined;
@@ -32,18 +32,7 @@ export function VideoLessonModal({
   const animationRef = useRef<number | null>(null);
   const generatorRef = useRef<VideoLessonGenerator | null>(null);
   
-  // Video settings
-  const videoConfig: VideoLessonConfig = {
-    width: 1920,
-    height: 1080,
-    fps: 30,
-    fontSize: 56,
-    backgroundColor: '#1a1a1a',
-    textColor: '#ffffff',
-    highlightColor: '#00ff88',
-    voiceGender: audioConfig.voiceGender || 'female',
-    includeMnemonics: audioConfig.includeMnemonics
-  };
+
   
   useEffect(() => {
     if (!isOpen) {
@@ -61,6 +50,19 @@ export function VideoLessonModal({
 
     // Initialize preview
     const initializePreview = () => {
+      // Video settings
+      const videoConfig: VideoLessonConfig = {
+        width: 1920,
+        height: 1080,
+        fps: 30,
+        fontSize: 56,
+        backgroundColor: '#1a1a1a',
+        textColor: '#ffffff',
+        highlightColor: '#00ff88',
+        voiceGender: audioConfig.voiceGender || 'female',
+        includeMnemonics: audioConfig.includeMnemonics
+      };
+      
       // Create video generator
       const generator = new VideoLessonGenerator(videoConfig);
       generatorRef.current = generator;
@@ -124,7 +126,7 @@ export function VideoLessonModal({
     };
     
     initializePreview();
-  }, [isOpen, phrases, videoConfig, audioConfig, lessonType]);
+  }, [isOpen, phrases, audioConfig, lessonType]);
   
   const startPreview = () => {
     if (!generatorRef.current) return;
@@ -201,11 +203,11 @@ export function VideoLessonModal({
         showRecDot: false,
         showAlerts: false,
         showDialogs: true, // Let it handle the download
-        ffmpegCoreWASMPath: 'https://unpkg.com/@ffmpeg/core@0.12.2/dist/umd/ffmpeg-core.js'
+        ffmpegCorePath: 'https://unpkg.com/@ffmpeg/core@0.12.2/dist/umd/ffmpeg-core.js'
       });
       
       // Configure recording
-      const fps = videoConfig.fps || 30;
+      const fps = 30;
       const totalDuration = generatorRef.current.getTotalDuration();
       const totalFrames = Math.ceil(totalDuration * fps);
       

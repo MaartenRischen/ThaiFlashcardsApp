@@ -10,7 +10,6 @@ import { SimpleAudioLessonConfig } from '@/app/lib/audio-lesson-generator-simple
 interface AudioLessonPlayerProps {
   audioUrl: string;
   phrases: Phrase[];
-  setName: string;
   audioConfig: SimpleAudioLessonConfig;
   lessonType: 'simple' | 'structured';
 }
@@ -18,7 +17,6 @@ interface AudioLessonPlayerProps {
 export function AudioLessonPlayer({
   audioUrl,
   phrases,
-  setName,
   audioConfig,
   lessonType
 }: AudioLessonPlayerProps) {
@@ -142,7 +140,7 @@ export function AudioLessonPlayer({
                     {activePhrase.phrase.thai}
                   </h2>
                   <p className="text-2xl text-gray-300">
-                    {activePhrase.phrase.phonetic}
+                    {activePhrase.phrase.pronunciation}
                   </p>
                 </div>
               )}

@@ -642,7 +642,6 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
             <AudioLessonPlayer
               audioUrl={audioUrl}
               phrases={activeSetContent}
-              setName={setName}
               audioConfig={lessonMode === 'simple' ? simpleConfig as SimpleAudioLessonConfig : {
                 voiceGender: config.voiceGender || 'female',
                 repetitions: 3,

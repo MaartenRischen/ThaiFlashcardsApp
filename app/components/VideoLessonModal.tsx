@@ -7,7 +7,10 @@ import type { CanvasCapture as CanvasCaptureType } from 'canvas-capture';
 let CanvasCapture: typeof CanvasCaptureType | undefined;
 if (typeof window !== 'undefined') {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  CanvasCapture = (require('canvas-capture') as { CanvasCapture: typeof CanvasCaptureType }).CanvasCapture;
+  const canvasCapture = require('canvas-capture');
+  console.log('Loaded canvas-capture:', canvasCapture);
+  CanvasCapture = canvasCapture.CanvasCapture;
+  console.log('CanvasCapture initialized:', CanvasCapture);
 }
 
 import { VideoLessonConfig, VideoLessonModalProps } from '@/app/lib/video/types';
@@ -208,54 +211,83 @@ export function VideoLessonModal({
     try {
       const sourceCanvas = generatorRef.current.getCanvas();
       
-      // Initialize CanvasCapture
-      CanvasCapture.init(sourceCanvas, {
-        verbose: false,
-        showRecDot: false,
-        showAlerts: true,
-        showDialogs: false,
-        ffmpegCorePath: 'https://unpkg.com/@ffmpeg/core@0.12.2/dist/umd/ffmpeg-core.js'
-      });
+      console.log('Starting video generation with source canvas:', sourceCanvas);
       
-      // Configure recording
-      const fps = 30;
-      const totalDuration = generatorRef.current.getTotalDuration();
-      const totalFrames = Math.ceil(totalDuration * fps);
-      
-      // Start recording
-      CanvasCapture.beginVideoRecord({
-        format: 'webm',
-        name: `${setName}_Video_Lesson`,
-        fps: fps,
-        quality: 0.92,
-        onExportProgress: (prog: number) => {
-          setProgress(50 + Math.round(prog * 50)); // 50-100% for encoding
-        },
-        onExportFinish: () => {
-          toast.success('Video downloaded successfully!');
-          setIsGenerating(false);
-          setProgress(0);
-        },
-        onError: (error: Error | unknown) => {
-          console.error('Video generation error:', error);
-          toast.error('Failed to generate video');
-          setIsGenerating(false);
-          setProgress(0);
-        }
-      });
+      try {
+        // Initialize CanvasCapture
+        console.log('Initializing CanvasCapture...');
+        CanvasCapture.init(sourceCanvas, {
+          verbose: true, // Enable verbose logging
+          showRecDot: false,
+          showAlerts: true,
+          showDialogs: false
+        });
+        console.log('CanvasCapture initialized successfully');
+        
+        // Configure recording
+        const fps = 30;
+        const totalDuration = generatorRef.current.getTotalDuration();
+        const totalFrames = Math.ceil(totalDuration * fps);
+        console.log('Video config:', { fps, totalDuration, totalFrames });
+        
+        // Start recording
+        console.log('Starting video recording...');
+        CanvasCapture.beginVideoRecord({
+          format: 'webm',
+          name: `${setName}_Video_Lesson`,
+          fps: fps,
+          quality: 0.92,
+          onExportProgress: (prog: number) => {
+            console.log('Export progress:', prog);
+            setProgress(50 + Math.round(prog * 50)); // 50-100% for encoding
+          },
+          onExportFinish: () => {
+            console.log('Video export finished successfully');
+            toast.success('Video downloaded successfully!');
+            setIsGenerating(false);
+            setProgress(0);
+          },
+          onError: (error: Error | unknown) => {
+            console.error('Video generation error:', error);
+            toast.error('Failed to generate video');
+            setIsGenerating(false);
+            setProgress(0);
+          }
+        });
+        console.log('Video recording started');
+      } catch (initError) {
+        console.error('Error during CanvasCapture initialization:', initError);
+        toast.error('Failed to initialize video recording');
+        setIsGenerating(false);
+        setProgress(0);
+        return;
+      }
       
       // Render all frames
+      console.log('Starting frame rendering...');
       for (let frame = 0; frame < totalFrames; frame++) {
         const currentTime = frame / fps;
         
         // Update progress (recording phase)
-        setProgress(Math.round((frame / totalFrames) * 50)); // 0-50% for recording
+        const recordingProgress = Math.round((frame / totalFrames) * 50);
+        setProgress(recordingProgress);
+        if (frame % 30 === 0) {
+          console.log(`Recording progress: ${recordingProgress}%, Frame: ${frame}/${totalFrames}`);
+        }
         
-        // Render frame
-        generatorRef.current.renderFrame(currentTime);
-        
-        // Record frame
-        CanvasCapture.recordFrame();
+        try {
+          // Render frame
+          generatorRef.current.renderFrame(currentTime);
+          
+          // Record frame
+          CanvasCapture.recordFrame();
+        } catch (frameError) {
+          console.error('Error during frame rendering/recording:', frameError);
+          toast.error('Failed to render video frame');
+          setIsGenerating(false);
+          setProgress(0);
+          return;
+        }
         
         // Allow UI to update
         if (frame % 30 === 0) {
@@ -264,8 +296,10 @@ export function VideoLessonModal({
       }
       
       // Stop recording and export
+      console.log('Frame rendering complete, stopping recording...');
       setProgress(50); // Start export phase
       CanvasCapture.stopRecord();
+      console.log('Recording stopped, waiting for export...');
       
     } catch (error) {
       console.error('Error generating video:', error);

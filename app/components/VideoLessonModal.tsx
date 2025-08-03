@@ -9,7 +9,7 @@ if (typeof window !== 'undefined') {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   CanvasCapture = (require('canvas-capture') as { CanvasCapture: typeof CanvasCaptureType }).CanvasCapture;
 }
-import { Phrase } from '@/app/lib/generation/types';
+
 import { VideoLessonConfig, VideoLessonModalProps } from '@/app/lib/video/types';
 import { VideoLessonGenerator } from '@/app/lib/video/lesson-generator';
 import { VideoTimingExtractor } from '@/app/lib/video/timing-extractor';
@@ -97,7 +97,7 @@ export function VideoLessonModal({
     
     const timings = lessonType === 'simple'
       ? timingExtractor.extractSimpleLessonTimings(phrases.length)
-      : timingExtractor.extractStructuredLessonTimings(phrases.length);
+      : timingExtractor.extractGuidedLessonTimings(phrases.length);
     
     // Generate overlays
     const overlays = generator.generateOverlayTimings(phrases, timings);

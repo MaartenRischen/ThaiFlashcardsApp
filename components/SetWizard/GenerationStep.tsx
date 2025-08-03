@@ -57,8 +57,8 @@ export function GenerationStep({
                 'Creating mnemonics...',
                 'Generating flashcards...'
               ];
-              const messageIndex = Math.floor((simulatedProgress / 70) * messages.length);
-              // updateProgress(simulatedProgress, messages[Math.min(messageIndex, messages.length - 1)]); // Removed updateProgress
+              const message = messages[Math.floor((simulatedProgress / 70) * messages.length)];
+              // updateProgress(simulatedProgress, message); // Removed updateProgress
             } else {
               const messages = [
                 'Contacting AI service...',
@@ -67,8 +67,8 @@ export function GenerationStep({
                 'Generating contextual examples...',
                 'Creating flashcards...'
               ];
-              const messageIndex = Math.floor((simulatedProgress / 70) * messages.length);
-              // updateProgress(simulatedProgress, messages[Math.min(messageIndex, messages.length - 1)]); // Removed updateProgress
+              const message = messages[Math.floor((simulatedProgress / 70) * messages.length)];
+              // updateProgress(simulatedProgress, message); // Removed updateProgress
             }
           }
         }, 1000);

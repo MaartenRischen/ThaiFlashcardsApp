@@ -10,7 +10,7 @@ import type { SetMetaData } from '@/app/lib/storage';
 import { useUser } from '@clerk/nextjs'; // Add Clerk hook
 import PublishConfirmationModal from './PublishConfirmationModal';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Loader2 } from 'lucide-react';
+
 import { toast } from 'sonner';
 
 interface CombinedOptionsModalProps {

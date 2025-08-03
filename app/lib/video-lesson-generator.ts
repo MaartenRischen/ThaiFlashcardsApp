@@ -1,4 +1,4 @@
-import { Phrase } from '@/app/types';
+import { Phrase } from '@/app/lib/generation/types';
 
 export interface VideoLessonConfig {
   width?: number;

@@ -135,7 +135,7 @@ export function VideoLessonModal({
     videoConfig,
     audioConfig.includeMnemonics,
     audioConfig.loops,
-    audioConfig.mixSpeed,
+
     audioConfig.pauseBetweenPhrases,
     audioConfig.phraseRepetitions,
     audioConfig.speed,

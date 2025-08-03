@@ -50,25 +50,9 @@ export function GenerationStep({
           simulatedProgress += Math.random() * 5; // Increment by 0-5%
           if (simulatedProgress < 70) { // Don't go beyond 70% with simulation
             if (state.mode === 'manual') {
-              const messages = [
-                'Processing your phrases...',
-                'Translating to Thai...',
-                'Adding pronunciations...',
-                'Creating mnemonics...',
-                'Generating flashcards...'
-              ];
-              const message = messages[Math.floor((simulatedProgress / 70) * messages.length)];
-              // updateProgress(simulatedProgress, message); // Removed updateProgress
+              // Progress messages removed since updateProgress was removed
             } else {
-              const messages = [
-                'Contacting AI service...',
-                'Analyzing your preferences...',
-                'Crafting Thai phrases...',
-                'Generating contextual examples...',
-                'Creating flashcards...'
-              ];
-              const message = messages[Math.floor((simulatedProgress / 70) * messages.length)];
-              // updateProgress(simulatedProgress, message); // Removed updateProgress
+              // Progress messages removed since updateProgress was removed
             }
           }
         }, 1000);

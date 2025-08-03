@@ -204,7 +204,7 @@ export class VideoLessonGenerator {
     const centerY = this.canvas.height / 2;
     
     // We'll typically have one phrase at a time
-    const [phraseOverlays] = [...groupedOverlays.values()];
+    const [phraseOverlays] = Array.from(groupedOverlays.values());
     if (!phraseOverlays) return;
     
     // Sort overlays by type for consistent ordering

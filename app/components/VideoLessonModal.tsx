@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Download, Settings, Play, Pause } from 'lucide-react';
 import { CanvasCapture } from 'canvas-capture';
-import { Phrase } from '@/app/lib/types';
+import { Phrase } from '@/app/lib/generation/types';
 import { VideoLessonGenerator, VideoLessonConfig } from '@/app/lib/video-lesson-generator';
 import { AudioTimingExtractor } from '@/app/lib/audio-timing-extractor';
 import { SimpleAudioLessonConfig } from '@/app/lib/audio-lesson-generator-simple';
@@ -114,7 +114,18 @@ export function VideoLessonModal({
     
     // Call initialize
     initializePreview();
-  }, [isOpen, phrases, videoConfig]);
+  }, [
+    isOpen, 
+    phrases, 
+    videoConfig,
+    audioConfig.includeMnemonics,
+    audioConfig.loops,
+    audioConfig.mixSpeed,
+    audioConfig.pauseBetweenPhrases,
+    audioConfig.phraseRepetitions,
+    audioConfig.speed,
+    lessonType
+  ]);
   
   const startPreview = () => {
     if (!generatorRef.current) return;

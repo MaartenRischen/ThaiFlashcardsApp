@@ -10,10 +10,7 @@ import type { SetMetaData } from '@/app/lib/storage';
 import { useUser } from '@clerk/nextjs'; // Add Clerk hook
 import PublishConfirmationModal from './PublishConfirmationModal';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { CheckIcon, ChevronRightIcon, Loader2, ChevronUpIcon, ChevronDownIcon, Trash2, Plus, Volume2, Pencil } from 'lucide-react';
-import clsx from 'clsx';
-import { DEFAULT_SETS } from '@/app/data/default-sets';
-import { saveSetContent } from '@/app/lib/storage/set-content';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CombinedOptionsModalProps {

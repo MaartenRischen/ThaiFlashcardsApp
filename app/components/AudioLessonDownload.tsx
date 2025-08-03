@@ -623,7 +623,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
     </Dialog>
     
     {/* Video Lesson Modal */}
-    {audioUrl && activeSetContent && (
+    {audioUrl && activeSetContent && activeSetContent.length > 0 && (
       <VideoLessonModal
         isOpen={showVideoModal}
         onClose={() => setShowVideoModal(false)}
@@ -643,6 +643,28 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
         } as SimpleAudioLessonConfig}
         lessonType={lessonMode === 'pimsleur' ? 'structured' : 'simple'}
       />
+    )}
+    {/* Debug info */}
+    {showVideoModal && (!audioUrl || !activeSetContent || activeSetContent.length === 0) && (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden p-6">
+          <h2 className="text-xl font-semibold text-white mb-4">Cannot Generate Video</h2>
+          <div className="text-gray-300 space-y-2">
+            <p>Debug information:</p>
+            <ul className="list-disc list-inside">
+              <li>Audio URL: {audioUrl ? 'Available' : 'Not available'}</li>
+              <li>Active Set Content: {activeSetContent ? `${activeSetContent.length} phrases` : 'Not available'}</li>
+            </ul>
+            <p className="mt-4">Please ensure you have generated an audio lesson and the set content is loaded before trying to generate a video.</p>
+          </div>
+          <button
+            onClick={() => setShowVideoModal(false)}
+            className="mt-6 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
+          >
+            Close
+          </button>
+        </div>
+      </div>
     )}
     </>
   );

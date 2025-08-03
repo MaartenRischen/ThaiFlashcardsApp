@@ -216,7 +216,7 @@ export class VideoLessonGenerator {
     // Calculate vertical spacing
     const lineSpacing = this.config.fontSize! * 1.8;
     const totalHeight = phraseOverlays.length * lineSpacing;
-    let startY = centerY - totalHeight / 2 + lineSpacing / 2;
+    const startY = centerY - totalHeight / 2 + lineSpacing / 2;
     
     phraseOverlays.forEach((overlay, index) => {
       const y = startY + index * lineSpacing;

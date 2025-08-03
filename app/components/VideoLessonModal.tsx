@@ -35,7 +35,7 @@ export function VideoLessonModal({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | null>(null);
   const generatorRef = useRef<VideoLessonGenerator | null>(null);
-  const captureRef = useRef<any>(null);
+  const captureRef = useRef<ReturnType<typeof CanvasCapture.beginVideoRecord> | null>(null);
   
   // Video settings
   const [videoConfig, setVideoConfig] = useState<VideoLessonConfig>({
@@ -65,7 +65,7 @@ export function VideoLessonModal({
     if (isOpen && canvasRef.current) {
       initializePreview();
     }
-  }, [isOpen, phrases, videoConfig]);
+  }, [isOpen, phrases, videoConfig, initializePreview]);
   
   const initializePreview = () => {
     // Create video generator
@@ -202,7 +202,7 @@ export function VideoLessonModal({
           setIsGenerating(false);
           setProgress(0);
         },
-        onError: (error: any) => {
+        onError: (error: Error | unknown) => {
           console.error('Video generation error:', error);
           toast.error('Failed to generate video');
           setIsGenerating(false);

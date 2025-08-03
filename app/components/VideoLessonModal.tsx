@@ -10,19 +10,12 @@ if (typeof window !== 'undefined') {
   CanvasCapture = (require('canvas-capture') as { CanvasCapture: typeof CanvasCaptureType }).CanvasCapture;
 }
 import { Phrase } from '@/app/lib/generation/types';
-import { VideoLessonGenerator, VideoLessonConfig } from '@/app/lib/video-lesson-generator';
-import { AudioTimingExtractor } from '@/app/lib/audio-timing-extractor';
-import { SimpleAudioLessonConfig } from '@/app/lib/audio-lesson-generator-simple';
+import { VideoLessonConfig, VideoLessonModalProps } from '@/app/lib/video/types';
+import { VideoLessonGenerator } from '@/app/lib/video/lesson-generator';
+import { VideoTimingExtractor } from '@/app/lib/video/timing-extractor';
 import { toast } from 'sonner';
 
-interface VideoLessonModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  phrases: Phrase[];
-  setName: string;
-  audioConfig: SimpleAudioLessonConfig;
-  lessonType: 'simple' | 'structured';
-}
+
 
 export function VideoLessonModal({
   isOpen,
@@ -77,14 +70,30 @@ export function VideoLessonModal({
     generatorRef.current = generator;
     
     // Extract timing data
-    const timingExtractor = new AudioTimingExtractor({
-      pauseBetweenPhrases: audioConfig.pauseBetweenPhrases || 1500,
-      speed: audioConfig.speed || 1.0,
-      loops: audioConfig.loops || 1,
-      phraseRepetitions: audioConfig.phraseRepetitions || 2,
-      includeMnemonics: audioConfig.includeMnemonics || false,
-      mixSpeed: audioConfig.mixSpeed
-    });
+    const timingExtractor = new VideoTimingExtractor(
+      lessonType === 'simple' ? {
+        pauseBetweenPhrases: audioConfig.pauseBetweenPhrases || 1500,
+        speed: audioConfig.speed || 1.0,
+        loops: audioConfig.loops || 1,
+        phraseRepetitions: audioConfig.phraseRepetitions || 2,
+        includeMnemonics: audioConfig.includeMnemonics || false,
+        mixSpeed: false
+      } : {
+        pauseDurationMs: {
+          afterInstruction: 2000,
+          forPractice: 3000,
+          betweenPhrases: 1500,
+          beforeAnswer: 2000
+        },
+        repetitions: {
+          introduction: 2,
+          practice: 3,
+          review: 2
+        },
+        includeMnemonics: audioConfig.includeMnemonics || false,
+        speed: audioConfig.speed || 1.0
+      }
+    );
     
     const timings = lessonType === 'simple'
       ? timingExtractor.extractSimpleLessonTimings(phrases.length)

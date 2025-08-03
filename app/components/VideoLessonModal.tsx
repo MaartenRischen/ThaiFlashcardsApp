@@ -38,7 +38,9 @@ export function VideoLessonModal({
 
   
   useEffect(() => {
+    console.log('VideoLessonModal isOpen changed to:', isOpen);
     if (!isOpen) {
+      console.log('Modal closing, cleaning up...');
       // Cleanup when modal closes
       stopPreview();
       if (generatorRef.current) {

@@ -194,11 +194,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
   return (
     <>
     <Dialog open={showSettings} onOpenChange={(open) => {
+        console.log('Audio modal open state changed:', open);
         setShowSettings(open);
-        if (!open) {
-          // Close video modal when audio modal is closed
-          setShowVideoModal(false);
-        }
+        // Don't auto-close video modal when audio modal closes
+        // Let user manually close video modal
       }}>
       <DialogTrigger asChild>
         <button
@@ -524,7 +523,11 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                   Download
                 </button>
                 <button
-                  onClick={() => setShowVideoModal(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log('Video button clicked, setting showVideoModal to true');
+                    setShowVideoModal(true);
+                  }}
                   className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
                   title="Generate video lesson with synchronized text"
                 >
@@ -626,7 +629,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
     {audioUrl && activeSetContent && activeSetContent.length > 0 && (
       <VideoLessonModal
         isOpen={showVideoModal}
-        onClose={() => setShowVideoModal(false)}
+        onClose={() => {
+          console.log('VideoLessonModal onClose called, setting showVideoModal to false');
+          setShowVideoModal(false);
+        }}
         phrases={activeSetContent}
         setName={setName}
         audioConfig={lessonMode === 'simple' ? simpleConfig as SimpleAudioLessonConfig : {

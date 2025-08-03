@@ -6,6 +6,7 @@ import { VideoLessonConfig, VideoLessonModalProps } from '@/app/lib/video/types'
 import { VideoLessonGenerator } from '@/app/lib/video/lesson-generator';
 import { VideoTimingExtractor } from '@/app/lib/video/timing-extractor';
 import { toast } from 'sonner';
+import { useParams } from 'next/navigation';
 
 export function VideoLessonModal({
   isOpen,
@@ -15,9 +16,12 @@ export function VideoLessonModal({
   audioConfig,
   lessonType
 }: VideoLessonModalProps) {
+  const params = useParams();
+  const setId = params?.id as string || 'default';
   const [isGenerating, setIsGenerating] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [progressMessage, setProgressMessage] = useState('Initializing...');
+  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
   const generatorRef = useRef<VideoLessonGenerator | null>(null);
   
@@ -29,9 +33,8 @@ export function VideoLessonModal({
         generatorRef.current.dispose();
         generatorRef.current = null;
       }
-      if (videoUrl) {
-        URL.revokeObjectURL(videoUrl);
-        setVideoUrl(null);
+      if (videoBlob) {
+        setVideoBlob(null);
       }
       setProgress(0);
       setError(null);
@@ -58,10 +61,12 @@ export function VideoLessonModal({
         };
         
         // Create video generator
+        setProgressMessage('Setting up video generator...');
         const generator = new VideoLessonGenerator(videoConfig);
         generatorRef.current = generator;
         
         // Extract timing data
+        setProgressMessage('Extracting audio timings...');
         const timingExtractor = new VideoTimingExtractor(
           lessonType === 'simple' ? {
             pauseBetweenPhrases: audioConfig.pauseBetweenPhrases || 1500,
@@ -92,49 +97,84 @@ export function VideoLessonModal({
           : timingExtractor.extractGuidedLessonTimings(phrases.length);
         
         // Generate overlays
+        setProgressMessage('Preparing text overlays...');
         const overlays = generator.generateOverlayTimings(phrases, timings);
         generator.setOverlays(overlays);
         
-        // Generate frames as images
+        // Generate frames as data URLs
         const fps = videoConfig.fps || 30;
         const totalDuration = generator.getTotalDuration();
         const totalFrames = Math.ceil(totalDuration * fps);
-        const frames: Blob[] = [];
+        const frames: string[] = [];
+        
+        setProgressMessage('Rendering video frames...');
         
         // Render all frames
         for (let frame = 0; frame < totalFrames; frame++) {
           const currentTime = frame / fps;
           
-          // Update progress
-          setProgress(Math.round((frame / totalFrames) * 100));
+          // Update progress (0-70% for frame generation)
+          setProgress(Math.round((frame / totalFrames) * 70));
           
           // Render frame
           generator.renderFrame(currentTime);
           
-          // Get frame as blob
+          // Get frame as data URL
           const canvas = generator.getCanvas();
-          const blob = await new Promise<Blob>((resolve) => {
-            canvas.toBlob((blob) => {
-              resolve(blob!);
-            }, 'image/webp', 0.95);
-          });
+          const dataUrl = canvas.toDataURL('image/png', 0.9);
+          frames.push(dataUrl);
           
-          frames.push(blob);
-          
-          // Allow UI to update
-          if (frame % 30 === 0) {
+          // Allow UI to update every 10 frames
+          if (frame % 10 === 0) {
             await new Promise(resolve => setTimeout(resolve, 0));
           }
         }
         
-        // For now, just create a download of the first frame as a preview
-        // In a real implementation, you would send frames to a server to encode as video
-        // or use a WebAssembly video encoder
-        const previewUrl = URL.createObjectURL(frames[0]);
-        setVideoUrl(previewUrl);
+        // Send frames to server for encoding
+        setProgressMessage('Encoding video on server...');
+        setProgress(75);
         
+        const response = await fetch(`/api/flashcard-sets/${setId}/video-lesson`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            frames,
+            fps,
+            width: videoConfig.width,
+            height: videoConfig.height,
+            filename: setName
+          }),
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to generate video');
+        }
+        
+        setProgress(90);
+        setProgressMessage('Downloading video...');
+        
+        // Get video blob from response
+        const blob = await response.blob();
+        setVideoBlob(blob);
+        
+        setProgress(100);
         setIsGenerating(false);
-        toast.success('Video preview ready! Full video generation requires server-side encoding.');
+        
+        // Automatically download the video
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${setName.replace(/[^a-z0-9]/gi, '_')}_Video_Lesson.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        toast.success('Video downloaded successfully!');
         
       } catch (err) {
         console.error('Error generating video:', err);
@@ -145,18 +185,20 @@ export function VideoLessonModal({
     };
     
     generateVideo();
-  }, [isOpen, phrases, setName, audioConfig, lessonType]);
+  }, [isOpen, phrases, setName, audioConfig, lessonType, setId, videoBlob]);
   
   const handleDownload = () => {
-    if (!videoUrl) return;
+    if (!videoBlob) return;
     
+    const url = URL.createObjectURL(videoBlob);
     const a = document.createElement('a');
-    a.href = videoUrl;
-    a.download = `${setName.replace(/[^a-z0-9]/gi, '_')}_Video_Preview.webp`;
+    a.href = url;
+    a.download = `${setName.replace(/[^a-z0-9]/gi, '_')}_Video_Lesson.mp4`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    toast.info('Downloaded preview frame. Full video generation requires server-side processing.');
+    URL.revokeObjectURL(url);
+    toast.success('Video downloaded!');
   };
   
   if (!isOpen) return null;
@@ -170,6 +212,7 @@ export function VideoLessonModal({
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+            disabled={isGenerating}
           >
             <X className="w-5 h-5 text-gray-400" />
           </button>
@@ -190,7 +233,8 @@ export function VideoLessonModal({
           ) : isGenerating ? (
             <div className="text-center py-8">
               <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
-              <p className="text-white mb-2">Generating video frames...</p>
+              <p className="text-white mb-2">Generating video...</p>
+              <p className="text-gray-400 text-sm mb-4">{progressMessage}</p>
               <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
                 <div
                   className="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-300"
@@ -202,26 +246,22 @@ export function VideoLessonModal({
           ) : (
             <div className="text-center py-8">
               <div className="mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-500/20 rounded-full mb-4">
-                  <Download className="w-8 h-8 text-yellow-500" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 rounded-full mb-4">
+                  <Download className="w-8 h-8 text-green-500" />
                 </div>
-                <h3 className="text-lg font-medium text-white mb-2">Preview Ready</h3>
-                <p className="text-gray-400 text-sm mb-2">
-                  Video frame generation complete.
-                </p>
-                <p className="text-yellow-400 text-xs">
-                  Note: Full video encoding requires server-side processing. 
-                  This feature is coming soon!
+                <h3 className="text-lg font-medium text-white mb-2">Video Ready!</h3>
+                <p className="text-gray-400 text-sm">
+                  Your video lesson has been generated and downloaded.
                 </p>
               </div>
               
               <div className="space-y-3">
                 <button
                   onClick={handleDownload}
-                  className="w-full px-6 py-3 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition-all flex items-center justify-center gap-2"
+                  className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all flex items-center justify-center gap-2"
                 >
                   <Download className="w-5 h-5" />
-                  Download Preview Frame
+                  Download Again
                 </button>
                 
                 <button

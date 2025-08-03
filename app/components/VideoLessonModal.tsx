@@ -129,13 +129,20 @@ export function VideoLessonModal({
   }, [isOpen, phrases, audioConfig, lessonType]);
   
   const startPreview = () => {
-    if (!generatorRef.current) return;
+    if (!generatorRef.current) {
+      console.error('No generator available for preview');
+      return;
+    }
     
+    console.log('Starting preview...');
     setIsPreviewPlaying(true);
     const startTime = Date.now() - previewTime * 1000;
     
     const animate = () => {
-      if (!generatorRef.current || !canvasRef.current) return;
+      if (!generatorRef.current || !canvasRef.current) {
+        console.error('Generator or canvas not available during animation');
+        return;
+      }
       
       const currentTime = (Date.now() - startTime) / 1000;
       const totalDuration = generatorRef.current.getTotalDuration();
@@ -185,6 +192,10 @@ export function VideoLessonModal({
   };
   
   const generateVideo = async () => {
+    console.log('generateVideo called');
+    console.log('generatorRef.current:', generatorRef.current);
+    console.log('CanvasCapture:', CanvasCapture);
+    
     if (!generatorRef.current || !CanvasCapture) {
       toast.error('Video generation not available');
       return;
@@ -201,8 +212,8 @@ export function VideoLessonModal({
       CanvasCapture.init(sourceCanvas, {
         verbose: false,
         showRecDot: false,
-        showAlerts: false,
-        showDialogs: true, // Let it handle the download
+        showAlerts: true,
+        showDialogs: false,
         ffmpegCorePath: 'https://unpkg.com/@ffmpeg/core@0.12.2/dist/umd/ffmpeg-core.js'
       });
       
@@ -213,18 +224,32 @@ export function VideoLessonModal({
       
       // Start recording
       CanvasCapture.beginVideoRecord({
-        format: 'webm', // Use WebM format which is better supported
+        format: 'webm',
         name: `${setName}_Video_Lesson`,
         fps: fps,
-        quality: 0.92
+        quality: 0.92,
+        onExportProgress: (prog: number) => {
+          setProgress(50 + Math.round(prog * 50)); // 50-100% for encoding
+        },
+        onExportFinish: () => {
+          toast.success('Video downloaded successfully!');
+          setIsGenerating(false);
+          setProgress(0);
+        },
+        onError: (error: Error | unknown) => {
+          console.error('Video generation error:', error);
+          toast.error('Failed to generate video');
+          setIsGenerating(false);
+          setProgress(0);
+        }
       });
       
       // Render all frames
       for (let frame = 0; frame < totalFrames; frame++) {
         const currentTime = frame / fps;
         
-        // Update progress
-        setProgress(Math.round((frame / totalFrames) * 100));
+        // Update progress (recording phase)
+        setProgress(Math.round((frame / totalFrames) * 50)); // 0-50% for recording
         
         // Render frame
         generatorRef.current.renderFrame(currentTime);
@@ -238,16 +263,15 @@ export function VideoLessonModal({
         }
       }
       
-      // Stop recording and download
+      // Stop recording and export
+      setProgress(50); // Start export phase
       CanvasCapture.stopRecord();
-      
-      setIsGenerating(false);
-      toast.success('Video downloaded!');
       
     } catch (error) {
       console.error('Error generating video:', error);
       toast.error('Failed to generate video');
       setIsGenerating(false);
+      setProgress(0);
     }
   };
   
@@ -275,7 +299,10 @@ export function VideoLessonModal({
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-medium text-white">Preview</h3>
                 <button
-                  onClick={isPreviewPlaying ? stopPreview : startPreview}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    isPreviewPlaying ? stopPreview() : startPreview();
+                  }}
                   className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
                 >
                   {isPreviewPlaying ? (
@@ -330,7 +357,11 @@ export function VideoLessonModal({
             Close
           </button>
           <button
-            onClick={generateVideo}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('Download button clicked');
+              generateVideo();
+            }}
             disabled={isGenerating || !CanvasCapture}
             className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >

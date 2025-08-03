@@ -49,10 +49,20 @@ export function VideoLessonModal({
   }, [isOpen]);
   
   useEffect(() => {
-    if (!isOpen || !canvasRef.current) return;
+    console.log('VideoLessonModal useEffect triggered');
+    console.log('isOpen:', isOpen);
+    console.log('canvasRef.current:', canvasRef.current);
+    console.log('phrases:', phrases);
+    
+    if (!isOpen || !canvasRef.current) {
+      console.log('Skipping initialization - modal not open or canvas not ready');
+      return;
+    }
 
     // Initialize preview
     const initializePreview = () => {
+      console.log('Initializing preview...');
+      
       // Video settings
       const videoConfig: VideoLessonConfig = {
         width: 1920,
@@ -132,6 +142,11 @@ export function VideoLessonModal({
   }, [isOpen, phrases, audioConfig, lessonType]);
   
   const startPreview = () => {
+    console.log('startPreview called');
+    console.log('generatorRef.current:', generatorRef.current);
+    console.log('canvasRef.current:', canvasRef.current);
+    console.log('isPreviewPlaying:', isPreviewPlaying);
+    
     if (!generatorRef.current) {
       console.error('No generator available for preview');
       return;
@@ -198,8 +213,15 @@ export function VideoLessonModal({
     console.log('generateVideo called');
     console.log('generatorRef.current:', generatorRef.current);
     console.log('CanvasCapture:', CanvasCapture);
+    console.log('isGenerating:', isGenerating);
+    console.log('showVideoModal:', showVideoModal);
+    console.log('phrases:', phrases);
     
     if (!generatorRef.current || !CanvasCapture) {
+      console.error('Missing required objects:', {
+        hasGenerator: !!generatorRef.current,
+        hasCanvasCapture: !!CanvasCapture
+      });
       toast.error('Video generation not available');
       return;
     }
@@ -311,6 +333,16 @@ export function VideoLessonModal({
   
   if (!isOpen) return null;
   
+  console.log('VideoLessonModal render', {
+    isOpen,
+    isGenerating,
+    showVideoModal: true,
+    hasCanvas: !!canvasRef.current,
+    hasGenerator: !!generatorRef.current,
+    hasCanvasCapture: !!CanvasCapture,
+    phrases: phrases?.length
+  });
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
       <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
@@ -318,7 +350,11 @@ export function VideoLessonModal({
         <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-white">Video Lesson</h2>
           <button
-            onClick={onClose}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('Close button clicked');
+              onClose();
+            }}
             className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
           >
             <X className="w-5 h-5 text-gray-400" />

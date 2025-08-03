@@ -193,7 +193,13 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
 
   return (
     <>
-    <Dialog open={showSettings} onOpenChange={setShowSettings}>
+    <Dialog open={showSettings} onOpenChange={(open) => {
+        setShowSettings(open);
+        if (!open) {
+          // Close video modal when audio modal is closed
+          setShowVideoModal(false);
+        }
+      }}>
       <DialogTrigger asChild>
         <button
           className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#f59e0b] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(245,158,11,0.15)] before:pointer-events-none"

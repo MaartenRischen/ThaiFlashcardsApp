@@ -28,6 +28,7 @@ export function VideoLessonModal({
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
+  const [isAudioGenerated] = useState(true); // Since we only show this modal after audio is generated
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
   const [previewTime, setPreviewTime] = useState(0);
   
@@ -280,11 +281,11 @@ export function VideoLessonModal({
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
       <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-white">Generate Video Lesson</h2>
+          <h2 className="text-xl font-semibold text-white">{isAudioGenerated ? 'Video Preview' : 'Generate Video Lesson'}</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
@@ -340,7 +341,7 @@ export function VideoLessonModal({
             <div>
               {showSettings ? (
                 <div>
-                  <h3 className="text-lg font-medium text-white mb-4">Video Settings</h3>
+                  <h3 className="text-lg font-medium text-white mb-4">{isAudioGenerated ? 'Video Preview Settings' : 'Video Settings'}</h3>
                   
                   <div className="space-y-4">
                     {/* Resolution */}
@@ -409,7 +410,7 @@ export function VideoLessonModal({
                 </div>
               ) : (
                 <div>
-                  <h3 className="text-lg font-medium text-white mb-4">Video Information</h3>
+                  <h3 className="text-lg font-medium text-white mb-4">{isAudioGenerated ? 'Video Preview Information' : 'Video Information'}</h3>
                   
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
@@ -444,8 +445,9 @@ export function VideoLessonModal({
                   
                   <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
                     <p className="text-sm text-gray-300">
-                      This will generate an MP4 video with synchronized text overlays matching your audio lesson. 
-                      The text will appear in sync with the audio, highlighting active phrases for better learning.
+                      {isAudioGenerated
+                        ? "Preview the video with synchronized text overlays matching your audio lesson. You can adjust the preview settings and download the video when you're ready."
+                        : "This will generate an MP4 video with synchronized text overlays matching your audio lesson. The text will appear in sync with the audio, highlighting active phrases for better learning."}
                     </p>
                   </div>
                 </div>
@@ -487,7 +489,7 @@ export function VideoLessonModal({
             className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <Download className="w-5 h-5" />
-            {isGenerating ? 'Generating...' : 'Generate Video'}
+            {isGenerating ? 'Generating...' : isAudioGenerated ? 'Download Video' : 'Generate Video'}
           </button>
         </div>
       </div>

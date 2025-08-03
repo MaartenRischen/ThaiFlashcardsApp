@@ -213,6 +213,12 @@ export function VideoLessonModal({
       
       console.log('Starting video generation with source canvas:', sourceCanvas);
       
+      // Configure recording
+      const fps = 30;
+      const totalDuration = generatorRef.current.getTotalDuration();
+      const totalFrames = Math.ceil(totalDuration * fps);
+      console.log('Video config:', { fps, totalDuration, totalFrames });
+      
       try {
         // Initialize CanvasCapture
         console.log('Initializing CanvasCapture...');
@@ -223,12 +229,6 @@ export function VideoLessonModal({
           showDialogs: false
         });
         console.log('CanvasCapture initialized successfully');
-        
-        // Configure recording
-        const fps = 30;
-        const totalDuration = generatorRef.current.getTotalDuration();
-        const totalFrames = Math.ceil(totalDuration * fps);
-        console.log('Video config:', { fps, totalDuration, totalFrames });
         
         // Start recording
         console.log('Starting video recording...');

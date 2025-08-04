@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, RotateCcw, Volume2, SkipBack, SkipForward } from 'lucide-react';
+import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
 import { Phrase } from '@/app/lib/generation/types';
 
 interface SimpleAudioPlayerProps {
@@ -14,10 +14,33 @@ export function SimpleAudioPlayer({ audioUrl, phrases }: SimpleAudioPlayerProps)
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
-  const [showType, setShowType] = useState<'thai' | 'english' | 'pronunciation'>('thai');
+  const [currentDisplay, setCurrentDisplay] = useState<'english' | 'thai'>('english');
   
   const audioRef = useRef<HTMLAudioElement>(null);
   const animationRef = useRef<number | null>(null);
+  
+  // Simple timing calculation - each phrase has roughly equal time
+  // English -> Thai -> pause pattern
+  const getDisplayState = (currentTime: number, totalDuration: number) => {
+    if (totalDuration === 0 || phrases.length === 0) return { phraseIndex: 0, display: 'english' as const };
+    
+    const timePerPhrase = totalDuration / phrases.length;
+    const phraseIndex = Math.min(Math.floor(currentTime / timePerPhrase), phrases.length - 1);
+    
+    // Within each phrase: first half = english, second half = thai
+    const timeWithinPhrase = (currentTime % timePerPhrase) / timePerPhrase;
+    const display = timeWithinPhrase < 0.5 ? 'english' : 'thai';
+    
+    return { phraseIndex, display };
+  };
+  
+  useEffect(() => {
+    if (duration > 0) {
+      const { phraseIndex, display } = getDisplayState(currentTime, duration);
+      setCurrentPhraseIndex(phraseIndex);
+      setCurrentDisplay(display);
+    }
+  }, [currentTime, duration, phrases.length]);
   
   const updateTime = () => {
     if (audioRef.current) {
@@ -44,19 +67,6 @@ export function SimpleAudioPlayer({ audioUrl, phrases }: SimpleAudioPlayerProps)
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       setCurrentTime(0);
-      setCurrentPhraseIndex(0);
-    }
-  };
-  
-  const handleNextPhrase = () => {
-    if (currentPhraseIndex < phrases.length - 1) {
-      setCurrentPhraseIndex(currentPhraseIndex + 1);
-    }
-  };
-  
-  const handlePreviousPhrase = () => {
-    if (currentPhraseIndex > 0) {
-      setCurrentPhraseIndex(currentPhraseIndex - 1);
     }
   };
   
@@ -77,12 +87,23 @@ export function SimpleAudioPlayer({ audioUrl, phrases }: SimpleAudioPlayerProps)
           Phrase {currentPhraseIndex + 1} of {phrases.length}
         </div>
         
+        {/* Current Audio Type Indicator */}
+        <div className="text-gray-500 text-xs mb-2">
+          Now playing: {currentDisplay === 'english' ? 'English' : 'Thai'}
+        </div>
+        
         {/* Main Text Display */}
         <div className="text-center space-y-6 max-w-4xl">
           {currentPhrase && (
             <>
-              {showType === 'thai' && (
-                <div className="space-y-4">
+              {currentDisplay === 'english' && (
+                <h2 className="text-5xl text-blue-400 transition-all duration-300">
+                  {currentPhrase.english}
+                </h2>
+              )}
+              
+              {currentDisplay === 'thai' && (
+                <div className="space-y-4 transition-all duration-300">
                   <h2 className="text-6xl font-thai text-green-400">
                     {currentPhrase.thai}
                   </h2>
@@ -92,19 +113,7 @@ export function SimpleAudioPlayer({ audioUrl, phrases }: SimpleAudioPlayerProps)
                 </div>
               )}
               
-              {showType === 'english' && (
-                <h2 className="text-5xl text-blue-400">
-                  {currentPhrase.english}
-                </h2>
-              )}
-              
-              {showType === 'pronunciation' && (
-                <h2 className="text-4xl text-yellow-400">
-                  {currentPhrase.pronunciation}
-                </h2>
-              )}
-              
-              {/* Memory Hint */}
+              {/* Memory Hint - Always visible */}
               {currentPhrase.mnemonic && (
                 <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
                   <p className="text-lg text-purple-300 italic">
@@ -115,61 +124,11 @@ export function SimpleAudioPlayer({ audioUrl, phrases }: SimpleAudioPlayerProps)
             </>
           )}
         </div>
-        
-        {/* Navigation Buttons */}
-        <div className="flex items-center gap-4 mt-8">
-          <button
-            onClick={handlePreviousPhrase}
-            disabled={currentPhraseIndex === 0}
-            className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Previous phrase"
-          >
-            <SkipBack className="w-5 h-5 text-gray-300" />
-          </button>
-          
-          <button
-            onClick={handleNextPhrase}
-            disabled={currentPhraseIndex === phrases.length - 1}
-            className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Next phrase"
-          >
-            <SkipForward className="w-5 h-5 text-gray-300" />
-          </button>
-        </div>
       </div>
       
-      {/* Display Type Selector */}
-      <div className="flex justify-center gap-2">
-        <button
-          onClick={() => setShowType('thai')}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            showType === 'thai' 
-              ? 'bg-green-600 text-white' 
-              : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-          }`}
-        >
-          Thai
-        </button>
-        <button
-          onClick={() => setShowType('english')}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            showType === 'english' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-          }`}
-        >
-          English
-        </button>
-        <button
-          onClick={() => setShowType('pronunciation')}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            showType === 'pronunciation' 
-              ? 'bg-yellow-600 text-white' 
-              : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-          }`}
-        >
-          Pronunciation
-        </button>
+      {/* Auto-Sync Info */}
+      <div className="text-center text-gray-400 text-sm">
+        Automatically synced: English audio → English text, Thai audio → Thai text + pronunciation
       </div>
       
       {/* Progress Bar */}
@@ -218,7 +177,7 @@ export function SimpleAudioPlayer({ audioUrl, phrases }: SimpleAudioPlayerProps)
       
       {/* Instructions */}
       <div className="text-center text-gray-400 text-sm">
-        Use the navigation buttons to follow along with the audio, or switch between Thai, English, and pronunciation views
+        Text automatically switches to match the audio - just listen and watch!
       </div>
       
       {/* Audio Element */}

@@ -529,10 +529,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                     setShowSettings(false);
                   }}
                   className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
-                  title="Open interactive text player"
+                  title="Play with synchronized text display"
                 >
                   <Play className="w-4 h-4" />
-                  Text Player
+                  Play with Text
                 </button>
               </div>
             </div>
@@ -631,10 +631,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
         <DialogContent className="max-w-6xl w-[95vw] max-h-[90vh] bg-[#1f1f1f] border-[#404040] text-[#E0E0E0] overflow-y-auto p-0">
           <DialogHeader className="px-6 py-4 border-b border-gray-800">
             <DialogTitle className="text-[#E0E0E0] text-xl font-semibold">
-              Audio Lesson Player - {setName}
+              Synchronized Audio Player - {setName}
             </DialogTitle>
             <DialogDescription className="text-[#BDBDBD]">
-              Listen to your lesson while navigating through the phrases manually
+              Text automatically switches to match what you're hearing
             </DialogDescription>
           </DialogHeader>
           

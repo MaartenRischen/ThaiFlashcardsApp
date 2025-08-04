@@ -23,7 +23,7 @@ import { AudioLessonConfig } from '../lib/audio-lesson-generator';
 import { SimpleAudioLessonConfig } from '../lib/audio-lesson-generator-simple';
 import { toast } from 'sonner';
 import { useGeneration } from '@/app/context/GenerationContext';
-import { AudioLessonPlayer } from './AudioLessonPlayer';
+import { SimpleAudioPlayer } from './SimpleAudioPlayer';
 import { useSet } from '@/app/context/SetContext';
 
 interface AudioLessonDownloadProps {
@@ -529,10 +529,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                     setShowSettings(false);
                   }}
                   className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
-                  title="Open player with synchronized text"
+                  title="Open interactive text player"
                 >
                   <Play className="w-4 h-4" />
-                  Play with Text
+                  Text Player
                 </button>
               </div>
             </div>
@@ -634,27 +634,14 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
               Audio Lesson Player - {setName}
             </DialogTitle>
             <DialogDescription className="text-[#BDBDBD]">
-              Listen to your lesson with synchronized text display
+              Listen to your lesson while navigating through the phrases manually
             </DialogDescription>
           </DialogHeader>
           
           <div className="p-6">
-            <AudioLessonPlayer
+            <SimpleAudioPlayer
               audioUrl={audioUrl}
               phrases={activeSetContent}
-              audioConfig={lessonMode === 'simple' ? simpleConfig as SimpleAudioLessonConfig : {
-                voiceGender: config.voiceGender || 'female',
-                repetitions: 3,
-                pauseBetweenRepetitions: 1000,
-                pauseBetweenPhrases: 1500,
-                speed: 1.0,
-                loops: 1,
-                phraseRepetitions: 2,
-                mixSpeed: false,
-                includeMnemonics: false,
-                includePolitenessParticles: config.includePolitenessParticles || false
-              } as SimpleAudioLessonConfig}
-              lessonType={lessonMode === 'pimsleur' ? 'structured' : 'simple'}
             />
           </div>
         </DialogContent>

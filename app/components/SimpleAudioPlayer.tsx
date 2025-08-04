@@ -1,75 +1,23 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Volume2, SkipBack, SkipForward } from 'lucide-react';
 import { Phrase } from '@/app/lib/generation/types';
-import { VideoTimingExtractor } from '@/app/lib/video/timing-extractor';
-import { AudioTiming } from '@/app/lib/video/types';
-import { SimpleAudioLessonConfig } from '@/app/lib/audio-lesson-generator-simple';
 
-interface AudioLessonPlayerProps {
+interface SimpleAudioPlayerProps {
   audioUrl: string;
   phrases: Phrase[];
-  audioConfig: SimpleAudioLessonConfig;
-  lessonType: 'simple' | 'structured';
 }
 
-export function AudioLessonPlayer({
-  audioUrl,
-  phrases,
-  audioConfig,
-  lessonType
-}: AudioLessonPlayerProps) {
+export function SimpleAudioPlayer({ audioUrl, phrases }: SimpleAudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [activeTimings, setActiveTimings] = useState<AudioTiming[]>([]);
-  const [allTimings, setAllTimings] = useState<AudioTiming[]>([]);
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const [showType, setShowType] = useState<'thai' | 'english' | 'pronunciation'>('thai');
   
   const audioRef = useRef<HTMLAudioElement>(null);
   const animationRef = useRef<number | null>(null);
-  
-  // Extract timing data on mount
-  useEffect(() => {
-    const timingExtractor = new VideoTimingExtractor(
-      lessonType === 'simple' ? {
-        pauseBetweenPhrases: audioConfig.pauseBetweenPhrases || 1500,
-        speed: audioConfig.speed || 1.0,
-        loops: audioConfig.loops || 1,
-        phraseRepetitions: audioConfig.phraseRepetitions || 2,
-        includeMnemonics: audioConfig.includeMnemonics || false,
-        mixSpeed: false
-      } : {
-        pauseDurationMs: {
-          afterInstruction: 2000,
-          forPractice: 3000,
-          betweenPhrases: 1500,
-          beforeAnswer: 2000
-        },
-        repetitions: {
-          introduction: 2,
-          practice: 3,
-          review: 2
-        },
-        includeMnemonics: audioConfig.includeMnemonics || false,
-        speed: audioConfig.speed || 1.0
-      }
-    );
-    
-    const timings = lessonType === 'simple'
-      ? timingExtractor.extractSimpleLessonTimings(phrases.length)
-      : timingExtractor.extractGuidedLessonTimings(phrases.length);
-    
-    setAllTimings(timings);
-  }, [phrases, audioConfig, lessonType]);
-  
-  // Update active timings based on current time
-  useEffect(() => {
-    const active = allTimings.filter(timing => 
-      currentTime >= timing.startTime && currentTime < timing.endTime
-    );
-    setActiveTimings(active);
-  }, [currentTime, allTimings]);
   
   const updateTime = () => {
     if (audioRef.current) {
@@ -96,6 +44,19 @@ export function AudioLessonPlayer({
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       setCurrentTime(0);
+      setCurrentPhraseIndex(0);
+    }
+  };
+  
+  const handleNextPhrase = () => {
+    if (currentPhraseIndex < phrases.length - 1) {
+      setCurrentPhraseIndex(currentPhraseIndex + 1);
+    }
+  };
+  
+  const handlePreviousPhrase = () => {
+    if (currentPhraseIndex > 0) {
+      setCurrentPhraseIndex(currentPhraseIndex - 1);
     }
   };
   
@@ -105,67 +66,110 @@ export function AudioLessonPlayer({
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
   
-  const getActivePhrase = () => {
-    const activeTiming = activeTimings.find(t => t.type !== 'pause');
-    if (!activeTiming) return null;
-    
-    const phrase = phrases[activeTiming.phraseIndex];
-    if (!phrase) return null;
-    
-    return {
-      phrase,
-      type: activeTiming.type,
-      instructionText: activeTiming.instructionText
-    };
-  };
-  
-  const activePhrase = getActivePhrase();
+  const currentPhrase = phrases[currentPhraseIndex];
   
   return (
     <div className="w-full bg-gray-900 rounded-2xl p-6 space-y-6">
       {/* Display Area */}
-      <div className="bg-black rounded-xl p-8 min-h-[300px] flex items-center justify-center">
+      <div className="bg-black rounded-xl p-8 min-h-[300px] flex flex-col items-center justify-center">
+        {/* Phrase Counter */}
+        <div className="text-gray-400 text-sm mb-4">
+          Phrase {currentPhraseIndex + 1} of {phrases.length}
+        </div>
+        
+        {/* Main Text Display */}
         <div className="text-center space-y-6 max-w-4xl">
-          {activePhrase ? (
+          {currentPhrase && (
             <>
-              {activePhrase.instructionText && (
-                <p className="text-gray-400 text-lg mb-4 italic">
-                  {activePhrase.instructionText}
-                </p>
-              )}
-              
-              {activePhrase.type === 'thai' && (
+              {showType === 'thai' && (
                 <div className="space-y-4">
                   <h2 className="text-6xl font-thai text-green-400">
-                    {activePhrase.phrase.thai}
+                    {currentPhrase.thai}
                   </h2>
                   <p className="text-2xl text-gray-300">
-                    {activePhrase.phrase.pronunciation}
+                    {currentPhrase.pronunciation}
                   </p>
                 </div>
               )}
               
-              {activePhrase.type === 'english' && (
+              {showType === 'english' && (
                 <h2 className="text-5xl text-blue-400">
-                  {activePhrase.phrase.english}
+                  {currentPhrase.english}
                 </h2>
               )}
               
-              {activePhrase.type === 'mnemonic' && activePhrase.phrase.mnemonic && (
-                <div className="space-y-2">
-                  <p className="text-xl text-purple-400">Memory Hint:</p>
-                  <p className="text-2xl text-purple-300 italic">
-                    {activePhrase.phrase.mnemonic}
+              {showType === 'pronunciation' && (
+                <h2 className="text-4xl text-yellow-400">
+                  {currentPhrase.pronunciation}
+                </h2>
+              )}
+              
+              {/* Memory Hint */}
+              {currentPhrase.mnemonic && (
+                <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
+                  <p className="text-lg text-purple-300 italic">
+                    💡 {currentPhrase.mnemonic}
                   </p>
                 </div>
               )}
             </>
-          ) : (
-            <div className="text-gray-500 text-2xl">
-              {isPlaying ? 'Pause...' : 'Press play to start'}
-            </div>
           )}
         </div>
+        
+        {/* Navigation Buttons */}
+        <div className="flex items-center gap-4 mt-8">
+          <button
+            onClick={handlePreviousPhrase}
+            disabled={currentPhraseIndex === 0}
+            className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Previous phrase"
+          >
+            <SkipBack className="w-5 h-5 text-gray-300" />
+          </button>
+          
+          <button
+            onClick={handleNextPhrase}
+            disabled={currentPhraseIndex === phrases.length - 1}
+            className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Next phrase"
+          >
+            <SkipForward className="w-5 h-5 text-gray-300" />
+          </button>
+        </div>
+      </div>
+      
+      {/* Display Type Selector */}
+      <div className="flex justify-center gap-2">
+        <button
+          onClick={() => setShowType('thai')}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            showType === 'thai' 
+              ? 'bg-green-600 text-white' 
+              : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+          }`}
+        >
+          Thai
+        </button>
+        <button
+          onClick={() => setShowType('english')}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            showType === 'english' 
+              ? 'bg-blue-600 text-white' 
+              : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+          }`}
+        >
+          English
+        </button>
+        <button
+          onClick={() => setShowType('pronunciation')}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            showType === 'pronunciation' 
+              ? 'bg-yellow-600 text-white' 
+              : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+          }`}
+        >
+          Pronunciation
+        </button>
       </div>
       
       {/* Progress Bar */}
@@ -179,20 +183,10 @@ export function AudioLessonPlayer({
             className="absolute h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-100"
             style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
           />
-          {/* Show timing markers */}
-          {allTimings.map((timing, idx) => (
-            <div
-              key={idx}
-              className={`absolute h-full w-px ${
-                timing.type === 'pause' ? 'bg-gray-700' : 'bg-gray-600'
-              }`}
-              style={{ left: `${(timing.startTime / duration) * 100}%` }}
-            />
-          ))}
         </div>
       </div>
       
-      {/* Controls */}
+      {/* Audio Controls */}
       <div className="flex items-center justify-center gap-4">
         <button
           onClick={handleReset}
@@ -220,6 +214,11 @@ export function AudioLessonPlayer({
         >
           <Volume2 className="w-5 h-5 text-gray-300" />
         </button>
+      </div>
+      
+      {/* Instructions */}
+      <div className="text-center text-gray-400 text-sm">
+        Use the navigation buttons to follow along with the audio, or switch between Thai, English, and pronunciation views
       </div>
       
       {/* Audio Element */}

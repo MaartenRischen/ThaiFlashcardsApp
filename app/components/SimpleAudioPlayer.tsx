@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
 import { Phrase } from '@/app/lib/generation/types';
 
@@ -21,18 +21,23 @@ export function SimpleAudioPlayer({ audioUrl, phrases }: SimpleAudioPlayerProps)
   
   // Simple timing calculation - each phrase has roughly equal time
   // English -> Thai -> pause pattern
-  const getDisplayState = (currentTime: number, totalDuration: number) => {
-    if (totalDuration === 0 || phrases.length === 0) return { phraseIndex: 0, display: 'english' as const };
+  const getDisplayState = useCallback((currentTime: number, totalDuration: number): { 
+    phraseIndex: number; 
+    display: 'english' | 'thai';
+  } => {
+    if (totalDuration === 0 || phrases.length === 0) {
+      return { phraseIndex: 0, display: 'english' };
+    }
     
     const timePerPhrase = totalDuration / phrases.length;
     const phraseIndex = Math.min(Math.floor(currentTime / timePerPhrase), phrases.length - 1);
     
     // Within each phrase: first half = english, second half = thai
     const timeWithinPhrase = (currentTime % timePerPhrase) / timePerPhrase;
-    const display = timeWithinPhrase < 0.5 ? 'english' : 'thai';
+    const display: 'english' | 'thai' = timeWithinPhrase < 0.5 ? 'english' : 'thai';
     
     return { phraseIndex, display };
-  };
+  }, [phrases.length]);
   
   useEffect(() => {
     if (duration > 0) {
@@ -40,7 +45,7 @@ export function SimpleAudioPlayer({ audioUrl, phrases }: SimpleAudioPlayerProps)
       setCurrentPhraseIndex(phraseIndex);
       setCurrentDisplay(display);
     }
-  }, [currentTime, duration, phrases.length]);
+  }, [currentTime, duration, getDisplayState]);
   
   const updateTime = () => {
     if (audioRef.current) {

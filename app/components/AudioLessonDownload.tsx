@@ -44,7 +44,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple' | 'srs'>('simple');
+  const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple' | 'shuffle'>('simple');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
@@ -103,7 +103,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
     setIsGenerating(true);
     
     // Start generation progress immediately
-    const mode = lessonMode === 'pimsleur' ? 'audio-pimsleur' : lessonMode === 'srs' ? 'audio-srs' : 'audio-simple';
+    const mode = lessonMode === 'pimsleur' ? 'audio-pimsleur' : lessonMode === 'shuffle' ? 'audio-shuffle' : 'audio-simple';
     startGeneration(mode, 0);
     
     try {
@@ -278,17 +278,17 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                 </div>
               </button>
               <button
-                onClick={() => setLessonMode('srs')}
+                onClick={() => setLessonMode('shuffle')}
                 className={`flex items-center justify-start gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                  lessonMode === 'srs' 
+                  lessonMode === 'shuffle' 
                     ? 'bg-[#A9C4FC] text-[#121212] border border-[#A9C4FC]' 
                     : 'bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] hover:bg-[#4C4C4C]'
                 }`}
               >
                 <Repeat className="w-5 h-5 flex-shrink-0" />
                 <div className="text-left">
-                  <div className="font-medium">SRS Review</div>
-                  <div className="text-xs opacity-80">Adaptive order: due → unseen → weak</div>
+                  <div className="font-medium">Shuffle</div>
+                  <div className="text-xs opacity-80">Randomized order for variety</div>
                 </div>
               </button>
             </div>
@@ -336,9 +336,9 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
               </>
             ) : (
               <>
-                <p>• Adaptive order using your progress: wrong → unseen → due today → others</p>
+                <p>• Randomized card order each generation</p>
                 <p>• Uses the same repetition and speed settings as Repetition Mode</p>
-                <p>• Great for passive review aligned with SRS</p>
+                <p>• Great for varied passive review</p>
               </>
             )}
           </div>

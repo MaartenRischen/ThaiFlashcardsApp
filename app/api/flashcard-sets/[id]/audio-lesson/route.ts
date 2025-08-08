@@ -141,36 +141,18 @@ export async function POST(
     console.log(`Audio generation: Loaded ${phrases.length} phrases for set: ${setName}`);
     
     // Generate the audio lesson based on mode
-    const fileNameSafe = `${setName.replace(/[^a-z0-9]/gi, '_')}_${mode === 'simple' ? 'simple' : mode === 'srs' ? 'srs' : 'pimsleur'}.wav`;
-    if (mode === 'simple' || mode === 'srs') {
-      // If SRS mode, reorder phrases by SRS priority using user's progress
-      if (mode === 'srs') {
-        // Fetch progress for this set
-        const progressMap = await prisma.userSetProgress.findUnique({
-          where: { userId_setId: { userId, setId: params.id } },
-          select: { progressData: true },
-        });
-        type ProgressEntry = {
-          lastReviewedDate?: string;
-          nextReviewDate?: string;
-          difficulty?: 'easy' | 'good' | 'hard';
-        };
-        const progress = (progressMap?.progressData ?? {}) as Record<string, ProgressEntry>;
-        // Build priority buckets: wrong -> unseen -> due -> rest
-        const today = new Date();
-        const unseen: typeof phrases = [];
-        const wrong: typeof phrases = [];
-        const due: typeof phrases = [];
-        const rest: typeof phrases = [];
-        phrases.forEach((p, idx) => {
-          const key = String(idx);
-          const pg = progress[key];
-          if (!pg || !pg.lastReviewedDate) unseen.push(p);
-          else if (pg.difficulty === 'hard') wrong.push(p);
-          else if (pg.nextReviewDate && new Date(pg.nextReviewDate) <= today) due.push(p);
-          else rest.push(p);
-        });
-        phrases = [...wrong, ...unseen, ...due, ...rest];
+    const fileNameSafe = `${setName.replace(/[^a-z0-9]/gi, '_')}_${mode === 'simple' ? 'simple' : mode === 'shuffle' ? 'shuffle' : 'pimsleur'}.wav`;
+    if (mode === 'simple' || mode === 'shuffle') {
+      // If shuffle mode, randomize order deterministically per request
+      if (mode === 'shuffle') {
+        // Seeded shuffle using timestamp for variety
+        const seed = Date.now();
+        let rand = seed % 2147483647;
+        const nextRand = () => (rand = (rand * 48271) % 2147483647);
+        phrases = [...phrases]
+          .map((p, i) => ({ p, r: nextRand() }))
+          .sort((a, b) => a.r - b.r)
+          .map(({ p }) => p);
       }
 
       const result = await new SimpleAudioLessonGenerator(config).generateSimpleLesson(phrases, setName);

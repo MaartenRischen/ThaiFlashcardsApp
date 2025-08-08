@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useCallback } from 'react'
 
-type GenerationMode = 'auto' | 'manual' | 'audio-pimsleur' | 'audio-simple' | 'audio-srs'
+type GenerationMode = 'auto' | 'manual' | 'audio-pimsleur' | 'audio-simple' | 'audio-shuffle'
 
 interface GenerationStatus {
   isGenerating: boolean

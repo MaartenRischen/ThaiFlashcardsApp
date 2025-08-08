@@ -154,10 +154,11 @@ export async function POST(
         'Cache-Control': 'no-store, max-age=0',
       },
     });
-  } catch (error: any) {
-    console.error('Error in audio lesson generation:', error?.message || error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Error in audio lesson generation:', message);
     return NextResponse.json(
-      { error: 'Failed to generate audio lesson', details: error?.message || String(error) },
+      { error: 'Failed to generate audio lesson', details: message },
       { status: 500 }
     );
   }

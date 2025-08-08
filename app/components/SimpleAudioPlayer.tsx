@@ -82,7 +82,7 @@ export function SimpleAudioPlayer({
   useEffect(() => {
     const t = findActiveTiming(currentTime);
     if (t) {
-      setCurrentPhraseIndex(t.phraseIndex >= 0 ? t.phraseIndex : currentPhraseIndex);
+      setCurrentPhraseIndex(prevIndex => (t.phraseIndex >= 0 ? t.phraseIndex : prevIndex));
       setCurrentDisplay(t.type);
     }
   }, [currentTime, findActiveTiming]);

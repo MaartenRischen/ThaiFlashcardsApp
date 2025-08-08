@@ -6,6 +6,7 @@ import { SimpleAudioLessonGenerator } from '@/app/lib/audio-lesson-generator-sim
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
 import { DEFAULT_SETS } from '@/app/data/default-sets';
 import { Prisma } from '@prisma/client';
+import { putTimings } from '@/app/lib/audioTimingsStore';
 
 export async function POST(
   request: NextRequest,
@@ -156,13 +157,16 @@ export async function POST(
       }
 
       const result = await new SimpleAudioLessonGenerator(config).generateSimpleLesson(phrases, setName);
+      // Put timings in ephemeral store keyed by a request-scoped id
+      const requestId = `${params.id}:${Date.now()}`;
+      putTimings(requestId, result.timings);
       return new Response(result.audioBuffer, {
         headers: {
           'Content-Type': 'audio/wav',
           'Content-Disposition': `inline; filename="${fileNameSafe}"`,
           'Cache-Control': 'no-store, max-age=0',
-          // send timings as JSON in a header (client will fetch blob; we’ll also add a separate endpoint soon)
-          'X-Audio-Timings': encodeURIComponent(JSON.stringify(result.timings)),
+          // return id that frontend can use to fetch timings
+          'X-Audio-Timings-Id': requestId,
         },
       });
     }

@@ -143,8 +143,19 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
       }
 
       // Extract timings header if present
-      const timingsHeader = response.headers.get('X-Audio-Timings');
-      const timings = timingsHeader ? JSON.parse(decodeURIComponent(timingsHeader)) : null;
+      const timingsId = response.headers.get('X-Audio-Timings-Id');
+      let timings: AudioTiming[] | null = null;
+      if (timingsId) {
+        try {
+          const tRes = await fetch(`/api/flashcard-sets/${setId}/audio-lesson/timings?rid=${encodeURIComponent(timingsId)}`, { cache: 'no-store' });
+          if (tRes.ok) {
+            const data = await tRes.json();
+            timings = Array.isArray(data.timings) ? data.timings : null;
+          }
+        } catch (e) {
+          console.warn('Failed to fetch precise timings', e);
+        }
+      }
 
       // Get the blob from the response
       const blob = await response.blob();

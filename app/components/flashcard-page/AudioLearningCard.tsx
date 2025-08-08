@@ -3,6 +3,7 @@
 import React from 'react';
 import type { Phrase } from '@/app/lib/generation/types';
 import { getThaiWithGender, getGenderedPronunciation } from '@/app/lib/pronunciation';
+import type { ExampleSentence as PronExample } from '@/app/lib/pronunciation';
 
 interface AudioLearningCardProps {
   phrase: Phrase;
@@ -15,8 +16,13 @@ interface AudioLearningCardProps {
  * but without interactivity or the "In Context" section. Used for audio-synced view.
  */
 export function AudioLearningCard({ phrase, isMale, isPoliteMode }: AudioLearningCardProps) {
-  const thaiText = getThaiWithGender(phrase, isMale, isPoliteMode);
-  const pronunciation = getGenderedPronunciation(phrase, isMale, isPoliteMode);
+  const pronInput: PronExample = {
+    thai: phrase.thai,
+    translation: phrase.english,
+    pronunciation: phrase.pronunciation,
+  };
+  const thaiText = getThaiWithGender(pronInput, isMale, isPoliteMode);
+  const pronunciation = getGenderedPronunciation(pronInput, isMale, isPoliteMode);
 
   return (
     <div className="border-t border-[#333] p-6 flex flex-col min-h-[20rem] overflow-y-auto card-back-container">

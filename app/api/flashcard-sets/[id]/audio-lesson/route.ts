@@ -131,15 +131,19 @@ export async function POST(
     console.log(`Audio generation: Loaded ${phrases.length} phrases for set: ${setName}`);
     
     // Generate the audio lesson based on mode
-    if (mode === 'simple') {
-      const generator = new SimpleAudioLessonGenerator(config);
-      const audioBuffer = await generator.generateSimpleLesson(phrases, setName);
-      return new Response(audioBuffer);
-    } else {
-      const generator = new AudioLessonGenerator(config);
-      const audioBuffer = await generator.generateLesson(phrases, setName);
-      return new Response(audioBuffer);
-    }
+    const fileNameSafe = `${setName.replace(/[^a-z0-9]/gi, '_')}_${mode === 'simple' ? 'simple' : 'pimsleur'}.wav`;
+    const buffer =
+      mode === 'simple'
+        ? await new SimpleAudioLessonGenerator(config).generateSimpleLesson(phrases, setName)
+        : await new AudioLessonGenerator(config).generateLesson(phrases, setName);
+
+    return new Response(buffer, {
+      headers: {
+        'Content-Type': 'audio/wav',
+        'Content-Disposition': `inline; filename="${fileNameSafe}"`,
+        'Cache-Control': 'no-store, max-age=0',
+      },
+    });
   } catch (error) {
     console.error('Error in audio lesson generation:', error);
     return NextResponse.json(

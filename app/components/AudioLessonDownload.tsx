@@ -642,6 +642,9 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
             <SimpleAudioPlayer
               audioUrl={audioUrl}
               phrases={activeSetContent}
+              mode={lessonMode}
+              pimsleurConfig={config}
+              simpleConfig={simpleConfig}
             />
           </div>
         </DialogContent>

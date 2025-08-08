@@ -24,6 +24,13 @@ import { SimpleAudioLessonConfig } from '../lib/audio-lesson-generator-simple';
 import { toast } from 'sonner';
 import { useGeneration } from '@/app/context/GenerationContext';
 import { SimpleAudioPlayer } from './SimpleAudioPlayer';
+import type { AudioTiming } from '@/app/lib/video-lesson-generator';
+
+declare global {
+  interface Window {
+    __AUDIO_TIMINGS__?: AudioTiming[];
+  }
+}
 import { useSet } from '@/app/context/SetContext';
 
 interface AudioLessonDownloadProps {
@@ -147,7 +154,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
       setAudioUrl(url);
       // Store exact timings for playback sync
       if (timings && Array.isArray(timings)) {
-        (window as any).__AUDIO_TIMINGS__ = timings;
+        window.__AUDIO_TIMINGS__ = timings as AudioTiming[];
       }
       
       // Complete generation after a short delay

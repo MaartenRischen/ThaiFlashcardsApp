@@ -36,7 +36,7 @@ export function SimpleAudioPlayer({
 
   const timings: AudioTiming[] = useMemo(() => {
     // Prefer precise timings from backend if available
-    const injected = (typeof window !== 'undefined' && (window as any).__AUDIO_TIMINGS__) as AudioTiming[] | undefined;
+    const injected = (typeof window !== 'undefined' && (window as unknown as { __AUDIO_TIMINGS__?: AudioTiming[] }).__AUDIO_TIMINGS__);
     if (injected && injected.length > 0) return injected;
 
     // Fallback: estimated timings

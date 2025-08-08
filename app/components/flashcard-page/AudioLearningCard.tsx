@@ -25,10 +25,10 @@ export function AudioLearningCard({ phrase, isMale, isPoliteMode }: AudioLearnin
   const pronunciation = getGenderedPronunciation(pronInput, isMale, isPoliteMode);
 
   return (
-    <div className="border-t border-[#333] p-6 flex flex-col min-h-[20rem] overflow-y-auto card-back-container">
+    <div className="border-t border-[#333] p-6 flex flex-col min-h-[20rem] overflow-y-auto card-back-container items-center">
       {/* Main Phrase Section - Centered */}
-      <div className="flex flex-col items-center justify-center mb-4">
-        <div className="text-center">
+      <div className="flex flex-col items-center justify-center mb-4 w-full">
+        <div className="text-center w-full max-w-[720px] mx-auto">
           {/* Thai word */}
           <div className="text-3xl md:text-4xl font-extrabold mb-2 text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
             {thaiText}
@@ -36,8 +36,8 @@ export function AudioLearningCard({ phrase, isMale, isPoliteMode }: AudioLearnin
 
           {/* Match card-back order: pronunciation (quoted) then English in parentheses */}
           {pronunciation && (
-            <div className="text-center mb-2">
-              <span className="text-gray-400 text-sm italic">"{pronunciation}"</span>
+            <div className="text-center mb-3">
+              <span className="text-gray-300 text-lg md:text-xl italic">"{pronunciation}"</span>
             </div>
           )}
 
@@ -49,10 +49,15 @@ export function AudioLearningCard({ phrase, isMale, isPoliteMode }: AudioLearnin
         </div>
       </div>
 
-      {/* Mnemonic (read-only) */}
-      <div className="mt-4">
+      {/* Pronunciation box (like card view) + Mnemonic (read-only) */}
+      <div className="mt-2 w-full max-w-[720px] mx-auto">
+        {pronunciation && (
+          <div className="mb-3 p-3 bg-gray-800 rounded text-gray-200 font-semibold text-center text-base md:text-lg">
+            <span className="text-blue-400">Pronunciation:</span> {pronunciation}
+          </div>
+        )}
         {phrase.mnemonic && (
-          <div className="neumorphic-input w-full min-h-24 rounded-lg p-3 text-gray-200 bg-[#1f1f1f] border border-[#333]">
+          <div className="neumorphic-input w-full min-h-24 rounded-lg p-4 text-gray-200 bg-[#1f1f1f] border border-[#333] text-base">
             {phrase.mnemonic}
           </div>
         )}

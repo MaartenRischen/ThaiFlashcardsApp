@@ -30,9 +30,9 @@ export function deleteTimings(id: string): void {
 // Periodic cleanup
 setInterval(() => {
   const now = Date.now();
-  for (const [key, value] of store.entries()) {
+  store.forEach((value, key) => {
     if (now > value.expiresAt) store.delete(key);
-  }
+  });
 }, 60 * 1000).unref?.();
 
 

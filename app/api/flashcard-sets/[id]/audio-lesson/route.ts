@@ -151,7 +151,7 @@ export async function POST(
         let rand = seed % 2147483647;
         const nextRand = () => (rand = (rand * 48271) % 2147483647);
         phrases = [...phrases]
-          .map((p, i) => ({ p, r: nextRand() }))
+          .map((p) => ({ p, r: nextRand() }))
           .sort((a, b) => a.r - b.r)
           .map(({ p }) => p);
       }

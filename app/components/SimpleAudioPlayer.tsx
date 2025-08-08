@@ -8,6 +8,7 @@ import { SimpleAudioLessonConfig } from '@/app/lib/audio-lesson-generator-simple
 import { AudioTimingExtractor } from '@/app/lib/audio-timing-extractor';
 import type { AudioTiming } from '@/app/lib/video-lesson-generator';
 import { FlashcardDisplay } from '@/app/components/FlashcardDisplay';
+import type { Phrase as FlashcardPhrase } from '@/app/components/FlashcardDisplay';
 
 interface SimpleAudioPlayerProps {
   audioUrl: string;
@@ -28,7 +29,6 @@ export function SimpleAudioPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
-  const [currentDisplay, setCurrentDisplay] = useState<'english' | 'thai' | 'mnemonic' | 'pause'>('english');
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const animationRef = useRef<number | null>(null);
@@ -84,7 +84,6 @@ export function SimpleAudioPlayer({
     const t = findActiveTiming(currentTime);
     if (t) {
       setCurrentPhraseIndex(prevIndex => (t.phraseIndex >= 0 ? t.phraseIndex : prevIndex));
-      setCurrentDisplay(t.type);
     }
   }, [currentTime, findActiveTiming]);
 
@@ -131,6 +130,16 @@ export function SimpleAudioPlayer({
   };
 
   const currentPhrase = phrases[Math.max(0, Math.min(currentPhraseIndex, phrases.length - 1))];
+  const cardForDisplay: FlashcardPhrase | null = currentPhrase
+    ? {
+        thai: currentPhrase.thai,
+        translation: currentPhrase.english,
+        pronunciation: currentPhrase.pronunciation,
+        english: currentPhrase.english,
+        examples: [],
+        mnemonic: currentPhrase.mnemonic,
+      }
+    : null;
 
   return (
     <div className="w-full bg-gray-900 rounded-2xl p-6 space-y-6">
@@ -139,12 +148,9 @@ export function SimpleAudioPlayer({
         <div className="text-gray-400 text-sm mb-2 text-center">
           {Math.max(1, currentPhraseIndex + 1)} / {phrases.length}
         </div>
-        {currentPhrase && (
+        {cardForDisplay && (
           <FlashcardDisplay
-            phrase={{
-              ...currentPhrase,
-              examples: currentPhrase.examples || [],
-            } as any}
+            phrase={cardForDisplay}
             showAnswer={true}
             mnemonic={currentPhrase.mnemonic}
             autoplay={false}

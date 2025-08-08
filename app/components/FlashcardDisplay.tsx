@@ -24,6 +24,7 @@ export interface FlashcardDisplayProps {
   onPlayAudio?: () => void;
   onNextCard?: () => void;
   onPrevCard?: () => void;
+  hideControls?: boolean;
 }
 
 export function FlashcardDisplay({
@@ -37,6 +38,7 @@ export function FlashcardDisplay({
   onPlayAudio = () => {},
   onNextCard = () => {},
   onPrevCard = () => {},
+  hideControls = false,
 }: FlashcardDisplayProps) {
   // Play audio automatically when answer is shown if autoplay is enabled
   React.useEffect(() => {
@@ -73,39 +75,43 @@ export function FlashcardDisplay({
           <p className="pronunciation">{phrase.pronunciation}</p>
           
           {/* Audio controls */}
-          <button 
-            className="play-button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onPlayAudio();
-            }}
-            aria-label="Play pronunciation"
-          >
-            Play
-          </button>
+          {!hideControls && (
+            <button 
+              className="play-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPlayAudio();
+              }}
+              aria-label="Play pronunciation"
+            >
+              Play
+            </button>
+          )}
           
           {/* Navigation controls */}
-          <div className="navigation">
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                onPrevCard();
-              }}
-              aria-label="Previous card"
-            >
-              Prev
-            </button>
-            
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                onNextCard();
-              }}
-              aria-label="Next card"
-            >
-              Next
-            </button>
-          </div>
+          {!hideControls && (
+            <div className="navigation">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPrevCard();
+                }}
+                aria-label="Previous card"
+              >
+                Prev
+              </button>
+              
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNextCard();
+                }}
+                aria-label="Next card"
+              >
+                Next
+              </button>
+            </div>
+          )}
           
           {/* Mnemonic section */}
           {mnemonic && (

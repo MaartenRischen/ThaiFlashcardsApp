@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
+import { Play, Pause, RotateCcw } from 'lucide-react';
 import { Phrase } from '@/app/lib/generation/types';
 import { AudioLessonConfig } from '@/app/lib/audio-lesson-generator';
 import { SimpleAudioLessonConfig } from '@/app/lib/audio-lesson-generator-simple';
 import { AudioTimingExtractor } from '@/app/lib/audio-timing-extractor';
 import type { AudioTiming } from '@/app/lib/video-lesson-generator';
+import { FlashcardDisplay } from '@/app/components/FlashcardDisplay';
 
 interface SimpleAudioPlayerProps {
   audioUrl: string;
@@ -131,57 +132,34 @@ export function SimpleAudioPlayer({
 
   const currentPhrase = phrases[Math.max(0, Math.min(currentPhraseIndex, phrases.length - 1))];
 
-  const nowPlayingLabel =
-    currentDisplay === 'english'
-      ? 'English'
-      : currentDisplay === 'thai'
-      ? 'Thai'
-      : currentDisplay === 'mnemonic'
-      ? 'Memory hint'
-      : '…';
-
   return (
     <div className="w-full bg-gray-900 rounded-2xl p-6 space-y-6">
-      {/* Display Area */}
-      <div className="bg-black rounded-xl p-8 min-h-[300px] flex flex-col items-center justify-center">
-        <div className="text-gray-400 text-sm mb-4">
-          Phrase {Math.max(1, currentPhraseIndex + 1)} of {phrases.length}
+      {/* Display Area: Render the real flashcard UI */}
+      <div className="bg-black rounded-xl p-6">
+        <div className="text-gray-400 text-sm mb-2 text-center">
+          {Math.max(1, currentPhraseIndex + 1)} / {phrases.length}
         </div>
-
-        <div className="text-gray-500 text-xs mb-2">Now playing: {nowPlayingLabel}</div>
-
-        {/* Main Text Display */}
-        <div className="text-center space-y-6 max-w-4xl">
-          {currentPhrase && (
-            <>
-              {(currentDisplay === 'english') && (
-                <h2 className="text-5xl text-blue-400 transition-all duration-300">
-                  {currentPhrase.english}
-                </h2>
-              )}
-
-              {(currentDisplay === 'thai') && (
-                <div className="space-y-4 transition-all duration-300">
-                  <h2 className="text-6xl font-thai text-green-400">
-                    {currentPhrase.thai}
-                  </h2>
-                  <p className="text-2xl text-gray-300">{currentPhrase.pronunciation}</p>
-                </div>
-              )}
-
-              {(currentDisplay === 'mnemonic') && currentPhrase.mnemonic && (
-                <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
-                  <p className="text-lg text-purple-300 italic">💡 {currentPhrase.mnemonic}</p>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+        {currentPhrase && (
+          <FlashcardDisplay
+            phrase={{
+              ...currentPhrase,
+              examples: currentPhrase.examples || [],
+            } as any}
+            showAnswer={true}
+            mnemonic={currentPhrase.mnemonic}
+            autoplay={false}
+            isMale={simpleConfig?.voiceGender === 'male' || pimsleurConfig?.voiceGender === 'male'}
+            isPoliteMode={true}
+            onToggleAnswer={() => {}}
+            onPlayAudio={() => {}}
+            onNextCard={() => {}}
+            onPrevCard={() => {}}
+            hideControls
+          />
+        )}
       </div>
 
-      <div className="text-center text-gray-400 text-sm">
-        Automatically synced: English audio → English text, Thai audio → Thai text + pronunciation
-      </div>
+      <div className="text-center text-gray-400 text-sm">Auto-synced to audio</div>
 
       {/* Progress Bar */}
       <div className="space-y-2">
@@ -219,9 +197,7 @@ export function SimpleAudioPlayer({
           {isPlaying ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white ml-0.5" />}
         </button>
 
-        <button className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors" title="Volume">
-          <Volume2 className="w-5 h-5 text-gray-300" />
-        </button>
+        {/* Intentionally minimal controls for learning mode */}
       </div>
 
       <div className="text-center text-gray-400 text-sm">

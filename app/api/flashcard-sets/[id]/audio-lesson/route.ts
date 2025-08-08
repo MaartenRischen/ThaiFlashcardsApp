@@ -12,6 +12,16 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Ensure this route can use Node APIs (required by Azure Speech SDK)
+    // and fail fast when missing credentials
+    if (!process.env.AZURE_SPEECH_KEY) {
+      console.error('AZURE_SPEECH_KEY is not set');
+      return NextResponse.json(
+        { error: 'Audio generation is not configured (missing Azure credentials).' },
+        { status: 500 }
+      );
+    }
+
     const { userId } = await auth();
     
     if (!userId) {
@@ -144,10 +154,10 @@ export async function POST(
         'Cache-Control': 'no-store, max-age=0',
       },
     });
-  } catch (error) {
-    console.error('Error in audio lesson generation:', error);
+  } catch (error: any) {
+    console.error('Error in audio lesson generation:', error?.message || error);
     return NextResponse.json(
-      { error: 'Failed to generate audio lesson' },
+      { error: 'Failed to generate audio lesson', details: error?.message || String(error) },
       { status: 500 }
     );
   }

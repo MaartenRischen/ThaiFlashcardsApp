@@ -125,7 +125,14 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate audio lesson');
+        // Try to read error details for better feedback
+        let detail = '';
+        try {
+          const data = await response.json();
+          detail = data?.error || data?.details || '';
+        } catch (_) {}
+        const message = detail ? `Failed to generate audio lesson: ${detail}` : 'Failed to generate audio lesson';
+        throw new Error(message);
       }
 
       // Get the blob from the response
@@ -144,7 +151,8 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
     } catch (error) {
       console.error('Error generating audio lesson:', error);
       failGeneration();
-      toast.error('Failed to generate audio lesson');
+      const msg = error instanceof Error ? error.message : 'Failed to generate audio lesson';
+      toast.error(msg);
     } finally {
       setIsGenerating(false);
     }

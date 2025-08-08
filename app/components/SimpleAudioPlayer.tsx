@@ -130,6 +130,10 @@ export function SimpleAudioPlayer({
 
   const currentPhrase = phrases[Math.max(0, Math.min(currentPhraseIndex, phrases.length - 1))];
   const isMaleVoice = simpleConfig?.voiceGender === 'male' || pimsleurConfig?.voiceGender === 'male';
+  const isPoliteEnabled =
+    mode === 'simple'
+      ? Boolean(simpleConfig?.includePolitenessParticles)
+      : Boolean(pimsleurConfig?.includePolitenessParticles);
 
   return (
     <div className="w-full bg-gray-900 rounded-2xl p-6 space-y-6">
@@ -139,7 +143,11 @@ export function SimpleAudioPlayer({
           {Math.max(1, currentPhraseIndex + 1)} / {phrases.length}
         </div>
         {currentPhrase && (
-          <AudioLearningCard phrase={currentPhrase} isMale={Boolean(isMaleVoice)} isPoliteMode={true} />
+          <AudioLearningCard
+            phrase={currentPhrase}
+            isMale={Boolean(isMaleVoice)}
+            isPoliteMode={isPoliteEnabled}
+          />
         )}
       </div>
 

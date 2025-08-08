@@ -34,14 +34,13 @@ export function AudioLearningCard({ phrase, isMale, isPoliteMode }: AudioLearnin
             {thaiText}
           </div>
 
-          {/* Pronunciation text display */}
+          {/* Match card-back order: pronunciation (quoted) then English in parentheses */}
           {pronunciation && (
             <div className="text-center mb-2">
               <span className="text-gray-400 text-sm italic">"{pronunciation}"</span>
             </div>
           )}
 
-          {/* English translation in blue, in parentheses */}
           {phrase.english && (
             <div className="text-base md:text-lg font-medium mb-2 text-blue-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
               ({phrase.english})
@@ -50,14 +49,8 @@ export function AudioLearningCard({ phrase, isMale, isPoliteMode }: AudioLearnin
         </div>
       </div>
 
-      {/* Mnemonic + Pronunciation box (read-only) */}
+      {/* Mnemonic (read-only) */}
       <div className="mt-4">
-        {pronunciation && (
-          <div className="mb-2 p-2 bg-gray-800 rounded text-gray-300 font-medium text-center">
-            <span className="text-blue-400">Pronunciation:</span> {pronunciation}
-          </div>
-        )}
-
         {phrase.mnemonic && (
           <div className="neumorphic-input w-full min-h-24 rounded-lg p-3 text-gray-200 bg-[#1f1f1f] border border-[#333]">
             {phrase.mnemonic}

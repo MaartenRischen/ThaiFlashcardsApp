@@ -7,8 +7,7 @@ import { AudioLessonConfig } from '@/app/lib/audio-lesson-generator';
 import { SimpleAudioLessonConfig } from '@/app/lib/audio-lesson-generator-simple';
 import { AudioTimingExtractor } from '@/app/lib/audio-timing-extractor';
 import type { AudioTiming } from '@/app/lib/video-lesson-generator';
-import { FlashcardDisplay } from '@/app/components/FlashcardDisplay';
-import type { Phrase as FlashcardPhrase } from '@/app/components/FlashcardDisplay';
+import AudioLearningCard from '@/app/components/flashcard-page/AudioLearningCard';
 
 interface SimpleAudioPlayerProps {
   audioUrl: string;
@@ -130,16 +129,7 @@ export function SimpleAudioPlayer({
   };
 
   const currentPhrase = phrases[Math.max(0, Math.min(currentPhraseIndex, phrases.length - 1))];
-  const cardForDisplay: FlashcardPhrase | null = currentPhrase
-    ? {
-        thai: currentPhrase.thai,
-        translation: currentPhrase.english,
-        pronunciation: currentPhrase.pronunciation,
-        english: currentPhrase.english,
-        examples: [],
-        mnemonic: currentPhrase.mnemonic,
-      }
-    : null;
+  const isMaleVoice = simpleConfig?.voiceGender === 'male' || pimsleurConfig?.voiceGender === 'male';
 
   return (
     <div className="w-full bg-gray-900 rounded-2xl p-6 space-y-6">
@@ -148,20 +138,8 @@ export function SimpleAudioPlayer({
         <div className="text-gray-400 text-sm mb-2 text-center">
           {Math.max(1, currentPhraseIndex + 1)} / {phrases.length}
         </div>
-        {cardForDisplay && (
-          <FlashcardDisplay
-            phrase={cardForDisplay}
-            showAnswer={true}
-            mnemonic={currentPhrase.mnemonic}
-            autoplay={false}
-            isMale={simpleConfig?.voiceGender === 'male' || pimsleurConfig?.voiceGender === 'male'}
-            isPoliteMode={true}
-            onToggleAnswer={() => {}}
-            onPlayAudio={() => {}}
-            onNextCard={() => {}}
-            onPrevCard={() => {}}
-            hideControls
-          />
+        {currentPhrase && (
+          <AudioLearningCard phrase={currentPhrase} isMale={Boolean(isMaleVoice)} isPoliteMode={true} />
         )}
       </div>
 

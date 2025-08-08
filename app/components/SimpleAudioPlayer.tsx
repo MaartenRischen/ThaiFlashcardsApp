@@ -35,6 +35,11 @@ export function SimpleAudioPlayer({
   const lastTimingIndexRef = useRef<number>(0);
 
   const timings: AudioTiming[] = useMemo(() => {
+    // Prefer precise timings from backend if available
+    const injected = (typeof window !== 'undefined' && (window as any).__AUDIO_TIMINGS__) as AudioTiming[] | undefined;
+    if (injected && injected.length > 0) return injected;
+
+    // Fallback: estimated timings
     const extractor = new AudioTimingExtractor({
       pauseBetweenPhrases:
         mode === 'simple'
@@ -46,7 +51,6 @@ export function SimpleAudioPlayer({
       includeMnemonics: mode === 'simple' ? Boolean(simpleConfig?.includeMnemonics) : false,
       mixSpeed: mode === 'simple' ? Boolean(simpleConfig?.mixSpeed) : false,
     });
-
     return mode === 'simple'
       ? extractor.extractSimpleLessonTimings(phrases.length)
       : extractor.extractStructuredLessonTimings(phrases.length);

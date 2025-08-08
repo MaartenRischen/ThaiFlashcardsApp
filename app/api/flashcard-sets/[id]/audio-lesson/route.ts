@@ -142,10 +142,20 @@ export async function POST(
     
     // Generate the audio lesson based on mode
     const fileNameSafe = `${setName.replace(/[^a-z0-9]/gi, '_')}_${mode === 'simple' ? 'simple' : 'pimsleur'}.wav`;
-    const buffer =
-      mode === 'simple'
-        ? await new SimpleAudioLessonGenerator(config).generateSimpleLesson(phrases, setName)
-        : await new AudioLessonGenerator(config).generateLesson(phrases, setName);
+    if (mode === 'simple') {
+      const result = await new SimpleAudioLessonGenerator(config).generateSimpleLesson(phrases, setName);
+      return new Response(result.audioBuffer, {
+        headers: {
+          'Content-Type': 'audio/wav',
+          'Content-Disposition': `inline; filename="${fileNameSafe}"`,
+          'Cache-Control': 'no-store, max-age=0',
+          // send timings as JSON in a header (client will fetch blob; we’ll also add a separate endpoint soon)
+          'X-Audio-Timings': encodeURIComponent(JSON.stringify(result.timings)),
+        },
+      });
+    }
+
+    const buffer = await new AudioLessonGenerator(config).generateLesson(phrases, setName);
 
     return new Response(buffer, {
       headers: {

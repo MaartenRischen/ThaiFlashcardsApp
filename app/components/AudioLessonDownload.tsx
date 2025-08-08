@@ -135,12 +135,20 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
         throw new Error(message);
       }
 
+      // Extract timings header if present
+      const timingsHeader = response.headers.get('X-Audio-Timings');
+      const timings = timingsHeader ? JSON.parse(decodeURIComponent(timingsHeader)) : null;
+
       // Get the blob from the response
       const blob = await response.blob();
       
       // Create object URL for in-app playback
       const url = window.URL.createObjectURL(blob);
       setAudioUrl(url);
+      // Store exact timings for playback sync
+      if (timings && Array.isArray(timings)) {
+        (window as any).__AUDIO_TIMINGS__ = timings;
+      }
       
       // Complete generation after a short delay
       setTimeout(() => {

@@ -1,5 +1,6 @@
 import { AzureTTSAudio } from './azure-tts-audio';
 import { AudioCombiner } from './audio-combiner';
+import type { AudioTiming } from '@/app/lib/video-lesson-generator';
 
 // Simple audio lesson configuration
 export interface SimpleAudioLessonConfig {
@@ -33,6 +34,8 @@ export class SimpleAudioLessonGenerator {
   private audioSegments: ArrayBuffer[] = [];
   private azureTTS: AzureTTSAudio;
   private ttsCache: Map<string, ArrayBuffer> = new Map();
+  private timings: AudioTiming[] = [];
+  private currentTimeSec = 0;
 
   constructor(config: Partial<SimpleAudioLessonConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -60,13 +63,15 @@ export class SimpleAudioLessonGenerator {
       mnemonic?: string;
     }>,
     setName: string
-  ): Promise<ArrayBuffer> {
+  ): Promise<{ audioBuffer: ArrayBuffer; timings: AudioTiming[] }> {
     if (process.env.NODE_ENV !== 'production') {
       console.log('Starting simple audio lesson generation for:', setName);
       console.log('Config:', this.config);
       console.log('Speed setting:', this.config.speed);
     }
     this.audioSegments = [];
+    this.timings = [];
+    this.currentTimeSec = 0;
 
     try {
       // Main loop - repeat the entire set multiple times
@@ -95,15 +100,18 @@ export class SimpleAudioLessonGenerator {
           // 1. English meaning
           const englishAudio = await this.getAudio(card.english, 'english', this.config.voiceGender, baseSpeed);
           this.audioSegments.push(englishAudio);
+          this.addTiming(i, 'english', englishAudio);
           
           // 2. Thai translation (no pause)
           const thaiAudio = await this.getAudio(thaiText, 'thai', this.config.voiceGender, baseSpeed);
           this.audioSegments.push(thaiAudio);
+          this.addTiming(i, 'thai', thaiAudio);
           
           // 3. Optional mnemonic (no pause)
           if (this.config.includeMnemonics && card.mnemonic) {
             const mnemonicAudio = await this.getAudio(card.mnemonic, 'english', this.config.voiceGender, baseSpeed);
             this.audioSegments.push(mnemonicAudio);
+            this.addTiming(i, 'mnemonic', mnemonicAudio);
           }
           
           // 4. Repetition pattern: English -> Thai -> Thai -> Thai -> English -> Thai
@@ -123,39 +131,47 @@ export class SimpleAudioLessonGenerator {
             // 1. English
             const englishRepAudio = await this.getAudio(card.english, 'english', this.config.voiceGender, currentSpeed);
             this.audioSegments.push(englishRepAudio);
+            this.addTiming(i, 'english', englishRepAudio, true, rep);
             
             // 2. Thai (first)
             const thaiRepAudio1 = await this.getAudio(thaiText, 'thai', this.config.voiceGender, currentSpeed);
             this.audioSegments.push(thaiRepAudio1);
+            this.addTiming(i, 'thai', thaiRepAudio1, true, rep);
             
             // 3. Thai (second)
             const thaiRepAudio2 = await this.getAudio(thaiText, 'thai', this.config.voiceGender, currentSpeed);
             this.audioSegments.push(thaiRepAudio2);
+            this.addTiming(i, 'thai', thaiRepAudio2, true, rep);
             
             // 4. Thai (third)
             const thaiRepAudio3 = await this.getAudio(thaiText, 'thai', this.config.voiceGender, currentSpeed);
             this.audioSegments.push(thaiRepAudio3);
+            this.addTiming(i, 'thai', thaiRepAudio3, true, rep);
             
             // 5. English (again)
             const englishRepAudio2 = await this.getAudio(card.english, 'english', this.config.voiceGender, currentSpeed);
             this.audioSegments.push(englishRepAudio2);
+            this.addTiming(i, 'english', englishRepAudio2, true, rep);
             
             // 6. Thai (fourth)
             const thaiRepAudio4 = await this.getAudio(thaiText, 'thai', this.config.voiceGender, currentSpeed);
             this.audioSegments.push(thaiRepAudio4);
+            this.addTiming(i, 'thai', thaiRepAudio4, true, rep);
           }
           
           // Pause between different phrases
           if (i < flashcards.length - 1) {
-            this.audioSegments.push(
-              this.azureTTS.createSilence(this.config.pauseBetweenPhrases)
-            );
+            const silence = this.azureTTS.createSilence(this.config.pauseBetweenPhrases);
+            this.audioSegments.push(silence);
+            this.addPause(this.config.pauseBetweenPhrases);
           }
         }
         
         // Pause between loops (longer)
         if (loop < this.config.loops - 1) {
-          this.audioSegments.push(this.azureTTS.createSilence(3000));
+          const silence = this.azureTTS.createSilence(3000);
+          this.audioSegments.push(silence);
+          this.addPause(3000);
         }
       }
 
@@ -166,14 +182,18 @@ export class SimpleAudioLessonGenerator {
         'english',
         this.config.voiceGender
       );
-      this.audioSegments.push(this.azureTTS.createSilence(1000));
+      const preOutroSilence = this.azureTTS.createSilence(1000);
+      this.audioSegments.push(preOutroSilence);
+      this.addPause(1000);
       this.audioSegments.push(outroAudio);
+      this.addTiming(flashcards.length - 1, 'english', outroAudio);
 
       // Combine all segments - NO PROGRESS TRACKING
       if (process.env.NODE_ENV !== 'production') {
         console.log('Combining audio segments...');
       }
-      return AudioCombiner.combineWavBuffers(this.audioSegments);
+      const audioBuffer = AudioCombiner.combineWavBuffers(this.audioSegments);
+      return { audioBuffer, timings: this.timings };
 
     } catch (error) {
       console.error('Error generating simple audio lesson:', error);
@@ -265,5 +285,38 @@ export class SimpleAudioLessonGenerator {
     const buffer = await this.azureTTS.synthesizeToBuffer(text, language, voiceGender, speed);
     this.ttsCache.set(key, buffer);
     return buffer;
+  }
+
+  private addTiming(
+    phraseIndex: number,
+    type: 'english' | 'thai' | 'mnemonic',
+    buffer: ArrayBuffer,
+    isActive: boolean = false,
+    repetition?: number
+  ): void {
+    const durationSec = this.getDurationSeconds(buffer);
+    const start = this.currentTimeSec;
+    const end = start + durationSec;
+    this.timings.push({ phraseIndex, type, startTime: start, endTime: end, isActive, repetition });
+    this.currentTimeSec = end;
+  }
+
+  private addPause(durationMs: number): void {
+    const start = this.currentTimeSec;
+    const end = start + durationMs / 1000;
+    this.timings.push({ phraseIndex: -1, type: 'pause', startTime: start, endTime: end });
+    this.currentTimeSec = end;
+  }
+
+  private getDurationSeconds(buffer: ArrayBuffer): number {
+    // 16kHz, 16-bit mono
+    const sampleRate = 16000;
+    if (buffer.byteLength <= 44) return 0;
+    const view = new DataView(buffer);
+    const isWav =
+      buffer.byteLength > 44 && view.getUint32(0, false) === 0x52494646 && view.getUint32(8, false) === 0x57415645;
+    const pcmBytes = isWav ? buffer.byteLength - 44 : buffer.byteLength;
+    const samples = pcmBytes / 2; // 16-bit
+    return samples / sampleRate;
   }
 } 

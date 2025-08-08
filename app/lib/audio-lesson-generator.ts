@@ -48,17 +48,20 @@ export class AudioLessonGenerator {
   private audioSegments: ArrayBuffer[] = [];
   private sampleRate = 16000; // Azure TTS default
   private azureTTS: AzureTTSAudio;
+  private ttsCache: Map<string, ArrayBuffer> = new Map();
 
   constructor(config: Partial<AudioLessonConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.azureTTS = new AzureTTSAudio();
     
-    // Debug logging
-    console.log('🔧 PIMSLEUR AUDIO GENERATOR CONSTRUCTOR');
-    console.log('🔧 Input config:', JSON.stringify(config, null, 2));
-    console.log('🔧 DEFAULT_CONFIG:', JSON.stringify(DEFAULT_CONFIG, null, 2));
-    console.log('🔧 Final merged config:', JSON.stringify(this.config, null, 2));
-    console.log('🔧 Politeness particles setting:', this.config.includePolitenessParticles);
+    // Debug logging (only in development)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🔧 PIMSLEUR AUDIO GENERATOR CONSTRUCTOR');
+      console.log('🔧 Input config:', JSON.stringify(config, null, 2));
+      console.log('🔧 DEFAULT_CONFIG:', JSON.stringify(DEFAULT_CONFIG, null, 2));
+      console.log('🔧 Final merged config:', JSON.stringify(this.config, null, 2));
+      console.log('🔧 Politeness particles setting:', this.config.includePolitenessParticles);
+    }
   }
 
   /**
@@ -137,11 +140,11 @@ export class AudioLessonGenerator {
     }>,
     setName: string
   ): Promise<ArrayBuffer> {
-    console.log('Starting audio lesson generation for:', setName);
+    if (process.env.NODE_ENV !== 'production') console.log('Starting audio lesson generation for:', setName);
     this.audioSegments = [];
 
     try {
-      console.log('Creating introduction...');
+      if (process.env.NODE_ENV !== 'production') console.log('Creating introduction...');
       // 1. Introduction
       await this.addSegment({
         type: 'instruction',
@@ -151,11 +154,11 @@ export class AudioLessonGenerator {
 
       await this.addSilence(2000);
 
-      console.log('Creating introduction phase...');
+      if (process.env.NODE_ENV !== 'production') console.log('Creating introduction phase...');
       // 2. Introduction phase - present each phrase
       for (let i = 0; i < flashcards.length; i++) {
         const card = flashcards[i];
-        console.log(`Introducing phrase ${i + 1}/${flashcards.length}`);
+        if (process.env.NODE_ENV !== 'production') console.log(`Introducing phrase ${i + 1}/${flashcards.length}`);
         await this.introducePhrase(card, i + 1);
         
         if (i < flashcards.length - 1) {
@@ -165,7 +168,7 @@ export class AudioLessonGenerator {
 
       await this.addSilence(3000);
 
-      console.log('Creating practice phase...');
+      if (process.env.NODE_ENV !== 'production') console.log('Creating practice phase...');
       // 3. Practice phase - active recall
       await this.addSegment({
         type: 'instruction',
@@ -177,7 +180,7 @@ export class AudioLessonGenerator {
 
       for (let i = 0; i < flashcards.length; i++) {
         const card = flashcards[i];
-        console.log(`Practice session ${i + 1}/${flashcards.length}`);
+        if (process.env.NODE_ENV !== 'production') console.log(`Practice session ${i + 1}/${flashcards.length}`);
         await this.practicePhrase(card, i + 1);
         
         if (i < flashcards.length - 1) {
@@ -187,7 +190,7 @@ export class AudioLessonGenerator {
 
       await this.addSilence(3000);
 
-      console.log('Creating review phase...');
+      if (process.env.NODE_ENV !== 'production') console.log('Creating review phase...');
       // 4. Review phase - quick repetitions
       await this.addSegment({
         type: 'instruction',
@@ -199,7 +202,7 @@ export class AudioLessonGenerator {
 
       for (let i = 0; i < flashcards.length; i++) {
         const card = flashcards[i];
-        console.log(`Reviewing phrase ${i + 1}/${flashcards.length}`);
+        if (process.env.NODE_ENV !== 'production') console.log(`Reviewing phrase ${i + 1}/${flashcards.length}`);
         await this.reviewPhrase(card);
         
         if (i < flashcards.length - 1) {
@@ -208,7 +211,7 @@ export class AudioLessonGenerator {
       }
 
       // 5. Conclusion
-      console.log('Creating conclusion...');
+      if (process.env.NODE_ENV !== 'production') console.log('Creating conclusion...');
       await this.addSilence(2000);
       await this.addSegment({
         type: 'instruction',
@@ -217,7 +220,7 @@ export class AudioLessonGenerator {
       });
 
       // Combine all audio segments - NO PROGRESS TRACKING
-      console.log('Combining audio segments...');
+      if (process.env.NODE_ENV !== 'production') console.log('Combining audio segments...');
       return AudioCombiner.combineWavBuffers(this.audioSegments);
 
     } catch (error) {
@@ -229,29 +232,17 @@ export class AudioLessonGenerator {
   // Add instruction text and wait
   private async addSegment(segment: LessonSegment): Promise<void> {
     if (segment.type === 'instruction' && segment.text) {
-      const audioBuffer = await this.azureTTS.synthesizeToBuffer(
-        segment.text,
-        'english',
-        this.config.voiceGender
-      );
+      const audioBuffer = await this.getAudio(segment.text, 'english');
       this.audioSegments.push(audioBuffer);
       
       if (segment.voice !== 'thai') {
         await this.addSilence(this.config.pauseDurationMs.afterInstruction);
       }
     } else if (segment.type === 'thai' && segment.text) {
-      const audioBuffer = await this.azureTTS.synthesizeToBuffer(
-        segment.text,
-        'thai',
-        this.config.voiceGender
-      );
+      const audioBuffer = await this.getAudio(segment.text, 'thai');
       this.audioSegments.push(audioBuffer);
     } else if (segment.type === 'english' && segment.text) {
-      const audioBuffer = await this.azureTTS.synthesizeToBuffer(
-        segment.text,
-        'english',
-        this.config.voiceGender
-      );
+      const audioBuffer = await this.getAudio(segment.text, 'english');
       this.audioSegments.push(audioBuffer);
     }
   }
@@ -349,21 +340,24 @@ export class AudioLessonGenerator {
     const thaiText = this.getThaiText(card);
     
     for (let i = 0; i < this.config.repetitions.review; i++) {
-      await this.addSegment({
-        type: 'english',
-        text: card.english
-      });
+      await this.addSegment({ type: 'english', text: card.english });
       
       await this.addSilence(300);
       
-      await this.addSegment({
-        type: 'thai',
-        text: thaiText
-      });
+      await this.addSegment({ type: 'thai', text: thaiText });
       
       if (i < this.config.repetitions.review - 1) {
         await this.addSilence(800);
       }
     }
+  }
+
+  private async getAudio(text: string, language: 'thai' | 'english'): Promise<ArrayBuffer> {
+    const key = `${language}|${this.config.voiceGender}|1.0|${text}`;
+    const cached = this.ttsCache.get(key);
+    if (cached) return cached;
+    const buffer = await this.azureTTS.synthesizeToBuffer(text, language, this.config.voiceGender, 1.0);
+    this.ttsCache.set(key, buffer);
+    return buffer;
   }
 } 

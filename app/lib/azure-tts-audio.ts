@@ -1,8 +1,8 @@
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 
 // Azure Speech Service configuration (same as azure-tts.ts)
-const AZURE_SPEECH_KEY = 'CKUt0UglFFtkn96zA1lWcG1EUTS2Y4NAS6edR0QL6tcDBuVxrdYlJQQJ99BGACqBBLyXJ3w3AAAEACOGih5x';
-const AZURE_SPEECH_REGION = 'southeastasia';
+const AZURE_SPEECH_KEY = process.env.AZURE_SPEECH_KEY || '';
+const AZURE_SPEECH_REGION = process.env.AZURE_SPEECH_REGION || 'southeastasia';
 
 // Voice configurations
 const THAI_VOICES = {
@@ -19,6 +19,9 @@ export class AzureTTSAudio {
   private speechConfig: sdk.SpeechConfig;
 
   constructor() {
+    if (!AZURE_SPEECH_KEY) {
+      throw new Error('Missing AZURE_SPEECH_KEY');
+    }
     this.speechConfig = sdk.SpeechConfig.fromSubscription(AZURE_SPEECH_KEY, AZURE_SPEECH_REGION);
     this.speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Riff16Khz16BitMonoPcm;
   }
@@ -69,8 +72,10 @@ export class AzureTTSAudio {
         </speak>
       `;
 
-      console.log(`Synthesizing ${language} audio with ${voiceGender} voice at rate="${rateValue}" (${validSpeed}x):`, text.substring(0, 50) + '...');
-      console.log('SSML:', ssml.trim());
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`Synthesizing ${language} audio with ${voiceGender} voice at rate="${rateValue}" (${validSpeed}x):`, text.substring(0, 50) + '...');
+        console.log('SSML:', ssml.trim());
+      }
 
       // Create synthesizer with no audio output (we'll get the data directly)
       const synthesizer = new sdk.SpeechSynthesizer(this.speechConfig, null);
@@ -91,13 +96,13 @@ export class AzureTTSAudio {
             synthesizer.close();
             resolve(arrayBuffer);
           } else {
-            console.error('Speech synthesis failed:', result.errorDetails);
+          if (process.env.NODE_ENV !== 'production') console.error('Speech synthesis failed:', result.errorDetails);
             synthesizer.close();
             reject(new Error(result.errorDetails || 'Speech synthesis failed'));
           }
         },
         error => {
-          console.error('Speech synthesis error:', error);
+          if (process.env.NODE_ENV !== 'production') console.error('Speech synthesis error:', error);
           synthesizer.close();
           reject(error);
         }

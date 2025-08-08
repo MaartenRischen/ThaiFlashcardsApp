@@ -32,17 +32,20 @@ export class SimpleAudioLessonGenerator {
   private config: SimpleAudioLessonConfig;
   private audioSegments: ArrayBuffer[] = [];
   private azureTTS: AzureTTSAudio;
+  private ttsCache: Map<string, ArrayBuffer> = new Map();
 
   constructor(config: Partial<SimpleAudioLessonConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.azureTTS = new AzureTTSAudio();
     
-    // Debug logging
-    console.log('🔧 SIMPLE AUDIO GENERATOR CONSTRUCTOR');
-    console.log('🔧 Input config:', JSON.stringify(config, null, 2));
-    console.log('🔧 DEFAULT_CONFIG:', JSON.stringify(DEFAULT_CONFIG, null, 2));
-    console.log('🔧 Final merged config:', JSON.stringify(this.config, null, 2));
-    console.log('🔧 Politeness particles setting:', this.config.includePolitenessParticles);
+    // Debug logging (only in development)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🔧 SIMPLE AUDIO GENERATOR CONSTRUCTOR');
+      console.log('🔧 Input config:', JSON.stringify(config, null, 2));
+      console.log('🔧 DEFAULT_CONFIG:', JSON.stringify(DEFAULT_CONFIG, null, 2));
+      console.log('🔧 Final merged config:', JSON.stringify(this.config, null, 2));
+      console.log('🔧 Politeness particles setting:', this.config.includePolitenessParticles);
+    }
   }
 
   /**
@@ -58,19 +61,25 @@ export class SimpleAudioLessonGenerator {
     }>,
     setName: string
   ): Promise<ArrayBuffer> {
-    console.log('Starting simple audio lesson generation for:', setName);
-    console.log('Config:', this.config);
-    console.log('Speed setting:', this.config.speed);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Starting simple audio lesson generation for:', setName);
+      console.log('Config:', this.config);
+      console.log('Speed setting:', this.config.speed);
+    }
     this.audioSegments = [];
 
     try {
       // Main loop - repeat the entire set multiple times
       for (let loop = 0; loop < this.config.loops; loop++) {
-        console.log(`Loop ${loop + 1} of ${this.config.loops}`);
+        if (process.env.NODE_ENV !== 'production') {
+          console.log(`Loop ${loop + 1} of ${this.config.loops}`);
+        }
         
         for (let i = 0; i < flashcards.length; i++) {
           const card = flashcards[i];
-          console.log(`Generating audio for phrase ${i + 1}/${flashcards.length} (loop ${loop + 1})`);
+          if (process.env.NODE_ENV !== 'production') {
+            console.log(`Generating audio for phrase ${i + 1}/${flashcards.length} (loop ${loop + 1})`);
+          }
           
           // Get the appropriate Thai text based on gender
           const thaiText = this.getThaiText(card);
@@ -79,34 +88,21 @@ export class SimpleAudioLessonGenerator {
           
           // Get speed for initial parts (always normal speed for first occurrence)
           const baseSpeed = this.config.speed || 1.0;
-          console.log('Using base speed:', baseSpeed);
+          if (process.env.NODE_ENV !== 'production') {
+            console.log('Using base speed:', baseSpeed);
+          }
           
           // 1. English meaning
-          const englishAudio = await this.azureTTS.synthesizeToBuffer(
-            card.english,
-            'english',
-            this.config.voiceGender,
-            baseSpeed
-          );
+          const englishAudio = await this.getAudio(card.english, 'english', this.config.voiceGender, baseSpeed);
           this.audioSegments.push(englishAudio);
           
           // 2. Thai translation (no pause)
-          const thaiAudio = await this.azureTTS.synthesizeToBuffer(
-            thaiText,
-            'thai',
-            this.config.voiceGender,
-            baseSpeed
-          );
+          const thaiAudio = await this.getAudio(thaiText, 'thai', this.config.voiceGender, baseSpeed);
           this.audioSegments.push(thaiAudio);
           
           // 3. Optional mnemonic (no pause)
           if (this.config.includeMnemonics && card.mnemonic) {
-            const mnemonicAudio = await this.azureTTS.synthesizeToBuffer(
-              card.mnemonic,
-              'english',
-              this.config.voiceGender,
-              baseSpeed
-            );
+            const mnemonicAudio = await this.getAudio(card.mnemonic, 'english', this.config.voiceGender, baseSpeed);
             this.audioSegments.push(mnemonicAudio);
           }
           
@@ -125,57 +121,27 @@ export class SimpleAudioLessonGenerator {
             // Pattern: English -> Thai -> Thai -> Thai -> English -> Thai
             
             // 1. English
-            const englishRepAudio = await this.azureTTS.synthesizeToBuffer(
-              card.english,
-              'english',
-              this.config.voiceGender,
-              currentSpeed
-            );
+            const englishRepAudio = await this.getAudio(card.english, 'english', this.config.voiceGender, currentSpeed);
             this.audioSegments.push(englishRepAudio);
             
             // 2. Thai (first)
-            const thaiRepAudio1 = await this.azureTTS.synthesizeToBuffer(
-              thaiText,
-              'thai',
-              this.config.voiceGender,
-              currentSpeed
-            );
+            const thaiRepAudio1 = await this.getAudio(thaiText, 'thai', this.config.voiceGender, currentSpeed);
             this.audioSegments.push(thaiRepAudio1);
             
             // 3. Thai (second)
-            const thaiRepAudio2 = await this.azureTTS.synthesizeToBuffer(
-              thaiText,
-              'thai',
-              this.config.voiceGender,
-              currentSpeed
-            );
+            const thaiRepAudio2 = await this.getAudio(thaiText, 'thai', this.config.voiceGender, currentSpeed);
             this.audioSegments.push(thaiRepAudio2);
             
             // 4. Thai (third)
-            const thaiRepAudio3 = await this.azureTTS.synthesizeToBuffer(
-              thaiText,
-              'thai',
-              this.config.voiceGender,
-              currentSpeed
-            );
+            const thaiRepAudio3 = await this.getAudio(thaiText, 'thai', this.config.voiceGender, currentSpeed);
             this.audioSegments.push(thaiRepAudio3);
             
             // 5. English (again)
-            const englishRepAudio2 = await this.azureTTS.synthesizeToBuffer(
-              card.english,
-              'english',
-              this.config.voiceGender,
-              currentSpeed
-            );
+            const englishRepAudio2 = await this.getAudio(card.english, 'english', this.config.voiceGender, currentSpeed);
             this.audioSegments.push(englishRepAudio2);
             
             // 6. Thai (fourth)
-            const thaiRepAudio4 = await this.azureTTS.synthesizeToBuffer(
-              thaiText,
-              'thai',
-              this.config.voiceGender,
-              currentSpeed
-            );
+            const thaiRepAudio4 = await this.getAudio(thaiText, 'thai', this.config.voiceGender, currentSpeed);
             this.audioSegments.push(thaiRepAudio4);
           }
           
@@ -204,7 +170,9 @@ export class SimpleAudioLessonGenerator {
       this.audioSegments.push(outroAudio);
 
       // Combine all segments - NO PROGRESS TRACKING
-      console.log('Combining audio segments...');
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Combining audio segments...');
+      }
       return AudioCombiner.combineWavBuffers(this.audioSegments);
 
     } catch (error) {
@@ -223,59 +191,79 @@ export class SimpleAudioLessonGenerator {
   }): string {
     let thaiText: string;
     
-    console.log('🔧 GET_THAI_TEXT CALLED WITH:', {
-      thai: card.thai,
-      thaiMasculine: card.thaiMasculine,
-      thaiFeminine: card.thaiFeminine
-    });
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🔧 GET_THAI_TEXT CALLED WITH:', {
+        thai: card.thai,
+        thaiMasculine: card.thaiMasculine,
+        thaiFeminine: card.thaiFeminine
+      });
+    }
     
     // First get the appropriate text based on gender
     if (this.config.voiceGender === 'male' && card.thaiMasculine) {
       thaiText = card.thaiMasculine;
-      console.log('🔧 Selected thaiMasculine:', thaiText);
+      if (process.env.NODE_ENV !== 'production') console.log('🔧 Selected thaiMasculine:', thaiText);
     } else if (this.config.voiceGender === 'female' && card.thaiFeminine) {
       thaiText = card.thaiFeminine;
-      console.log('🔧 Selected thaiFeminine:', thaiText);
+      if (process.env.NODE_ENV !== 'production') console.log('🔧 Selected thaiFeminine:', thaiText);
     } else {
       thaiText = card.thai;
-      console.log('🔧 Selected base thai:', thaiText);
+      if (process.env.NODE_ENV !== 'production') console.log('🔧 Selected base thai:', thaiText);
     }
     
     // Debug logging
-    console.log('🔧 GET_THAI_TEXT DEBUG START');
-    console.log('🔧 Input text:', thaiText);
-    console.log('🔧 Config includePolitenessParticles:', this.config.includePolitenessParticles);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🔧 GET_THAI_TEXT DEBUG START');
+      console.log('🔧 Input text:', thaiText);
+      console.log('🔧 Config includePolitenessParticles:', this.config.includePolitenessParticles);
+    }
     
     // FIRST: Strip any existing politeness particles - MORE COMPREHENSIVE REGEX
     const beforeStrip = thaiText;
     // Match krub/krap/ka in various forms, including Thai script
     thaiText = thaiText.replace(/(\s*(krap|krub|khrap|khrub|ka|kha|ครับ|คร้าบ|คร๊าบ|คับ|ค่ะ|คะ|ค้า|ค๊ะ))$/gi, '');
     if (beforeStrip !== thaiText) {
-      console.log('🔧 Stripped existing particles:', beforeStrip, '->', thaiText);
+      if (process.env.NODE_ENV !== 'production') console.log('🔧 Stripped existing particles:', beforeStrip, '->', thaiText);
     }
     
     // Handle politeness particles based on configuration
     if (this.config.includePolitenessParticles === false) {
-      console.log('🔧 POLITENESS PARTICLES DISABLED - returning text without particles:', thaiText);
+      if (process.env.NODE_ENV !== 'production') console.log('🔧 POLITENESS PARTICLES DISABLED - returning text without particles:', thaiText);
     } else {
-      console.log('🔧 POLITENESS PARTICLES ENABLED - checking if we need to add');
+      if (process.env.NODE_ENV !== 'production') console.log('🔧 POLITENESS PARTICLES ENABLED - checking if we need to add');
       // Don't add particles to questions or certain phrases
       const isQuestion = /(\s*(ไหม|มั้ย|หรือ|อะไร|ทำไม|อย่างไร|ที่ไหน|เหรอ|หรือเปล่า|รึเปล่า))$/i.test(thaiText);
-      console.log('🔧 Is question:', isQuestion);
+      if (process.env.NODE_ENV !== 'production') console.log('🔧 Is question:', isQuestion);
       
       if (!isQuestion) {
         // Add appropriate politeness particle
         const particle = this.config.voiceGender === 'female' ? ' ka' : ' krap';
-        console.log('🔧 Adding particle:', particle);
+        if (process.env.NODE_ENV !== 'production') console.log('🔧 Adding particle:', particle);
         thaiText += particle;
-        console.log('🔧 Text after adding particle:', thaiText);
+        if (process.env.NODE_ENV !== 'production') console.log('🔧 Text after adding particle:', thaiText);
       } else {
-        console.log('🔧 Skipping particle addition for question');
+        if (process.env.NODE_ENV !== 'production') console.log('🔧 Skipping particle addition for question');
       }
     }
     
-    console.log('🔧 FINAL THAI TEXT FOR TTS:', thaiText);
-    console.log('🔧 GET_THAI_TEXT DEBUG END');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🔧 FINAL THAI TEXT FOR TTS:', thaiText);
+      console.log('🔧 GET_THAI_TEXT DEBUG END');
+    }
     return thaiText;
+  }
+
+  private async getAudio(
+    text: string,
+    language: 'thai' | 'english',
+    voiceGender: 'male' | 'female',
+    speed: number
+  ): Promise<ArrayBuffer> {
+    const key = `${language}|${voiceGender}|${speed}|${text}`;
+    const cached = this.ttsCache.get(key);
+    if (cached) return cached;
+    const buffer = await this.azureTTS.synthesizeToBuffer(text, language, voiceGender, speed);
+    this.ttsCache.set(key, buffer);
+    return buffer;
   }
 } 

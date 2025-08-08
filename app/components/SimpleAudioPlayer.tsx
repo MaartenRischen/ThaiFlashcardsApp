@@ -12,7 +12,7 @@ import AudioLearningCard from '@/app/components/flashcard-page/AudioLearningCard
 interface SimpleAudioPlayerProps {
   audioUrl: string;
   phrases: Phrase[];
-  mode?: 'pimsleur' | 'simple';
+  mode?: 'pimsleur' | 'simple' | 'srs';
   pimsleurConfig?: Partial<AudioLessonConfig>;
   simpleConfig?: Partial<SimpleAudioLessonConfig>;
 }

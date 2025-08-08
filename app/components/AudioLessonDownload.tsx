@@ -44,7 +44,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple'>('simple');
+  const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple' | 'srs'>('simple');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
@@ -103,7 +103,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
     setIsGenerating(true);
     
     // Start generation progress immediately
-    const mode = lessonMode === 'pimsleur' ? 'audio-pimsleur' : 'audio-simple';
+    const mode = lessonMode === 'pimsleur' ? 'audio-pimsleur' : lessonMode === 'srs' ? 'audio-srs' : 'audio-simple';
     startGeneration(mode, 0);
     
     try {
@@ -126,7 +126,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
           'Cache-Control': 'no-cache',
         },
         body: JSON.stringify({
-          mode: lessonMode,
+           mode: lessonMode,
           config: configToSend,
         }),
       });
@@ -248,7 +248,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
           {/* Mode Selection */}
           <div className="grid gap-3">
             <Label className="text-[#E0E0E0] font-medium">Lesson Style</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 onClick={() => setLessonMode('pimsleur')}
                 className={`flex items-center justify-start gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -275,6 +275,20 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                 <div className="text-left">
                   <div className="font-medium">Repetition Mode</div>
                   <div className="text-xs opacity-80">For sleep learning</div>
+                </div>
+              </button>
+              <button
+                onClick={() => setLessonMode('srs')}
+                className={`flex items-center justify-start gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  lessonMode === 'srs' 
+                    ? 'bg-[#A9C4FC] text-[#121212] border border-[#A9C4FC]' 
+                    : 'bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] hover:bg-[#4C4C4C]'
+                }`}
+              >
+                <Repeat className="w-5 h-5 flex-shrink-0" />
+                <div className="text-left">
+                  <div className="font-medium">SRS Review</div>
+                  <div className="text-xs opacity-80">Adaptive order: due → unseen → weak</div>
                 </div>
               </button>
             </div>
@@ -310,7 +324,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                 <p>• Practice time: {(config.pauseDurationMs?.forPractice || 3000) / 1000} seconds to repeat each word</p>
                 <p>• Each phrase will be repeated {config.repetitions?.practice || 3} times</p>
               </>
-            ) : (
+            ) : lessonMode === 'simple' ? (
               <>
                 <p>• Each phrase will be repeated {simpleConfig.phraseRepetitions || 2} times in a row</p>
                 <p>• Speaking speed: {((simpleConfig.speed || 1) * 100).toFixed(0)}% of normal speed</p>
@@ -319,6 +333,12 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                 <p>• Perfect for passive listening or sleep learning</p>
                 {simpleConfig.includeMnemonics && <p>• Memory hints (mnemonics) will be included in the audio</p>}
                 {simpleConfig.includePolitenessParticles && <p>• Polite endings (ka/krub) will be added</p>}
+              </>
+            ) : (
+              <>
+                <p>• Adaptive order using your progress: wrong → unseen → due today → others</p>
+                <p>• Uses the same repetition and speed settings as Repetition Mode</p>
+                <p>• Great for passive review aligned with SRS</p>
               </>
             )}
           </div>

@@ -150,7 +150,12 @@ export async function POST(
           where: { userId_setId: { userId, setId: params.id } },
           select: { progressData: true },
         });
-        const progress: Record<string, any> = (progressMap?.progressData as any) || {};
+        type ProgressEntry = {
+          lastReviewedDate?: string;
+          nextReviewDate?: string;
+          difficulty?: 'easy' | 'good' | 'hard';
+        };
+        const progress = (progressMap?.progressData ?? {}) as Record<string, ProgressEntry>;
         // Build priority buckets: wrong -> unseen -> due -> rest
         const today = new Date();
         const unseen: typeof phrases = [];

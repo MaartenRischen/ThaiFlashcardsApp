@@ -139,16 +139,26 @@ export function SimpleAudioPlayer({
       ? Boolean(simpleConfig?.includePolitenessParticles)
       : Boolean(pimsleurConfig?.includePolitenessParticles);
 
+  // If backend provided a shuffled order, reorder phrases to match audio so visuals are aligned
+  const audioOrder = typeof window !== 'undefined'
+    ? (window as unknown as { __AUDIO_ORDER__?: number[] }).__AUDIO_ORDER__
+    : undefined;
+  const orderedPhrases = useMemo(() => {
+    if (!audioOrder || audioOrder.length === 0) return phrases;
+    // Safety: ensure indices are in range
+    return audioOrder.map((i) => phrases[Math.max(0, Math.min(i, phrases.length - 1))]).filter(Boolean);
+  }, [audioOrder, phrases]);
+
   return (
     <div className="w-full bg-gray-900 rounded-2xl p-6 space-y-6">
       {/* Display Area: Render the real flashcard UI */}
       <div className="bg-black rounded-xl p-6">
         <div className="text-gray-400 text-sm mb-2 text-center">
-          {Math.max(1, currentPhraseIndex + 1)} / {phrases.length}
+          {Math.max(1, currentPhraseIndex + 1)} / {orderedPhrases.length}
         </div>
         {currentPhrase && (
           <AudioLearningCard
-            phrase={currentPhrase}
+            phrase={orderedPhrases[Math.max(0, Math.min(currentPhraseIndex, orderedPhrases.length - 1))]}
             isMale={Boolean(isMaleVoice)}
             isPoliteMode={isPoliteEnabled}
           />

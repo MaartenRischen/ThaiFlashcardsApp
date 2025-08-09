@@ -5,9 +5,9 @@ export async function GET(request: NextRequest, { params: _params }: { params: {
   const url = new URL(request.url);
   const reqId = url.searchParams.get('rid');
   if (!reqId) return NextResponse.json({ error: 'Missing rid' }, { status: 400 });
-  const timings = getTimings(reqId);
-  if (!timings) return NextResponse.json({ error: 'Not found or expired' }, { status: 404 });
-  return NextResponse.json({ timings });
+  const meta = getTimings(reqId);
+  if (!meta) return NextResponse.json({ error: 'Not found or expired' }, { status: 404 });
+  return NextResponse.json(meta);
 }
 
 

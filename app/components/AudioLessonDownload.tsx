@@ -145,12 +145,14 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
       // Extract timings header if present
       const timingsId = response.headers.get('X-Audio-Timings-Id');
       let timings: AudioTiming[] | null = null;
+      let order: number[] | undefined;
       if (timingsId) {
         try {
           const tRes = await fetch(`/api/flashcard-sets/${setId}/audio-lesson/timings?rid=${encodeURIComponent(timingsId)}`, { cache: 'no-store' });
           if (tRes.ok) {
             const data = await tRes.json();
             timings = Array.isArray(data.timings) ? data.timings : null;
+            order = Array.isArray(data.order) ? data.order : undefined;
           }
         } catch (e) {
           console.warn('Failed to fetch precise timings', e);
@@ -166,6 +168,9 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
       // Store exact timings for playback sync
       if (timings && Array.isArray(timings)) {
         window.__AUDIO_TIMINGS__ = timings as AudioTiming[];
+        if (order && Array.isArray(order)) {
+          (window as unknown as { __AUDIO_ORDER__?: number[] }).__AUDIO_ORDER__ = order;
+        }
       }
       
       // Complete generation after a short delay

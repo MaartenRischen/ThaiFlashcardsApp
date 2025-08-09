@@ -145,21 +145,22 @@ export async function POST(
     const fileNameSafe = `${setName.replace(/[^a-z0-9]/gi, '_')}_${mode === 'simple' ? 'simple' : mode === 'shuffle' ? 'shuffle' : 'pimsleur'}.wav`;
     if (mode === 'simple' || mode === 'shuffle') {
       // If shuffle mode, randomize order deterministically per request
+      let indexOrder: number[] | undefined = undefined;
       if (mode === 'shuffle') {
         // Seeded shuffle using timestamp for variety
         const seed = Date.now();
         let rand = seed % 2147483647;
         const nextRand = () => (rand = (rand * 48271) % 2147483647);
-        phrases = [...phrases]
-          .map((p) => ({ p, r: nextRand() }))
-          .sort((a, b) => a.r - b.r)
-          .map(({ p }) => p);
+        const pairs = [...phrases].map((p, i) => ({ p, i, r: nextRand() }));
+        pairs.sort((a, b) => a.r - b.r);
+        indexOrder = pairs.map((x) => x.i);
+        phrases = pairs.map((x) => x.p);
       }
 
       const result = await new SimpleAudioLessonGenerator(config).generateSimpleLesson(phrases, setName);
       // Put timings in ephemeral store keyed by a request-scoped id
       const requestId = `${params.id}:${Date.now()}`;
-      putTimings(requestId, result.timings);
+      putTimings(requestId, { timings: result.timings, order: indexOrder });
       return new Response(result.audioBuffer, {
         headers: {
           'Content-Type': 'audio/wav',

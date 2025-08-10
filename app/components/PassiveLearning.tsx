@@ -52,7 +52,15 @@ export default function PassiveLearning({ isMale = false, isPoliteMode = true }:
           await wait(400); // short pause
 
           // 2. Flip to Thai (front side), play Thai
-          const thai = getThaiWithGender(card, isMale, isPoliteMode);
+          const thai = getThaiWithGender(
+            {
+              thai: card.thai,
+              translation: card.english,
+              pronunciation: card.pronunciation,
+            },
+            isMale,
+            isPoliteMode
+          );
           setShowAnswer(false);
           await ttsService.speak({ text: thai, genderValue: isMale });
           if (stopRef.current) break;

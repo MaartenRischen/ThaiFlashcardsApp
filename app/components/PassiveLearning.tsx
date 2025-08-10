@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSet } from '@/app/context/SetContext';
 import { FlashcardDisplay } from '@/app/components/FlashcardDisplay';
+import type { Phrase as DisplayPhrase, ExampleSentence as DisplayExample } from '@/app/components/FlashcardDisplay';
 import { getThaiWithGender } from '@/app/lib/pronunciation';
 import { ttsService } from '@/app/lib/tts-service';
 
@@ -21,6 +22,21 @@ export default function PassiveLearning({ isMale = false, isPoliteMode = true }:
   const stopRef = useRef(false);
 
   const current = useMemo(() => (phrases && phrases.length > 0 ? phrases[index] : undefined), [phrases, index]);
+
+  const currentForDisplay: DisplayPhrase | undefined = useMemo(() => {
+    if (!current) return undefined;
+    const mappedExamples: DisplayExample[] = Array.isArray(current.examples)
+      ? current.examples.map((ex: any) => ({ thai: ex.thai, translation: ex.translation, pronunciation: ex.pronunciation }))
+      : [];
+    return {
+      thai: current.thai,
+      translation: current.english,
+      pronunciation: current.pronunciation,
+      english: current.english,
+      examples: mappedExamples,
+      mnemonic: current.mnemonic,
+    };
+  }, [current]);
 
   const pickRandomIndex = useCallback((): number => {
     if (!phrases || phrases.length === 0) return 0;
@@ -94,7 +110,7 @@ export default function PassiveLearning({ isMale = false, isPoliteMode = true }:
       </div>
       <div className="border border-[#333] rounded-lg p-4 bg-[#111]">
         <FlashcardDisplay
-          phrase={current!}
+          phrase={currentForDisplay!}
           showAnswer={showAnswer}
           autoplay={false}
           isMale={isMale}

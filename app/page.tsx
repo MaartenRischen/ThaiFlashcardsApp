@@ -34,7 +34,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { getToneLabel } from '@/app/lib/utils'; // Import getToneLabel
 import { HowItWorksModal } from './components/modals/HowItWorksModal';
-import PassiveLearning from './components/PassiveLearning';
+import TipJar from './components/TipJar';
+// PassiveLearning removed per request
 import { ProgressModal } from './components/modals/ProgressModal';
 import { CardsListModal } from './components/modals/CardsListModal';
 
@@ -1420,17 +1421,7 @@ export default function ThaiFlashcards() {
         onClose={() => setShowHowItWorks(false)} 
       />
 
-      {/* Passive Learning entry (simple inline, can be moved later) */}
-      <div className="fixed bottom-4 right-4 z-20">
-        <a href="#passive-learning" className="neumorphic-button text-green-400 px-3 py-2">Passive Learning</a>
-      </div>
-
-      <div id="passive-learning" className="mt-8" />
-      <ClientOnly>
-        <div className="mt-8">
-          <PassiveLearning isMale={isMale} isPoliteMode={isPoliteMode} />
-        </div>
-      </ClientOnly>
+      {/* Passive Learning removed per request */}
       <ProgressModal 
         isOpen={showProgress}
         onClose={() => setShowProgress(false)}
@@ -1509,6 +1500,22 @@ export default function ThaiFlashcards() {
         onSelectCard={(idx) => setIndex(idx)}
         getCardStatus={getCardStatus}
       />
+
+      {/* Tip Jar */}
+      <div className="mt-12">
+        <ClientOnly>
+          <TipJar
+            addresses={{
+              Bitcoin: process.env.NEXT_PUBLIC_TIP_BTC || '',
+              Lightning: process.env.NEXT_PUBLIC_TIP_LN || '',
+              Ethereum: process.env.NEXT_PUBLIC_TIP_ETH || '',
+              Solana: process.env.NEXT_PUBLIC_TIP_SOL || '',
+            }}
+            paypalUrl={process.env.NEXT_PUBLIC_TIP_PAYPAL}
+            stripeUrl={process.env.NEXT_PUBLIC_TIP_STRIPE}
+          />
+        </ClientOnly>
+      </div>
 
     </main>
   );

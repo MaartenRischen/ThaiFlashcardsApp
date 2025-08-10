@@ -26,7 +26,11 @@ export default function PassiveLearning({ isMale = false, isPoliteMode = true }:
   const currentForDisplay: DisplayPhrase | undefined = useMemo(() => {
     if (!current) return undefined;
     const mappedExamples: DisplayExample[] = Array.isArray(current.examples)
-      ? current.examples.map((ex: any) => ({ thai: ex.thai, translation: ex.translation, pronunciation: ex.pronunciation }))
+      ? current.examples.map((ex: { thai: string; translation: string; pronunciation: string }) => ({
+          thai: ex.thai,
+          translation: ex.translation,
+          pronunciation: ex.pronunciation,
+        }))
       : [];
     return {
       thai: current.thai,

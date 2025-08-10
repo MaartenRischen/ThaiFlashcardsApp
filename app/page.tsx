@@ -34,6 +34,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { getToneLabel } from '@/app/lib/utils'; // Import getToneLabel
 import { HowItWorksModal } from './components/modals/HowItWorksModal';
+import PassiveLearning from './components/PassiveLearning';
 import { ProgressModal } from './components/modals/ProgressModal';
 import { CardsListModal } from './components/modals/CardsListModal';
 
@@ -1419,7 +1420,17 @@ export default function ThaiFlashcards() {
         onClose={() => setShowHowItWorks(false)} 
       />
 
-      {/* Renamed Vocabulary Modal to Progress Modal */}
+      {/* Passive Learning entry (simple inline, can be moved later) */}
+      <div className="fixed bottom-4 right-4 z-20">
+        <a href="#passive-learning" className="neumorphic-button text-green-400 px-3 py-2">Passive Learning</a>
+      </div>
+
+      <div id="passive-learning" className="mt-8" />
+      <ClientOnly>
+        <div className="mt-8">
+          <PassiveLearning isMale={isMale} isPoliteMode={isPoliteMode} />
+        </div>
+      </ClientOnly>
       <ProgressModal 
         isOpen={showProgress}
         onClose={() => setShowProgress(false)}

@@ -3,7 +3,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSet } from '@/app/context/SetContext';
 import { FlashcardDisplay } from '@/app/components/FlashcardDisplay';
-import type { Phrase as DisplayPhrase, ExampleSentence as DisplayExample } from '@/app/components/FlashcardDisplay';
+import type { Phrase as DisplayPhrase } from '@/app/components/FlashcardDisplay';
+type DisplayExample = { thai: string; translation: string; pronunciation: string };
 import { getThaiWithGender } from '@/app/lib/pronunciation';
 import { ttsService } from '@/app/lib/tts-service';
 

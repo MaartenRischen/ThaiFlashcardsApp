@@ -1236,7 +1236,13 @@ export default function ThaiFlashcards() {
                     <div className="text-3xl md:text-4xl font-extrabold mb-2 text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
                       {getThaiWithGender(phrases[index], isMale, isPoliteMode)}
                     </div>
-                    {/* Pronunciation buttons - Normal and Slow speed */}
+                    {/* Pronunciation text display (framed and prominent) */}
+                    <div className="text-center mb-3">
+                      <div className="text-xl md:text-2xl font-semibold text-gray-100 px-4 py-2 bg-[#0f172a] rounded-lg inline-block">
+                        {getGenderedPronunciation(phrases[index], isMale, isPoliteMode) || ''}
+                      </div>
+                    </div>
+                    {/* Pronunciation buttons - Normal and Slow speed UNDER pronunciation */}
                     <div className="flex justify-center gap-3 mb-4">
                       {/* Normal speed button */}
                       <button
@@ -1269,12 +1275,7 @@ export default function ThaiFlashcards() {
                       </button>
                     </div>
                     
-                    {/* Pronunciation text display (framed and prominent) */}
-                    <div className="text-center mb-3">
-                      <div className="text-xl md:text-2xl font-semibold text-gray-100 px-4 py-2 bg-[#0f172a] rounded-lg inline-block">
-                        {getGenderedPronunciation(phrases[index], isMale, isPoliteMode) || ''}
-                      </div>
-                    </div>
+                    
                     {/* English translation in blue, in parentheses */}
                     {phrases[index]?.english && (
                       <div className="text-base md:text-lg font-medium mb-2 text-blue-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">

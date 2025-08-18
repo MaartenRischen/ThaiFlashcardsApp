@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
-import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal, Gift, LogIn } from 'lucide-react';
+import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal, Gift, Heart, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { AudioLessonDownload } from '../AudioLessonDownload';
@@ -231,7 +231,10 @@ export function FlashcardHeader({
                   title="Tip Jar"
                   aria-label="Tip Jar"
                 >
-                  <Gift />
+                  <div className="relative">
+                    <Gift className="inline-block" />
+                    <Heart className="inline-block absolute -right-2 -top-2 w-3 h-3" />
+                  </div>
                 </button>
               </DialogTrigger>
               <DialogContent className="max-w-md w-[95vw] bg-[#1f1f1f] border-[#404040] text-[#E0E0E0]">

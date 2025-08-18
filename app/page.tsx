@@ -1269,9 +1269,9 @@ export default function ThaiFlashcards() {
                       </button>
                     </div>
                     
-                    {/* Pronunciation text display */}
+                    {/* Pronunciation text display (framed and prominent) */}
                     <div className="text-center mb-3">
-                      <div className="text-xl md:text-2xl font-semibold text-gray-100">
+                      <div className="text-xl md:text-2xl font-semibold text-gray-100 px-4 py-2 bg-[#0f172a] rounded-lg inline-block">
                         {getGenderedPronunciation(phrases[index], isMale, isPoliteMode) || ''}
                       </div>
                     </div>
@@ -1355,12 +1355,7 @@ export default function ThaiFlashcards() {
                     <button onClick={resetCurrentMnemonic} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"><RotateCcw className="w-3 h-3" /> Reset</button>
                   </div>
                   
-                  {/* Pronunciation displayed above the mnemonic */}
-                  {phrases[index]?.pronunciation && (
-                    <div className="mb-2 p-3 bg-gray-800 rounded text-gray-100 font-semibold text-center text-lg">
-                      <span className="text-blue-400">Pronunciation:</span> {getGenderedPronunciation(phrases[index], isMale, isPoliteMode)}
-                    </div>
-                  )}
+                  {/* Secondary pronunciation removed; rely on main line above */}
                   
                   <textarea
                     value={(() => {
@@ -1518,21 +1513,7 @@ export default function ThaiFlashcards() {
         getCardStatus={getCardStatus}
       />
 
-      {/* Tip Jar */}
-      <div className="mt-12">
-        <ClientOnly>
-          <TipJar
-            addresses={{
-              Bitcoin: process.env.NEXT_PUBLIC_TIP_BTC || '',
-              Lightning: process.env.NEXT_PUBLIC_TIP_LN || '',
-              Ethereum: process.env.NEXT_PUBLIC_TIP_ETH || '',
-              Solana: process.env.NEXT_PUBLIC_TIP_SOL || '',
-            }}
-            paypalUrl={process.env.NEXT_PUBLIC_TIP_PAYPAL}
-            stripeUrl={process.env.NEXT_PUBLIC_TIP_STRIPE}
-          />
-        </ClientOnly>
-      </div>
+      {/* Tip Jar moved to header - removed bottom section */}
 
     </main>
   );

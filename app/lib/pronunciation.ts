@@ -61,7 +61,7 @@ export function getGenderedPronunciation(phraseData: Phrase | ExampleSentence | 
   // If Thai has a pronoun but pronunciation doesn't start with one, add it
   if ((thaiHasMalePronoun || thaiHasFemalePronoun) && !startsWithPronoun) {
     // Check if the English meaning implies first person (I, me, my)
-    const english = (phraseData as any).english || '';
+    const english = 'english' in phraseData ? phraseData.english : '';
     const isFirstPerson = /\b(I|me|my|I'm|I've|I'll|I'd)\b/i.test(english);
     
     if (isFirstPerson || thaiHasMalePronoun || thaiHasFemalePronoun) {

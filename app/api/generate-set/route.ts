@@ -162,9 +162,9 @@ ${cleanedPhrases.map((p, i) => `${i + 1}. ${p}`).join('\n')}
 For each phrase, provide:
 1. Accurate Thai translation with Thai script
 2. Both masculine (ครับ) and feminine (ค่ะ/คะ) versions
-3. Clear romanized pronunciation guide
+3. Clear romanized pronunciation guide (MUST include phom/chan when Thai has ผม/ฉัน)
 4. Creative mnemonic linking sound/meaning
-5. Two example sentences showing usage
+5. Two example sentences showing usage (with matching context to the main phrase)
 
 ### REQUIRED OUTPUT FORMAT:
 Return a JSON object with this EXACT structure:

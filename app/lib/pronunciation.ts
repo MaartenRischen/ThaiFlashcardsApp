@@ -51,14 +51,22 @@ export function getGenderedPronunciation(phraseData: Phrase | ExampleSentence | 
   // Step 1: Handle gendered pronouns in pronunciation (case-insensitive, both orders)
   basePronunciation = basePronunciation.replace(/phom\/chan|chan\/phom/gi, isMale ? 'phom' : 'chan');
   
-  // If Thai contains an explicit pronoun but pronunciation is missing it, prefix it
-  const hasPronounInPron = /\b(phom|chan)\b/i.test(basePronunciation);
+  // Check if Thai has a pronoun
   const thaiHasMalePronoun = /ผม/.test(baseThaiForEndingCheck);
   const thaiHasFemalePronoun = /(ฉัน|ดิฉัน|ชั้น|หนู)/.test(baseThaiForEndingCheck);
   
-  if (!hasPronounInPron && (thaiHasMalePronoun || thaiHasFemalePronoun)) {
-    // Always add the appropriate pronoun based on gender setting when Thai has one
-    basePronunciation = `${isMale ? 'phom' : 'chan'} ${basePronunciation}`;
+  // Check if pronunciation is missing the pronoun at the start
+  const startsWithPronoun = /^(phom|chan)\s/i.test(basePronunciation.trim());
+  
+  // If Thai has a pronoun but pronunciation doesn't start with one, add it
+  if ((thaiHasMalePronoun || thaiHasFemalePronoun) && !startsWithPronoun) {
+    // Check if the English meaning implies first person (I, me, my)
+    const english = (phraseData as any).english || '';
+    const isFirstPerson = /\b(I|me|my|I'm|I've|I'll|I'd)\b/i.test(english);
+    
+    if (isFirstPerson || thaiHasMalePronoun || thaiHasFemalePronoun) {
+      basePronunciation = `${isMale ? 'phom' : 'chan'} ${basePronunciation.trim()}`;
+    }
   }
 
   // Step 2: Check Polite Mode for adding particles

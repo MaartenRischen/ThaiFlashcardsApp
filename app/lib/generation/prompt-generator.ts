@@ -18,11 +18,12 @@ export function generateSystemPrompt(toneDescription: string): string {
 1. Generate EXACT NUMBER of phrases requested - no more, no less
 2. Focus on natural phrases Thai people actually use, not literal translations
 3. DO NOT include politeness particles (ครับ/ค่ะ/จ้ะ/จ๊ะ/นะ/สิ/หรอ) - these will be added later by the app
-4. Provide gendered variations where appropriate (pronouns, certain vocabulary)
-5. Avoid overly formal or outdated expressions unless specifically requested
-6. Prioritize frequency and usefulness in daily conversations
-7. Mnemonics should be creative, visual, and culturally sensitive
-8. Examples must use the EXACT phrase being taught with complete contextual sentences
+4. ALWAYS include pronouns (phom/chan) in pronunciation when the Thai text contains ผม/ฉัน/ดิฉัน
+5. Provide gendered variations where appropriate (pronouns, certain vocabulary)
+6. Avoid overly formal or outdated expressions unless specifically requested
+7. Prioritize frequency and usefulness in daily conversations
+8. Mnemonics should be creative, visual, and culturally sensitive
+9. Examples must use the EXACT phrase being taught with complete contextual sentences
 
 ### TONE AND STYLE: ${toneDescription}
 

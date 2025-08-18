@@ -76,13 +76,31 @@ export function GenerationStep({
           
           console.log('GenerationStep: API response status:', response.status);
           
+          if (response.status === 401) {
+            if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+            failGeneration();
+            alert('Please sign in to create a custom set.');
+            return;
+          }
           if (!response.ok) {
-            const error = await response.json();
-            console.error('GenerationStep: API error:', error);
-            throw new Error(error.error || 'Failed to generate set');
+            const errorText = await response.text();
+            let errorMessage = 'Failed to generate set';
+            try {
+              const parsed = JSON.parse(errorText);
+              errorMessage = parsed.error || errorMessage;
+            } catch {
+              errorMessage = errorText || errorMessage;
+            }
+            console.error('GenerationStep: API error:', errorMessage);
+            throw new Error(errorMessage);
           }
           
-          const result = await response.json();
+          let result: any;
+          try {
+            result = await response.json();
+          } catch (e) {
+            throw new Error('Unexpected response from server while generating set');
+          }
           console.log('GenerationStep: API result:', result);
           
           // Clear simulated progress
@@ -133,10 +151,23 @@ export function GenerationStep({
           
           console.log('GenerationStep: API response status:', response.status);
           
+          if (response.status === 401) {
+            if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+            failGeneration();
+            alert('Please sign in to generate a set.');
+            return;
+          }
           if (!response.ok) {
-            const error = await response.json();
-            console.error('GenerationStep: API error:', error);
-            throw new Error(error.error || 'Failed to generate set');
+            const errorText = await response.text();
+            let errorMessage = 'Failed to generate set';
+            try {
+              const parsed = JSON.parse(errorText);
+              errorMessage = parsed.error || errorMessage;
+            } catch {
+              errorMessage = errorText || errorMessage;
+            }
+            console.error('GenerationStep: API error:', errorMessage);
+            throw new Error(errorMessage);
           }
           
           // Clear simulated progress
@@ -146,7 +177,12 @@ export function GenerationStep({
           
           // updateProgress(70, 'AI is finalizing your flashcards...'); // Removed updateProgress
           
-          const result = await response.json();
+          let result: any;
+          try {
+            result = await response.json();
+          } catch (e) {
+            throw new Error('Unexpected response from server while generating set');
+          }
           console.log('GenerationStep: API result:', result);
           
           // updateProgress(80, 'Saving your flashcards...'); // Removed updateProgress

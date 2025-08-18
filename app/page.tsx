@@ -38,6 +38,7 @@ import TipJar from './components/TipJar';
 // PassiveLearning removed per request
 import { ProgressModal } from './components/modals/ProgressModal';
 import { CardsListModal } from './components/modals/CardsListModal';
+import { useAuth } from '@clerk/nextjs';
 
 // Utility function to detect mobile devices
 const isMobileDevice = (): boolean => {
@@ -1106,7 +1107,18 @@ export default function ThaiFlashcards() {
         onOpenSettings={() => setIsSettingsModalOpen(true)}
         onOpenCards={() => setShowCardsModal(true)}
         onOpenSetManager={() => setIsManagementModalOpen(true)}
-        onOpenSetWizard={() => setShowSetWizardModal(true)}
+        onOpenSetWizard={() => {
+          try {
+            // If Clerk is available, require sign-in; otherwise fallback to showing and backend will 401
+            // We import useAuth above. We'll check last known state via localStorage token presence as lightweight guard.
+            const hasClerkSession = typeof window !== 'undefined' && !!document.cookie.match(/__session=/);
+            if (!hasClerkSession) {
+              toast.error('Please sign in to create a custom set.');
+              return;
+            }
+          } catch {}
+          setShowSetWizardModal(true)
+        }}
         isMale={isMale}
       />
 

@@ -1,8 +1,15 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { SignInButton } from '@clerk/nextjs';
+import { LogIn } from 'lucide-react';
 
-export function WelcomeStep({ onNext }: { onNext: () => void }) {
+interface WelcomeStepProps {
+  onNext: () => void;
+  isAuthenticated?: boolean;
+}
+
+export function WelcomeStep({ onNext, isAuthenticated = true }: WelcomeStepProps) {
   return (
     <div className="space-y-6 px-4">
       <motion.div 
@@ -40,15 +47,31 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
         transition={{ delay: 0.5, duration: 0.5 }}
         className="flex justify-center pt-4"
       >
-        <button
-          onClick={onNext}
-          className="neumorphic-button text-blue-400 px-8 py-3 text-lg font-medium
-            hover:scale-105 transition-all duration-200
-            bg-gradient-to-r from-blue-500/10 to-purple-500/10
-            hover:from-blue-500/20 hover:to-purple-500/20"
-        >
-          Let's Get Started
-        </button>
+        {isAuthenticated ? (
+          <button
+            onClick={onNext}
+            className="neumorphic-button text-blue-400 px-8 py-3 text-lg font-medium
+              hover:scale-105 transition-all duration-200
+              bg-gradient-to-r from-blue-500/10 to-purple-500/10
+              hover:from-blue-500/20 hover:to-purple-500/20"
+          >
+            Let's Get Started
+          </button>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-gray-400 text-sm">Sign in to create your own flashcard sets</p>
+            <SignInButton mode="modal">
+              <button className="neumorphic-button text-blue-400 px-8 py-3 text-lg font-medium
+                hover:scale-105 transition-all duration-200
+                bg-gradient-to-r from-blue-500/10 to-purple-500/10
+                hover:from-blue-500/20 hover:to-purple-500/20
+                flex items-center gap-2"
+              >
+                <LogIn className="w-5 h-5" /> Sign In
+              </button>
+            </SignInButton>
+          </div>
+        )}
       </motion.div>
     </div>
   );

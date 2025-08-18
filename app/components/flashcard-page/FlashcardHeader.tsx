@@ -1,9 +1,12 @@
 import React from 'react';
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
-import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal } from 'lucide-react';
+import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal, Gift, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { AudioLessonDownload } from '../AudioLessonDownload';
+import TipJar from '../TipJar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { SignInButton } from '@clerk/nextjs';
 
 // Update props for combined settings modal
 interface FlashcardHeaderProps {
@@ -37,6 +40,8 @@ export function FlashcardHeader({
   setImageUrl = setImageUrl || '/images/defaultnew.png';
 
   const router = useRouter();
+  const [showTipJar, setShowTipJar] = React.useState(false);
+  const hasClerkSession = typeof window !== 'undefined' && !!document.cookie.match(/__session=/);
 
   return (
     <div className="bg-[#1F1F1F] border-b border-[#404040] flex flex-col">
@@ -115,6 +120,15 @@ export function FlashcardHeader({
               <Plus size={28} />
             </button>
             <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Create!</span>
+            {!hasClerkSession && (
+              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                <SignInButton mode="modal">
+                  <button className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1">
+                    <LogIn className="w-3 h-3" /> Sign in to create
+                  </button>
+                </SignInButton>
+              </div>
+            )}
           </div>
           {/* Gallery */}
           <div className="flex flex-col items-center">
@@ -183,6 +197,36 @@ export function FlashcardHeader({
           <div className="h-12 w-px bg-[#404040]/50 mx-1" />
           
           {/* === App Controls Category === */}
+          {/* Tip Jar */}
+          <div className="flex flex-col items-center">
+            <Dialog open={showTipJar} onOpenChange={setShowTipJar}>
+              <DialogTrigger asChild>
+                <button
+                  className="neumorphic-icon-button text-xl rounded-xl"
+                  title="Tip Jar"
+                  aria-label="Tip Jar"
+                >
+                  <Gift />
+                </button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md w-[95vw] bg-[#1f1f1f] border-[#404040] text-[#E0E0E0]">
+                <DialogHeader>
+                  <DialogTitle>Support Donkey Bridge</DialogTitle>
+                </DialogHeader>
+                <TipJar
+                  addresses={{
+                    Bitcoin: process.env.NEXT_PUBLIC_TIPJAR_BTC || '',
+                    Lightning: process.env.NEXT_PUBLIC_TIPJAR_LIGHTNING || '',
+                    Ethereum: process.env.NEXT_PUBLIC_TIPJAR_ETH || '',
+                    Solana: process.env.NEXT_PUBLIC_TIPJAR_SOL || '',
+                  }}
+                  paypalUrl={process.env.NEXT_PUBLIC_TIPJAR_PAYPAL || ''}
+                  stripeUrl={process.env.NEXT_PUBLIC_TIPJAR_STRIPE || ''}
+                />
+              </DialogContent>
+            </Dialog>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Tip Jar</span>
+          </div>
           {/* Settings */}
           <div className="flex flex-col items-center">
             <button

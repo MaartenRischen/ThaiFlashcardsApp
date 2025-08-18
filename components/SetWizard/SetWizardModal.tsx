@@ -178,6 +178,7 @@ export function SetWizardModal({
   const [cardCount, setCardCount] = React.useState(8);
   const [manualPhrases, setManualPhrases] = React.useState<string[]>([]);
   const [manualCorrections, setManualCorrections] = React.useState<Array<{original: string, corrected: string}>>([]);
+  const hasClerkSession = typeof window !== 'undefined' && !!document.cookie.match(/__session=/);
 
   // Reset state when modal opens
   React.useEffect(() => {
@@ -414,7 +415,7 @@ export function SetWizardModal({
             {(() => {
               switch (currentStepData.type) {
                 case 'welcome':
-                  return <WelcomeStep {...currentStepData.props} />;
+                  return <WelcomeStep {...currentStepData.props} isAuthenticated={hasClerkSession} />;
                 case 'modeSelection':
                   return <ModeSelectionStep {...currentStepData.props} />;
                 case 'manualInput':

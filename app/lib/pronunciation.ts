@@ -50,16 +50,15 @@ export function getGenderedPronunciation(phraseData: Phrase | ExampleSentence | 
 
   // Step 1: Handle gendered pronouns in pronunciation (case-insensitive, both orders)
   basePronunciation = basePronunciation.replace(/phom\/chan|chan\/phom/gi, isMale ? 'phom' : 'chan');
+  
   // If Thai contains an explicit pronoun but pronunciation is missing it, prefix it
   const hasPronounInPron = /\b(phom|chan)\b/i.test(basePronunciation);
   const thaiHasMalePronoun = /ผม/.test(baseThaiForEndingCheck);
-  const thaiHasFemalePronoun = /(ฉัน|ดิฉัน|ชั้น)/.test(baseThaiForEndingCheck);
-  if (!hasPronounInPron) {
-    if (thaiHasMalePronoun) {
-      basePronunciation = `phom ${basePronunciation}`;
-    } else if (thaiHasFemalePronoun) {
-      basePronunciation = `chan ${basePronunciation}`;
-    }
+  const thaiHasFemalePronoun = /(ฉัน|ดิฉัน|ชั้น|หนู)/.test(baseThaiForEndingCheck);
+  
+  if (!hasPronounInPron && (thaiHasMalePronoun || thaiHasFemalePronoun)) {
+    // Always add the appropriate pronoun based on gender setting when Thai has one
+    basePronunciation = `${isMale ? 'phom' : 'chan'} ${basePronunciation}`;
   }
 
   // Step 2: Check Polite Mode for adding particles

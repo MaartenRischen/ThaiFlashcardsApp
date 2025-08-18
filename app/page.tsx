@@ -23,7 +23,7 @@ import { SetWizardState } from '../components/SetWizard/types';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Dialog } from '@/components/ui/dialog';
-import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle, Grid, Layers, Plus, Settings, HelpCircle, GalleryHorizontal } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle, Grid, Layers, Plus, Settings, HelpCircle, GalleryHorizontal, Lightbulb, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -102,7 +102,7 @@ const getGenderedPronunciation = (phraseData: Phrase | ExampleSentence | null, i
   if (!phraseData) return '';
   let basePronunciation = phraseData.pronunciation;
   // Replace ambiguous pronouns with gendered ones
-  basePronunciation = basePronunciation.replace(/phom\/chan|chan\/phom|phom\/chan|chan\/phom/g, isMale ? 'phom' : 'chan');
+  basePronunciation = basePronunciation.replace(/phom\/chan|chan\/phom/gi, isMale ? 'phom' : 'chan');
 
   // If Polite Mode is OFF, remove polite particles if present
   if (!isPoliteMode) {
@@ -1270,10 +1270,10 @@ export default function ThaiFlashcards() {
                     </div>
                     
                     {/* Pronunciation text display */}
-                    <div className="text-center mb-2">
-                      <span className="text-gray-400 text-sm italic">
-                        "{getGenderedPronunciation(phrases[index], isMale, isPoliteMode) || ''}"
-                      </span>
+                    <div className="text-center mb-3">
+                      <div className="text-xl md:text-2xl font-semibold text-gray-100">
+                        {getGenderedPronunciation(phrases[index], isMale, isPoliteMode) || ''}
+                      </div>
                     </div>
                     {/* English translation in blue, in parentheses */}
                     {phrases[index]?.english && (
@@ -1284,10 +1284,13 @@ export default function ThaiFlashcards() {
                     {/* Difficulty Buttons - Wrapped in Popover (Step 3) */}
                     <Popover open={tutorialStep === 3}>
                       <PopoverTrigger asChild>
-                        <div className="flex justify-center space-x-2 mb-6">
-                          <button onClick={() => handleCardAction('hard')} className="neumorphic-button text-red-400">Wrong</button>
-                          <button onClick={() => handleCardAction('good')} className="neumorphic-button text-yellow-400">Correct</button>
-                          <button onClick={() => handleCardAction('easy')} className="neumorphic-button text-green-400">Easy</button>
+                        <div className="flex flex-col items-center mb-6">
+                          <div className="text-xs text-gray-400 mb-2">Hit one of the buttons to proceed.</div>
+                          <div className="flex justify-center space-x-3">
+                            <button onClick={() => handleCardAction('easy')} className="neumorphic-button text-green-400 px-4 py-2 text-sm">Easy</button>
+                            <button onClick={() => handleCardAction('good')} className="neumorphic-button text-yellow-400 px-4 py-2 text-sm">Correct</button>
+                            <button onClick={() => handleCardAction('hard')} className="neumorphic-button text-red-400 px-4 py-2 text-sm">Wrong</button>
+                          </div>
                         </div>
                       </PopoverTrigger>
                       <PopoverContent className="w-80 bg-gray-800 text-white border-gray-700" side="top" align="center">
@@ -1348,13 +1351,13 @@ export default function ThaiFlashcards() {
                 {/* Mnemonic Section */} 
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm text-gray-400">Mnemonic (editable)</label>
-                    <button onClick={resetCurrentMnemonic} className="text-xs text-blue-400 hover:text-blue-300">Reset</button>
+                    <label className="text-sm text-gray-200 font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4 text-yellow-400" /> Mnemonic (editable)</label>
+                    <button onClick={resetCurrentMnemonic} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"><RotateCcw className="w-3 h-3" /> Reset</button>
                   </div>
                   
                   {/* Pronunciation displayed above the mnemonic */}
                   {phrases[index]?.pronunciation && (
-                    <div className="mb-2 p-2 bg-gray-800 rounded text-gray-300 font-medium text-center">
+                    <div className="mb-2 p-3 bg-gray-800 rounded text-gray-100 font-semibold text-center text-lg">
                       <span className="text-blue-400">Pronunciation:</span> {getGenderedPronunciation(phrases[index], isMale, isPoliteMode)}
                     </div>
                   )}
@@ -1372,8 +1375,8 @@ export default function ThaiFlashcards() {
                   />
                 </div>
 
-                {/* === Context section === */}
-                <div className="p-4 space-y-2 rounded-xl bg-[#222] border border-[#333] neumorphic mb-4 text-center">
+                {/* === Context section (Speech bubble) === */}
+                <div className="relative p-4 space-y-2 rounded-2xl bg-[#222] border border-[#333] neumorphic mb-6 text-center">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm text-blue-400 uppercase tracking-wider w-full text-center">In Context</h3>
                   </div>
@@ -1381,11 +1384,13 @@ export default function ThaiFlashcards() {
                     <p className="text-base text-white font-medium">
                       {randomSentence ? replaceName(getThaiWithGender(randomSentence, isMale, isPoliteMode), contextName) : "(No example available)"}
                     </p>
-                    <p className="text-sm text-gray-300 italic">
+                    <p className="text-base text-gray-300 italic">
                       {randomSentence ? replaceName(getGenderedPronunciation(randomSentence, isMale, isPoliteMode), contextName) : ""}
                     </p>
                     <p className="text-sm text-gray-400 italic">{randomSentence?.translation ? replaceName(randomSentence.translation, contextName) : ""}</p>
                   </ClientOnly>
+                  {/* Speech bubble tail */}
+                  <div className="absolute left-8 -bottom-3 w-0 h-0" style={{ borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderTop: '10px solid #222' }} />
                   <div className="flex items-center justify-between mt-2">
                     <button 
                           onClick={() => generateRandomPhrase('prev')}

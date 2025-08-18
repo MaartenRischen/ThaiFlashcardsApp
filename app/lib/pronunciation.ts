@@ -48,9 +48,8 @@ export function getGenderedPronunciation(phraseData: Phrase | ExampleSentence | 
   let basePronunciation = phraseData.pronunciation;
   const baseThaiForEndingCheck = phraseData.thai; // Check ending on BASE Thai
 
-  // Step 1: Handle gendered pronouns in pronunciation
-  if (basePronunciation.includes('chan/phom')) basePronunciation = basePronunciation.replace('chan/phom', isMale ? 'phom' : 'chan');
-  else if (basePronunciation.includes('phom/chan')) basePronunciation = basePronunciation.replace('phom/chan', isMale ? 'phom' : 'chan');
+  // Step 1: Handle gendered pronouns in pronunciation (case-insensitive, both orders)
+  basePronunciation = basePronunciation.replace(/phom\/chan|chan\/phom/gi, isMale ? 'phom' : 'chan');
 
   // Step 2: Check Polite Mode for adding particles
   if (!isPoliteMode) {

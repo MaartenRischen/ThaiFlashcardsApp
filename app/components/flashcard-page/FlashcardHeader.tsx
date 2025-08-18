@@ -197,36 +197,6 @@ export function FlashcardHeader({
           <div className="h-12 w-px bg-[#404040]/50 mx-1" />
           
           {/* === App Controls Category === */}
-          {/* Tip Jar */}
-          <div className="flex flex-col items-center">
-            <Dialog open={showTipJar} onOpenChange={setShowTipJar}>
-              <DialogTrigger asChild>
-                <button
-                  className="neumorphic-icon-button text-xl rounded-xl"
-                  title="Tip Jar"
-                  aria-label="Tip Jar"
-                >
-                  <Gift />
-                </button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md w-[95vw] bg-[#1f1f1f] border-[#404040] text-[#E0E0E0]">
-                <DialogHeader>
-                  <DialogTitle>Support Donkey Bridge</DialogTitle>
-                </DialogHeader>
-                <TipJar
-                  addresses={{
-                    Bitcoin: process.env.NEXT_PUBLIC_TIPJAR_BTC || '',
-                    Lightning: process.env.NEXT_PUBLIC_TIPJAR_LIGHTNING || '',
-                    Ethereum: process.env.NEXT_PUBLIC_TIPJAR_ETH || '',
-                    Solana: process.env.NEXT_PUBLIC_TIPJAR_SOL || '',
-                  }}
-                  paypalUrl={process.env.NEXT_PUBLIC_TIPJAR_PAYPAL || ''}
-                  stripeUrl={process.env.NEXT_PUBLIC_TIPJAR_STRIPE || ''}
-                />
-              </DialogContent>
-            </Dialog>
-            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Tip Jar</span>
-          </div>
           {/* Settings */}
           <div className="flex flex-col items-center">
             <button
@@ -250,6 +220,37 @@ export function FlashcardHeader({
               <HelpCircle />
             </button>
             <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Help</span>
+          </div>
+          {/* Tip Jar at far right with inviting red glow */}
+          <div className="flex flex-col items-center">
+            <Dialog open={showTipJar} onOpenChange={setShowTipJar}>
+              <DialogTrigger asChild>
+                <button
+                  className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#443c3c] text-[#ef4444] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(239,68,68,0.2)] before:pointer-events-none"
+                  style={{ boxShadow: '0 0 20px rgba(239, 68, 68, 0.25), 0 0 40px rgba(255, 255, 255, 0.05)' }}
+                  title="Tip Jar"
+                  aria-label="Tip Jar"
+                >
+                  <Gift />
+                </button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md w-[95vw] bg-[#1f1f1f] border-[#404040] text-[#E0E0E0]">
+                <DialogHeader>
+                  <DialogTitle>Support Donkey Bridge</DialogTitle>
+                </DialogHeader>
+                <TipJar
+                  addresses={{
+                    Bitcoin: process.env.NEXT_PUBLIC_TIPJAR_BTC || '',
+                    Lightning: process.env.NEXT_PUBLIC_TIPJAR_LIGHTNING || '',
+                    Ethereum: process.env.NEXT_PUBLIC_TIPJAR_ETH || '',
+                    Solana: process.env.NEXT_PUBLIC_TIPJAR_SOL || '',
+                  }}
+                  paypalUrl={process.env.NEXT_PUBLIC_TIPJAR_PAYPAL || ''}
+                  stripeUrl={process.env.NEXT_PUBLIC_TIPJAR_STRIPE || ''}
+                />
+              </DialogContent>
+            </Dialog>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Tip Jar</span>
           </div>
         </div>
       </div>

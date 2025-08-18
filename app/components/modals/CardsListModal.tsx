@@ -231,7 +231,12 @@ export function CardsListModal({
                 <div
                   key={idx}
                   className={`border-b border-gray-700/50 last:border-b-0 ${!isEditMode && 'cursor-pointer hover:bg-[#1f2937]'}`}
-                  onClick={() => !isEditMode && onSelectCard(idx) && onClose()}
+                  onClick={() => {
+                    if (!isEditMode) {
+                      onSelectCard(idx);
+                      onClose();
+                    }
+                  }}
                 >
                   <div className="flex p-4 items-center gap-3">
                     <div className="flex-1 min-w-0 overflow-hidden">

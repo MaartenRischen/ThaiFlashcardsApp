@@ -23,7 +23,10 @@ export async function POST(request: NextRequest) {
     // Create the prompt
     const prompt = createBreakdownPrompt(thai, pronunciation, english);
 
-    // Call OpenRouter API
+    // Call OpenRouter API with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -32,6 +35,7 @@ export async function POST(request: NextRequest) {
         'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
         'X-Title': 'Thai Flashcards Word Breakdown',
       },
+      signal: controller.signal,
       body: JSON.stringify({
         model: 'anthropic/claude-3-haiku',
         messages: [
@@ -48,6 +52,8 @@ export async function POST(request: NextRequest) {
         max_tokens: 1000,
       }),
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const error = await response.text();
@@ -72,8 +78,17 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ breakdown });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Word breakdown error:', error);
+    
+    // Check for timeout error
+    if (error.name === 'AbortError') {
+      return NextResponse.json(
+        { error: 'Request timed out. Please try again.' },
+        { status: 504 }
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

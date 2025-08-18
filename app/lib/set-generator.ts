@@ -341,6 +341,7 @@ function getTemperatureFromToneLevel(toneLevel: number | undefined): number {
 
 async function callOpenRouterWithFallback(prompt: string, models: string[], temperature: number): Promise<string> {
   const MAX_TOKENS = 4000;
+  const TIMEOUT_MS = 25000; // 25 second timeout
   const headers = {
     'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
     'Content-Type': 'application/json',
@@ -351,9 +352,14 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
     try {
       console.log(`[OpenRouter] Attempting with model: ${model}, temperature: ${temperature}`);
       
+      // Create an AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+      
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers,
+        signal: controller.signal,
         body: JSON.stringify({
           model,
           messages: [
@@ -371,6 +377,8 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
         })
       });
       
+      clearTimeout(timeoutId);
+      
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`API Error (${response.status}): ${errorText}`);
@@ -379,8 +387,15 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
       const data = await response.json();
       return data.choices[0].message.content;
       
-    } catch (error) {
+    } catch (error: any) {
       console.error(`[OpenRouter] Model ${model} failed:`, error);
+      
+      // Check if it's a timeout error
+      if (error.name === 'AbortError') {
+        console.error(`[OpenRouter] Request timed out after ${TIMEOUT_MS}ms`);
+        // Continue to next model
+      }
+      
       if (model === models[models.length - 1]) {
         throw error;
       }

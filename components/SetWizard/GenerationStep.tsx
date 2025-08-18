@@ -5,6 +5,18 @@ import { Loader2 } from 'lucide-react';
 import { useGeneration } from '@/app/context/GenerationContext';
 import { SetWizardState } from './types';
 import { useSet } from '@/app/context/SetContext';
+import { SetMetaData } from '@/app/lib/storage';
+
+interface GenerationResponse {
+  newSetMetaData: SetMetaData;
+  phrases: Array<{
+    english: string;
+    thai: string;
+    pronunciation: string;
+    mnemonic?: string;
+  }>;
+  generationTime: number;
+}
 
 interface GenerationStepProps {
   state: SetWizardState;
@@ -95,7 +107,7 @@ export function GenerationStep({
             throw new Error(errorMessage);
           }
           
-          let result: any;
+          let result: GenerationResponse;
           try {
             result = await response.json();
           } catch (e) {
@@ -177,7 +189,7 @@ export function GenerationStep({
           
           // updateProgress(70, 'AI is finalizing your flashcards...'); // Removed updateProgress
           
-          let result: any;
+          let result: GenerationResponse;
           try {
             result = await response.json();
           } catch (e) {

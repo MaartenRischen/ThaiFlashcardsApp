@@ -23,7 +23,7 @@ import { SetWizardState } from '../components/SetWizard/types';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Dialog } from '@/components/ui/dialog';
-import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle, Grid, Layers, Plus, Settings, HelpCircle, GalleryHorizontal, Lightbulb, RotateCcw } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle, Grid, Layers, Plus, Settings, HelpCircle, GalleryHorizontal, Lightbulb, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ import TipJar from './components/TipJar';
 import { ProgressModal } from './components/modals/ProgressModal';
 import { CardsListModal } from './components/modals/CardsListModal';
 import { useAuth } from '@clerk/nextjs';
+import { PhraseBreakdown, getCachedBreakdown, setCachedBreakdown } from './lib/word-breakdown';
 
 // Utility function to detect mobile devices
 const isMobileDevice = (): boolean => {
@@ -213,6 +214,9 @@ export default function ThaiFlashcards() {
   const [isPlayingContext, setIsPlayingContext] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showProgress, setShowProgress] = useState(false); // Renamed from showVocabulary
+  const [showBreakdown, setShowBreakdown] = useState(false);
+  const [wordBreakdowns, setWordBreakdowns] = useState<Record<string, PhraseBreakdown>>({});
+  const [loadingBreakdown, setLoadingBreakdown] = useState(false);
   const [autoplay, setAutoplay] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('autoplay');
@@ -687,6 +691,42 @@ export default function ThaiFlashcards() {
     setReviewsCompletedToday(completedCount);
   }, [activeSetProgress, phrases]); // Depend on progress and phrases
 
+  // Function to fetch word breakdown
+  const fetchWordBreakdown = async (phrase: Phrase) => {
+    const thai = getThaiWithGender(phrase, isMale, isPoliteMode);
+    const pronunciation = getGenderedPronunciation(phrase, isMale, isPoliteMode);
+    const cacheKey = `${thai}_${pronunciation}`;
+    
+    // Check cache first
+    const cached = wordBreakdowns[cacheKey] || getCachedBreakdown(thai);
+    if (cached) {
+      setWordBreakdowns(prev => ({ ...prev, [cacheKey]: cached }));
+      return;
+    }
+    
+    setLoadingBreakdown(true);
+    try {
+      const response = await fetch('/api/word-breakdown', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          thai,
+          pronunciation,
+          english: phrase.english
+        })
+      });
+      
+      if (response.ok) {
+        const { breakdown } = await response.json();
+        setWordBreakdowns(prev => ({ ...prev, [cacheKey]: breakdown }));
+        setCachedBreakdown(thai, breakdown);
+      }
+    } catch (error) {
+      console.error('Failed to fetch word breakdown:', error);
+    }
+    setLoadingBreakdown(false);
+  };
+  
   // Function to handle card review actions (difficulty buttons)
   // --- Simplified version without external sm2 function --- 
   const handleCardAction = (difficulty: 'easy' | 'good' | 'hard') => {
@@ -743,6 +783,7 @@ export default function ThaiFlashcards() {
     setShowAnswer(false);
     setRandomSentence(null);
     setShowMnemonicHint(false); // Hide hint
+    setShowBreakdown(false); // Hide word breakdown
     
     // Update active cards and reset progress
     updateActiveCards();
@@ -1095,6 +1136,7 @@ export default function ThaiFlashcards() {
   const handleHideAnswer = () => {
     setShowAnswer(false);
     setShowMnemonicHint(false); // Hide mnemonic hint on front
+    setShowBreakdown(false); // Hide word breakdown
     // Optionally scroll to top or card top if needed
     // window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -1417,8 +1459,78 @@ export default function ThaiFlashcards() {
                           Next
                     </button>
                   </div>
-                </div> {/* End Context Section */} 
-              </div> // This closing div might be the issue or misplaced
+                </div> {/* End Context Section */}
+                
+                {/* Word Breakdown Section */}
+                {phrases[index] && (
+                  <div className="mt-4">
+                    <button
+                      onClick={() => {
+                        if (!showBreakdown && !wordBreakdowns[`${getThaiWithGender(phrases[index], isMale, isPoliteMode)}_${getGenderedPronunciation(phrases[index], isMale, isPoliteMode)}`]) {
+                          fetchWordBreakdown(phrases[index]);
+                        }
+                        setShowBreakdown(!showBreakdown);
+                      }}
+                      className="w-full neumorphic-button text-blue-400 flex items-center justify-center gap-2 py-2"
+                    >
+                      {showBreakdown ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      Breaking It Down
+                    </button>
+                    
+                    {showBreakdown && (
+                      <div className="mt-3 p-4 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a]">
+                        {loadingBreakdown ? (
+                          <div className="text-center text-gray-400">Loading breakdown...</div>
+                        ) : (
+                          (() => {
+                            const thai = getThaiWithGender(phrases[index], isMale, isPoliteMode);
+                            const pronunciation = getGenderedPronunciation(phrases[index], isMale, isPoliteMode);
+                            const cacheKey = `${thai}_${pronunciation}`;
+                            const breakdown = wordBreakdowns[cacheKey];
+                            
+                            if (!breakdown) {
+                              return <div className="text-center text-gray-400">No breakdown available</div>;
+                            }
+                            
+                            return (
+                              <div className="space-y-3">
+                                {/* Individual Words */}
+                                <div className="space-y-2">
+                                  {breakdown.words.map((word, idx) => (
+                                    <div key={idx} className="flex items-baseline gap-2">
+                                      <span className="text-white font-medium">{word.thai}</span>
+                                      <span className="text-gray-400 text-sm">({word.pronunciation})</span>
+                                      <span className="text-blue-300 text-sm flex-1">= {word.english}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                                
+                                {/* Compound Meanings */}
+                                {breakdown.compounds && breakdown.compounds.length > 0 && (
+                                  <>
+                                    <div className="border-t border-[#333] pt-3">
+                                      <h4 className="text-sm text-gray-400 mb-2">Compound meanings:</h4>
+                                      <div className="space-y-2">
+                                        {breakdown.compounds.map((compound, idx) => (
+                                          <div key={idx} className="flex items-baseline gap-2">
+                                            <span className="text-white font-medium">{compound.thai}</span>
+                                            <span className="text-gray-400 text-sm">({compound.pronunciation})</span>
+                                            <span className="text-green-300 text-sm flex-1">= {compound.english}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            );
+                          })()
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>

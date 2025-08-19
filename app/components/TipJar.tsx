@@ -3,20 +3,35 @@
 import React, { useMemo, useState } from 'react';
 import { Copy, Check, Wallet, CreditCard } from 'lucide-react';
 
-type Network = 'Bitcoin' | 'Ethereum' | 'Solana' | 'Lightning';
+type Network = 'Bitcoin' | 'Ethereum' | 'Solana' | 'Lightning' | 'USDC' | 'Monero';
+type Chain = 'Ethereum' | 'Polygon' | 'BSC' | 'Solana';
 
 interface AddressEntry {
   label: Network;
   address: string;
   uri?: string; // payment URI when applicable
+  chain?: Chain; // For tokens like USDC that exist on multiple chains
+  qrData?: string; // QR code data (can be address or URI)
+}
+
+interface CryptoAddress {
+  address: string;
+  chain?: Chain;
+  uri?: string;
 }
 
 interface TipJarProps {
   // Crypto addresses (set via env or settings)
-  addresses?: Partial<Record<Network, string>>;
-  // Optional PayPal/Stripe URLs
+  addresses?: Partial<Record<Network, CryptoAddress>>;
+  // Traditional payment URLs
   paypalUrl?: string;
   stripeUrl?: string;
+  kofiUrl?: string;
+  buyMeACoffeeUrl?: string;
+  patreonUrl?: string;
+  // Display options
+  showQrCodes?: boolean;
+  preferredChains?: Chain[]; // For multi-chain tokens like USDC
 }
 
 export default function TipJar({ addresses, paypalUrl, stripeUrl }: TipJarProps) {

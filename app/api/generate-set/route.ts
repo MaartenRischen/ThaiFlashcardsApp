@@ -4,7 +4,8 @@ import {
   generateCustomSet, 
   GenerationResult,
   generateOpenRouterBatch
-} from '@/app/lib/set-generator'; 
+} from '@/app/lib/set-generator';
+import { TEXT_MODELS } from '@/app/lib/generation/constants'; 
 import * as storage from '@/app/lib/storage';
 import { SetMetaData } from '@/app/lib/storage';
 import { generateImage } from '@/app/lib/ideogram-service';
@@ -92,7 +93,7 @@ Example format: "floating bitcoin symbols, chart patterns in sky, golden coins s
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'anthropic/claude-3.5-sonnet',
+          model: 'openai/gpt-4o-mini', // Use fast model for title generation
           messages: [
             {
               role: 'user',
@@ -205,7 +206,7 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
     console.log("API Route: Calling generateOpenRouterBatch for manual mode...");
     const result = await generateOpenRouterBatch(
       manualPrompt,
-      ['anthropic/claude-3.5-sonnet', 'openai/gpt-4o'],
+      TEXT_MODELS,  // Use the same optimized models as auto mode
       0,
       preferences.toneLevel
     );
@@ -226,7 +227,7 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
       phrases,
       cleverTitle: title,
       llmBrand: 'OpenRouter',
-      llmModel: 'claude-3.5-sonnet'
+      llmModel: TEXT_MODELS[0] // Will use the first available model
     };
 
     // If we're adding to an existing set, just return the phrases
@@ -336,7 +337,7 @@ Return ONLY the title, nothing else.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3.5-sonnet',
+        model: 'openai/gpt-4o-mini', // Use fast model for image prompt generation
         messages: [
           {
             role: 'user',

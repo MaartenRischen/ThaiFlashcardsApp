@@ -42,7 +42,7 @@ Only include items in "corrections" array if the phrase was actually changed. If
       method: 'POST',
       headers,
       body: JSON.stringify({
-        model: 'anthropic/claude-3.5-sonnet',
+        model: 'openai/gpt-4o-mini', // Use fast model for spellcheck
         messages: [
           {
             role: 'user',

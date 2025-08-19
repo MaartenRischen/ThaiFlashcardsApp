@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       },
       signal: controller.signal,
       body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku',
+        model: 'deepseek/deepseek-chat', // Use fast, cheap model for word breakdowns
         messages: [
           {
             role: 'system',

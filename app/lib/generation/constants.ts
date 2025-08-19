@@ -3,24 +3,26 @@ export const MAX_RETRIES = 3;
 
 // Prioritized list of text models for set generation
 export const TEXT_MODELS = [
-  'anthropic/claude-3.5-sonnet', // Claude 3.5 Sonnet - Primary (fast & reliable)
-  'anthropic/claude-3-haiku',    // Claude 3 Haiku - Fallback (cheaper)
-  'openai/gpt-4o',               // OpenAI GPT-4o - Good alternative
-  'openai/gpt-3.5-turbo',        // OpenAI GPT-3.5 Turbo - Budget option
-  'meta-llama/llama-3.3-70b-instruct', // Llama 3.3 - Free tier
-  'google/gemini-2.0-flash-exp:free',  // Gemini 2.0 Flash - Free tier
+  'openrouter/auto',             // Let OpenRouter pick the best model automatically
+  'deepseek/deepseek-chat',      // DeepSeek V3 - VERY fast & cheap ($0.14/1M input, $0.28/1M output)
+  'openai/gpt-4o-mini',          // GPT-4o Mini - Fast and cost-effective ($0.15/1M input)
+  'google/gemini-2.0-flash-exp', // Gemini 2.0 Flash - Latest Google model, very fast
+  'anthropic/claude-3.5-sonnet', // Claude 3.5 Sonnet - Very capable but more expensive
+  'anthropic/claude-3-haiku',    // Claude 3 Haiku - Cheap fallback ($0.25/1M input)
+  'meta-llama/llama-3.1-8b-instruct:free', // Free tier fallback
 ];
 
 // Dynamic batch size based on model capabilities
 export function getBatchSize(model: string): number {
   switch (model) {
+    case 'openrouter/auto': return 8;                  // Auto router - conservative batch size
+    case 'deepseek/deepseek-chat': return 10;          // Very fast, can handle larger batches
     case 'anthropic/claude-3.5-sonnet': return 8;
+    case 'openai/gpt-4o-mini': return 10;             // Optimized for speed
+    case 'google/gemini-2.0-flash-exp': return 10;    // Flash models are very fast
     case 'anthropic/claude-3-haiku': return 10;
-    case 'openai/gpt-4o': return 6;
-    case 'openai/gpt-3.5-turbo': return 8;
-    case 'meta-llama/llama-3.3-70b-instruct': return 5;
-    case 'google/gemini-2.0-flash-exp:free': return 8;
-    default: return 5;
+    case 'meta-llama/llama-3.1-8b-instruct:free': return 8;
+    default: return 6;
   }
 }
 

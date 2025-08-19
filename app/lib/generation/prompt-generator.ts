@@ -22,10 +22,28 @@ export function generateSystemPrompt(toneDescription: string): string {
 5. Provide gendered variations where appropriate (pronouns, certain vocabulary)
 6. Avoid overly formal or outdated expressions unless specifically requested
 7. Prioritize frequency and usefulness in daily conversations
-8. Mnemonics should be creative, visual, and culturally sensitive
-9. Examples must use the EXACT phrase being taught with complete contextual sentences
+8. Examples must use the EXACT phrase being taught with complete contextual sentences
 
 ### TONE AND STYLE: ${toneDescription}
+
+IMPORTANT: This tone level applies ONLY to:
+- The selection and variety of vocabulary/phrases (formal vs casual vs unusual)
+- The contexts and situations where phrases are used
+- The example sentences and their settings
+
+This tone level does NOT apply to:
+- Mnemonics (ALWAYS create practical, effective memory aids based on sound similarities)
+- Pronunciation guides (ALWAYS accurate and clear)
+- Translations (ALWAYS correct and appropriate)
+- Grammar explanations (ALWAYS helpful and clear)
+
+### MNEMONIC CREATION RULES:
+Regardless of tone level, ALWAYS create mnemonics that:
+1. Focus on sound similarities between Thai pronunciation and English words
+2. Are practical and easy to remember
+3. Help with memorization through logical connections
+4. Are clear and effective learning tools
+Example: "ขอบคุณ (khob khun)" → "Cop couldn't thank you enough"
 
 ### CULTURAL AWARENESS:
 - Respect Thai cultural sensitivities and hierarchies
@@ -81,7 +99,7 @@ Return a JSON object with this EXACT structure:
       "thaiMasculine": "Thai with masculine forms/particles",
       "thaiFeminine": "Thai with feminine forms/particles", 
       "pronunciation": "Phonetic pronunciation (romanized)",
-      "mnemonic": "Creative memory aid linking sound/meaning",
+      "mnemonic": "Practical memory aid based on sound similarities (e.g., 'sawatdee' → 'So what, Dee?')",
       "examples": [
         {
           "thai": "Complete Thai sentence using the phrase",
@@ -127,16 +145,16 @@ export function createPromptConfig(
 
 function getToneDescription(toneLevel: number, toneLabel: string): string {
   const toneDescriptions: Record<number, string> = {
-    1: "Ultra-professional and academic. Use formal vocabulary, technical terminology, and textbook-perfect examples. Suitable for serious academic study or professional contexts.",
-    2: "Professional but approachable. Clear, practical vocabulary with standard examples. Perfect for structured learning environments.",
-    3: "Balanced and conversational. Mix of practical phrases and interesting examples. Natural but still educational.",
-    4: "Friendly and engaging. Use relatable scenarios, mild humor, and memorable examples that make learning enjoyable.",
-    5: "Creative and entertaining. Include wordplay, cultural references, and clever mnemonics. Make learning fun without sacrificing usefulness.",
-    6: "Playful and quirky. Use unexpected comparisons, gentle humor, and creative scenarios while maintaining educational value.",
-    7: "Whimsical and imaginative. Create unusual but memorable associations. Balance creativity with practical application.",
-    8: "Absurdist with purpose. Use surreal scenarios and unexpected connections that stick in memory. Still teach real, usable Thai.",
-    9: "Wildly creative and unconventional. Push boundaries with bizarre mnemonics and scenarios while teaching genuine phrases.",
-    10: "Complete creative chaos. Maximum absurdity, surreal examples, and utterly unexpected associations. For adventurous learners who learn best through the ridiculous."
+    1: "Ultra-professional and academic. Select formal vocabulary, technical terminology, and business/academic contexts. Focus on workplace, university, and official situations.",
+    2: "Professional but approachable. Choose standard vocabulary with workplace and educational contexts. Include polite social interactions and formal settings.",
+    3: "Balanced and conversational. Mix everyday phrases with practical situations. Cover daily life, shopping, travel, and common social interactions.",
+    4: "Friendly and casual. Use common colloquial phrases, informal speech patterns, and relaxed social contexts. Include friend gatherings and casual settings.",
+    5: "Modern and trendy. Include contemporary slang, social media language, and youth culture references. Mix practical phrases with current expressions.",
+    6: "Playful and quirky. Select colorful Thai expressions, local idioms, and street language. Include market banter and informal local phrases.",
+    7: "Whimsical and creative. Choose expressive Thai phrases, regional dialects, and cultural idioms. Include festival contexts and cultural events.",
+    8: "Unconventional but real. Use genuine but unusual Thai phrases, rare expressions, and unique contexts. Include night market slang and subculture vocabulary.",
+    9: "Wildly unconventional. Select the most colorful Thai slang, extreme expressions, and underground culture phrases. Still real language people actually use.",
+    10: "Complete linguistic chaos. Maximum variety in phrase selection - mix ancient proverbs with internet slang, formal titles with street food vendor calls. All real Thai, maximum diversity."
   };
 
   return `${toneLabel}: ${toneDescriptions[toneLevel] || toneDescriptions[5]}`;

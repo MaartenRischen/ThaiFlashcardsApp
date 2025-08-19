@@ -164,7 +164,7 @@ For each phrase, provide:
 1. Accurate Thai translation with Thai script
 2. Both masculine (ครับ) and feminine (ค่ะ/คะ) versions
 3. Clear romanized pronunciation guide (MUST include phom/chan when Thai has ผม/ฉัน)
-4. Creative mnemonic linking sound/meaning
+4. Practical mnemonic based on sound similarities (e.g., 'khob khun' → 'Cop couldn't thank you')
 5. Two example sentences showing usage (with matching context to the main phrase)
 
 ### REQUIRED OUTPUT FORMAT:
@@ -177,7 +177,7 @@ Return a JSON object with this EXACT structure:
       "thaiMasculine": "Thai with masculine forms/particles",
       "thaiFeminine": "Thai with feminine forms/particles", 
       "pronunciation": "Phonetic pronunciation (romanized)",
-      "mnemonic": "Creative memory aid linking sound/meaning",
+      "mnemonic": "Practical memory aid based on sound similarities",
       "examples": [
         {
           "thai": "Complete Thai sentence using the phrase",

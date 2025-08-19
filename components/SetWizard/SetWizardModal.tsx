@@ -286,7 +286,7 @@ export function SetWizardModal({
             state: wizardState,
             onComplete: (newSetId: string) => {
               onComplete(newSetId);
-              // Don't close automatically - let the user see the success screen
+              onClose(); // Close the modal after successful generation
             },
             onBack: () => setCurrentStep(4),
             onClose,
@@ -335,7 +335,7 @@ export function SetWizardModal({
             state: wizardState,
             onComplete: (newSetId: string) => {
               onComplete(newSetId);
-              // Don't close automatically - let the user see the success screen
+              onClose(); // Close the modal after successful generation
             },
             onBack: () => setCurrentStep(3),
             onClose,

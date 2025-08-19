@@ -243,13 +243,20 @@ export function FlashcardHeader({
                 </DialogHeader>
                 <TipJar
                   addresses={{
-                    Bitcoin: process.env.NEXT_PUBLIC_TIPJAR_BTC || '',
-                    Lightning: process.env.NEXT_PUBLIC_TIPJAR_LIGHTNING || '',
-                    Ethereum: process.env.NEXT_PUBLIC_TIPJAR_ETH || '',
-                    Solana: process.env.NEXT_PUBLIC_TIPJAR_SOL || '',
+                    Bitcoin: { address: process.env.NEXT_PUBLIC_TIPJAR_BTC || '', uri: `bitcoin:${process.env.NEXT_PUBLIC_TIPJAR_BTC}` },
+                    Lightning: { address: process.env.NEXT_PUBLIC_TIPJAR_LIGHTNING || '', uri: `lightning:${process.env.NEXT_PUBLIC_TIPJAR_LIGHTNING}` },
+                    Ethereum: { address: process.env.NEXT_PUBLIC_TIPJAR_ETH || '', uri: `ethereum:${process.env.NEXT_PUBLIC_TIPJAR_ETH}` },
+                    USDC: { address: process.env.NEXT_PUBLIC_TIPJAR_USDC_ETH || '', chain: 'Ethereum' as const, uri: `ethereum:${process.env.NEXT_PUBLIC_TIPJAR_USDC_ETH}` },
+                    Solana: { address: process.env.NEXT_PUBLIC_TIPJAR_SOL || '', uri: `solana:${process.env.NEXT_PUBLIC_TIPJAR_SOL}` },
+                    Monero: { address: process.env.NEXT_PUBLIC_TIPJAR_XMR || '' },
                   }}
-                  paypalUrl={process.env.NEXT_PUBLIC_TIPJAR_PAYPAL || ''}
-                  stripeUrl={process.env.NEXT_PUBLIC_TIPJAR_STRIPE || ''}
+                  paypalUrl={process.env.NEXT_PUBLIC_TIPJAR_PAYPAL}
+                  stripeUrl={process.env.NEXT_PUBLIC_TIPJAR_STRIPE}
+                  kofiUrl={process.env.NEXT_PUBLIC_TIPJAR_KOFI}
+                  buyMeACoffeeUrl={process.env.NEXT_PUBLIC_TIPJAR_BMAC}
+                  patreonUrl={process.env.NEXT_PUBLIC_TIPJAR_PATREON}
+                  showQrCodes={true}
+                  preferredChains={['Ethereum', 'Polygon']}
                 />
               </DialogContent>
             </Dialog>

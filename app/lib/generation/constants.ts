@@ -3,20 +3,24 @@ export const MAX_RETRIES = 3;
 
 // Prioritized list of text models for set generation
 export const TEXT_MODELS = [
-  'google/gemini-2.5-flash-preview', // Gemini 2.5 Flash - Primary
-  'google/gemini-2.5-pro-preview-03-25', // Gemini 2.5 Pro - Fallback
-  'openai/gpt-4',          // OpenAI GPT-4
-  'openai/gpt-3.5-turbo',  // OpenAI GPT-3.5 Turbo
-  'anthropic/claude-3-opus', // Anthropic Claude
-  'mistralai/mixtral-8x7b', // Other fallback
+  'anthropic/claude-3.5-sonnet', // Claude 3.5 Sonnet - Primary (fast & reliable)
+  'anthropic/claude-3-haiku',    // Claude 3 Haiku - Fallback (cheaper)
+  'openai/gpt-4o',               // OpenAI GPT-4o - Good alternative
+  'openai/gpt-3.5-turbo',        // OpenAI GPT-3.5 Turbo - Budget option
+  'meta-llama/llama-3.3-70b-instruct', // Llama 3.3 - Free tier
+  'google/gemini-2.0-flash-exp:free',  // Gemini 2.0 Flash - Free tier
 ];
 
 // Dynamic batch size based on model capabilities
 export function getBatchSize(model: string): number {
   switch (model) {
-    case 'google/gemini-2.5-flash-preview': return 8;
-    case 'openai/gpt-4': return 4;
-    default: return 3;
+    case 'anthropic/claude-3.5-sonnet': return 8;
+    case 'anthropic/claude-3-haiku': return 10;
+    case 'openai/gpt-4o': return 6;
+    case 'openai/gpt-3.5-turbo': return 8;
+    case 'meta-llama/llama-3.3-70b-instruct': return 5;
+    case 'google/gemini-2.0-flash-exp:free': return 8;
+    default: return 5;
   }
 }
 

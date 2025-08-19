@@ -340,7 +340,7 @@ function getTemperatureFromToneLevel(toneLevel: number | undefined): number {
 }
 
 async function callOpenRouterWithFallback(prompt: string, models: string[], temperature: number): Promise<string> {
-  const MAX_TOKENS = 4000;
+  const MAX_TOKENS = 8000; // Increased to prevent truncation
   const TIMEOUT_MS = 25000; // 25 second timeout
   
   const apiKey = process.env.OPENROUTER_API_KEY;
@@ -459,7 +459,20 @@ export async function generateOpenRouterBatch(
       parsedData = JSON.parse(cleanedResponse);
     } catch (parseError) {
       console.error(`[Batch ${batchIndex}] JSON parse error:`, parseError);
-      throw new Error(`Invalid JSON response: ${parseError}`);
+      console.error(`[Batch ${batchIndex}] Cleaned response that failed to parse:`, cleanedResponse.substring(0, 500));
+      
+      // Try to extract valid JSON from partial response
+      const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          parsedData = JSON.parse(jsonMatch[0]);
+          console.log(`[Batch ${batchIndex}] Successfully extracted JSON from partial response`);
+        } catch (e) {
+          throw new Error(`Invalid JSON response: ${parseError}`);
+        }
+      } else {
+        throw new Error(`Invalid JSON response: ${parseError}`);
+      }
     }
     
     // Validate structure

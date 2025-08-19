@@ -39,10 +39,50 @@ export default function TipJar({ addresses, paypalUrl, stripeUrl }: TipJarProps)
 
   const entries: AddressEntry[] = useMemo(() => {
     const list: AddressEntry[] = [];
-    if (addresses?.Bitcoin) list.push({ label: 'Bitcoin', address: addresses.Bitcoin, uri: `bitcoin:${addresses.Bitcoin}` });
-    if (addresses?.Lightning) list.push({ label: 'Lightning', address: addresses.Lightning, uri: `lightning:${addresses.Lightning}` });
-    if (addresses?.Ethereum) list.push({ label: 'Ethereum', address: addresses.Ethereum, uri: `ethereum:${addresses.Ethereum}` });
-    if (addresses?.Solana) list.push({ label: 'Solana', address: addresses.Solana, uri: `solana:${addresses.Solana}` });
+    if (addresses?.Bitcoin) {
+      list.push({ 
+        label: 'Bitcoin', 
+        address: addresses.Bitcoin.address, 
+        uri: addresses.Bitcoin.uri || `bitcoin:${addresses.Bitcoin.address}` 
+      });
+    }
+    if (addresses?.Lightning) {
+      list.push({ 
+        label: 'Lightning', 
+        address: addresses.Lightning.address, 
+        uri: addresses.Lightning.uri || `lightning:${addresses.Lightning.address}` 
+      });
+    }
+    if (addresses?.Ethereum) {
+      list.push({ 
+        label: 'Ethereum', 
+        address: addresses.Ethereum.address, 
+        uri: addresses.Ethereum.uri || `ethereum:${addresses.Ethereum.address}`,
+        chain: addresses.Ethereum.chain 
+      });
+    }
+    if (addresses?.USDC) {
+      list.push({ 
+        label: 'USDC', 
+        address: addresses.USDC.address, 
+        uri: addresses.USDC.uri || `ethereum:${addresses.USDC.address}`,
+        chain: addresses.USDC.chain || 'Ethereum'
+      });
+    }
+    if (addresses?.Solana) {
+      list.push({ 
+        label: 'Solana', 
+        address: addresses.Solana.address, 
+        uri: addresses.Solana.uri || `solana:${addresses.Solana.address}` 
+      });
+    }
+    if (addresses?.Monero) {
+      list.push({ 
+        label: 'Monero', 
+        address: addresses.Monero.address, 
+        uri: addresses.Monero.uri 
+      });
+    }
     return list;
   }, [addresses]);
 

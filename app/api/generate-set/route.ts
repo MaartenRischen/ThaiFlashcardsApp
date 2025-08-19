@@ -456,7 +456,12 @@ export async function POST(request: Request) {
     }
 
     if (!generationResult || !generationResult.phrases || generationResult.phrases.length === 0) {
-      console.error("API Route: No phrases generated.");
+      console.error("API Route: No phrases generated.", {
+        generationResult,
+        hasResult: !!generationResult,
+        hasPhrases: !!generationResult?.phrases,
+        phraseCount: generationResult?.phrases?.length || 0
+      });
       throw new Error("No phrases were generated");
     }
     

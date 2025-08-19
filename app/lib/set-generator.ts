@@ -342,8 +342,17 @@ function getTemperatureFromToneLevel(toneLevel: number | undefined): number {
 async function callOpenRouterWithFallback(prompt: string, models: string[], temperature: number): Promise<string> {
   const MAX_TOKENS = 4000;
   const TIMEOUT_MS = 25000; // 25 second timeout
+  
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    console.error('[OpenRouter] No API key found in environment variables');
+    throw new Error('OpenRouter API key not configured');
+  }
+  
+  console.log('[OpenRouter] API key length:', apiKey.length);
+  
   const headers = {
-    'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+    'Authorization': `Bearer ${apiKey}`,
     'Content-Type': 'application/json',
     'X-Title': 'Thai Flashcards App'
   };
@@ -381,10 +390,27 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
       
       if (!response.ok) {
         const errorText = await response.text();
+        console.error(`[OpenRouter] API Error ${response.status}:`, errorText);
+        
+        // Check for specific error types
+        if (response.status === 401) {
+          throw new Error('Invalid API key or authentication failed');
+        } else if (response.status === 429) {
+          throw new Error('Rate limit exceeded');
+        } else if (response.status === 402) {
+          throw new Error('Insufficient credits');
+        }
+        
         throw new Error(`API Error (${response.status}): ${errorText}`);
       }
       
       const data = await response.json();
+      
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        console.error('[OpenRouter] Invalid response structure:', JSON.stringify(data).substring(0, 200));
+        throw new Error('Invalid response structure from API');
+      }
+      
       return data.choices[0].message.content;
       
     } catch (error) {
@@ -414,9 +440,13 @@ export async function generateOpenRouterBatch(
     const temperature = getTemperatureFromToneLevel(toneLevel);
   
   try {
-    console.log(`[Batch ${batchIndex}] Calling OpenRouter API...`);
+    console.log(`[Batch ${batchIndex}] Calling OpenRouter API with models:`, models);
+    console.log(`[Batch ${batchIndex}] Temperature:`, temperature);
     
     const rawResponse = await callOpenRouterWithFallback(prompt, models, temperature);
+    
+    console.log(`[Batch ${batchIndex}] Raw response length:`, rawResponse.length);
+    console.log(`[Batch ${batchIndex}] Raw response preview:`, rawResponse.substring(0, 200));
     
     // Clean and parse response
     const cleanedResponse = rawResponse

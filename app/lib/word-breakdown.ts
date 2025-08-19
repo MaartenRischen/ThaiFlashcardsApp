@@ -38,7 +38,7 @@ const PARTICLES: Record<string, { pronunciation: string; english: string }> = {
 /**
  * Common Thai function words
  */
-const FUNCTION_WORDS: Record<string, { pronunciation: string; english: string }> = {
+const _FUNCTION_WORDS: Record<string, { pronunciation: string; english: string }> = {
   'ที่': { pronunciation: 'tee', english: 'that/which/at' },
   'ของ': { pronunciation: 'khong', english: "of/'s" },
   'และ': { pronunciation: 'lae', english: 'and' },
@@ -62,7 +62,7 @@ const FUNCTION_WORDS: Record<string, { pronunciation: string; english: string }>
 /**
  * Extract particles from the end of a phrase
  */
-function extractParticles(thai: string): { main: string; particles: string[] } {
+function _extractParticles(thai: string): { main: string; particles: string[] } {
   let main = thai;
   const particles: string[] = [];
   

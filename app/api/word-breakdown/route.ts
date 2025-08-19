@@ -78,11 +78,11 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ breakdown });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Word breakdown error:', error);
     
     // Check for timeout error
-    if (error.name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json(
         { error: 'Request timed out. Please try again.' },
         { status: 504 }

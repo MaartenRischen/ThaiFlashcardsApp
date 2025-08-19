@@ -387,11 +387,11 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
       const data = await response.json();
       return data.choices[0].message.content;
       
-    } catch (error: any) {
+    } catch (error) {
       console.error(`[OpenRouter] Model ${model} failed:`, error);
       
       // Check if it's a timeout error
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         console.error(`[OpenRouter] Request timed out after ${TIMEOUT_MS}ms`);
         // Continue to next model
       }

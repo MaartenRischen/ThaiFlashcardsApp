@@ -13,6 +13,8 @@ export interface Phrase {
   thaiFeminine: string;
   pronunciation: string;
   mnemonic?: string;
+  // Optional literal/verbatim meaning to display before the idiomatic English
+  literal?: string;
   examples: ExampleSentence[]; // REQUIRED: Must have at least 2 example sentences
 }
 

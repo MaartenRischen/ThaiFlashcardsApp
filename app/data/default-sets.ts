@@ -714,6 +714,151 @@ export const DEFAULT_SETS: DefaultSet[] = [
           }
         ]
       }
+      ,
+      {
+        english: "Older brother",
+        thai: "พี่ชาย",
+        thaiMasculine: "พี่ชายครับ",
+        thaiFeminine: "พี่ชายค่ะ",
+        pronunciation: "pee chaai",
+        mnemonic: "P comes before → older; 'chai' sounds like 'chai' tea for bros",
+        examples: [
+          {
+            thai: "พี่ชายของฉัน",
+            thaiMasculine: "พี่ชายของผมครับ",
+            thaiFeminine: "พี่ชายของฉันค่ะ",
+            pronunciation: "pee chaai khong phom/chan",
+            translation: "My older brother."
+          },
+          {
+            thai: "พี่ชายอยู่กรุงเทพ",
+            thaiMasculine: "พี่ชายอยู่กรุงเทพครับ",
+            thaiFeminine: "พี่ชายอยู่กรุงเทพค่ะ",
+            pronunciation: "pee chaai yuu krung-thep",
+            translation: "My older brother lives in Bangkok."
+          }
+        ]
+      },
+      {
+        english: "Older sister",
+        thai: "พี่สาว",
+        thaiMasculine: "พี่สาวครับ",
+        thaiFeminine: "พี่สาวค่ะ",
+        pronunciation: "pee saao",
+        mnemonic: "P comes before → older; 'sao' is sister",
+        examples: [
+          {
+            thai: "พี่สาวของฉันใจดี",
+            thaiMasculine: "พี่สาวของผมใจดีครับ",
+            thaiFeminine: "พี่สาวของฉันใจดีค่ะ",
+            pronunciation: "pee saao khong phom/chan jai dee",
+            translation: "My older sister is kind."
+          },
+          {
+            thai: "พี่สาวทำงานเป็นพยาบาล",
+            thaiMasculine: "พี่สาวทำงานเป็นพยาบาลครับ",
+            thaiFeminine: "พี่สาวทำงานเป็นพยาบาลค่ะ",
+            pronunciation: "pee saao tam-ngaan pen pha-yaa-baan",
+            translation: "My older sister works as a nurse."
+          }
+        ]
+      },
+      {
+        english: "Younger brother",
+        thai: "น้องชาย",
+        thaiMasculine: "น้องชายครับ",
+        thaiFeminine: "น้องชายค่ะ",
+        pronunciation: "nong chaai",
+        mnemonic: "Nong = younger; 'chai' is brother",
+        examples: [
+          {
+            thai: "น้องชายเรียนมหาวิทยาลัย",
+            thaiMasculine: "น้องชายเรียนมหาวิทยาลัยครับ",
+            thaiFeminine: "น้องชายเรียนมหาวิทยาลัยค่ะ",
+            pronunciation: "nong chaai rian ma-ha-wit-tha-yaa-lai",
+            translation: "My younger brother studies at university."
+          },
+          {
+            thai: "น้องชายชอบฟุตบอล",
+            thaiMasculine: "น้องชายชอบฟุตบอลครับ",
+            thaiFeminine: "น้องชายชอบฟุตบอลค่ะ",
+            pronunciation: "nong chaai chop foot-bon",
+            translation: "My younger brother likes football."
+          }
+        ]
+      },
+      {
+        english: "Younger sister",
+        thai: "น้องสาว",
+        thaiMasculine: "น้องสาวครับ",
+        thaiFeminine: "น้องสาวค่ะ",
+        pronunciation: "nong saao",
+        mnemonic: "Nong = younger; 'sao' is sister",
+        examples: [
+          {
+            thai: "น้องสาวไปโรงเรียน",
+            thaiMasculine: "น้องสาวไปโรงเรียนครับ",
+            thaiFeminine: "น้องสาวไปโรงเรียนค่ะ",
+            pronunciation: "nong saao pai rohng-rian",
+            translation: "My younger sister goes to school."
+          },
+          {
+            thai: "น้องสาวชอบอ่านหนังสือ",
+            thaiMasculine: "น้องสาวชอบอ่านหนังสือครับ",
+            thaiFeminine: "น้องสาวชอบอ่านหนังสือค่ะ",
+            pronunciation: "nong saao chop aan nang-seu",
+            translation: "My younger sister likes reading."
+          }
+        ]
+      },
+      {
+        english: "Uncle (older than parent)",
+        thai: "ลุง",
+        thaiMasculine: "ลุงครับ",
+        thaiFeminine: "ลุงค่ะ",
+        pronunciation: "lung",
+        mnemonic: "Older uncle is 'lung' — long-lived elder",
+        examples: [
+          {
+            thai: "ลุงของฉันอยู่เชียงใหม่",
+            thaiMasculine: "ลุงของผมอยู่เชียงใหม่ครับ",
+            thaiFeminine: "ลุงของฉันอยู่เชียงใหม่ค่ะ",
+            pronunciation: "lung khong phom/chan yuu chiang-mai",
+            translation: "My uncle lives in Chiang Mai."
+          },
+          {
+            thai: "ลุงทำสวนผลไม้",
+            thaiMasculine: "ลุงทำสวนผลไม้ครับ",
+            thaiFeminine: "ลุงทำสวนผลไม้ค่ะ",
+            pronunciation: "lung tam suan phon-la-mai",
+            translation: "My uncle runs a fruit orchard."
+          }
+        ]
+      },
+      {
+        english: "Aunt (older than parent)",
+        thai: "ป้า",
+        thaiMasculine: "ป้าครับ",
+        thaiFeminine: "ป้าค่ะ",
+        pronunciation: "paa",
+        mnemonic: "Older aunt is 'paa' — like paaa-rents' elder",
+        examples: [
+          {
+            thai: "ป้าทำกับข้าวอร่อยมาก",
+            thaiMasculine: "ป้าทำกับข้าวอร่อยมากครับ",
+            thaiFeminine: "ป้าทำกับข้าวอร่อยมากค่ะ",
+            pronunciation: "paa tam gap khao a-roi mak",
+            translation: "My aunt cooks very delicious food."
+          },
+          {
+            thai: "ป้าอยู่ใกล้บ้านเรา",
+            thaiMasculine: "ป้าอยู่ใกล้บ้านเราครับ",
+            thaiFeminine: "ป้าอยู่ใกล้บ้านเราค่ะ",
+            pronunciation: "paa yuu glai baan rao",
+            translation: "My aunt lives near our house."
+          }
+        ]
+      }
     ]
   },
 
@@ -865,6 +1010,150 @@ export const DEFAULT_SETS: DefaultSet[] = [
             thaiFeminine: "กลางเดือนมิถุนายนค่ะ",
             pronunciation: "glaang duean mi-tu-naa-yon",
             translation: "Mid-June."
+          }
+        ]
+      },
+      {
+        english: "July",
+        thai: "กรกฎาคม",
+        thaiMasculine: "เดือนกรกฎาคมครับ",
+        thaiFeminine: "เดือนกรกฎาคมค่ะ",
+        pronunciation: "ga-ra-ga-da-kom",
+        mnemonic: "'Ga-ragga-da' — fireworks in July",
+        examples: [
+          {
+            thai: "กรกฎาคมเป็นหน้าฝน",
+            thaiMasculine: "กรกฎาคมเป็นหน้าฝนครับ",
+            thaiFeminine: "กรกฎาคมเป็นหน้าฝนค่ะ",
+            pronunciation: "ga-ra-ga-da-kom pen naa fon",
+            translation: "July is in the rainy season."
+          },
+          {
+            thai: "ฉันเกิดเดือนกรกฎาคม",
+            thaiMasculine: "ผมเกิดเดือนกรกฎาคมครับ",
+            thaiFeminine: "ฉันเกิดเดือนกรกฎาคมค่ะ",
+            pronunciation: "chan/phom koet duean ga-ra-ga-da-kom",
+            translation: "I was born in July."
+          }
+        ]
+      },
+      {
+        english: "August",
+        thai: "สิงหาคม",
+        thaiMasculine: "เดือนสิงหาคมครับ",
+        thaiFeminine: "เดือนสิงหาคมค่ะ",
+        pronunciation: "sing-haa-kom",
+        mnemonic: "'Singha' like the lion month",
+        examples: [
+          {
+            thai: "สิงหาคมฝนตกบ่อย",
+            thaiMasculine: "สิงหาคมฝนตกบ่อยครับ",
+            thaiFeminine: "สิงหาคมฝนตกบ่อยค่ะ",
+            pronunciation: "sing-haa-kom fon tok boi",
+            translation: "It rains often in August."
+          },
+          {
+            thai: "เราจะไปเที่ยวในเดือนสิงหาคม",
+            thaiMasculine: "เราจะไปเที่ยวในเดือนสิงหาคมครับ",
+            thaiFeminine: "เราจะไปเที่ยวในเดือนสิงหาคมค่ะ",
+            pronunciation: "rao ja pai tiew nai duean sing-haa-kom",
+            translation: "We will travel in August."
+          }
+        ]
+      },
+      {
+        english: "September",
+        thai: "กันยายน",
+        thaiMasculine: "เดือนกันยายนครับ",
+        thaiFeminine: "เดือนกันยายนค่ะ",
+        pronunciation: "gan-yaa-yon",
+        mnemonic: "'Kan-yaa' — school term starts",
+        examples: [
+          {
+            thai: "กันยายนเปิดเทอม",
+            thaiMasculine: "กันยายนเปิดเทอมครับ",
+            thaiFeminine: "กันยายนเปิดเทอมค่ะ",
+            pronunciation: "gan-yaa-yon pirt term",
+            translation: "The term starts in September."
+          },
+          {
+            thai: "กันยายนอากาศดี",
+            thaiMasculine: "กันยายนอากาศดีครับ",
+            thaiFeminine: "กันยายนอากาศดีค่ะ",
+            pronunciation: "gan-yaa-yon aa-gaat dee",
+            translation: "The weather is nice in September."
+          }
+        ]
+      },
+      {
+        english: "October",
+        thai: "ตุลาคม",
+        thaiMasculine: "เดือนตุลาคมครับ",
+        thaiFeminine: "เดือนตุลาคมค่ะ",
+        pronunciation: "tu-laa-kom",
+        mnemonic: "'Tu-la' — cool season approaches",
+        examples: [
+          {
+            thai: "ตุลาคมเริ่มเย็น",
+            thaiMasculine: "ตุลาคมเริ่มเย็นครับ",
+            thaiFeminine: "ตุลาคมเริ่มเย็นค่ะ",
+            pronunciation: "tu-laa-kom roem yen",
+            translation: "October starts to get cooler."
+          },
+          {
+            thai: "เรามีนัดเดือนตุลาคม",
+            thaiMasculine: "เรามีนัดเดือนตุลาคมครับ",
+            thaiFeminine: "เรามีนัดเดือนตุลาคมค่ะ",
+            pronunciation: "rao mee nat duean tu-laa-kom",
+            translation: "We have an appointment in October."
+          }
+        ]
+      },
+      {
+        english: "November",
+        thai: "พฤศจิกายน",
+        thaiMasculine: "เดือนพฤศจิกายนครับ",
+        thaiFeminine: "เดือนพฤศจิกายนค่ะ",
+        pronunciation: "phruet-sa-ji-gaa-yon",
+        mnemonic: "Long 'phruet-sa-ji' — Loy Krathong month",
+        examples: [
+          {
+            thai: "ลอยกระทงมักอยู่ในเดือนพฤศจิกายน",
+            thaiMasculine: "ลอยกระทงมักอยู่ในเดือนพฤศจิกายนครับ",
+            thaiFeminine: "ลอยกระทงมักอยู่ในเดือนพฤศจิกายนค่ะ",
+            pronunciation: "loy kra-thong mak yuu nai duean phruet-sa-ji-gaa-yon",
+            translation: "Loy Krathong is often in November."
+          },
+          {
+            thai: "พฤศจิกายนอากาศเย็นสบาย",
+            thaiMasculine: "พฤศจิกายนอากาศเย็นสบายครับ",
+            thaiFeminine: "พฤศจิกายนอากาศเย็นสบายค่ะ",
+            pronunciation: "phruet-sa-ji-gaa-yon aa-gaat yen sa-baai",
+            translation: "November weather is pleasantly cool."
+          }
+        ]
+      },
+      {
+        english: "December",
+        thai: "ธันวาคม",
+        thaiMasculine: "เดือนธันวาคมครับ",
+        thaiFeminine: "เดือนธันวาคมค่ะ",
+        pronunciation: "than-waa-kom",
+        mnemonic: "'Than-waa' — holidays month",
+        examples: [
+          {
+            thai: "ธันวาคมเป็นเดือนสุดท้ายของปี",
+            thaiMasculine: "ธันวาคมเป็นเดือนสุดท้ายของปีครับ",
+            thaiFeminine: "ธันวาคมเป็นเดือนสุดท้ายของปีค่ะ",
+            pronunciation: "than-waa-kom pen duean sut-thaai khong pii",
+            translation: "December is the last month of the year."
+          },
+          {
+            thai: "ปลายเดือนธันวาคมมีวันหยุดยาว",
+            thaiMasculine: "ปลายเดือนธันวาคมมีวันหยุดยาวครับ",
+            thaiFeminine: "ปลายเดือนธันวาคมมีวันหยุดยาวค่ะ",
+            pronunciation: "plaai duean than-waa-kom mee wan yut yaao",
+            translation: "At the end of December there is a long holiday."
           }
         ]
       }
@@ -1019,525 +1308,151 @@ export const DEFAULT_SETS: DefaultSet[] = [
             translation: "Shoes."
           }
         ]
-      }
-    ]
-  },
-
-  // Advanced Sets (2 sets)
-  {
-    id: 'weather-terms',
-    name: 'Weather & Climate',
-    level: 'Advanced',
-    description: 'Weather conditions and climate terms',
-    phrases: [
+      },
       {
-        english: "It's raining heavily",
-        thai: "ฝนตกหนัก",
-        thaiMasculine: "ฝนตกหนักครับ",
-        thaiFeminine: "ฝนตกหนักค่ะ",
-        pronunciation: "fon tok nak",
-        mnemonic: "Think: 'Phone talk knock' - rain knocks while on phone",
+        english: "Ear",
+        thai: "หู",
+        thaiMasculine: "หูครับ",
+        thaiFeminine: "หูค่ะ",
+        pronunciation: "hoo",
+        mnemonic: "Two holes → two ears 'hoo'",
         examples: [
           {
-            thai: "วันนี้ฝนตกหนักมาก ออกไปไม่ได้",
-            thaiMasculine: "วันนี้ฝนตกหนักมากครับ ออกไปไม่ได้",
-            thaiFeminine: "วันนี้ฝนตกหนักมากค่ะ ออกไปไม่ได้",
-            pronunciation: "wan-nee fon tok nak maak, ok pai mai dai",
-            translation: "It's raining very heavily today, can't go out."
+            thai: "ปวดหู",
+            thaiMasculine: "ผมปวดหูครับ",
+            thaiFeminine: "ฉันปวดหูค่ะ",
+            pronunciation: "puat hoo",
+            translation: "I have an earache."
           },
           {
-            thai: "ฝนตกหนักตั้งแต่เมื่อวาน",
-            thaiMasculine: "ฝนตกหนักตั้งแต่เมื่อวานครับ",
-            thaiFeminine: "ฝนตกหนักตั้งแต่เมื่อวานค่ะ",
-            pronunciation: "fon tok nak tang-tae meua-wan",
-            translation: "It has been raining heavily since yesterday."
+            thai: "ช่วยฟังด้วยหู",
+            thaiMasculine: "ช่วยฟังด้วยหูครับ",
+            thaiFeminine: "ช่วยฟังด้วยหูค่ะ",
+            pronunciation: "chuai fang duai hoo",
+            translation: "Please listen with your ears."
           }
         ]
       },
       {
-        english: "The weather is humid",
-        thai: "อากาศชื้น",
-        thaiMasculine: "อากาศชื้นครับ",
-        thaiFeminine: "อากาศชื้นค่ะ",
-        pronunciation: "aa-gaat chuen",
-        mnemonic: "Think: 'Ah got chewin' - humid makes you chew air",
+        english: "Arm",
+        thai: "แขน",
+        thaiMasculine: "แขนครับ",
+        thaiFeminine: "แขนค่ะ",
+        pronunciation: "khaen",
+        mnemonic: "Arm can 'khaen' carry",
         examples: [
           {
-            thai: "อากาศชื้นมาก รู้สึกไม่สบาย",
-            thaiMasculine: "อากาศชื้นมากครับ รู้สึกไม่สบาย",
-            thaiFeminine: "อากาศชื้นมากค่ะ รู้สึกไม่สบาย",
-            pronunciation: "aa-gaat chuen maak, ruu-seuk mai sa-baai",
-            translation: "The weather is very humid, feeling uncomfortable."
+            thai: "ปวดแขน",
+            thaiMasculine: "ผมปวดแขนครับ",
+            thaiFeminine: "ฉันปวดแขนค่ะ",
+            pronunciation: "puat khaen",
+            translation: "My arm hurts."
           },
           {
-            thai: "ในหน้าฝน อากาศชื้นตลอด",
-            thaiMasculine: "ในหน้าฝน อากาศชื้นตลอดครับ",
-            thaiFeminine: "ในหน้าฝน อากาศชื้นตลอดค่ะ",
-            pronunciation: "nai naa fon, aa-gaat chuen ta-lot",
-            translation: "During rainy season, the weather is always humid."
+            thai: "ยกแขนขึ้น",
+            thaiMasculine: "ยกแขนขึ้นครับ",
+            thaiFeminine: "ยกแขนขึ้นค่ะ",
+            pronunciation: "yok khaen khen",
+            translation: "Raise your arm."
           }
         ]
       },
       {
-        english: "Thunder and lightning",
-        thai: "ฟ้าร้องฟ้าผ่า",
-        thaiMasculine: "ฟ้าร้องฟ้าผ่าครับ",
-        thaiFeminine: "ฟ้าร้องฟ้าผ่าค่ะ",
-        pronunciation: "faa rong faa paa",
-        mnemonic: "Think: 'Far wrong, far pass' - thunder wrong, lightning pass",
+        english: "Leg",
+        thai: "ขา",
+        thaiMasculine: "ขาครับ",
+        thaiFeminine: "ขาค่ะ",
+        pronunciation: "khaa",
+        mnemonic: "Legs carry 'khaa' body",
         examples: [
           {
-            thai: "เมื่อคืนฟ้าร้องฟ้าผ่าดังมาก",
-            thaiMasculine: "เมื่อคืนฟ้าร้องฟ้าผ่าดังมากครับ",
-            thaiFeminine: "เมื่อคืนฟ้าร้องฟ้าผ่าดังมากค่ะ",
-            pronunciation: "meua-khuen faa rong faa paa dang maak",
-            translation: "Last night there was very loud thunder and lightning."
+            thai: "ปวดขา",
+            thaiMasculine: "ผมปวดขาครับ",
+            thaiFeminine: "ฉันปวดขาค่ะ",
+            pronunciation: "puat khaa",
+            translation: "My leg hurts."
           },
           {
-            thai: "เด็กๆ กลัวฟ้าร้องฟ้าผ่า",
-            thaiMasculine: "เด็กๆ กลัวฟ้าร้องฟ้าผ่าครับ",
-            thaiFeminine: "เด็กๆ กลัวฟ้าร้องฟ้าผ่าค่ะ",
-            pronunciation: "dek-dek glua faa rong faa paa",
-            translation: "Children are afraid of thunder and lightning."
+            thai: "ยืดขา",
+            thaiMasculine: "ยืดขาครับ",
+            thaiFeminine: "ยืดขาค่ะ",
+            pronunciation: "yuet khaa",
+            translation: "Stretch your leg."
           }
         ]
       },
       {
-        english: "Cloudy with chance of rain",
-        thai: "มีเมฆมาก ฝนอาจจะตก",
-        thaiMasculine: "มีเมฆมาก ฝนอาจจะตกครับ",
-        thaiFeminine: "มีเมฆมาก ฝนอาจจะตกค่ะ",
-        pronunciation: "mee mek maak, fon aat ja tok",
-        mnemonic: "Think: 'Me make mark, phone at jaw talk' - clouds mark rain talk",
+        english: "Heart",
+        thai: "หัวใจ",
+        thaiMasculine: "หัวใจครับ",
+        thaiFeminine: "หัวใจค่ะ",
+        pronunciation: "hua-jai",
+        mnemonic: "'Hua' head + 'jai' heart",
         examples: [
           {
-            thai: "วันนี้มีเมฆมาก ฝนอาจจะตกในช่วงบ่าย",
-            thaiMasculine: "วันนี้มีเมฆมาก ฝนอาจจะตกในช่วงบ่ายครับ",
-            thaiFeminine: "วันนี้มีเมฆมาก ฝนอาจจะตกในช่วงบ่ายค่ะ",
-            pronunciation: "wan-nee mee mek maak, fon aat ja tok nai chuang baai",
-            translation: "Today is very cloudy, it might rain in the afternoon."
+            thai: "หัวใจเต้นเร็ว",
+            thaiMasculine: "หัวใจเต้นเร็วครับ",
+            thaiFeminine: "หัวใจเต้นเร็วค่ะ",
+            pronunciation: "hua-jai ten reo",
+            translation: "My heart is beating fast."
           },
           {
-            thai: "ท้องฟ้ามีเมฆมาก ควรพกร่มไว้",
-            thaiMasculine: "ท้องฟ้ามีเมฆมาก ควรพกร่มไว้ครับ",
-            thaiFeminine: "ท้องฟ้ามีเมฆมาก ควรพกร่มไว้ค่ะ",
-            pronunciation: "tong-faa mee mek maak, khuan pok rom wai",
-            translation: "The sky is very cloudy, should bring an umbrella."
+            thai: "ดูแลหัวใจให้ดี",
+            thaiMasculine: "ดูแลหัวใจให้ดีครับ",
+            thaiFeminine: "ดูแลหัวใจให้ดีค่ะ",
+            pronunciation: "doo-lae hua-jai hai dee",
+            translation: "Take good care of your heart."
           }
         ]
       },
       {
-        english: "The sun is scorching hot",
-        thai: "แดดร้อนจัด",
-        thaiMasculine: "แดดร้อนจัดครับ",
-        thaiFeminine: "แดดร้อนจัดค่ะ",
-        pronunciation: "daet ron jat",
-        mnemonic: "Think: 'Date ron chat' - date in hot sun chat",
+        english: "Stomach",
+        thai: "ท้อง",
+        thaiMasculine: "ท้องครับ",
+        thaiFeminine: "ท้องค่ะ",
+        pronunciation: "thong",
+        mnemonic: "Hungry? empty 'thong'",
         examples: [
           {
-            thai: "แดดร้อนจัด ต้องใส่ครีมกันแดด",
-            thaiMasculine: "แดดร้อนจัดครับ ต้องใส่ครีมกันแดด",
-            thaiFeminine: "แดดร้อนจัดค่ะ ต้องใส่ครีมกันแดด",
-            pronunciation: "daet ron jat, tong sai cream gan daet",
-            translation: "The sun is scorching hot, need to apply sunscreen."
+            thai: "ปวดท้อง",
+            thaiMasculine: "ผมปวดท้องครับ",
+            thaiFeminine: "ฉันปวดท้องค่ะ",
+            pronunciation: "puat thong",
+            translation: "I have a stomachache."
           },
           {
-            thai: "อย่าออกไปข้างนอก แดดร้อนจัดเกินไป",
-            thaiMasculine: "อย่าออกไปข้างนอกครับ แดดร้อนจัดเกินไป",
-            thaiFeminine: "อย่าออกไปข้างนอกค่ะ แดดร้อนจัดเกินไป",
-            pronunciation: "yaa ok pai khaang-nok, daet ron jat gern pai",
-            translation: "Don't go outside, the sun is too scorching hot."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'time-expressions',
-    name: 'Time Expressions',
-    level: 'Advanced',
-    description: 'Complex time-related phrases',
-    phrases: [
-      {
-        english: "In the early morning",
-        thai: "ในตอนเช้าตรู่",
-        thaiMasculine: "ในตอนเช้าตรู่ครับ",
-        thaiFeminine: "ในตอนเช้าตรู่ค่ะ",
-        pronunciation: "nai ton chao truu",
-        mnemonic: "Think: 'Night turn chow true' - night turns to morning true",
-        examples: [
-          {
-            thai: "ในตอนเช้าตรู่ อากาศเย็นสบาย",
-            thaiMasculine: "ในตอนเช้าตรู่ อากาศเย็นสบายครับ",
-            thaiFeminine: "ในตอนเช้าตรู่ อากาศเย็นสบายค่ะ",
-            pronunciation: "nai ton chao truu, aa-gaat yen sa-baai",
-            translation: "In the early morning, the weather is cool and comfortable."
-          },
-          {
-            thai: "ฉันชอบวิ่งในตอนเช้าตรู่",
-            thaiMasculine: "ผมชอบวิ่งในตอนเช้าตรู่ครับ",
-            thaiFeminine: "ฉันชอบวิ่งในตอนเช้าตรู่ค่ะ",
-            pronunciation: "phom/chan chop wing nai ton chao truu",
-            translation: "I like to run in the early morning."
+            thai: "ท้องหิว",
+            thaiMasculine: "ผมหิวท้องครับ",
+            thaiFeminine: "ฉันท้องหิวค่ะ",
+            pronunciation: "thong hiu",
+            translation: "I'm hungry."
           }
         ]
       },
       {
-        english: "Every other day",
-        thai: "วันเว้นวัน",
-        thaiMasculine: "วันเว้นวันครับ",
-        thaiFeminine: "วันเว้นวันค่ะ",
-        pronunciation: "wan wen wan",
-        mnemonic: "Think: 'One when one' - one day when another passes",
+        english: "Back",
+        thai: "หลัง",
+        thaiMasculine: "หลังครับ",
+        thaiFeminine: "หลังค่ะ",
+        pronunciation: "lang",
+        mnemonic: "Lean back 'lang'",
         examples: [
           {
-            thai: "ฉันออกกำลังกายวันเว้นวัน",
-            thaiMasculine: "ผมออกกำลังกายวันเว้นวันครับ",
-            thaiFeminine: "ฉันออกกำลังกายวันเว้นวันค่ะ",
-            pronunciation: "phom/chan ok gam-lang-gaai wan wen wan",
-            translation: "I exercise every other day."
+            thai: "ปวดหลัง",
+            thaiMasculine: "ผมปวดหลังครับ",
+            thaiFeminine: "ฉันปวดหลังค่ะ",
+            pronunciation: "puat lang",
+            translation: "I have back pain."
           },
           {
-            thai: "กินยาวันเว้นวัน",
-            thaiMasculine: "กินยาวันเว้นวันครับ",
-            thaiFeminine: "กินยาวันเว้นวันค่ะ",
-            pronunciation: "gin yaa wan wen wan",
-            translation: "Take medicine every other day."
-          }
-        ]
-      },
-      {
-        english: "Once in a while",
-        thai: "นานๆ ครั้ง",
-        thaiMasculine: "นานๆ ครั้งครับ",
-        thaiFeminine: "นานๆ ครั้งค่ะ",
-        pronunciation: "naan-naan khrang",
-        mnemonic: "Think: 'Nan nan crown' - grandmother's crown worn rarely",
-        examples: [
-          {
-            thai: "เราเจอกันนานๆ ครั้ง",
-            thaiMasculine: "เราเจอกันนานๆ ครั้งครับ",
-            thaiFeminine: "เราเจอกันนานๆ ครั้งค่ะ",
-            pronunciation: "rao jer gan naan-naan khrang",
-            translation: "We meet once in a while."
-          },
-          {
-            thai: "นานๆ ครั้งจะกินอาหารฝรั่ง",
-            thaiMasculine: "นานๆ ครั้งจะกินอาหารฝรั่งครับ",
-            thaiFeminine: "นานๆ ครั้งจะกินอาหารฝรั่งค่ะ",
-            pronunciation: "naan-naan khrang ja gin aa-haan fa-rang",
-            translation: "Once in a while I eat Western food."
-          }
-        ]
-      },
-      {
-        english: "As soon as possible",
-        thai: "โดยเร็วที่สุด",
-        thaiMasculine: "โดยเร็วที่สุดครับ",
-        thaiFeminine: "โดยเร็วที่สุดค่ะ",
-        pronunciation: "doi reo tee sut",
-        mnemonic: "Think: 'Do it ray-o the suit' - do it quick in the suit",
-        examples: [
-          {
-            thai: "กรุณาตอบกลับโดยเร็วที่สุด",
-            thaiMasculine: "กรุณาตอบกลับโดยเร็วที่สุดครับ",
-            thaiFeminine: "กรุณาตอบกลับโดยเร็วที่สุดค่ะ",
-            pronunciation: "ga-ru-naa top glap doi reo tee sut",
-            translation: "Please reply as soon as possible."
-          },
-          {
-            thai: "ต้องการให้ซ่อมโดยเร็วที่สุด",
-            thaiMasculine: "ต้องการให้ซ่อมโดยเร็วที่สุดครับ",
-            thaiFeminine: "ต้องการให้ซ่อมโดยเร็วที่สุดค่ะ",
-            pronunciation: "tong-gaan hai som doi reo tee sut",
-            translation: "Need it repaired as soon as possible."
-          }
-        ]
-      },
-      {
-        english: "Running late",
-        thai: "มาสาย",
-        thaiMasculine: "มาสายครับ",
-        thaiFeminine: "มาสายค่ะ",
-        pronunciation: "maa saai",
-        mnemonic: "Think: 'Ma sigh' - mother sighs when you're late",
-        examples: [
-          {
-            thai: "ขอโทษที่มาสาย รถติดมาก",
-            thaiMasculine: "ขอโทษที่มาสายครับ รถติดมาก",
-            thaiFeminine: "ขอโทษที่มาสายค่ะ รถติดมาก",
-            pronunciation: "khor-tot tee maa saai, rot tit maak",
-            translation: "Sorry for being late, traffic was heavy."
-          },
-          {
-            thai: "อย่ามาสายนะ",
-            thaiMasculine: "อย่ามาสายนะครับ",
-            thaiFeminine: "อย่ามาสายนะคะ",
-            pronunciation: "yaa maa saai na",
-            translation: "Don't be late."
+            thai: "นั่งหลังตรง",
+            thaiMasculine: "นั่งหลังตรงครับ",
+            thaiFeminine: "นั่งหลังตรงค่ะ",
+            pronunciation: "nang lang trong",
+            translation: "Sit with a straight back."
           }
         ]
       }
     ]
   },
-
-  // Native/Fluent Set (1 set)
-  {
-    id: 'formal-business',
-    name: 'Formal Business Thai',
-    level: 'Native/Fluent',
-    description: 'Professional and business language',
-    phrases: [
-      {
-        english: "I would like to schedule a meeting",
-        thai: "ข้าพเจ้าต้องการนัดหมายการประชุม",
-        thaiMasculine: "กระผมต้องการนัดหมายการประชุมครับ",
-        thaiFeminine: "ดิฉันต้องการนัดหมายการประชุมค่ะ",
-        pronunciation: "kra-phom/di-chan tong-gaan nat-maai gaan pra-chum",
-        mnemonic: "Business formality requires proper pronouns and structure",
-        examples: [
-          {
-            thai: "กระผมต้องการนัดหมายการประชุมกับท่านผู้จัดการ",
-            thaiMasculine: "กระผมต้องการนัดหมายการประชุมกับท่านผู้จัดการครับ",
-            thaiFeminine: "ดิฉันต้องการนัดหมายการประชุมกับท่านผู้จัดการค่ะ",
-            pronunciation: "kra-phom/di-chan tong-gaan nat-maai gaan pra-chum gap tan puu-jat-gaan",
-            translation: "I would like to schedule a meeting with the manager."
-          },
-          {
-            thai: "ท่านสะดวกให้เข้าพบเมื่อใด",
-            thaiMasculine: "ท่านสะดวกให้เข้าพบเมื่อใดครับ",
-            thaiFeminine: "ท่านสะดวกให้เข้าพบเมื่อใดคะ",
-            pronunciation: "tan sa-duak hai khao phop meua dai",
-            translation: "When would it be convenient for you to meet?"
-          }
-        ]
-      },
-      {
-        english: "Thank you for your cooperation",
-        thai: "ขอขอบคุณสำหรับความร่วมมือ",
-        thaiMasculine: "ขอขอบคุณสำหรับความร่วมมือครับ",
-        thaiFeminine: "ขอขอบคุณสำหรับความร่วมมือค่ะ",
-        pronunciation: "khor khop-khun sam-rap khwaam ruam-mue",
-        mnemonic: "Formal thanks emphasizes collaboration",
-        examples: [
-          {
-            thai: "ขอขอบคุณสำหรับความร่วมมือของทุกท่านในโครงการนี้",
-            thaiMasculine: "ขอขอบคุณสำหรับความร่วมมือของทุกท่านในโครงการนี้ครับ",
-            thaiFeminine: "ขอขอบคุณสำหรับความร่วมมือของทุกท่านในโครงการนี้ค่ะ",
-            pronunciation: "khor khop-khun sam-rap khwaam ruam-mue khong took tan nai khrong-gaan nee",
-            translation: "Thank you for everyone's cooperation on this project."
-          },
-          {
-            thai: "ความร่วมมือของท่านมีค่ายิ่ง",
-            thaiMasculine: "ความร่วมมือของท่านมีค่ายิ่งครับ",
-            thaiFeminine: "ความร่วมมือของท่านมีค่ายิ่งค่ะ",
-            pronunciation: "khwaam ruam-mue khong tan mee khaa ying",
-            translation: "Your cooperation is greatly valued."
-          }
-        ]
-      },
-      {
-        english: "The quarterly report shows improvement",
-        thai: "รายงานประจำไตรมาสแสดงให้เห็นถึงความก้าวหน้า",
-        thaiMasculine: "รายงานประจำไตรมาสแสดงให้เห็นถึงความก้าวหน้าครับ",
-        thaiFeminine: "รายงานประจำไตรมาสแสดงให้เห็นถึงความก้าวหน้าค่ะ",
-        pronunciation: "raai-ngaan pra-jam trai-maat sa-daeng hai hen theung khwaam gaao-naa",
-        mnemonic: "Formal reporting language for business contexts",
-        examples: [
-          {
-            thai: "รายงานประจำไตรมาสแสดงให้เห็นถึงความก้าวหน้าในทุกภาคส่วน",
-            thaiMasculine: "รายงานประจำไตรมาสแสดงให้เห็นถึงความก้าวหน้าในทุกภาคส่วนครับ",
-            thaiFeminine: "รายงานประจำไตรมาสแสดงให้เห็นถึงความก้าวหน้าในทุกภาคส่วนค่ะ",
-            pronunciation: "raai-ngaan pra-jam trai-maat sa-daeng hai hen theung khwaam gaao-naa nai took paak suan",
-            translation: "The quarterly report shows improvement in all sectors."
-          },
-          {
-            thai: "ผลประกอบการดีขึ้นอย่างมีนัยสำคัญ",
-            thaiMasculine: "ผลประกอบการดีขึ้นอย่างมีนัยสำคัญครับ",
-            thaiFeminine: "ผลประกอบการดีขึ้นอย่างมีนัยสำคัญค่ะ",
-            pronunciation: "phon pra-gop gaan dee kheun yaang mee nai sam-khan",
-            translation: "Performance has improved significantly."
-          }
-        ]
-      },
-      {
-        english: "Please submit the proposal by the deadline",
-        thai: "กรุณาส่งข้อเสนอภายในกำหนดเวลา",
-        thaiMasculine: "กรุณาส่งข้อเสนอภายในกำหนดเวลาครับ",
-        thaiFeminine: "กรุณาส่งข้อเสนอภายในกำหนดเวลาค่ะ",
-        pronunciation: "ga-ru-naa song khor sa-ner paai-nai gam-not we-laa",
-        mnemonic: "Professional request with deadline emphasis",
-        examples: [
-          {
-            thai: "กรุณาส่งข้อเสนอภายในกำหนดเวลาเพื่อการพิจารณา",
-            thaiMasculine: "กรุณาส่งข้อเสนอภายในกำหนดเวลาเพื่อการพิจารณาครับ",
-            thaiFeminine: "กรุณาส่งข้อเสนอภายในกำหนดเวลาเพื่อการพิจารณาค่ะ",
-            pronunciation: "ga-ru-naa song khor sa-ner paai-nai gam-not we-laa pheua gaan pi-jaa-ra-naa",
-            translation: "Please submit the proposal by the deadline for consideration."
-          },
-          {
-            thai: "เอกสารทั้งหมดต้องครบถ้วนสมบูรณ์",
-            thaiMasculine: "เอกสารทั้งหมดต้องครบถ้วนสมบูรณ์ครับ",
-            thaiFeminine: "เอกสารทั้งหมดต้องครบถ้วนสมบูรณ์ค่ะ",
-            pronunciation: "ek-ga-saan tang-mot tong khrop-thuan som-buun",
-            translation: "All documents must be complete."
-          }
-        ]
-      },
-      {
-        english: "The investment shows promising returns",
-        thai: "การลงทุนแสดงผลตอบแทนที่น่าพอใจ",
-        thaiMasculine: "การลงทุนแสดงผลตอบแทนที่น่าพอใจครับ",
-        thaiFeminine: "การลงทุนแสดงผลตอบแทนที่น่าพอใจค่ะ",
-        pronunciation: "gaan long-tun sa-daeng phon top-taen tee naa por-jai",
-        mnemonic: "Financial terminology for professional contexts",
-        examples: [
-          {
-            thai: "การลงทุนในไตรมาสนี้แสดงผลตอบแทนที่น่าพอใจเป็นอย่างยิ่ง",
-            thaiMasculine: "การลงทุนในไตรมาสนี้แสดงผลตอบแทนที่น่าพอใจเป็นอย่างยิ่งครับ",
-            thaiFeminine: "การลงทุนในไตรมาสนี้แสดงผลตอบแทนที่น่าพอใจเป็นอย่างยิ่งค่ะ",
-            pronunciation: "gaan long-tun nai trai-maat nee sa-daeng phon top-taen tee naa por-jai pen yaang ying",
-            translation: "This quarter's investment shows highly satisfactory returns."
-          },
-          {
-            thai: "อัตราผลตอบแทนสูงกว่าที่คาดการณ์ไว้",
-            thaiMasculine: "อัตราผลตอบแทนสูงกว่าที่คาดการณ์ไว้ครับ",
-            thaiFeminine: "อัตราผลตอบแทนสูงกว่าที่คาดการณ์ไว้ค่ะ",
-            pronunciation: "at-traa phon top-taen suung gwaa tee khaat-gaan wai",
-            translation: "The return rate is higher than projected."
-          }
-        ]
-      }
-    ]
-  },
-
-  // God Mode Set (1 set)
-  {
-    id: 'thai-proverbs',
-    name: 'Thai Proverbs & Idioms',
-    level: 'God Mode',
-    description: 'Advanced Thai proverbs and cultural expressions',
-    phrases: [
-      {
-        english: "Don't count your chickens before they hatch (Thai equivalent)",
-        thai: "อย่าวางใจไก่ก่อนฟักออกจากไข่",
-        thaiMasculine: "อย่าวางใจไก่ก่อนฟักออกจากไข่ครับ",
-        thaiFeminine: "อย่าวางใจไก่ก่อนฟักออกจากไข่ค่ะ",
-        pronunciation: "yaa waang jai gai gon fak ok jaak khai",
-        mnemonic: "Literally: Don't trust the chicken before it hatches from the egg",
-        examples: [
-          {
-            thai: "เขาเริ่มใช้เงินก่อนได้โบนัส อย่าวางใจไก่ก่อนฟักออกจากไข่",
-            thaiMasculine: "เขาเริ่มใช้เงินก่อนได้โบนัสครับ อย่าวางใจไก่ก่อนฟักออกจากไข่",
-            thaiFeminine: "เขาเริ่มใช้เงินก่อนได้โบนัสค่ะ อย่าวางใจไก่ก่อนฟักออกจากไข่",
-            pronunciation: "khao rerm chai ngern gon dai bonus, yaa waang jai gai gon fak ok jaak khai",
-            translation: "He started spending money before getting the bonus, don't count your chickens before they hatch."
-          },
-          {
-            thai: "การวางแผนล่วงหน้าดี แต่อย่าวางใจไก่ก่อนฟักออกจากไข่",
-            thaiMasculine: "การวางแผนล่วงหน้าดีครับ แต่อย่าวางใจไก่ก่อนฟักออกจากไข่",
-            thaiFeminine: "การวางแผนล่วงหน้าดีค่ะ แต่อย่าวางใจไก่ก่อนฟักออกจากไข่",
-            pronunciation: "gaan waang paen luang-naa dee, tae yaa waang jai gai gon fak ok jaak khai",
-            translation: "Planning ahead is good, but don't count your chickens before they hatch."
-          }
-        ]
-      },
-      {
-        english: "Water flows, fish swim (go with the flow)",
-        thai: "น้ำไหลไฟดับ",
-        thaiMasculine: "น้ำไหลไฟดับครับ",
-        thaiFeminine: "น้ำไหลไฟดับค่ะ",
-        pronunciation: "nam lai fai dap",
-        mnemonic: "Water extinguishes fire - natural order prevails",
-        examples: [
-          {
-            thai: "ไม่ต้องเครียด ปล่อยให้เป็นไปตามน้ำไหลไฟดับ",
-            thaiMasculine: "ไม่ต้องเครียดครับ ปล่อยให้เป็นไปตามน้ำไหลไฟดับ",
-            thaiFeminine: "ไม่ต้องเครียดค่ะ ปล่อยให้เป็นไปตามน้ำไหลไฟดับ",
-            pronunciation: "mai tong khriat, ploy hai pen pai taam nam lai fai dap",
-            translation: "Don't stress, let things flow naturally."
-          },
-          {
-            thai: "บางครั้งต้องยอมรับความจริงแบบน้ำไหลไฟดับ",
-            thaiMasculine: "บางครั้งต้องยอมรับความจริงแบบน้ำไหลไฟดับครับ",
-            thaiFeminine: "บางครั้งต้องยอมรับความจริงแบบน้ำไหลไฟดับค่ะ",
-            pronunciation: "baang khrang tong yom rap khwaam jing baep nam lai fai dap",
-            translation: "Sometimes you must accept reality and go with the flow."
-          }
-        ]
-      },
-      {
-        english: "The dog that barks doesn't bite",
-        thai: "สุนัขขี้เห่าไม่กัด",
-        thaiMasculine: "สุนัขขี้เห่าไม่กัดครับ",
-        thaiFeminine: "สุนัขขี้เห่าไม่กัดค่ะ",
-        pronunciation: "su-nak khee hao mai gat",
-        mnemonic: "Those who threaten loudly rarely take action",
-        examples: [
-          {
-            thai: "เขาพูดแต่ปากแต่ไม่ทำอะไร สุนัขขี้เห่าไม่กัด",
-            thaiMasculine: "เขาพูดแต่ปากแต่ไม่ทำอะไรครับ สุนัขขี้เห่าไม่กัด",
-            thaiFeminine: "เขาพูดแต่ปากแต่ไม่ทำอะไรค่ะ สุนัขขี้เห่าไม่กัด",
-            pronunciation: "khao phuut tae paak tae mai tam a-rai, su-nak khee hao mai gat",
-            translation: "He's all talk but no action, the dog that barks doesn't bite."
-          },
-          {
-            thai: "อย่ากลัวคำขู่ของเขา สุนัขขี้เห่าไม่กัดหรอก",
-            thaiMasculine: "อย่ากลัวคำขู่ของเขาครับ สุนัขขี้เห่าไม่กัดหรอก",
-            thaiFeminine: "อย่ากลัวคำขู่ของเขาค่ะ สุนัขขี้เห่าไม่กัดหรอก",
-            pronunciation: "yaa glua kham khuu khong khao, su-nak khee hao mai gat rok",
-            translation: "Don't fear his threats, the barking dog doesn't bite."
-          }
-        ]
-      },
-      {
-        english: "Riding an elephant to catch a grasshopper (overkill)",
-        thai: "ขี่ช้างจับตั๊กแตน",
-        thaiMasculine: "ขี่ช้างจับตั๊กแตนครับ",
-        thaiFeminine: "ขี่ช้างจับตั๊กแตนค่ะ",
-        pronunciation: "khee chaang jap tak-ga-taen",
-        mnemonic: "Using excessive force for a simple task",
-        examples: [
-          {
-            thai: "ใช้ทีมทั้งหมดทำงานเล็กๆ นี่มันขี่ช้างจับตั๊กแตน",
-            thaiMasculine: "ใช้ทีมทั้งหมดทำงานเล็กๆ นี่มันขี่ช้างจับตั๊กแตนครับ",
-            thaiFeminine: "ใช้ทีมทั้งหมดทำงานเล็กๆ นี่มันขี่ช้างจับตั๊กแตนค่ะ",
-            pronunciation: "chai team tang-mot tam ngaan lek-lek, nee man khee chaang jap tak-ga-taen",
-            translation: "Using the whole team for this small task is overkill."
-          },
-          {
-            thai: "ซื้อรถใหม่เพื่อขับไปร้านข้างบ้าน ขี่ช้างจับตั๊กแตนไปหน่อย",
-            thaiMasculine: "ซื้อรถใหม่เพื่อขับไปร้านข้างบ้าน ขี่ช้างจับตั๊กแตนไปหน่อยครับ",
-            thaiFeminine: "ซื้อรถใหม่เพื่อขับไปร้านข้างบ้าน ขี่ช้างจับตั๊กแตนไปหน่อยค่ะ",
-            pronunciation: "sue rot mai pheua khap pai raan khaang baan, khee chaang jap tak-ga-taen pai noy",
-            translation: "Buying a new car just to drive to the neighborhood store is a bit overkill."
-          }
-        ]
-      },
-      {
-        english: "Teaching a crocodile to swim (teaching grandmother to suck eggs)",
-        thai: "สอนจระเข้ให้ว่ายน้ำ",
-        thaiMasculine: "สอนจระเข้ให้ว่ายน้ำครับ",
-        thaiFeminine: "สอนจระเข้ให้ว่ายน้ำค่ะ",
-        pronunciation: "sorn jo-ra-khay hai waai nam",
-        mnemonic: "Teaching someone something they already know better than you",
-        examples: [
-          {
-            thai: "เขาเป็นเชฟมา 20 ปี คุณจะไปสอนทำอาหาร นั่นมันสอนจระเข้ให้ว่ายน้ำ",
-            thaiMasculine: "เขาเป็นเชฟมา 20 ปีครับ คุณจะไปสอนทำอาหาร นั่นมันสอนจระเข้ให้ว่ายน้ำ",
-            thaiFeminine: "เขาเป็นเชฟมา 20 ปีค่ะ คุณจะไปสอนทำอาหาร นั่นมันสอนจระเข้ให้ว่ายน้ำ",
-            pronunciation: "khao pen chef maa yee-sip pee, khun ja pai sorn tam aa-haan, nan man sorn jo-ra-khay hai waai nam",
-            translation: "He's been a chef for 20 years, you teaching him to cook is like teaching a crocodile to swim."
-          },
-          {
-            thai: "อย่าไปสอนผู้เชี่ยวชาญ เป็นการสอนจระเข้ให้ว่ายน้ำ",
-            thaiMasculine: "อย่าไปสอนผู้เชี่ยวชาญครับ เป็นการสอนจระเข้ให้ว่ายน้ำ",
-            thaiFeminine: "อย่าไปสอนผู้เชี่ยวชาญค่ะ เป็นการสอนจระเข้ให้ว่ายน้ำ",
-            pronunciation: "yaa pai sorn puu chiao-chaan, pen gaan sorn jo-ra-khay hai waai nam",
-            translation: "Don't teach the expert, it's like teaching a crocodile to swim."
-          }
-        ]
-      }
-    ]
-  }
-]; 
+];

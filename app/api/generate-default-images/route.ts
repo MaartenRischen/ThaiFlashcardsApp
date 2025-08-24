@@ -23,13 +23,7 @@ const IMAGE_PROMPTS: Record<string, string> = {
   
   'body-parts': "Create an educational illustration showing a friendly cartoon character (not too anatomical) with visual indicators pointing to different body parts. Make it child-friendly and educational, like a fun anatomy poster. NO TEXT OR LABELS.",
   
-  'weather-terms': "Create a dynamic illustration showing various weather conditions in Thailand - sunny skies, rain, thunderstorms, and cloudy weather. Show the transitions between different weather patterns in an artistic way. NO TEXT OR WEATHER LABELS.",
-  
-  'time-expressions': "Create an artistic illustration showing the passage of time through a day - sunrise, morning activities, afternoon, evening, and night. Include clocks showing different times and people doing time-specific activities. NO TEXT OR TIME LABELS.",
-  
-  'formal-business': "Create a professional illustration showing Thai business people in formal attire having a meeting in a modern office setting. Include elements like presentations, handshakes, and professional interactions. Make it look sophisticated and corporate. NO TEXT OR SIGNAGE.",
-  
-  'thai-proverbs': "Create an artistic, traditional Thai-style illustration with mystical elements, showing wise animals (elephants, tigers) and traditional Thai art motifs. Make it look like ancient wisdom being passed down through generations. NO TEXT OR PROVERBS."
+  // Removed advanced/less practical sets to keep defaults focused and logical
 };
 
 async function downloadImage(url: string): Promise<Buffer> {

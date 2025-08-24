@@ -1319,9 +1319,13 @@ export default function ThaiFlashcards() {
                     
                     
                     {/* English translation in blue, in parentheses */}
-                    {phrases[index]?.english && (
+                    {phrases[index] && (
                       <div className="text-base md:text-lg font-medium mb-2 text-blue-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
-                        ({phrases[index].english})
+                        {(() => {
+                          const literal = (phrases[index] as any).literal as string | undefined;
+                          const idiomatic = phrases[index]?.english ?? '';
+                          return literal ? `${literal} (${idiomatic})` : `(${idiomatic})`;
+                        })()}
                       </div>
                     )}
                     {/* Difficulty Buttons - Wrapped in Popover (Step 3) */}

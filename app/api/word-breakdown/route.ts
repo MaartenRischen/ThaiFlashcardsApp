@@ -6,10 +6,9 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!;
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Allow both authenticated and guest users
+    // Note: We still call auth() for logging/metrics, but do not require it
+    const { userId: _userId } = await auth();
 
     const { thai, pronunciation, english } = await request.json();
     

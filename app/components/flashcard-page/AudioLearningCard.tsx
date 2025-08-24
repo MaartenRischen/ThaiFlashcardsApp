@@ -43,7 +43,7 @@ export function AudioLearningCard({ phrase, isMale, isPoliteMode }: AudioLearnin
 
           <div className="text-base md:text-lg font-medium mb-2 text-blue-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
             {(() => {
-              const literal = (phrase as any).literal as string | undefined;
+              const literal = phrase.literal;
               const idiomatic = phrase.english ?? '';
               return literal ? `${literal} (${idiomatic})` : `(${idiomatic})`;
             })()}

@@ -14,6 +14,7 @@ export interface Phrase {
   thaiFeminine: string;
   pronunciation: string;
   mnemonic?: string;
+  literal?: string;
   examples: ExampleSentence[];
 }
 

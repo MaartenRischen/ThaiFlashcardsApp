@@ -1456,3 +1456,9 @@ export const DEFAULT_SETS: DefaultSet[] = [
     ]
   },
 ];
+
+// Import common words sets
+import { COMMON_WORDS_SETS } from './common-words-sets';
+
+// Export combined sets
+export const ALL_DEFAULT_SETS = [...DEFAULT_SETS, ...COMMON_WORDS_SETS];

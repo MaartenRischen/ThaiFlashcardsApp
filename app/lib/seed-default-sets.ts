@@ -1,4 +1,4 @@
-import { DEFAULT_SETS } from '@/app/data/default-sets';
+import { ALL_DEFAULT_SETS } from '@/app/data/default-sets';
 import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases';
 import { SetMetaData } from './storage/types';
 
@@ -20,7 +20,7 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
   ];
   
   // Add all the new default sets
-  DEFAULT_SETS.forEach((set, index) => {
+  ALL_DEFAULT_SETS.forEach((set, index) => {
     defaultSets.push({
       id: `default-${set.id}`,
       name: set.name,
@@ -49,7 +49,7 @@ export function getDefaultSetContent(setId: string): Phrase[] | null {
   
   // Check if it's one of the new default sets
   const defaultSetId = setId.replace('default-', '');
-  const defaultSet = DEFAULT_SETS.find(set => set.id === defaultSetId);
+  const defaultSet = ALL_DEFAULT_SETS.find(set => set.id === defaultSetId);
   
   if (defaultSet) {
     return defaultSet.phrases;

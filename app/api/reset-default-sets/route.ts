@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/app/lib/prisma';
-import { DEFAULT_SETS } from '@/app/data/default-sets';
+import { ALL_DEFAULT_SETS } from '@/app/data/default-sets';
 import { Prisma } from '@prisma/client';
 
 export async function POST() {
@@ -13,7 +13,7 @@ export async function POST() {
 
     // Reset each default set
     const results = await Promise.all(
-      DEFAULT_SETS.map(async (defaultSet) => {
+      ALL_DEFAULT_SETS.map(async (defaultSet) => {
         try {
           // Check if this default set exists in the user's database
           const existingSet = await prisma.flashcardSet.findFirst({

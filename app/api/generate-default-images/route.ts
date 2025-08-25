@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { generateImage } from '@/app/lib/ideogram-service';
-import { DEFAULT_SETS } from '@/app/data/default-sets';
+import { ALL_DEFAULT_SETS } from '@/app/data/default-sets';
 import fs from 'fs/promises';
 import path from 'path';
 import https from 'https';
@@ -23,7 +23,17 @@ const IMAGE_PROMPTS: Record<string, string> = {
   
   'body-parts': "Create an educational illustration showing a friendly cartoon character (not too anatomical) with visual indicators pointing to different body parts. Make it child-friendly and educational, like a fun anatomy poster. NO TEXT OR LABELS.",
   
-  // Removed advanced/less practical sets to keep defaults focused and logical
+  // 100 Most Common Words sets
+  'common-words-1': "Create an artistic collage showing everyday Thai life activities - people talking, eating, going places, helping each other. Include various emotions and interactions. Modern Thai urban setting with warm colors. NO TEXT.",
+  'common-words-2': "Create a vibrant scene of Thai people in various activities - friends meeting, people working, shopping at markets, expressing likes and needs. Show diversity of ages and situations. NO TEXT.",
+  'common-words-3': "Create a bustling Thai street scene with people eating at food stalls, going home, sleeping, working together. Include day and night activities. Warm, inviting atmosphere. NO TEXT.",
+  'common-words-4': "Create an illustration showing emotions and relationships - people thinking, loving, happy faces, waiting, new and old items contrasted. Thai cultural context with modern elements. NO TEXT.",
+  'common-words-5': "Create a Thai food market scene with rice dishes, chicken, pork, vegetables, and people eating together. Show understanding through gestures and expressions. Colorful and appetizing. NO TEXT.",
+  'common-words-6': "Create a scene showing contrasts - before/after, same/different, open/closed, right/wrong. Use Thai architectural elements and daily life situations. Clear visual storytelling. NO TEXT.",
+  'common-words-7': "Create a Thai café scene with people drinking coffee and tea, eating fruits and vegetables, fish dishes. Show different food and beverage options in a modern setting. NO TEXT.",
+  'common-words-8': "Create a Thai city scene with cars, taxis, phones, different rooms and buildings. Show urban life with people together and alone. Modern Bangkok-style setting. NO TEXT.",
+  'common-words-9': "Create scenes of Thai daily life including markets, hospitals, police, showing easy and difficult tasks, young and old people. Community-focused illustration. NO TEXT.",
+  'common-words-10': "Create a scene showing directions (left, right, straight), times of day (morning, evening, night), and celebration. Include Thai architectural elements for navigation context. NO TEXT."
 };
 
 async function downloadImage(url: string): Promise<Buffer> {
@@ -49,8 +59,8 @@ export async function POST() {
   
   const results = [];
   
-  for (let i = 0; i < DEFAULT_SETS.length; i++) {
-    const set = DEFAULT_SETS[i];
+  for (let i = 0; i < ALL_DEFAULT_SETS.length; i++) {
+    const set = ALL_DEFAULT_SETS[i];
     const prompt = IMAGE_PROMPTS[set.id];
     
     if (!prompt) {

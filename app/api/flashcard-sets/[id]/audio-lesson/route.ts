@@ -4,7 +4,7 @@ import { prisma } from '@/app/lib/prisma';
 import { AudioLessonGenerator } from '@/app/lib/audio-lesson-generator';
 import { SimpleAudioLessonGenerator } from '@/app/lib/audio-lesson-generator-simple';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
-import { DEFAULT_SETS } from '@/app/data/default-sets';
+import { ALL_DEFAULT_SETS } from '@/app/data/default-sets';
 import { Prisma } from '@prisma/client';
 import { putTimings } from '@/app/lib/audioTimingsStore';
 
@@ -73,12 +73,12 @@ export async function POST(
       } else {
         const setId = params.id.replace('default-', '');
         console.log('Looking for setId:', setId);
-        console.log('Available DEFAULT_SETS ids:', DEFAULT_SETS.map(s => s.id));
-        const defaultSet = DEFAULT_SETS.find(set => set.id === setId);
+        console.log('Available ALL_DEFAULT_SETS ids:', ALL_DEFAULT_SETS.map(s => s.id));
+        const defaultSet = ALL_DEFAULT_SETS.find(set => set.id === setId);
         console.log('Found defaultSet:', defaultSet ? defaultSet.name : 'NOT FOUND');
         if (!defaultSet) {
           return NextResponse.json({ 
-            error: `Default set template not found for id: ${setId}. Available sets: ${DEFAULT_SETS.map(s => s.id).join(', ')}` 
+            error: `Default set template not found for id: ${setId}. Available sets: ${ALL_DEFAULT_SETS.map(s => s.id).join(', ')}` 
           }, { status: 404 });
         }
         defaultContent = defaultSet.phrases;

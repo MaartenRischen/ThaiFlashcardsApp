@@ -12,6 +12,8 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  console.log('[AUDIO LESSON] Route called for ID:', params.id);
+  
   try {
     // Ensure this route can use Node APIs (required by Azure Speech SDK)
     // and fail fast when missing credentials
@@ -72,10 +74,11 @@ export async function POST(
         defaultSetName = 'Default Set';
       } else {
         const setId = params.id.replace('default-', '');
-        console.log('Looking for setId:', setId);
-        console.log('Available ALL_DEFAULT_SETS ids:', ALL_DEFAULT_SETS.map(s => s.id));
+        console.log('[AUDIO LESSON] Looking for setId:', setId);
+        console.log('[AUDIO LESSON] Available ALL_DEFAULT_SETS ids:', ALL_DEFAULT_SETS.map(s => s.id));
+        console.log('[AUDIO LESSON] ALL_DEFAULT_SETS length:', ALL_DEFAULT_SETS.length);
         const defaultSet = ALL_DEFAULT_SETS.find(set => set.id === setId);
-        console.log('Found defaultSet:', defaultSet ? defaultSet.name : 'NOT FOUND');
+        console.log('[AUDIO LESSON] Found defaultSet:', defaultSet ? defaultSet.name : 'NOT FOUND');
         if (!defaultSet) {
           return NextResponse.json({ 
             error: `Default set template not found for id: ${setId}. Available sets: ${ALL_DEFAULT_SETS.map(s => s.id).join(', ')}` 

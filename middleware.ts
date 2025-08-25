@@ -14,6 +14,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/health', // Health check endpoint
   '/api/env-check', // Environment check endpoint
   '/api/generate-placeholder-image', // Placeholder image generation endpoint
+  '/api/test-default-sets', // Test endpoint for debugging
   '/api/generate-set(.*)', // Let route handle auth and return JSON 401
   '/public-sets(.*)', // Public sets page
   '/share/(.*)', // Share pages

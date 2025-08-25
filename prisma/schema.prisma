@@ -24,6 +24,7 @@ model User {
   // Application-specific relations
   flashcardSets   FlashcardSet[]
   userSetProgress UserSetProgress[]
+  userMnemonics   UserMnemonic[]
 }
 
 model FlashcardSet {
@@ -98,4 +99,20 @@ model PublishedSet {
   publishedAt    DateTime @default(now())
 
   @@index([publishedAt])
+}
+
+model UserMnemonic {
+  id          String   @id @default(cuid())
+  userId      String   // Foreign key referencing User.id (Clerk User ID)
+  setId       String   // Can be a default set ID or a custom set ID
+  phraseIndex Int      // Index of the phrase in the set
+  mnemonic    String   // The custom mnemonic
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, setId, phraseIndex])
+  @@index([userId])
+  @@index([setId])
 }

@@ -522,20 +522,43 @@ export default function ThaiFlashcards() {
     }
   };
 
-  // Update mnemonic loading to be per-set
-  useEffect(() => {
-    const savedMnemonics = localStorage.getItem('mnemonics-v2');
-    if (savedMnemonics) {
-      try {
-        setMnemonics(JSON.parse(savedMnemonics));
-      } catch (error) {
-        console.error('Error loading mnemonics:', error);
-      }
-    }
-  }, []);
+  // Add auth hook
+  const { userId } = useAuth();
 
-  // Function to update mnemonics - now per set and phrase
-  const updateMnemonics = (phraseIndex: number, newMnemonic: string) => {
+  // Update mnemonic loading to use API for logged-in users
+  useEffect(() => {
+    const loadMnemonics = async () => {
+      if (userId) {
+        // Load from database for logged-in users
+        try {
+          const response = await fetch('/api/user-mnemonics', {
+            credentials: 'include'
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setMnemonics(data);
+          }
+        } catch (error) {
+          console.error('Error loading mnemonics from API:', error);
+        }
+      } else {
+        // Load from localStorage for guests
+        const savedMnemonics = localStorage.getItem('mnemonics-v2');
+        if (savedMnemonics) {
+          try {
+            setMnemonics(JSON.parse(savedMnemonics));
+          } catch (error) {
+            console.error('Error loading mnemonics:', error);
+          }
+        }
+      }
+    };
+
+    loadMnemonics();
+  }, [userId]);
+
+  // Function to update mnemonics - now syncs to database for logged-in users
+  const updateMnemonics = async (phraseIndex: number, newMnemonic: string) => {
     if (!activeSetId || phraseIndex === undefined) return;
     
     const phraseKey = `${phraseIndex}`;
@@ -547,10 +570,32 @@ export default function ThaiFlashcards() {
       }
     };
     setMnemonics(updated);
-    localStorage.setItem('mnemonics-v2', JSON.stringify(updated));
+    
+    if (userId) {
+      // Save to database for logged-in users
+      try {
+        await fetch('/api/user-mnemonics', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            setId: activeSetId,
+            phraseIndex: phraseIndex,
+            mnemonic: newMnemonic
+          }),
+          credentials: 'include'
+        });
+      } catch (error) {
+        console.error('Error saving mnemonic to API:', error);
+      }
+    } else {
+      // Save to localStorage for guests
+      localStorage.setItem('mnemonics-v2', JSON.stringify(updated));
+    }
   };
 
-  const resetCurrentMnemonic = () => {
+  const resetCurrentMnemonic = async () => {
     if (!activeSetId) return;
     
     const phraseKey = `${index}`;
@@ -562,7 +607,21 @@ export default function ThaiFlashcards() {
       }
     }
     setMnemonics(updated);
-    localStorage.setItem('mnemonics-v2', JSON.stringify(updated));
+    
+    if (userId) {
+      // Delete from database for logged-in users
+      try {
+        await fetch(`/api/user-mnemonics?setId=${activeSetId}&phraseIndex=${index}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+      } catch (error) {
+        console.error('Error deleting mnemonic from API:', error);
+      }
+    } else {
+      // Save to localStorage for guests
+      localStorage.setItem('mnemonics-v2', JSON.stringify(updated));
+    }
   };
 
   const handleMnemonicChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -579,11 +638,26 @@ export default function ThaiFlashcards() {
   };
 
   // Function to reset all progress and mnemonics
-  const resetAllProgress = () => {
+  const resetAllProgress = async () => {
     if (confirm('Are you sure you want to reset all progress AND mnemonics? This cannot be undone.')) {
       updateSetProgress({}); 
       setMnemonics({});
-      localStorage.removeItem('mnemonics-v2');
+      
+      if (userId && activeSetId) {
+        // Delete all mnemonics for this set from database
+        try {
+          await fetch(`/api/user-mnemonics?setId=${activeSetId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+          });
+        } catch (error) {
+          console.error('Error deleting all mnemonics from API:', error);
+        }
+      } else {
+        // Remove from localStorage for guests
+        localStorage.removeItem('mnemonics-v2');
+      }
+      
       setIndex(0);
       setShowAnswer(false);
       setRandomSentence(null);
@@ -791,7 +865,7 @@ export default function ThaiFlashcards() {
   // }, []);
 
   // Function to reset current card
-  const resetCard = () => {
+  const resetCard = async () => {
     // Remove card progress
     const newCardProgress = { ...activeSetProgress };
     delete newCardProgress[index];
@@ -806,7 +880,21 @@ export default function ThaiFlashcards() {
       }
     }
     setMnemonics(newMnemonics);
-    localStorage.setItem('mnemonics-v2', JSON.stringify(newMnemonics));
+    
+    if (userId && activeSetId) {
+      // Delete from database for logged-in users
+      try {
+        await fetch(`/api/user-mnemonics?setId=${activeSetId}&phraseIndex=${index}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+      } catch (error) {
+        console.error('Error deleting mnemonic from API:', error);
+      }
+    } else {
+      // Save to localStorage for guests
+      localStorage.setItem('mnemonics-v2', JSON.stringify(newMnemonics));
+    }
     
     // Reset the card
     setShowAnswer(false);

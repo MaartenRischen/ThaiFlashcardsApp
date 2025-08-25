@@ -24,6 +24,16 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
   
   // Add all the new default sets
   ALL_DEFAULT_SETS.forEach((set, index) => {
+    // Use the new common-words images for sets 7-16
+    let imageUrl: string;
+    if (set.id.startsWith('common-words-')) {
+      const setNumber = set.id.replace('common-words-', '');
+      imageUrl = `/images/defaults/default-common-words-${setNumber.padStart(2, '0')}.png`;
+    } else {
+      // Use original thailand images for the first 6 sets
+      imageUrl = `/images/defaults/default-thailand-${(index + 1).toString().padStart(2, '0')}.png`;
+    }
+    
     defaultSets.push({
       id: `default-${set.id}`,
       name: set.name,
@@ -32,7 +42,7 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
       source: 'default',
       level: set.level as 'complete beginner' | 'basic understanding' | 'intermediate' | 'advanced' | 'native/fluent' | 'god mode',
       specificTopics: set.description,
-      imageUrl: `/images/defaults/default-thailand-${(index + 1).toString().padStart(2, '0')}.png`,
+      imageUrl,
       isFullyLearned: false,
       seriousnessLevel: null,
       toneLevel: null

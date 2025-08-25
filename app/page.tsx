@@ -40,6 +40,8 @@ import { ProgressModal } from './components/modals/ProgressModal';
 import { CardsListModal } from './components/modals/CardsListModal';
 import { useAuth } from '@clerk/nextjs';
 import { PhraseBreakdown, getCachedBreakdown, setCachedBreakdown } from './lib/word-breakdown';
+import Confetti from './components/Confetti';
+import { useSetCompletion } from './hooks/useSetCompletion';
 
 // Utility function to detect mobile devices
 const isMobileDevice = (): boolean => {
@@ -281,6 +283,10 @@ export default function ThaiFlashcards() {
   const prevShowAnswerRef = React.useRef(false);
   // Add a ref for the card back
   const cardBackRef = useRef<HTMLDivElement>(null);
+  
+  // Confetti and completion state
+  const [showConfetti, setShowConfetti] = useState(false);
+  const { isSetCompleted } = useSetCompletion(phrases, activeSetProgress);
 
   console.log("ThaiFlashcards: Component rendering/re-rendering. randomSentence:", randomSentence); // DEBUG
 
@@ -731,10 +737,30 @@ export default function ThaiFlashcards() {
   // --- Simplified version without external sm2 function --- 
   const handleCardAction = (difficulty: 'easy' | 'good' | 'hard') => {
     const updated = calculateNextReview(activeSetProgress[index], difficulty);
-    updateSetProgress({
+    const newProgress = {
       ...activeSetProgress,
       [index]: updated,
-    });
+    };
+    
+    // Check if this action completes the set
+    const wasCompleted = isSetCompleted;
+    updateSetProgress(newProgress);
+    
+    // Check if set just became completed
+    if (!wasCompleted && difficulty === 'easy') {
+      // Check if all cards are now easy
+      let allEasy = true;
+      for (let i = 0; i < phrases.length; i++) {
+        const progress = i === index ? updated : newProgress[i];
+        if (!progress || progress.difficulty !== 'easy') {
+          allEasy = false;
+          break;
+        }
+      }
+      if (allEasy) {
+        setShowConfetti(true);
+      }
+    }
 
     // Move to next card
     const nextActiveIndex = (activeCardsIndex + 1) % activeCards.length;
@@ -1632,6 +1658,11 @@ export default function ThaiFlashcards() {
 
       {/* Tip Jar moved to header - removed bottom section */}
 
+      {/* Confetti celebration */}
+      <Confetti 
+        trigger={showConfetti} 
+        onComplete={() => setShowConfetti(false)}
+      />
     </main>
   );
 } 

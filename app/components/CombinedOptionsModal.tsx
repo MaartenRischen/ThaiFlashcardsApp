@@ -10,8 +10,6 @@ import type { SetMetaData } from '@/app/lib/storage';
 import { useUser } from '@clerk/nextjs'; // Add Clerk hook
 import PublishConfirmationModal from './PublishConfirmationModal';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import CompletionBadge from './CompletionBadge';
-import { useSetCompletion } from '../hooks/useSetCompletion';
 import SetCompletionBadge from './SetCompletionBadge';
 
 import { toast } from 'sonner';

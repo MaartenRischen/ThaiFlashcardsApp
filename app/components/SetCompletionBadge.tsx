@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import CompletionBadge from './CompletionBadge';
 import { useSet } from '../context/SetContext';
 import { getDefaultSetContent } from '../lib/seed-default-sets';
+import type { PhraseProgressData } from '../lib/storage';
 
 interface SetCompletionBadgeProps {
   setId: string;
@@ -26,7 +27,7 @@ export default function SetCompletionBadge({ setId }: SetCompletionBadgeProps) {
         }
 
         // Get progress data
-        let progress: Record<string, any> = {};
+        let progress: Record<string, PhraseProgressData> = {};
         
         // If this is the active set, use the current progress from context
         if (setId === activeSetId) {

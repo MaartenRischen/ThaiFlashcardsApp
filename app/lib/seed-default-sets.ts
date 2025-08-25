@@ -6,6 +6,9 @@ import { SetMetaData } from './storage/types';
  * Makes default sets available for non-authenticated users
  */
 export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
+  console.log('[SEED-DEFAULT-SETS] Getting default sets for unauthenticated users');
+  console.log('[SEED-DEFAULT-SETS] ALL_DEFAULT_SETS length:', ALL_DEFAULT_SETS.length);
+  
   const defaultSets: SetMetaData[] = [
     {
       id: 'default',
@@ -35,6 +38,9 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
       toneLevel: null
     });
   });
+  
+  console.log('[SEED-DEFAULT-SETS] Total default sets:', defaultSets.length);
+  console.log('[SEED-DEFAULT-SETS] Default set IDs:', defaultSets.map(s => s.id));
   
   return defaultSets;
 }

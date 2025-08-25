@@ -742,12 +742,11 @@ export default function ThaiFlashcards() {
       [index]: updated,
     };
     
-    // Check if this action completes the set
-    const wasCompleted = isSetCompleted;
+    // Update progress first
     updateSetProgress(newProgress);
     
     // Check if set just became completed
-    if (!wasCompleted && difficulty === 'easy') {
+    if (difficulty === 'easy') {
       // Check if all cards are now easy
       let allEasy = true;
       for (let i = 0; i < phrases.length; i++) {
@@ -758,7 +757,11 @@ export default function ThaiFlashcards() {
         }
       }
       if (allEasy) {
-        setShowConfetti(true);
+        console.log('🎉 Set completed! All cards marked as easy');
+        // Delay confetti slightly to ensure state update
+        setTimeout(() => {
+          setShowConfetti(true);
+        }, 100);
       }
     }
 

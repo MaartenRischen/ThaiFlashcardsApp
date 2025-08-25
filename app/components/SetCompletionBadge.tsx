@@ -10,7 +10,7 @@ interface SetCompletionBadgeProps {
 }
 
 export default function SetCompletionBadge({ setId }: SetCompletionBadgeProps) {
-  const { availableSets } = useSet();
+  const { availableSets, activeSetProgress, activeSetId } = useSet();
   const [isCompleted, setIsCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -27,28 +27,35 @@ export default function SetCompletionBadge({ setId }: SetCompletionBadgeProps) {
 
         // Get progress data
         let progress: Record<string, any> = {};
-        if (setId === 'default' || setId.startsWith('default-')) {
-          // For default sets, check localStorage
-          const storedProgress = localStorage.getItem(`progress_${setId}`);
-          if (storedProgress) {
-            try {
-              progress = JSON.parse(storedProgress);
-            } catch (e) {
-              console.error('Failed to parse progress:', e);
-            }
-          }
+        
+        // If this is the active set, use the current progress from context
+        if (setId === activeSetId) {
+          progress = activeSetProgress;
         } else {
-          // For user sets, fetch from API
-          try {
-            const response = await fetch(`/api/flashcard-sets/${setId}/progress`, {
-              credentials: 'include'
-            });
-            if (response.ok) {
-              const data = await response.json();
-              progress = data.progress || {};
+          // Otherwise load from storage
+          if (setId === 'default' || setId.startsWith('default-')) {
+            // For default sets, check localStorage
+            const storedProgress = localStorage.getItem(`progress_${setId}`);
+            if (storedProgress) {
+              try {
+                progress = JSON.parse(storedProgress);
+              } catch (e) {
+                console.error('Failed to parse progress:', e);
+              }
             }
-          } catch (error) {
-            console.error('Failed to fetch progress:', error);
+          } else {
+            // For user sets, fetch from API
+            try {
+              const response = await fetch(`/api/flashcard-sets/${setId}/progress`, {
+                credentials: 'include'
+              });
+              if (response.ok) {
+                const data = await response.json();
+                progress = data.progress || {};
+              }
+            } catch (error) {
+              console.error('Failed to fetch progress:', error);
+            }
           }
         }
 
@@ -86,7 +93,7 @@ export default function SetCompletionBadge({ setId }: SetCompletionBadgeProps) {
     };
 
     checkCompletion();
-  }, [setId, availableSets]);
+  }, [setId, availableSets, activeSetProgress, activeSetId]);
 
   if (loading || !isCompleted) {
     return null;

@@ -88,18 +88,35 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     let fetchedProgress: SetProgress = {};
 
     try {
-      // Fetch progress via API
-      console.log(`SetContext: Fetching progress via API for set ${id}`);
-      const progressResponse = await fetch(`/api/user-progress?setId=${id}`, { credentials: 'include' });
-      if (!progressResponse.ok) {
-        console.error(`SetContext: Error fetching progress API for set ${id}: ${progressResponse.statusText}`);
-        fetchedProgress = {};
+      // For default sets or when user is not logged in, load from localStorage
+      if (!userId || id === DEFAULT_SET_ID || id?.startsWith('default-')) {
+        const storedProgress = localStorage.getItem(`progress_${id}`);
+        if (storedProgress) {
+          try {
+            fetchedProgress = JSON.parse(storedProgress);
+            console.log(`SetContext: Progress loaded from localStorage for set ${id}:`, fetchedProgress);
+          } catch (e) {
+            console.error(`SetContext: Failed to parse localStorage progress for set ${id}:`, e);
+            fetchedProgress = {};
+          }
+        } else {
+          fetchedProgress = {};
+          console.log(`SetContext: No localStorage progress found for set ${id}`);
+        }
       } else {
-        // FIX: Extract the inner progress object
-        const result = await progressResponse.json();
-        fetchedProgress = result.progress || {}; // Assign the inner object or empty if missing
+        // For user sets, fetch progress via API
+        console.log(`SetContext: Fetching progress via API for set ${id}`);
+        const progressResponse = await fetch(`/api/user-progress?setId=${id}`, { credentials: 'include' });
+        if (!progressResponse.ok) {
+          console.error(`SetContext: Error fetching progress API for set ${id}: ${progressResponse.statusText}`);
+          fetchedProgress = {};
+        } else {
+          // FIX: Extract the inner progress object
+          const result = await progressResponse.json();
+          fetchedProgress = result.progress || {}; // Assign the inner object or empty if missing
+        }
+        console.log(`SetContext: Progress fetched via API for set ${id}:`, fetchedProgress);
       }
-      console.log(`SetContext: Progress fetched via API for set ${id}:`, fetchedProgress);
 
       // Fetch content
       if (id === DEFAULT_SET_ID || id?.startsWith('default-')) {
@@ -208,19 +225,27 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   // Function to save progress for the active set
   const updateSetProgress = useCallback(async (newProgress: SetProgress) => {
     if (!isLoaded) return; // Don't run if Clerk isn't ready
-    if (!activeSetId || !userId || activeSetId === DEFAULT_SET_ID) { 
-      if(activeSetId === DEFAULT_SET_ID) console.log("SetContext: Not saving progress for default set.");
-      else console.warn(`SetContext: updateSetProgress called without activeSetId (${activeSetId}) or userId (${userId}).`);
-      if (activeSetId === DEFAULT_SET_ID) {
-          setActiveSetProgress(newProgress);
-      }
+    if (!activeSetId) {
+      console.warn(`SetContext: updateSetProgress called without activeSetId`);
       return;
     }
+    
     console.log(`SetContext: updateSetProgress called for activeSetId=${activeSetId}, userId=${userId}`);
     setActiveSetProgress(newProgress); // Update local state immediately
 
+    // For default sets or when user is not logged in, save to localStorage
+    if (!userId || activeSetId === DEFAULT_SET_ID || activeSetId.startsWith('default-')) {
+      try {
+        localStorage.setItem(`progress_${activeSetId}`, JSON.stringify(newProgress));
+        console.log(`SetContext: Saved progress to localStorage for ${activeSetId}`);
+      } catch (error) {
+        console.error("SetContext: Error saving progress to localStorage:", error);
+      }
+      return;
+    }
+
+    // For user sets, save via API
     try {
-      // Save via API endpoint instead of directly using storage
       const response = await fetch(`/api/flashcard-sets/${activeSetId}/progress`, {
         method: 'POST',
         headers: {

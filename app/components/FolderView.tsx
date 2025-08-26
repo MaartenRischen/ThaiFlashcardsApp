@@ -68,7 +68,24 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
       }
 
       const data = await response.json();
-      setCurrentFolder(data.folder);
+      const folder = data.folder;
+      
+      // Get all sets that belong to this folder (by folderId or folderName)
+      const folderSets = availableSets.filter(set => 
+        set.folderId === folder.id || set.folderName === folder.name
+      );
+      
+      // Enhance the folder with the actual sets
+      setCurrentFolder({
+        ...folder,
+        sets: folderSets.map(set => ({
+          id: set.id,
+          name: set.name,
+          imageUrl: set.imageUrl,
+          phraseCount: set.phraseCount,
+          createdAt: set.createdAt
+        }))
+      });
     } catch (error) {
       console.error('Error fetching folder details:', error);
     } finally {
@@ -279,24 +296,41 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
 
             {/* Folders Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto max-h-[calc(80vh-200px)]">
-              {folders.map(folder => (
-                <FolderCard
-                  key={folder.id}
-                  folder={folder}
-                  onClick={() => fetchFolderDetails(folder.id)}
-                  onEdit={() => {
-                    setIsEditingFolder(folder);
-                    setFolderForm({
-                      name: folder.name,
-                      description: folder.description || ''
-                    });
-                  }}
-                  onDelete={() => handleDeleteFolder(folder)}
-                />
-              ))}
+              {folders.map(folder => {
+                // Get sets for this folder - handle both folderId and folderName
+                const folderSets = availableSets.filter(set => 
+                  set.folderId === folder.id || set.folderName === folder.name
+                );
+                
+                // Create enhanced folder with preview images from actual sets
+                const enhancedFolder = {
+                  ...folder,
+                  setCount: folderSets.length,
+                  previewImages: folderSets
+                    .slice(0, 4)
+                    .map(set => set.imageUrl)
+                    .filter((url): url is string => url !== null)
+                };
+                
+                return (
+                  <FolderCard
+                    key={folder.id}
+                    folder={enhancedFolder}
+                    onClick={() => fetchFolderDetails(folder.id)}
+                    onEdit={() => {
+                      setIsEditingFolder(folder);
+                      setFolderForm({
+                        name: folder.name,
+                        description: folder.description || ''
+                      });
+                    }}
+                    onDelete={() => handleDeleteFolder(folder)}
+                  />
+                );
+              })}
 
               {/* Unfiled Sets */}
-              {availableSets.filter(set => !set.folderId).length > 0 && (
+              {availableSets.filter(set => !set.folderId && !set.folderName).length > 0 && (
                 <div
                   onClick={() => {
                     // Show unfiled sets
@@ -310,7 +344,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                       createdAt: new Date().toISOString(),
                       updatedAt: new Date().toISOString(),
                       sets: availableSets
-                        .filter(set => !set.folderId)
+                        .filter(set => !set.folderId && !set.folderName)
                         .map(set => ({
                           id: set.id,
                           name: set.name,
@@ -333,7 +367,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                   <div className="mt-3">
                     <h3 className="font-semibold text-gray-400">Unfiled Sets</h3>
                     <p className="text-sm text-gray-600">
-                      {availableSets.filter(set => !set.folderId).length} sets
+                      {availableSets.filter(set => !set.folderId && !set.folderName).length} sets
                     </p>
                   </div>
                 </div>

@@ -19,6 +19,7 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
       createdAt: new Date().toISOString(),
       phraseCount: INITIAL_PHRASES.length,
       source: 'default',
+      imageUrl: '/images/default-set-logo.png',
       isFullyLearned: false,
       seriousnessLevel: null,
       toneLevel: null,

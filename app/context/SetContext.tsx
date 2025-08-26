@@ -324,6 +324,20 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
       if (userId) { // Check if userId is available (user is authenticated)
         try {
+          // Initialize folders first
+          console.log(`SetContext: Initializing folders for user...`);
+          const folderInitResponse = await fetch('/api/init-folders', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+          });
+          
+          if (!folderInitResponse.ok) {
+            console.error('Failed to initialize folders:', folderInitResponse.status);
+          }
+          
           console.log(`SetContext: Fetching initial sets via API for userId: ${userId}`);
           const response = await fetch('/api/flashcard-sets', { // <-- Fetch from API
             method: 'GET',

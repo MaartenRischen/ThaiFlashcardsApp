@@ -1,6 +1,8 @@
 import { ALL_DEFAULT_SETS } from '@/app/data/default-sets';
 import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases';
 import { SetMetaData } from './storage/types';
+import { DEFAULT_FOLDERS } from './storage/folders';
+import { getDefaultSetFolderMapping } from './storage/default-folder-assignment';
 
 /**
  * Makes default sets available for non-authenticated users
@@ -8,6 +10,8 @@ import { SetMetaData } from './storage/types';
 export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
   console.log('[SEED-DEFAULT-SETS] Getting default sets for unauthenticated users');
   console.log('[SEED-DEFAULT-SETS] ALL_DEFAULT_SETS length:', ALL_DEFAULT_SETS.length);
+  
+  const folderMapping = getDefaultSetFolderMapping();
   
   const defaultSets: SetMetaData[] = [
     {
@@ -18,7 +22,8 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
       source: 'default',
       isFullyLearned: false,
       seriousnessLevel: null,
-      toneLevel: null
+      toneLevel: null,
+      folderName: folderMapping['default']
     }
   ];
   
@@ -37,8 +42,9 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
       imageUrl = `/images/defaults/default-thailand-${(index + 1).toString().padStart(2, '0')}.png`;
     }
     
+    const setId = `default-${set.id}`;
     defaultSets.push({
-      id: `default-${set.id}`,
+      id: setId,
       name: set.name,
       createdAt: new Date().toISOString(),
       phraseCount: set.phrases.length,
@@ -48,7 +54,8 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
       imageUrl,
       isFullyLearned: false,
       seriousnessLevel: null,
-      toneLevel: null
+      toneLevel: null,
+      folderName: folderMapping[setId]
     });
   });
   

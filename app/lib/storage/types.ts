@@ -18,6 +18,8 @@ export interface SetMetaData {
   toneLevel: string | null;
   llmBrand?: string;
   llmModel?: string;
+  folderId?: string | null;
+  folderName?: string; // For display purposes
 }
 
 export interface PhraseProgressData {

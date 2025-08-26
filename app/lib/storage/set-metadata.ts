@@ -23,6 +23,12 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
       include: {
         _count: {
           select: { phrases: true }
+        },
+        folder: {
+          select: {
+            id: true,
+            name: true
+          }
         }
       }
     });

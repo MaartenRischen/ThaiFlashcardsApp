@@ -20,7 +20,7 @@ export function generateUUID(): string {
 
 // Map database record to storage metadata
 export function mapDatabaseToStorage(
-  dbSet: FlashcardSet & { _count?: { phrases: number } }
+  dbSet: FlashcardSet & { _count?: { phrases: number }, folder?: { id: string, name: string } | null }
 ): SetMetaData {
   const toneLevelValue = dbSet.seriousnessLevel;
   const toneLabel = toneLevelValue !== null ? getToneLabel(toneLevelValue) : null;
@@ -40,7 +40,9 @@ export function mapDatabaseToStorage(
     seriousnessLevel: toneLevelValue,
     toneLevel: toneLabel,
     llmBrand: dbSet.llmBrand || undefined,
-    llmModel: dbSet.llmModel || undefined
+    llmModel: dbSet.llmModel || undefined,
+    folderId: dbSet.folderId || undefined,
+    folderName: dbSet.folder?.name || undefined
   };
 }
 

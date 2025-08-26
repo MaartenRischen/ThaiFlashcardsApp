@@ -50,7 +50,7 @@ export function mapDatabaseToStorage(
 export function mapStorageToDatabase(
   storageSet: SetMetaData
 ): Omit<FlashcardSet, 'id' | 'createdAt' | 'updatedAt' | 'userId' | 'shareId' | 'toneLevel'> {
-  const { toneLevel, isFullyLearned, phraseCount, createdAt, id, ...rest } = storageSet;
+  const { toneLevel, isFullyLearned, phraseCount, createdAt, id, folderName, ...rest } = storageSet;
 
   return {
     ...rest,
@@ -62,5 +62,6 @@ export function mapStorageToDatabase(
     seriousnessLevel: rest.seriousnessLevel,
     llmBrand: rest.llmBrand || null,
     llmModel: rest.llmModel || null,
+    folderId: rest.folderId || null,
   };
 } 

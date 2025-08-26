@@ -1,7 +1,6 @@
 import { ALL_DEFAULT_SETS } from '@/app/data/default-sets';
 import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases';
 import { SetMetaData } from './storage/types';
-import { DEFAULT_FOLDERS } from './storage/folders';
 import { getDefaultSetFolderMapping } from './storage/default-folder-assignment';
 
 /**

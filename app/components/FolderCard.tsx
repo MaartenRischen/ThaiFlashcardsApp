@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { Folder } from '@/app/lib/storage/folders';
 
 interface FolderCardProps {
@@ -31,51 +32,78 @@ export default function FolderCard({ folder, onClick, onEdit, onDelete }: Folder
         {folder.previewImages && folder.previewImages.length > 0 ? (
           <div className="grid grid-cols-2 gap-0.5 h-full">
             {folder.previewImages.length === 1 ? (
-              <img
-                src={folder.previewImages[0]}
-                alt={folder.name}
-                className="w-full h-full object-cover col-span-2"
-              />
+              <div className="relative w-full h-full col-span-2">
+                <Image
+                  src={folder.previewImages[0]}
+                  alt={folder.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
+              </div>
             ) : folder.previewImages.length === 2 ? (
               <>
-                <img
-                  src={folder.previewImages[0]}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-                <img
-                  src={folder.previewImages[1]}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
+                <div className="relative w-full h-full">
+                  <Image
+                    src={folder.previewImages[0]}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 25vw, 12.5vw"
+                  />
+                </div>
+                <div className="relative w-full h-full">
+                  <Image
+                    src={folder.previewImages[1]}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 25vw, 12.5vw"
+                  />
+                </div>
               </>
             ) : folder.previewImages.length === 3 ? (
               <>
-                <img
-                  src={folder.previewImages[0]}
-                  alt=""
-                  className="w-full h-full object-cover col-span-2"
-                />
-                <img
-                  src={folder.previewImages[1]}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-                <img
-                  src={folder.previewImages[2]}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
+                <div className="relative w-full h-full col-span-2">
+                  <Image
+                    src={folder.previewImages[0]}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                  />
+                </div>
+                <div className="relative w-full h-full">
+                  <Image
+                    src={folder.previewImages[1]}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 25vw, 12.5vw"
+                  />
+                </div>
+                <div className="relative w-full h-full">
+                  <Image
+                    src={folder.previewImages[2]}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 25vw, 12.5vw"
+                  />
+                </div>
               </>
             ) : (
               // 4 images
               folder.previewImages.slice(0, 4).map((img, idx) => (
-                <img
-                  key={idx}
-                  src={img}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
+                <div key={idx} className="relative w-full h-full">
+                  <Image
+                    src={img}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 25vw, 12.5vw"
+                  />
+                </div>
               ))
             )}
           </div>

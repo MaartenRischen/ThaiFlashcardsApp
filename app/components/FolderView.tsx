@@ -19,7 +19,7 @@ interface FolderViewProps {
   highlightSetId: string | null;
 }
 
-export function FolderView({ isOpen, onClose, highlightSetId }: FolderViewProps) {
+export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }: FolderViewProps) {
   const { availableSets, switchSet, activeSetId } = useSet();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [currentFolder, setCurrentFolder] = useState<FolderWithSets | null>(null);

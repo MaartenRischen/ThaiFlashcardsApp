@@ -76,7 +76,7 @@ export async function assignDefaultSetsToFolders(userId: string) {
  * Ensures default folders exist and default sets are assigned for unauthenticated users
  * Returns folder information for default sets
  */
-export function getDefaultSetFolderMapping() {
+export function getDefaultSetFolderMapping(): Record<string, string> {
   return {
     'default': DEFAULT_FOLDERS.DEFAULT_SETS,
     'default-proverbs': DEFAULT_FOLDERS.DEFAULT_SETS,

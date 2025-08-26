@@ -24,11 +24,14 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
   
   // Add all the new default sets
   ALL_DEFAULT_SETS.forEach((set, index) => {
-    // Use the new common-words images for sets 7-16
+    // Determine which image to use based on set ID
     let imageUrl: string;
     if (set.id.startsWith('common-words-')) {
       const setNumber = set.id.replace('common-words-', '');
       imageUrl = `/images/defaults/default-common-words-${setNumber.padStart(2, '0')}.png`;
+    } else if (set.id.startsWith('common-sentences-')) {
+      const setNumber = set.id.replace('common-sentences-', '');
+      imageUrl = `/images/defaults/default-common-sentences-${setNumber}.png`;
     } else {
       // Use original thailand images for the first 6 sets
       imageUrl = `/images/defaults/default-thailand-${(index + 1).toString().padStart(2, '0')}.png`;

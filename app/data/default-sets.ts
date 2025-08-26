@@ -1,5 +1,6 @@
 import { Phrase } from './phrases';
 import { COMMON_WORDS_SETS } from './common-words-sets';
+import { ALL_COMMON_SENTENCES_SETS } from './common-sentences-sets';
 
 export interface DefaultSet {
   id: string;
@@ -1459,4 +1460,4 @@ export const DEFAULT_SETS: DefaultSet[] = [
 ];
 
 // Export combined sets
-export const ALL_DEFAULT_SETS = [...DEFAULT_SETS, ...COMMON_WORDS_SETS];
+export const ALL_DEFAULT_SETS = [...DEFAULT_SETS, ...COMMON_WORDS_SETS, ...ALL_COMMON_SENTENCES_SETS];

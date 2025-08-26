@@ -19,6 +19,7 @@ const isPublicRoute = createRouteMatcher([
   '/public-sets(.*)', // Public sets page
   '/share/(.*)', // Share pages
   '/clerk-debug', // Debug page
+  '/api/generate-sentence-images', // Temporary for generating sentence images
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

@@ -3,9 +3,9 @@ import { DefaultSet } from './default-sets';
 export const COMMON_WORDS_SETS: DefaultSet[] = [
   {
     id: 'common-words-1',
-    name: '100 Most Used Thai Words & Phrases 1',
+            name: '100 Most Used Thai Words 1',
     level: 'Complete Beginner',
-    description: 'Essential everyday Thai words and phrases (1-10)',
+    description: 'Essential everyday Thai words (1-10)',
     phrases: [
       {
         english: "Can",
@@ -251,9 +251,9 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
   },
   {
     id: 'common-words-2',
-    name: '100 Most Used Thai Words & Phrases 2',
+    name: '100 Most Used Thai Words 2',
     level: 'Complete Beginner',
-    description: 'Essential everyday Thai words and phrases (11-20)',
+    description: 'Essential everyday Thai words (11-20)',
     phrases: [
       {
         english: "Like",
@@ -499,9 +499,9 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
   },
   {
     id: 'common-words-3',
-    name: '100 Most Used Thai Words & Phrases 3',
+    name: '100 Most Used Thai Words 3',
     level: 'Complete Beginner',
-    description: 'Essential everyday Thai words and phrases (21-30)',
+    description: 'Essential everyday Thai words (21-30)',
     phrases: [
       {
         english: "Eat",
@@ -747,9 +747,9 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
   },
   {
     id: 'common-words-4',
-    name: '100 Most Used Thai Words & Phrases 4',
+    name: '100 Most Used Thai Words 4',
     level: 'Complete Beginner',
-    description: 'Essential everyday Thai words and phrases (31-40)',
+    description: 'Essential everyday Thai words (31-40)',
     phrases: [
       {
         english: "Think",
@@ -996,9 +996,9 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
   },
   {
     id: 'common-words-5',
-    name: '100 Most Used Thai Words & Phrases 5',
+    name: '100 Most Used Thai Words 5',
     level: 'Basic Understanding',
-    description: 'Essential everyday Thai words and phrases (41-50)',
+    description: 'Essential everyday Thai words (41-50)',
     phrases: [
       {
         english: "Maybe/Probably",
@@ -1245,9 +1245,9 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
   },
   {
     id: 'common-words-6',
-    name: '100 Most Used Thai Words & Phrases 6',
+    name: '100 Most Used Thai Words 6',
     level: 'Basic Understanding',
-    description: 'Essential everyday Thai words and phrases (51-60)',
+    description: 'Essential everyday Thai words (51-60)',
     phrases: [
       {
         english: "Important",
@@ -1493,9 +1493,9 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
   },
   {
     id: 'common-words-7',
-    name: '100 Most Used Thai Words & Phrases 7',
+    name: '100 Most Used Thai Words 7',
     level: 'Basic Understanding',
-    description: 'Essential everyday Thai words and phrases (61-70)',
+    description: 'Essential everyday Thai words (61-70)',
     phrases: [
       {
         english: "Different",
@@ -1741,9 +1741,9 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
   },
   {
     id: 'common-words-8',
-    name: '100 Most Used Thai Words & Phrases 8',
+    name: '100 Most Used Thai Words 8',
     level: 'Intermediate',
-    description: 'Essential everyday Thai words and phrases (71-80)',
+    description: 'Essential everyday Thai words (71-80)',
     phrases: [
       {
         english: "Car",
@@ -1990,9 +1990,9 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
   },
   {
     id: 'common-words-9',
-    name: '100 Most Used Thai Words & Phrases 9',
+    name: '100 Most Used Thai Words 9',
     level: 'Intermediate',
-    description: 'Essential everyday Thai words and phrases (81-90)',
+    description: 'Essential everyday Thai words (81-90)',
     phrases: [
       {
         english: "Market",
@@ -2238,9 +2238,9 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
   },
   {
     id: 'common-words-10',
-    name: '100 Most Used Thai Words & Phrases 10',
+    name: '100 Most Used Thai Words 10',
     level: 'Intermediate',
-    description: 'Essential everyday Thai words and phrases (91-100)',
+    description: 'Essential everyday Thai words (91-100)',
     phrases: [
       {
         english: "Left",

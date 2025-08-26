@@ -18,12 +18,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ขอโทษครับ ห้องน้ำอยู่ที่ไหนครับ",
-            english: "Excuse me, where is the bathroom?",
+            translation: "Excuse me, where is the bathroom?",
             pronunciation: "kɔ̌ɔ-tôot kráp hɔ̂ɔŋ-náam yùu tîi-nǎi kráp"
           },
           {
             thai: "ห้องน้ำอยู่ทางขวามือค่ะ",
-            english: "The bathroom is on the right.",
+            translation: "The bathroom is on the right.",
             pronunciation: "hɔ̂ɔŋ-náam yùu taaŋ kwǎa mʉʉ kâ"
           }
         ]
@@ -39,12 +39,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "อันนี้ราคาเท่าไหร่คะ",
-            english: "How much does this cost? (female asking)",
+            translation: "How much does this cost? (female asking)",
             pronunciation: "an-níi raa-kaa tâo-rài kâ"
           },
           {
             thai: "ราคาร้อยบาทครับ",
-            english: "The price is 100 baht.",
+            translation: "The price is 100 baht.",
             pronunciation: "raa-kaa rɔ́ɔy bàat kráp"
           }
         ]
@@ -60,12 +60,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ขอโทษครับ ผมไม่เข้าใจ",
-            english: "Sorry, I don't understand. (male)",
+            translation: "Sorry, I don't understand. (male)",
             pronunciation: "kɔ̌ɔ-tôot kráp pǒm mâi kâo-jai"
           },
           {
             thai: "คุณช่วยพูดช้าๆ หน่อยได้ไหมคะ ฉันไม่เข้าใจ",
-            english: "Can you speak slowly? I don't understand.",
+            translation: "Can you speak slowly? I don't understand.",
             pronunciation: "kun chûai pûut cháa-cháa nɔ̀i dâai mǎi kâ chǎn mâi kâo-jai"
           }
         ]
@@ -81,12 +81,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "คุณช่วยฉันหน่อยได้ไหมคะ",
-            english: "Can you help me a bit? (female)",
+            translation: "Can you help me a bit? (female)",
             pronunciation: "kun chûai chǎn nɔ̀i dâai mǎi kâ"
           },
           {
             thai: "ผมหลงทาง คุณช่วยผมได้ไหมครับ",
-            english: "I'm lost. Can you help me? (male)",
+            translation: "I'm lost. Can you help me? (male)",
             pronunciation: "pǒm lǒŋ taaŋ kun chûai pǒm dâai mǎi kráp"
           }
         ]
@@ -102,12 +102,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ผมอยากได้น้ำเย็นครับ",
-            english: "I would like cold water. (male)",
+            translation: "I would like cold water. (male)",
             pronunciation: "pǒm yàak dâai náam yen kráp"
           },
           {
             thai: "ฉันอยากได้น้ำอุ่นค่ะ",
-            english: "I would like warm water. (female)",
+            translation: "I would like warm water. (female)",
             pronunciation: "chǎn yàak dâai náam ùn kâ"
           }
         ]
@@ -123,12 +123,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "สวัสดีครับ คุณชื่ออะไรครับ",
-            english: "Hello, what is your name? (male asking)",
+            translation: "Hello, what is your name? (male asking)",
             pronunciation: "sà-wàt-dii kráp kun chʉ̂ʉ à-rai kráp"
           },
           {
             thai: "ฉันชื่อสมศรี คุณชื่ออะไรคะ",
-            english: "My name is Somsri. What is your name?",
+            translation: "My name is Somsri. What is your name?",
             pronunciation: "chǎn chʉ̂ʉ sǒm-sǐi kun chʉ̂ʉ à-rai kâ"
           }
         ]
@@ -144,12 +144,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ยินดีที่ได้รู้จักครับ ผมชื่อจอห์น",
-            english: "Nice to meet you. My name is John.",
+            translation: "Nice to meet you. My name is John.",
             pronunciation: "yin-dii tîi dâai rúu-jàk kráp pǒm chʉ̂ʉ jɔɔn"
           },
           {
             thai: "ยินดีที่ได้รู้จักเช่นกันค่ะ",
-            english: "Nice to meet you too.",
+            translation: "Nice to meet you too.",
             pronunciation: "yin-dii tîi dâai rúu-jàk chên-gan kâ"
           }
         ]
@@ -165,12 +165,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ผมขอโทษที่มาสาย",
-            english: "I'm sorry for being late. (male)",
+            translation: "I'm sorry for being late. (male)",
             pronunciation: "pǒm kɔ̌ɔ-tôot tîi maa sǎai"
           },
           {
             thai: "ขอโทษค่ะ ฉันไม่ได้ตั้งใจ",
-            english: "I'm sorry, I didn't mean to.",
+            translation: "I'm sorry, I didn't mean to.",
             pronunciation: "kɔ̌ɔ-tôot kâ chǎn mâi dâai tâŋ-jai"
           }
         ]
@@ -186,12 +186,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ไปก่อนนะครับ แล้วเจอกัน",
-            english: "I'm going now. See you later.",
+            translation: "I'm going now. See you later.",
             pronunciation: "pai gɔ̀ɔn ná kráp láeo jəə gan"
           },
           {
             thai: "แล้วเจอกันพรุ่งนี้ค่ะ",
-            english: "See you tomorrow.",
+            translation: "See you tomorrow.",
             pronunciation: "láeo jəə gan prûŋ-níi kâ"
           }
         ]
@@ -207,12 +207,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ผมชอบอาหารไทยมาก โดยเฉพาะต้มยำกุ้ง",
-            english: "I really like Thai food, especially tom yum goong.",
+            translation: "I really like Thai food, especially tom yum goong.",
             pronunciation: "pǒm chɔ̂ɔp aa-hǎan thai mâak dooi-chà-pɔ́ tôm-yam-gûŋ"
           },
           {
             thai: "คุณชอบอาหารไทยไหมคะ",
-            english: "Do you like Thai food?",
+            translation: "Do you like Thai food?",
             pronunciation: "kun chɔ̂ɔp aa-hǎan thai mǎi kâ"
           }
         ]
@@ -236,12 +236,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ขอโทษครับ คุณพูดภาษาอังกฤษได้ไหมครับ",
-            english: "Excuse me, do you speak English?",
+            translation: "Excuse me, do you speak English?",
             pronunciation: "kɔ̌ɔ-tôot kráp kun pûut paa-sǎa aŋ-grìt dâai mǎi kráp"
           },
           {
             thai: "ผมพูดได้นิดหน่อยครับ",
-            english: "I can speak a little.",
+            translation: "I can speak a little.",
             pronunciation: "pǒm pûut dâai nít-nɔ̀i kráp"
           }
         ]
@@ -257,12 +257,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ผมหิวมากครับ ไปกินข้าวกันไหม",
-            english: "I'm very hungry. Shall we go eat?",
+            translation: "I'm very hungry. Shall we go eat?",
             pronunciation: "pǒm hǐu mâak kráp pai gin kâao gan mǎi"
           },
           {
             thai: "คุณหิวไหมคะ",
-            english: "Are you hungry?",
+            translation: "Are you hungry?",
             pronunciation: "kun hǐu mǎi kâ"
           }
         ]
@@ -278,12 +278,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "อาหารร้านนี้อร่อยมากเลยค่ะ",
-            english: "The food at this restaurant is really delicious.",
+            translation: "The food at this restaurant is really delicious.",
             pronunciation: "aa-hǎan ráan níi à-rɔ̀i mâak ləəi kâ"
           },
           {
             thai: "ต้มยำกุ้งอร่อยที่สุด",
-            english: "Tom yum goong is the most delicious.",
+            translation: "Tom yum goong is the most delicious.",
             pronunciation: "tôm-yam-gûŋ à-rɔ̀i tîi-sùt"
           }
         ]
@@ -299,12 +299,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "พี่ครับ ขอบิลหน่อยครับ",
-            english: "Waiter, can I have the bill please? (male)",
+            translation: "Waiter, can I have the bill please? (male)",
             pronunciation: "pîi kráp kɔ̌ɔ bin nɔ̀i kráp"
           },
           {
             thai: "เสร็จแล้วค่ะ ขอบิลหน่อย",
-            english: "We're finished. Can I have the bill?",
+            translation: "We're finished. Can I have the bill?",
             pronunciation: "sèt láeo kâ kɔ̌ɔ bin nɔ̀i"
           }
         ]
@@ -320,12 +320,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ผมอยากไปสนามบินครับ",
-            english: "I want to go to the airport.",
+            translation: "I want to go to the airport.",
             pronunciation: "pǒm yàak pai sà-nǎam-bin kráp"
           },
           {
             thai: "ฉันอยากไปตลาดนัดจตุจักร",
-            english: "I want to go to Chatuchak Market.",
+            translation: "I want to go to Chatuchak Market.",
             pronunciation: "chǎn yàak pai tà-làat-nát jà-tù-jàk"
           }
         ]
@@ -341,12 +341,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "เลี้ยวซ้ายตรงสี่แยกครับ",
-            english: "Turn left at the intersection.",
+            translation: "Turn left at the intersection.",
             pronunciation: "líao sáai troŋ sìi-yɛ̂ɛk kráp"
           },
           {
             thai: "เลี้ยวขวาแล้วตรงไปเรื่อยๆ",
-            english: "Turn right then go straight.",
+            translation: "Turn right then go straight.",
             pronunciation: "líao kwǎa láeo troŋ pai rʉ̂ai-rʉ̂ai"
           }
         ]
@@ -362,12 +362,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ขอโทษครับ ผมพูดไทยไม่เก่ง",
-            english: "Sorry, I don't speak Thai well.",
+            translation: "Sorry, I don't speak Thai well.",
             pronunciation: "kɔ̌ɔ-tôot kráp pǒm pûut thai mâi gèŋ"
           },
           {
             thai: "ฉันกำลังเรียนภาษาไทย แต่ยังพูดไม่เก่ง",
-            english: "I'm learning Thai but still don't speak well.",
+            translation: "I'm learning Thai but still don't speak well.",
             pronunciation: "chǎn gam-laŋ rian paa-sǎa thai tɛ̀ɛ yaŋ pûut mâi gèŋ"
           }
         ]
@@ -383,12 +383,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "วัดโพธิ์ไกลไหมครับ",
-            english: "Is Wat Pho far?",
+            translation: "Is Wat Pho far?",
             pronunciation: "wát-poo glai mǎi kráp"
           },
           {
             thai: "ไม่ไกลค่ะ ประมาณสิบนาที",
-            english: "Not far, about ten minutes.",
+            translation: "Not far, about ten minutes.",
             pronunciation: "mâi glai kâ prà-maan sìp naa-tii"
           }
         ]
@@ -404,12 +404,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ผมเอาอันนี้สองชิ้นครับ",
-            english: "I'll take two of these.",
+            translation: "I'll take two of these.",
             pronunciation: "pǒm ao an-níi sɔ̌ɔŋ chín kráp"
           },
           {
             thai: "เอาอันนี้แล้วกันค่ะ สวยดี",
-            english: "I'll take this one, it's pretty.",
+            translation: "I'll take this one, it's pretty.",
             pronunciation: "ao an-níi láeo gan kâ sǔai dii"
           }
         ]
@@ -425,12 +425,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ขอโทษครับ ตอนนี้กี่โมงแล้วครับ",
-            english: "Excuse me, what time is it now?",
+            translation: "Excuse me, what time is it now?",
             pronunciation: "kɔ̌ɔ-tôot kráp tɔɔn-níi gìi mooŋ láeo kráp"
           },
           {
             thai: "สามโมงครึ่งแล้วค่ะ",
-            english: "It's 3:30.",
+            translation: "It's 3:30.",
             pronunciation: "sǎam mooŋ krʉ̂ŋ láeo kâ"
           }
         ]
@@ -446,12 +446,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ขอให้เดินทางปลอดภัยนะครับ",
-            english: "Have a safe trip!",
+            translation: "Have a safe trip!",
             pronunciation: "kɔ̌ɔ hâi dəən-taaŋ plɔ̀ɔt-pai ná kráp"
           },
           {
             thai: "เดินทางปลอดภัย แล้วเจอกันใหม่",
-            english: "Have a safe trip, see you again.",
+            translation: "Have a safe trip, see you again.",
             pronunciation: "dəən-taaŋ plɔ̀ɔt-pai láeo jəə gan mài"
           }
         ]
@@ -475,12 +475,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "สวัสดีครับ คุณกำลังทำอะไรอยู่ครับ",
-            english: "Hello, what are you doing?",
+            translation: "Hello, what are you doing?",
             pronunciation: "sà-wàt-dii kráp kun gam-laŋ tam à-rai yùu kráp"
           },
           {
             thai: "ฉันกำลังทำอาหารค่ะ",
-            english: "I'm cooking.",
+            translation: "I'm cooking.",
             pronunciation: "chǎn gam-laŋ tam aa-hǎan kâ"
           }
         ]
@@ -496,12 +496,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ผมมาจากอเมริกา มาเที่ยวประเทศไทย",
-            english: "I come from America, visiting Thailand.",
+            translation: "I come from America, visiting Thailand.",
             pronunciation: "pǒm maa jàak à-mee-rí-gaa maa tîao prà-têet thai"
           },
           {
             thai: "คุณมาจากประเทศอะไรคะ",
-            english: "What country do you come from?",
+            translation: "What country do you come from?",
             pronunciation: "kun maa jàak prà-têet à-rai kâ"
           }
         ]
@@ -517,12 +517,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "คุณอยู่เมืองไทยมานานแค่ไหนแล้วครับ",
-            english: "How long have you been in Thailand?",
+            translation: "How long have you been in Thailand?",
             pronunciation: "kun yùu mʉaŋ thai maa naan kɛ̂ɛ-nǎi láeo kráp"
           },
           {
             thai: "ผมอยู่มาสองเดือนแล้วครับ",
-            english: "I've been here for two months.",
+            translation: "I've been here for two months.",
             pronunciation: "pǒm yùu maa sɔ̌ɔŋ dʉan láeo kráp"
           }
         ]
@@ -538,12 +538,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ช่วยแนะนำร้านอาหารไทยแถวนี้หน่อยได้ไหมครับ",
-            english: "Can you recommend a Thai restaurant around here?",
+            translation: "Can you recommend a Thai restaurant around here?",
             pronunciation: "chûai nɛ́-nam ráan aa-hǎan thai tɛ̌ɛo níi nɔ̀i dâai mǎi kráp"
           },
           {
             thai: "ร้านนี้อร่อยมากค่ะ แนะนำเลย",
-            english: "This restaurant is very delicious, I recommend it.",
+            translation: "This restaurant is very delicious, I recommend it.",
             pronunciation: "ráan níi à-rɔ̀i mâak kâ nɛ́-nam ləəi"
           }
         ]
@@ -559,12 +559,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ผมไม่สบาย ต้องไปโรงพยาบาลครับ",
-            english: "I'm not feeling well, I need to go to the hospital.",
+            translation: "I'm not feeling well, I need to go to the hospital.",
             pronunciation: "pǒm mâi sà-baai tɔ̂ŋ pai rooŋ-pá-yaa-baan kráp"
           },
           {
             thai: "โรงพยาบาลที่ใกล้ที่สุดอยู่ที่ไหนคะ",
-            english: "Where is the nearest hospital?",
+            translation: "Where is the nearest hospital?",
             pronunciation: "rooŋ-pá-yaa-baan tîi glâi tîi-sùt yùu tîi-nǎi kâ"
           }
         ]
@@ -580,12 +580,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "วันนี้อากาศร้อนมาก ควรดื่มน้ำเยอะๆ",
-            english: "It's very hot today, should drink lots of water.",
+            translation: "It's very hot today, should drink lots of water.",
             pronunciation: "wan-níi aa-gàat rɔ́ɔn mâak kuan dʉ̀ʉm náam yə́-yə́"
           },
           {
             thai: "พรุ่งนี้อากาศจะร้อนกว่านี้อีก",
-            english: "Tomorrow will be even hotter.",
+            translation: "Tomorrow will be even hotter.",
             pronunciation: "prûŋ-níi aa-gàat jà rɔ́ɔn gwàa níi ìik"
           }
         ]
@@ -601,12 +601,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ผมอยากจองห้องพักสำหรับคืนนี้ครับ",
-            english: "I'd like to book a room for tonight.",
+            translation: "I'd like to book a room for tonight.",
             pronunciation: "pǒm yàak jɔɔŋ hɔ̂ŋ-pák sǎm-ràp kʉʉn níi kráp"
           },
           {
             thai: "ห้องพักเต็มหมดแล้วค่ะ",
-            english: "All rooms are fully booked.",
+            translation: "All rooms are fully booked.",
             pronunciation: "hɔ̂ŋ-pák tem mòt láeo kâ"
           }
         ]
@@ -622,12 +622,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ผมกำลังเรียนภาษาไทย ยังพูดไม่ค่อยเก่ง",
-            english: "I'm learning Thai, still can't speak well.",
+            translation: "I'm learning Thai, still can't speak well.",
             pronunciation: "pǒm gam-laŋ rian paa-sǎa thai yaŋ pûut mâi kɔ̂i gèŋ"
           },
           {
             thai: "เรียนภาษาไทยมานานแค่ไหนแล้วคะ",
-            english: "How long have you been learning Thai?",
+            translation: "How long have you been learning Thai?",
             pronunciation: "rian paa-sǎa thai maa naan kɛ̂ɛ-nǎi láeo kâ"
           }
         ]
@@ -643,12 +643,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ขอโทษที่มาสายครับ - ไม่เป็นไรครับ",
-            english: "Sorry for being late - It doesn't matter.",
+            translation: "Sorry for being late - It doesn't matter.",
             pronunciation: "kɔ̌ɔ-tôot tîi maa sǎai kráp - mâi pen rai kráp"
           },
           {
             thai: "ไม่เป็นไรค่ะ ไม่ต้องห่วง",
-            english: "It's okay, don't worry.",
+            translation: "It's okay, don't worry.",
             pronunciation: "mâi pen rai kâ mâi tɔ̂ŋ hùaŋ"
           }
         ]
@@ -664,12 +664,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "คำนี้หมายความว่าอะไรครับ",
-            english: "What does this word mean?",
+            translation: "What does this word mean?",
             pronunciation: "kam níi mǎai kwaam wâa à-rai kráp"
           },
           {
             thai: "หมายความว่า ขอบคุณ ค่ะ",
-            english: "It means 'thank you'.",
+            translation: "It means 'thank you'.",
             pronunciation: "mǎai kwaam wâa kɔ̀ɔp-kun kâ"
           }
         ]
@@ -693,12 +693,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "สวัสดีครับ กินข้าวหรือยังครับ",
-            english: "Hello, have you eaten yet?",
+            translation: "Hello, have you eaten yet?",
             pronunciation: "sà-wàt-dii kráp gin kâao rʉ̌ʉ yaŋ kráp"
           },
           {
             thai: "ยังค่ะ เดี๋ยวจะไปกิน",
-            english: "Not yet, I'll go eat soon.",
+            translation: "Not yet, I'll go eat soon.",
             pronunciation: "yaŋ kâ dǐao jà pai gin"
           }
         ]
@@ -714,12 +714,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ดึกแล้ว ผมกลับบ้านก่อนนะครับ",
-            english: "It's late, I'm going home now.",
+            translation: "It's late, I'm going home now.",
             pronunciation: "dʉ̀k láeo pǒm glàp bâan gɔ̀ɔn ná kráp"
           },
           {
             thai: "กลับบ้านดีๆ นะคะ",
-            english: "Get home safely.",
+            translation: "Get home safely.",
             pronunciation: "glàp bâan dii-dii ná kâ"
           }
         ]
@@ -735,12 +735,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "รอสักครู่นะครับ เดี๋ยวผมกลับมา",
-            english: "Wait a moment, I'll be right back.",
+            translation: "Wait a moment, I'll be right back.",
             pronunciation: "rɔɔ sàk-krûu ná kráp dǐao pǒm glàp maa"
           },
           {
             thai: "ได้ค่ะ ไม่รีบ",
-            english: "Sure, no rush.",
+            translation: "Sure, no rush.",
             pronunciation: "dâai kâ mâi rîip"
           }
         ]
@@ -756,12 +756,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ผมไม่มีเงินสด มีบัตรเครดิตได้ไหม",
-            english: "I don't have cash, can I use credit card?",
+            translation: "I don't have cash, can I use credit card?",
             pronunciation: "pǒm mâi mii ŋəən sòt mii bàt kree-dìt dâai mǎi"
           },
           {
             thai: "วันนี้ไม่มีเงิน พรุ่งนี้ค่อยซื้อ",
-            english: "Don't have money today, will buy tomorrow.",
+            translation: "Don't have money today, will buy tomorrow.",
             pronunciation: "wan-níi mâi mii ŋəən prûŋ-níi kɔ̂i sʉ́ʉ"
           }
         ]
@@ -777,12 +777,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "อาหารร้านนี้อร่อยมาก - ผมก็คิดอย่างนั้นครับ",
-            english: "This restaurant's food is delicious - I think so too.",
+            translation: "This restaurant's food is delicious - I think so too.",
             pronunciation: "aa-hǎan ráan níi à-rɔ̀i mâak - pǒm gɔ̂ɔ kít yàaŋ-nán kráp"
           },
           {
             thai: "ฉันก็คิดอย่างนั้นเหมือนกัน",
-            english: "I think the same way.",
+            translation: "I think the same way.",
             pronunciation: "chǎn gɔ̂ɔ kít yàaŋ-nán mʉ̌an-gan"
           }
         ]
@@ -798,12 +798,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ขอโทษครับ พูดช้าๆ หน่อยได้ไหมครับ",
-            english: "Excuse me, can you speak slowly?",
+            translation: "Excuse me, can you speak slowly?",
             pronunciation: "kɔ̌ɔ-tôot kráp pûut cháa-cháa nɔ̀i dâai mǎi kráp"
           },
           {
             thai: "ได้ค่ะ จะพูดช้าลง",
-            english: "Sure, I'll speak slower.",
+            translation: "Sure, I'll speak slower.",
             pronunciation: "dâai kâ jà pûut cháa loŋ"
           }
         ]
@@ -819,12 +819,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ง่วงแล้ว ผมจะไปนอนครับ",
-            english: "I'm sleepy, I'm going to sleep.",
+            translation: "I'm sleepy, I'm going to sleep.",
             pronunciation: "ŋûaŋ láeo pǒm jà pai nɔɔn kráp"
           },
           {
             thai: "ฝันดีนะคะ",
-            english: "Sweet dreams.",
+            translation: "Sweet dreams.",
             pronunciation: "fǎn dii ná kâ"
           }
         ]
@@ -840,12 +840,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ขอเบอร์โทรศัพท์หน่อยได้ไหมครับ",
-            english: "Can I have your phone number?",
+            translation: "Can I have your phone number?",
             pronunciation: "kɔ̌ɔ bəə too-rá-sàp nɔ̀i dâai mǎi kráp"
           },
           {
             thai: "เบอร์ผม 081-234-5678 ครับ",
-            english: "My number is 081-234-5678.",
+            translation: "My number is 081-234-5678.",
             pronunciation: "bəə pǒm sǔun-pɛ̀ɛt-nʉ̀ŋ sɔ̌ɔŋ-sǎam-sìi hâa-hòk-jèt-pɛ̀ɛt kráp"
           }
         ]
@@ -861,12 +861,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "ตอนนี้ยุ่ง เดี๋ยวผมโทรหาใหม่นะครับ",
-            english: "I'm busy now, I'll call you back later.",
+            translation: "I'm busy now, I'll call you back later.",
             pronunciation: "tɔɔn-níi yûŋ dǐao pǒm too hǎa mài ná kráp"
           },
           {
             thai: "โทรหาตอนไหนก็ได้ค่ะ",
-            english: "You can call anytime.",
+            translation: "You can call anytime.",
             pronunciation: "too hǎa tɔɔn nǎi gɔ̂ɔ dâai kâ"
           }
         ]
@@ -882,12 +882,12 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         examples: [
           {
             thai: "พรุ่งนี้ว่างไหมครับ ไปกินข้าวกันไหม",
-            english: "Are you free tomorrow? Want to have a meal together?",
+            translation: "Are you free tomorrow? Want to have a meal together?",
             pronunciation: "prûŋ-níi wâaŋ mǎi kráp pai gin kâao gan mǎi"
           },
           {
             thai: "พรุ่งนี้ไม่ว่างค่ะ มีนัด",
-            english: "I'm not free tomorrow, I have an appointment.",
+            translation: "I'm not free tomorrow, I have an appointment.",
             pronunciation: "prûŋ-níi mâi wâaŋ kâ mii nát"
           }
         ]

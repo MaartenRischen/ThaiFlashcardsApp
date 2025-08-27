@@ -1441,11 +1441,7 @@ export default function ThaiFlashcards() {
                     {/* English translation in blue, in parentheses */}
                     {phrases[index] && (
                       <div className="text-base md:text-lg font-medium mb-2 text-blue-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
-                        {(() => {
-                          const literal = (phrases[index] as any).literal as string | undefined;
-                          const idiomatic = phrases[index]?.english ?? '';
-                          return literal ? `${literal} (${idiomatic})` : `(${idiomatic})`;
-                        })()}
+                        ({phrases[index]?.english ?? ''})
                       </div>
                     )}
                     {/* Difficulty Buttons - Wrapped in Popover (Step 3) */}
@@ -1598,7 +1594,7 @@ export default function ThaiFlashcards() {
                       className="w-full neumorphic-button text-blue-400 flex items-center justify-center gap-2 py-2"
                     >
                       {showBreakdown ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      Breaking It Down
+                      Breaking It Down / Literal Translation
                     </button>
                     
                     {showBreakdown && (
@@ -1613,11 +1609,28 @@ export default function ThaiFlashcards() {
                             const breakdown = wordBreakdowns[cacheKey];
                             
                             if (!breakdown) {
+                              // Still show literal translation even if no breakdown is available
+                              if ((phrases[index] as any).literal) {
+                                return (
+                                  <div className="mb-3 p-3 bg-[#0f0f0f] rounded-lg border border-[#333]">
+                                    <h4 className="text-sm text-gray-400 mb-1">Literal Translation:</h4>
+                                    <p className="text-white font-medium">{(phrases[index] as any).literal}</p>
+                                  </div>
+                                );
+                              }
                               return <div className="text-center text-gray-400">No breakdown available</div>;
                             }
                             
                             return (
                               <div className="space-y-3">
+                                {/* Literal Translation */}
+                                {(phrases[index] as any).literal && (
+                                  <div className="mb-3 p-3 bg-[#0f0f0f] rounded-lg border border-[#333]">
+                                    <h4 className="text-sm text-gray-400 mb-1">Literal Translation:</h4>
+                                    <p className="text-white font-medium">{(phrases[index] as any).literal}</p>
+                                  </div>
+                                )}
+                                
                                 {/* Individual Words */}
                                 <div className="space-y-2">
                                   {breakdown.words.map((word, idx) => (

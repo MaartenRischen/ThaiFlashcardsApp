@@ -13,7 +13,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ห้องน้ำอยู่ที่ไหนครับ",
         thaiFeminine: "ห้องน้ำอยู่ที่ไหนคะ",
         pronunciation: "hɔ̂ɔŋ-náam yùu tîi-nǎi",
-        mnemonic: "Hong (room) + nam (water) = water room; yuu (is at) + tee-nai (where)",
+        mnemonic: "Think: 'Hong' Kong needs 'nam' (water) - where's the water room?",
         literal: "Room water is at where",
         examples: [
           {
@@ -38,7 +38,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "อันนี้ราคาเท่าไหร่ครับ",
         thaiFeminine: "อันนี้ราคาเท่าไหร่คะ",
         pronunciation: "an-níi raa-kaa tâo-rài",
-        mnemonic: "An-nee (this one) + raakaa (price) + tao-rai (how much)",
+        mnemonic: "Think: 'nee' (knee) got 'racked' - how much damage?",
         literal: "This one price how much",
         examples: [
           {
@@ -63,7 +63,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ผมไม่เข้าใจครับ",
         thaiFeminine: "ฉันไม่เข้าใจค่ะ",
         pronunciation: "chǎn/pǒm mâi kâo-jai",
-        mnemonic: "Mai (not) + kao-jai (enter-heart) = not entering the heart/mind",
+        mnemonic: "Think: 'my cow jai' (my cow sighs) - confused cow doesn't understand",
         literal: "I not enter heart",
         examples: [
           {
@@ -138,7 +138,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "คุณชื่ออะไรครับ",
         thaiFeminine: "คุณชื่ออะไรคะ",
         pronunciation: "kun chʉ̂ʉ à-rai",
-        mnemonic: "Kun (you) + chue (name) + arai (what)",
+        mnemonic: "Think: 'coon chew a rye' - person chewing rye bread",
         literal: "You name what",
         examples: [
           {
@@ -163,7 +163,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ยินดีที่ได้รู้จักครับ",
         thaiFeminine: "ยินดีที่ได้รู้จักค่ะ",
         pronunciation: "yin-dii tîi dâai rúu-jàk",
-        mnemonic: "Yin-dee (glad) + tee dai (that got to) + ruu-jak (know)",
+        mnemonic: "Think: 'yin dee' sounds like 'indie' - indie bands are nice to meet",
         literal: "Glad that got to know",
         examples: [
           {
@@ -346,7 +346,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ขอบิลหน่อยครับ",
         thaiFeminine: "ขอบิลหน่อยค่ะ",
         pronunciation: "kɔ̌ɔ bin nɔ̀i",
-        mnemonic: "Kor (ask for) + bill + noy (a bit/please)",
+        mnemonic: "Think: 'check bin' - check in the bin (bill)",
         literal: "Ask bill a bit",
         examples: [
           {
@@ -396,7 +396,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "เลี้ยวซ้าย/ขวาครับ",
         thaiFeminine: "เลี้ยวซ้าย/ขวาค่ะ",
         pronunciation: "líao sáai/kwǎa",
-        mnemonic: "Liao (turn) + sai (left) / kwaa (right)",
+        mnemonic: "Think: 'leo sigh/kwah' - Leo sighs left/right",
         literal: "Turn left/right",
         examples: [
           {
@@ -446,7 +446,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ไกลไหมครับ",
         thaiFeminine: "ไกลไหมคะ",
         pronunciation: "glai mǎi",
-        mnemonic: "Glai (far) + mai (question word)",
+        mnemonic: "Think: 'glide my' - glide there, is it far?",
         literal: "Far (question)",
         examples: [
           {
@@ -496,7 +496,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "กี่โมงแล้วครับ",
         thaiFeminine: "กี่โมงแล้วคะ",
         pronunciation: "gìi mooŋ láeo",
-        mnemonic: "Gee (how many) + mong (o'clock) + laeo (already)",
+        mnemonic: "Think: 'gee mohng' - gee, what moon (time)?",
         literal: "How many o'clock already",
         examples: [
           {
@@ -779,7 +779,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "นี่หมายความว่าอะไรครับ",
         thaiFeminine: "นี่หมายความว่าอะไรคะ",
         pronunciation: "nîi mǎai kwaam wâa à-rai",
-        mnemonic: "Nee (this) + maai kwaam (means) + waa arai (what)",
+        mnemonic: "Think: 'my cow sigh' - confused cow asking meaning",
         literal: "This means what",
         examples: [
           {

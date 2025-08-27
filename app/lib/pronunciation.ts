@@ -49,14 +49,25 @@ export function getGenderedPronunciation(phraseData: Phrase | ExampleSentence | 
   const baseThaiForEndingCheck = phraseData.thai; // Check ending on BASE Thai
 
   // Step 1: Handle gendered pronouns in pronunciation (case-insensitive, both orders)
-  basePronunciation = basePronunciation.replace(/phom\/chan|chan\/phom/gi, isMale ? 'phom' : 'chan');
+  // Handle all variations: phom/chan, pom/chan, pǒm/chǎn, chǎn/pǒm, etc.
+  basePronunciation = basePronunciation.replace(/ph?[oǒ]m\/ch[aǎ]n|ch[aǎ]n\/ph?[oǒ]m/gi, (match) => {
+    // Extract the actual forms used in this match
+    const hasToneMark = match.includes('ǒ') || match.includes('ǎ');
+    if (hasToneMark) {
+      return isMale ? 'pǒm' : 'chǎn';
+    } else if (match.toLowerCase().includes('phom')) {
+      return isMale ? 'phom' : 'chan';
+    } else {
+      return isMale ? 'pom' : 'chan';
+    }
+  });
   
   // Check if Thai has a pronoun
   const thaiHasMalePronoun = /ผม/.test(baseThaiForEndingCheck);
   const thaiHasFemalePronoun = /(ฉัน|ดิฉัน|ชั้น|หนู)/.test(baseThaiForEndingCheck);
   
   // Check if pronunciation is missing the pronoun at the start
-  const startsWithPronoun = /^(phom|chan)\s/i.test(basePronunciation.trim());
+  const startsWithPronoun = /^(ph?[oǒ]m|ch[aǎ]n)\s/i.test(basePronunciation.trim());
   
   // If Thai has a pronoun but pronunciation doesn't start with one, add it
   if ((thaiHasMalePronoun || thaiHasFemalePronoun) && !startsWithPronoun) {

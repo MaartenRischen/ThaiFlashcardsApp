@@ -14,7 +14,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "คุณคิดยังไงกับเรื่องนี้ครับ",
         thaiFeminine: "คุณคิดยังไงกับเรื่องนี้คะ",
         pronunciation: "kun kít yaŋ-ŋai gàp rʉ̂aŋ níi",
-        mnemonic: "Kit yang-ngai (think how) + gap ruang nee (about this matter)",
+        mnemonic: "Think: 'kid young guy' - young guy thinking",
         literal: "You think how about matter this",
         examples: [
           {

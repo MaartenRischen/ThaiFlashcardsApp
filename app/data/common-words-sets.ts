@@ -854,7 +854,7 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
         thaiFeminine: "ดีใจค่ะ",
         pronunciation: "dee jai",
         literal: "Good heart",
-        mnemonic: "Think: 'D-jai' - good heart = happy",
+        mnemonic: "Think: 'dee jai' - create your own sound association",
         examples: [
           {
             thai: "ดีใจมาก",

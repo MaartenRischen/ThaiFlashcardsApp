@@ -49,7 +49,10 @@ export function getGenderedPronunciation(phraseData: Phrase | ExampleSentence | 
   const baseThaiForEndingCheck = phraseData.thai; // Check ending on BASE Thai
 
   // Step 1: Handle gendered pronouns in pronunciation (case-insensitive, both orders)
+  // Handle both English-style (phom/chan) and romanized Thai (pŏm/chǎn) pronunciations
   basePronunciation = basePronunciation.replace(/phom\/chan|chan\/phom/gi, isMale ? 'phom' : 'chan');
+  basePronunciation = basePronunciation.replace(/pŏm\/chǎn|chǎn\/pŏm/gi, isMale ? 'pŏm' : 'chǎn');
+  basePronunciation = basePronunciation.replace(/pom\/chan|chan\/pom/gi, isMale ? 'pom' : 'chan');
   
   // Check if Thai has a pronoun
   const thaiHasMalePronoun = /ผม/.test(baseThaiForEndingCheck);

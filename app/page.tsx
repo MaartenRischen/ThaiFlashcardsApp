@@ -105,8 +105,10 @@ const getThaiWithGender = (phrase: Phrase | ExampleSentence | null, isMale: bool
 const getGenderedPronunciation = (phraseData: Phrase | ExampleSentence | null, isMale: boolean, isPoliteMode: boolean): string => {
   if (!phraseData) return '';
   let basePronunciation = phraseData.pronunciation;
-  // Replace ambiguous pronouns with gendered ones
+  // Replace ambiguous pronouns with gendered ones - handle all variations
   basePronunciation = basePronunciation.replace(/phom\/chan|chan\/phom/gi, isMale ? 'phom' : 'chan');
+  basePronunciation = basePronunciation.replace(/pǒm\/chǎn|chǎn\/pǒm/gi, isMale ? 'pǒm' : 'chǎn');
+  basePronunciation = basePronunciation.replace(/pom\/chan|chan\/pom/gi, isMale ? 'pom' : 'chan');
 
   // If Polite Mode is OFF, remove polite particles if present
   if (!isPoliteMode) {

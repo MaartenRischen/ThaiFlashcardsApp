@@ -44,6 +44,11 @@ import { PhraseBreakdown, getCachedBreakdown, setCachedBreakdown } from './lib/w
 import Confetti from './components/Confetti';
 import { useSetCompletion } from './hooks/useSetCompletion';
 
+// Type for phrases with literal translation
+interface PhraseWithLiteral extends Phrase {
+  literal?: string;
+}
+
 // Utility function to detect mobile devices
 const isMobileDevice = (): boolean => {
   if (typeof window === 'undefined') return false;
@@ -1643,11 +1648,12 @@ export default function ThaiFlashcards() {
                             
                             if (!breakdown) {
                               // Still show literal translation even if no breakdown is available
-                              if ((phrases[index] as any).literal) {
+                              const currentPhrase = phrases[index] as PhraseWithLiteral;
+                          if (currentPhrase.literal) {
                                 return (
                                   <div className="mb-3 p-3 bg-[#0f0f0f] rounded-lg border border-[#333]">
                                     <h4 className="text-sm text-gray-400 mb-1">Literal Translation:</h4>
-                                    <p className="text-white font-medium">{(phrases[index] as any).literal}</p>
+                                    <p className="text-white font-medium">{currentPhrase.literal}</p>
                                   </div>
                                 );
                               }
@@ -1657,10 +1663,10 @@ export default function ThaiFlashcards() {
                             return (
                               <div className="space-y-3">
                                 {/* Literal Translation */}
-                                {(phrases[index] as any).literal && (
+                                {currentPhrase.literal && (
                                   <div className="mb-3 p-3 bg-[#0f0f0f] rounded-lg border border-[#333]">
                                     <h4 className="text-sm text-gray-400 mb-1">Literal Translation:</h4>
-                                    <p className="text-white font-medium">{(phrases[index] as any).literal}</p>
+                                    <p className="text-white font-medium">{currentPhrase.literal}</p>
                                   </div>
                                 )}
                                 

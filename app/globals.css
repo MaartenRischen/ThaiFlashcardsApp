@@ -3,6 +3,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent auto-scroll and bounce on mobile */
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent scroll snapping on flashcard view */
+.flashcard-container {
+  scroll-snap-type: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* Ensure breakdown section stays visible */
+.breakdown-open {
+  min-height: 150vh !important;
+  padding-bottom: 20rem !important;
+}
+
 :root {
   --background: #121212;
   --foreground: #E0E0E0;
@@ -73,9 +91,12 @@
   /* Main Content Area */
   .main-content {
   /* Ensure content doesn't get hidden behind mobile browser UI */
-  padding-bottom: calc(env(safe-area-inset-bottom, 5rem) + 4rem);
+  padding-bottom: calc(env(safe-area-inset-bottom, 5rem) + 6rem);
   /* Add extra space at the bottom to ensure Breaking It Down is visible */
-  min-height: calc(100vh + 8rem);
+  min-height: calc(100vh + 10rem);
+  /* Prevent rubber-band scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
     @apply bg-[#121212] min-h-screen pb-8;
   }
 

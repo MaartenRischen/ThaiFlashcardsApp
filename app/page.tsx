@@ -1605,29 +1605,43 @@ export default function ThaiFlashcards() {
                 
                 {/* Word Breakdown Section with scroll indicator */}
                 {phrases[index] && (
-                  <div className="mt-4 relative">
-                    {/* Scroll indicator */}
-                    <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce">
-                      <div className="text-gray-400 text-sm mb-1">Scroll for more</div>
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
-                    </div>
+                  <div className={`mt-4 relative ${showBreakdown ? 'mb-40' : ''}`}>
+                    {/* Scroll indicator - only show when breakdown is collapsed */}
+                    {!showBreakdown && (
+                      <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce">
+                        <div className="text-gray-400 text-sm mb-1">Scroll for more</div>
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                      </div>
+                    )}
                     <button
                       onClick={(e) => {
-                        // Prevent any default scroll behavior
                         e.preventDefault();
-                        
-                        // Store current scroll position
-                        const scrollPos = window.scrollY;
+                        e.stopPropagation();
                         
                         if (!showBreakdown && !wordBreakdowns[`${getThaiWithGender(phrases[index], isMale, isPoliteMode)}_${getGenderedPronunciation(phrases[index], isMale, isPoliteMode)}`]) {
                           fetchWordBreakdown(phrases[index]);
                         }
+                        
                         setShowBreakdown(!showBreakdown);
                         
-                        // Restore scroll position after a short delay to let content render
-                        setTimeout(() => {
-                          window.scrollTo(0, scrollPos);
-                        }, 50);
+                        // If opening breakdown, ensure it's visible
+                        if (!showBreakdown) {
+                          setTimeout(() => {
+                            const breakdownButton = e.currentTarget as HTMLElement;
+                            const rect = breakdownButton.getBoundingClientRect();
+                            const viewportHeight = window.innerHeight;
+                            
+                            // If button is near bottom of viewport, scroll to show content below
+                            if (rect.bottom > viewportHeight - 200) {
+                              const scrollTo = window.scrollY + rect.top - 100;
+                              
+                              // Use requestAnimationFrame for smoother scrolling
+                              requestAnimationFrame(() => {
+                                window.scrollTo({ top: scrollTo, behavior: 'smooth' });
+                              });
+                            }
+                          }, 150);
+                        }
                       }}
                       className="w-full neumorphic-button text-blue-400 flex items-center justify-center gap-2 py-2 relative animate-pulse hover:animate-none"
                     >

@@ -1645,11 +1645,11 @@ export default function ThaiFlashcards() {
                             const pronunciation = getGenderedPronunciation(phrases[index], isMale, isPoliteMode);
                             const cacheKey = `${thai}_${pronunciation}`;
                             const breakdown = wordBreakdowns[cacheKey];
+                            const currentPhrase = phrases[index] as PhraseWithLiteral;
                             
                             if (!breakdown) {
                               // Still show literal translation even if no breakdown is available
-                              const currentPhrase = phrases[index] as PhraseWithLiteral;
-                          if (currentPhrase.literal) {
+                              if (currentPhrase.literal) {
                                 return (
                                   <div className="mb-3 p-3 bg-[#0f0f0f] rounded-lg border border-[#333]">
                                     <h4 className="text-sm text-gray-400 mb-1">Literal Translation:</h4>

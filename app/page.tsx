@@ -1703,7 +1703,6 @@ export default function ThaiFlashcards() {
                           })()
                         )}
                       </div>
-                    )}
                   </div>
                 )}
               </div>

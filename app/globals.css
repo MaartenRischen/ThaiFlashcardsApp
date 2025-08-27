@@ -72,6 +72,8 @@
 
   /* Main Content Area */
   .main-content {
+  /* Ensure content doesn't get hidden behind mobile browser UI */
+  padding-bottom: env(safe-area-inset-bottom, 5rem);
     @apply bg-[#121212] min-h-screen pb-8;
   }
 

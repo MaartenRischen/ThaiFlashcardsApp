@@ -1602,11 +1602,22 @@ export default function ThaiFlashcards() {
                 {phrases[index] && (
                   <div className="mt-4">
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        // Prevent any default scroll behavior
+                        e.preventDefault();
+                        
+                        // Store current scroll position
+                        const scrollPos = window.scrollY;
+                        
                         if (!showBreakdown && !wordBreakdowns[`${getThaiWithGender(phrases[index], isMale, isPoliteMode)}_${getGenderedPronunciation(phrases[index], isMale, isPoliteMode)}`]) {
                           fetchWordBreakdown(phrases[index]);
                         }
                         setShowBreakdown(!showBreakdown);
+                        
+                        // Restore scroll position after a short delay to let content render
+                        setTimeout(() => {
+                          window.scrollTo(0, scrollPos);
+                        }, 50);
                       }}
                       className="w-full neumorphic-button text-blue-400 flex items-center justify-center gap-2 py-2"
                     >

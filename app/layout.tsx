@@ -18,6 +18,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   themeColor: '#ffffff',
+  viewportFit: 'cover',
 }
 
 export const metadata: Metadata = {
@@ -75,7 +76,7 @@ export default function RootLayout({
                 <AppInitializer />
                 <GenerationStatusBar />
                 <Navbar />
-                <main className="main-content min-h-screen relative">
+                <main className="main-content min-h-screen relative pb-32 md:pb-0">
                   {children}
                 </main>
                 {/* Copyright Notice */}

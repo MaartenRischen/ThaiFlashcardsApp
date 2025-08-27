@@ -1522,12 +1522,29 @@ export default function ThaiFlashcards() {
                   
                   <textarea
                     value={(() => {
-                      const rawMnemonic = activeSetId ? (mnemonics[activeSetId]?.[`${index}`] ?? phrases[index]?.mnemonic ?? '') : (phrases[index]?.mnemonic ?? '');
+                      let rawMnemonic = activeSetId ? (mnemonics[activeSetId]?.[`${index}`] ?? phrases[index]?.mnemonic ?? '') : (phrases[index]?.mnemonic ?? '');
+                      
+                      // Check if this is an old word breakdown mnemonic (contains + or =)
+                      if (activeSetId?.startsWith('default-') && (rawMnemonic.includes(' + ') || rawMnemonic.includes(' = '))) {
+                        // Use the updated default mnemonic instead
+                        rawMnemonic = phrases[index]?.mnemonic ?? '';
+                      }
+                      
                       // Replace Phom/Chan or Chan/Phom with correct gendered pronoun
                       return rawMnemonic.replace(/Phom\/Chan|Chan\/Phom/gi, isMale ? 'Phom' : 'Chan');
                     })()}
                     onChange={handleMnemonicChange}
-                    onBlur={() => updateMnemonics(index, activeSetId ? (mnemonics[activeSetId]?.[`${index}`] ?? phrases[index]?.mnemonic ?? '') : (phrases[index]?.mnemonic ?? ''))}
+                    onBlur={() => {
+                      let rawMnemonic = activeSetId ? (mnemonics[activeSetId]?.[`${index}`] ?? phrases[index]?.mnemonic ?? '') : (phrases[index]?.mnemonic ?? '');
+                      
+                      // Check if this is an old word breakdown mnemonic (contains + or =)
+                      if (activeSetId?.startsWith('default-') && (rawMnemonic.includes(' + ') || rawMnemonic.includes(' = '))) {
+                        // Use the updated default mnemonic instead
+                        rawMnemonic = phrases[index]?.mnemonic ?? '';
+                      }
+                      
+                      updateMnemonics(index, rawMnemonic);
+                    }}
                     placeholder="Create a memory aid to help remember this word..."
                     className="neumorphic-input w-full h-24 resize-none rounded-lg"
                   />

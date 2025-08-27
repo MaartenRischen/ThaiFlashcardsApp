@@ -73,7 +73,9 @@
   /* Main Content Area */
   .main-content {
   /* Ensure content doesn't get hidden behind mobile browser UI */
-  padding-bottom: env(safe-area-inset-bottom, 5rem);
+  padding-bottom: calc(env(safe-area-inset-bottom, 5rem) + 4rem);
+  /* Add extra space at the bottom to ensure Breaking It Down is visible */
+  min-height: calc(100vh + 8rem);
     @apply bg-[#121212] min-h-screen pb-8;
   }
 

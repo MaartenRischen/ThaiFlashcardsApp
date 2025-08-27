@@ -1598,9 +1598,14 @@ export default function ThaiFlashcards() {
                   </div>
                 </div> {/* End Context Section */}
                 
-                {/* Word Breakdown Section */}
+                {/* Word Breakdown Section with scroll indicator */}
                 {phrases[index] && (
-                  <div className="mt-4">
+                  <div className="mt-4 relative">
+                    {/* Scroll indicator */}
+                    <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce">
+                      <div className="text-gray-400 text-sm mb-1">Scroll for more</div>
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </div>
                     <button
                       onClick={(e) => {
                         // Prevent any default scroll behavior
@@ -1619,14 +1624,14 @@ export default function ThaiFlashcards() {
                           window.scrollTo(0, scrollPos);
                         }, 50);
                       }}
-                      className="w-full neumorphic-button text-blue-400 flex items-center justify-center gap-2 py-2"
+                      className="w-full neumorphic-button text-blue-400 flex items-center justify-center gap-2 py-2 relative animate-pulse hover:animate-none"
                     >
                       {showBreakdown ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       Breaking It Down / Literal Translation
                     </button>
                     
-                    {showBreakdown && (
-                      <div className="mt-3 p-4 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a]">
+                    {/* Always render the container but hide it when closed */}
+                    <div className={`mt-3 p-4 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] transition-all duration-300 ${showBreakdown ? 'opacity-100 max-h-[1000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
                         {loadingBreakdown ? (
                           <div className="text-center text-gray-400">Loading breakdown...</div>
                         ) : (

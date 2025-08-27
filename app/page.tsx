@@ -224,7 +224,7 @@ export default function ThaiFlashcards() {
   const [isPlayingContext, setIsPlayingContext] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showProgress, setShowProgress] = useState(false); // Renamed from showVocabulary
-  const [showBreakdown, setShowBreakdown] = useState(false);
+  const [showBreakdown, setShowBreakdown] = useState(true); // Default to open
   const [wordBreakdowns, setWordBreakdowns] = useState<Record<string, PhraseBreakdown>>({});
   const [loadingBreakdown, setLoadingBreakdown] = useState(false);
   const [autoplay, setAutoplay] = useState<boolean>(() => {
@@ -401,6 +401,22 @@ export default function ThaiFlashcards() {
       speak(getThaiWithGender(phrases[index], isMale, isPoliteMode), true, isMale); // Normal speed
     }
   }, [isMale, isPoliteMode]);
+  
+  // Auto-load breakdown when card is shown
+  useEffect(() => {
+    if (showAnswer && phrases[index]) {
+      const thai = getThaiWithGender(phrases[index], isMale, isPoliteMode);
+      const pronunciation = getGenderedPronunciation(phrases[index], isMale, isPoliteMode);
+      const cacheKey = `${thai}_${pronunciation}`;
+      
+      // Only fetch if not already cached
+      if (!wordBreakdowns[cacheKey]) {
+        fetchWordBreakdown(phrases[index]);
+      }
+    }
+  }, [showAnswer, index, phrases, isMale, isPoliteMode]);
+  
+
 
   // Add a useEffect to initialize the random sentence when the answer is shown
   useEffect(() => {
@@ -1603,9 +1619,9 @@ export default function ThaiFlashcards() {
                   </div>
                 </div> {/* End Context Section */}
                 
-                {/* Word Breakdown Section with scroll indicator */}
+                {/* Word Breakdown Section */}
                 {phrases[index] && (
-                  <div className={`mt-4 relative ${showBreakdown ? 'mb-40' : ''}`}>
+                  <div className="mt-4 relative mb-40">
                     {/* Scroll indicator - only show when breakdown is collapsed */}
                     {!showBreakdown && (
                       <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce">
@@ -1618,39 +1634,23 @@ export default function ThaiFlashcards() {
                         e.preventDefault();
                         e.stopPropagation();
                         
+                        // Just toggle the breakdown visibility
+                        setShowBreakdown(!showBreakdown);
+                        
+                        // If opening and no breakdown loaded yet, fetch it
                         if (!showBreakdown && !wordBreakdowns[`${getThaiWithGender(phrases[index], isMale, isPoliteMode)}_${getGenderedPronunciation(phrases[index], isMale, isPoliteMode)}`]) {
                           fetchWordBreakdown(phrases[index]);
                         }
-                        
-                        setShowBreakdown(!showBreakdown);
-                        
-                        // If opening breakdown, ensure it's visible
-                        if (!showBreakdown) {
-                          setTimeout(() => {
-                            const breakdownButton = e.currentTarget as HTMLElement;
-                            const rect = breakdownButton.getBoundingClientRect();
-                            const viewportHeight = window.innerHeight;
-                            
-                            // If button is near bottom of viewport, scroll to show content below
-                            if (rect.bottom > viewportHeight - 200) {
-                              const scrollTo = window.scrollY + rect.top - 100;
-                              
-                              // Use requestAnimationFrame for smoother scrolling
-                              requestAnimationFrame(() => {
-                                window.scrollTo({ top: scrollTo, behavior: 'smooth' });
-                              });
-                            }
-                          }, 150);
-                        }
                       }}
-                      className="w-full neumorphic-button text-blue-400 flex items-center justify-center gap-2 py-2 relative animate-pulse hover:animate-none"
+                      className="w-full neumorphic-button text-blue-400 flex items-center justify-center gap-2 py-2 relative"
                     >
                       {showBreakdown ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       Breaking It Down / Literal Translation
                     </button>
                     
-                    {/* Always render the container but hide it when closed */}
-                    <div className={`mt-3 p-4 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] transition-all duration-300 ${showBreakdown ? 'opacity-100 max-h-[1000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+                    {/* Breakdown container */}
+                    {showBreakdown && (
+                    <div className="mt-3 p-4 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a]">
                         {loadingBreakdown ? (
                           <div className="text-center text-gray-400">Loading breakdown...</div>
                         ) : (
@@ -1717,6 +1717,7 @@ export default function ThaiFlashcards() {
                           })()
                         )}
                       </div>
+                    )}
                   </div>
                 )}
               </div>

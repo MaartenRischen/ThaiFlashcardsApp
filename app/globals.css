@@ -4,9 +4,18 @@
 @tailwind utilities;
 
 /* Prevent auto-scroll and bounce on mobile */
-html, body {
+html {
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  overflow-x: hidden;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
+  /* Prevent iOS bounce and auto-scroll */
+  position: relative;
+  min-height: 100vh;
 }
 
 /* Prevent scroll snapping on flashcard view */
@@ -19,6 +28,14 @@ html, body {
 .breakdown-open {
   min-height: 150vh !important;
   padding-bottom: 20rem !important;
+}
+
+/* Prevent viewport from auto-adjusting on mobile */
+@media (max-width: 768px) {
+  .main-content {
+    /* Prevent auto-scroll by disabling any scroll anchoring */
+    overflow-anchor: none;
+  }
 }
 
 :root {

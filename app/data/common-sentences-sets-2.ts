@@ -14,7 +14,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "คุณคิดยังไงกับเรื่องนี้ครับ",
         thaiFeminine: "คุณคิดยังไงกับเรื่องนี้คะ",
         pronunciation: "kun kít yaŋ-ŋai gàp rʉ̂aŋ níi",
-        mnemonic: "Memory aid: Connect 'kun' with 'what do you think about this?'",
+        mnemonic: "Kit yang-ngai (think how) + gap ruang nee (about this matter)",
         literal: "You think how about matter this",
         examples: [
           {
@@ -39,7 +39,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมรอมานานแล้วครับ",
         thaiFeminine: "ฉันรอมานานแล้วค่ะ",
         pronunciation: "chǎn/pǒm rɔɔ maa naan láeo",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i've been waiting for a long time'",
+        mnemonic: "Ror (wait) + maa naan (for long) + laeo (already)",
         literal: "I wait come long already",
         examples: [
           {
@@ -64,7 +64,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ช่วยพูดอีกทีได้ไหมครับ",
         thaiFeminine: "ช่วยพูดอีกทีได้ไหมคะ",
         pronunciation: "chûai pûut ìik tii dâai mǎi",
-        mnemonic: "Memory aid: Connect 'chûai' with 'could you please repeat that?'",
+        mnemonic: "Chuay (help) + poot eek tee (speak again) + dai mai (can?)",
         literal: "Help speak again once can (question)",
         examples: [
           {
@@ -89,7 +89,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมชอบอาหารไทยมากกว่าอาหารฝรั่งครับ",
         thaiFeminine: "ฉันชอบอาหารไทยมากกว่าอาหารฝรั่งค่ะ",
         pronunciation: "chǎn/pǒm chɔ̂ɔp aa-hǎan thai mâak gwàa aa-hǎan fà-ràŋ",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i prefer thai food over western food'",
+        mnemonic: "Chorp (like) + ahaan Thai + maak gwaa (more than) + ahaan farang",
         literal: "I like food Thai more than food Western",
         examples: [
           {
@@ -114,7 +114,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมต้องถอนเงินจากตู้เอทีเอ็มครับ",
         thaiFeminine: "ฉันต้องถอนเงินจากตู้เอทีเอ็มค่ะ",
         pronunciation: "chǎn/pǒm tɔ̂ŋ tɔ̌ɔn ŋəən jàak tûu ee-tii-em",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i need to withdraw money from atm'",
+        mnemonic: "Tong (must) + torn ngern (withdraw money) + jaak too ATM",
         literal: "I must withdraw money from machine ATM",
         examples: [
           {
@@ -139,7 +139,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ขอคิดดูก่อนครับ",
         thaiFeminine: "ขอคิดดูก่อนค่ะ",
         pronunciation: "kɔ̌ɔ kít duu gɔ̀ɔn",
-        mnemonic: "Memory aid: Connect 'kɔ̌ɔ' with 'let me think about it'",
+        mnemonic: "Kor (ask to) + kit doo (think see) + gorn (first)",
         literal: "Ask think see first",
         examples: [
           {
@@ -164,7 +164,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "วันนี้รถติดมากครับ",
         thaiFeminine: "วันนี้รถติดมากค่ะ",
         pronunciation: "wan-níi rót tìt mâak",
-        mnemonic: "Memory aid: Connect 'wan-níi' with 'the traffic is very bad today'",
+        mnemonic: "Wan-nee (today) + rot tit (car stuck) + maak (very)",
         literal: "Today car stuck very",
         examples: [
           {
@@ -189,7 +189,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ลดราคาให้หน่อยได้ไหมครับ",
         thaiFeminine: "ลดราคาให้หน่อยได้ไหมคะ",
         pronunciation: "lót raa-kaa hâi nɔ̀i dâai mǎi",
-        mnemonic: "Memory aid: Connect 'lót' with 'can you give me a discount?'",
+        mnemonic: "Lot raakaa (reduce price) + hai noy (give a bit) + dai mai (can?)",
         literal: "Reduce price give a bit can (question)",
         examples: [
           {
@@ -214,7 +214,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมแพ้อาหารทะเลครับ",
         thaiFeminine: "ฉันแพ้อาหารทะเลค่ะ",
         pronunciation: "chǎn/pǒm pɛ́ɛ aa-hǎan tá-lee",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i'm allergic to seafood'",
+        mnemonic: "Pae (allergic) + ahaan talay (seafood)",
         literal: "I allergic food sea",
         examples: [
           {
@@ -239,7 +239,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมอยู่ที่นี่มาห้าปีแล้วครับ",
         thaiFeminine: "ฉันอยู่ที่นี่มาห้าปีแล้วค่ะ",
         pronunciation: "chǎn/pǒm yùu tîi-nîi maa hâa pii láeo",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i've lived here for 5 years'",
+        mnemonic: "Yuu tee-nee (stay here) + maa haa pee laeo (for 5 years already)",
         literal: "I stay here come five year already",
         examples: [
           {
@@ -272,7 +272,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ช่วยเปิดแอร์หน่อยครับ",
         thaiFeminine: "ช่วยเปิดแอร์หน่อยค่ะ",
         pronunciation: "chûai pə̀ət ɛɛ nɔ̀i",
-        mnemonic: "Memory aid: Connect 'chûai' with 'please turn on the air conditioner'",
+        mnemonic: "Chuay (help) + pert (open) + air + noy (please)",
         literal: "Help open air a bit",
         examples: [
           {
@@ -297,7 +297,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมอยากแลกเงินครับ",
         thaiFeminine: "ฉันอยากแลกเงินค่ะ",
         pronunciation: "chǎn/pǒm yàak lɛ̂ɛk ŋəən",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i'd like to change money'",
+        mnemonic: "Yaak (want) + laek ngern (exchange money)",
         literal: "I want exchange money",
         examples: [
           {
@@ -322,7 +322,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "แบตมือถือผมหมดครับ",
         thaiFeminine: "แบตมือถือฉันหมดค่ะ",
         pronunciation: "bɛ̀ɛt mʉʉ-tʉ̌ʉ mòt",
-        mnemonic: "Memory aid: Connect 'bɛ̀ɛt' with 'my phone battery is dead'",
+        mnemonic: "Bat (battery) + mue-tue (mobile) + mot (finished/empty)",
         literal: "Battery mobile finished",
         examples: [
           {
@@ -347,7 +347,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ร้านปิดกี่โมงครับ",
         thaiFeminine: "ร้านปิดกี่โมงคะ",
         pronunciation: "ráan pìt gìi mooŋ",
-        mnemonic: "Memory aid: Connect 'ráan' with 'what time does the shop close?'",
+        mnemonic: "Raan (shop) + pit (close) + gee mong (what time)",
         literal: "Shop close how many o'clock",
         examples: [
           {
@@ -372,7 +372,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมกินเผ็ดไม่ได้ครับ",
         thaiFeminine: "ฉันกินเผ็ดไม่ได้ค่ะ",
         pronunciation: "chǎn/pǒm gin pèt mâi dâai",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i can't eat spicy food'",
+        mnemonic: "Gin (eat) + pet (spicy) + mai dai (cannot)",
         literal: "I eat spicy not can",
         examples: [
           {
@@ -397,7 +397,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมกำลังหางานทำครับ",
         thaiFeminine: "ฉันกำลังหางานทำค่ะ",
         pronunciation: "chǎn/pǒm gam-laŋ hǎa ŋaan tam",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i'm looking for a job'",
+        mnemonic: "Gam-lang (currently) + haa ngaan tam (find work do)",
         literal: "I currently find work do",
         examples: [
           {
@@ -422,7 +422,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "จ่ายด้วยบัตรเครดิตได้ไหมครับ",
         thaiFeminine: "จ่ายด้วยบัตรเครดิตได้ไหมคะ",
         pronunciation: "jàai dûai bàt kree-dìt dâai mǎi",
-        mnemonic: "Memory aid: Connect 'jàai' with 'can i pay by credit card?'",
+        mnemonic: "Jaai (pay) + duay (with) + bat credit + dai mai (can?)",
         literal: "Pay with card credit can (question)",
         examples: [
           {
@@ -447,7 +447,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมปวดหัวครับ",
         thaiFeminine: "ฉันปวดหัวค่ะ",
         pronunciation: "chǎn/pǒm pùat hǔa",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i have a headache'",
+        mnemonic: "Puat (ache/pain) + hua (head)",
         literal: "I ache head",
         examples: [
           {
@@ -472,7 +472,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "อาหารอร่อยมากครับ",
         thaiFeminine: "อาหารอร่อยมากค่ะ",
         pronunciation: "aa-hǎan à-rɔ̀i mâak",
-        mnemonic: "Memory aid: Connect 'aa-hǎan' with 'the food was delicious'",
+        mnemonic: "Ahaan (food) + aroy maak (very delicious)",
         literal: "Food delicious very",
         examples: [
           {
@@ -497,7 +497,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมคิดถึงครอบครัวครับ",
         thaiFeminine: "ฉันคิดถึงครอบครัวค่ะ",
         pronunciation: "chǎn/pǒm kít-tʉ̌ŋ krɔ̂ɔp-krua",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i miss my family'",
+        mnemonic: "Kit-teung (miss/think of) + krop-krua (family)",
         literal: "I miss family",
         examples: [
           {
@@ -530,7 +530,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมอยากต่อวีซ่าครับ",
         thaiFeminine: "ฉันอยากต่อวีซ่าค่ะ",
         pronunciation: "chǎn/pǒm yàak tɔ̀ɔ wii-sâa",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i'd like to extend my visa'",
+        mnemonic: "Yaak (want) + tor (extend) + visa",
         literal: "I want extend visa",
         examples: [
           {
@@ -555,7 +555,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ช่วยเขียนให้หน่อยได้ไหมครับ",
         thaiFeminine: "ช่วยเขียนให้หน่อยได้ไหมคะ",
         pronunciation: "chûai kǐan hâi nɔ̀i dâai mǎi",
-        mnemonic: "Memory aid: Connect 'chûai' with 'could you write it down for me?'",
+        mnemonic: "Chuay (help) + kian (write) + hai noy (for me please) + dai mai",
         literal: "Help write give a bit can (question)",
         examples: [
           {
@@ -580,7 +580,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมมีปัญหาในการเข้าใจครับ",
         thaiFeminine: "ฉันมีปัญหาในการเข้าใจค่ะ",
         pronunciation: "chǎn/pǒm mii pan-hǎa nai gaan kâo-jai",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i'm having trouble understanding'",
+        mnemonic: "Mee pan-haa (have problem) + nai gaan (in the) + kao-jai (understanding)",
         literal: "I have problem in the understanding",
         examples: [
           {
@@ -605,7 +605,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "การประชุมเลื่อนไปแล้วครับ",
         thaiFeminine: "การประชุมเลื่อนไปแล้วค่ะ",
         pronunciation: "gaan prà-chum lʉ̂an pai láeo",
-        mnemonic: "Memory aid: Connect 'gaan' with 'the meeting has been postponed'",
+        mnemonic: "Gaan prachum (meeting) + luan pai (moved/postponed) + laeo",
         literal: "The meeting move go already",
         examples: [
           {
@@ -630,7 +630,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมต้องพบหมอด่วนครับ",
         thaiFeminine: "ฉันต้องพบหมอด่วนค่ะ",
         pronunciation: "chǎn/pǒm tɔ̂ŋ póp mɔ̌ɔ dùan",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i need to see a doctor urgently'",
+        mnemonic: "Tong (must) + pob mor (meet doctor) + duan (urgent)",
         literal: "I must meet doctor urgent",
         examples: [
           {
@@ -655,7 +655,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมไม่เห็นด้วยกับความคิดของคุณครับ",
         thaiFeminine: "ฉันไม่เห็นด้วยกับความคิดของคุณค่ะ",
         pronunciation: "chǎn/pǒm mâi hěn dûai gàp kwaam-kít kɔ̌ɔŋ kun",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i disagree with your opinion'",
+        mnemonic: "Mai hen duay (not agree) + gap kwaam kit (with thought) + kong kun (of you)",
         literal: "I not see with with thought of you",
         examples: [
           {
@@ -680,7 +680,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "คุณภาพไม่ดีพอครับ",
         thaiFeminine: "คุณภาพไม่ดีพอค่ะ",
         pronunciation: "kun-ná-pâap mâi dii pɔɔ",
-        mnemonic: "Memory aid: Connect 'kun-ná-pâap' with 'the quality is not good enough'",
+        mnemonic: "Kunnaphaap (quality) + mai dee por (not good enough)",
         literal: "Quality not good enough",
         examples: [
           {
@@ -705,7 +705,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ระวังด้วยนะครับ",
         thaiFeminine: "ระวังด้วยนะคะ",
         pronunciation: "rá-waŋ dûai ná",
-        mnemonic: "Memory aid: Connect 'rá-waŋ' with 'please be careful'",
+        mnemonic: "Rawang (be careful) + duay na (emphasis)",
         literal: "Careful with (particle)",
         examples: [
           {
@@ -730,7 +730,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมจะพิจารณาแล้วบอกให้ทราบครับ",
         thaiFeminine: "ฉันจะพิจารณาแล้วบอกให้ทราบค่ะ",
         pronunciation: "chǎn/pǒm jà pí-jaa-rá-naa láeo bɔ̀ɔk hâi sâap",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i'll consider it and let you know'",
+        mnemonic: "Ja pijaranaa (will consider) + laeo bork hai saap (then inform)",
         literal: "I will consider then tell give know",
         examples: [
           {
@@ -755,7 +755,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมซาบซึ้งในความช่วยเหลือของคุณครับ",
         thaiFeminine: "ฉันซาบซึ้งในความช่วยเหลือของคุณค่ะ",
         pronunciation: "chǎn/pǒm sâap-sʉ́ŋ nai kwaam chûai-lʉ̌a kɔ̌ɔŋ kun",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i appreciate your help'",
+        mnemonic: "Saap-seung (appreciate) + nai kwaam chuay-lua (in help) + kong kun",
         literal: "I appreciate in help of you",
         examples: [
           {
@@ -788,7 +788,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "สถานการณ์มันซับซ้อนครับ",
         thaiFeminine: "สถานการณ์มันซับซ้อนค่ะ",
         pronunciation: "sà-tǎa-ná-gaan man sáp-sɔ́ɔn",
-        mnemonic: "Memory aid: Connect 'sà-tǎa-ná-gaan' with 'the situation is complicated'",
+        mnemonic: "Sathaanagaan (situation) + man (it) + sap-sorn (complicated)",
         literal: "Situation it complicated",
         examples: [
           {
@@ -813,7 +813,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมมีนัดตอนบ่ายสามโมงครับ",
         thaiFeminine: "ฉันมีนัดตอนบ่ายสามโมงค่ะ",
         pronunciation: "chǎn/pǒm mii nát tɔɔn bàai sǎam mooŋ",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i have an appointment at 3 pm'",
+        mnemonic: "Mee nat (have appointment) + torn baai saam mong (afternoon 3 o'clock)",
         literal: "I have appointment time afternoon three o'clock",
         examples: [
           {
@@ -838,7 +838,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ช่วยอธิบายให้ชัดเจนกว่านี้ได้ไหมครับ",
         thaiFeminine: "ช่วยอธิบายให้ชัดเจนกว่านี้ได้ไหมคะ",
         pronunciation: "chûai à-tí-baai hâi chát-jeen gwàa níi dâai mǎi",
-        mnemonic: "Memory aid: Connect 'chûai' with 'can you explain it more clearly?'",
+        mnemonic: "Chuay athibaai (help explain) + hai chat-jeen gwaa nee (more clearly)",
         literal: "Help explain give clear more this can (question)",
         examples: [
           {
@@ -863,7 +863,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมกังวลเรื่องเส้นตายครับ",
         thaiFeminine: "ฉันกังวลเรื่องเส้นตายค่ะ",
         pronunciation: "chǎn/pǒm gaŋ-won rʉ̂aŋ sên-taai",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i'm worried about the deadline'",
+        mnemonic: "Gang-won (worried) + ruang (about) + sen-taai (deadline)",
         literal: "I worried about line dead",
         examples: [
           {
@@ -888,7 +888,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมจะจัดการให้ครับ",
         thaiFeminine: "ฉันจะจัดการให้ค่ะ",
         pronunciation: "chǎn/pǒm jà jàt-gaan hâi",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i'll take care of it'",
+        mnemonic: "Ja (will) + jat-gaan (manage/handle) + hai (for you)",
         literal: "I will manage give",
         examples: [
           {
@@ -913,7 +913,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "เกิดความเข้าใจผิดครับ",
         thaiFeminine: "เกิดความเข้าใจผิดค่ะ",
         pronunciation: "gə̀ət kwaam kâo-jai pìt",
-        mnemonic: "Memory aid: Connect 'gə̀ət' with 'there's been a misunderstanding'",
+        mnemonic: "Gert (happen) + kwaam kao-jai pit (misunderstanding)",
         literal: "Happen understanding wrong",
         examples: [
           {
@@ -938,7 +938,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมต้องการข้อมูลเพิ่มเติมครับ",
         thaiFeminine: "ฉันต้องการข้อมูลเพิ่มเติมค่ะ",
         pronunciation: "chǎn/pǒm tɔ̂ŋ-gaan kɔ̂ɔ-muun pə̂əm-təəm",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i need more information'",
+        mnemonic: "Tong-gaan (need) + kor-moon (information) + perm-term (additional)",
         literal: "I need information additional",
         examples: [
           {
@@ -963,7 +963,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมไม่ได้หมายความอย่างนั้นครับ",
         thaiFeminine: "ฉันไม่ได้หมายความอย่างนั้นค่ะ",
         pronunciation: "chǎn/pǒm mâi dâai mǎai kwaam yàaŋ-nán",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'that's not what i meant'",
+        mnemonic: "Mai dai maai kwaam (didn't mean) + yaang-nan (like that)",
         literal: "I not get mean like that",
         examples: [
           {
@@ -988,7 +988,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมประทับใจกับงานของคุณครับ",
         thaiFeminine: "ฉันประทับใจกับงานของคุณค่ะ",
         pronunciation: "chǎn/pǒm prà-táp-jai gàp ŋaan kɔ̌ɔŋ kun",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i'm impressed with your work'",
+        mnemonic: "Pratap-jai (impressed) + gap ngaan (with work) + kong kun",
         literal: "I impressed with work of you",
         examples: [
           {
@@ -1013,7 +1013,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "มานัดประชุมกันอีกครั้งครับ",
         thaiFeminine: "มานัดประชุมกันอีกครั้งค่ะ",
         pronunciation: "maa nát prà-chum gan ìik kráŋ",
-        mnemonic: "Memory aid: Connect 'maa' with 'let's schedule another meeting'",
+        mnemonic: "Maa nat (come schedule) + prachum (meeting) + gan eek krang (together again)",
         literal: "Come schedule meeting together again time",
         examples: [
           {
@@ -1046,7 +1046,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "อย่าไปถือสาเลยครับ",
         thaiFeminine: "อย่าไปถือสาเลยค่ะ",
         pronunciation: "yàa pai tʉ̌ʉ-sǎa ləəi",
-        mnemonic: "Memory aid: Connect 'yàa' with 'don't take it personally'",
+        mnemonic: "Yaa pai (don't go) + tue-saa (hold grudge) + loey (at all)",
         literal: "Don't go hold grudge at all",
         examples: [
           {
@@ -1071,7 +1071,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "น่าจะลองพิจารณาดูครับ",
         thaiFeminine: "น่าจะลองพิจารณาดูค่ะ",
         pronunciation: "nâa jà lɔɔŋ pí-jaa-rá-naa duu",
-        mnemonic: "Memory aid: Connect 'nâa' with 'it's worth considering'",
+        mnemonic: "Naa ja (should) + long (try) + pijaranaa doo (consider)",
         literal: "Should will try consider see",
         examples: [
           {
@@ -1096,7 +1096,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "อย่าเพิ่งด่วนสรุปครับ",
         thaiFeminine: "อย่าเพิ่งด่วนสรุปค่ะ",
         pronunciation: "yàa pə̂ŋ dùan sà-rùp",
-        mnemonic: "Memory aid: Connect 'yàa' with 'let's not jump to conclusions'",
+        mnemonic: "Yaa perng (don't yet) + duan sarup (rush conclude)",
         literal: "Don't yet rush conclude",
         examples: [
           {
@@ -1121,7 +1121,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมจะจำไว้ครับ",
         thaiFeminine: "ฉันจะจำไว้ค่ะ",
         pronunciation: "chǎn/pǒm jà jam wái",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i'll keep that in mind'",
+        mnemonic: "Ja (will) + jam wai (remember/keep)",
         literal: "I will remember keep",
         examples: [
           {
@@ -1146,7 +1146,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "พูดง่ายกว่าทำครับ",
         thaiFeminine: "พูดง่ายกว่าทำค่ะ",
         pronunciation: "pûut ŋâai gwàa tam",
-        mnemonic: "Memory aid: Connect 'pûut' with 'that's easier said than done'",
+        mnemonic: "Poot ngaai (speak easy) + gwaa tam (than do)",
         literal: "Speak easy more than do",
         examples: [
           {
@@ -1171,7 +1171,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมรู้สึกคลุมเครือกับเรื่องนี้ครับ",
         thaiFeminine: "ฉันรู้สึกคลุมเครือกับเรื่องนี้ค่ะ",
         pronunciation: "chǎn/pǒm rúu-sʉ̀k klum-krʉa gàp rʉ̂aŋ níi",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i have mixed feelings about this'",
+        mnemonic: "Ruu-seuk (feel) + klum-krua (vague/mixed) + gap ruang nee",
         literal: "I feel vague with matter this",
         examples: [
           {
@@ -1196,7 +1196,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "เรามีความเห็นต่างกันก็แล้วกันครับ",
         thaiFeminine: "เรามีความเห็นต่างกันก็แล้วกันค่ะ",
         pronunciation: "rao mii kwaam-hěn tàaŋ gan gɔ̂ɔ láeo gan",
-        mnemonic: "Memory aid: Connect 'rao' with 'let's agree to disagree'",
+        mnemonic: "Rao mee kwaam hen taang gan (we have different opinions) + gor laeo gan (then so be it)",
         literal: "We have opinion different then already together",
         examples: [
           {
@@ -1221,7 +1221,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "เวลาจะเป็นเครื่องพิสูจน์ครับ",
         thaiFeminine: "เวลาจะเป็นเครื่องพิสูจน์ค่ะ",
         pronunciation: "wee-laa jà pen krʉ̂aŋ pí-sùut",
-        mnemonic: "Memory aid: Connect 'wee-laa' with 'time will tell'",
+        mnemonic: "Welaa (time) + ja pen kruang pisoot (will be tool prove)",
         literal: "Time will be tool prove",
         examples: [
           {
@@ -1246,7 +1246,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมต้องทำใจให้สบายครับ",
         thaiFeminine: "ฉันต้องทำใจให้สบายค่ะ",
         pronunciation: "chǎn/pǒm tɔ̂ŋ tam jai hâi sà-baai",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i need to clear my head'",
+        mnemonic: "Tong (must) + tam jai (make heart) + hai sabaai (comfortable)",
         literal: "I must make heart give comfortable",
         examples: [
           {
@@ -1271,7 +1271,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ที่ผ่านมาก็ให้มันผ่านไปครับ",
         thaiFeminine: "ที่ผ่านมาก็ให้มันผ่านไปค่ะ",
         pronunciation: "tîi pàan maa gɔ̂ɔ hâi man pàan pai",
-        mnemonic: "Memory aid: Connect 'tîi' with 'let bygones be bygones'",
+        mnemonic: "Tee paan maa (that passed come) + gor hai man paan pai (then let it pass go)",
         literal: "That pass come then give it pass go",
         examples: [
           {
@@ -1304,7 +1304,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "เสียนี้เพื่อลาภหน้าครับ",
         thaiFeminine: "เสียนี้เพื่อลาภหน้าค่ะ",
         pronunciation: "sǐa níi pʉ̂a lâap nâa",
-        mnemonic: "Memory aid: Connect 'sǐa' with 'it's a blessing in disguise'",
+        mnemonic: "Sia nee (lose this) + phua laap naa (for fortune ahead)",
         literal: "Lose this for fortune front",
         examples: [
           {
@@ -1329,7 +1329,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "การกระทำสำคัญกว่าคำพูดครับ",
         thaiFeminine: "การกระทำสำคัญกว่าคำพูดค่ะ",
         pronunciation: "gaan grà-tam sǎm-kan gwàa kam-pûut",
-        mnemonic: "Memory aid: Connect 'gaan' with 'actions speak louder than words'",
+        mnemonic: "Gaan gratam (actions) + samkan gwaa (more important than) + kam poot (words)",
         literal: "The action important more than words",
         examples: [
           {
@@ -1354,7 +1354,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมต้องขอโทษคุณครับ",
         thaiFeminine: "ฉันต้องขอโทษคุณค่ะ",
         pronunciation: "chǎn/pǒm tɔ̂ŋ kɔ̌ɔ-tôot kun",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i owe you an apology'",
+        mnemonic: "Tong (must) + kor-toht (apologize) + kun (you)",
         literal: "I must ask punishment you",
         examples: [
           {
@@ -1379,7 +1379,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "สายดีกว่าไม่มาครับ",
         thaiFeminine: "สายดีกว่าไม่มาค่ะ",
         pronunciation: "sǎai dii gwàa mâi maa",
-        mnemonic: "Memory aid: Connect 'sǎai' with 'better late than never'",
+        mnemonic: "Saai (late) + dee gwaa (better than) + mai maa (not come)",
         literal: "Late better than not come",
         examples: [
           {
@@ -1404,7 +1404,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "พอแค่นี้วันนี้ครับ",
         thaiFeminine: "พอแค่นี้วันนี้ค่ะ",
         pronunciation: "pɔɔ kɛ̂ɛ níi wan-níi",
-        mnemonic: "Memory aid: Connect 'pɔɔ' with 'let's call it a day'",
+        mnemonic: "Por kae nee (enough just this) + wan-nee (today)",
         literal: "Enough just this today",
         examples: [
           {
@@ -1429,7 +1429,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมจะชดเชยให้ครับ",
         thaiFeminine: "ฉันจะชดเชยให้ค่ะ",
         pronunciation: "chǎn/pǒm jà chót-chəəi hâi",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i'll make it up to you'",
+        mnemonic: "Ja (will) + chot-choey (compensate) + hai (give)",
         literal: "I will compensate give",
         examples: [
           {
@@ -1454,7 +1454,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "พอแล้ว ทนไม่ไหวแล้วครับ",
         thaiFeminine: "พอแล้ว ทนไม่ไหวแล้วค่ะ",
         pronunciation: "pɔɔ láeo ton mâi wǎi láeo",
-        mnemonic: "Memory aid: Connect 'pɔɔ' with 'that's the last straw'",
+        mnemonic: "Por laeo (enough already) + ton mai wai laeo (can't endure anymore)",
         literal: "Enough already endure not able already",
         examples: [
           {
@@ -1479,7 +1479,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ถ้าไม่ใช่ตอนนี้ก็ไม่มีโอกาสแล้วครับ",
         thaiFeminine: "ถ้าไม่ใช่ตอนนี้ก็ไม่มีโอกาสแล้วค่ะ",
         pronunciation: "tâa mâi châi tɔɔn-níi gɔ̂ɔ mâi mii oo-gàat láeo",
-        mnemonic: "Memory aid: Connect 'tâa' with 'it's now or never'",
+        mnemonic: "Taa mai chai torn nee (if not now) + gor mai mee okaat laeo (then no chance already)",
         literal: "If not be now then not have chance already",
         examples: [
           {
@@ -1504,7 +1504,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมภูมิใจในตัวคุณครับ",
         thaiFeminine: "ฉันภูมิใจในตัวคุณค่ะ",
         pronunciation: "chǎn/pǒm puum-jai nai tua kun",
-        mnemonic: "Memory aid: Connect 'chǎn/pǒm' with 'i'm proud of you'",
+        mnemonic: "Poom-jai (proud) + nai tua kun (in you)",
         literal: "I proud in body you",
         examples: [
           {
@@ -1529,7 +1529,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ขอบคุณสำหรับทุกอย่างครับ",
         thaiFeminine: "ขอบคุณสำหรับทุกอย่างค่ะ",
         pronunciation: "kɔ̀ɔp-kun sǎm-ràp túk yàaŋ",
-        mnemonic: "Memory aid: Connect 'kɔ̀ɔp-kun' with 'thank you for everything'",
+        mnemonic: "Korp-kun (thank you) + samrap tuk yaang (for everything)",
         literal: "Thank you for every thing",
         examples: [
           {

@@ -426,7 +426,7 @@ export const DEFAULT_SETS: DefaultSet[] = [
         thaiMasculine: "วันจันทร์ครับ",
         thaiFeminine: "วันจันทร์ค่ะ",
         pronunciation: "wan jan",
-        mnemonic: "Think: 'One chan' - Monday is day one",
+        mnemonic: "Think: 'wan-jan' - monday",
         examples: [
           {
             thai: "วันจันทร์หน้า",
@@ -747,7 +747,7 @@ export const DEFAULT_SETS: DefaultSet[] = [
         thaiMasculine: "พี่สาวครับ",
         thaiFeminine: "พี่สาวค่ะ",
         pronunciation: "pee saao",
-        mnemonic: "P comes before → older; 'sao' is sister",
+        mnemonic: "Think: 'pee-saao' - older sister",
         examples: [
           {
             thai: "พี่สาวของฉันใจดี",
@@ -1021,7 +1021,7 @@ export const DEFAULT_SETS: DefaultSet[] = [
         thaiMasculine: "เดือนกรกฎาคมครับ",
         thaiFeminine: "เดือนกรกฎาคมค่ะ",
         pronunciation: "ga-ra-ga-da-kom",
-        mnemonic: "'Ga-ragga-da' — fireworks in July",
+        mnemonic: "Think: 'ga ra...' for july",
         examples: [
           {
             thai: "กรกฎาคมเป็นหน้าฝน",
@@ -1093,7 +1093,7 @@ export const DEFAULT_SETS: DefaultSet[] = [
         thaiMasculine: "เดือนตุลาคมครับ",
         thaiFeminine: "เดือนตุลาคมค่ะ",
         pronunciation: "tu-laa-kom",
-        mnemonic: "'Tu-la' — cool season approaches",
+        mnemonic: "Think: 'tu-laa-kom' - october",
         examples: [
           {
             thai: "ตุลาคมเริ่มเย็น",
@@ -1437,7 +1437,7 @@ export const DEFAULT_SETS: DefaultSet[] = [
         thaiMasculine: "หลังครับ",
         thaiFeminine: "หลังค่ะ",
         pronunciation: "lang",
-        mnemonic: "Lean back 'lang'",
+        mnemonic: "Think: 'lang' - sounds like back",
         examples: [
           {
             thai: "ปวดหลัง",

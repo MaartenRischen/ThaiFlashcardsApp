@@ -165,7 +165,7 @@ For each phrase, provide:
 1. Accurate Thai translation with Thai script
 2. Both masculine (ครับ) and feminine (ค่ะ/คะ) versions
 3. Clear romanized pronunciation guide (MUST include phom/chan when Thai has ผม/ฉัน)
-4. Practical mnemonic based on sound similarities (e.g., 'khob khun' → 'Cop couldn't thank you')
+4. Practical mnemonic based on sound similarities - NEVER include pronouns (chan/pom) or particles (ka/krap) in the mnemonic itself. Focus on other key words. (e.g., 'yàak pai' → 'Yak pie - yak wants pie')
 5. Word-by-word literal translation (e.g., "ไม่เป็นไร" → "Not become thing")
 6. Two example sentences showing usage (with matching context to the main phrase)
 
@@ -179,7 +179,7 @@ Return a JSON object with this EXACT structure:
       "thaiMasculine": "Thai with masculine forms/particles",
       "thaiFeminine": "Thai with feminine forms/particles", 
       "pronunciation": "Phonetic pronunciation (romanized)",
-      "mnemonic": "Practical memory aid based on sound similarities",
+      "mnemonic": "Practical memory aid based on sound similarities (NEVER include pronouns chan/pom or particles ka/krap)",
       "literal": "Word-by-word literal translation",
       "examples": [
         {

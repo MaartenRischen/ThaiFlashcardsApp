@@ -188,7 +188,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ผมขอโทษครับ",
         thaiFeminine: "ฉันขอโทษค่ะ",
         pronunciation: "chǎn/pǒm kɔ̌ɔ-tôot",
-        mnemonic: "Think: 'chan/pom kaw toot' - caught tooting (sorry!)",
+        mnemonic: "Think: 'kɔ̌ɔ-tôot' - i'm sorry",
         literal: "I ask punishment",
         examples: [
           {
@@ -213,7 +213,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "แล้วเจอกันครับ",
         thaiFeminine: "แล้วเจอกันค่ะ",
         pronunciation: "láeo jəə gan",
-        mnemonic: "Think: 'láeo jəə gan' - create your own sound association",
+        mnemonic: "Think: 'Laew-pob-gan' - allow pop gun (see you)",
         literal: "Then meet together",
         examples: [
           {
@@ -238,7 +238,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ผมชอบอาหารไทยครับ",
         thaiFeminine: "ฉันชอบอาหารไทยค่ะ",
         pronunciation: "chǎn/pǒm chɔ̂ɔp aa-hǎan thai",
-        mnemonic: "Think: 'chan chɔɔp aa-hǎan thai' - create your own sound association",
+        mnemonic: "Think: 'chɔ̂ɔp aa...' for i like thai food",
         literal: "I like food Thai",
         examples: [
           {
@@ -271,7 +271,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "คุณพูดภาษาอังกฤษได้ไหมครับ",
         thaiFeminine: "คุณพูดภาษาอังกฤษได้ไหมคะ",
         pronunciation: "kun pûut paa-sǎa aŋ-grìt dâai mǎi",
-        mnemonic: "Think: 'kun pûut paa-sǎa aŋ-grìt dâai mǎi' - create your own sound association",
+        mnemonic: "Think: 'Poot-paa-saa-ang-grit' - put pass English?",
         literal: "You speak language English can (question)",
         examples: [
           {
@@ -321,7 +321,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "อาหารอร่อยครับ",
         thaiFeminine: "อาหารอร่อยค่ะ",
         pronunciation: "aa-hǎan à-rɔ̀i",
-        mnemonic: "Think: 'aa-hǎan à-rɔi' - create your own sound association",
+        mnemonic: "Think: 'A-roy' - Ahoy! Delicious",
         literal: "Food delicious",
         examples: [
           {
@@ -371,7 +371,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ผมอยากไป...ครับ",
         thaiFeminine: "ฉันอยากไป...ค่ะ",
         pronunciation: "chǎn/pǒm yàak pai...",
-        mnemonic: "Think: 'chan yàak pai...' - create your own sound association",
+        mnemonic: "Think: 'yak pie' - yak wants pie (I want to go)",
         literal: "I want go...",
         examples: [
           {
@@ -421,7 +421,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ผมพูดไทยไม่เก่งครับ",
         thaiFeminine: "ฉันพูดไทยไม่เก่งค่ะ",
         pronunciation: "chǎn/pǒm pûut thai mâi gèŋ",
-        mnemonic: "Think: 'chan pûut thai mâi gèŋ' - create your own sound association",
+        mnemonic: "Think: 'pûut thai...' for i don't speak thai well",
         literal: "I speak Thai not skilled",
         examples: [
           {
@@ -521,7 +521,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "เดินทางปลอดภัยนะครับ",
         thaiFeminine: "เดินทางปลอดภัยนะคะ",
         pronunciation: "dəən-taaŋ plɔ̀ɔt-pai",
-        mnemonic: "Think: 'dəən-taaŋ plɔɔt-pai' - create your own sound association",
+        mnemonic: "Think: 'Dern-tang-plaw-pai' - turn tang plow pie (safe trip)",
         literal: "Travel safe",
         examples: [
           {
@@ -554,7 +554,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "คุณกำลังทำอะไรครับ",
         thaiFeminine: "คุณกำลังทำอะไรคะ",
         pronunciation: "kun gam-laŋ tam à-rai",
-        mnemonic: "Think: 'kun gam-laŋ tam à-rai' - create your own sound association",
+        mnemonic: "Think: 'kun gam...' for what are you doing?",
         literal: "You currently do what",
         examples: [
           {
@@ -579,7 +579,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ผมมาจากอเมริกาครับ",
         thaiFeminine: "ฉันมาจากอเมริกาค่ะ",
         pronunciation: "chǎn/pǒm maa jàak à-mee-rí-gaa",
-        mnemonic: "Think: 'chan maa jàak à-mee-rí-gaa' - create your own sound association",
+        mnemonic: "Think: 'maa jàak...' for i come from america",
         literal: "I come from America",
         examples: [
           {
@@ -604,7 +604,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "คุณอยู่เมืองไทยนานแค่ไหนครับ",
         thaiFeminine: "คุณอยู่เมืองไทยนานแค่ไหนคะ",
         pronunciation: "kun yùu mʉaŋ thai naan kɛ̂ɛ-nǎi",
-        mnemonic: "Think: 'kun yùu mʉaŋ thai naan kɛɛ-nǎi' - create your own sound association",
+        mnemonic: "Think: 'kun yùu...' for how long have you been in thailand?",
         literal: "You stay Thailand long how much",
         examples: [
           {
@@ -629,7 +629,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "คุณแนะนำร้านอาหารดีๆ ได้ไหมครับ",
         thaiFeminine: "คุณแนะนำร้านอาหารดีๆ ได้ไหมคะ",
         pronunciation: "kun nɛ́-nam ráan aa-hǎan dii-dii dâai mǎi",
-        mnemonic: "Think: 'kun nɛ-nam ráan aa-hǎan dii-dii dâai mǎi' - create your own sound association",
+        mnemonic: "Think: 'Dee' - dee is good",
         literal: "You recommend restaurant good can (question)",
         examples: [
           {
@@ -654,7 +654,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ผมต้องไปโรงพยาบาลครับ",
         thaiFeminine: "ฉันต้องไปโรงพยาบาลค่ะ",
         pronunciation: "chǎn/pǒm tɔ̂ŋ pai rooŋ-pá-yaa-baan",
-        mnemonic: "Think: 'chan tɔŋ pai rooŋ-pá-yaa-baan' - create your own sound association",
+        mnemonic: "Think: 'tɔ̂ŋ pai...' for i need to go to the hospital",
         literal: "I must go hospital",
         examples: [
           {
@@ -679,7 +679,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "วันนี้อากาศร้อนมากครับ",
         thaiFeminine: "วันนี้อากาศร้อนมากค่ะ",
         pronunciation: "wan-níi aa-gàat rɔ́ɔn mâak",
-        mnemonic: "Think: 'wan-níi aa-gàat rɔɔn mâak' - create your own sound association",
+        mnemonic: "Think: 'Wan-knee' - one knee today",
         literal: "Today weather hot very",
         examples: [
           {
@@ -704,7 +704,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ผมอยากจองห้องพักครับ",
         thaiFeminine: "ฉันอยากจองห้องพักค่ะ",
         pronunciation: "chǎn/pǒm yàak jɔɔŋ hɔ̂ŋ-pák",
-        mnemonic: "Think: 'chan/pom yahk jong hong park' - I yak, John's home park (want to book)",
+        mnemonic: "Think: 'yàak jɔɔŋ...' for i'd like to book a room",
         literal: "I want book room stay",
         examples: [
           {
@@ -729,7 +729,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ผมกำลังเรียนภาษาไทยครับ",
         thaiFeminine: "ฉันกำลังเรียนภาษาไทยค่ะ",
         pronunciation: "chǎn/pǒm gam-laŋ rian paa-sǎa thai",
-        mnemonic: "Think: 'chan gam-laŋ rian paa-sǎa thai' - create your own sound association",
+        mnemonic: "Think: 'gam laŋ...' for i'm learning thai",
         literal: "I currently learn language Thai",
         examples: [
           {
@@ -812,7 +812,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "กินข้าวหรือยังครับ",
         thaiFeminine: "กินข้าวหรือยังคะ",
         pronunciation: "gin kâao rʉ̌ʉ yaŋ",
-        mnemonic: "Think: 'gin kâao rʉʉ yaŋ' - create your own sound association",
+        mnemonic: "Think: 'gin kâao...' for have you eaten yet?",
         literal: "Eat rice or yet",
         examples: [
           {
@@ -887,7 +887,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ผมไม่มีเงินครับ",
         thaiFeminine: "ฉันไม่มีเงินค่ะ",
         pronunciation: "chǎn/pǒm mâi mii ŋəən",
-        mnemonic: "Think: 'chan mâi mii ŋəən' - create your own sound association",
+        mnemonic: "Think: 'my-me-ŋəən' - i don't have money",
         literal: "I not have money",
         examples: [
           {
@@ -912,7 +912,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ผมก็คิดอย่างนั้นครับ",
         thaiFeminine: "ฉันก็คิดอย่างนั้นค่ะ",
         pronunciation: "chǎn/pǒm gɔ̂ɔ kít yàaŋ-nán",
-        mnemonic: "Think: 'chan/pom gaw kit young nun' - I got kit, young nun (think so too)",
+        mnemonic: "Think: 'gɔ̂ɔ kít...' for i think so too",
         literal: "I also think like that",
         examples: [
           {
@@ -962,7 +962,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "ผมจะไปนอนครับ",
         thaiFeminine: "ฉันจะไปนอนค่ะ",
         pronunciation: "chǎn/pǒm jà pai nɔɔn",
-        mnemonic: "Think: 'chan jà pai nɔɔn' - create your own sound association",
+        mnemonic: "Think: 'jà-pie-nɔɔn' - i'm going to sleep",
         literal: "I will go sleep",
         examples: [
           {
@@ -987,7 +987,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "เบอร์โทรศัพท์คุณอะไรครับ",
         thaiFeminine: "เบอร์โทรศัพท์คุณอะไรคะ",
         pronunciation: "bəə too-rá-sàp kun à-rai",
-        mnemonic: "Think: 'bəə too-rá-sàp kun à-rai' - create your own sound association",
+        mnemonic: "Think: 'bəə too...' for what's your phone number?",
         literal: "Number telephone your what",
         examples: [
           {
@@ -1012,7 +1012,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "เดี๋ยวผมโทรหาครับ",
         thaiFeminine: "เดี๋ยวฉันโทรหาค่ะ",
         pronunciation: "dǐao too hǎa",
-        mnemonic: "Think: 'dǐao too hǎa' - create your own sound association",
+        mnemonic: "Think: 'dǐao-too-hǎa' - i'll call you later",
         literal: "Later call find",
         examples: [
           {
@@ -1037,7 +1037,7 @@ export const COMMON_SENTENCES_SETS: DefaultSet[] = [
         thaiMasculine: "พรุ่งนี้ว่างไหมครับ",
         thaiFeminine: "พรุ่งนี้ว่างไหมคะ",
         pronunciation: "prûŋ-níi wâaŋ mǎi",
-        mnemonic: "Think: 'prûŋ-níi wâaŋ mǎi' - create your own sound association",
+        mnemonic: "Think: 'Prong-knee' - prong knee tomorrow",
         literal: "Tomorrow free (question)",
         examples: [
           {

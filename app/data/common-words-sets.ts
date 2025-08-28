@@ -557,7 +557,7 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
         thaiMasculine: "เงินครับ",
         thaiFeminine: "เงินค่ะ",
         pronunciation: "ngern",
-        mnemonic: "Think: 'Earn' money",
+        mnemonic: "Think: 'ngern' - sounds like money",
         examples: [
           {
             thai: "ไม่มีเงิน",
@@ -854,7 +854,7 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
         thaiFeminine: "ดีใจค่ะ",
         pronunciation: "dee jai",
         literal: "Good heart",
-        mnemonic: "Think: 'dee jai' - create your own sound association",
+        mnemonic: "Think: 'dee-jai' - happy",
         examples: [
           {
             thai: "ดีใจมาก",
@@ -950,7 +950,7 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
         thaiMasculine: "อิ่มครับ",
         thaiFeminine: "อิ่มค่ะ",
         pronunciation: "im",
-        mnemonic: "Think: 'I'm' full",
+        mnemonic: "Think: 'im' - sounds like full (stomach)",
         examples: [
           {
             thai: "อิ่มแล้ว",
@@ -1223,7 +1223,7 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
         thaiMasculine: "ฟรีครับ",
         thaiFeminine: "ฟรีค่ะ",
         pronunciation: "free",
-        mnemonic: "Same as English!",
+        mnemonic: "Think: 'My chai' - my, not chai (no)",
         examples: [
           {
             thai: "ของฟรี",
@@ -1775,7 +1775,7 @@ export const COMMON_WORDS_SETS: DefaultSet[] = [
         thaiMasculine: "แท็กซี่ครับ",
         thaiFeminine: "แท็กซี่ค่ะ",
         pronunciation: "taek-see",
-        mnemonic: "Same as English!",
+        mnemonic: "Think: 'taek-see' - taxi",
         examples: [
           {
             thai: "เรียกแท็กซี่",

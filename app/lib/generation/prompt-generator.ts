@@ -43,7 +43,21 @@ Regardless of tone level, ALWAYS create mnemonics that:
 2. Are practical and easy to remember
 3. Help with memorization through logical connections
 4. Are clear and effective learning tools
-Example: "ขอบคุณ (khob khun)" → "Cop couldn't thank you enough"
+5. NEVER include gender-specific pronouns (chan/pom/dichan) in the mnemonic itself
+6. NEVER include politeness particles (ka/krap/krub) in the mnemonic
+7. For phrases with pronouns, focus on OTHER key words in the phrase
+8. Must relate to the meaning while sounding like the pronunciation
+
+Good examples:
+- "ขอบคุณ (khob khun)" → "Think: 'Cop coon' - cop saying thanks"
+- "อยากไป (yàak pai)" → "Think: 'Yak pie' - yak wants pie (go)"
+- "ที่ไหน (thîi nǎi)" → "Think: 'Tea nigh' - tea at night where?"
+
+Bad examples to AVOID:
+- "ผมอยากไป" → "Think: 'pom yàak...'" ❌ (contains pronoun)
+- "สวัสดีครับ" → "Think: '...krap'" ❌ (contains particle)
+- "Think: 'create your own sound'" ❌ (placeholder text)
+- Just repeating the pronunciation ❌ (not creative)
 
 ### CULTURAL AWARENESS:
 - Respect Thai cultural sensitivities and hierarchies

@@ -31,7 +31,7 @@ export function AudioGenerationStatusBar({ onAudioReady }: AudioGenerationStatus
 
   return (
     <div className="fixed top-20 left-2 right-2 sm:top-24 sm:left-auto sm:right-4 sm:w-96 z-40">
-      <div className="p-3 sm:p-4 border-2 border-blue-500 bg-black/80 backdrop-blur-sm rounded-xl">
+      <div className="p-3 sm:p-4 border border-blue-500/50 bg-black/50 backdrop-blur-md rounded-xl">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
@@ -48,9 +48,9 @@ export function AudioGenerationStatusBar({ onAudioReady }: AudioGenerationStatus
         {state.isGenerating ? (
           <>
             <p className="text-sm text-gray-400 mb-2">{state.message}</p>
-            <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden">
               <div 
-                className="bg-blue-500 h-full transition-all duration-500 ease-out"
+                className="bg-blue-500 h-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]"
                 style={{ width: `${state.progress}%` }}
               />
             </div>

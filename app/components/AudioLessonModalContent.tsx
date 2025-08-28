@@ -66,13 +66,8 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
     const selectedConfig = lessonMode === 'pimsleur' ? config : simpleConfig;
     await startGeneration(setId, setName, lessonMode, selectedConfig);
     
-    // Show a toast to remind users they can navigate
-    const { toast } = await import('sonner');
-    toast.info('Audio generating in background - continue learning!', {
-      duration: 4000,
-    });
-    
-    onClose(); // Close the modal after starting generation
+    // Don't close the modal immediately - let user see the status bar appear
+    // They can close it manually when ready
   };
 
 
@@ -258,6 +253,15 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
               </>
             )}
           </button>
+          
+          {/* Show confirmation when generation starts */}
+          {state.isGenerating && (
+            <div className="mt-4 p-3 bg-green-900/20 border border-green-700/50 rounded-lg">
+              <p className="text-sm text-green-400 text-center">
+                ✓ Audio generation started! You can close this window and continue learning.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

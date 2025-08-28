@@ -583,6 +583,48 @@ export default function ThaiFlashcards() {
     loadMnemonics();
   }, [userId]);
 
+  // Clear bad "check bin" mnemonics after loading
+  useEffect(() => {
+    if (Object.keys(mnemonics).length > 0) {
+      let modified = false;
+      const cleaned = { ...mnemonics };
+      
+      // Check all default sets
+      Object.keys(cleaned).forEach(setId => {
+        if (setId.startsWith('default-') && cleaned[setId]) {
+          Object.keys(cleaned[setId]).forEach(phraseIndex => {
+            if (cleaned[setId][phraseIndex]?.includes('check bin')) {
+              delete cleaned[setId][phraseIndex];
+              modified = true;
+              console.log(`Clearing bad "check bin" mnemonic for set ${setId}, phrase ${phraseIndex}`);
+            }
+          });
+        }
+      });
+      
+      if (modified) {
+        setMnemonics(cleaned);
+        
+        // Also update localStorage if not logged in
+        if (!userId) {
+          localStorage.setItem('mnemonics-v2', JSON.stringify(cleaned));
+        }
+        
+        // Call API to clear from database if logged in
+        if (userId) {
+          fetch('/api/clear-bad-mnemonic', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+              if (data.deletedCount > 0) {
+                console.log(`Cleared ${data.deletedCount} bad mnemonics from database`);
+              }
+            })
+            .catch(err => console.error('Error calling clear API:', err));
+        }
+      }
+    }
+  }, [mnemonics, userId]);
+
   // Function to update mnemonics - now syncs to database for logged-in users
   const updateMnemonics = async (phraseIndex: number, newMnemonic: string) => {
     if (!activeSetId || phraseIndex === undefined) return;
@@ -1555,8 +1597,11 @@ export default function ThaiFlashcards() {
                     value={(() => {
                       let rawMnemonic = activeSetId ? (mnemonics[activeSetId]?.[`${index}`] ?? phrases[index]?.mnemonic ?? '') : (phrases[index]?.mnemonic ?? '');
                       
-                      // Check if this is an old word breakdown mnemonic (contains + or =)
-                      if (activeSetId?.startsWith('default-') && (rawMnemonic.includes(' + ') || rawMnemonic.includes(' = '))) {
+                      // Check if this is an old word breakdown mnemonic (contains + or =) or the known bad "check bin" mnemonic
+                      if (activeSetId?.startsWith('default-') && 
+                          (rawMnemonic.includes(' + ') || 
+                           rawMnemonic.includes(' = ') ||
+                           rawMnemonic.includes('check bin'))) {
                         // Use the updated default mnemonic instead
                         rawMnemonic = phrases[index]?.mnemonic ?? '';
                       }
@@ -1568,8 +1613,11 @@ export default function ThaiFlashcards() {
                     onBlur={() => {
                       let rawMnemonic = activeSetId ? (mnemonics[activeSetId]?.[`${index}`] ?? phrases[index]?.mnemonic ?? '') : (phrases[index]?.mnemonic ?? '');
                       
-                      // Check if this is an old word breakdown mnemonic (contains + or =)
-                      if (activeSetId?.startsWith('default-') && (rawMnemonic.includes(' + ') || rawMnemonic.includes(' = '))) {
+                      // Check if this is an old word breakdown mnemonic (contains + or =) or the known bad "check bin" mnemonic
+                      if (activeSetId?.startsWith('default-') && 
+                          (rawMnemonic.includes(' + ') || 
+                           rawMnemonic.includes(' = ') ||
+                           rawMnemonic.includes('check bin'))) {
                         // Use the updated default mnemonic instead
                         rawMnemonic = phrases[index]?.mnemonic ?? '';
                       }

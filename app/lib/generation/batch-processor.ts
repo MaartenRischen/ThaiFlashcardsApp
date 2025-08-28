@@ -82,7 +82,7 @@ export async function processBatch(
       
       if (mnemonicIssues.length > 0) {
         errors.push({
-          type: 'VALIDATION_ERROR' as const,
+          type: 'INVALID_DATA' as const,
           message: `Fixed ${mnemonicIssues.length} mnemonic mismatches`,
           details: { mnemonicIssues, attemptNumber: retries + 1 },
           timestamp: new Date().toISOString()

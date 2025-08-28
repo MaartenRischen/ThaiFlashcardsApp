@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { createBreakdownPrompt, parseWordBreakdown } from '@/app/lib/word-breakdown';
+import { createBreakdownPrompt, parseWordBreakdown, getCachedBreakdown } from '@/app/lib/word-breakdown';
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!;
 
@@ -17,6 +17,14 @@ export async function POST(request: NextRequest) {
         { error: 'Missing required fields: thai, pronunciation, english' },
         { status: 400 }
       );
+    }
+    
+    // Check pre-generated cache first
+    const cacheKey = `${thai}_${pronunciation}`;
+    const cached = getCachedBreakdown(cacheKey);
+    if (cached) {
+      console.log(`Using pre-generated breakdown for: ${thai}`);
+      return NextResponse.json({ breakdown: cached });
     }
 
     // Create the prompt

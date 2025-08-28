@@ -92,8 +92,16 @@ function _extractParticles(thai: string): { main: string; particles: string[] } 
  */
 export function parseWordBreakdown(llmResponse: string): PhraseBreakdown | null {
   try {
-    // Try to parse as JSON first
-    const parsed = JSON.parse(llmResponse);
+    // Remove markdown code blocks if present
+    let cleanResponse = llmResponse;
+    if (llmResponse.includes('```json')) {
+      cleanResponse = llmResponse.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+    } else if (llmResponse.includes('```')) {
+      cleanResponse = llmResponse.replace(/```\s*/g, '');
+    }
+    
+    // Try to parse as JSON
+    const parsed = JSON.parse(cleanResponse.trim());
     return parsed as PhraseBreakdown;
   } catch {
     // If not JSON, try to parse structured text
@@ -201,10 +209,42 @@ Return ONLY the JSON, no additional text.`;
  */
 const breakdownCache = new Map<string, PhraseBreakdown>();
 
-export function getCachedBreakdown(thai: string): PhraseBreakdown | null {
-  return breakdownCache.get(thai) || null;
+// Pre-generated breakdown cache
+let preGeneratedCache: Record<string, any> = {};
+
+// Load pre-generated cache on module initialization
+if (typeof window === 'undefined') {
+  // Server-side: try to load from file
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const cacheFile = path.join(process.cwd(), 'app', 'data', 'breakdown-cache.json');
+    if (fs.existsSync(cacheFile)) {
+      preGeneratedCache = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+      console.log(`Loaded ${Object.keys(preGeneratedCache).length} pre-generated breakdowns`);
+    }
+  } catch (error) {
+    console.error('Failed to load pre-generated cache:', error);
+  }
 }
 
-export function setCachedBreakdown(thai: string, breakdown: PhraseBreakdown): void {
-  breakdownCache.set(thai, breakdown);
+export function getCachedBreakdown(cacheKey: string): PhraseBreakdown | null {
+  // Check runtime cache first
+  if (breakdownCache.has(cacheKey)) {
+    return breakdownCache.get(cacheKey) || null;
+  }
+  
+  // Check pre-generated cache
+  if (preGeneratedCache[cacheKey]) {
+    const breakdown = preGeneratedCache[cacheKey];
+    // Store in runtime cache for faster access
+    breakdownCache.set(cacheKey, breakdown);
+    return breakdown;
+  }
+  
+  return null;
+}
+
+export function setCachedBreakdown(cacheKey: string, breakdown: PhraseBreakdown): void {
+  breakdownCache.set(cacheKey, breakdown);
 }

@@ -1,0 +1,295 @@
+{
+  "คุณช่วยฉันได้ไหมคะ_kun chûai chǎn/pǒm dâai mǎi": {
+    "words": [
+      {
+        "thai": "คุณ",
+        "pronunciation": "kun",
+        "english": "you"
+      },
+      {
+        "thai": "ช่วย",
+        "pronunciation": "chûai",
+        "english": "help"
+      },
+      {
+        "thai": "ฉัน",
+        "pronunciation": "chǎn",
+        "english": "me"
+      },
+      {
+        "thai": "ได้",
+        "pronunciation": "dâai",
+        "english": "can"
+      },
+      {
+        "thai": "ไหม",
+        "pronunciation": "mǎi",
+        "english": "question particle"
+      },
+      {
+        "thai": "คะ",
+        "pronunciation": "ká",
+        "english": "polite particle (female speaker)"
+      }
+    ],
+    "compounds": []
+  },
+  "สวัสดีค่ะ_sa-wat-dee": {
+    "words": [
+      {
+        "thai": "สวัสดี",
+        "pronunciation": "sa-wat-dee",
+        "english": "hello/greetings"
+      },
+      {
+        "thai": "ค่ะ",
+        "pronunciation": "ka",
+        "english": "polite particle (female speaker)"
+      }
+    ],
+    "compounds": []
+  },
+  "ขอบคุณ_khop-khun": {
+    "words": [
+      {
+        "thai": "ขอบ",
+        "pronunciation": "khop",
+        "english": "to thank"
+      },
+      {
+        "thai": "คุณ",
+        "pronunciation": "khun",
+        "english": "you"
+      }
+    ],
+    "compounds": [
+      {
+        "thai": "ขอบคุณ",
+        "pronunciation": "khop-khun",
+        "english": "thank you"
+      }
+    ]
+  },
+  "ห้องน้ำอยู่ที่ไหน_hɔ̂ɔŋ-náam yùu tîi-nǎi": {
+    "words": [
+      {
+        "thai": "ห้องน้ำ",
+        "pronunciation": "hɔ̂ɔng-náam",
+        "english": "bathroom"
+      },
+      {
+        "thai": "อยู่",
+        "pronunciation": "yùu",
+        "english": "is located"
+      },
+      {
+        "thai": "ที่",
+        "pronunciation": "tîi",
+        "english": "at"
+      },
+      {
+        "thai": "ไหน",
+        "pronunciation": "nǎi",
+        "english": "where"
+      }
+    ],
+    "compounds": []
+  },
+  "ห้องน้ำอยู่ที่ไหนคะ_hɔ̂ɔŋ-náam yùu tîi-nǎi": {
+    "words": [
+      {
+        "thai": "ห้องน้ำ",
+        "pronunciation": "hɔ̂ɔng-náam",
+        "english": "bathroom"
+      },
+      {
+        "thai": "อยู่",
+        "pronunciation": "yùu",
+        "english": "to be located"
+      },
+      {
+        "thai": "ที่",
+        "pronunciation": "tîi",
+        "english": "at"
+      },
+      {
+        "thai": "ไหน",
+        "pronunciation": "nǎi",
+        "english": "where"
+      },
+      {
+        "thai": "คะ",
+        "pronunciation": "ká",
+        "english": "polite particle (female)"
+      }
+    ],
+    "compounds": []
+  },
+  "เท่าไร_tâo-rai": {
+    "words": [
+      {
+        "thai": "เท่า",
+        "pronunciation": "tâo",
+        "english": "equal, same as"
+      },
+      {
+        "thai": "ไร",
+        "pronunciation": "rai",
+        "english": "what"
+      }
+    ],
+    "compounds": [
+      {
+        "thai": "เท่าไร",
+        "pronunciation": "tâo-rai",
+        "english": "how much?"
+      }
+    ]
+  },
+  "อาหาร_aa-hǎan": {
+    "words": [
+      {
+        "thai": "อาหาร",
+        "pronunciation": "aa-hǎan",
+        "english": "Food"
+      }
+    ],
+    "compounds": []
+  },
+  "คุณช่วยฉันได้ไหม_kun chûai chǎn/pǒm dâai mǎi": {
+    "words": [
+      {
+        "thai": "คุณ",
+        "pronunciation": "kun",
+        "english": "you"
+      },
+      {
+        "thai": "ช่วย",
+        "pronunciation": "chûai",
+        "english": "help"
+      },
+      {
+        "thai": "ฉัน",
+        "pronunciation": "chǎn",
+        "english": "me (female speaker)"
+      },
+      {
+        "thai": "ได้",
+        "pronunciation": "dâai",
+        "english": "can/able to"
+      },
+      {
+        "thai": "ไหม",
+        "pronunciation": "mǎi",
+        "english": "question particle"
+      }
+    ],
+    "compounds": []
+  },
+  "สวัสดี_sa-wat-dee": {
+    "words": [
+      {
+        "thai": "สวัสดี",
+        "pronunciation": "sa-wat-dee",
+        "english": "Hello"
+      }
+    ],
+    "compounds": []
+  },
+  "ขอบคุณค่ะ_khop-khun": {
+    "words": [
+      {
+        "thai": "ขอบคุณ",
+        "pronunciation": "khop-khun",
+        "english": "thank you"
+      },
+      {
+        "thai": "ค่ะ",
+        "pronunciation": "kha",
+        "english": "polite particle (female speaker)"
+      }
+    ],
+    "compounds": []
+  },
+  "ไม่เข้าใจ_mâi kâo-jai": {
+    "words": [
+      {
+        "thai": "ไม่",
+        "pronunciation": "mâi",
+        "english": "not"
+      },
+      {
+        "thai": "เข้าใจ",
+        "pronunciation": "kâo-jai",
+        "english": "understand"
+      }
+    ],
+    "compounds": []
+  },
+  "ฉันไม่เข้าใจค่ะ_mâi kâo-jai": {
+    "words": [
+      {
+        "thai": "ฉัน",
+        "pronunciation": "chǎn",
+        "english": "I (female speaker)"
+      },
+      {
+        "thai": "ไม่",
+        "pronunciation": "mâi",
+        "english": "not"
+      },
+      {
+        "thai": "เข้าใจ",
+        "pronunciation": "kâo-jai",
+        "english": "understand"
+      },
+      {
+        "thai": "ค่ะ",
+        "pronunciation": "kâ",
+        "english": "polite particle (female speaker)"
+      }
+    ],
+    "compounds": []
+  },
+  "น้ำ_náam": {
+    "words": [
+      {
+        "thai": "น้ำ",
+        "pronunciation": "náam",
+        "english": "Water"
+      }
+    ],
+    "compounds": []
+  },
+  "ดี_dii": {
+    "words": [
+      {
+        "thai": "ดี",
+        "pronunciation": "dii",
+        "english": "Good"
+      }
+    ],
+    "compounds": []
+  },
+  "ไม่ดี_mâi dii": {
+    "words": [
+      {
+        "thai": "ไม่",
+        "pronunciation": "mâi",
+        "english": "not"
+      },
+      {
+        "thai": "ดี",
+        "pronunciation": "dii",
+        "english": "good"
+      }
+    ],
+    "compounds": [
+      {
+        "thai": "ไม่ดี",
+        "pronunciation": "mâi dii",
+        "english": "not good"
+      }
+    ]
+  }
+}

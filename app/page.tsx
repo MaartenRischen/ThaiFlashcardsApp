@@ -652,7 +652,7 @@ export default function ThaiFlashcards() {
           .then(data => {
             if (data.success) {
               console.log('Force reset successful - reloading set');
-              console.log('Fresh content from API:', data.freshContent?.find(p => p.english === "Can I have the bill?"));
+              console.log('Fresh content from API:', data.freshContent?.find((p: any) => p.english === "Can I have the bill?"));
               // Force reload the set
               refreshSets().then(() => {
                 switchSet('default-common-sentences-2');

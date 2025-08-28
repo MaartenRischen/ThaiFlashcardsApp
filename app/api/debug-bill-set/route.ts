@@ -4,7 +4,7 @@ import { prisma } from '@/app/lib/prisma';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
 import { ALL_COMMON_SENTENCES_SETS } from '@/app/data/common-sentences-sets';
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     const { userId } = await auth();
     

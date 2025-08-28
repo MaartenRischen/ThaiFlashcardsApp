@@ -3,7 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/app/lib/prisma';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
     const { userId } = await auth();
     

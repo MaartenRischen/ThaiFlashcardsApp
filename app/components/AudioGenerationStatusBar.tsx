@@ -30,8 +30,8 @@ export function AudioGenerationStatusBar({ onAudioReady }: AudioGenerationStatus
   };
 
   return (
-    <div className="fixed top-[200px] left-2 right-2 sm:top-[180px] sm:left-auto sm:right-4 sm:w-96 z-40">
-      <div className="neumorphic-card p-3 sm:p-4 border-2 border-blue-500 bg-[#1F1F1F]">
+    <div className="fixed top-20 left-2 right-2 sm:top-24 sm:left-auto sm:right-4 sm:w-96 z-40">
+      <div className="p-3 sm:p-4 border-2 border-blue-500 bg-black/80 backdrop-blur-sm rounded-xl">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
@@ -54,8 +54,8 @@ export function AudioGenerationStatusBar({ onAudioReady }: AudioGenerationStatus
                 style={{ width: `${state.progress}%` }}
               />
             </div>
-            <p className="text-[10px] sm:text-xs text-gray-500 mt-2">
-              You can continue using the app. Switching sets will cancel generation.
+            <p className="text-[11px] sm:text-xs text-gray-300 mt-2">
+              ✓ Continue learning • Navigate freely • Only switching sets cancels
             </p>
           </>
         ) : state.audioUrl && (

@@ -65,6 +65,13 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
   const handleGenerate = async () => {
     const selectedConfig = lessonMode === 'pimsleur' ? config : simpleConfig;
     await startGeneration(setId, setName, lessonMode, selectedConfig);
+    
+    // Show a toast to remind users they can navigate
+    const { toast } = await import('sonner');
+    toast.info('Audio generating in background - continue learning!', {
+      duration: 4000,
+    });
+    
     onClose(); // Close the modal after starting generation
   };
 
@@ -144,53 +151,91 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
               {showAdvanced ? 'Hide' : 'Show'} Advanced Settings
             </button>
 
-            {showAdvanced && lessonMode === 'simple' && (
+            {showAdvanced && (
               <div className="space-y-4 p-4 bg-[#2a2a2a] rounded-lg">
-                <div className="grid gap-3">
-                  <Label>Loops (full set repetitions): {simpleConfig.loops}</Label>
-                  <Slider
-                    value={[simpleConfig.loops || 3]}
-                    onValueChange={([value]) => setSimpleConfig(prev => ({ ...prev, loops: value }))}
-                    min={1}
-                    max={5}
-                    step={1}
-                    className="w-full"
-                  />
-                </div>
-                
-                <div className="grid gap-3">
-                  <Label>Speed: {simpleConfig.speed}x</Label>
-                  <Slider
-                    value={[simpleConfig.speed || 1]}
-                    onValueChange={([value]) => setSimpleConfig(prev => ({ ...prev, speed: value }))}
-                    min={0.5}
-                    max={1.5}
-                    step={0.1}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="includeMnemonics"
-                    checked={simpleConfig.includeMnemonics}
-                    onChange={(e) => setSimpleConfig(prev => ({ ...prev, includeMnemonics: e.target.checked }))}
-                    className="rounded"
-                  />
-                  <Label htmlFor="includeMnemonics">Include mnemonics</Label>
+                {/* Gender Switch - Available for both modes */}
+                <div className="grid gap-3 pb-3 border-b border-gray-700">
+                  <Label>Voice Gender</Label>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => {
+                        setConfig(prev => ({ ...prev, voiceGender: 'male' }));
+                        setSimpleConfig(prev => ({ ...prev, voiceGender: 'male' }));
+                      }}
+                      className={`flex-1 py-2 px-4 rounded-lg transition-all ${
+                        (lessonMode === 'pimsleur' ? config.voiceGender : simpleConfig.voiceGender) === 'male'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      Male (ครับ)
+                    </button>
+                    <button
+                      onClick={() => {
+                        setConfig(prev => ({ ...prev, voiceGender: 'female' }));
+                        setSimpleConfig(prev => ({ ...prev, voiceGender: 'female' }));
+                      }}
+                      className={`flex-1 py-2 px-4 rounded-lg transition-all ${
+                        (lessonMode === 'pimsleur' ? config.voiceGender : simpleConfig.voiceGender) === 'female'
+                          ? 'bg-pink-600 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      Female (ค่ะ)
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="includePoliteness"
-                    checked={simpleConfig.includePolitenessParticles}
-                    onChange={(e) => setSimpleConfig(prev => ({ ...prev, includePolitenessParticles: e.target.checked }))}
-                    className="rounded"
-                  />
-                  <Label htmlFor="includePoliteness">Include politeness particles (ครับ/ค่ะ)</Label>
-                </div>
+                {/* Mode-specific settings */}
+                {lessonMode === 'simple' && (
+                  <>
+                    <div className="grid gap-3">
+                      <Label>Loops (full set repetitions): {simpleConfig.loops}</Label>
+                      <Slider
+                        value={[simpleConfig.loops || 3]}
+                        onValueChange={([value]) => setSimpleConfig(prev => ({ ...prev, loops: value }))}
+                        min={1}
+                        max={5}
+                        step={1}
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    <div className="grid gap-3">
+                      <Label>Speed: {simpleConfig.speed}x</Label>
+                      <Slider
+                        value={[simpleConfig.speed || 1]}
+                        onValueChange={([value]) => setSimpleConfig(prev => ({ ...prev, speed: value }))}
+                        min={0.5}
+                        max={1.5}
+                        step={0.1}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="includeMnemonics"
+                        checked={simpleConfig.includeMnemonics}
+                        onChange={(e) => setSimpleConfig(prev => ({ ...prev, includeMnemonics: e.target.checked }))}
+                        className="rounded"
+                      />
+                      <Label htmlFor="includeMnemonics">Include mnemonics</Label>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="includePoliteness"
+                        checked={simpleConfig.includePolitenessParticles}
+                        onChange={(e) => setSimpleConfig(prev => ({ ...prev, includePolitenessParticles: e.target.checked }))}
+                        className="rounded"
+                      />
+                      <Label htmlFor="includePoliteness">Include politeness particles (ครับ/ค่ะ)</Label>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>

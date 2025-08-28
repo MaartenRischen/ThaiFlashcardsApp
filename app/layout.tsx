@@ -73,9 +73,9 @@ export default function RootLayout({
         <body className={inter.className}>
           <Toaster richColors position="top-left" duration={5000} />
           <Tooltip.Provider>
-            <SetProvider>
-              <GenerationProvider>
-                <AudioGenerationProvider>
+            <AudioGenerationProvider>
+              <SetProvider>
+                <GenerationProvider>
                   <AppInitializer />
                   <GenerationStatusBar />
                   <AudioGenerationStatusBar />
@@ -87,9 +87,9 @@ export default function RootLayout({
                   <div className="w-full text-center text-xs text-gray-600 py-3 bg-[#181818]">
                     Copyright (c) 2025 Maarten Rischen. All rights reserved.
                   </div>
-                </AudioGenerationProvider>
-              </GenerationProvider>
-            </SetProvider>
+                </GenerationProvider>
+              </SetProvider>
+            </AudioGenerationProvider>
           </Tooltip.Provider>
         </body>
       </html>

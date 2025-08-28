@@ -10,15 +10,26 @@ export async function POST(request: Request) {
     // This needs to work for both authenticated and unauthenticated users
     if (userId) {
       // For logged-in users, delete the database copy of this set
-      const deleted = await prisma.flashcardSet.deleteMany({
+      // Try multiple approaches to ensure deletion
+      const deleted1 = await prisma.flashcardSet.deleteMany({
         where: {
           userId,
           source: 'default',
-          id: { in: ['default-common-sentences-2'] }
+          id: 'default-common-sentences-2'
         }
       });
       
-      console.log(`Deleted ${deleted.count} cached sets for user ${userId}`);
+      // Also try with name matching
+      const deleted2 = await prisma.flashcardSet.deleteMany({
+        where: {
+          userId,
+          name: '100 Most Used Thai Sentences 2'
+        }
+      });
+      
+      const totalDeleted = deleted1.count + deleted2.count;
+      
+      console.log(`Deleted ${totalDeleted} cached sets for user ${userId}`);
       
       // Also clear any saved mnemonics for this set
       await prisma.userMnemonic.deleteMany({

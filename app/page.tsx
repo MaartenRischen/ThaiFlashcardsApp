@@ -630,8 +630,21 @@ export default function ThaiFlashcards() {
     if (activeSetId === 'default-common-sentences-2' && phrases.length > 0) {
       // Check if we have the old "check bin" mnemonic in the current data
       const billPhrase = phrases.find(p => p.english === "Can I have the bill?");
+      console.log('Bill phrase check:', {
+        found: !!billPhrase,
+        mnemonic: billPhrase?.mnemonic,
+        hasCheckBin: billPhrase?.mnemonic?.includes('check bin')
+      });
+      
       if (billPhrase && billPhrase.mnemonic?.includes('check bin')) {
         console.log('Detected old cached data for bill set - forcing reset');
+        
+        // First debug what's happening
+        fetch('/api/debug-bill-set')
+          .then(res => res.json())
+          .then(debug => {
+            console.log('Debug info:', debug);
+          });
         
         // Call API to force reset
         fetch('/api/force-reset-bill-set', { method: 'POST' })
@@ -639,6 +652,7 @@ export default function ThaiFlashcards() {
           .then(data => {
             if (data.success) {
               console.log('Force reset successful - reloading set');
+              console.log('Fresh content from API:', data.freshContent?.find(p => p.english === "Can I have the bill?"));
               // Force reload the set
               refreshSets().then(() => {
                 switchSet('default-common-sentences-2');

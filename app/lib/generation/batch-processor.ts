@@ -34,22 +34,27 @@ export async function processBatch(
 
       for (const phrase of result.phrases) {
         if (isValidPhrase(phrase)) {
-          // Validate mnemonic
-          const mnemonicValidation = validateMnemonic(
-            phrase.pronunciation,
-            phrase.mnemonic,
-            phrase.english
-          );
-          
-          if (!mnemonicValidation.isValid) {
-            console.warn(`[Batch ${index}] Mnemonic validation failed for "${phrase.english}":`, mnemonicValidation.issues);
-            mnemonicIssues.push(`${phrase.english}: ${mnemonicValidation.issues.join(', ')}`);
+          // Validate mnemonic if it exists
+          if (phrase.mnemonic) {
+            const mnemonicValidation = validateMnemonic(
+              phrase.pronunciation,
+              phrase.mnemonic,
+              phrase.english
+            );
             
-            // Try to fix the mnemonic using suggestions
-            if (mnemonicValidation.suggestions && mnemonicValidation.suggestions.length > 0) {
-              phrase.mnemonic = mnemonicValidation.suggestions[0];
-              console.log(`[Batch ${index}] Applied suggested mnemonic: ${phrase.mnemonic}`);
+            if (!mnemonicValidation.isValid) {
+              console.warn(`[Batch ${index}] Mnemonic validation failed for "${phrase.english}":`, mnemonicValidation.issues);
+              mnemonicIssues.push(`${phrase.english}: ${mnemonicValidation.issues.join(', ')}`);
+              
+              // Try to fix the mnemonic using suggestions
+              if (mnemonicValidation.suggestions && mnemonicValidation.suggestions.length > 0) {
+                phrase.mnemonic = mnemonicValidation.suggestions[0];
+                console.log(`[Batch ${index}] Applied suggested mnemonic: ${phrase.mnemonic}`);
+              }
             }
+          } else {
+            console.warn(`[Batch ${index}] Missing mnemonic for "${phrase.english}"`);
+            mnemonicIssues.push(`${phrase.english}: Missing mnemonic`);
           }
           
           validPhrases.push(phrase);

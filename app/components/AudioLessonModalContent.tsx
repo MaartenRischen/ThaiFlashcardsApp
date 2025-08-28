@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { AudioLessonConfig } from '../lib/audio-lesson-generator';
 import { SimpleAudioLessonConfig } from '../lib/audio-lesson-generator-simple';
 import { toast } from 'sonner';
-import { SimpleAudioPlayer } from './SimpleAudioPlayer';
 import type { AudioTiming } from '@/app/lib/video-lesson-generator';
 
 declare global {
@@ -349,24 +348,27 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
                 onEnded={() => setIsPlaying(false)}
-                className="hidden"
+                controls
+                className="w-full mt-4"
               />
               
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center">
                 <button
                   onClick={handlePlay}
-                  className="neumorphic-button p-3 rounded-full"
+                  className="neumorphic-button px-6 py-3 flex items-center gap-3"
                 >
-                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                  {isPlaying ? (
+                    <>
+                      <Pause className="w-5 h-5" />
+                      <span>Pause</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-5 h-5" />
+                      <span>Play</span>
+                    </>
+                  )}
                 </button>
-                <div className="flex-1">
-                  <SimpleAudioPlayer
-                    audioUrl={audioUrl}
-                    audioRef={audioRef}
-                    isPlaying={isPlaying}
-                    onPlayPause={handlePlay}
-                  />
-                </div>
               </div>
             </div>
           )}

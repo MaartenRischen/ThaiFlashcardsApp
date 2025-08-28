@@ -83,32 +83,45 @@ export function AudioGenerationProvider({ children }: { children: ReactNode }) {
         message: 'Processing audio...',
       }));
 
-      const data = await response.json();
+      // Check content type to determine response format
+      const contentType = response.headers.get('content-type');
+      console.log('Response content-type:', contentType);
       
-      if (data.audioDataBase64) {
-        // Convert base64 to blob
-        const byteCharacters = atob(data.audioDataBase64);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'audio/wav' });
-        const url = window.URL.createObjectURL(blob);
-        
-        setState({
-          isGenerating: false,
-          progress: 100,
-          message: 'Audio lesson ready!',
-          setInfo: { setId, setName },
-          audioUrl: url,
-          error: null,
-        });
-        
-        toast.success('Audio lesson generated successfully!');
+      let audioUrl: string;
+      
+      if (contentType && contentType.includes('audio')) {
+        // Direct audio file response
+        const blob = await response.blob();
+        audioUrl = window.URL.createObjectURL(blob);
       } else {
-        throw new Error('No audio data received');
+        // JSON response with base64 data
+        const data = await response.json();
+        
+        if (data.audioDataBase64) {
+          // Convert base64 to blob
+          const byteCharacters = atob(data.audioDataBase64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'audio/wav' });
+          audioUrl = window.URL.createObjectURL(blob);
+        } else {
+          throw new Error('No audio data received');
+        }
       }
+      
+      setState({
+        isGenerating: false,
+        progress: 100,
+        message: 'Audio lesson ready!',
+        setInfo: { setId, setName },
+        audioUrl: audioUrl,
+        error: null,
+      });
+      
+      toast.success('Audio lesson generated successfully!');
     } catch (error) {
       console.error('Error generating audio lesson:', error);
       const msg = error instanceof Error ? error.message : 'Failed to generate audio lesson';

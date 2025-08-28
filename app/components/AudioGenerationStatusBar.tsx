@@ -30,12 +30,12 @@ export function AudioGenerationStatusBar({ onAudioReady }: AudioGenerationStatus
   };
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-50">
-      <div className="neumorphic-card p-4 border-2 border-blue-500">
+    <div className="fixed top-[200px] left-2 right-2 sm:top-[180px] sm:left-auto sm:right-4 sm:w-96 z-40">
+      <div className="neumorphic-card p-3 sm:p-4 border-2 border-blue-500 bg-[#1F1F1F]">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <Volume2 className="w-5 h-5 text-blue-400" />
-            <span className="font-medium text-[#E0E0E0]">Audio Generation</span>
+            <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+            <span className="font-medium text-sm sm:text-base text-[#E0E0E0]">Audio Generation</span>
           </div>
           <button
             onClick={state.isGenerating ? cancelGeneration : clearAudio}
@@ -54,7 +54,7 @@ export function AudioGenerationStatusBar({ onAudioReady }: AudioGenerationStatus
                 style={{ width: `${state.progress}%` }}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-[10px] sm:text-xs text-gray-500 mt-2">
               You can continue using the app. Switching sets will cancel generation.
             </p>
           </>

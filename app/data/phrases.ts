@@ -26,6 +26,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiFeminine: "สวัสดีค่ะ",
     pronunciation: "sa-wat-dee",
     mnemonic: "Think: 'Swadee' - like saying 'sweet day' quickly",
+    literal: "Safe auspicious",
     examples: [
       {
         thai: "สวัสดีตอนเช้า",
@@ -71,6 +72,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiFeminine: "ขอบคุณค่ะ",
     pronunciation: "khop-khun",
     mnemonic: "Think: 'Cope-Kun' - you cope with kindness",
+    literal: "Request merit",
     examples: [
       {
         thai: "ขอบคุณมากสำหรับความช่วยเหลือ",
@@ -116,6 +118,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiFeminine: "ใช่ค่ะ",
     pronunciation: "chai",
     mnemonic: "Think: 'Chai' - like the tea, say 'yes' to chai",
+    literal: "Yes",
     examples: [
       {
         thai: "ใช่ ฉันเข้าใจ",
@@ -161,6 +164,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiFeminine: "ไม่ค่ะ",
     pronunciation: "mai",
     mnemonic: "Think: 'My' - 'My answer is no'",
+    literal: "Not",
     examples: [
       {
         thai: "ไม่ ขอบคุณ",
@@ -701,6 +705,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiFeminine: "น้ำค่ะ",
     pronunciation: "nam",
     mnemonic: "Think: 'Nom' - like 'nom nom' drinking water",
+    literal: "Water",
     examples: [
       {
         thai: "ขอน้ำหน่อย",
@@ -746,6 +751,7 @@ export const INITIAL_PHRASES: Phrase[] = [
     thaiFeminine: "อาหารค่ะ",
     pronunciation: "a-han",
     mnemonic: "Think: 'A-han' - 'a hand' full of food",
+    literal: "Food",
     examples: [
       {
         thai: "อาหารไทยอร่อย",

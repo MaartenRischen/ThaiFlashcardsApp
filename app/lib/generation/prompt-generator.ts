@@ -100,6 +100,7 @@ Return a JSON object with this EXACT structure:
       "thaiFeminine": "Thai with feminine forms/particles", 
       "pronunciation": "Phonetic pronunciation (romanized)",
       "mnemonic": "Practical memory aid based on sound similarities (e.g., 'sawatdee' → 'So what, Dee?')",
+      "literal": "Word-by-word literal translation (e.g., 'ไม่เป็นไร' → 'Not become thing')",
       "examples": [
         {
           "thai": "Complete Thai sentence using the phrase",

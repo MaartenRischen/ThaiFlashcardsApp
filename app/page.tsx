@@ -39,6 +39,7 @@ import TipJar from './components/TipJar';
 // PassiveLearning removed per request
 import { ProgressModal } from './components/modals/ProgressModal';
 import { CardsListModal } from './components/modals/CardsListModal';
+import { BreakdownModal } from './components/modals/BreakdownModal';
 import { useAuth } from '@clerk/nextjs';
 import { PhraseBreakdown, getCachedBreakdown, setCachedBreakdown } from './lib/word-breakdown';
 import Confetti from './components/Confetti';
@@ -224,9 +225,10 @@ export default function ThaiFlashcards() {
   const [isPlayingContext, setIsPlayingContext] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showProgress, setShowProgress] = useState(false); // Renamed from showVocabulary
-  const [showBreakdown, setShowBreakdown] = useState(true); // Default to open
+  const [showBreakdown, setShowBreakdown] = useState(false); // Changed back to false for modal
   const [wordBreakdowns, setWordBreakdowns] = useState<Record<string, PhraseBreakdown>>({});
   const [loadingBreakdown, setLoadingBreakdown] = useState(false);
+  const [showBreakdownModal, setShowBreakdownModal] = useState(false);
   const [autoplay, setAutoplay] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('autoplay');
@@ -1465,6 +1467,15 @@ export default function ThaiFlashcards() {
                         ({phrases[index]?.english ?? ''})
                       </div>
                     )}
+                    
+                    {/* Literal/Breakdown Button */}
+                    <button
+                      onClick={() => setShowBreakdownModal(true)}
+                      className="text-xs text-gray-400 hover:text-gray-300 underline mb-3"
+                    >
+                      Literal / breakdown
+                    </button>
+                    
                     {/* Difficulty Buttons - Wrapped in Popover (Step 3) */}
                     <Popover open={tutorialStep === 3}>
                       <PopoverTrigger asChild>
@@ -1619,107 +1630,7 @@ export default function ThaiFlashcards() {
                   </div>
                 </div> {/* End Context Section */}
                 
-                {/* Word Breakdown Section */}
-                {phrases[index] && (
-                  <div className="mt-4 relative mb-40">
-                    {/* Scroll indicator - only show when breakdown is collapsed */}
-                    {!showBreakdown && (
-                      <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce">
-                        <div className="text-gray-400 text-sm mb-1">Scroll for more</div>
-                        <ChevronDown className="w-4 h-4 text-gray-400" />
-                      </div>
-                    )}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        // Just toggle the breakdown visibility
-                        setShowBreakdown(!showBreakdown);
-                        
-                        // If opening and no breakdown loaded yet, fetch it
-                        if (!showBreakdown && !wordBreakdowns[`${getThaiWithGender(phrases[index], isMale, isPoliteMode)}_${getGenderedPronunciation(phrases[index], isMale, isPoliteMode)}`]) {
-                          fetchWordBreakdown(phrases[index]);
-                        }
-                      }}
-                      className="w-full neumorphic-button text-blue-400 flex items-center justify-center gap-2 py-2 relative"
-                    >
-                      {showBreakdown ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      Breaking It Down / Literal Translation
-                    </button>
-                    
-                    {/* Breakdown container */}
-                    {showBreakdown && (
-                    <div className="mt-3 p-4 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a]">
-                        {loadingBreakdown ? (
-                          <div className="text-center text-gray-400">Loading breakdown...</div>
-                        ) : (
-                          (() => {
-                            const thai = getThaiWithGender(phrases[index], isMale, isPoliteMode);
-                            const pronunciation = getGenderedPronunciation(phrases[index], isMale, isPoliteMode);
-                            const cacheKey = `${thai}_${pronunciation}`;
-                            const breakdown = wordBreakdowns[cacheKey];
-                            const currentPhrase = phrases[index] as PhraseWithLiteral;
-                            
-                            if (!breakdown) {
-                              // Still show literal translation even if no breakdown is available
-                              if (currentPhrase.literal) {
-                                return (
-                                  <div className="mb-3 p-3 bg-[#0f0f0f] rounded-lg border border-[#333]">
-                                    <h4 className="text-sm text-gray-400 mb-1">Literal Translation:</h4>
-                                    <p className="text-white font-medium">{currentPhrase.literal}</p>
-                                  </div>
-                                );
-                              }
-                              return <div className="text-center text-gray-400">No breakdown available</div>;
-                            }
-                            
-                            return (
-                              <div className="space-y-3">
-                                {/* Literal Translation */}
-                                {currentPhrase.literal && (
-                                  <div className="mb-3 p-3 bg-[#0f0f0f] rounded-lg border border-[#333]">
-                                    <h4 className="text-sm text-gray-400 mb-1">Literal Translation:</h4>
-                                    <p className="text-white font-medium">{currentPhrase.literal}</p>
-                                  </div>
-                                )}
-                                
-                                {/* Individual Words */}
-                                <div className="space-y-2">
-                                  {breakdown.words.map((word, idx) => (
-                                    <div key={idx} className="flex items-baseline gap-2">
-                                      <span className="text-white font-medium">{word.thai}</span>
-                                      <span className="text-gray-400 text-sm">({word.pronunciation})</span>
-                                      <span className="text-blue-300 text-sm flex-1">= {word.english}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                                
-                                {/* Compound Meanings */}
-                                {breakdown.compounds && breakdown.compounds.length > 0 && (
-                                  <>
-                                    <div className="border-t border-[#333] pt-3">
-                                      <h4 className="text-sm text-gray-400 mb-2">Compound meanings:</h4>
-                                      <div className="space-y-2">
-                                        {breakdown.compounds.map((compound, idx) => (
-                                          <div key={idx} className="flex items-baseline gap-2">
-                                            <span className="text-white font-medium">{compound.thai}</span>
-                                            <span className="text-gray-400 text-sm">({compound.pronunciation})</span>
-                                            <span className="text-green-300 text-sm flex-1">= {compound.english}</span>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            );
-                          })()
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
+
               </div>
             )}
           </div>
@@ -1823,6 +1734,21 @@ export default function ThaiFlashcards() {
       <Confetti 
         trigger={showConfetti} 
         onComplete={() => setShowConfetti(false)}
+      />
+      
+      {/* Breakdown Modal */}
+      <BreakdownModal
+        isOpen={showBreakdownModal}
+        onClose={() => setShowBreakdownModal(false)}
+        breakdown={(() => {
+          if (!phrases[index]) return null;
+          const thai = getThaiWithGender(phrases[index], isMale, isPoliteMode);
+          const pronunciation = getGenderedPronunciation(phrases[index], isMale, isPoliteMode);
+          const cacheKey = `${thai}_${pronunciation}`;
+          return wordBreakdowns[cacheKey] || null;
+        })()}
+        literal={(phrases[index] as PhraseWithLiteral)?.literal || null}
+        isLoading={loadingBreakdown}
       />
     </main>
   );

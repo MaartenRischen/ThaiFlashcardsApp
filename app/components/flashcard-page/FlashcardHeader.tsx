@@ -180,18 +180,7 @@ export function FlashcardHeader({
             </button>
             <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Cards</span>
           </div>
-          {/* Audio Lesson */}
-          {activeSet && activeSet.id !== 'default' && (
-            <div className="flex flex-col items-center">
-              <AudioLessonDownload 
-                setId={activeSet.id}
-                setName={activeSet.name}
-                phraseCount={activeSet.phraseCount}
-                isMale={isMale}
-              />
-              <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Audio</span>
-            </div>
-          )}
+
           
           {/* Divider between categories */}
           <div className="h-12 w-px bg-[#404040]/50 mx-1" />

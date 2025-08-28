@@ -4,6 +4,7 @@ import { Trash2, Plus, Edit3, Check, X, Loader2 } from 'lucide-react';
 import { useSet } from '@/app/context/SetContext';
 import { saveSetContent } from '@/app/lib/storage/set-content';
 import { toast } from 'sonner';
+import { AudioLessonDownload } from '../AudioLessonDownload';
 
 interface CardsListModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface CardsListModalProps {
   phrases: Phrase[];
   onSelectCard: (index: number) => void;
   getCardStatus: (index: number) => string;
+  isMale: boolean;
 }
 
 export function CardsListModal({
@@ -18,9 +20,13 @@ export function CardsListModal({
   onClose,
   phrases,
   onSelectCard,
-  getCardStatus
+  getCardStatus,
+  isMale
 }: CardsListModalProps) {
-  const { activeSetId, refreshSets, reloadActiveSet } = useSet();
+  const { activeSetId, refreshSets, reloadActiveSet, availableSets } = useSet();
+  
+  // Get active set data for audio lesson
+  const activeSet = availableSets.find(set => set.id === activeSetId);
   const [isEditMode, setIsEditMode] = useState(false);
   const [localPhrases, setLocalPhrases] = useState<Phrase[]>([]);
   const [showAddCard, setShowAddCard] = useState(false);
@@ -184,6 +190,15 @@ export function CardsListModal({
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-bold text-blue-300">Cards in Current Set</h3>
           <div className="flex items-center gap-2">
+            {/* Audio Lesson Button - only show for non-default sets */}
+            {activeSet && activeSet.id !== 'default' && (
+              <AudioLessonDownload 
+                setId={activeSet.id}
+                setName={activeSet.name}
+                phraseCount={activeSet.phraseCount}
+                isMale={isMale}
+              />
+            )}
             {!isEditMode ? (
               <button
                 onClick={() => setIsEditMode(true)}

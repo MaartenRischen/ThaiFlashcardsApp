@@ -1814,6 +1814,7 @@ export default function ThaiFlashcards() {
         phrases={phrases}
         onSelectCard={(idx) => setIndex(idx)}
         getCardStatus={getCardStatus}
+        isMale={isMale}
       />
 
       {/* Tip Jar moved to header - removed bottom section */}

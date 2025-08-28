@@ -2,22 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Download, Volume2, Settings2, Loader2, Brain, Repeat, Play, Pause, FileAudio, X } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { AudioLessonConfig } from '../lib/audio-lesson-generator';
 import { SimpleAudioLessonConfig } from '../lib/audio-lesson-generator-simple';
 import { toast } from 'sonner';
-import { useGeneration } from '@/app/context/GenerationContext';
 import { SimpleAudioPlayer } from './SimpleAudioPlayer';
 import type { AudioTiming } from '@/app/lib/video-lesson-generator';
-import { useSet } from '@/app/context/SetContext';
 
 declare global {
   interface Window {
@@ -39,9 +30,7 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
   const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple' | 'shuffle'>('simple');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showPlayer, setShowPlayer] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { activeSetContent } = useSet();
   const [config, setConfig] = useState<Partial<AudioLessonConfig>>({
     voiceGender: isMale ? 'male' : 'female',
     pauseDurationMs: {
@@ -77,8 +66,6 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
     setSimpleConfig(prev => ({ ...prev, voiceGender: isMale ? 'male' : 'female' }));
   }, [isMale]);
 
-  const { startGeneration, completeGeneration, failGeneration } = useGeneration();
-
   const handleGenerate = async () => {
     // Clear previous audio if regenerating
     if (audioUrl) {
@@ -90,11 +77,9 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
       window.URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
       setIsPlaying(false);
-      setShowPlayer(false);
     }
 
     setIsGenerating(true);
-    startGeneration(`Generating ${lessonMode} audio lesson for ${setName}...`);
     
     try {
       console.log('🎵 Generating audio lesson:', { 
@@ -135,7 +120,6 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
         const blob = new Blob([byteArray], { type: 'audio/wav' });
         const url = window.URL.createObjectURL(blob);
         setAudioUrl(url);
-        setShowPlayer(true);
         
         // Store timings if available
         if (data.timings) {
@@ -145,12 +129,9 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
         throw new Error('No audio data received');
       }
       
-      completeGeneration();
-      
       toast.success('Audio lesson generated successfully!');
     } catch (error) {
       console.error('Error generating audio lesson:', error);
-      failGeneration();
       const msg = error instanceof Error ? error.message : 'Failed to generate audio lesson';
       toast.error(msg);
     } finally {

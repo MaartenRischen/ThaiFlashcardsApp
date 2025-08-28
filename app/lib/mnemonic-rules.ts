@@ -230,7 +230,6 @@ export function generateFallbackMnemonic(
   
   // For "I want to..." patterns
   if (english.toLowerCase().includes('i want to')) {
-    const keyWord = words.find(w => w.includes('yak') || w.includes('yaak')) || words[1];
     return `Think: "yak ${words.slice(1).join(' ')}" - yak wants to ${english.toLowerCase().replace('i want to', '').trim()}`;
   }
   

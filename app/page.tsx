@@ -44,6 +44,8 @@ import { useAuth } from '@clerk/nextjs';
 import { PhraseBreakdown, getCachedBreakdown, setCachedBreakdown } from './lib/word-breakdown';
 import Confetti from './components/Confetti';
 import { useSetCompletion } from './hooks/useSetCompletion';
+import { useAudioGeneration } from './context/AudioGenerationContext';
+import { AudioReadyModal } from './components/AudioReadyModal';
 
 // Type for phrases with literal translation
 interface PhraseWithLiteral extends Phrase {
@@ -209,6 +211,8 @@ export default function ThaiFlashcards() {
     refreshSets,
     setAvailableSets,
   } = useSet();
+  
+  const audioGeneration = useAudioGeneration();
   
   // Log activeSetProgress whenever the component renders
   console.log("ThaiFlashcards Rendering - ActiveSetProgress:", JSON.stringify(activeSetProgress));
@@ -1835,6 +1839,12 @@ export default function ThaiFlashcards() {
         })()}
         literal={(phrases[index] as PhraseWithLiteral)?.literal || null}
         isLoading={loadingBreakdown}
+      />
+      
+      {/* Audio Ready Modal */}
+      <AudioReadyModal
+        isOpen={audioGeneration.state.audioUrl !== null && !audioGeneration.state.isGenerating}
+        onClose={() => audioGeneration.clearAudio()}
       />
     </main>
   );

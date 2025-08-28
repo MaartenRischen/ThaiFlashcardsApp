@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Download, Volume2, Settings2, Loader2, Brain, Repeat, Play, Pause, FileAudio, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Volume2, Settings2, Loader2, Brain, Repeat, X } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { AudioLessonConfig } from '../lib/audio-lesson-generator';
 import { SimpleAudioLessonConfig } from '../lib/audio-lesson-generator-simple';
-import { toast } from 'sonner';
+import { useAudioGeneration } from '@/app/context/AudioGenerationContext';
 import type { AudioTiming } from '@/app/lib/video-lesson-generator';
 
 declare global {
@@ -24,12 +24,9 @@ interface AudioLessonModalContentProps {
 }
 
 export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = false, onClose }: AudioLessonModalContentProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
+  const { state, startGeneration } = useAudioGeneration();
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple' | 'shuffle'>('simple');
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple'>('simple');
   const [config, setConfig] = useState<Partial<AudioLessonConfig>>({
     voiceGender: isMale ? 'male' : 'female',
     pauseDurationMs: {
@@ -66,110 +63,12 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
   }, [isMale]);
 
   const handleGenerate = async () => {
-    // Clear previous audio if regenerating
-    if (audioUrl) {
-      // Stop audio if playing
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-      window.URL.revokeObjectURL(audioUrl);
-      setAudioUrl(null);
-      setIsPlaying(false);
-    }
-
-    setIsGenerating(true);
-    
-    try {
-      console.log('🎵 Generating audio lesson:', { 
-        setId, 
-        mode: lessonMode,
-        voiceGender: lessonMode === 'pimsleur' ? config.voiceGender : simpleConfig.voiceGender,
-        config: lessonMode === 'pimsleur' ? config : simpleConfig
-      });
-      
-      const response = await fetch(`/api/flashcard-sets/${setId}/audio-lesson?t=${Date.now()}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mode: lessonMode,
-          config: lessonMode === 'pimsleur' ? config : simpleConfig,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Audio generation failed:', errorText);
-        throw new Error('Failed to generate audio lesson');
-      }
-
-      const data = await response.json();
-      console.log('Audio lesson response:', data);
-      
-      if (data.audioDataBase64) {
-        // Convert base64 to blob
-        const byteCharacters = atob(data.audioDataBase64);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'audio/wav' });
-        const url = window.URL.createObjectURL(blob);
-        setAudioUrl(url);
-        
-        // Store timings if available
-        if (data.timings) {
-          window.__AUDIO_TIMINGS__ = data.timings;
-        }
-      } else {
-        throw new Error('No audio data received');
-      }
-      
-      toast.success('Audio lesson generated successfully!');
-    } catch (error) {
-      console.error('Error generating audio lesson:', error);
-      const msg = error instanceof Error ? error.message : 'Failed to generate audio lesson';
-      toast.error(msg);
-    } finally {
-      setIsGenerating(false);
-    }
+    const selectedConfig = lessonMode === 'pimsleur' ? config : simpleConfig;
+    await startGeneration(setId, setName, lessonMode, selectedConfig);
+    onClose(); // Close the modal after starting generation
   };
 
-  const handlePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
 
-  const handleDownload = () => {
-    if (audioUrl) {
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = audioUrl;
-      a.download = `${setName.replace(/[^a-z0-9]/gi, '_')}_${lessonMode}_lesson.wav`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      toast.success('Audio lesson downloaded!');
-    }
-  };
-
-  // Cleanup audio URL when component unmounts
-  useEffect(() => {
-    return () => {
-      if (audioUrl) {
-        window.URL.revokeObjectURL(audioUrl);
-      }
-    };
-  }, [audioUrl]);
 
   const estimatedDuration = Math.round(
     lessonMode === 'pimsleur' 
@@ -202,7 +101,7 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
           {/* Mode Selection */}
           <div className="grid gap-3">
             <Label className="text-[#E0E0E0] font-medium">Lesson Style</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 onClick={() => setLessonMode('pimsleur')}
                 className={`flex items-center justify-start gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -231,20 +130,7 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
                   <div className="text-xs opacity-80">For passive practice</div>
                 </div>
               </button>
-              <button
-                onClick={() => setLessonMode('shuffle')}
-                className={`flex items-center justify-start gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                  lessonMode === 'shuffle' 
-                    ? 'bg-[#A9C4FC] text-[#121212] border border-[#A9C4FC]' 
-                    : 'bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] hover:bg-[#4C4C4C]'
-                }`}
-              >
-                <FileAudio className="w-5 h-5 flex-shrink-0" />
-                <div className="text-left">
-                  <div className="font-medium">Shuffle Mode</div>
-                  <div className="text-xs opacity-80">For review sessions</div>
-                </div>
-              </button>
+
             </div>
           </div>
 
@@ -312,10 +198,10 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
           {/* Generate Button */}
           <button
             onClick={handleGenerate}
-            disabled={isGenerating}
+            disabled={state.isGenerating}
             className="w-full neumorphic-button py-3 text-base font-medium flex items-center justify-center gap-3"
           >
-            {isGenerating ? (
+            {state.isGenerating ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
                 <span>Generating Audio Lesson...</span>
@@ -327,51 +213,6 @@ export function AudioLessonModalContent({ setId, setName, phraseCount, isMale = 
               </>
             )}
           </button>
-
-          {/* Audio Player */}
-          {audioUrl && (
-            <div className="space-y-4 p-4 bg-[#2a2a2a] rounded-lg">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium text-[#E0E0E0]">Audio Lesson Ready</h3>
-                <button
-                  onClick={handleDownload}
-                  className="neumorphic-button px-3 py-1.5 text-sm flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Download</span>
-                </button>
-              </div>
-              
-              <audio
-                ref={audioRef}
-                src={audioUrl}
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-                onEnded={() => setIsPlaying(false)}
-                controls
-                className="w-full mt-4"
-              />
-              
-              <div className="flex items-center justify-center">
-                <button
-                  onClick={handlePlay}
-                  className="neumorphic-button px-6 py-3 flex items-center gap-3"
-                >
-                  {isPlaying ? (
-                    <>
-                      <Pause className="w-5 h-5" />
-                      <span>Pause</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-5 h-5" />
-                      <span>Play</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

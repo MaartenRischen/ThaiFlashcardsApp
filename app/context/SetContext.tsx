@@ -5,6 +5,8 @@ import { useAuth } from '@clerk/nextjs'; // <-- Import useAuth from Clerk
 import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases';
 import { getDefaultSetsForUnauthenticatedUsers, getDefaultSetContent } from '@/app/lib/seed-default-sets';
 import { SetMetaData, SetProgress } from '@/app/lib/storage';
+import { useAudioGeneration } from '@/app/context/AudioGenerationContext';
+import { toast } from 'sonner';
 
 interface SetContextProps {
   availableSets: SetMetaData[];
@@ -52,6 +54,7 @@ const DEFAULT_SET_METADATA: SetMetaData = {
 
 export const SetProvider = ({ children }: { children: ReactNode }) => {
   const { userId, isLoaded } = useAuth(); // <-- Use Clerk's useAuth hook
+  const audioGeneration = useAudioGeneration();
   const [availableSets, setAvailableSets] = useState<SetMetaData[]>([DEFAULT_SET_METADATA]);
   const [activeSetId, setActiveSetId] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
@@ -572,9 +575,21 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       console.log(`SetContext: Set ${id} is already active.`);
       return; // No need to switch if already active
     }
+    
+    // Check if audio generation is in progress
+    if (audioGeneration.state.isGenerating) {
+      const confirmed = window.confirm(
+        'Audio generation is in progress. Switching sets will cancel it. Continue?'
+      );
+      if (!confirmed) {
+        return;
+      }
+      audioGeneration.cancelGeneration();
+    }
+    
     console.log(`SetContext: Switching to set ${id}`);
     setActiveSetId(id); // Triggers useEffect to load new set data
-  }, [activeSetId]);
+  }, [activeSetId, audioGeneration]);
 
   // --- reloadActiveSet (Force reload current set content) --- 
   const reloadActiveSet = useCallback(async () => {

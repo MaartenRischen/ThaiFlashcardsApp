@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Volume2, Download, Play, Pause } from 'lucide-react';
+import { X, Download, Play, Pause } from 'lucide-react';
 import { useAudioGeneration } from '@/app/context/AudioGenerationContext';
 import { toast } from 'sonner';
 

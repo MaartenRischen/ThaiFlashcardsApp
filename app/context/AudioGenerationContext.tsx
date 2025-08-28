@@ -17,7 +17,7 @@ interface AudioGenerationState {
 
 interface AudioGenerationContextType {
   state: AudioGenerationState;
-  startGeneration: (setId: string, setName: string, mode: 'pimsleur' | 'simple', config: any) => Promise<void>;
+  startGeneration: (setId: string, setName: string, mode: 'pimsleur' | 'simple', config: Record<string, unknown>) => Promise<void>;
   cancelGeneration: () => void;
   clearAudio: () => void;
 }
@@ -34,7 +34,7 @@ export function AudioGenerationProvider({ children }: { children: ReactNode }) {
     error: null,
   });
 
-  const startGeneration = useCallback(async (setId: string, setName: string, mode: 'pimsleur' | 'simple', config: any) => {
+  const startGeneration = useCallback(async (setId: string, setName: string, mode: 'pimsleur' | 'simple', config: Record<string, unknown>) => {
     // Clear any previous audio
     if (state.audioUrl) {
       window.URL.revokeObjectURL(state.audioUrl);

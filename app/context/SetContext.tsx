@@ -6,7 +6,6 @@ import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases';
 import { getDefaultSetsForUnauthenticatedUsers, getDefaultSetContent } from '@/app/lib/seed-default-sets';
 import { SetMetaData, SetProgress } from '@/app/lib/storage';
 import { useAudioGeneration } from '@/app/context/AudioGenerationContext';
-import { toast } from 'sonner';
 
 interface SetContextProps {
   availableSets: SetMetaData[];

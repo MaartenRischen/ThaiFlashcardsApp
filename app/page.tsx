@@ -1560,12 +1560,12 @@ export default function ThaiFlashcards() {
                     <Popover open={tutorialStep === 3}>
                       <PopoverTrigger asChild>
                         <div className="flex flex-col items-center mb-6">
-                          <div className="text-xs text-gray-400 mb-2">Hit one of the buttons to proceed.</div>
                           <div className="flex justify-center space-x-3">
                             <button onClick={() => handleCardAction('easy')} className="neumorphic-button text-green-400 px-4 py-2 text-sm">Easy</button>
                             <button onClick={() => handleCardAction('good')} className="neumorphic-button text-yellow-400 px-4 py-2 text-sm">Correct</button>
                             <button onClick={() => handleCardAction('hard')} className="neumorphic-button text-red-400 px-4 py-2 text-sm">Wrong</button>
                           </div>
+                          <div className="text-xs text-gray-400 mt-2">Hit one of the buttons to proceed.</div>
                         </div>
                       </PopoverTrigger>
                       <PopoverContent className="w-80 bg-gray-800 text-white border-gray-700" side="top" align="center">

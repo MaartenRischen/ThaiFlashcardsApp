@@ -1,10 +1,10 @@
 import React from 'react';
 import { useSet } from '@/app/context/SetContext'; // Import useSet hook
-import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal, Gift, Heart, LogIn } from 'lucide-react';
+import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
-import TipJar from '../TipJar';
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { SignInButton } from '@clerk/nextjs';
 
@@ -38,7 +38,7 @@ export function FlashcardHeader({
   setImageUrl = setImageUrl || '/images/defaultnew.png';
 
   const router = useRouter();
-  const [showTipJar, setShowTipJar] = React.useState(false);
+
   const hasClerkSession = typeof window !== 'undefined' && !!document.cookie.match(/__session=/);
 
   return (
@@ -207,47 +207,6 @@ export function FlashcardHeader({
               <HelpCircle />
             </button>
             <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Help</span>
-          </div>
-          {/* Tip Jar at far right with inviting red glow */}
-          <div className="flex flex-col items-center">
-            <Dialog open={showTipJar} onOpenChange={setShowTipJar}>
-              <DialogTrigger asChild>
-                <button
-                  className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#443c3c] text-[#ef4444] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(239,68,68,0.2)] before:pointer-events-none"
-                  style={{ boxShadow: '0 0 20px rgba(239, 68, 68, 0.25), 0 0 40px rgba(255, 255, 255, 0.05)' }}
-                  title="Tip Jar"
-                  aria-label="Tip Jar"
-                >
-                  <div className="relative">
-                    <Gift className="inline-block" />
-                    <Heart className="inline-block absolute -right-2 -top-2 w-3 h-3" />
-                  </div>
-                </button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md w-[95vw] bg-[#1f1f1f] border-[#404040] text-[#E0E0E0]">
-                <DialogHeader>
-                  <DialogTitle>Support Donkey Bridge</DialogTitle>
-                </DialogHeader>
-                <TipJar
-                  addresses={{
-                    Bitcoin: { address: process.env.NEXT_PUBLIC_TIPJAR_BTC || '', uri: `bitcoin:${process.env.NEXT_PUBLIC_TIPJAR_BTC}` },
-                    Lightning: { address: process.env.NEXT_PUBLIC_TIPJAR_LIGHTNING || '', uri: `lightning:${process.env.NEXT_PUBLIC_TIPJAR_LIGHTNING}` },
-                    Ethereum: { address: process.env.NEXT_PUBLIC_TIPJAR_ETH || '', uri: `ethereum:${process.env.NEXT_PUBLIC_TIPJAR_ETH}` },
-                    USDC: { address: process.env.NEXT_PUBLIC_TIPJAR_USDC_ETH || '', chain: 'Ethereum' as const, uri: `ethereum:${process.env.NEXT_PUBLIC_TIPJAR_USDC_ETH}` },
-                    Solana: { address: process.env.NEXT_PUBLIC_TIPJAR_SOL || '', uri: `solana:${process.env.NEXT_PUBLIC_TIPJAR_SOL}` },
-                    Monero: { address: process.env.NEXT_PUBLIC_TIPJAR_XMR || '' },
-                  }}
-                  paypalUrl={process.env.NEXT_PUBLIC_TIPJAR_PAYPAL}
-                  stripeUrl={process.env.NEXT_PUBLIC_TIPJAR_STRIPE}
-                  kofiUrl={process.env.NEXT_PUBLIC_TIPJAR_KOFI}
-                  buyMeACoffeeUrl={process.env.NEXT_PUBLIC_TIPJAR_BMAC}
-                  patreonUrl={process.env.NEXT_PUBLIC_TIPJAR_PATREON}
-                  showQrCodes={true}
-                  preferredChains={['Ethereum', 'Polygon']}
-                />
-              </DialogContent>
-            </Dialog>
-            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Tip Jar</span>
           </div>
         </div>
       </div>

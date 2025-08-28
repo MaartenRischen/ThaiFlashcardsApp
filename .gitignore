@@ -5,6 +5,7 @@ v2/node_modules/
 # Backups
 backups/
 *.tar.gz
+INPLANE-backup-*.zip
 
 # Build files
 .next/

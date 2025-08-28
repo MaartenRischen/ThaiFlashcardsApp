@@ -625,6 +625,31 @@ export default function ThaiFlashcards() {
     }
   }, [mnemonics, userId]);
 
+  // Force reset the bill set if it contains old data
+  useEffect(() => {
+    if (activeSetId === 'default-common-sentences-2' && phrases.length > 0) {
+      // Check if we have the old "check bin" mnemonic in the current data
+      const billPhrase = phrases.find(p => p.english === "Can I have the bill?");
+      if (billPhrase && billPhrase.mnemonic?.includes('check bin')) {
+        console.log('Detected old cached data for bill set - forcing reset');
+        
+        // Call API to force reset
+        fetch('/api/force-reset-bill-set', { method: 'POST' })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              console.log('Force reset successful - reloading set');
+              // Force reload the set
+              refreshSets().then(() => {
+                switchSet('default-common-sentences-2');
+              });
+            }
+          })
+          .catch(err => console.error('Error forcing reset:', err));
+      }
+    }
+  }, [activeSetId, phrases, refreshSets, switchSet]);
+
   // Function to update mnemonics - now syncs to database for logged-in users
   const updateMnemonics = async (phraseIndex: number, newMnemonic: string) => {
     if (!activeSetId || phraseIndex === undefined) return;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
 
 interface ConfettiProps {
@@ -9,8 +9,13 @@ interface ConfettiProps {
 }
 
 export default function Confetti({ trigger, onComplete }: ConfettiProps) {
+  const [showMessage, setShowMessage] = useState(false);
+
   useEffect(() => {
     if (trigger) {
+      // Show completion message
+      setShowMessage(true);
+      
       // Fire confetti from multiple angles
       const duration = 3 * 1000;
       const animationEnd = Date.now() + duration;
@@ -25,7 +30,11 @@ export default function Confetti({ trigger, onComplete }: ConfettiProps) {
 
         if (timeLeft <= 0) {
           clearInterval(interval);
-          onComplete?.();
+          // Hide message after confetti ends
+          setTimeout(() => {
+            setShowMessage(false);
+            onComplete?.();
+          }, 1000);
           return;
         }
 
@@ -52,5 +61,15 @@ export default function Confetti({ trigger, onComplete }: ConfettiProps) {
     }
   }, [trigger, onComplete]);
 
-  return null;
+  return (
+    <>
+      {showMessage && (
+        <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-[2000]">
+          <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white text-2xl md:text-4xl font-bold px-8 py-4 rounded-2xl shadow-2xl animate-bounce border-4 border-white">
+            🎉 Set Completed! 🎉
+          </div>
+        </div>
+      )}
+    </>
+  );
 }

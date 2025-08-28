@@ -13,6 +13,7 @@ import { uploadImageFromUrl } from '../../lib/imageStorage';
 import { getToneLabel, formatSetTitle } from '@/app/lib/utils';
 import dotenv from 'dotenv';
 import { prisma } from "@/app/lib/prisma"; // Ensure prisma is imported
+import { validateMnemonic } from '@/app/lib/mnemonic-validator';
 // import { uploadImageFromUrl } from '../../lib/imageStorage'; // Removed unused import
 
 // Initialize environment variables in development

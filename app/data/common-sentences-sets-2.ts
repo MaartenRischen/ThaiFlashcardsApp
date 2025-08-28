@@ -272,7 +272,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ช่วยเปิดแอร์หน่อยครับ",
         thaiFeminine: "ช่วยเปิดแอร์หน่อยค่ะ",
         pronunciation: "chûai pə̀ət ɛɛ nɔ̀i",
-        mnemonic: "Think: 'chûai pəət ɛɛ nɔi' - create your own sound association",
+        mnemonic: "Think: 'chew-eye pert air noy' - chew eye, pert air boy!",
         literal: "Help open air a bit",
         examples: [
           {
@@ -297,7 +297,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมอยากแลกเงินครับ",
         thaiFeminine: "ฉันอยากแลกเงินค่ะ",
         pronunciation: "chǎn/pǒm yàak lɛ̂ɛk ŋəən",
-        mnemonic: "Think: 'chan yàak lɛɛk ŋəən' - create your own sound association",
+        mnemonic: "Think: 'chan/pom yahk lack ngern' - I yak, lack earn (exchange money)",
         literal: "I want exchange money",
         examples: [
           {
@@ -322,7 +322,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "แบตมือถือผมหมดครับ",
         thaiFeminine: "แบตมือถือฉันหมดค่ะ",
         pronunciation: "bɛ̀ɛt mʉʉ-tʉ̌ʉ mòt",
-        mnemonic: "Think: 'bɛɛt mʉʉ-tʉʉ mòt' - create your own sound association",
+        mnemonic: "Think: 'bat moo-too moat' - bat moo too moat (battery dead)",
         literal: "Battery mobile finished",
         examples: [
           {
@@ -555,7 +555,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ช่วยเขียนให้หน่อยได้ไหมครับ",
         thaiFeminine: "ช่วยเขียนให้หน่อยได้ไหมคะ",
         pronunciation: "chûai kǐan hâi nɔ̀i dâai mǎi",
-        mnemonic: "Think: 'chûai kǐan hâi nɔi dâai mǎi' - create your own sound association",
+        mnemonic: "Think: 'chew-eye key-an high noy die my' - chew eye, key an high, boy die my?",
         literal: "Help write give a bit can (question)",
         examples: [
           {
@@ -630,7 +630,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมต้องพบหมอด่วนครับ",
         thaiFeminine: "ฉันต้องพบหมอด่วนค่ะ",
         pronunciation: "chǎn/pǒm tɔ̂ŋ póp mɔ̌ɔ dùan",
-        mnemonic: "Think: 'chan tɔŋ póp mɔɔ dùan' - create your own sound association",
+        mnemonic: "Think: 'chan/pom tong pop maw dwan' - I tong pop more, Dwan (see doctor)",
         literal: "I must meet doctor urgent",
         examples: [
           {
@@ -1096,7 +1096,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "อย่าเพิ่งด่วนสรุปครับ",
         thaiFeminine: "อย่าเพิ่งด่วนสรุปค่ะ",
         pronunciation: "yàa pə̂ŋ dùan sà-rùp",
-        mnemonic: "Think: 'yàa pəŋ dùan sà-rùp' - create your own sound association",
+        mnemonic: "Think: 'yah peng dwan sa-roop' - yeah, ping Dwan's syrup (don't rush)",
         literal: "Don't yet rush conclude",
         examples: [
           {
@@ -1304,7 +1304,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "เสียนี้เพื่อลาภหน้าครับ",
         thaiFeminine: "เสียนี้เพื่อลาภหน้าค่ะ",
         pronunciation: "sǐa níi pʉ̂a lâap nâa",
-        mnemonic: "Think: 'sǐa níi pʉa lâap nâa' - create your own sound association",
+        mnemonic: "Think: 'see-ah nee pua lahp nah' - see ah, knee pour lap, nah (loss for future gain)",
         literal: "Lose this for fortune front",
         examples: [
           {
@@ -1429,7 +1429,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมจะชดเชยให้ครับ",
         thaiFeminine: "ฉันจะชดเชยให้ค่ะ",
         pronunciation: "chǎn/pǒm jà chót-chəəi hâi",
-        mnemonic: "Think: 'chan jà chót-chəəi hâi' - create your own sound association",
+        mnemonic: "Think: 'chan/pom jah chot-chee-ee high' - I jaw chop chewy high (compensate)",
         literal: "I will compensate give",
         examples: [
           {

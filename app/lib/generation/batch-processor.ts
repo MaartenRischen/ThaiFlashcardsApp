@@ -2,6 +2,7 @@ import { Phrase, BatchError, BatchGenerationResult } from './types';
 import { isValidPhrase } from './phrase-validator';
 import { MAX_RETRIES } from './constants';
 import { PromptConfig } from './prompt-generator';
+import { validateMnemonic } from '../mnemonic-validator';
 
 export async function processBatch(
   index: number,
@@ -29,25 +30,64 @@ export async function processBatch(
       }
 
       const validPhrases: Phrase[] = [];
-      const invalidCount = result.phrases.length - validPhrases.length;
+      const mnemonicIssues: string[] = [];
 
       for (const phrase of result.phrases) {
         if (isValidPhrase(phrase)) {
+          // Validate mnemonic
+          const mnemonicValidation = validateMnemonic(
+            phrase.pronunciation,
+            phrase.mnemonic,
+            phrase.english
+          );
+          
+          if (!mnemonicValidation.isValid) {
+            console.warn(`[Batch ${index}] Mnemonic validation failed for "${phrase.english}":`, mnemonicValidation.issues);
+            mnemonicIssues.push(`${phrase.english}: ${mnemonicValidation.issues.join(', ')}`);
+            
+            // Try to fix the mnemonic using suggestions
+            if (mnemonicValidation.suggestions && mnemonicValidation.suggestions.length > 0) {
+              phrase.mnemonic = mnemonicValidation.suggestions[0];
+              console.log(`[Batch ${index}] Applied suggested mnemonic: ${phrase.mnemonic}`);
+            }
+          }
+          
           validPhrases.push(phrase);
         }
       }
+      
+      const invalidCount = result.phrases.length - validPhrases.length;
 
       console.log(`[Batch ${index}] Generated ${validPhrases.length} valid phrases (${invalidCount} invalid)`);
+      
+      if (mnemonicIssues.length > 0) {
+        console.log(`[Batch ${index}] Fixed ${mnemonicIssues.length} mnemonic issues`);
+      }
 
-      return {
-        batchId,
-        phrases: validPhrases,
-        errors: invalidCount > 0 ? [{
+      const errors: BatchError[] = [];
+      
+      if (invalidCount > 0) {
+        errors.push({
           type: 'INVALID_DATA' as const,
           message: `${invalidCount} invalid phrases filtered out`,
           details: { invalidCount, attemptNumber: retries + 1 },
           timestamp: new Date().toISOString()
-        }] : []
+        });
+      }
+      
+      if (mnemonicIssues.length > 0) {
+        errors.push({
+          type: 'VALIDATION_ERROR' as const,
+          message: `Fixed ${mnemonicIssues.length} mnemonic mismatches`,
+          details: { mnemonicIssues, attemptNumber: retries + 1 },
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      return {
+        batchId,
+        phrases: validPhrases,
+        errors
       };
 
     } catch (error) {

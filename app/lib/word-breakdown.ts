@@ -210,19 +210,22 @@ Return ONLY the JSON, no additional text.`;
 const breakdownCache = new Map<string, PhraseBreakdown>();
 
 // Pre-generated breakdown cache
-let preGeneratedCache: Record<string, any> = {};
+let preGeneratedCache: Record<string, PhraseBreakdown> = {};
 
 // Load pre-generated cache on module initialization
 if (typeof window === 'undefined') {
   // Server-side: try to load from file
   try {
-    const fs = require('fs');
-    const path = require('path');
-    const cacheFile = path.join(process.cwd(), 'app', 'data', 'breakdown-cache.json');
-    if (fs.existsSync(cacheFile)) {
-      preGeneratedCache = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
-      console.log(`Loaded ${Object.keys(preGeneratedCache).length} pre-generated breakdowns`);
-    }
+    // Dynamic imports for Node.js modules
+    import('fs').then(fsModule => {
+      import('path').then(pathModule => {
+        const cacheFile = pathModule.default.join(process.cwd(), 'app', 'data', 'breakdown-cache.json');
+        if (fsModule.default.existsSync(cacheFile)) {
+          preGeneratedCache = JSON.parse(fsModule.default.readFileSync(cacheFile, 'utf8'));
+          console.log(`Loaded ${Object.keys(preGeneratedCache).length} pre-generated breakdowns`);
+        }
+      });
+    });
   } catch (error) {
     console.error('Failed to load pre-generated cache:', error);
   }

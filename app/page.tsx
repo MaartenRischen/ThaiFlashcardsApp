@@ -1304,7 +1304,6 @@ export default function ThaiFlashcards() {
           } catch {}
           setShowSetWizardModal(true)
         }}
-        isMale={isMale}
       />
 
       {/* Show testGenResult for debugging - Refined conditional and type guards */}

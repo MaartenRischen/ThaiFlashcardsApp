@@ -3,7 +3,7 @@ import { useSet } from '@/app/context/SetContext'; // Import useSet hook
 import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal, Gift, Heart, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { AudioLessonDownload } from '../AudioLessonDownload';
+
 import TipJar from '../TipJar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { SignInButton } from '@clerk/nextjs';
@@ -15,7 +15,6 @@ interface FlashcardHeaderProps {
   onOpenSetManager: () => void;
   onOpenCards: () => void;
   onOpenSetWizard: () => void;
-  isMale: boolean;
 }
 
 export function FlashcardHeader({
@@ -24,7 +23,6 @@ export function FlashcardHeader({
   onOpenSetManager,
   onOpenCards,
   onOpenSetWizard,
-  isMale,
 }: FlashcardHeaderProps) {
   // Access the active set metadata to get the image URL
   const { availableSets, activeSetId } = useSet();

@@ -168,12 +168,12 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
 
   const preloadImages = useCallback(async (imageUrls: (string | null | undefined)[]) => {
     const validUrls = imageUrls.filter((url): url is string => !!url);
-    const uniqueUrls = [...new Set(validUrls)];
+    const uniqueUrls = Array.from(new Set(validUrls));
     
     console.log(`[SetCache] Pre-loading ${uniqueUrls.length} images...`);
     
     const imagePromises = uniqueUrls.map(url => {
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<void>((resolve) => {
         const img = new Image();
         img.onload = () => {
           console.log(`[SetCache] Successfully preloaded image: ${url}`);

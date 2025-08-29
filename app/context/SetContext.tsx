@@ -6,6 +6,7 @@ import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases';
 import { getDefaultSetsForUnauthenticatedUsers, getDefaultSetContent } from '@/app/lib/seed-default-sets';
 import { SetMetaData, SetProgress } from '@/app/lib/storage';
 import { useAudioGeneration } from '@/app/context/AudioGenerationContext';
+import { useSetCache } from '@/app/context/SetCacheContext';
 
 interface SetContextProps {
   availableSets: SetMetaData[];
@@ -54,6 +55,7 @@ const DEFAULT_SET_METADATA: SetMetaData = {
 export const SetProvider = ({ children }: { children: ReactNode }) => {
   const { userId, isLoaded } = useAuth(); // <-- Use Clerk's useAuth hook
   const audioGeneration = useAudioGeneration();
+  const { clearSetCache } = useSetCache(); // Get cache management functions
   const [availableSets, setAvailableSets] = useState<SetMetaData[]>([DEFAULT_SET_METADATA]);
   const [activeSetId, setActiveSetId] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
@@ -267,6 +269,11 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
         console.error("SetContext: Error saving progress:", error);
     }
 
+    // Clear cache when progress is updated
+    if (activeSetId) {
+      clearSetCache(activeSetId);
+    }
+
     // Update isFullyLearned status
     const currentSetContent = activeSetContent;
     if (currentSetContent && currentSetContent.length > 0) {
@@ -309,7 +316,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
           }
       }
     }
-  }, [activeSetId, userId, isLoaded, activeSetContent, availableSets]);
+  }, [activeSetId, userId, isLoaded, activeSetContent, availableSets, clearSetCache]);
 
   // --- Refactored Initial Data Loading --- (updated to use useAuth and fetch)
   useEffect(() => {
@@ -550,6 +557,9 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
         throw new Error(data.error || `API request failed with status ${response.status}`);
       }
 
+      // Clear cache for the deleted set
+      clearSetCache(id);
+      
       // Refresh the sets to get the updated phrase counts
       await refreshSets();
 
@@ -565,8 +575,8 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     } finally {
        setIsLoading(false);
     }
-  // Add refreshSets to dependencies
-  }, [activeSetId, userId, isLoaded, refreshSets]);
+  // Add refreshSets and clearSetCache to dependencies
+  }, [activeSetId, userId, isLoaded, refreshSets, clearSetCache]);
 
   // --- switchSet (No backend call needed, just state update) --- 
   const switchSet = useCallback(async (id: string) => {

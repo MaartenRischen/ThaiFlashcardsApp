@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Switch } from "@/app/components/ui/switch"; // Assuming path for Switch
 import { useSet } from '@/app/context/SetContext';
+import { useSetCache } from '@/app/context/SetCacheContext';
 import Image from 'next/image';
 import { Phrase } from '@/app/lib/set-generator';
 import type { PhraseProgressData } from '@/app/lib/storage';
@@ -398,6 +399,7 @@ export function SetManagerModal({ isOpen, onClose, highlightSetId }: {
 }) {
   const { availableSets, switchSet, activeSetId, deleteSet } = useSet();
   const { user } = useUser(); // Get user data
+  const { preloadAllSets, getCachedContent, preloadSetContent, preloadImages } = useSetCache();
   const [selected, setSelected] = useState<string[]>([]);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [cardsModalSetId, setCardsModalSetId] = useState<string | null>(null);
@@ -442,6 +444,29 @@ export function SetManagerModal({ isOpen, onClose, highlightSetId }: {
     }
   }, [highlightSetId, isOpen, availableSets]);
 
+  // Pre-load all sets and images when modal opens
+  useEffect(() => {
+    if (isOpen && availableSets.length > 0) {
+      console.log('[SetManagerModal] Preloading all sets and images...');
+      
+      // Preload set content
+      const setIds = availableSets.map(set => set.id);
+      preloadAllSets(setIds).catch(error => {
+        console.error('[SetManagerModal] Error preloading sets:', error);
+      });
+      
+      // Preload images
+      const imageUrls = availableSets.map(set => {
+        if (set.imageUrl) return set.imageUrl;
+        if (set.id === 'default') return '/images/defaultnew.png';
+        return '/images/default-set-logo.png';
+      });
+      preloadImages(imageUrls).catch(error => {
+        console.error('[SetManagerModal] Error preloading images:', error);
+      });
+    }
+  }, [isOpen, availableSets, preloadAllSets, preloadImages]);
+
   if (!isOpen) return null;
 
   // Bulk actions
@@ -470,50 +495,24 @@ export function SetManagerModal({ isOpen, onClose, highlightSetId }: {
     setCardsModalSetId(set.id);
     setCardsModalLoading(true);
     try {
-      // Check if it's a default set
-      if (set.id === 'default' || set.id.startsWith('default-')) {
-        // Import the getDefaultSetContent function at the top of the file
-        const { getDefaultSetContent } = await import('@/app/lib/seed-default-sets');
-        const defaultContent = getDefaultSetContent(set.id);
-        
-        if (defaultContent) {
-          setCardsModalPhrases(defaultContent);
-          setCardsModalProgress({});
-        } else {
-          throw new Error('Default set content not found');
-        }
+      // First try to get from cache
+      const cached = getCachedContent(set.id);
+      
+      if (cached) {
+        console.log(`[SetManagerModal] Using cached data for set ${set.id}`);
+        setCardsModalPhrases(cached.phrases);
+        setCardsModalProgress(cached.progress);
       } else {
-        // Fetch content via API for non-default sets
-        const contentResponse = await fetch(`/api/flashcard-sets/${set.id}/content`, {
-          credentials: 'include'
-        });
-        
-        if (!contentResponse.ok) {
-          throw new Error(`Failed to fetch content: ${contentResponse.status}`);
-        }
-        
-        const phrases = await contentResponse.json();
-        
-        // Fetch progress via API if user is logged in
-        if (userId) {
-          const progressResponse = await fetch(`/api/flashcard-sets/${set.id}/progress`, {
-            credentials: 'include'
-          });
-          
-          if (!progressResponse.ok) {
-            throw new Error(`Failed to fetch progress: ${progressResponse.status}`);
-          }
-          
-          const progressData = await progressResponse.json();
-          setCardsModalProgress(progressData.progress || {});
-        } else {
-          setCardsModalProgress({});
-        }
-        
-        setCardsModalPhrases(phrases);
+        console.log(`[SetManagerModal] No cache found, loading set ${set.id}`);
+        // Load the set content and it will be cached automatically
+        const content = await preloadSetContent(set.id);
+        setCardsModalPhrases(content.phrases);
+        setCardsModalProgress(content.progress);
       }
     } catch (error: unknown) {
       console.error('Error loading cards:', error instanceof Error ? error.message : String(error));
+      setCardsModalPhrases([]);
+      setCardsModalProgress({});
     } finally {
       setCardsModalLoading(false);
     }
@@ -569,16 +568,16 @@ export function SetManagerModal({ isOpen, onClose, highlightSetId }: {
     setIsPublishModalOpen(false); // Close the modal immediately
 
     try {
-      // Fetch content via API (or use getSetContent from context if available and preferred)
-      const contentResponse = await fetch(`/api/flashcard-sets/${set.id}/content`, {
-        credentials: 'include'
-      });
+      // Use cached content if available, otherwise load it
+      let phrases = [];
+      const cached = getCachedContent(set.id);
       
-      if (!contentResponse.ok) {
-        throw new Error(`Failed to fetch content: ${contentResponse.statusText}`);
+      if (cached) {
+        phrases = cached.phrases;
+      } else {
+        const content = await preloadSetContent(set.id);
+        phrases = content.phrases;
       }
-      
-      const phrases = await contentResponse.json();
       
       // Determine author based on input
       const author = authorName === null ? '' : authorName; // Use empty string for Anonymous

@@ -1,9 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSet } from '@/app/context/SetContext';
+import { useSetCache } from '@/app/context/SetCacheContext';
+import { useAuth } from '@clerk/nextjs';
 
 export function AppInitializer() {
+  const { isLoaded, userId } = useAuth();
+  const { availableSets } = useSet();
+  const { preloadAllSets, preloadImages } = useSetCache();
   const [initialized, setInitialized] = useState(false);
+  const [setsPreloaded, setSetsPreloaded] = useState(false);
 
   useEffect(() => {
     // Only run initialization once
@@ -36,6 +43,48 @@ export function AppInitializer() {
     const timer = setTimeout(initializeApp, 1000);
     return () => clearTimeout(timer);
   }, [initialized]);
+
+  // Preload sets after user is authenticated and sets are available
+  useEffect(() => {
+    if (!isLoaded || !userId || setsPreloaded || availableSets.length <= 1) {
+      return;
+    }
+
+    const preloadData = async () => {
+      console.log('[AppInitializer] Starting background preload of sets...');
+      
+      try {
+        // Get first 10 sets to preload (excluding default)
+        const setsToPreload = availableSets
+          .filter(set => set.id !== 'generating')
+          .slice(0, 10)
+          .map(set => set.id);
+        
+        // Preload set content
+        await preloadAllSets(setsToPreload);
+        
+        // Preload images
+        const imageUrls = availableSets
+          .slice(0, 10)
+          .map(set => {
+            if (set.imageUrl) return set.imageUrl;
+            if (set.id === 'default') return '/images/defaultnew.png';
+            return '/images/default-set-logo.png';
+          });
+        
+        await preloadImages(imageUrls);
+        
+        console.log('[AppInitializer] Background preload completed');
+        setSetsPreloaded(true);
+      } catch (error) {
+        console.error('[AppInitializer] Error during background preload:', error);
+      }
+    };
+
+    // Delay preloading to not interfere with initial page load
+    const timer = setTimeout(preloadData, 3000);
+    return () => clearTimeout(timer);
+  }, [isLoaded, userId, availableSets, setsPreloaded, preloadAllSets, preloadImages]);
 
   // This component doesn't render anything visible
   return null;

@@ -4,6 +4,7 @@ import React, { createContext, useState, useContext, useCallback, ReactNode } fr
 import { Phrase } from '@/app/lib/set-generator';
 import type { PhraseProgressData } from '@/app/lib/storage';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
+import { Folder } from '@/app/lib/storage/folders';
 
 interface SetContentCache {
   phrases: Phrase[];
@@ -11,13 +12,22 @@ interface SetContentCache {
   lastFetched: number;
 }
 
+interface FolderCache {
+  folders: Folder[];
+  lastFetched: number;
+}
+
 interface SetCacheContextProps {
   cache: Record<string, SetContentCache>;
+  folderCache: FolderCache | null;
   getCachedContent: (setId: string) => SetContentCache | null;
+  getCachedFolders: () => Folder[] | null;
   preloadSetContent: (setId: string, forceRefresh?: boolean) => Promise<SetContentCache>;
   preloadAllSets: (setIds: string[]) => Promise<void>;
+  preloadFolders: (forceRefresh?: boolean) => Promise<Folder[]>;
   clearCache: () => void;
   clearSetCache: (setId: string) => void;
+  clearFolderCache: () => void;
   preloadImages: (imageUrls: (string | null | undefined)[]) => Promise<void>;
 }
 
@@ -27,6 +37,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache validity
 
 export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
   const [cache, setCache] = useState<Record<string, SetContentCache>>({});
+  const [folderCache, setFolderCache] = useState<FolderCache | null>(null);
 
   const getCachedContent = useCallback((setId: string): SetContentCache | null => {
     const cached = cache[setId];
@@ -40,6 +51,18 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
     
     return cached;
   }, [cache]);
+
+  const getCachedFolders = useCallback((): Folder[] | null => {
+    if (!folderCache) return null;
+    
+    // Check if cache is still valid
+    const now = Date.now();
+    if (now - folderCache.lastFetched > CACHE_DURATION) {
+      return null; // Cache expired
+    }
+    
+    return folderCache.folders;
+  }, [folderCache]);
 
   const preloadSetContent = useCallback(async (setId: string, forceRefresh = false): Promise<SetContentCache> => {
     // Check cache first unless force refresh
@@ -166,6 +189,48 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
+  const clearFolderCache = useCallback(() => {
+    console.log('[SetCache] Clearing folder cache');
+    setFolderCache(null);
+  }, []);
+
+  const preloadFolders = useCallback(async (forceRefresh = false): Promise<Folder[]> => {
+    // Check cache first unless force refresh
+    if (!forceRefresh) {
+      const cached = getCachedFolders();
+      if (cached) {
+        console.log('[SetCache] Using cached folders');
+        return cached;
+      }
+    }
+
+    console.log('[SetCache] Fetching folders');
+    try {
+      const response = await fetch('/api/folders', {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch folders');
+      }
+
+      const data = await response.json();
+      const folders = data.folders || [];
+      
+      // Update cache
+      setFolderCache({
+        folders,
+        lastFetched: Date.now()
+      });
+
+      console.log(`[SetCache] Cached ${folders.length} folders`);
+      return folders;
+    } catch (error) {
+      console.error('[SetCache] Error loading folders:', error);
+      return [];
+    }
+  }, [getCachedFolders]);
+
   const preloadImages = useCallback(async (imageUrls: (string | null | undefined)[]) => {
     const validUrls = imageUrls.filter((url): url is string => !!url);
     const uniqueUrls = Array.from(new Set(validUrls));
@@ -194,11 +259,15 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
   return (
     <SetCacheContext.Provider value={{
       cache,
+      folderCache,
       getCachedContent,
+      getCachedFolders,
       preloadSetContent,
       preloadAllSets,
+      preloadFolders,
       clearCache,
       clearSetCache,
+      clearFolderCache,
       preloadImages
     }}>
       {children}

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSet } from '@/app/context/SetContext';
+import { useSetCache } from '@/app/context/SetCacheContext';
 import { Folder, FolderWithSets } from '@/app/lib/storage/folders';
 import FolderCard from './FolderCard';
 import Image from 'next/image';
@@ -21,6 +22,7 @@ interface FolderViewProps {
 
 export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }: FolderViewProps) {
   const { availableSets, switchSet, activeSetId } = useSet();
+  const { preloadFolders, getCachedFolders, clearFolderCache, preloadAllSets, preloadImages } = useSetCache();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [currentFolder, setCurrentFolder] = useState<FolderWithSets | null>(null);
   const [loading, setLoading] = useState(false);
@@ -29,26 +31,50 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
   const [folderForm, setFolderForm] = useState({ name: '', description: '' });
   const [folderError, setFolderError] = useState('');
 
-  // Fetch folders on mount
+  // Fetch folders on mount and preload data
   useEffect(() => {
     if (isOpen) {
       fetchFolders();
+      
+      // Preload all sets and images in the background
+      const preloadData = async () => {
+        console.log('[FolderView] Starting background preload...');
+        try {
+          // Get all set IDs
+          const setIds = availableSets.map(set => set.id);
+          await preloadAllSets(setIds);
+          
+          // Preload all images
+          const imageUrls = availableSets.map(set => 
+            set.imageUrl || (set.id === 'default' ? '/images/defaultnew.png' : '/images/default-set-logo.png')
+          );
+          await preloadImages(imageUrls);
+          
+          console.log('[FolderView] Background preload complete');
+        } catch (error) {
+          console.error('[FolderView] Error during preload:', error);
+        }
+      };
+      
+      // Start preloading after a small delay
+      setTimeout(preloadData, 100);
     }
-  }, [isOpen]);
+  }, [isOpen, availableSets, preloadAllSets, preloadImages]);
 
   const fetchFolders = async () => {
+    // Try cache first
+    const cachedFolders = getCachedFolders();
+    if (cachedFolders) {
+      console.log('[FolderView] Using cached folders');
+      setFolders(cachedFolders);
+      return;
+    }
+
+    // Otherwise load and cache
     setLoading(true);
     try {
-      const response = await fetch('/api/folders', {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch folders');
-      }
-
-      const data = await response.json();
-      setFolders(data.folders);
+      const loadedFolders = await preloadFolders();
+      setFolders(loadedFolders);
     } catch (error) {
       console.error('Error fetching folders:', error);
     } finally {
@@ -57,23 +83,30 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
   };
 
   const fetchFolderDetails = async (folderId: string) => {
+    // Find the folder from our cached data
+    const folder = folders.find(f => f.id === folderId);
+    if (!folder) {
+      console.error('Folder not found:', folderId);
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await fetch(`/api/folders/${folderId}`, {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch folder details');
-      }
-
-      const data = await response.json();
-      const folder = data.folder;
-      
       // Get all sets that belong to this folder (by folderId or folderName)
       const folderSets = availableSets.filter(set => 
         set.folderId === folder.id || set.folderName === folder.name
       );
+      
+      // Preload content for sets in this folder
+      const setIds = folderSets.map(set => set.id);
+      if (setIds.length > 0) {
+        console.log(`[FolderView] Preloading ${setIds.length} sets for folder ${folder.name}`);
+        await preloadAllSets(setIds);
+        
+        // Also preload images
+        const imageUrls = folderSets.map(set => set.imageUrl || '/images/default-set-logo.png');
+        await preloadImages(imageUrls);
+      }
       
       // Enhance the folder with the actual sets
       setCurrentFolder({
@@ -87,7 +120,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
         }))
       });
     } catch (error) {
-      console.error('Error fetching folder details:', error);
+      console.error('Error loading folder details:', error);
     } finally {
       setLoading(false);
     }
@@ -115,6 +148,8 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
         throw new Error(error.error || 'Failed to create folder');
       }
 
+      // Clear cache and reload
+      clearFolderCache();
       await fetchFolders();
       setIsCreatingFolder(false);
       setFolderForm({ name: '', description: '' });
@@ -143,6 +178,8 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
         throw new Error('Failed to update folder');
       }
 
+      // Clear cache and reload
+      clearFolderCache();
       await fetchFolders();
       setIsEditingFolder(null);
       setFolderForm({ name: '', description: '' });
@@ -167,6 +204,8 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
         throw new Error('Failed to delete folder');
       }
 
+      // Clear cache and reload
+      clearFolderCache();
       await fetchFolders();
     } catch (error) {
       alert('Failed to delete folder');

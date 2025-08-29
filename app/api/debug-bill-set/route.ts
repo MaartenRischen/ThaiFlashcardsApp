@@ -2,14 +2,15 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/app/lib/prisma';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
-import { ALL_COMMON_SENTENCES_SETS } from '@/app/data/common-sentences-sets';
+import { COMMON_SENTENCES_SETS } from '@/app/data/common-sentences-sets';
+import { COMMON_SENTENCES_SETS_2 } from '@/app/data/common-sentences-sets-2';
 
 export async function GET(_request: Request) {
   try {
     const { userId } = await auth();
     
     // Get the source data
-    const sourceSet = ALL_COMMON_SENTENCES_SETS.find(s => s.id === 'common-sentences-2');
+    const sourceSet = COMMON_SENTENCES_SETS_2.find(s => s.id === 'common-sentences-2');
     const billPhraseInSource = sourceSet?.phrases.find(p => p.english === "Can I have the bill?");
     
     // Get the default content

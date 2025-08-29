@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover"
 import { FlashcardHeader } from './components/flashcard-page/FlashcardHeader';
 import { SettingsModal } from './components/CombinedOptionsModal';
-import { FolderView } from './components/FolderView';
+import { FolderViewEnhanced } from './components/FolderViewEnhanced';
 import { calculateNextReview } from './lib/srs';
 import { Volume2 } from 'lucide-react';
 import { SetWizardModal } from '../components/SetWizard/SetWizardModal';
@@ -1798,7 +1798,7 @@ export default function ThaiFlashcards() {
         autoplay={autoplay}
         setAutoplay={setAutoplay}
       />
-      <FolderView
+      <FolderViewEnhanced
         isOpen={isManagementModalOpen}
         onClose={() => {
           setIsManagementModalOpen(false);

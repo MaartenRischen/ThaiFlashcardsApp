@@ -887,7 +887,7 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "น่าพิจารณาครับ",
         thaiFeminine: "น่าพิจารณาค่ะ",
         pronunciation: "nâa pí-jaa-rá-naa",
-        mnemonic: "Think: 'nah pee-ja-ra-na' - nah, worth considering',
+        mnemonic: "Think: 'nah pee-ja-ra-na' - nah, worth considering",
         literal: "Worth consider",
         examples: [
           {

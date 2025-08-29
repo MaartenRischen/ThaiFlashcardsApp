@@ -12,7 +12,7 @@ import type { SetMetaData } from '@/app/lib/storage';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, FolderOpen, ArrowLeft, X } from 'lucide-react';
+import { Plus, ArrowLeft, X } from 'lucide-react';
 
 interface FolderViewProps {
   isOpen: boolean;
@@ -36,7 +36,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
     if (isOpen) {
       fetchFolders();
     }
-  }, [isOpen]);
+  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchFolders = async () => {
     // Try cache first

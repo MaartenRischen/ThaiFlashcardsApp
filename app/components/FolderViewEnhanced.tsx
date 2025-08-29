@@ -20,19 +20,14 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { 
   Plus, 
-  FolderOpen, 
   ArrowLeft, 
   X, 
   Search,
   CheckSquare,
   Square,
   MoveRight,
-  Trash2,
-  Edit3,
-  MoreVertical,
   Grid3X3,
-  List,
-  SortAsc
+  List
 } from 'lucide-react';
 
 interface FolderViewEnhancedProps {
@@ -74,7 +69,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     if (isOpen) {
       fetchFolders();
     }
-  }, [isOpen]);
+  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset selection when leaving select mode
   useEffect(() => {

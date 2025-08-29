@@ -4,7 +4,6 @@ import React from 'react';
 import Image from 'next/image';
 import { Folder } from '@/app/lib/storage/folders';
 import { MoreVertical, Edit3, Trash2, FolderIcon, Palette } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,

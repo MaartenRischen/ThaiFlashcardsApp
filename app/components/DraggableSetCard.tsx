@@ -1,18 +1,14 @@
 'use client';
 
 import React from 'react';
-import { useDrag } from 'react-dnd';
+import { useDrag, DragSourceMonitor } from 'react-dnd';
 import { SetMetaData } from '@/app/lib/storage';
-import Image from 'next/image';
-import SetCompletionBadge from './SetCompletionBadge';
 import { cn } from '@/lib/utils';
 import { GripVertical } from 'lucide-react';
 
 interface DraggableSetCardProps {
   set: SetMetaData;
   isDragging?: boolean;
-  isSelected?: boolean;
-  isActive?: boolean;
   onDragStart?: () => void;
   onDragEnd?: () => void;
   children: React.ReactNode;
@@ -22,31 +18,30 @@ export const ItemTypes = {
   SET: 'set'
 };
 
+interface DragItem {
+  set: SetMetaData;
+}
+
 export function DraggableSetCard({ 
   set, 
   isDragging = false,
-  isSelected = false,
-  isActive = false,
   onDragStart,
   onDragEnd,
   children 
 }: DraggableSetCardProps) {
-  const [{ opacity }, dragRef] = useDrag(
-    () => ({
-      type: ItemTypes.SET,
-      item: { set },
-      collect: (monitor) => ({
-        opacity: monitor.isDragging() ? 0.5 : 1,
-      }),
-      begin: () => onDragStart?.(),
-      end: () => onDragEnd?.(),
+  const [{ opacity }, drag] = useDrag<DragItem, unknown, { opacity: number }>(() => ({
+    type: ItemTypes.SET,
+    item: { set },
+    collect: (monitor: DragSourceMonitor) => ({
+      opacity: monitor.isDragging() ? 0.5 : 1,
     }),
-    [set]
-  );
+    begin: () => onDragStart?.(),
+    end: () => onDragEnd?.(),
+  }), [set]);
 
   return (
     <div 
-      ref={dragRef} 
+      ref={drag as any}
       style={{ opacity }} 
       className={cn(
         "relative group cursor-move",

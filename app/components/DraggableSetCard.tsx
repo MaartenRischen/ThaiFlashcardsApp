@@ -41,6 +41,7 @@ export function DraggableSetCard({
 
   return (
     <div 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ref={drag as any}
       style={{ opacity }} 
       className={cn(

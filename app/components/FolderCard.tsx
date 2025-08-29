@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Folder } from '@/app/lib/storage/folders';
+import { MoreVertical, Edit3, Trash2, FolderIcon } from 'lucide-react';
 
 interface FolderCardProps {
   folder: Folder;
@@ -12,203 +13,130 @@ interface FolderCardProps {
 }
 
 export default function FolderCard({ folder, onClick, onEdit, onDelete }: FolderCardProps) {
+  const [showMenu, setShowMenu] = React.useState(false);
+
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMenu(!showMenu);
+  };
+
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setShowMenu(false);
     onEdit?.();
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setShowMenu(false);
     onDelete?.();
   };
+
+  // Close menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = () => setShowMenu(false);
+    if (showMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showMenu]);
 
   return (
     <div
       onClick={onClick}
-      className="relative group cursor-pointer transition-all duration-200 hover:scale-105"
+      className="relative group cursor-pointer transition-all duration-200"
     >
-      {/* Folder Image Collage */}
-      <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden shadow-md">
-        {folder.previewImages && folder.previewImages.length > 0 ? (
-          <div className="grid grid-cols-2 gap-0.5 h-full">
-            {folder.previewImages.length === 1 ? (
-              <div className="relative w-full h-full col-span-2">
-                <Image
-                  src={folder.previewImages[0]}
-                  alt={folder.name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                />
-              </div>
-            ) : folder.previewImages.length === 2 ? (
-              <>
-                <div className="relative w-full h-full">
-                  <Image
-                    src={folder.previewImages[0]}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 25vw, 12.5vw"
-                  />
-                </div>
-                <div className="relative w-full h-full">
-                  <Image
-                    src={folder.previewImages[1]}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 25vw, 12.5vw"
-                  />
-                </div>
-              </>
-            ) : folder.previewImages.length === 3 ? (
-              <>
-                <div className="relative w-full h-full col-span-2">
-                  <Image
-                    src={folder.previewImages[0]}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
-                </div>
-                <div className="relative w-full h-full">
-                  <Image
-                    src={folder.previewImages[1]}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 25vw, 12.5vw"
-                  />
-                </div>
-                <div className="relative w-full h-full">
-                  <Image
-                    src={folder.previewImages[2]}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 25vw, 12.5vw"
-                  />
-                </div>
-              </>
-            ) : (
-              // 4 images
-              folder.previewImages.slice(0, 4).map((img, idx) => (
-                <div key={idx} className="relative w-full h-full">
-                  <Image
-                    src={img}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 25vw, 12.5vw"
-                  />
-                </div>
-              ))
-            )}
-          </div>
-        ) : (
-          // Empty folder placeholder
-          <div className="flex items-center justify-center h-full">
-            <svg
-              className="w-16 h-16 text-gray-400 dark:text-gray-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+      {/* Main Card */}
+      <div className="neumorphic-card-static hover:neumorphic-card-static group-hover:border-[#505050] group-hover:bg-[#323232] relative overflow-hidden">
+        {/* Background Pattern or Image */}
+        <div className="aspect-[4/3] relative bg-gradient-to-br from-[#2C2C2C] to-[#1F1F1F]">
+          {folder.previewImages && folder.previewImages.length > 0 ? (
+            <div className="absolute inset-0 opacity-30">
+              <Image
+                src={folder.previewImages[0]}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 50vw, 25vw"
               />
-            </svg>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1F1F1F] via-[#1F1F1F]/80 to-transparent" />
+            </div>
+          ) : null}
+          
+          {/* Folder Icon */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="p-4 rounded-2xl bg-[#1F1F1F]/80 backdrop-blur-sm border border-[#404040]/50">
+              <FolderIcon size={48} className="text-[#A9C4FC]" />
+            </div>
           </div>
-        )}
-        
-        {/* Folder icon overlay for better recognition */}
-        <div className="absolute top-2 left-2 bg-white/90 dark:bg-gray-900/90 rounded-md p-1">
-          <svg
-            className="w-5 h-5 text-gray-700 dark:text-gray-300"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-          </svg>
-        </div>
-      </div>
 
-      {/* Folder Info */}
-      <div className="mt-3">
-        <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-          {folder.name}
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {folder.setCount} {folder.setCount === 1 ? 'set' : 'sets'}
-        </p>
-        {folder.description && (
-          <p className="text-xs text-gray-500 dark:text-gray-500 truncate mt-1">
-            {folder.description}
-          </p>
-        )}
-      </div>
+          {/* Set Count Badge */}
+          <div className="absolute top-3 left-3">
+            <div className="px-3 py-1 rounded-full bg-[#1F1F1F]/90 backdrop-blur-sm border border-[#404040]/50">
+              <span className="text-sm font-medium text-[#E0E0E0]">
+                {folder.setCount} {folder.setCount === 1 ? 'set' : 'sets'}
+              </span>
+            </div>
+          </div>
 
-      {/* Action buttons for non-default folders */}
-      {!folder.isDefault && (
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-          {onEdit && (
-            <button
-              onClick={handleEditClick}
-              className="bg-white/90 dark:bg-gray-900/90 rounded-md p-1.5 hover:bg-white dark:hover:bg-gray-900 transition-colors"
-              title="Edit folder"
-            >
-              <svg
-                className="w-4 h-4 text-gray-700 dark:text-gray-300"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                />
-              </svg>
-            </button>
+          {/* Default Badge */}
+          {folder.isDefault && (
+            <div className="absolute top-3 right-3">
+              <div className="px-3 py-1 rounded-full bg-[#A9C4FC]/20 backdrop-blur-sm border border-[#A9C4FC]/30">
+                <span className="text-xs font-medium text-[#A9C4FC]">Default</span>
+              </div>
+            </div>
           )}
-          {onDelete && (
-            <button
-              onClick={handleDeleteClick}
-              className="bg-white/90 dark:bg-gray-900/90 rounded-md p-1.5 hover:bg-white dark:hover:bg-gray-900 transition-colors"
-              title="Delete folder"
-            >
-              <svg
-                className="w-4 h-4 text-red-600 dark:text-red-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+
+          {/* Menu Button for non-default folders */}
+          {!folder.isDefault && (onEdit || onDelete) && (
+            <div className="absolute top-3 right-3">
+              <button
+                onClick={handleMenuClick}
+                className="p-2 rounded-lg bg-[#1F1F1F]/90 backdrop-blur-sm border border-[#404040]/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-[#2C2C2C]/90"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-            </button>
+                <MoreVertical size={16} className="text-[#BDBDBD]" />
+              </button>
+              
+              {/* Dropdown Menu */}
+              {showMenu && (
+                <div className="absolute right-0 mt-1 w-36 rounded-lg bg-[#2C2C2C] border border-[#404040] shadow-lg overflow-hidden z-10">
+                  {onEdit && (
+                    <button
+                      onClick={handleEditClick}
+                      className="w-full px-4 py-2 text-left text-sm text-[#E0E0E0] hover:bg-[#3C3C3C] flex items-center gap-2"
+                    >
+                      <Edit3 size={14} />
+                      Edit
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      onClick={handleDeleteClick}
+                      className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-[#3C3C3C] flex items-center gap-2"
+                    >
+                      <Trash2 size={14} />
+                      Delete
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
-      )}
 
-      {/* Default folder badge */}
-      {folder.isDefault && (
-        <div className="absolute bottom-2 right-2">
-          <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full">
-            Default
-          </span>
+        {/* Folder Info */}
+        <div className="p-4">
+          <h3 className="font-semibold text-lg text-[#E0E0E0] truncate mb-1">
+            {folder.name}
+          </h3>
+          {folder.description && (
+            <p className="text-sm text-[#BDBDBD] line-clamp-2">
+              {folder.description}
+            </p>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -32,6 +32,7 @@ export async function seedDefaultSetForAllUsers() {
             userId: user.id,
             name: 'Default Set',
             source: 'default',
+            imageUrl: '/images/defaultnew.png',
             phrases: {
               create: INITIAL_PHRASES.map(phrase => {
                 const { examples, ...rest } = phrase as Phrase;

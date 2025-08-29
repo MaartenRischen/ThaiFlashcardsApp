@@ -7,10 +7,11 @@ import { useAuth } from '@clerk/nextjs';
 
 export function AppInitializer() {
   const { isLoaded, userId } = useAuth();
-  const { availableSets } = useSet();
+  const { availableSets, refreshSets } = useSet();
   const { preloadAllSets, preloadImages, preloadFolders } = useSetCache();
   const [initialized, setInitialized] = useState(false);
   const [setsPreloaded, setSetsPreloaded] = useState(false);
+  const [defaultSetFixed, setDefaultSetFixed] = useState(false);
 
   useEffect(() => {
     // Only run initialization once
@@ -90,6 +91,37 @@ export function AppInitializer() {
     const timer = setTimeout(preloadData, 3000);
     return () => clearTimeout(timer);
   }, [isLoaded, userId, availableSets, setsPreloaded, preloadAllSets, preloadImages, preloadFolders]);
+
+  // Fix default set image once after authentication
+  useEffect(() => {
+    if (!isLoaded || !userId || defaultSetFixed) {
+      return;
+    }
+
+    const fixDefaultSetImage = async () => {
+      try {
+        console.log('[AppInitializer] Fixing default set image...');
+        const response = await fetch('/api/fix-default-set-image', {
+          method: 'POST',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          console.log('[AppInitializer] Default set image fixed successfully');
+          // Refresh sets to pick up the updated imageUrl
+          await refreshSets();
+        } else {
+          console.error('[AppInitializer] Failed to fix default set image:', response.status);
+        }
+      } catch (error) {
+        console.error('[AppInitializer] Error fixing default set image:', error);
+      } finally {
+        setDefaultSetFixed(true);
+      }
+    };
+
+    fixDefaultSetImage();
+  }, [isLoaded, userId, defaultSetFixed, refreshSets]);
 
   // This component doesn't render anything visible
   return null;

@@ -8,7 +8,7 @@ import { useAuth } from '@clerk/nextjs';
 export function AppInitializer() {
   const { isLoaded, userId } = useAuth();
   const { availableSets } = useSet();
-  const { preloadAllSets, preloadImages } = useSetCache();
+  const { preloadAllSets, preloadImages, preloadFolders } = useSetCache();
   const [initialized, setInitialized] = useState(false);
   const [setsPreloaded, setSetsPreloaded] = useState(false);
 
@@ -51,9 +51,13 @@ export function AppInitializer() {
     }
 
     const preloadData = async () => {
-      console.log('[AppInitializer] Starting background preload of sets...');
+      console.log('[AppInitializer] Starting background preload of folders and sets...');
       
       try {
+        // Preload folders first
+        await preloadFolders();
+        console.log('[AppInitializer] Folders preloaded');
+        
         // Get first 10 sets to preload (excluding default)
         const setsToPreload = availableSets
           .filter(set => set.id !== 'generating')
@@ -63,9 +67,8 @@ export function AppInitializer() {
         // Preload set content
         await preloadAllSets(setsToPreload);
         
-        // Preload images
+        // Preload images for ALL sets (not just first 10) to ensure My Sets modal has all images
         const imageUrls = availableSets
-          .slice(0, 10)
           .map(set => {
             if (set.imageUrl) return set.imageUrl;
             if (set.id === 'default') return '/images/defaultnew.png';
@@ -84,7 +87,7 @@ export function AppInitializer() {
     // Delay preloading to not interfere with initial page load
     const timer = setTimeout(preloadData, 3000);
     return () => clearTimeout(timer);
-  }, [isLoaded, userId, availableSets, setsPreloaded, preloadAllSets, preloadImages]);
+  }, [isLoaded, userId, availableSets, setsPreloaded, preloadAllSets, preloadImages, preloadFolders]);
 
   // This component doesn't render anything visible
   return null;

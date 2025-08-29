@@ -31,35 +31,12 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
   const [folderForm, setFolderForm] = useState({ name: '', description: '' });
   const [folderError, setFolderError] = useState('');
 
-  // Fetch folders on mount and preload data
+  // Fetch folders on mount
   useEffect(() => {
     if (isOpen) {
       fetchFolders();
-      
-      // Preload all sets and images in the background
-      const preloadData = async () => {
-        console.log('[FolderView] Starting background preload...');
-        try {
-          // Get all set IDs
-          const setIds = availableSets.map(set => set.id);
-          await preloadAllSets(setIds);
-          
-          // Preload all images
-          const imageUrls = availableSets.map(set => 
-            set.imageUrl || (set.id === 'default' ? '/images/defaultnew.png' : '/images/default-set-logo.png')
-          );
-          await preloadImages(imageUrls);
-          
-          console.log('[FolderView] Background preload complete');
-        } catch (error) {
-          console.error('[FolderView] Error during preload:', error);
-        }
-      };
-      
-      // Start preloading after a small delay
-      setTimeout(preloadData, 100);
     }
-  }, [isOpen, availableSets, preloadAllSets, preloadImages]);
+  }, [isOpen]);
 
   const fetchFolders = async () => {
     // Try cache first

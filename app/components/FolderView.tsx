@@ -206,34 +206,44 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl bg-[#1F1F1F] border-[#404040] text-white p-0 overflow-hidden h-[90vh] flex flex-col">
+      <DialogContent className="max-w-7xl bg-[#1F1F1F] border-[#404040] text-white p-0 overflow-hidden h-[90vh] flex flex-col [&>button]:hidden">
         {/* Header */}
         <div className="bg-[#2C2C2C] border-b border-[#404040] px-8 py-6 flex-shrink-0">
-          <DialogHeader>
-            <DialogTitle asChild>
-              {currentFolder ? (
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={handleBackToFolders}
-                    className="p-2.5 rounded-lg bg-[#3C3C3C] hover:bg-[#4C4C4C] transition-all duration-200 border border-[#404040] group"
-                  >
-                    <ArrowLeft size={20} className="text-[#A9C4FC] group-hover:text-[#A9C4FC]/80" />
-                  </button>
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-[#E0E0E0]">{currentFolder.name}</h2>
-                    {currentFolder.description && (
-                      <p className="text-sm text-[#BDBDBD] mt-1">{currentFolder.description}</p>
-                    )}
+          <div className="flex items-center justify-between">
+            <DialogHeader className="flex-1">
+              <DialogTitle asChild>
+                {currentFolder ? (
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={handleBackToFolders}
+                      className="p-4 rounded-xl bg-[#3C3C3C] hover:bg-[#4C4C4C] transition-all duration-200 border border-[#404040] group neumorphic-button"
+                    >
+                      <ArrowLeft size={24} className="text-[#A9C4FC] group-hover:text-[#A9C4FC]/80" />
+                    </button>
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-bold text-[#E0E0E0]">{currentFolder.name}</h2>
+                      {currentFolder.description && (
+                        <p className="text-sm text-[#BDBDBD] mt-1">{currentFolder.description}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div>
-                  <h2 className="text-2xl font-bold text-[#E0E0E0]">My Sets</h2>
-                  <p className="text-sm text-[#BDBDBD] mt-1">Organize your flashcard sets into folders</p>
-                </div>
-              )}
-            </DialogTitle>
-          </DialogHeader>
+                ) : (
+                  <div>
+                    <h2 className="text-2xl font-bold text-[#E0E0E0]">My Sets</h2>
+                    <p className="text-sm text-[#BDBDBD] mt-1">Organize your flashcard sets into folders</p>
+                  </div>
+                )}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {/* Single close button in header */}
+            <button
+              onClick={onClose}
+              className="p-4 rounded-xl bg-[#3C3C3C] hover:bg-[#4C4C4C] transition-all duration-200 border border-[#404040] group neumorphic-button ml-4"
+            >
+              <X size={24} className="text-[#BDBDBD] group-hover:text-[#E0E0E0]" />
+            </button>
+          </div>
         </div>
 
         {/* Content Area - Scrollable */}
@@ -377,25 +387,38 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                           }))
                       });
                     }}
-                    className="cursor-pointer"
+                    className="relative group cursor-pointer transition-all duration-200 transform hover:scale-105"
                   >
-                    <div className="neumorphic-card-static hover:neumorphic-card-static hover:border-[#505050] hover:bg-[#323232] transition-all duration-200 h-full">
-                      <div className="aspect-[4/3] relative bg-gradient-to-br from-[#2C2C2C] to-[#1F1F1F] flex items-center justify-center">
-                        <div className="p-4 rounded-2xl bg-[#1F1F1F]/80 backdrop-blur-sm border border-[#404040]/50">
-                          <FolderOpen size={48} className="text-[#BDBDBD]" />
+                    <div className="neumorphic-card-static hover:neumorphic-card-static hover:border-[#505050] hover:bg-[#323232] relative overflow-hidden h-full">
+                      <div className="aspect-[4/3] relative bg-gradient-to-br from-[#2C2C2C] to-[#1F1F1F] overflow-hidden">
+                        {/* Decorative pattern */}
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl bg-gray-400" />
+                          <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full blur-2xl bg-gray-500" />
                         </div>
                         
+                        {/* Folder Icon */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="relative">
+                            <div className="absolute inset-0 blur-xl opacity-30 bg-gray-400" />
+                            <div className="relative p-5 rounded-2xl bg-[#2C2C2C]/90 backdrop-blur-sm border border-[#404040]/50 shadow-xl">
+                              <FolderOpen size={56} className="text-[#BDBDBD]" />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Set Count Badge */}
                         <div className="absolute top-3 left-3">
-                          <div className="px-3 py-1 rounded-full bg-[#1F1F1F]/90 backdrop-blur-sm border border-[#404040]/50">
-                            <span className="text-sm font-medium text-[#E0E0E0]">
+                          <div className="px-4 py-1.5 rounded-full bg-[#1F1F1F]/95 backdrop-blur-sm border border-[#404040]/50 shadow-lg">
+                            <span className="text-sm font-bold text-[#E0E0E0]">
                               {availableSets.filter(set => !set.folderId && !set.folderName && set.id !== 'default').length} sets
                             </span>
                           </div>
                         </div>
                       </div>
                       <div className="p-4">
-                        <h3 className="font-semibold text-lg text-[#E0E0E0]">Unfiled Sets</h3>
-                        <p className="text-sm text-[#BDBDBD] mt-1">Sets not in any folder</p>
+                        <h3 className="font-bold text-lg text-[#E0E0E0] leading-tight">Unfiled Sets</h3>
+                        <p className="text-sm text-[#BDBDBD] mt-1 leading-relaxed">Sets not in any folder</p>
                       </div>
                     </div>
                   </div>
@@ -417,12 +440,12 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                 return (
                   <div
                     key={set.id}
-                    className={`group cursor-pointer transition-all duration-200 ${
+                    className={`group cursor-pointer transition-all duration-200 transform hover:scale-105 ${
                       isSelected ? 'scale-105' : ''
                     }`}
                     onClick={() => handleSetClick(fullSet)}
                   >
-                    <div className={`neumorphic-card-static hover:border-[#505050] hover:bg-[#323232] relative overflow-hidden ${
+                    <div className={`neumorphic-card-static hover:border-[#505050] hover:bg-[#323232] relative overflow-hidden h-full ${
                       isSelected ? 'ring-2 ring-[#A9C4FC] border-[#A9C4FC]' : ''
                     }`}>
                       <SetCompletionBadge setId={set.id} />
@@ -431,21 +454,32 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                         <Image
                           src={imgUrl}
                           alt={set.name}
-                          className="object-cover"
+                          className="object-cover transition-transform duration-300 group-hover:scale-110"
                           fill
                           sizes="(max-width: 768px) 100vw, 33vw"
                           unoptimized={true}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#1F1F1F] via-transparent to-transparent opacity-50" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#1F1F1F] via-[#1F1F1F]/20 to-transparent" />
+                        
+                        {/* Card count overlay */}
+                        <div className="absolute bottom-3 right-3">
+                          <div className="px-3 py-1.5 rounded-full bg-[#1F1F1F]/90 backdrop-blur-sm border border-[#404040]/50 shadow-lg">
+                            <span className="text-sm font-bold text-[#E0E0E0]">
+                              {set.phraseCount} cards
+                            </span>
+                          </div>
+                        </div>
                       </div>
 
                       <div className="p-4">
-                        <h3 className="text-lg font-semibold text-[#E0E0E0] line-clamp-2 mb-1">
+                        <h3 className="text-lg font-bold text-[#E0E0E0] leading-tight">
                           {set.name}
                         </h3>
-                        <p className="text-sm text-[#BDBDBD]">
-                          {set.phraseCount} cards
-                        </p>
+                        {fullSet.level && (
+                          <p className="text-sm text-[#A9C4FC] mt-1">
+                            Level: {fullSet.level}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -455,13 +489,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
           )}
         </div>
 
-        {/* Close button - always visible */}
-        <button
-          onClick={onClose}
-          className="absolute top-6 right-8 p-2 rounded-lg bg-[#3C3C3C] hover:bg-[#4C4C4C] transition-all duration-200 border border-[#404040] group"
-        >
-          <X size={20} className="text-[#BDBDBD] group-hover:text-[#E0E0E0]" />
-        </button>
+        {/* Removed duplicate close button */}
       </DialogContent>
     </Dialog>
   );

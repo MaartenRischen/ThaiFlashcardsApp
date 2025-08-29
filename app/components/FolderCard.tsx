@@ -41,39 +41,65 @@ export default function FolderCard({ folder, onClick, onEdit, onDelete }: Folder
     }
   }, [showMenu]);
 
+  // Generate a color based on folder name for variety
+  const getAccentColor = (name: string) => {
+    const colors = ['#A9C4FC', '#FCA9A9', '#A9FCA9', '#FCFCA9', '#FCA9FC', '#A9FCFC'];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  };
+
+  const accentColor = getAccentColor(folder.name);
+
   return (
     <div
       onClick={onClick}
-      className="relative group cursor-pointer transition-all duration-200"
+      className="relative group cursor-pointer transition-all duration-200 transform hover:scale-105"
     >
       {/* Main Card */}
-      <div className="neumorphic-card-static hover:neumorphic-card-static group-hover:border-[#505050] group-hover:bg-[#323232] relative overflow-hidden">
-        {/* Background Pattern or Image */}
-        <div className="aspect-[4/3] relative bg-gradient-to-br from-[#2C2C2C] to-[#1F1F1F]">
-          {folder.previewImages && folder.previewImages.length > 0 ? (
-            <div className="absolute inset-0 opacity-30">
-              <Image
-                src={folder.previewImages[0]}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1F1F1F] via-[#1F1F1F]/80 to-transparent" />
+      <div className="neumorphic-card-static hover:neumorphic-card-static group-hover:border-[#505050] group-hover:bg-[#323232] relative overflow-hidden h-full">
+        {/* Background Pattern with Images */}
+        <div className="aspect-[4/3] relative bg-gradient-to-br from-[#2C2C2C] to-[#1F1F1F] overflow-hidden">
+          {/* Background images collage */}
+          {folder.previewImages && folder.previewImages.length > 0 && (
+            <div className="absolute inset-0 grid grid-cols-2 gap-[1px] opacity-20">
+              {folder.previewImages.slice(0, 4).map((img, idx) => (
+                <div key={idx} className="relative overflow-hidden">
+                  <Image
+                    src={img}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 25vw, 12.5vw"
+                  />
+                </div>
+              ))}
+              <div className="absolute inset-0 bg-gradient-to-b from-[#1F1F1F]/60 via-[#1F1F1F]/80 to-[#1F1F1F]/95" />
             </div>
-          ) : null}
+          )}
           
-          {/* Folder Icon */}
+          {/* Decorative pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl" style={{ backgroundColor: accentColor }} />
+            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full blur-2xl" style={{ backgroundColor: accentColor }} />
+          </div>
+          
+          {/* Folder Icon - Larger and more prominent */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="p-4 rounded-2xl bg-[#1F1F1F]/80 backdrop-blur-sm border border-[#404040]/50">
-              <FolderIcon size={48} className="text-[#A9C4FC]" />
+            <div className="relative">
+              <div className="absolute inset-0 blur-xl opacity-30" style={{ backgroundColor: accentColor }} />
+              <div className="relative p-5 rounded-2xl bg-[#2C2C2C]/90 backdrop-blur-sm border border-[#404040]/50 shadow-xl">
+                <FolderIcon size={56} style={{ color: accentColor }} />
+              </div>
             </div>
           </div>
 
-          {/* Set Count Badge */}
+          {/* Set Count Badge - More prominent */}
           <div className="absolute top-3 left-3">
-            <div className="px-3 py-1 rounded-full bg-[#1F1F1F]/90 backdrop-blur-sm border border-[#404040]/50">
-              <span className="text-sm font-medium text-[#E0E0E0]">
+            <div className="px-4 py-1.5 rounded-full bg-[#1F1F1F]/95 backdrop-blur-sm border border-[#404040]/50 shadow-lg">
+              <span className="text-sm font-bold text-[#E0E0E0]">
                 {folder.setCount} {folder.setCount === 1 ? 'set' : 'sets'}
               </span>
             </div>
@@ -82,29 +108,32 @@ export default function FolderCard({ folder, onClick, onEdit, onDelete }: Folder
           {/* Default Badge */}
           {folder.isDefault && (
             <div className="absolute top-3 right-3">
-              <div className="px-3 py-1 rounded-full bg-[#A9C4FC]/20 backdrop-blur-sm border border-[#A9C4FC]/30">
-                <span className="text-xs font-medium text-[#A9C4FC]">Default</span>
+              <div className="px-3 py-1.5 rounded-full backdrop-blur-sm border shadow-lg" style={{ 
+                backgroundColor: `${accentColor}20`,
+                borderColor: `${accentColor}50`
+              }}>
+                <span className="text-xs font-bold" style={{ color: accentColor }}>DEFAULT</span>
               </div>
             </div>
           )}
 
           {/* Menu Button for non-default folders */}
           {!folder.isDefault && (onEdit || onDelete) && (
-            <div className="absolute top-3 right-3">
+            <div className="absolute bottom-3 right-3">
               <button
                 onClick={handleMenuClick}
-                className="p-2 rounded-lg bg-[#1F1F1F]/90 backdrop-blur-sm border border-[#404040]/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-[#2C2C2C]/90"
+                className="p-2.5 rounded-lg bg-[#1F1F1F]/95 backdrop-blur-sm border border-[#404040]/50 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#2C2C2C]/95 shadow-lg"
               >
-                <MoreVertical size={16} className="text-[#BDBDBD]" />
+                <MoreVertical size={18} className="text-[#BDBDBD]" />
               </button>
               
               {/* Dropdown Menu */}
               {showMenu && (
-                <div className="absolute right-0 mt-1 w-36 rounded-lg bg-[#2C2C2C] border border-[#404040] shadow-lg overflow-hidden z-10">
+                <div className="absolute right-0 bottom-full mb-2 w-36 rounded-lg bg-[#2C2C2C] border border-[#404040] shadow-xl overflow-hidden z-10">
                   {onEdit && (
                     <button
                       onClick={handleEditClick}
-                      className="w-full px-4 py-2 text-left text-sm text-[#E0E0E0] hover:bg-[#3C3C3C] flex items-center gap-2"
+                      className="w-full px-4 py-3 text-left text-sm text-[#E0E0E0] hover:bg-[#3C3C3C] flex items-center gap-2 transition-colors"
                     >
                       <Edit3 size={14} />
                       Edit
@@ -113,7 +142,7 @@ export default function FolderCard({ folder, onClick, onEdit, onDelete }: Folder
                   {onDelete && (
                     <button
                       onClick={handleDeleteClick}
-                      className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-[#3C3C3C] flex items-center gap-2"
+                      className="w-full px-4 py-3 text-left text-sm text-red-400 hover:bg-[#3C3C3C] flex items-center gap-2 transition-colors"
                     >
                       <Trash2 size={14} />
                       Delete
@@ -125,13 +154,13 @@ export default function FolderCard({ folder, onClick, onEdit, onDelete }: Folder
           )}
         </div>
 
-        {/* Folder Info */}
+        {/* Folder Info - Allow text wrapping */}
         <div className="p-4">
-          <h3 className="font-semibold text-lg text-[#E0E0E0] truncate mb-1">
+          <h3 className="font-bold text-lg text-[#E0E0E0] leading-tight">
             {folder.name}
           </h3>
           {folder.description && (
-            <p className="text-sm text-[#BDBDBD] line-clamp-2">
+            <p className="text-sm text-[#BDBDBD] mt-1 leading-relaxed">
               {folder.description}
             </p>
           )}

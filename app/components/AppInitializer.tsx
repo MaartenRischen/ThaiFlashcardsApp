@@ -70,7 +70,9 @@ export function AppInitializer() {
         // Preload images for ALL sets (not just first 10) to ensure My Sets modal has all images
         const imageUrls = availableSets
           .map(set => {
+            // Use the imageUrl from the set metadata if available
             if (set.imageUrl) return set.imageUrl;
+            // This is now redundant since DEFAULT_SET_METADATA has imageUrl, but kept for safety
             if (set.id === 'default') return '/images/defaultnew.png';
             return '/images/default-set-logo.png';
           });

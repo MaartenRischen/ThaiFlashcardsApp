@@ -39,6 +39,7 @@ const DEFAULT_SET_METADATA: SetMetaData = {
   phraseCount: INITIAL_PHRASES.length,
   source: 'default',
   isFullyLearned: false,
+  imageUrl: '/images/defaultnew.png', // Ensure default set uses correct image
   seriousnessLevel: null, // Add default null value
   toneLevel: null // Add default null value
 };

@@ -69,10 +69,21 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
 
     setLoading(true);
     try {
-      // Get all sets that belong to this folder (by folderId or folderName)
-      const folderSets = availableSets.filter(set => 
+      // Get all sets that belong to this folder
+      let folderSets = availableSets.filter(set => 
         set.folderId === folder.id || set.folderName === folder.name
       );
+      
+      // If this is the Default Sets folder, also include unfiled sets and the default set
+      if (folder.name === 'Default Sets' && folder.isDefault) {
+        const unfiledSets = availableSets.filter(set => 
+          (!set.folderId && !set.folderName) || set.id === 'default'
+        );
+        // Remove duplicates in case the default set is already included
+        const setIds = new Set(folderSets.map(s => s.id));
+        const uniqueUnfiledSets = unfiledSets.filter(set => !setIds.has(set.id));
+        folderSets = [...folderSets, ...uniqueUnfiledSets];
+      }
       
       // Preload content for sets in this folder
       const setIds = folderSets.map(set => set.id);
@@ -331,9 +342,20 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
                 {folders.map(folder => {
                   // Get sets for this folder - handle both folderId and folderName
-                  const folderSets = availableSets.filter(set => 
+                  let folderSets = availableSets.filter(set => 
                     set.folderId === folder.id || set.folderName === folder.name
                   );
+                  
+                  // If this is the Default Sets folder, also include unfiled sets and the default set
+                  if (folder.name === 'Default Sets' && folder.isDefault) {
+                    const unfiledSets = availableSets.filter(set => 
+                      (!set.folderId && !set.folderName) || set.id === 'default'
+                    );
+                    // Remove duplicates in case the default set is already included
+                    const setIds = new Set(folderSets.map(s => s.id));
+                    const uniqueUnfiledSets = unfiledSets.filter(set => !setIds.has(set.id));
+                    folderSets = [...folderSets, ...uniqueUnfiledSets];
+                  }
                   
                   // Create enhanced folder with preview images from actual sets
                   const enhancedFolder = {
@@ -362,61 +384,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                   );
                 })}
 
-                {/* Unfiled Sets */}
-                {availableSets.filter(set => !set.folderId && !set.folderName && set.id !== 'default').length > 0 && (
-                  <div
-                    onClick={() => {
-                      // Show unfiled sets
-                      setCurrentFolder({
-                        id: 'unfiled',
-                        userId: '',
-                        name: 'Unfiled Sets',
-                        description: 'Sets not organized in any folder',
-                        isDefault: false,
-                        orderIndex: 999,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString(),
-                        sets: availableSets
-                          .filter(set => !set.folderId && !set.folderName && set.id !== 'default')
-                          .map(set => ({
-                            id: set.id,
-                            name: set.name,
-                            imageUrl: set.imageUrl,
-                            phraseCount: set.phraseCount,
-                            createdAt: set.createdAt
-                          }))
-                      });
-                    }}
-                    className="relative group cursor-pointer transition-all duration-200 transform hover:scale-105"
-                  >
-                    <div className="relative overflow-hidden h-full bg-[#2C2C2C]/40 backdrop-blur-sm rounded-xl border border-[#404040]/30 hover:bg-[#2C2C2C]/60 hover:border-[#404040]/50 transition-all duration-200">
-                      <div className="aspect-[4/3] relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#2C2C2C]/20 to-[#1F1F1F]/40" />
-                        
-                        {/* Folder Icon */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="relative">
-                            <div className="absolute inset-0 blur-2xl opacity-20 bg-gray-400" />
-                            <FolderOpen size={64} className="text-[#BDBDBD] drop-shadow-2xl" />
-                          </div>
-                        </div>
-                        
-                        {/* Set Count Badge */}
-                        <div className="absolute top-3 left-3">
-                          <div className="px-3 py-1 rounded-full bg-[#1F1F1F]/60 backdrop-blur-md border border-[#404040]/30">
-                            <span className="text-sm font-bold text-[#E0E0E0]">
-                              {availableSets.filter(set => !set.folderId && !set.folderName && set.id !== 'default').length} sets
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-4 bg-[#1F1F1F]/30 backdrop-blur-sm">
-                        <h3 className="font-bold text-lg text-[#E0E0E0] leading-tight">Unfiled Sets</h3>
-                        <p className="text-sm text-[#BDBDBD]/80 mt-1 leading-relaxed">Sets not in any folder</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                {/* Removed Unfiled Sets - they now appear in Default Sets folder */}
               </div>
             </>
           )}

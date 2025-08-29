@@ -1,1350 +1,84 @@
-// Continuation of common-sentences-sets.ts
 import { DefaultSet } from './default-sets';
 
 export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
   {
-    id: 'common-sentences-5',
-    name: '100 Most Used Thai Sentences 5',
-    level: 'Intermediate',
-    description: 'Intermediate Thai sentences for daily conversation (41-50)',
-    phrases: [
-      {
-        english: "What do you think about this?",
-        thai: "คุณคิดยังไงกับเรื่องนี้",
-        thaiMasculine: "คุณคิดยังไงกับเรื่องนี้ครับ",
-        thaiFeminine: "คุณคิดยังไงกับเรื่องนี้คะ",
-        pronunciation: "kun kít yaŋ-ŋai gàp rʉ̂aŋ níi",
-        mnemonic: "Think: 'kid young guy' - young guy thinking",
-        literal: "You think how about matter this",
-        examples: [
-          {
-            thai: "คุณคิดยังไงกับข่าวนี้ครับ",
-            thaiMasculine: "คุณคิดยังไงกับข่าวนี้ครับ",
-            thaiFeminine: "คุณคิดยังไงกับข่าวนี้ครับ",
-            translation: "What do you think about this news?",
-            pronunciation: "kun kít yaŋ-ŋai gàp kàao níi kráp"
-          },
-          {
-            thai: "ฉันว่าน่าสนใจมากค่ะ",
-            thaiMasculine: "ฉันว่าน่าสนใจมากค่ะ",
-            thaiFeminine: "ฉันว่าน่าสนใจมากค่ะ",
-            translation: "I think it's very interesting.",
-            pronunciation: "chǎn wâa nâa-sǒn-jai mâak kâ"
-          }
-        ]
-      },
-      {
-        english: "I've been waiting for a long time",
-        thai: "ฉันรอมานานแล้ว",
-        thaiMasculine: "ผมรอมานานแล้วครับ",
-        thaiFeminine: "ฉันรอมานานแล้วค่ะ",
-        pronunciation: "chǎn/pǒm rɔɔ maa naan láeo",
-        mnemonic: "Think: 'rɔɔ maa...' for i've been waiting for a long time",
-        literal: "I wait come long already",
-        examples: [
-          {
-            thai: "ผมรอมานานแล้ว เกือบชั่วโมง",
-            thaiMasculine: "ผมรอมานานแล้ว เกือบชั่วโมง",
-            thaiFeminine: "ผมรอมานานแล้ว เกือบชั่วโมง",
-            translation: "I've been waiting for a long time, almost an hour.",
-            pronunciation: "pǒm rɔɔ maa naan láeo gʉ̀ap chûa-mooŋ"
-          },
-          {
-            thai: "ขอโทษที่ให้รอนานค่ะ",
-            thaiMasculine: "ขอโทษที่ให้รอนานค่ะ",
-            thaiFeminine: "ขอโทษที่ให้รอนานค่ะ",
-            translation: "Sorry for making you wait so long.",
-            pronunciation: "kɔ̌ɔ-tôot tîi hâi rɔɔ naan kâ"
-          }
-        ]
-      },
-      {
-        english: "Could you please repeat that?",
-        thai: "ช่วยพูดอีกทีได้ไหม",
-        thaiMasculine: "ช่วยพูดอีกทีได้ไหมครับ",
-        thaiFeminine: "ช่วยพูดอีกทีได้ไหมคะ",
-        pronunciation: "chûai pûut ìik tii dâai mǎi",
-        mnemonic: "Think: 'Poot-eek-tee' - put eek tea (repeat)",
-        literal: "Help speak again once can (question)",
-        examples: [
-          {
-            thai: "ขอโทษครับ ไม่ได้ยิน ช่วยพูดอีกทีได้ไหมครับ",
-            thaiMasculine: "ขอโทษครับ ไม่ได้ยิน ช่วยพูดอีกทีได้ไหมครับ",
-            thaiFeminine: "ขอโทษครับ ไม่ได้ยิน ช่วยพูดอีกทีได้ไหมครับ",
-            translation: "Sorry, I didn't hear. Could you please repeat?",
-            pronunciation: "kɔ̌ɔ-tôot kráp mâi dâai yin chûai pûut ìik tii dâai mǎi kráp"
-          },
-          {
-            thai: "ได้ค่ะ จะพูดให้ช้าลง",
-            thaiMasculine: "ได้ค่ะ จะพูดให้ช้าลง",
-            thaiFeminine: "ได้ค่ะ จะพูดให้ช้าลง",
-            translation: "Sure, I'll speak slower.",
-            pronunciation: "dâai kâ jà pûut hâi cháa loŋ"
-          }
-        ]
-      },
-      {
-        english: "I prefer Thai food over Western food",
-        thai: "ฉันชอบอาหารไทยมากกว่าอาหารฝรั่ง",
-        thaiMasculine: "ผมชอบอาหารไทยมากกว่าอาหารฝรั่งครับ",
-        thaiFeminine: "ฉันชอบอาหารไทยมากกว่าอาหารฝรั่งค่ะ",
-        pronunciation: "chǎn/pǒm chɔ̂ɔp aa-hǎan thai mâak gwàa aa-hǎan fà-ràŋ",
-        mnemonic: "Think: 'chɔ̂ɔp aa...' for i prefer thai food over western food",
-        literal: "I like food Thai more than food Western",
-        examples: [
-          {
-            thai: "ผมชอบอาหารไทยมากกว่า เพราะรสชาติจัดจ้าน",
-            thaiMasculine: "ผมชอบอาหารไทยมากกว่า เพราะรสชาติจัดจ้าน",
-            thaiFeminine: "ผมชอบอาหารไทยมากกว่า เพราะรสชาติจัดจ้าน",
-            translation: "I prefer Thai food because of the strong flavors.",
-            pronunciation: "pǒm chɔ̂ɔp aa-hǎan thai mâak gwàa prɔ́ rót-châat jàt-jâan"
-          },
-          {
-            thai: "คุณชอบอาหารแบบไหนมากกว่ากัน",
-            thaiMasculine: "คุณชอบอาหารแบบไหนมากกว่ากัน",
-            thaiFeminine: "คุณชอบอาหารแบบไหนมากกว่ากัน",
-            translation: "Which type of food do you prefer?",
-            pronunciation: "kun chɔ̂ɔp aa-hǎan bɛ̀ɛp nǎi mâak gwàa gan"
-          }
-        ]
-      },
-      {
-        english: "I need to withdraw money from ATM",
-        thai: "ฉันต้องถอนเงินจากตู้เอทีเอ็ม",
-        thaiMasculine: "ผมต้องถอนเงินจากตู้เอทีเอ็มครับ",
-        thaiFeminine: "ฉันต้องถอนเงินจากตู้เอทีเอ็มค่ะ",
-        pronunciation: "chǎn/pǒm tɔ̂ŋ tɔ̌ɔn ŋəən jàak tûu ee-tii-em",
-        mnemonic: "Think: 'tɔ̂ŋ tɔ̌ɔn...' for i need to withdraw money from atm",
-        literal: "I must withdraw money from machine ATM",
-        examples: [
-          {
-            thai: "ตู้เอทีเอ็มใกล้ที่สุดอยู่ที่ไหนครับ",
-            thaiMasculine: "ตู้เอทีเอ็มใกล้ที่สุดอยู่ที่ไหนครับ",
-            thaiFeminine: "ตู้เอทีเอ็มใกล้ที่สุดอยู่ที่ไหนครับ",
-            translation: "Where is the nearest ATM?",
-            pronunciation: "tûu ee-tii-em glâi tîi-sùt yùu tîi-nǎi kráp"
-          },
-          {
-            thai: "ตู้เอทีเอ็มอยู่หน้าธนาคารค่ะ",
-            thaiMasculine: "ตู้เอทีเอ็มอยู่หน้าธนาคารค่ะ",
-            thaiFeminine: "ตู้เอทีเอ็มอยู่หน้าธนาคารค่ะ",
-            translation: "The ATM is in front of the bank.",
-            pronunciation: "tûu ee-tii-em yùu nâa tá-naa-kaan kâ"
-          }
-        ]
-      },
-      {
-        english: "Let me think about it",
-        thai: "ขอคิดดูก่อน",
-        thaiMasculine: "ขอคิดดูก่อนครับ",
-        thaiFeminine: "ขอคิดดูก่อนค่ะ",
-        pronunciation: "kɔ̌ɔ kít duu gɔ̀ɔn",
-        mnemonic: "Think: 'kɔ̌ɔ kít...' for let me think about it",
-        literal: "Ask think see first",
-        examples: [
-          {
-            thai: "ขอคิดดูก่อนนะครับ แล้วจะบอก",
-            thaiMasculine: "ขอคิดดูก่อนนะครับ แล้วจะบอก",
-            thaiFeminine: "ขอคิดดูก่อนนะครับ แล้วจะบอก",
-            translation: "Let me think about it first, then I'll tell you.",
-            pronunciation: "kɔ̌ɔ kít duu gɔ̀ɔn ná kráp láeo jà bɔ̀ɔk"
-          },
-          {
-            thai: "ไม่ต้องรีบค่ะ คิดดูก่อนได้",
-            thaiMasculine: "ไม่ต้องรีบค่ะ คิดดูก่อนได้",
-            thaiFeminine: "ไม่ต้องรีบค่ะ คิดดูก่อนได้",
-            translation: "No rush, you can think about it.",
-            pronunciation: "mâi tɔ̂ŋ rîip kâ kít duu gɔ̀ɔn dâai"
-          }
-        ]
-      },
-      {
-        english: "The traffic is very bad today",
-        thai: "วันนี้รถติดมาก",
-        thaiMasculine: "วันนี้รถติดมากครับ",
-        thaiFeminine: "วันนี้รถติดมากค่ะ",
-        pronunciation: "wan-níi rót tìt mâak",
-        mnemonic: "Think: 'Wan-knee' - one knee today",
-        literal: "Today car stuck very",
-        examples: [
-          {
-            thai: "วันนี้รถติดมาก อาจจะไปถึงช้า",
-            thaiMasculine: "วันนี้รถติดมาก อาจจะไปถึงช้า",
-            thaiFeminine: "วันนี้รถติดมาก อาจจะไปถึงช้า",
-            translation: "Traffic is bad today, might arrive late.",
-            pronunciation: "wan-níi rót tìt mâak àat jà pai tʉ̌ŋ cháa"
-          },
-          {
-            thai: "ช่วงเช้ารถติดทุกวันเลย",
-            thaiMasculine: "ช่วงเช้ารถติดทุกวันเลย",
-            thaiFeminine: "ช่วงเช้ารถติดทุกวันเลย",
-            translation: "Traffic is bad every morning.",
-            pronunciation: "chûaŋ cháao rót tìt túk wan ləəi"
-          }
-        ]
-      },
-      {
-        english: "Can you give me a discount?",
-        thai: "ลดราคาให้หน่อยได้ไหม",
-        thaiMasculine: "ลดราคาให้หน่อยได้ไหมครับ",
-        thaiFeminine: "ลดราคาให้หน่อยได้ไหมคะ",
-        pronunciation: "lót raa-kaa hâi nɔ̀i dâai mǎi",
-        mnemonic: "Think: 'lót raa...' for can you give me a discount?",
-        literal: "Reduce price give a bit can (question)",
-        examples: [
-          {
-            thai: "ถ้าซื้อเยอะ ลดราคาให้หน่อยได้ไหมครับ",
-            thaiMasculine: "ถ้าซื้อเยอะ ลดราคาให้หน่อยได้ไหมครับ",
-            thaiFeminine: "ถ้าซื้อเยอะ ลดราคาให้หน่อยได้ไหมครับ",
-            translation: "If I buy a lot, can you give me a discount?",
-            pronunciation: "tâa sʉ́ʉ yə́ lót raa-kaa hâi nɔ̀i dâai mǎi kráp"
-          },
-          {
-            thai: "ลดให้ได้ 10 เปอร์เซ็นต์ค่ะ",
-            thaiMasculine: "ลดให้ได้ 10 เปอร์เซ็นต์ค่ะ",
-            thaiFeminine: "ลดให้ได้ 10 เปอร์เซ็นต์ค่ะ",
-            translation: "I can give you 10 percent off.",
-            pronunciation: "lót hâi dâai sìp pəə-sen kâ"
-          }
-        ]
-      },
-      {
-        english: "I'm allergic to seafood",
-        thai: "ฉันแพ้อาหารทะเล",
-        thaiMasculine: "ผมแพ้อาหารทะเลครับ",
-        thaiFeminine: "ฉันแพ้อาหารทะเลค่ะ",
-        pronunciation: "chǎn/pǒm pɛ́ɛ aa-hǎan tá-lee",
-        mnemonic: "Think: 'pɛ́ɛ aa...' for i'm allergic to seafood",
-        literal: "I allergic food sea",
-        examples: [
-          {
-            thai: "ผมแพ้อาหารทะเล โดยเฉพาะกุ้ง",
-            thaiMasculine: "ผมแพ้อาหารทะเล โดยเฉพาะกุ้ง",
-            thaiFeminine: "ผมแพ้อาหารทะเล โดยเฉพาะกุ้ง",
-            translation: "I'm allergic to seafood, especially shrimp.",
-            pronunciation: "pǒm pɛ́ɛ aa-hǎan tá-lee dooi-chà-pɔ́ gûŋ"
-          },
-          {
-            thai: "มีอาหารอื่นที่คุณแพ้ไหมคะ",
-            thaiMasculine: "มีอาหารอื่นที่คุณแพ้ไหมคะ",
-            thaiFeminine: "มีอาหารอื่นที่คุณแพ้ไหมคะ",
-            translation: "Are there other foods you're allergic to?",
-            pronunciation: "mii aa-hǎan ʉ̀ʉn tîi kun pɛ́ɛ mǎi kâ"
-          }
-        ]
-      },
-      {
-        english: "I've lived here for 5 years",
-        thai: "ฉันอยู่ที่นี่มาห้าปีแล้ว",
-        thaiMasculine: "ผมอยู่ที่นี่มาห้าปีแล้วครับ",
-        thaiFeminine: "ฉันอยู่ที่นี่มาห้าปีแล้วค่ะ",
-        pronunciation: "chǎn/pǒm yùu tîi-nîi maa hâa pii láeo",
-        mnemonic: "Think: 'Tea-knee' - at knee (here)",
-        literal: "I stay here come five year already",
-        examples: [
-          {
-            thai: "ผมอยู่ที่นี่มาห้าปีแล้ว และชอบมาก",
-            thaiMasculine: "ผมอยู่ที่นี่มาห้าปีแล้ว และชอบมาก",
-            thaiFeminine: "ผมอยู่ที่นี่มาห้าปีแล้ว และชอบมาก",
-            translation: "I've lived here for 5 years and really like it.",
-            pronunciation: "pǒm yùu tîi-nîi maa hâa pii láeo lɛ́ chɔ̂ɔp mâak"
-          },
-          {
-            thai: "อยู่มานานขนาดนั้น คงพูดไทยเก่งมาก",
-            thaiMasculine: "อยู่มานานขนาดนั้น คงพูดไทยเก่งมาก",
-            thaiFeminine: "อยู่มานานขนาดนั้น คงพูดไทยเก่งมาก",
-            translation: "Living that long, you must speak Thai very well.",
-            pronunciation: "yùu maa naan kà-nàat nán koŋ pûut thai gèŋ mâak"
-          }
-        ]
-      }
-    ]
-  },
-  {
     id: 'common-sentences-6',
     name: '100 Most Used Thai Sentences 6',
-    level: 'Intermediate',
-    description: 'Intermediate Thai sentences for daily conversation (51-60)',
+    level: 'Basic Understanding',
+    description: 'Essential everyday Thai sentences (51-60) - Aligned with Words Set 6',
     phrases: [
-      {
-        english: "Please turn on the air conditioner",
-        thai: "ช่วยเปิดแอร์หน่อย",
-        thaiMasculine: "ช่วยเปิดแอร์หน่อยครับ",
-        thaiFeminine: "ช่วยเปิดแอร์หน่อยค่ะ",
-        pronunciation: "chûai pə̀ət ɛɛ nɔ̀i",
-        mnemonic: "Think: 'chew-eye pert air noy' - chew eye, pert air boy!",
-        literal: "Help open air a bit",
-        examples: [
-          {
-            thai: "ร้อนมาก ช่วยเปิดแอร์หน่อยได้ไหมครับ",
-            thaiMasculine: "ร้อนมาก ช่วยเปิดแอร์หน่อยได้ไหมครับ",
-            thaiFeminine: "ร้อนมาก ช่วยเปิดแอร์หน่อยได้ไหมครับ",
-            translation: "It's very hot, could you please turn on the AC?",
-            pronunciation: "rɔ́ɔn mâak chûai pə̀ət ɛɛ nɔ̀i dâai mǎi kráp"
-          },
-          {
-            thai: "เปิดแอร์แล้วค่ะ เดี๋ยวจะเย็น",
-            thaiMasculine: "เปิดแอร์แล้วค่ะ เดี๋ยวจะเย็น",
-            thaiFeminine: "เปิดแอร์แล้วค่ะ เดี๋ยวจะเย็น",
-            translation: "I've turned on the AC, it'll be cool soon.",
-            pronunciation: "pə̀ət ɛɛ láeo kâ dǐao jà yen"
-          }
-        ]
-      },
-      {
-        english: "I'd like to change money",
-        thai: "ฉันอยากแลกเงิน",
-        thaiMasculine: "ผมอยากแลกเงินครับ",
-        thaiFeminine: "ฉันอยากแลกเงินค่ะ",
-        pronunciation: "chǎn/pǒm yàak lɛ̂ɛk ŋəən",
-        mnemonic: "Think: 'yak-lɛ̂ɛk-ŋəən' - i'd like to change money",
-        literal: "I want exchange money",
-        examples: [
-          {
-            thai: "ผมอยากแลกเงินดอลลาร์เป็นเงินบาท",
-            thaiMasculine: "ผมอยากแลกเงินดอลลาร์เป็นเงินบาท",
-            thaiFeminine: "ผมอยากแลกเงินดอลลาร์เป็นเงินบาท",
-            translation: "I'd like to exchange dollars to baht.",
-            pronunciation: "pǒm yàak lɛ̂ɛk ŋəən dɔɔn-lâa pen ŋəən bàat"
-          },
-          {
-            thai: "อัตราแลกเปลี่ยนวันนี้เท่าไหร่คะ",
-            thaiMasculine: "อัตราแลกเปลี่ยนวันนี้เท่าไหร่คะ",
-            thaiFeminine: "อัตราแลกเปลี่ยนวันนี้เท่าไหร่คะ",
-            translation: "What's the exchange rate today?",
-            pronunciation: "àt-traa lɛ̂ɛk-plìan wan-níi tâo-rài kâ"
-          }
-        ]
-      },
-      {
-        english: "My phone battery is dead",
-        thai: "แบตมือถือหมด",
-        thaiMasculine: "แบตมือถือผมหมดครับ",
-        thaiFeminine: "แบตมือถือฉันหมดค่ะ",
-        pronunciation: "bɛ̀ɛt mʉʉ-tʉ̌ʉ mòt",
-        mnemonic: "Think: 'bat moo-too moat' - bat moo too moat (battery dead)",
-        literal: "Battery mobile finished",
-        examples: [
-          {
-            thai: "แบตมือถือหมด มีที่ชาร์จไหมครับ",
-            thaiMasculine: "แบตมือถือหมด มีที่ชาร์จไหมครับ",
-            thaiFeminine: "แบตมือถือหมด มีที่ชาร์จไหมครับ",
-            translation: "My phone battery is dead, is there a charger?",
-            pronunciation: "bɛ̀ɛt mʉʉ-tʉ̌ʉ mòt mii tîi châat mǎi kráp"
-          },
-          {
-            thai: "ใช้ปลั๊กตรงนี้ได้ค่ะ",
-            thaiMasculine: "ใช้ปลั๊กตรงนี้ได้ค่ะ",
-            thaiFeminine: "ใช้ปลั๊กตรงนี้ได้ค่ะ",
-            translation: "You can use this outlet.",
-            pronunciation: "chái plák troŋ níi dâai kâ"
-          }
-        ]
-      },
-      {
-        english: "What time does the shop close?",
-        thai: "ร้านปิดกี่โมง",
-        thaiMasculine: "ร้านปิดกี่โมงครับ",
-        thaiFeminine: "ร้านปิดกี่โมงคะ",
-        pronunciation: "ráan pìt gìi mooŋ",
-        mnemonic: "Think: 'ráan pìt...' for what time does the shop close?",
-        literal: "Shop close how many o'clock",
-        examples: [
-          {
-            thai: "ร้านนี้ปิดกี่โมงครับ",
-            thaiMasculine: "ร้านนี้ปิดกี่โมงครับ",
-            thaiFeminine: "ร้านนี้ปิดกี่โมงครับ",
-            translation: "What time does this shop close?",
-            pronunciation: "ráan níi pìt gìi mooŋ kráp"
-          },
-          {
-            thai: "ปิดสี่ทุ่มค่ะ",
-            thaiMasculine: "ปิดสี่ทุ่มค่ะ",
-            thaiFeminine: "ปิดสี่ทุ่มค่ะ",
-            translation: "We close at 10 PM.",
-            pronunciation: "pìt sìi tûm kâ"
-          }
-        ]
-      },
-      {
-        english: "I can't eat spicy food",
-        thai: "ฉันกินเผ็ดไม่ได้",
-        thaiMasculine: "ผมกินเผ็ดไม่ได้ครับ",
-        thaiFeminine: "ฉันกินเผ็ดไม่ได้ค่ะ",
-        pronunciation: "chǎn/pǒm gin pèt mâi dâai",
-        mnemonic: "Think: 'gin pèt...' for i can't eat spicy food",
-        literal: "I eat spicy not can",
-        examples: [
-          {
-            thai: "ผมกินเผ็ดไม่ได้ ขอไม่เผ็ดนะครับ",
-            thaiMasculine: "ผมกินเผ็ดไม่ได้ ขอไม่เผ็ดนะครับ",
-            thaiFeminine: "ผมกินเผ็ดไม่ได้ ขอไม่เผ็ดนะครับ",
-            translation: "I can't eat spicy food, not spicy please.",
-            pronunciation: "pǒm gin pèt mâi dâai kɔ̌ɔ mâi pèt ná kráp"
-          },
-          {
-            thai: "ได้ค่ะ จะทำให้ไม่เผ็ด",
-            thaiMasculine: "ได้ค่ะ จะทำให้ไม่เผ็ด",
-            thaiFeminine: "ได้ค่ะ จะทำให้ไม่เผ็ด",
-            translation: "Sure, I'll make it not spicy.",
-            pronunciation: "dâai kâ jà tam hâi mâi pèt"
-          }
-        ]
-      },
-      {
-        english: "I'm looking for a job",
-        thai: "ฉันกำลังหางานทำ",
-        thaiMasculine: "ผมกำลังหางานทำครับ",
-        thaiFeminine: "ฉันกำลังหางานทำค่ะ",
-        pronunciation: "chǎn/pǒm gam-laŋ hǎa ŋaan tam",
-        mnemonic: "Think: 'gam laŋ...' for i'm looking for a job",
-        literal: "I currently find work do",
-        examples: [
-          {
-            thai: "ผมกำลังหางานทำ คุณรู้จักที่ไหนรับคนไหม",
-            thaiMasculine: "ผมกำลังหางานทำ คุณรู้จักที่ไหนรับคนไหม",
-            thaiFeminine: "ผมกำลังหางานทำ คุณรู้จักที่ไหนรับคนไหม",
-            translation: "I'm looking for a job, do you know anywhere hiring?",
-            pronunciation: "pǒm gam-laŋ hǎa ŋaan tam kun rúu-jàk tîi-nǎi ráp kon mǎi"
-          },
-          {
-            thai: "ลองดูใน JobThai สิคะ",
-            thaiMasculine: "ลองดูใน JobThai สิคะ",
-            thaiFeminine: "ลองดูใน JobThai สิคะ",
-            translation: "Try looking on JobThai.",
-            pronunciation: "lɔɔŋ duu nai jɔ̀ɔp-tai sì kâ"
-          }
-        ]
-      },
-      {
-        english: "Can I pay by credit card?",
-        thai: "จ่ายด้วยบัตรเครดิตได้ไหม",
-        thaiMasculine: "จ่ายด้วยบัตรเครดิตได้ไหมครับ",
-        thaiFeminine: "จ่ายด้วยบัตรเครดิตได้ไหมคะ",
-        pronunciation: "jàai dûai bàt kree-dìt dâai mǎi",
-        mnemonic: "Think: 'jàai dûai...' for can i pay by credit card?",
-        literal: "Pay with card credit can (question)",
-        examples: [
-          {
-            thai: "ที่นี่จ่ายด้วยบัตรเครดิตได้ไหมครับ",
-            thaiMasculine: "ที่นี่จ่ายด้วยบัตรเครดิตได้ไหมครับ",
-            thaiFeminine: "ที่นี่จ่ายด้วยบัตรเครดิตได้ไหมครับ",
-            translation: "Can I pay by credit card here?",
-            pronunciation: "tîi-nîi jàai dûai bàt kree-dìt dâai mǎi kráp"
-          },
-          {
-            thai: "ได้ค่ะ รับทุกบัตร",
-            thaiMasculine: "ได้ค่ะ รับทุกบัตร",
-            thaiFeminine: "ได้ค่ะ รับทุกบัตร",
-            translation: "Yes, we accept all cards.",
-            pronunciation: "dâai kâ ráp túk bàt"
-          }
-        ]
-      },
-      {
-        english: "I have a headache",
-        thai: "ฉันปวดหัว",
-        thaiMasculine: "ผมปวดหัวครับ",
-        thaiFeminine: "ฉันปวดหัวค่ะ",
-        pronunciation: "chǎn/pǒm pùat hǔa",
-        mnemonic: "Think: 'pùat-hǔa' - i have a headache",
-        literal: "I ache head",
-        examples: [
-          {
-            thai: "ผมปวดหัวมาก มียาแก้ปวดไหม",
-            thaiMasculine: "ผมปวดหัวมาก มียาแก้ปวดไหม",
-            thaiFeminine: "ผมปวดหัวมาก มียาแก้ปวดไหม",
-            translation: "I have a bad headache, do you have painkillers?",
-            pronunciation: "pǒm pùat hǔa mâak mii yaa gɛ̂ɛ pùat mǎi"
-          },
-          {
-            thai: "พักผ่อนเยอะๆ นะคะ",
-            thaiMasculine: "พักผ่อนเยอะๆ นะคะ",
-            thaiFeminine: "พักผ่อนเยอะๆ นะคะ",
-            translation: "Get plenty of rest.",
-            pronunciation: "pák-pɔ̀ɔn yə́-yə́ ná kâ"
-          }
-        ]
-      },
-      {
-        english: "The food was delicious",
-        thai: "อาหารอร่อยมาก",
-        thaiMasculine: "อาหารอร่อยมากครับ",
-        thaiFeminine: "อาหารอร่อยมากค่ะ",
-        pronunciation: "aa-hǎan à-rɔ̀i mâak",
-        mnemonic: "Think: 'A-roy' - Ahoy! Delicious",
-        literal: "Food delicious very",
-        examples: [
-          {
-            thai: "อาหารอร่อยมากครับ โดยเฉพาะผัดไทย",
-            thaiMasculine: "อาหารอร่อยมากครับ โดยเฉพาะผัดไทย",
-            thaiFeminine: "อาหารอร่อยมากครับ โดยเฉพาะผัดไทย",
-            translation: "The food was delicious, especially the pad thai.",
-            pronunciation: "aa-hǎan à-rɔ̀i mâak kráp dooi-chà-pɔ́ pàt-thai"
-          },
-          {
-            thai: "ขอบคุณค่ะ ดีใจที่ชอบ",
-            thaiMasculine: "ขอบคุณค่ะ ดีใจที่ชอบ",
-            thaiFeminine: "ขอบคุณค่ะ ดีใจที่ชอบ",
-            translation: "Thank you, glad you liked it.",
-            pronunciation: "kɔ̀ɔp-kun kâ dii-jai tîi chɔ̂ɔp"
-          }
-        ]
-      },
       {
         english: "I miss my family",
         thai: "ฉันคิดถึงครอบครัว",
         thaiMasculine: "ผมคิดถึงครอบครัวครับ",
         thaiFeminine: "ฉันคิดถึงครอบครัวค่ะ",
-        pronunciation: "chǎn/pǒm kít-tʉ̌ŋ krɔ̂ɔp-krua",
-        mnemonic: "Think: 'kít tʉ̌ŋ...' for i miss my family",
-        literal: "I miss family",
+        pronunciation: "chǎn/pǒm kít-tʉ̌ŋ krɔ̂ɔp-kruaa",
+        mnemonic: "Think: 'kit tung crop crew-ah' - kit to hang crop with crew-ah family",
+        literal: "I think-of family",
         examples: [
           {
-            thai: "อยู่ต่างประเทศนาน ผมคิดถึงครอบครัวมาก",
-            thaiMasculine: "อยู่ต่างประเทศนาน ผมคิดถึงครอบครัวมาก",
-            thaiFeminine: "อยู่ต่างประเทศนาน ผมคิดถึงครอบครัวมาก",
-            translation: "Being abroad for long, I miss my family a lot.",
-            pronunciation: "yùu tàaŋ prà-têet naan pǒm kít-tʉ̌ŋ krɔ̂ɔp-krua mâak"
+            thai: "คิดถึงบ้านมากครับ",
+            thaiMasculine: "คิดถึงบ้านมากครับ",
+            thaiFeminine: "คิดถึงบ้านมากครับ",
+            translation: "I miss home so much. (male)",
+            pronunciation: "kít-tʉ̌ŋ bâan mâak kráp"
           },
           {
-            thai: "โทรหาบ่อยๆ นะคะ",
-            thaiMasculine: "โทรหาบ่อยๆ นะคะ",
-            thaiFeminine: "โทรหาบ่อยๆ นะคะ",
-            translation: "Call them often.",
-            pronunciation: "too hǎa bɔ̀i-bɔ̀i ná kâ"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'common-sentences-7',
-    name: '100 Most Used Thai Sentences 7',
-    level: 'Advanced',
-    description: 'Advanced Thai sentences for complex situations (61-70)',
-    phrases: [
-      {
-        english: "I'd like to extend my visa",
-        thai: "ฉันอยากต่อวีซ่า",
-        thaiMasculine: "ผมอยากต่อวีซ่าครับ",
-        thaiFeminine: "ฉันอยากต่อวีซ่าค่ะ",
-        pronunciation: "chǎn/pǒm yàak tɔ̀ɔ wii-sâa",
-        mnemonic: "Think: 'yàak tɔ̀ɔ...' for i'd like to extend my visa",
-        literal: "I want extend visa",
-        examples: [
-          {
-            thai: "ผมอยากต่อวีซ่าท่องเที่ยว ต้องทำยังไงครับ",
-            thaiMasculine: "ผมอยากต่อวีซ่าท่องเที่ยว ต้องทำยังไงครับ",
-            thaiFeminine: "ผมอยากต่อวีซ่าท่องเที่ยว ต้องทำยังไงครับ",
-            translation: "I want to extend my tourist visa, what do I need to do?",
-            pronunciation: "pǒm yàak tɔ̀ɔ wii-sâa tɔ̂ŋ-tîao tɔ̂ŋ tam yaŋ-ŋai kráp"
-          },
-          {
-            thai: "ต้องไปที่สำนักงานตรวจคนเข้าเมืองค่ะ",
-            thaiMasculine: "ต้องไปที่สำนักงานตรวจคนเข้าเมืองค่ะ",
-            thaiFeminine: "ต้องไปที่สำนักงานตรวจคนเข้าเมืองค่ะ",
-            translation: "You need to go to the immigration office.",
-            pronunciation: "tɔ̂ŋ pai tîi sǎm-nák-ŋaan trùat kon kâo mʉaŋ kâ"
+            thai: "คิดถึงพ่อแม่ค่ะ",
+            thaiMasculine: "คิดถึงพ่อแม่ค่ะ",
+            thaiFeminine: "คิดถึงพ่อแม่ค่ะ",
+            translation: "I miss my parents. (female)",
+            pronunciation: "kít-tʉ̌ŋ pɔ̂ɔ mɛ̂ɛ kâ"
           }
         ]
       },
       {
-        english: "Could you write it down for me?",
-        thai: "ช่วยเขียนให้หน่อยได้ไหม",
-        thaiMasculine: "ช่วยเขียนให้หน่อยได้ไหมครับ",
-        thaiFeminine: "ช่วยเขียนให้หน่อยได้ไหมคะ",
-        pronunciation: "chûai kǐan hâi nɔ̀i dâai mǎi",
-        mnemonic: "Think: 'chew-eye key-an high noy die my' - chew eye, key an high, boy die my?",
-        literal: "Help write give a bit can (question)",
+        english: "What's your phone number?",
+        thai: "เบอร์โทรศัพท์คุณเบอร์อะไร",
+        thaiMasculine: "เบอร์โทรศัพท์คุณเบอร์อะไรครับ",
+        thaiFeminine: "เบอร์โทรศัพท์คุณเบอร์อะไรคะ",
+        pronunciation: "bəə too-rá-sàp kun bəə à-rai",
+        mnemonic: "Think: 'ber toe-ra-sap coon ber a-rye' - number toe-tap raccoon, what number rye?",
+        literal: "Number telephone you number what",
         examples: [
           {
-            thai: "ที่อยู่นี้ ช่วยเขียนให้หน่อยได้ไหมครับ",
-            thaiMasculine: "ที่อยู่นี้ ช่วยเขียนให้หน่อยได้ไหมครับ",
-            thaiFeminine: "ที่อยู่นี้ ช่วยเขียนให้หน่อยได้ไหมครับ",
-            translation: "This address, could you write it down for me?",
-            pronunciation: "tîi-yùu níi chûai kǐan hâi nɔ̀i dâai mǎi kráp"
+            thai: "ขอเบอร์โทรหน่อยครับ",
+            thaiMasculine: "ขอเบอร์โทรหน่อยครับ",
+            thaiFeminine: "ขอเบอร์โทรหน่อยครับ",
+            translation: "Can I have your phone number? (male)",
+            pronunciation: "kɔ̌ɔ bəə too nɔ̀i kráp"
           },
           {
-            thai: "ได้ค่ะ เดี๋ยวเขียนให้",
-            thaiMasculine: "ได้ค่ะ เดี๋ยวเขียนให้",
-            thaiFeminine: "ได้ค่ะ เดี๋ยวเขียนให้",
-            translation: "Sure, I'll write it for you.",
-            pronunciation: "dâai kâ dǐao kǐan hâi"
+            thai: "เบอร์ฉัน 081-234-5678 ค่ะ",
+            thaiMasculine: "เบอร์ฉัน 081-234-5678 ค่ะ",
+            thaiFeminine: "เบอร์ฉัน 081-234-5678 ค่ะ",
+            translation: "My number is 081-234-5678. (female)",
+            pronunciation: "bəə chǎn sǔun-pàat-nʉ̀ŋ... kâ"
           }
         ]
       },
       {
-        english: "I'm having trouble understanding",
-        thai: "ฉันมีปัญหาในการเข้าใจ",
-        thaiMasculine: "ผมมีปัญหาในการเข้าใจครับ",
-        thaiFeminine: "ฉันมีปัญหาในการเข้าใจค่ะ",
-        pronunciation: "chǎn/pǒm mii pan-hǎa nai gaan kâo-jai",
-        mnemonic: "Think: 'mii pan...' for i'm having trouble understanding",
-        literal: "I have problem in the understanding",
+        english: "I'll call you later",
+        thai: "ฉันจะโทรหาคุณทีหลัง",
+        thaiMasculine: "ผมจะโทรหาคุณทีหลังครับ",
+        thaiFeminine: "ฉันจะโทรหาคุณทีหลังค่ะ",
+        pronunciation: "chǎn/pǒm jà too hǎa kun tii-lǎŋ",
+        mnemonic: "Think: 'ja toe ha coon tea lung' - will toe find raccoon tea later",
+        literal: "I will call find you later",
         examples: [
           {
-            thai: "ผมมีปัญหาในการเข้าใจภาษาไทย เมื่อคนพูดเร็ว",
-            thaiMasculine: "ผมมีปัญหาในการเข้าใจภาษาไทย เมื่อคนพูดเร็ว",
-            thaiFeminine: "ผมมีปัญหาในการเข้าใจภาษาไทย เมื่อคนพูดเร็ว",
-            translation: "I have trouble understanding Thai when people speak fast.",
-            pronunciation: "pǒm mii pan-hǎa nai gaan kâo-jai paa-sǎa thai mʉ̂a kon pûut reo"
+            thai: "เดี๋ยวโทรกลับครับ",
+            thaiMasculine: "เดี๋ยวโทรกลับครับ",
+            thaiFeminine: "เดี๋ยวโทรกลับครับ",
+            translation: "I'll call back soon. (male)",
+            pronunciation: "dǐao too glàp kráp"
           },
           {
-            thai: "ไม่เป็นไรค่ะ ค่อยๆ เรียนไป",
-            thaiMasculine: "ไม่เป็นไรค่ะ ค่อยๆ เรียนไป",
-            thaiFeminine: "ไม่เป็นไรค่ะ ค่อยๆ เรียนไป",
-            translation: "It's okay, learn gradually.",
-            pronunciation: "mâi pen rai kâ kɔ̂i-kɔ̂i rian pai"
-          }
-        ]
-      },
-      {
-        english: "The meeting has been postponed",
-        thai: "การประชุมเลื่อนไปแล้ว",
-        thaiMasculine: "การประชุมเลื่อนไปแล้วครับ",
-        thaiFeminine: "การประชุมเลื่อนไปแล้วค่ะ",
-        pronunciation: "gaan prà-chum lʉ̂an pai láeo",
-        mnemonic: "Think: 'gaan prà...' for the meeting has been postponed",
-        literal: "The meeting move go already",
-        examples: [
-          {
-            thai: "การประชุมเลื่อนไปเป็นวันพรุ่งนี้แทน",
-            thaiMasculine: "การประชุมเลื่อนไปเป็นวันพรุ่งนี้แทน",
-            thaiFeminine: "การประชุมเลื่อนไปเป็นวันพรุ่งนี้แทน",
-            translation: "The meeting has been postponed to tomorrow instead.",
-            pronunciation: "gaan prà-chum lʉ̂an pai pen wan prûŋ-níi tɛɛn"
-          },
-          {
-            thai: "ทราบแล้วครับ ขอบคุณที่แจ้ง",
-            thaiMasculine: "ทราบแล้วครับ ขอบคุณที่แจ้ง",
-            thaiFeminine: "ทราบแล้วครับ ขอบคุณที่แจ้ง",
-            translation: "Noted, thanks for informing.",
-            pronunciation: "sâap láeo kráp kɔ̀ɔp-kun tîi jɛ̂ɛŋ"
-          }
-        ]
-      },
-      {
-        english: "I need to see a doctor urgently",
-        thai: "ฉันต้องพบหมอด่วน",
-        thaiMasculine: "ผมต้องพบหมอด่วนครับ",
-        thaiFeminine: "ฉันต้องพบหมอด่วนค่ะ",
-        pronunciation: "chǎn/pǒm tɔ̂ŋ póp mɔ̌ɔ dùan",
-        mnemonic: "Think: 'tɔ̂ŋ póp...' for i need to see a doctor urgently",
-        literal: "I must meet doctor urgent",
-        examples: [
-          {
-            thai: "ผมไม่สบายหนัก ต้องพบหมอด่วนครับ",
-            thaiMasculine: "ผมไม่สบายหนัก ต้องพบหมอด่วนครับ",
-            thaiFeminine: "ผมไม่สบายหนัก ต้องพบหมอด่วนครับ",
-            translation: "I'm very sick, I need to see a doctor urgently.",
-            pronunciation: "pǒm mâi sà-baai nàk tɔ̂ŋ póp mɔ̌ɔ dùan kráp"
-          },
-          {
-            thai: "โรงพยาบาลใกล้ที่สุดอยู่ตรงนี้ค่ะ",
-            thaiMasculine: "โรงพยาบาลใกล้ที่สุดอยู่ตรงนี้ค่ะ",
-            thaiFeminine: "โรงพยาบาลใกล้ที่สุดอยู่ตรงนี้ค่ะ",
-            translation: "The nearest hospital is right here.",
-            pronunciation: "rooŋ-pá-yaa-baan glâi tîi-sùt yùu troŋ níi kâ"
-          }
-        ]
-      },
-      {
-        english: "I disagree with your opinion",
-        thai: "ฉันไม่เห็นด้วยกับความคิดของคุณ",
-        thaiMasculine: "ผมไม่เห็นด้วยกับความคิดของคุณครับ",
-        thaiFeminine: "ฉันไม่เห็นด้วยกับความคิดของคุณค่ะ",
-        pronunciation: "chǎn/pǒm mâi hěn dûai gàp kwaam-kít kɔ̌ɔŋ kun",
-        mnemonic: "Think: 'mâi hěn...' for i disagree with your opinion",
-        literal: "I not see with with thought of you",
-        examples: [
-          {
-            thai: "ขอโทษครับ ผมไม่เห็นด้วยกับเรื่องนี้",
-            thaiMasculine: "ขอโทษครับ ผมไม่เห็นด้วยกับเรื่องนี้",
-            thaiFeminine: "ขอโทษครับ ผมไม่เห็นด้วยกับเรื่องนี้",
-            translation: "Sorry, I disagree with this matter.",
-            pronunciation: "kɔ̌ɔ-tôot kráp pǒm mâi hěn dûai gàp rʉ̂aŋ níi"
-          },
-          {
-            thai: "ไม่เป็นไรค่ะ ทุกคนมีความคิดเห็นต่างกันได้",
-            thaiMasculine: "ไม่เป็นไรค่ะ ทุกคนมีความคิดเห็นต่างกันได้",
-            thaiFeminine: "ไม่เป็นไรค่ะ ทุกคนมีความคิดเห็นต่างกันได้",
-            translation: "It's okay, everyone can have different opinions.",
-            pronunciation: "mâi pen rai kâ túk kon mii kwaam-kít-hěn tàaŋ gan dâai"
-          }
-        ]
-      },
-      {
-        english: "The quality is not good enough",
-        thai: "คุณภาพไม่ดีพอ",
-        thaiMasculine: "คุณภาพไม่ดีพอครับ",
-        thaiFeminine: "คุณภาพไม่ดีพอค่ะ",
-        pronunciation: "kun-ná-pâap mâi dii pɔɔ",
-        mnemonic: "Think: 'My chai' - my, not chai (no)",
-        literal: "Quality not good enough",
-        examples: [
-          {
-            thai: "สินค้าชิ้นนี้คุณภาพไม่ดีพอ ขอเปลี่ยนได้ไหม",
-            thaiMasculine: "สินค้าชิ้นนี้คุณภาพไม่ดีพอ ขอเปลี่ยนได้ไหม",
-            thaiFeminine: "สินค้าชิ้นนี้คุณภาพไม่ดีพอ ขอเปลี่ยนได้ไหม",
-            translation: "This product's quality isn't good enough, can I exchange it?",
-            pronunciation: "sǐn-káa chín níi kun-ná-pâap mâi dii pɔɔ kɔ̌ɔ plìan dâai mǎi"
-          },
-          {
-            thai: "ได้ค่ะ ขออภัยด้วย",
-            thaiMasculine: "ได้ค่ะ ขออภัยด้วย",
-            thaiFeminine: "ได้ค่ะ ขออภัยด้วย",
-            translation: "Yes, sorry about that.",
-            pronunciation: "dâai kâ kɔ̌ɔ-à-pai dûai"
-          }
-        ]
-      },
-      {
-        english: "Please be careful",
-        thai: "ระวังด้วยนะ",
-        thaiMasculine: "ระวังด้วยนะครับ",
-        thaiFeminine: "ระวังด้วยนะคะ",
-        pronunciation: "rá-waŋ dûai ná",
-        mnemonic: "Think: 'rá waŋ...' for please be careful",
-        literal: "Careful with (particle)",
-        examples: [
-          {
-            thai: "ฝนตก ถนนลื่น ระวังด้วยนะครับ",
-            thaiMasculine: "ฝนตก ถนนลื่น ระวังด้วยนะครับ",
-            thaiFeminine: "ฝนตก ถนนลื่น ระวังด้วยนะครับ",
-            translation: "It's raining, the road is slippery, please be careful.",
-            pronunciation: "fǒn tòk tà-nǒn lʉ̂ʉn rá-waŋ dûai ná kráp"
-          },
-          {
-            thai: "ขอบคุณที่เป็นห่วงค่ะ",
-            thaiMasculine: "ขอบคุณที่เป็นห่วงค่ะ",
-            thaiFeminine: "ขอบคุณที่เป็นห่วงค่ะ",
-            translation: "Thank you for caring.",
-            pronunciation: "kɔ̀ɔp-kun tîi pen hùaŋ kâ"
-          }
-        ]
-      },
-      {
-        english: "I'll consider it and let you know",
-        thai: "ฉันจะพิจารณาแล้วบอกให้ทราบ",
-        thaiMasculine: "ผมจะพิจารณาแล้วบอกให้ทราบครับ",
-        thaiFeminine: "ฉันจะพิจารณาแล้วบอกให้ทราบค่ะ",
-        pronunciation: "chǎn/pǒm jà pí-jaa-rá-naa láeo bɔ̀ɔk hâi sâap",
-        mnemonic: "Think: 'My chai' - my, not chai (no)",
-        literal: "I will consider then tell give know",
-        examples: [
-          {
-            thai: "ข้อเสนอน่าสนใจ ผมจะพิจารณาแล้วบอกให้ทราบ",
-            thaiMasculine: "ข้อเสนอน่าสนใจ ผมจะพิจารณาแล้วบอกให้ทราบ",
-            thaiFeminine: "ข้อเสนอน่าสนใจ ผมจะพิจารณาแล้วบอกให้ทราบ",
-            translation: "Interesting proposal, I'll consider it and let you know.",
-            pronunciation: "kɔ̂ɔ-sà-nəə nâa-sǒn-jai pǒm jà pí-jaa-rá-naa láeo bɔ̀ɔk hâi sâap"
-          },
-          {
-            thai: "ไม่ต้องรีบค่ะ",
-            thaiMasculine: "ไม่ต้องรีบค่ะ",
-            thaiFeminine: "ไม่ต้องรีบค่ะ",
-            translation: "No rush.",
-            pronunciation: "mâi tɔ̂ŋ rîip kâ"
-          }
-        ]
-      },
-      {
-        english: "I appreciate your help",
-        thai: "ฉันซาบซึ้งในความช่วยเหลือของคุณ",
-        thaiMasculine: "ผมซาบซึ้งในความช่วยเหลือของคุณครับ",
-        thaiFeminine: "ฉันซาบซึ้งในความช่วยเหลือของคุณค่ะ",
-        pronunciation: "chǎn/pǒm sâap-sʉ́ŋ nai kwaam chûai-lʉ̌a kɔ̌ɔŋ kun",
-        mnemonic: "Think: 'sâap sʉ́ŋ...' for i appreciate your help",
-        literal: "I appreciate in help of you",
-        examples: [
-          {
-            thai: "ผมซาบซึ้งในความช่วยเหลือของคุณมาก",
-            thaiMasculine: "ผมซาบซึ้งในความช่วยเหลือของคุณมาก",
-            thaiFeminine: "ผมซาบซึ้งในความช่วยเหลือของคุณมาก",
-            translation: "I really appreciate your help.",
-            pronunciation: "pǒm sâap-sʉ́ŋ nai kwaam chûai-lʉ̌a kɔ̌ɔŋ kun mâak"
-          },
-          {
-            thai: "ยินดีช่วยเสมอค่ะ",
-            thaiMasculine: "ยินดีช่วยเสมอค่ะ",
-            thaiFeminine: "ยินดีช่วยเสมอค่ะ",
-            translation: "Always happy to help.",
-            pronunciation: "yin-dii chûai sà-mə̌ə kâ"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'common-sentences-8',
-    name: '100 Most Used Thai Sentences 8',
-    level: 'Advanced',
-    description: 'Advanced Thai sentences for complex situations (71-80)',
-    phrases: [
-      {
-        english: "The situation is complicated",
-        thai: "สถานการณ์มันซับซ้อน",
-        thaiMasculine: "สถานการณ์มันซับซ้อนครับ",
-        thaiFeminine: "สถานการณ์มันซับซ้อนค่ะ",
-        pronunciation: "sà-tǎa-ná-gaan man sáp-sɔ́ɔn",
-        mnemonic: "Think: 'sà tǎa...' for the situation is complicated",
-        literal: "Situation it complicated",
-        examples: [
-          {
-            thai: "เรื่องนี้สถานการณ์มันซับซ้อน ต้องคิดให้ดี",
-            thaiMasculine: "เรื่องนี้สถานการณ์มันซับซ้อน ต้องคิดให้ดี",
-            thaiFeminine: "เรื่องนี้สถานการณ์มันซับซ้อน ต้องคิดให้ดี",
-            translation: "This matter's situation is complicated, need to think carefully.",
-            pronunciation: "rʉ̂aŋ níi sà-tǎa-ná-gaan man sáp-sɔ́ɔn tɔ̂ŋ kít hâi dii"
-          },
-          {
-            thai: "ค่อยๆ แก้ปัญหาทีละอย่าง",
-            thaiMasculine: "ค่อยๆ แก้ปัญหาทีละอย่าง",
-            thaiFeminine: "ค่อยๆ แก้ปัญหาทีละอย่าง",
-            translation: "Solve problems one by one.",
-            pronunciation: "kɔ̂i-kɔ̂i gɛ̂ɛ pan-hǎa tii-lá-yàaŋ"
-          }
-        ]
-      },
-      {
-        english: "I have an appointment at 3 PM",
-        thai: "ฉันมีนัดตอนบ่ายสามโมง",
-        thaiMasculine: "ผมมีนัดตอนบ่ายสามโมงครับ",
-        thaiFeminine: "ฉันมีนัดตอนบ่ายสามโมงค่ะ",
-        pronunciation: "chǎn/pǒm mii nát tɔɔn bàai sǎam mooŋ",
-        mnemonic: "Think: 'mii nát...' for i have an appointment at 3 pm",
-        literal: "I have appointment time afternoon three o'clock",
-        examples: [
-          {
-            thai: "ผมมีนัดตอนบ่ายสามโมง ต้องไปแล้ว",
-            thaiMasculine: "ผมมีนัดตอนบ่ายสามโมง ต้องไปแล้ว",
-            thaiFeminine: "ผมมีนัดตอนบ่ายสามโมง ต้องไปแล้ว",
-            translation: "I have an appointment at 3 PM, I have to go.",
-            pronunciation: "pǒm mii nát tɔɔn bàai sǎam mooŋ tɔ̂ŋ pai láeo"
-          },
-          {
-            thai: "อย่าไปสายนะคะ",
-            thaiMasculine: "อย่าไปสายนะคะ",
-            thaiFeminine: "อย่าไปสายนะคะ",
-            translation: "Don't be late.",
-            pronunciation: "yàa pai sǎai ná kâ"
-          }
-        ]
-      },
-      {
-        english: "Can you explain it more clearly?",
-        thai: "ช่วยอธิบายให้ชัดเจนกว่านี้ได้ไหม",
-        thaiMasculine: "ช่วยอธิบายให้ชัดเจนกว่านี้ได้ไหมครับ",
-        thaiFeminine: "ช่วยอธิบายให้ชัดเจนกว่านี้ได้ไหมคะ",
-        pronunciation: "chûai à-tí-baai hâi chát-jeen gwàa níi dâai mǎi",
-        mnemonic: "Think: 'chûai à...' for can you explain it more clearly?",
-        literal: "Help explain give clear more this can (question)",
-        examples: [
-          {
-            thai: "ผมยังไม่เข้าใจ ช่วยอธิบายให้ชัดเจนกว่านี้ได้ไหมครับ",
-            thaiMasculine: "ผมยังไม่เข้าใจ ช่วยอธิบายให้ชัดเจนกว่านี้ได้ไหมครับ",
-            thaiFeminine: "ผมยังไม่เข้าใจ ช่วยอธิบายให้ชัดเจนกว่านี้ได้ไหมครับ",
-            translation: "I still don't understand, can you explain more clearly?",
-            pronunciation: "pǒm yaŋ mâi kâo-jai chûai à-tí-baai hâi chát-jeen gwàa níi dâai mǎi kráp"
-          },
-          {
-            thai: "ได้ค่ะ เดี๋ยวอธิบายใหม่",
-            thaiMasculine: "ได้ค่ะ เดี๋ยวอธิบายใหม่",
-            thaiFeminine: "ได้ค่ะ เดี๋ยวอธิบายใหม่",
-            translation: "Sure, I'll explain again.",
-            pronunciation: "dâai kâ dǐao à-tí-baai mài"
-          }
-        ]
-      },
-      {
-        english: "I'm worried about the deadline",
-        thai: "ฉันกังวลเรื่องเส้นตาย",
-        thaiMasculine: "ผมกังวลเรื่องเส้นตายครับ",
-        thaiFeminine: "ฉันกังวลเรื่องเส้นตายค่ะ",
-        pronunciation: "chǎn/pǒm gaŋ-won rʉ̂aŋ sên-taai",
-        mnemonic: "Think: 'gaŋ won...' for i'm worried about the deadline",
-        literal: "I worried about line dead",
-        examples: [
-          {
-            thai: "ผมกังวลเรื่องเส้นตาย เหลือเวลาไม่มาก",
-            thaiMasculine: "ผมกังวลเรื่องเส้นตาย เหลือเวลาไม่มาก",
-            thaiFeminine: "ผมกังวลเรื่องเส้นตาย เหลือเวลาไม่มาก",
-            translation: "I'm worried about the deadline, not much time left.",
-            pronunciation: "pǒm gaŋ-won rʉ̂aŋ sên-taai lʉ̌a wee-laa mâi mâak"
-          },
-          {
-            thai: "ทำเสร็จทันแน่นอนค่ะ",
-            thaiMasculine: "ทำเสร็จทันแน่นอนค่ะ",
-            thaiFeminine: "ทำเสร็จทันแน่นอนค่ะ",
-            translation: "It will definitely be done on time.",
-            pronunciation: "tam sèt tan nɛ̂ɛ-nɔɔn kâ"
-          }
-        ]
-      },
-      {
-        english: "I'll take care of it",
-        thai: "ฉันจะจัดการให้",
-        thaiMasculine: "ผมจะจัดการให้ครับ",
-        thaiFeminine: "ฉันจะจัดการให้ค่ะ",
-        pronunciation: "chǎn/pǒm jà jàt-gaan hâi",
-        mnemonic: "Think: 'Doo-lae-tua' - do lay two-a (take care)",
-        literal: "I will manage give",
-        examples: [
-          {
-            thai: "ไม่ต้องห่วง ผมจะจัดการให้เอง",
-            thaiMasculine: "ไม่ต้องห่วง ผมจะจัดการให้เอง",
-            thaiFeminine: "ไม่ต้องห่วง ผมจะจัดการให้เอง",
-            translation: "Don't worry, I'll take care of it myself.",
-            pronunciation: "mâi tɔ̂ŋ hùaŋ pǒm jà jàt-gaan hâi eeŋ"
-          },
-          {
-            thai: "ขอบคุณมากค่ะ ช่วยได้เยอะเลย",
-            thaiMasculine: "ขอบคุณมากค่ะ ช่วยได้เยอะเลย",
-            thaiFeminine: "ขอบคุณมากค่ะ ช่วยได้เยอะเลย",
-            translation: "Thank you so much, that helps a lot.",
-            pronunciation: "kɔ̀ɔp-kun mâak kâ chûai dâai yə́ ləəi"
-          }
-        ]
-      },
-      {
-        english: "There's been a misunderstanding",
-        thai: "เกิดความเข้าใจผิด",
-        thaiMasculine: "เกิดความเข้าใจผิดครับ",
-        thaiFeminine: "เกิดความเข้าใจผิดค่ะ",
-        pronunciation: "gə̀ət kwaam kâo-jai pìt",
-        mnemonic: "Think: 'Tea-knee' - at knee (here)",
-        literal: "Happen understanding wrong",
-        examples: [
-          {
-            thai: "ขอโทษครับ คิดว่าเกิดความเข้าใจผิด",
-            thaiMasculine: "ขอโทษครับ คิดว่าเกิดความเข้าใจผิด",
-            thaiFeminine: "ขอโทษครับ คิดว่าเกิดความเข้าใจผิด",
-            translation: "Sorry, I think there's been a misunderstanding.",
-            pronunciation: "kɔ̌ɔ-tôot kráp kít wâa gə̀ət kwaam kâo-jai pìt"
-          },
-          {
-            thai: "ไม่เป็นไรค่ะ มาคุยกันใหม่",
-            thaiMasculine: "ไม่เป็นไรค่ะ มาคุยกันใหม่",
-            thaiFeminine: "ไม่เป็นไรค่ะ มาคุยกันใหม่",
-            translation: "It's okay, let's talk again.",
-            pronunciation: "mâi pen rai kâ maa kui gan mài"
-          }
-        ]
-      },
-      {
-        english: "I need more information",
-        thai: "ฉันต้องการข้อมูลเพิ่มเติม",
-        thaiMasculine: "ผมต้องการข้อมูลเพิ่มเติมครับ",
-        thaiFeminine: "ฉันต้องการข้อมูลเพิ่มเติมค่ะ",
-        pronunciation: "chǎn/pǒm tɔ̂ŋ-gaan kɔ̂ɔ-muun pə̂əm-təəm",
-        mnemonic: "Think: 'tɔ̂ŋ gaan...' for i need more information",
-        literal: "I need information additional",
-        examples: [
-          {
-            thai: "ผมต้องการข้อมูลเพิ่มเติมก่อนตัดสินใจ",
-            thaiMasculine: "ผมต้องการข้อมูลเพิ่มเติมก่อนตัดสินใจ",
-            thaiFeminine: "ผมต้องการข้อมูลเพิ่มเติมก่อนตัดสินใจ",
-            translation: "I need more information before making a decision.",
-            pronunciation: "pǒm tɔ̂ŋ-gaan kɔ̂ɔ-muun pə̂əm-təəm gɔ̀ɔn tàt-sǐn-jai"
-          },
-          {
-            thai: "จะส่งรายละเอียดให้ค่ะ",
-            thaiMasculine: "จะส่งรายละเอียดให้ค่ะ",
-            thaiFeminine: "จะส่งรายละเอียดให้ค่ะ",
-            translation: "I'll send you the details.",
-            pronunciation: "jà sòŋ raai-lá-ìat hâi kâ"
-          }
-        ]
-      },
-      {
-        english: "That's not what I meant",
-        thai: "ฉันไม่ได้หมายความอย่างนั้น",
-        thaiMasculine: "ผมไม่ได้หมายความอย่างนั้นครับ",
-        thaiFeminine: "ฉันไม่ได้หมายความอย่างนั้นค่ะ",
-        pronunciation: "chǎn/pǒm mâi dâai mǎai kwaam yàaŋ-nán",
-        mnemonic: "Think: 'My chai' - my, not chai (no)",
-        literal: "I not get mean like that",
-        examples: [
-          {
-            thai: "ขอโทษครับ ผมไม่ได้หมายความอย่างนั้น",
-            thaiMasculine: "ขอโทษครับ ผมไม่ได้หมายความอย่างนั้น",
-            thaiFeminine: "ขอโทษครับ ผมไม่ได้หมายความอย่างนั้น",
-            translation: "Sorry, that's not what I meant.",
-            pronunciation: "kɔ̌ɔ-tôot kráp pǒm mâi dâai mǎai kwaam yàaŋ-nán"
-          },
-          {
-            thai: "งั้นหมายความว่ายังไงคะ",
-            thaiMasculine: "งั้นหมายความว่ายังไงคะ",
-            thaiFeminine: "งั้นหมายความว่ายังไงคะ",
-            translation: "So what do you mean?",
-            pronunciation: "ŋán mǎai kwaam wâa yaŋ-ŋai kâ"
-          }
-        ]
-      },
-      {
-        english: "I'm impressed with your work",
-        thai: "ฉันประทับใจกับงานของคุณ",
-        thaiMasculine: "ผมประทับใจกับงานของคุณครับ",
-        thaiFeminine: "ฉันประทับใจกับงานของคุณค่ะ",
-        pronunciation: "chǎn/pǒm prà-táp-jai gàp ŋaan kɔ̌ɔŋ kun",
-        mnemonic: "Think: 'prà táp...' for i'm impressed with your work",
-        literal: "I impressed with work of you",
-        examples: [
-          {
-            thai: "ผมประทับใจกับงานของคุณมาก ทำได้ดีมาก",
-            thaiMasculine: "ผมประทับใจกับงานของคุณมาก ทำได้ดีมาก",
-            thaiFeminine: "ผมประทับใจกับงานของคุณมาก ทำได้ดีมาก",
-            translation: "I'm very impressed with your work, very well done.",
-            pronunciation: "pǒm prà-táp-jai gàp ŋaan kɔ̌ɔŋ kun mâak tam dâai dii mâak"
-          },
-          {
-            thai: "ขอบคุณค่ะ ดีใจที่ชอบ",
-            thaiMasculine: "ขอบคุณค่ะ ดีใจที่ชอบ",
-            thaiFeminine: "ขอบคุณค่ะ ดีใจที่ชอบ",
-            translation: "Thank you, glad you like it.",
-            pronunciation: "kɔ̀ɔp-kun kâ dii-jai tîi chɔ̂ɔp"
-          }
-        ]
-      },
-      {
-        english: "Let's schedule another meeting",
-        thai: "มานัดประชุมกันอีกครั้ง",
-        thaiMasculine: "มานัดประชุมกันอีกครั้งครับ",
-        thaiFeminine: "มานัดประชุมกันอีกครั้งค่ะ",
-        pronunciation: "maa nát prà-chum gan ìik kráŋ",
-        mnemonic: "Think: 'My chai' - my, not chai (no)",
-        literal: "Come schedule meeting together again time",
-        examples: [
-          {
-            thai: "เรื่องนี้ยังไม่จบ มานัดประชุมกันอีกครั้งครับ",
-            thaiMasculine: "เรื่องนี้ยังไม่จบ มานัดประชุมกันอีกครั้งครับ",
-            thaiFeminine: "เรื่องนี้ยังไม่จบ มานัดประชุมกันอีกครั้งครับ",
-            translation: "This matter isn't finished, let's schedule another meeting.",
-            pronunciation: "rʉ̂aŋ níi yaŋ mâi jòp maa nát prà-chum gan ìik kráŋ kráp"
-          },
-          {
-            thai: "ได้ค่ะ สัปดาห์หน้าว่างไหม",
-            thaiMasculine: "ได้ค่ะ สัปดาห์หน้าว่างไหม",
-            thaiFeminine: "ได้ค่ะ สัปดาห์หน้าว่างไหม",
-            translation: "Sure, are you free next week?",
-            pronunciation: "dâai kâ sàp-daa nâa wâaŋ mǎi"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'common-sentences-9',
-    name: '100 Most Used Thai Sentences 9',
-    level: 'Native/Fluent',
-    description: 'Native-level Thai sentences for nuanced communication (81-90)',
-    phrases: [
-      {
-        english: "Don't take it personally",
-        thai: "อย่าไปถือสาเลย",
-        thaiMasculine: "อย่าไปถือสาเลยครับ",
-        thaiFeminine: "อย่าไปถือสาเลยค่ะ",
-        pronunciation: "yàa pai tʉ̌ʉ-sǎa ləəi",
-        mnemonic: "Think: 'yàa pai...' for don't take it personally",
-        literal: "Don't go hold grudge at all",
-        examples: [
-          {
-            thai: "เขาแค่เครียด อย่าไปถือสาเลย",
-            thaiMasculine: "เขาแค่เครียด อย่าไปถือสาเลย",
-            thaiFeminine: "เขาแค่เครียด อย่าไปถือสาเลย",
-            translation: "He's just stressed, don't take it personally.",
-            pronunciation: "kǎo kɛ̂ɛ krîat yàa pai tʉ̌ʉ-sǎa ləəi"
-          },
-          {
-            thai: "ไม่ถือสาหรอกค่ะ เข้าใจ",
-            thaiMasculine: "ไม่ถือสาหรอกค่ะ เข้าใจ",
-            thaiFeminine: "ไม่ถือสาหรอกค่ะ เข้าใจ",
-            translation: "I don't take it personally, I understand.",
-            pronunciation: "mâi tʉ̌ʉ-sǎa rɔ̀ɔk kâ kâo-jai"
-          }
-        ]
-      },
-      {
-        english: "It's worth considering",
-        thai: "น่าจะลองพิจารณาดู",
-        thaiMasculine: "น่าจะลองพิจารณาดูครับ",
-        thaiFeminine: "น่าจะลองพิจารณาดูค่ะ",
-        pronunciation: "nâa jà lɔɔŋ pí-jaa-rá-naa duu",
-        mnemonic: "Think: 'nâa jà...' for it's worth considering",
-        literal: "Should will try consider see",
-        examples: [
-          {
-            thai: "ข้อเสนอนี้น่าจะลองพิจารณาดู มีประโยชน์",
-            thaiMasculine: "ข้อเสนอนี้น่าจะลองพิจารณาดู มีประโยชน์",
-            thaiFeminine: "ข้อเสนอนี้น่าจะลองพิจารณาดู มีประโยชน์",
-            translation: "This proposal is worth considering, it's beneficial.",
-            pronunciation: "kɔ̂ɔ-sà-nəə níi nâa jà lɔɔŋ pí-jaa-rá-naa duu mii prà-yòot"
-          },
-          {
-            thai: "เห็นด้วยค่ะ น่าสนใจมาก",
-            thaiMasculine: "เห็นด้วยค่ะ น่าสนใจมาก",
-            thaiFeminine: "เห็นด้วยค่ะ น่าสนใจมาก",
-            translation: "I agree, very interesting.",
-            pronunciation: "hěn dûai kâ nâa sǒn-jai mâak"
-          }
-        ]
-      },
-      {
-        english: "Let's not jump to conclusions",
-        thai: "อย่าเพิ่งด่วนสรุป",
-        thaiMasculine: "อย่าเพิ่งด่วนสรุปครับ",
-        thaiFeminine: "อย่าเพิ่งด่วนสรุปค่ะ",
-        pronunciation: "yàa pə̂ŋ dùan sà-rùp",
-        mnemonic: "Think: 'yah peng dwan sa-roop' - yeah, ping Dwan's syrup (don't rush)",
-        literal: "Don't yet rush conclude",
-        examples: [
-          {
-            thai: "อย่าเพิ่งด่วนสรุป รอฟังทุกฝ่ายก่อน",
-            thaiMasculine: "อย่าเพิ่งด่วนสรุป รอฟังทุกฝ่ายก่อน",
-            thaiFeminine: "อย่าเพิ่งด่วนสรุป รอฟังทุกฝ่ายก่อน",
-            translation: "Let's not jump to conclusions, wait to hear from all sides first.",
-            pronunciation: "yàa pə̂ŋ dùan sà-rùp rɔɔ faŋ túk fàai gɔ̀ɔn"
-          },
-          {
-            thai: "ใช่ค่ะ ควรรอข้อมูลให้ครบก่อน",
-            thaiMasculine: "ใช่ค่ะ ควรรอข้อมูลให้ครบก่อน",
-            thaiFeminine: "ใช่ค่ะ ควรรอข้อมูลให้ครบก่อน",
-            translation: "Yes, we should wait for complete information first.",
-            pronunciation: "châi kâ kuan rɔɔ kɔ̂ɔ-muun hâi króp gɔ̀ɔn"
-          }
-        ]
-      },
-      {
-        english: "I'll keep that in mind",
-        thai: "ฉันจะจำไว้",
-        thaiMasculine: "ผมจะจำไว้ครับ",
-        thaiFeminine: "ฉันจะจำไว้ค่ะ",
-        pronunciation: "chǎn/pǒm jà jam wái",
-        mnemonic: "Think: 'jà-jam-wái' - i'll keep that in mind",
-        literal: "I will remember keep",
-        examples: [
-          {
-            thai: "ขอบคุณสำหรับคำแนะนำ ผมจะจำไว้",
-            thaiMasculine: "ขอบคุณสำหรับคำแนะนำ ผมจะจำไว้",
-            thaiFeminine: "ขอบคุณสำหรับคำแนะนำ ผมจะจำไว้",
-            translation: "Thanks for the advice, I'll keep that in mind.",
-            pronunciation: "kɔ̀ɔp-kun sǎm-ràp kam nɛ́-nam pǒm jà jam wái"
-          },
-          {
-            thai: "หวังว่าจะเป็นประโยชน์นะคะ",
-            thaiMasculine: "หวังว่าจะเป็นประโยชน์นะคะ",
-            thaiFeminine: "หวังว่าจะเป็นประโยชน์นะคะ",
-            translation: "Hope it will be useful.",
-            pronunciation: "wǎŋ wâa jà pen prà-yòot ná kâ"
-          }
-        ]
-      },
-      {
-        english: "That's easier said than done",
-        thai: "พูดง่ายกว่าทำ",
-        thaiMasculine: "พูดง่ายกว่าทำครับ",
-        thaiFeminine: "พูดง่ายกว่าทำค่ะ",
-        pronunciation: "pûut ŋâai gwàa tam",
-        mnemonic: "Think: 'pûut ŋâai...' for that's easier said than done",
-        literal: "Speak easy more than do",
-        examples: [
-          {
-            thai: "ฟังดูง่าย แต่พูดง่ายกว่าทำนะครับ",
-            thaiMasculine: "ฟังดูง่าย แต่พูดง่ายกว่าทำนะครับ",
-            thaiFeminine: "ฟังดูง่าย แต่พูดง่ายกว่าทำนะครับ",
-            translation: "Sounds easy, but that's easier said than done.",
-            pronunciation: "faŋ duu ŋâai tɛ̀ɛ pûut ŋâai gwàa tam ná kráp"
-          },
-          {
-            thai: "จริงค่ะ แต่ต้องพยายาม",
-            thaiMasculine: "จริงค่ะ แต่ต้องพยายาม",
-            thaiFeminine: "จริงค่ะ แต่ต้องพยายาม",
-            translation: "True, but we must try.",
-            pronunciation: "jiŋ kâ tɛ̀ɛ tɔ̂ŋ pá-yaa-yaam"
-          }
-        ]
-      },
-      {
-        english: "I have mixed feelings about this",
-        thai: "ฉันรู้สึกคลุมเครือกับเรื่องนี้",
-        thaiMasculine: "ผมรู้สึกคลุมเครือกับเรื่องนี้ครับ",
-        thaiFeminine: "ฉันรู้สึกคลุมเครือกับเรื่องนี้ค่ะ",
-        pronunciation: "chǎn/pǒm rúu-sʉ̀k klum-krʉa gàp rʉ̂aŋ níi",
-        mnemonic: "Think: 'rúu sʉ̀k...' for i have mixed feelings about this",
-        literal: "I feel vague with matter this",
-        examples: [
-          {
-            thai: "ผมรู้สึกคลุมเครือ มีทั้งดีและไม่ดี",
-            thaiMasculine: "ผมรู้สึกคลุมเครือ มีทั้งดีและไม่ดี",
-            thaiFeminine: "ผมรู้สึกคลุมเครือ มีทั้งดีและไม่ดี",
-            translation: "I have mixed feelings, there's both good and bad.",
-            pronunciation: "pǒm rúu-sʉ̀k klum-krʉa mii táŋ dii lɛ́ mâi dii"
-          },
-          {
-            thai: "เข้าใจค่ะ เป็นเรื่องที่ตัดสินใจยาก",
-            thaiMasculine: "เข้าใจค่ะ เป็นเรื่องที่ตัดสินใจยาก",
-            thaiFeminine: "เข้าใจค่ะ เป็นเรื่องที่ตัดสินใจยาก",
-            translation: "I understand, it's a difficult decision.",
-            pronunciation: "kâo-jai kâ pen rʉ̂aŋ tîi tàt-sǐn-jai yâak"
-          }
-        ]
-      },
-      {
-        english: "Let's agree to disagree",
-        thai: "เรามีความเห็นต่างกันก็แล้วกัน",
-        thaiMasculine: "เรามีความเห็นต่างกันก็แล้วกันครับ",
-        thaiFeminine: "เรามีความเห็นต่างกันก็แล้วกันค่ะ",
-        pronunciation: "rao mii kwaam-hěn tàaŋ gan gɔ̂ɔ láeo gan",
-        mnemonic: "Think: 'rao mii...' for let's agree to disagree",
-        literal: "We have opinion different then already together",
-        examples: [
-          {
-            thai: "ถกเถียงกันไปก็ไม่จบ เรามีความเห็นต่างกันก็แล้วกัน",
-            thaiMasculine: "ถกเถียงกันไปก็ไม่จบ เรามีความเห็นต่างกันก็แล้วกัน",
-            thaiFeminine: "ถกเถียงกันไปก็ไม่จบ เรามีความเห็นต่างกันก็แล้วกัน",
-            translation: "Arguing won't end, let's agree to disagree.",
-            pronunciation: "tòk-tǐaŋ gan pai gɔ̂ɔ mâi jòp rao mii kwaam-hěn tàaŋ gan gɔ̂ɔ láeo gan"
-          },
-          {
-            thai: "ก็ดีค่ะ เคารพความคิดเห็นซึ่งกันและกัน",
-            thaiMasculine: "ก็ดีค่ะ เคารพความคิดเห็นซึ่งกันและกัน",
-            thaiFeminine: "ก็ดีค่ะ เคารพความคิดเห็นซึ่งกันและกัน",
-            translation: "That's good, respecting each other's opinions.",
-            pronunciation: "gɔ̂ɔ dii kâ kao-róp kwaam-kít-hěn sʉ̂ŋ gan lɛ́ gan"
-          }
-        ]
-      },
-      {
-        english: "Time will tell",
-        thai: "เวลาจะเป็นเครื่องพิสูจน์",
-        thaiMasculine: "เวลาจะเป็นเครื่องพิสูจน์ครับ",
-        thaiFeminine: "เวลาจะเป็นเครื่องพิสูจน์ค่ะ",
-        pronunciation: "wee-laa jà pen krʉ̂aŋ pí-sùut",
-        mnemonic: "Think: 'wee laa...' for time will tell",
-        literal: "Time will be tool prove",
-        examples: [
-          {
-            thai: "ตอนนี้ยังไม่รู้ผล เวลาจะเป็นเครื่องพิสูจน์",
-            thaiMasculine: "ตอนนี้ยังไม่รู้ผล เวลาจะเป็นเครื่องพิสูจน์",
-            thaiFeminine: "ตอนนี้ยังไม่รู้ผล เวลาจะเป็นเครื่องพิสูจน์",
-            translation: "We don't know the results now, time will tell.",
-            pronunciation: "tɔɔn-níi yaŋ mâi rúu pǒn wee-laa jà pen krʉ̂aŋ pí-sùut"
-          },
-          {
-            thai: "ใช่ค่ะ รอดูกันต่อไป",
-            thaiMasculine: "ใช่ค่ะ รอดูกันต่อไป",
-            thaiFeminine: "ใช่ค่ะ รอดูกันต่อไป",
-            translation: "Yes, let's wait and see.",
-            pronunciation: "châi kâ rɔɔ duu gan tɔ̀ɔ pai"
-          }
-        ]
-      },
-      {
-        english: "I need to clear my head",
-        thai: "ฉันต้องทำใจให้สบาย",
-        thaiMasculine: "ผมต้องทำใจให้สบายครับ",
-        thaiFeminine: "ฉันต้องทำใจให้สบายค่ะ",
-        pronunciation: "chǎn/pǒm tɔ̂ŋ tam jai hâi sà-baai",
-        mnemonic: "Think: 'tɔ̂ŋ tam...' for i need to clear my head",
-        literal: "I must make heart give comfortable",
-        examples: [
-          {
-            thai: "เครียดมาก ผมต้องทำใจให้สบายก่อน",
-            thaiMasculine: "เครียดมาก ผมต้องทำใจให้สบายก่อน",
-            thaiFeminine: "เครียดมาก ผมต้องทำใจให้สบายก่อน",
-            translation: "Very stressed, I need to clear my head first.",
-            pronunciation: "krîat mâak pǒm tɔ̂ŋ tam jai hâi sà-baai gɔ̀ɔn"
-          },
-          {
-            thai: "ไปพักผ่อนบ้างสิคะ",
-            thaiMasculine: "ไปพักผ่อนบ้างสิคะ",
-            thaiFeminine: "ไปพักผ่อนบ้างสิคะ",
-            translation: "Go relax a bit.",
-            pronunciation: "pai pák-pɔ̀ɔn bâaŋ sì kâ"
-          }
-        ]
-      },
-      {
-        english: "Let bygones be bygones",
-        thai: "ที่ผ่านมาก็ให้มันผ่านไป",
-        thaiMasculine: "ที่ผ่านมาก็ให้มันผ่านไปครับ",
-        thaiFeminine: "ที่ผ่านมาก็ให้มันผ่านไปค่ะ",
-        pronunciation: "tîi pàan maa gɔ̂ɔ hâi man pàan pai",
-        mnemonic: "Think: 'tîi pàan...' for let bygones be bygones",
-        literal: "That pass come then give it pass go",
-        examples: [
-          {
-            thai: "ไม่ต้องคิดมากแล้ว ที่ผ่านมาก็ให้มันผ่านไป",
-            thaiMasculine: "ไม่ต้องคิดมากแล้ว ที่ผ่านมาก็ให้มันผ่านไป",
-            thaiFeminine: "ไม่ต้องคิดมากแล้ว ที่ผ่านมาก็ให้มันผ่านไป",
-            translation: "Don't think too much, let bygones be bygones.",
-            pronunciation: "mâi tɔ̂ŋ kít mâak láeo tîi pàan maa gɔ̂ɔ hâi man pàan pai"
-          },
-          {
-            thai: "คุณพูดถูก ต้องมองไปข้างหน้า",
-            thaiMasculine: "คุณพูดถูก ต้องมองไปข้างหน้า",
-            thaiFeminine: "คุณพูดถูก ต้องมองไปข้างหน้า",
-            translation: "You're right, must look forward.",
-            pronunciation: "kun pûut tùuk tɔ̂ŋ mɔɔŋ pai kâaŋ nâa"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'common-sentences-10',
-    name: '100 Most Used Thai Sentences 10',
-    level: 'Native/Fluent',
-    description: 'Native-level Thai sentences for nuanced communication (91-100)',
-    phrases: [
-      {
-        english: "It's a blessing in disguise",
-        thai: "เสียนี้เพื่อลาภหน้า",
-        thaiMasculine: "เสียนี้เพื่อลาภหน้าครับ",
-        thaiFeminine: "เสียนี้เพื่อลาภหน้าค่ะ",
-        pronunciation: "sǐa níi pʉ̂a lâap nâa",
-        mnemonic: "Think: 'see-ah nee pua lahp nah' - see ah, knee pour lap, nah (loss for future gain)",
-        literal: "Lose this for fortune front",
-        examples: [
-          {
-            thai: "ไม่ได้งานนั้นก็ดี เสียนี้เพื่อลาภหน้า",
-            thaiMasculine: "ไม่ได้งานนั้นก็ดี เสียนี้เพื่อลาภหน้า",
-            thaiFeminine: "ไม่ได้งานนั้นก็ดี เสียนี้เพื่อลาภหน้า",
-            translation: "Not getting that job is good, it's a blessing in disguise.",
-            pronunciation: "mâi dâai ŋaan nán gɔ̂ɔ dii sǐa níi pʉ̂a lâap nâa"
-          },
-          {
-            thai: "ใช่ค่ะ อาจมีงานที่ดีกว่ารออยู่",
-            thaiMasculine: "ใช่ค่ะ อาจมีงานที่ดีกว่ารออยู่",
-            thaiFeminine: "ใช่ค่ะ อาจมีงานที่ดีกว่ารออยู่",
-            translation: "Yes, there might be a better job waiting.",
-            pronunciation: "châi kâ àat mii ŋaan tîi dii gwàa rɔɔ yùu"
-          }
-        ]
-      },
-      {
-        english: "Actions speak louder than words",
-        thai: "การกระทำสำคัญกว่าคำพูด",
-        thaiMasculine: "การกระทำสำคัญกว่าคำพูดครับ",
-        thaiFeminine: "การกระทำสำคัญกว่าคำพูดค่ะ",
-        pronunciation: "gaan grà-tam sǎm-kan gwàa kam-pûut",
-        mnemonic: "Think: 'gaan grà...' for actions speak louder than words",
-        literal: "The action important more than words",
-        examples: [
-          {
-            thai: "เขาพูดดีแต่ไม่ทำ การกระทำสำคัญกว่าคำพูด",
-            thaiMasculine: "เขาพูดดีแต่ไม่ทำ การกระทำสำคัญกว่าคำพูด",
-            thaiFeminine: "เขาพูดดีแต่ไม่ทำ การกระทำสำคัญกว่าคำพูด",
-            translation: "He talks well but doesn't do, actions speak louder than words.",
-            pronunciation: "kǎo pûut dii tɛ̀ɛ mâi tam gaan grà-tam sǎm-kan gwàa kam-pûut"
-          },
-          {
-            thai: "เห็นด้วยค่ะ ต้องดูที่การกระทำ",
-            thaiMasculine: "เห็นด้วยค่ะ ต้องดูที่การกระทำ",
-            thaiFeminine: "เห็นด้วยค่ะ ต้องดูที่การกระทำ",
-            translation: "I agree, must look at actions.",
-            pronunciation: "hěn dûai kâ tɔ̂ŋ duu tîi gaan grà-tam"
+            thai: "โทรหาเย็นนี้นะคะ",
+            thaiMasculine: "โทรหาเย็นนี้นะคะ",
+            thaiFeminine: "โทรหาเย็นนี้นะคะ",
+            translation: "I'll call you this evening. (female)",
+            pronunciation: "too hǎa yen níi ná kâ"
           }
         ]
       },
@@ -1354,147 +88,22 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมต้องขอโทษคุณครับ",
         thaiFeminine: "ฉันต้องขอโทษคุณค่ะ",
         pronunciation: "chǎn/pǒm tɔ̂ŋ kɔ̌ɔ-tôot kun",
-        mnemonic: "Think: 'tɔ̂ŋ kɔ̌ɔ...' for i owe you an apology",
-        literal: "I must ask punishment you",
+        mnemonic: "Think: 'tong core tote coon' - must core tote to raccoon",
+        literal: "I must ask forgiveness you",
         examples: [
           {
-            thai: "ผมต้องขอโทษคุณ ที่ผมเข้าใจผิด",
-            thaiMasculine: "ผมต้องขอโทษคุณ ที่ผมเข้าใจผิด",
-            thaiFeminine: "ผมต้องขอโทษคุณ ที่ผมเข้าใจผิด",
-            translation: "I owe you an apology, I misunderstood.",
-            pronunciation: "pǒm tɔ̂ŋ kɔ̌ɔ-tôot kun tîi pǒm kâo-jai pìt"
+            thai: "ผมผิดเองครับ ขอโทษ",
+            thaiMasculine: "ผมผิดเองครับ ขอโทษ",
+            thaiFeminine: "ผมผิดเองครับ ขอโทษ",
+            translation: "It's my fault, I'm sorry. (male)",
+            pronunciation: "pǒm pìt eeŋ kráp kɔ̌ɔ-tôot"
           },
           {
-            thai: "ไม่เป็นไรค่ะ ลืมมันไปเถอะ",
-            thaiMasculine: "ไม่เป็นไรค่ะ ลืมมันไปเถอะ",
-            thaiFeminine: "ไม่เป็นไรค่ะ ลืมมันไปเถอะ",
-            translation: "It's okay, let's forget about it.",
-            pronunciation: "mâi pen rai kâ lʉʉm man pai tə̀"
-          }
-        ]
-      },
-      {
-        english: "Better late than never",
-        thai: "สายดีกว่าไม่มา",
-        thaiMasculine: "สายดีกว่าไม่มาครับ",
-        thaiFeminine: "สายดีกว่าไม่มาค่ะ",
-        pronunciation: "sǎai dii gwàa mâi maa",
-        mnemonic: "Think: 'sǎai dii...' for better late than never",
-        literal: "Late better than not come",
-        examples: [
-          {
-            thai: "ขอโทษที่มาช้า - ไม่เป็นไรครับ สายดีกว่าไม่มา",
-            thaiMasculine: "ขอโทษที่มาช้า - ไม่เป็นไรครับ สายดีกว่าไม่มา",
-            thaiFeminine: "ขอโทษที่มาช้า - ไม่เป็นไรครับ สายดีกว่าไม่มา",
-            translation: "Sorry for coming late - It's okay, better late than never.",
-            pronunciation: "kɔ̌ɔ-tôot tîi maa cháa - mâi pen rai kráp sǎai dii gwàa mâi maa"
-          },
-          {
-            thai: "จริงค่ะ สำคัญที่มา",
-            thaiMasculine: "จริงค่ะ สำคัญที่มา",
-            thaiFeminine: "จริงค่ะ สำคัญที่มา",
-            translation: "True, what matters is that you came.",
-            pronunciation: "jiŋ kâ sǎm-kan tîi maa"
-          }
-        ]
-      },
-      {
-        english: "Let's call it a day",
-        thai: "พอแค่นี้วันนี้",
-        thaiMasculine: "พอแค่นี้วันนี้ครับ",
-        thaiFeminine: "พอแค่นี้วันนี้ค่ะ",
-        pronunciation: "pɔɔ kɛ̂ɛ níi wan-níi",
-        mnemonic: "Think: 'pɔɔ kɛ̂ɛ...' for let's call it a day",
-        literal: "Enough just this today",
-        examples: [
-          {
-            thai: "ทำงานมาทั้งวันแล้ว พอแค่นี้วันนี้",
-            thaiMasculine: "ทำงานมาทั้งวันแล้ว พอแค่นี้วันนี้",
-            thaiFeminine: "ทำงานมาทั้งวันแล้ว พอแค่นี้วันนี้",
-            translation: "We've worked all day, let's call it a day.",
-            pronunciation: "tam ŋaan maa táŋ wan láeo pɔɔ kɛ̂ɛ níi wan-níi"
-          },
-          {
-            thai: "เห็นด้วยค่ะ เหนื่อยแล้ว",
-            thaiMasculine: "เห็นด้วยค่ะ เหนื่อยแล้ว",
-            thaiFeminine: "เห็นด้วยค่ะ เหนื่อยแล้ว",
-            translation: "I agree, I'm tired.",
-            pronunciation: "hěn dûai kâ nʉ̀ai láeo"
-          }
-        ]
-      },
-      {
-        english: "I'll make it up to you",
-        thai: "ฉันจะชดเชยให้",
-        thaiMasculine: "ผมจะชดเชยให้ครับ",
-        thaiFeminine: "ฉันจะชดเชยให้ค่ะ",
-        pronunciation: "chǎn/pǒm jà chót-chəəi hâi",
-        mnemonic: "Think: 'jà chót...' for i'll make it up to you",
-        literal: "I will compensate give",
-        examples: [
-          {
-            thai: "ขอโทษที่ทำให้ผิดหวัง ผมจะชดเชยให้",
-            thaiMasculine: "ขอโทษที่ทำให้ผิดหวัง ผมจะชดเชยให้",
-            thaiFeminine: "ขอโทษที่ทำให้ผิดหวัง ผมจะชดเชยให้",
-            translation: "Sorry for disappointing you, I'll make it up to you.",
-            pronunciation: "kɔ̌ɔ-tôot tîi tam hâi pìt-wǎŋ pǒm jà chót-chəəi hâi"
-          },
-          {
-            thai: "ไม่ต้องหรอกค่ะ ไม่เป็นไร",
-            thaiMasculine: "ไม่ต้องหรอกค่ะ ไม่เป็นไร",
-            thaiFeminine: "ไม่ต้องหรอกค่ะ ไม่เป็นไร",
-            translation: "You don't have to, it's okay.",
-            pronunciation: "mâi tɔ̂ŋ rɔ̀ɔk kâ mâi pen rai"
-          }
-        ]
-      },
-      {
-        english: "That's the last straw",
-        thai: "พอแล้ว ทนไม่ไหวแล้ว",
-        thaiMasculine: "พอแล้ว ทนไม่ไหวแล้วครับ",
-        thaiFeminine: "พอแล้ว ทนไม่ไหวแล้วค่ะ",
-        pronunciation: "pɔɔ láeo ton mâi wǎi láeo",
-        mnemonic: "Think: 'pɔɔ láeo...' for that's the last straw",
-        literal: "Enough already endure not able already",
-        examples: [
-          {
-            thai: "เขาทำแบบนี้อีกแล้ว พอแล้ว ทนไม่ไหวแล้ว",
-            thaiMasculine: "เขาทำแบบนี้อีกแล้ว พอแล้ว ทนไม่ไหวแล้ว",
-            thaiFeminine: "เขาทำแบบนี้อีกแล้ว พอแล้ว ทนไม่ไหวแล้ว",
-            translation: "He did this again, that's the last straw.",
-            pronunciation: "kǎo tam bɛ̀ɛp níi ìik láeo pɔɔ láeo ton mâi wǎi láeo"
-          },
-          {
-            thai: "ใจเย็นๆ ค่ะ คุยกันดีๆ",
-            thaiMasculine: "ใจเย็นๆ ค่ะ คุยกันดีๆ",
-            thaiFeminine: "ใจเย็นๆ ค่ะ คุยกันดีๆ",
-            translation: "Calm down, let's talk nicely.",
-            pronunciation: "jai yen-yen kâ kui gan dii-dii"
-          }
-        ]
-      },
-      {
-        english: "It's now or never",
-        thai: "ถ้าไม่ใช่ตอนนี้ก็ไม่มีโอกาสแล้ว",
-        thaiMasculine: "ถ้าไม่ใช่ตอนนี้ก็ไม่มีโอกาสแล้วครับ",
-        thaiFeminine: "ถ้าไม่ใช่ตอนนี้ก็ไม่มีโอกาสแล้วค่ะ",
-        pronunciation: "tâa mâi châi tɔɔn-níi gɔ̂ɔ mâi mii oo-gàat láeo",
-        mnemonic: "Think: 'My chai' - my, not chai (no)",
-        literal: "If not be now then not have chance already",
-        examples: [
-          {
-            thai: "ต้องตัดสินใจเลย ถ้าไม่ใช่ตอนนี้ก็ไม่มีโอกาสแล้ว",
-            thaiMasculine: "ต้องตัดสินใจเลย ถ้าไม่ใช่ตอนนี้ก็ไม่มีโอกาสแล้ว",
-            thaiFeminine: "ต้องตัดสินใจเลย ถ้าไม่ใช่ตอนนี้ก็ไม่มีโอกาสแล้ว",
-            translation: "Must decide now, it's now or never.",
-            pronunciation: "tɔ̂ŋ tàt-sǐn-jai ləəi tâa mâi châi tɔɔn-níi gɔ̂ɔ mâi mii oo-gàat láeo"
-          },
-          {
-            thai: "งั้นต้องรีบทำเลย",
-            thaiMasculine: "งั้นต้องรีบทำเลย",
-            thaiFeminine: "งั้นต้องรีบทำเลย",
-            translation: "Then must hurry and do it.",
-            pronunciation: "ŋán tɔ̂ŋ rîip tam ləəi"
+            thai: "ขอโทษจริงๆ ค่ะ",
+            thaiMasculine: "ขอโทษจริงๆ ค่ะ",
+            thaiFeminine: "ขอโทษจริงๆ ค่ะ",
+            translation: "I'm really sorry. (female)",
+            pronunciation: "kɔ̌ɔ-tôot jiŋ-jiŋ kâ"
           }
         ]
       },
@@ -1504,47 +113,1179 @@ export const COMMON_SENTENCES_SETS_2: DefaultSet[] = [
         thaiMasculine: "ผมภูมิใจในตัวคุณครับ",
         thaiFeminine: "ฉันภูมิใจในตัวคุณค่ะ",
         pronunciation: "chǎn/pǒm puum-jai nai tua kun",
-        mnemonic: "Think: 'puum jai...' for i'm proud of you",
+        mnemonic: "Think: 'poom jai nigh two-ah coon' - boom joy in two-ah raccoon",
         literal: "I proud in body you",
         examples: [
           {
-            thai: "คุณทำได้ดีมาก ผมภูมิใจในตัวคุณ",
-            thaiMasculine: "คุณทำได้ดีมาก ผมภูมิใจในตัวคุณ",
-            thaiFeminine: "คุณทำได้ดีมาก ผมภูมิใจในตัวคุณ",
-            translation: "You did very well, I'm proud of you.",
-            pronunciation: "kun tam dâai dii mâak pǒm puum-jai nai tua kun"
+            thai: "ภูมิใจมากครับ",
+            thaiMasculine: "ภูมิใจมากครับ",
+            thaiFeminine: "ภูมิใจมากครับ",
+            translation: "I'm very proud. (male)",
+            pronunciation: "puum-jai mâak kráp"
           },
           {
-            thai: "ขอบคุณค่ะ หนูดีใจมาก",
-            thaiMasculine: "ขอบคุณค่ะ หนูดีใจมาก",
-            thaiFeminine: "ขอบคุณค่ะ หนูดีใจมาก",
-            translation: "Thank you, I'm very happy.",
-            pronunciation: "kɔ̀ɔp-kun kâ nǔu dii-jai mâak"
+            thai: "คุณเก่งมากค่ะ",
+            thaiMasculine: "คุณเก่งมากค่ะ",
+            thaiFeminine: "คุณเก่งมากค่ะ",
+            translation: "You're amazing. (female)",
+            pronunciation: "kun gèŋ mâak kâ"
           }
         ]
       },
       {
-        english: "Thank you for everything",
-        thai: "ขอบคุณสำหรับทุกอย่าง",
-        thaiMasculine: "ขอบคุณสำหรับทุกอย่างครับ",
-        thaiFeminine: "ขอบคุณสำหรับทุกอย่างค่ะ",
-        pronunciation: "kɔ̀ɔp-kun sǎm-ràp túk yàaŋ",
-        mnemonic: "Think: 'Cop-coon' - cop thanks you",
-        literal: "Thank you for every thing",
+        english: "Don't take it personally",
+        thai: "อย่าคิดมาก",
+        thaiMasculine: "อย่าคิดมากครับ",
+        thaiFeminine: "อย่าคิดมากค่ะ",
+        pronunciation: "yàa kít mâak",
+        mnemonic: "Think: 'yah kit mark' - yeah, don't kit mark too much",
+        literal: "Don't think much",
         examples: [
           {
-            thai: "ขอบคุณสำหรับทุกอย่างที่คุณทำให้ผม",
-            thaiMasculine: "ขอบคุณสำหรับทุกอย่างที่คุณทำให้ผม",
-            thaiFeminine: "ขอบคุณสำหรับทุกอย่างที่คุณทำให้ผม",
-            translation: "Thank you for everything you've done for me.",
-            pronunciation: "kɔ̀ɔp-kun sǎm-ràp túk yàaŋ tîi kun tam hâi pǒm"
+            thai: "ไม่ต้องคิดมากครับ",
+            thaiMasculine: "ไม่ต้องคิดมากครับ",
+            thaiFeminine: "ไม่ต้องคิดมากครับ",
+            translation: "No need to overthink. (male)",
+            pronunciation: "mâi tɔ̂ŋ kít mâak kráp"
           },
           {
-            thai: "ยินดีค่ะ ดูแลตัวเองด้วยนะ",
-            thaiMasculine: "ยินดีค่ะ ดูแลตัวเองด้วยนะ",
-            thaiFeminine: "ยินดีค่ะ ดูแลตัวเองด้วยนะ",
-            translation: "You're welcome, take care of yourself too.",
-            pronunciation: "yin-dii kâ duu-lɛɛ tua-eeŋ dûai ná"
+            thai: "ไม่ได้ว่าคุณค่ะ",
+            thaiMasculine: "ไม่ได้ว่าคุณค่ะ",
+            thaiFeminine: "ไม่ได้ว่าคุณค่ะ",
+            translation: "I'm not criticizing you. (female)",
+            pronunciation: "mâi dâai wâa kun kâ"
+          }
+        ]
+      },
+      {
+        english: "How long have you been in Thailand?",
+        thai: "คุณอยู่เมืองไทยนานแค่ไหน",
+        thaiMasculine: "คุณอยู่เมืองไทยนานแค่ไหนครับ",
+        thaiFeminine: "คุณอยู่เมืองไทยนานแค่ไหนคะ",
+        pronunciation: "kun yùu mʉaŋ tai naan kɛ̂ɛ nǎi",
+        mnemonic: "Think: 'coon you mung tie nan care nigh' - raccoon you among Thai grandma care night",
+        literal: "You stay Thailand long how much",
+        examples: [
+          {
+            thai: "อยู่มากี่ปีแล้วครับ",
+            thaiMasculine: "อยู่มากี่ปีแล้วครับ",
+            thaiFeminine: "อยู่มากี่ปีแล้วครับ",
+            translation: "How many years have you been here? (male)",
+            pronunciation: "yùu maa gìi pii láew kráp"
+          },
+          {
+            thai: "เพิ่งมาได้สองเดือนค่ะ",
+            thaiMasculine: "เพิ่งมาได้สองเดือนค่ะ",
+            thaiFeminine: "เพิ่งมาได้สองเดือนค่ะ",
+            translation: "I just arrived two months ago. (female)",
+            pronunciation: "pə̂əŋ maa dâai sɔ̌ɔŋ dʉan kâ"
+          }
+        ]
+      },
+      {
+        english: "I've lived here for 5 years",
+        thai: "ฉันอยู่ที่นี่มา 5 ปีแล้ว",
+        thaiMasculine: "ผมอยู่ที่นี่มา 5 ปีแล้วครับ",
+        thaiFeminine: "ฉันอยู่ที่นี่มา 5 ปีแล้วค่ะ",
+        pronunciation: "chǎn/pǒm yùu tîi-nîi maa hâa pii láew",
+        mnemonic: "Think: 'you tea knee ma ha pee lao' - you tea knee, ma five pee now",
+        literal: "I stay here come 5 year already",
+        examples: [
+          {
+            thai: "อยู่มานานแล้วครับ",
+            thaiMasculine: "อยู่มานานแล้วครับ",
+            thaiFeminine: "อยู่มานานแล้วครับ",
+            translation: "I've been here a long time. (male)",
+            pronunciation: "yùu maa naan láew kráp"
+          },
+          {
+            thai: "รู้สึกเหมือนบ้านเลยค่ะ",
+            thaiMasculine: "รู้สึกเหมือนบ้านเลยค่ะ",
+            thaiFeminine: "รู้สึกเหมือนบ้านเลยค่ะ",
+            translation: "It feels like home. (female)",
+            pronunciation: "rúu-sʉ̀k mʉ̌an bâan ləəi kâ"
+          }
+        ]
+      },
+      {
+        english: "Let's schedule another meeting",
+        thai: "นัดประชุมอีกครั้ง",
+        thaiMasculine: "นัดประชุมอีกครั้งครับ",
+        thaiFeminine: "นัดประชุมอีกครั้งค่ะ",
+        pronunciation: "nát prà-chum ìik kráŋ",
+        mnemonic: "Think: 'nat pra-choom eek krung' - not pra-choom again krung meeting",
+        literal: "Appointment meeting again time",
+        examples: [
+          {
+            thai: "เมื่อไหร่สะดวกครับ",
+            thaiMasculine: "เมื่อไหร่สะดวกครับ",
+            thaiFeminine: "เมื่อไหร่สะดวกครับ",
+            translation: "When is convenient? (male)",
+            pronunciation: "mʉ̂a-rài sà-dùak kráp"
+          },
+          {
+            thai: "อาทิตย์หน้าได้ไหมคะ",
+            thaiMasculine: "อาทิตย์หน้าได้ไหมคะ",
+            thaiFeminine: "อาทิตย์หน้าได้ไหมคะ",
+            translation: "Is next week okay? (female)",
+            pronunciation: "aa-tít nâa dâai mǎi kâ"
+          }
+        ]
+      },
+      {
+        english: "Let me think about it",
+        thai: "ขอคิดดูก่อน",
+        thaiMasculine: "ขอคิดดูก่อนครับ",
+        thaiFeminine: "ขอคิดดูก่อนค่ะ",
+        pronunciation: "kɔ̌ɔ kít duu gɔ̀ɔn",
+        mnemonic: "Think: 'core kit do gone' - core kit to do, gone thinking",
+        literal: "Request think look first",
+        examples: [
+          {
+            thai: "ขอเวลาคิดหน่อยครับ",
+            thaiMasculine: "ขอเวลาคิดหน่อยครับ",
+            thaiFeminine: "ขอเวลาคิดหน่อยครับ",
+            translation: "Give me some time to think. (male)",
+            pronunciation: "kɔ̌ɔ wee-laa kít nɔ̀i kráp"
+          },
+          {
+            thai: "ยังไม่แน่ใจค่ะ",
+            thaiMasculine: "ยังไม่แน่ใจค่ะ",
+            thaiFeminine: "ยังไม่แน่ใจค่ะ",
+            translation: "I'm not sure yet. (female)",
+            pronunciation: "yaŋ mâi nɛ̂ɛ-jai kâ"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'common-sentences-7',
+    name: '100 Most Used Thai Sentences 7',
+    level: 'Intermediate',
+    description: 'Essential everyday Thai sentences (61-70) - Aligned with Words Set 7',
+    phrases: [
+      {
+        english: "I think so too",
+        thai: "ฉันก็คิดเช่นกัน",
+        thaiMasculine: "ผมก็คิดเช่นกันครับ",
+        thaiFeminine: "ฉันก็คิดเช่นกันค่ะ",
+        pronunciation: "chǎn/pǒm gɔ̂ɔ kít chên-gan",
+        mnemonic: "Think: 'gore kit chain gun' - also kit chain gun thinking",
+        literal: "I also think same",
+        examples: [
+          {
+            thai: "ใช่ครับ ผมเห็นด้วย",
+            thaiMasculine: "ใช่ครับ ผมเห็นด้วย",
+            thaiFeminine: "ใช่ครับ ผมเห็นด้วย",
+            translation: "Yes, I agree. (male)",
+            pronunciation: "châi kráp pǒm hěn dûai"
+          },
+          {
+            thai: "คิดเหมือนกันเลยค่ะ",
+            thaiMasculine: "คิดเหมือนกันเลยค่ะ",
+            thaiFeminine: "คิดเหมือนกันเลยค่ะ",
+            translation: "I think the same. (female)",
+            pronunciation: "kít mʉ̌an gan ləəi kâ"
+          }
+        ]
+      },
+      {
+        english: "What do you think about this?",
+        thai: "คุณคิดยังไงกับเรื่องนี้",
+        thaiMasculine: "คุณคิดยังไงกับเรื่องนี้ครับ",
+        thaiFeminine: "คุณคิดยังไงกับเรื่องนี้คะ",
+        pronunciation: "kun kít yaŋ-ŋai gàp rʉ̂aŋ níi",
+        mnemonic: "Think: 'coon kit young guy gap ruang knee' - raccoon kit young guy gap story knee",
+        literal: "You think how with matter this",
+        examples: [
+          {
+            thai: "คุณคิดยังไงกับข่าวนี้ครับ",
+            thaiMasculine: "คุณคิดยังไงกับข่าวนี้ครับ",
+            thaiFeminine: "คุณคิดยังไงกับข่าวนี้ครับ",
+            translation: "What do you think about this news?",
+            pronunciation: "kun kít yaŋ-ŋai gàp kàao níi kráp"
+          },
+          {
+            thai: "คุณว่าดีไหมคะ",
+            thaiMasculine: "คุณว่าดีไหมคะ",
+            thaiFeminine: "คุณว่าดีไหมคะ",
+            translation: "Do you think it's good?",
+            pronunciation: "kun wâa dii mǎi kâ"
+          }
+        ]
+      },
+      {
+        english: "I have mixed feelings about this",
+        thai: "ฉันรู้สึกคลุมเครือกับเรื่องนี้",
+        thaiMasculine: "ผมรู้สึกคลุมเครือกับเรื่องนี้ครับ",
+        thaiFeminine: "ฉันรู้สึกคลุมเครือกับเรื่องนี้ค่ะ",
+        pronunciation: "chǎn/pǒm rúu-sʉ̀k klum-krʉa gàp rʉ̂aŋ níi",
+        mnemonic: "Think: 'roo-seuk kloom-krua gap ruang knee' - feel gloom-crew gap story knee",
+        literal: "I feel vague with matter this",
+        examples: [
+          {
+            thai: "ไม่แน่ใจว่าดีหรือไม่ดีครับ",
+            thaiMasculine: "ไม่แน่ใจว่าดีหรือไม่ดีครับ",
+            thaiFeminine: "ไม่แน่ใจว่าดีหรือไม่ดีครับ",
+            translation: "Not sure if it's good or bad. (male)",
+            pronunciation: "mâi nɛ̂ɛ-jai wâa dii rʉ̌ʉ mâi dii kráp"
+          },
+          {
+            thai: "มีทั้งดีและไม่ดีค่ะ",
+            thaiMasculine: "มีทั้งดีและไม่ดีค่ะ",
+            thaiFeminine: "มีทั้งดีและไม่ดีค่ะ",
+            translation: "There's both good and bad. (female)",
+            pronunciation: "mii táŋ dii lɛ́ mâi dii kâ"
+          }
+        ]
+      },
+      {
+        english: "I'm worried about the deadline",
+        thai: "ฉันกังวลเรื่องเดดไลน์",
+        thaiMasculine: "ผมกังวลเรื่องเดดไลน์ครับ",
+        thaiFeminine: "ฉันกังวลเรื่องเดดไลน์ค่ะ",
+        pronunciation: "chǎn/pǒm gaŋ-won rʉ̂aŋ dèt-laai",
+        mnemonic: "Think: 'gang-won ruang dead-line' - gang won about deadline matter",
+        literal: "I worried matter deadline",
+        examples: [
+          {
+            thai: "กลัวไม่ทันครับ",
+            thaiMasculine: "กลัวไม่ทันครับ",
+            thaiFeminine: "กลัวไม่ทันครับ",
+            translation: "I'm afraid I won't make it. (male)",
+            pronunciation: "gluaa mâi tan kráp"
+          },
+          {
+            thai: "เหลือเวลาไม่มากค่ะ",
+            thaiMasculine: "เหลือเวลาไม่มากค่ะ",
+            thaiFeminine: "เหลือเวลาไม่มากค่ะ",
+            translation: "Not much time left. (female)",
+            pronunciation: "lʉ̌a wee-laa mâi mâak kâ"
+          }
+        ]
+      },
+      {
+        english: "It doesn't matter",
+        thai: "ไม่เป็นไร",
+        thaiMasculine: "ไม่เป็นไรครับ",
+        thaiFeminine: "ไม่เป็นไรค่ะ",
+        pronunciation: "mâi pen rai",
+        mnemonic: "Think: 'my pen rye' - my pen? Never mind, rye",
+        literal: "Not be thing",
+        examples: [
+          {
+            thai: "ไม่เป็นไรครับ ไม่ต้องห่วง",
+            thaiMasculine: "ไม่เป็นไรครับ ไม่ต้องห่วง",
+            thaiFeminine: "ไม่เป็นไรครับ ไม่ต้องห่วง",
+            translation: "It's okay, don't worry. (male)",
+            pronunciation: "mâi pen rai kráp mâi tɔ̂ŋ hùaŋ"
+          },
+          {
+            thai: "ช่างมันค่ะ",
+            thaiMasculine: "ช่างมันค่ะ",
+            thaiFeminine: "ช่างมันค่ะ",
+            translation: "Let it be. (female)",
+            pronunciation: "châaŋ man kâ"
+          }
+        ]
+      },
+      {
+        english: "There's been a misunderstanding",
+        thai: "มีการเข้าใจผิด",
+        thaiMasculine: "มีการเข้าใจผิดครับ",
+        thaiFeminine: "มีการเข้าใจผิดค่ะ",
+        pronunciation: "mii gaan kâo-jai pìt",
+        mnemonic: "Think: 'me gan cow-jai pit' - me can cow-understand pit wrong",
+        literal: "Have the understanding wrong",
+        examples: [
+          {
+            thai: "คุณเข้าใจผิดแล้วครับ",
+            thaiMasculine: "คุณเข้าใจผิดแล้วครับ",
+            thaiFeminine: "คุณเข้าใจผิดแล้วครับ",
+            translation: "You misunderstood. (male)",
+            pronunciation: "kun kâo-jai pìt láew kráp"
+          },
+          {
+            thai: "ไม่ใช่อย่างที่คิดค่ะ",
+            thaiMasculine: "ไม่ใช่อย่างที่คิดค่ะ",
+            thaiFeminine: "ไม่ใช่อย่างที่คิดค่ะ",
+            translation: "It's not what you think. (female)",
+            pronunciation: "mâi châi yàaŋ tîi kít kâ"
+          }
+        ]
+      },
+      {
+        english: "I disagree with your opinion",
+        thai: "ฉันไม่เห็นด้วยกับความคิดของคุณ",
+        thaiMasculine: "ผมไม่เห็นด้วยกับความคิดของคุณครับ",
+        thaiFeminine: "ฉันไม่เห็นด้วยกับความคิดของคุณค่ะ",
+        pronunciation: "chǎn/pǒm mâi hěn dûai gàp kwaam-kít kɔ̌ɔŋ kun",
+        mnemonic: "Think: 'my hen doo-eye gap kwam-kit kong coon' - my hen dual-eye gap thought of raccoon",
+        literal: "I not see with with thought of you",
+        examples: [
+          {
+            thai: "ผมมีความเห็นต่างครับ",
+            thaiMasculine: "ผมมีความเห็นต่างครับ",
+            thaiFeminine: "ผมมีความเห็นต่างครับ",
+            translation: "I have a different opinion. (male)",
+            pronunciation: "pǒm mii kwaam-hěn tàaŋ kráp"
+          },
+          {
+            thai: "ไม่เห็นด้วยค่ะ",
+            thaiMasculine: "ไม่เห็นด้วยค่ะ",
+            thaiFeminine: "ไม่เห็นด้วยค่ะ",
+            translation: "I disagree. (female)",
+            pronunciation: "mâi hěn dûai kâ"
+          }
+        ]
+      },
+      {
+        english: "Let's agree to disagree",
+        thai: "ต่างคนต่างความเห็น",
+        thaiMasculine: "ต่างคนต่างความเห็นครับ",
+        thaiFeminine: "ต่างคนต่างความเห็นค่ะ",
+        pronunciation: "tàaŋ kon tàaŋ kwaam-hěn",
+        mnemonic: "Think: 'tang cone tang kwam-hen' - different cone, different view hen",
+        literal: "Different person different opinion",
+        examples: [
+          {
+            thai: "คิดไม่เหมือนกันก็ได้ครับ",
+            thaiMasculine: "คิดไม่เหมือนกันก็ได้ครับ",
+            thaiFeminine: "คิดไม่เหมือนกันก็ได้ครับ",
+            translation: "It's okay to think differently. (male)",
+            pronunciation: "kít mâi mʉ̌an gan gɔ̂ɔ dâai kráp"
+          },
+          {
+            thai: "เคารพความคิดเห็นค่ะ",
+            thaiMasculine: "เคารพความคิดเห็นค่ะ",
+            thaiFeminine: "เคารพความคิดเห็นค่ะ",
+            translation: "I respect your opinion. (female)",
+            pronunciation: "kao-róp kwaam-kít-hěn kâ"
+          }
+        ]
+      },
+      {
+        english: "I'll keep that in mind",
+        thai: "ฉันจะจำไว้",
+        thaiMasculine: "ผมจะจำไว้ครับ",
+        thaiFeminine: "ฉันจะจำไว้ค่ะ",
+        pronunciation: "chǎn/pǒm jà jam wái",
+        mnemonic: "Think: 'ja jam why' - will jam it in mind, why?",
+        literal: "I will remember keep",
+        examples: [
+          {
+            thai: "จำไว้แล้วครับ",
+            thaiMasculine: "จำไว้แล้วครับ",
+            thaiFeminine: "จำไว้แล้วครับ",
+            translation: "I've remembered it. (male)",
+            pronunciation: "jam wái láew kráp"
+          },
+          {
+            thai: "จะไม่ลืมค่ะ",
+            thaiMasculine: "จะไม่ลืมค่ะ",
+            thaiFeminine: "จะไม่ลืมค่ะ",
+            translation: "I won't forget. (female)",
+            pronunciation: "jà mâi lʉʉm kâ"
+          }
+        ]
+      },
+      {
+        english: "I need to clear my head",
+        thai: "ฉันต้องทำใจให้สบาย",
+        thaiMasculine: "ผมต้องทำใจให้สบายครับ",
+        thaiFeminine: "ฉันต้องทำใจให้สบายค่ะ",
+        pronunciation: "chǎn/pǒm tɔ̂ŋ tam jai hâi sà-baai",
+        mnemonic: "Think: 'tong tam jai hi sa-bye' - must make heart hi, relax bye",
+        literal: "I must make heart give comfortable",
+        examples: [
+          {
+            thai: "ต้องพักสมองหน่อยครับ",
+            thaiMasculine: "ต้องพักสมองหน่อยครับ",
+            thaiFeminine: "ต้องพักสมองหน่อยครับ",
+            translation: "Need to rest my brain. (male)",
+            pronunciation: "tɔ̂ŋ pák sà-mɔ̌ɔŋ nɔ̀i kráp"
+          },
+          {
+            thai: "เครียดมากค่ะ",
+            thaiMasculine: "เครียดมากค่ะ",
+            thaiFeminine: "เครียดมากค่ะ",
+            translation: "I'm very stressed. (female)",
+            pronunciation: "krîat mâak kâ"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'common-sentences-8',
+    name: '100 Most Used Thai Sentences 8',
+    level: 'Intermediate',
+    description: 'Essential everyday Thai sentences (71-80) - Aligned with Words Set 8',
+    phrases: [
+      {
+        english: "I'm learning Thai",
+        thai: "ฉันกำลังเรียนภาษาไทย",
+        thaiMasculine: "ผมกำลังเรียนภาษาไทยครับ",
+        thaiFeminine: "ฉันกำลังเรียนภาษาไทยค่ะ",
+        pronunciation: "chǎn/pǒm gam-laŋ rian paa-sǎa tai",
+        mnemonic: "Think: 'gum-lung rian pa-sa tie' - chewing gum lung, learn pa-sa Thai",
+        literal: "I currently learn language Thai",
+        examples: [
+          {
+            thai: "เรียนมาสองเดือนแล้วครับ",
+            thaiMasculine: "เรียนมาสองเดือนแล้วครับ",
+            thaiFeminine: "เรียนมาสองเดือนแล้วครับ",
+            translation: "I've been learning for two months. (male)",
+            pronunciation: "rian maa sɔ̌ɔŋ dʉan láew kráp"
+          },
+          {
+            thai: "ภาษาไทยยากค่ะ",
+            thaiMasculine: "ภาษาไทยยากค่ะ",
+            thaiFeminine: "ภาษาไทยยากค่ะ",
+            translation: "Thai language is difficult. (female)",
+            pronunciation: "paa-sǎa tai yâak kâ"
+          }
+        ]
+      },
+      {
+        english: "Could you please repeat that?",
+        thai: "ช่วยพูดอีกทีได้ไหม",
+        thaiMasculine: "ช่วยพูดอีกทีได้ไหมครับ",
+        thaiFeminine: "ช่วยพูดอีกทีได้ไหมคะ",
+        pronunciation: "chûai pûut ìik tii dâai mǎi",
+        mnemonic: "Think: 'chew-eye poot eek tea die my' - chew-eye, put again tea, die my?",
+        literal: "Help speak again time can (question)",
+        examples: [
+          {
+            thai: "ขอฟังอีกทีครับ",
+            thaiMasculine: "ขอฟังอีกทีครับ",
+            thaiFeminine: "ขอฟังอีกทีครับ",
+            translation: "Let me hear it again. (male)",
+            pronunciation: "kɔ̌ɔ faŋ ìik tii kráp"
+          },
+          {
+            thai: "พูดอีกครั้งได้ไหมคะ",
+            thaiMasculine: "พูดอีกครั้งได้ไหมคะ",
+            thaiFeminine: "พูดอีกครั้งได้ไหมคะ",
+            translation: "Can you say it again? (female)",
+            pronunciation: "pûut ìik kráŋ dâai mǎi kâ"
+          }
+        ]
+      },
+      {
+        english: "Could you write it down for me?",
+        thai: "ช่วยเขียนให้หน่อยได้ไหม",
+        thaiMasculine: "ช่วยเขียนให้หน่อยได้ไหมครับ",
+        thaiFeminine: "ช่วยเขียนให้หน่อยได้ไหมคะ",
+        pronunciation: "chûai kǐan hâi nɔ̀i dâai mǎi",
+        mnemonic: "Think: 'chew-eye key-an hi noy die my' - chew-eye key-write hi, little die my?",
+        literal: "Help write give a bit can (question)",
+        examples: [
+          {
+            thai: "เขียนตรงนี้ได้ครับ",
+            thaiMasculine: "เขียนตรงนี้ได้ครับ",
+            thaiFeminine: "เขียนตรงนี้ได้ครับ",
+            translation: "You can write it here. (male)",
+            pronunciation: "kǐan troŋ níi dâai kráp"
+          },
+          {
+            thai: "ขอกระดาษหน่อยค่ะ",
+            thaiMasculine: "ขอกระดาษหน่อยค่ะ",
+            thaiFeminine: "ขอกระดาษหน่อยค่ะ",
+            translation: "Can I have some paper? (female)",
+            pronunciation: "kɔ̌ɔ grà-dàat nɔ̀i kâ"
+          }
+        ]
+      },
+      {
+        english: "I'm having trouble understanding",
+        thai: "ฉันมีปัญหาในการเข้าใจ",
+        thaiMasculine: "ผมมีปัญหาในการเข้าใจครับ",
+        thaiFeminine: "ฉันมีปัญหาในการเข้าใจค่ะ",
+        pronunciation: "chǎn/pǒm mii pan-hǎa nai gaan kâo-jai",
+        mnemonic: "Think: 'me pan-ha nigh gan cow-jai' - me pan-problem in can cow-understand",
+        literal: "I have problem in the understanding",
+        examples: [
+          {
+            thai: "ยังไม่เข้าใจครับ",
+            thaiMasculine: "ยังไม่เข้าใจครับ",
+            thaiFeminine: "ยังไม่เข้าใจครับ",
+            translation: "I still don't understand. (male)",
+            pronunciation: "yaŋ mâi kâo-jai kráp"
+          },
+          {
+            thai: "งงมากค่ะ",
+            thaiMasculine: "งงมากค่ะ",
+            thaiFeminine: "งงมากค่ะ",
+            translation: "I'm very confused. (female)",
+            pronunciation: "ŋoŋ mâak kâ"
+          }
+        ]
+      },
+      {
+        english: "Can you explain it more clearly?",
+        thai: "ช่วยอธิบายให้ชัดกว่านี้ได้ไหม",
+        thaiMasculine: "ช่วยอธิบายให้ชัดกว่านี้ได้ไหมครับ",
+        thaiFeminine: "ช่วยอธิบายให้ชัดกว่านี้ได้ไหมคะ",
+        pronunciation: "chûai à-tí-baai hâi chát gwàa níi dâai mǎi",
+        mnemonic: "Think: 'chew-eye a-tea-bye hi chat gwa knee die my' - explain hi chat more than knee",
+        literal: "Help explain give clear more this can (question)",
+        examples: [
+          {
+            thai: "ยกตัวอย่างได้ไหมครับ",
+            thaiMasculine: "ยกตัวอย่างได้ไหมครับ",
+            thaiFeminine: "ยกตัวอย่างได้ไหมครับ",
+            translation: "Can you give an example? (male)",
+            pronunciation: "yók tua-yàaŋ dâai mǎi kráp"
+          },
+          {
+            thai: "อธิบายง่ายๆ ค่ะ",
+            thaiMasculine: "อธิบายง่ายๆ ค่ะ",
+            thaiFeminine: "อธิบายง่ายๆ ค่ะ",
+            translation: "Explain it simply. (female)",
+            pronunciation: "à-tí-baai ŋâai-ŋâai kâ"
+          }
+        ]
+      },
+      {
+        english: "That's not what I meant",
+        thai: "นั่นไม่ใช่สิ่งที่ฉันหมายถึง",
+        thaiMasculine: "นั่นไม่ใช่สิ่งที่ผมหมายถึงครับ",
+        thaiFeminine: "นั่นไม่ใช่สิ่งที่ฉันหมายถึงค่ะ",
+        pronunciation: "nân mâi châi sìŋ tîi chǎn/pǒm mǎai tʉ̌ŋ",
+        mnemonic: "Think: 'nan my chai sing tea my tung' - nan not chai thing tea I mean to",
+        literal: "That not be thing that I mean to",
+        examples: [
+          {
+            thai: "ผมไม่ได้หมายความอย่างนั้นครับ",
+            thaiMasculine: "ผมไม่ได้หมายความอย่างนั้นครับ",
+            thaiFeminine: "ผมไม่ได้หมายความอย่างนั้นครับ",
+            translation: "I didn't mean it like that. (male)",
+            pronunciation: "pǒm mâi dâai mǎai kwaam yàaŋ nán kráp"
+          },
+          {
+            thai: "เข้าใจผิดค่ะ",
+            thaiMasculine: "เข้าใจผิดค่ะ",
+            thaiFeminine: "เข้าใจผิดค่ะ",
+            translation: "Misunderstood. (female)",
+            pronunciation: "kâo-jai pìt kâ"
+          }
+        ]
+      },
+      {
+        english: "I need more information",
+        thai: "ฉันต้องการข้อมูลเพิ่มเติม",
+        thaiMasculine: "ผมต้องการข้อมูลเพิ่มเติมครับ",
+        thaiFeminine: "ฉันต้องการข้อมูลเพิ่มเติมค่ะ",
+        pronunciation: "chǎn/pǒm tɔ̂ŋ-gaan kɔ̂ɔ-muun pə̂əm-təəm",
+        mnemonic: "Think: 'tong-gan core moon perm term' - must can core moon info add term",
+        literal: "I need information add more",
+        examples: [
+          {
+            thai: "ขอรายละเอียดเพิ่มครับ",
+            thaiMasculine: "ขอรายละเอียดเพิ่มครับ",
+            thaiFeminine: "ขอรายละเอียดเพิ่มครับ",
+            translation: "I'd like more details. (male)",
+            pronunciation: "kɔ̌ɔ raai-lá-ìat pə̂əm kráp"
+          },
+          {
+            thai: "ยังขาดข้อมูลค่ะ",
+            thaiMasculine: "ยังขาดข้อมูลค่ะ",
+            thaiFeminine: "ยังขาดข้อมูลค่ะ",
+            translation: "Still lacking information. (female)",
+            pronunciation: "yaŋ kàat kɔ̂ɔ-muun kâ"
+          }
+        ]
+      },
+      {
+        english: "I'm looking for a job",
+        thai: "ฉันกำลังหางาน",
+        thaiMasculine: "ผมกำลังหางานครับ",
+        thaiFeminine: "ฉันกำลังหางานค่ะ",
+        pronunciation: "chǎn/pǒm gam-laŋ hǎa ŋaan",
+        mnemonic: "Think: 'gum-lung ha ngan' - chewing gum lung, find work ngan",
+        literal: "I currently find work",
+        examples: [
+          {
+            thai: "มีงานว่างไหมครับ",
+            thaiMasculine: "มีงานว่างไหมครับ",
+            thaiFeminine: "มีงานว่างไหมครับ",
+            translation: "Are there any job openings? (male)",
+            pronunciation: "mii ŋaan wâaŋ mǎi kráp"
+          },
+          {
+            thai: "อยากทำงานที่นี่ค่ะ",
+            thaiMasculine: "อยากทำงานที่นี่ค่ะ",
+            thaiFeminine: "อยากทำงานที่นี่ค่ะ",
+            translation: "I want to work here. (female)",
+            pronunciation: "yàak tam ŋaan tîi-nîi kâ"
+          }
+        ]
+      },
+      {
+        english: "I'm impressed with your work",
+        thai: "ฉันประทับใจกับงานของคุณ",
+        thaiMasculine: "ผมประทับใจกับงานของคุณครับ",
+        thaiFeminine: "ฉันประทับใจกับงานของคุณค่ะ",
+        pronunciation: "chǎn/pǒm prà-táp-jai gàp ŋaan kɔ̌ɔŋ kun",
+        mnemonic: "Think: 'pra-tap-jai gap ngan kong coon' - tap heart gap work of raccoon",
+        literal: "I impressed with work of you",
+        examples: [
+          {
+            thai: "ทำได้ดีมากครับ",
+            thaiMasculine: "ทำได้ดีมากครับ",
+            thaiFeminine: "ทำได้ดีมากครับ",
+            translation: "Very well done. (male)",
+            pronunciation: "tam dâai dii mâak kráp"
+          },
+          {
+            thai: "เยี่ยมมากค่ะ",
+            thaiMasculine: "เยี่ยมมากค่ะ",
+            thaiFeminine: "เยี่ยมมากค่ะ",
+            translation: "Excellent! (female)",
+            pronunciation: "yîam mâak kâ"
+          }
+        ]
+      },
+      {
+        english: "I'd like to extend my visa",
+        thai: "ฉันต้องการต่อวีซ่า",
+        thaiMasculine: "ผมต้องการต่อวีซ่าครับ",
+        thaiFeminine: "ฉันต้องการต่อวีซ่าค่ะ",
+        pronunciation: "chǎn/pǒm tɔ̂ŋ-gaan tɔ̀ɔ wii-sâa",
+        mnemonic: "Think: 'tong-gan taw wee-sa' - must can extend visa",
+        literal: "I need extend visa",
+        examples: [
+          {
+            thai: "วีซ่าใกล้หมดแล้วครับ",
+            thaiMasculine: "วีซ่าใกล้หมดแล้วครับ",
+            thaiFeminine: "วีซ่าใกล้หมดแล้วครับ",
+            translation: "My visa is almost expired. (male)",
+            pronunciation: "wii-sâa glâi mòt láew kráp"
+          },
+          {
+            thai: "ต่อได้ที่ไหนคะ",
+            thaiMasculine: "ต่อได้ที่ไหนคะ",
+            thaiFeminine: "ต่อได้ที่ไหนคะ",
+            translation: "Where can I extend it? (female)",
+            pronunciation: "tɔ̀ɔ dâai tîi-nǎi kâ"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'common-sentences-9',
+    name: '100 Most Used Thai Sentences 9',
+    level: 'Intermediate',
+    description: 'Essential everyday Thai sentences (81-90) - Aligned with Words Set 9',
+    phrases: [
+      {
+        english: "I'd like to book a room",
+        thai: "ฉันต้องการจองห้องพัก",
+        thaiMasculine: "ผมต้องการจองห้องพักครับ",
+        thaiFeminine: "ฉันต้องการจองห้องพักค่ะ",
+        pronunciation: "chǎn/pǒm tɔ̂ŋ-gaan jɔɔŋ hɔ̂ŋ-pák",
+        mnemonic: "Think: 'tong-gan jong hong pak' - must can book room stay",
+        literal: "I need book room stay",
+        examples: [
+          {
+            thai: "มีห้องว่างไหมครับ",
+            thaiMasculine: "มีห้องว่างไหมครับ",
+            thaiFeminine: "มีห้องว่างไหมครับ",
+            translation: "Do you have any vacant rooms? (male)",
+            pronunciation: "mii hɔ̂ŋ wâaŋ mǎi kráp"
+          },
+          {
+            thai: "จองสองคืนค่ะ",
+            thaiMasculine: "จองสองคืนค่ะ",
+            thaiFeminine: "จองสองคืนค่ะ",
+            translation: "Book for two nights. (female)",
+            pronunciation: "jɔɔŋ sɔ̌ɔŋ kʉʉn kâ"
+          }
+        ]
+      },
+      {
+        english: "The quality is not good enough",
+        thai: "คุณภาพไม่ดีพอ",
+        thaiMasculine: "คุณภาพไม่ดีพอครับ",
+        thaiFeminine: "คุณภาพไม่ดีพอค่ะ",
+        pronunciation: "kun-ná-pâap mâi dii pɔɔ",
+        mnemonic: "Think: 'coon-na-paap my dee paw' - raccoon nap quality my good paw",
+        literal: "Quality not good enough",
+        examples: [
+          {
+            thai: "ไม่ได้มาตรฐานครับ",
+            thaiMasculine: "ไม่ได้มาตรฐานครับ",
+            thaiFeminine: "ไม่ได้มาตรฐานครับ",
+            translation: "Not up to standard. (male)",
+            pronunciation: "mâi dâai maa-trà-tǎan kráp"
+          },
+          {
+            thai: "ต้องปรับปรุงค่ะ",
+            thaiMasculine: "ต้องปรับปรุงค่ะ",
+            thaiFeminine: "ต้องปรับปรุงค่ะ",
+            translation: "Needs improvement. (female)",
+            pronunciation: "tɔ̂ŋ pràp-pruŋ kâ"
+          }
+        ]
+      },
+      {
+        english: "My phone battery is dead",
+        thai: "แบตเตอรี่โทรศัพท์หมด",
+        thaiMasculine: "แบตเตอรี่โทรศัพท์หมดครับ",
+        thaiFeminine: "แบตเตอรี่โทรศัพท์หมดค่ะ",
+        pronunciation: "bɛ̀t-təə-rîi too-rá-sàp mòt",
+        mnemonic: "Think: 'bat-ter-ree toe-ra-sap mot' - battery toe-tap phone empty",
+        literal: "Battery telephone finished",
+        examples: [
+          {
+            thai: "มีที่ชาร์จไหมครับ",
+            thaiMasculine: "มีที่ชาร์จไหมครับ",
+            thaiFeminine: "มีที่ชาร์จไหมครับ",
+            translation: "Do you have a charger? (male)",
+            pronunciation: "mii tîi châat mǎi kráp"
+          },
+          {
+            thai: "ขอชาร์จหน่อยค่ะ",
+            thaiMasculine: "ขอชาร์จหน่อยค่ะ",
+            thaiFeminine: "ขอชาร์จหน่อยค่ะ",
+            translation: "Can I charge it? (female)",
+            pronunciation: "kɔ̌ɔ châat nɔ̀i kâ"
+          }
+        ]
+      },
+      {
+        english: "I'll consider it and let you know",
+        thai: "ฉันจะพิจารณาแล้วแจ้งให้คุณทราบ",
+        thaiMasculine: "ผมจะพิจารณาแล้วแจ้งให้คุณทราบครับ",
+        thaiFeminine: "ฉันจะพิจารณาแล้วแจ้งให้คุณทราบค่ะ",
+        pronunciation: "chǎn/pǒm jà pí-jaa-rá-naa láew jɛ̂ɛŋ hâi kun sâap",
+        mnemonic: "Think: 'ja pee-ja-ra-na lao jang hi coon sap' - will consider now tell hi raccoon know",
+        literal: "I will consider then inform give you know",
+        examples: [
+          {
+            thai: "ขอเวลาคิดก่อนครับ",
+            thaiMasculine: "ขอเวลาคิดก่อนครับ",
+            thaiFeminine: "ขอเวลาคิดก่อนครับ",
+            translation: "Let me think first. (male)",
+            pronunciation: "kɔ̌ɔ wee-laa kít gɔ̀ɔn kráp"
+          },
+          {
+            thai: "จะบอกพรุ่งนี้ค่ะ",
+            thaiMasculine: "จะบอกพรุ่งนี้ค่ะ",
+            thaiFeminine: "จะบอกพรุ่งนี้ค่ะ",
+            translation: "I'll tell you tomorrow. (female)",
+            pronunciation: "jà bɔ̀ɔk prûŋ-níi kâ"
+          }
+        ]
+      },
+      {
+        english: "It's worth considering",
+        thai: "น่าพิจารณา",
+        thaiMasculine: "น่าพิจารณาครับ",
+        thaiFeminine: "น่าพิจารณาค่ะ",
+        pronunciation: "nâa pí-jaa-rá-naa",
+        mnemonic: "Think: 'nah pee-ja-ra-na' - nah, worth considering',
+        literal: "Worth consider",
+        examples: [
+          {
+            thai: "น่าสนใจครับ",
+            thaiMasculine: "น่าสนใจครับ",
+            thaiFeminine: "น่าสนใจครับ",
+            translation: "Interesting. (male)",
+            pronunciation: "nâa sǒn-jai kráp"
+          },
+          {
+            thai: "ลองดูก็ได้ค่ะ",
+            thaiMasculine: "ลองดูก็ได้ค่ะ",
+            thaiFeminine: "ลองดูก็ได้ค่ะ",
+            translation: "Can give it a try. (female)",
+            pronunciation: "lɔɔŋ duu gɔ̂ɔ dâai kâ"
+          }
+        ]
+      },
+      {
+        english: "That's easier said than done",
+        thai: "พูดง่ายกว่าทำ",
+        thaiMasculine: "พูดง่ายกว่าทำครับ",
+        thaiFeminine: "พูดง่ายกว่าทำค่ะ",
+        pronunciation: "pûut ŋâai gwàa tam",
+        mnemonic: "Think: 'poot ngai gwa tam' - speak easy more than do",
+        literal: "Speak easy more than do",
+        examples: [
+          {
+            thai: "ทำจริงยากครับ",
+            thaiMasculine: "ทำจริงยากครับ",
+            thaiFeminine: "ทำจริงยากครับ",
+            translation: "Actually doing it is hard. (male)",
+            pronunciation: "tam jiŋ yâak kráp"
+          },
+          {
+            thai: "ไม่ง่ายอย่างที่คิดค่ะ",
+            thaiMasculine: "ไม่ง่ายอย่างที่คิดค่ะ",
+            thaiFeminine: "ไม่ง่ายอย่างที่คิดค่ะ",
+            translation: "Not as easy as you think. (female)",
+            pronunciation: "mâi ŋâai yàaŋ tîi kít kâ"
+          }
+        ]
+      },
+      {
+        english: "The situation is complicated",
+        thai: "สถานการณ์ซับซ้อน",
+        thaiMasculine: "สถานการณ์ซับซ้อนครับ",
+        thaiFeminine: "สถานการณ์ซับซ้อนค่ะ",
+        pronunciation: "sà-tǎa-ná-gaan sáp-sɔ́ɔn",
+        mnemonic: "Think: 'sa-tan-na-gan sap-sawn' - satan can sap situation complex",
+        literal: "Situation complicated",
+        examples: [
+          {
+            thai: "เรื่องมันยุ่งยากครับ",
+            thaiMasculine: "เรื่องมันยุ่งยากครับ",
+            thaiFeminine: "เรื่องมันยุ่งยากครับ",
+            translation: "It's a difficult matter. (male)",
+            pronunciation: "rʉ̂aŋ man yûŋ-yâak kráp"
+          },
+          {
+            thai: "ไม่ง่ายเลยค่ะ",
+            thaiMasculine: "ไม่ง่ายเลยค่ะ",
+            thaiFeminine: "ไม่ง่ายเลยค่ะ",
+            translation: "Not easy at all. (female)",
+            pronunciation: "mâi ŋâai ləəi kâ"
+          }
+        ]
+      },
+      {
+        english: "I'll take care of it",
+        thai: "ฉันจะดูแล",
+        thaiMasculine: "ผมจะดูแลครับ",
+        thaiFeminine: "ฉันจะดูแลค่ะ",
+        pronunciation: "chǎn/pǒm jà duu-lɛɛ",
+        mnemonic: "Think: 'ja do-lay' - will do, okay!",
+        literal: "I will look after",
+        examples: [
+          {
+            thai: "ไม่ต้องห่วงครับ",
+            thaiMasculine: "ไม่ต้องห่วงครับ",
+            thaiFeminine: "ไม่ต้องห่วงครับ",
+            translation: "Don't worry. (male)",
+            pronunciation: "mâi tɔ̂ŋ hùaŋ kráp"
+          },
+          {
+            thai: "ฉันจัดการเองค่ะ",
+            thaiMasculine: "ฉันจัดการเองค่ะ",
+            thaiFeminine: "ฉันจัดการเองค่ะ",
+            translation: "I'll handle it myself. (female)",
+            pronunciation: "chǎn jàt-gaan eeŋ kâ"
+          }
+        ]
+      },
+      {
+        english: "I'll make it up to you",
+        thai: "ฉันจะชดใช้ให้คุณ",
+        thaiMasculine: "ผมจะชดใช้ให้คุณครับ",
+        thaiFeminine: "ฉันจะชดใช้ให้คุณค่ะ",
+        pronunciation: "chǎn/pǒm jà chót-chái hâi kun",
+        mnemonic: "Think: 'ja chot-chai hi coon' - will compensate hi raccoon",
+        literal: "I will compensate give you",
+        examples: [
+          {
+            thai: "ขอโอกาสอีกครั้งครับ",
+            thaiMasculine: "ขอโอกาสอีกครั้งครับ",
+            thaiFeminine: "ขอโอกาสอีกครั้งครับ",
+            translation: "Give me another chance. (male)",
+            pronunciation: "kɔ̌ɔ oo-gàat ìik kráŋ kráp"
+          },
+          {
+            thai: "จะทำให้ดีกว่านี้ค่ะ",
+            thaiMasculine: "จะทำให้ดีกว่านี้ค่ะ",
+            thaiFeminine: "จะทำให้ดีกว่านี้ค่ะ",
+            translation: "I'll do better. (female)",
+            pronunciation: "jà tam hâi dii gwàa níi kâ"
+          }
+        ]
+      },
+      {
+        english: "Better late than never",
+        thai: "ดีกว่าไม่มาเลย",
+        thaiMasculine: "ดีกว่าไม่มาเลยครับ",
+        thaiFeminine: "ดีกว่าไม่มาเลยค่ะ",
+        pronunciation: "dii gwàa mâi maa ləəi",
+        mnemonic: "Think: 'dee gwa my ma loey' - good more than not come at all",
+        literal: "Good more than not come at all",
+        examples: [
+          {
+            thai: "มาสายหน่อยครับ",
+            thaiMasculine: "มาสายหน่อยครับ",
+            thaiFeminine: "มาสายหน่อยครับ",
+            translation: "Came a bit late. (male)",
+            pronunciation: "maa sǎai nɔ̀i kráp"
+          },
+          {
+            thai: "ยังดีที่มาค่ะ",
+            thaiMasculine: "ยังดีที่มาค่ะ",
+            thaiFeminine: "ยังดีที่มาค่ะ",
+            translation: "Good that you came. (female)",
+            pronunciation: "yaŋ dii tîi maa kâ"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'common-sentences-10',
+    name: '100 Most Used Thai Sentences 10',
+    level: 'Intermediate',
+    description: 'Essential everyday Thai sentences (91-100) - Aligned with Words Set 10',
+    phrases: [
+      {
+        english: "Have a safe trip",
+        thai: "เดินทางปลอดภัย",
+        thaiMasculine: "เดินทางปลอดภัยครับ",
+        thaiFeminine: "เดินทางปลอดภัยค่ะ",
+        pronunciation: "dəən-taaŋ plɔ̀ɔt-pai",
+        mnemonic: "Think: 'dern tang plot pie' - journey to plot pie safely",
+        literal: "Travel safe",
+        examples: [
+          {
+            thai: "เดินทางปลอดภัยนะครับ",
+            thaiMasculine: "เดินทางปลอดภัยนะครับ",
+            thaiFeminine: "เดินทางปลอดภัยนะครับ",
+            translation: "Have a safe trip! (male)",
+            pronunciation: "dəən-taaŋ plɔ̀ɔt-pai ná kráp"
+          },
+          {
+            thai: "ระวังตัวด้วยค่ะ",
+            thaiMasculine: "ระวังตัวด้วยค่ะ",
+            thaiFeminine: "ระวังตัวด้วยค่ะ",
+            translation: "Take care of yourself. (female)",
+            pronunciation: "rá-waŋ tua dûai kâ"
+          }
+        ]
+      },
+      {
+        english: "Turn left/right",
+        thai: "เลี้ยวซ้าย/ขวา",
+        thaiMasculine: "เลี้ยวซ้าย/ขวาครับ",
+        thaiFeminine: "เลี้ยวซ้าย/ขวาค่ะ",
+        pronunciation: "líao sáai/kwǎa",
+        mnemonic: "Think: 'lee-ow sigh/kwaa' - Leo sighs at the quail",
+        literal: "Turn left/right",
+        examples: [
+          {
+            thai: "เลี้ยวซ้ายตรงไฟแดงครับ",
+            thaiMasculine: "เลี้ยวซ้ายตรงไฟแดงครับ",
+            thaiFeminine: "เลี้ยวซ้ายตรงไฟแดงครับ",
+            translation: "Turn left at the traffic light. (male)",
+            pronunciation: "líao sáai troŋ fai dɛɛŋ kráp"
+          },
+          {
+            thai: "ตรงไปข้างหน้าค่ะ",
+            thaiMasculine: "ตรงไปข้างหน้าค่ะ",
+            thaiFeminine: "ตรงไปข้างหน้าค่ะ",
+            translation: "Go straight ahead. (female)",
+            pronunciation: "troŋ pai kâaŋ nâa kâ"
+          }
+        ]
+      },
+      {
+        english: "I need to go to the hospital",
+        thai: "ฉันต้องไปโรงพยาบาล",
+        thaiMasculine: "ผมต้องไปโรงพยาบาลครับ",
+        thaiFeminine: "ฉันต้องไปโรงพยาบาลค่ะ",
+        pronunciation: "chǎn/pǒm tɔ̂ŋ pai rooŋ-pá-yaa-baan",
+        mnemonic: "Think: 'tong pie rong-pa-ya-ban' - must pie to hospital building",
+        literal: "I must go hospital",
+        examples: [
+          {
+            thai: "ไม่สบายครับ",
+            thaiMasculine: "ไม่สบายครับ",
+            thaiFeminine: "ไม่สบายครับ",
+            translation: "I'm not feeling well. (male)",
+            pronunciation: "mâi sà-baai kráp"
+          },
+          {
+            thai: "ช่วยพาไปหน่อยค่ะ",
+            thaiMasculine: "ช่วยพาไปหน่อยค่ะ",
+            thaiFeminine: "ช่วยพาไปหน่อยค่ะ",
+            translation: "Please take me there. (female)",
+            pronunciation: "chûai paa pai nɔ̀i kâ"
+          }
+        ]
+      },
+      {
+        english: "Actions speak louder than words",
+        thai: "การกระทำสำคัญกว่าคำพูด",
+        thaiMasculine: "การกระทำสำคัญกว่าคำพูดครับ",
+        thaiFeminine: "การกระทำสำคัญกว่าคำพูดค่ะ",
+        pronunciation: "gaan grà-tam sǎm-kan gwàa kam-pûut",
+        mnemonic: "Think: 'gan gra-tam sam-kan gwa kam-poot' - action can important more than word speak",
+        literal: "The action important more than words",
+        examples: [
+          {
+            thai: "ทำให้ดูครับ",
+            thaiMasculine: "ทำให้ดูครับ",
+            thaiFeminine: "ทำให้ดูครับ",
+            translation: "Show me by doing. (male)",
+            pronunciation: "tam hâi duu kráp"
+          },
+          {
+            thai: "อย่าแค่พูดค่ะ",
+            thaiMasculine: "อย่าแค่พูดค่ะ",
+            thaiFeminine: "อย่าแค่พูดค่ะ",
+            translation: "Don't just talk. (female)",
+            pronunciation: "yàa kɛ̂ɛ pûut kâ"
+          }
+        ]
+      },
+      {
+        english: "It's a blessing in disguise",
+        thai: "โชคร้ายที่กลายเป็นโชคดี",
+        thaiMasculine: "โชคร้ายที่กลายเป็นโชคดีครับ",
+        thaiFeminine: "โชคร้ายที่กลายเป็นโชคดีค่ะ",
+        pronunciation: "chôok-ráai tîi glaai pen chôok-dii",
+        mnemonic: "Think: 'choke-rye tea glai pen choke-dee' - bad luck tea becomes good luck dee",
+        literal: "Bad luck that become good luck",
+        examples: [
+          {
+            thai: "บางทีก็ดีครับ",
+            thaiMasculine: "บางทีก็ดีครับ",
+            thaiFeminine: "บางทีก็ดีครับ",
+            translation: "Sometimes it's good. (male)",
+            pronunciation: "baaŋ-tii gɔ̂ɔ dii kráp"
+          },
+          {
+            thai: "เป็นโอกาสใหม่ค่ะ",
+            thaiMasculine: "เป็นโอกาสใหม่ค่ะ",
+            thaiFeminine: "เป็นโอกาสใหม่ค่ะ",
+            translation: "It's a new opportunity. (female)",
+            pronunciation: "pen oo-gàat mài kâ"
+          }
+        ]
+      },
+      {
+        english: "Let bygones be bygones",
+        thai: "ให้อดีตเป็นอดีต",
+        thaiMasculine: "ให้อดีตเป็นอดีตครับ",
+        thaiFeminine: "ให้อดีตเป็นอดีตค่ะ",
+        pronunciation: "hâi à-dìit pen à-dìit",
+        mnemonic: "Think: 'hi a-deet pen a-deet' - let past be past",
+        literal: "Let past be past",
+        examples: [
+          {
+            thai: "ลืมมันไปครับ",
+            thaiMasculine: "ลืมมันไปครับ",
+            thaiFeminine: "ลืมมันไปครับ",
+            translation: "Forget about it. (male)",
+            pronunciation: "lʉʉm man pai kráp"
+          },
+          {
+            thai: "เริ่มต้นใหม่ค่ะ",
+            thaiMasculine: "เริ่มต้นใหม่ค่ะ",
+            thaiFeminine: "เริ่มต้นใหม่ค่ะ",
+            translation: "Start anew. (female)",
+            pronunciation: "rə̂əm tôn mài kâ"
+          }
+        ]
+      },
+      {
+        english: "Time will tell",
+        thai: "เวลาจะเป็นเครื่องพิสูจน์",
+        thaiMasculine: "เวลาจะเป็นเครื่องพิสูจน์ครับ",
+        thaiFeminine: "เวลาจะเป็นเครื่องพิสูจน์ค่ะ",
+        pronunciation: "wee-laa jà pen krʉ̂aŋ pí-sùut",
+        mnemonic: "Think: 'way-la ja pen kruang pee-soot' - time will be machine prove",
+        literal: "Time will be tool prove",
+        examples: [
+          {
+            thai: "รอดูกันครับ",
+            thaiMasculine: "รอดูกันครับ",
+            thaiFeminine: "รอดูกันครับ",
+            translation: "Let's wait and see. (male)",
+            pronunciation: "rɔɔ duu gan kráp"
+          },
+          {
+            thai: "เดี๋ยวก็รู้ค่ะ",
+            thaiMasculine: "เดี๋ยวก็รู้ค่ะ",
+            thaiFeminine: "เดี๋ยวก็รู้ค่ะ",
+            translation: "We'll know soon. (female)",
+            pronunciation: "dǐao gɔ̂ɔ rúu kâ"
+          }
+        ]
+      },
+      {
+        english: "That's the last straw",
+        thai: "นี่เป็นครั้งสุดท้าย",
+        thaiMasculine: "นี่เป็นครั้งสุดท้ายครับ",
+        thaiFeminine: "นี่เป็นครั้งสุดท้ายค่ะ",
+        pronunciation: "nîi pen kráŋ sùt-táai",
+        mnemonic: "Think: 'knee pen krung soot-tie' - this is time last tie",
+        literal: "This be time last",
+        examples: [
+          {
+            thai: "พอแล้วครับ",
+            thaiMasculine: "พอแล้วครับ",
+            thaiFeminine: "พอแล้วครับ",
+            translation: "That's enough. (male)",
+            pronunciation: "pɔɔ láew kráp"
+          },
+          {
+            thai: "ทนไม่ไหวแล้วค่ะ",
+            thaiMasculine: "ทนไม่ไหวแล้วค่ะ",
+            thaiFeminine: "ทนไม่ไหวแล้วค่ะ",
+            translation: "I can't take it anymore. (female)",
+            pronunciation: "ton mâi wǎi láew kâ"
+          }
+        ]
+      },
+      {
+        english: "I have a headache",
+        thai: "ฉันปวดหัว",
+        thaiMasculine: "ผมปวดหัวครับ",
+        thaiFeminine: "ฉันปวดหัวค่ะ",
+        pronunciation: "chǎn/pǒm pùat hǔa",
+        mnemonic: "Think: 'poo-at hua' - pain at head hua",
+        literal: "I pain head",
+        examples: [
+          {
+            thai: "ขอยาแก้ปวดครับ",
+            thaiMasculine: "ขอยาแก้ปวดครับ",
+            thaiFeminine: "ขอยาแก้ปวดครับ",
+            translation: "Can I have pain medicine? (male)",
+            pronunciation: "kɔ̌ɔ yaa gɛ̂ɛ pùat kráp"
+          },
+          {
+            thai: "ปวดหัวมากค่ะ",
+            thaiMasculine: "ปวดหัวมากค่ะ",
+            thaiFeminine: "ปวดหัวมากค่ะ",
+            translation: "I have a bad headache. (female)",
+            pronunciation: "pùat hǔa mâak kâ"
+          }
+        ]
+      },
+      {
+        english: "Please turn on the air conditioner",
+        thai: "กรุณาเปิดแอร์",
+        thaiMasculine: "กรุณาเปิดแอร์ครับ",
+        thaiFeminine: "กรุณาเปิดแอร์ค่ะ",
+        pronunciation: "ga-rú-naa pə̀ət ɛɛ",
+        mnemonic: "Think: 'ga-roo-na pert air' - kangaroo na, open air",
+        literal: "Please open air",
+        examples: [
+          {
+            thai: "ร้อนมากครับ",
+            thaiMasculine: "ร้อนมากครับ",
+            thaiFeminine: "ร้อนมากครับ",
+            translation: "It's very hot. (male)",
+            pronunciation: "rɔ́ɔn mâak kráp"
+          },
+          {
+            thai: "ปรับอุณหภูมิหน่อยค่ะ",
+            thaiMasculine: "ปรับอุณหภูมิหน่อยค่ะ",
+            thaiFeminine: "ปรับอุณหภูมิหน่อยค่ะ",
+            translation: "Adjust the temperature please. (female)",
+            pronunciation: "pràp un-hà-puum nɔ̀i kâ"
           }
         ]
       }

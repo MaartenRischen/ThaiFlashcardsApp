@@ -206,9 +206,9 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl bg-[#1F1F1F] border-[#404040] text-white p-0 overflow-hidden h-[90vh] flex flex-col [&>button]:hidden">
+      <DialogContent className="max-w-7xl bg-[#1F1F1F]/95 backdrop-blur-md border-[#404040]/50 text-white p-0 overflow-hidden h-[90vh] flex flex-col [&>button]:hidden">
         {/* Header */}
-        <div className="bg-[#2C2C2C] border-b border-[#404040] px-8 py-6 flex-shrink-0">
+        <div className="bg-[#2C2C2C]/80 backdrop-blur-sm border-b border-[#404040]/50 px-8 py-6 flex-shrink-0">
           <div className="flex items-center justify-between">
             <DialogHeader className="flex-1">
               <DialogTitle asChild>
@@ -216,7 +216,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                   <div className="flex items-center gap-4">
                     <button
                       onClick={handleBackToFolders}
-                      className="p-4 rounded-xl bg-[#3C3C3C] hover:bg-[#4C4C4C] transition-all duration-200 border border-[#404040] group neumorphic-button"
+                      className="p-4 rounded-xl bg-[#3C3C3C]/50 hover:bg-[#3C3C3C]/70 backdrop-blur-sm transition-all duration-200 border border-[#404040]/50 group"
                     >
                       <ArrowLeft size={24} className="text-[#A9C4FC] group-hover:text-[#A9C4FC]/80" />
                     </button>
@@ -239,7 +239,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
             {/* Single close button in header */}
             <button
               onClick={onClose}
-              className="p-4 rounded-xl bg-[#3C3C3C] hover:bg-[#4C4C4C] transition-all duration-200 border border-[#404040] group neumorphic-button ml-4"
+              className="p-4 rounded-xl bg-[#3C3C3C]/50 hover:bg-[#3C3C3C]/70 backdrop-blur-sm transition-all duration-200 border border-[#404040]/50 group ml-4"
             >
               <X size={24} className="text-[#BDBDBD] group-hover:text-[#E0E0E0]" />
             </button>
@@ -258,7 +258,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
             <>
               {/* Create/Edit Folder Form */}
               {(isCreatingFolder || isEditingFolder) && (
-                <div className="mb-6 p-6 bg-[#2C2C2C] rounded-xl border border-[#404040]">
+                <div className="mb-6 p-6 bg-[#2C2C2C]/40 backdrop-blur-sm rounded-xl border border-[#404040]/50">
                   <h3 className="text-lg font-semibold mb-4 text-[#E0E0E0]">
                     {isCreatingFolder ? 'Create New Folder' : 'Edit Folder'}
                   </h3>
@@ -270,7 +270,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                         value={folderForm.name}
                         onChange={(e) => setFolderForm({ ...folderForm, name: e.target.value })}
                         placeholder="Enter folder name"
-                        className="mt-1 bg-[#3C3C3C] border-[#404040] text-[#E0E0E0] focus:border-[#A9C4FC] focus:ring-1 focus:ring-[#A9C4FC]"
+                        className="mt-1 bg-[#3C3C3C]/50 backdrop-blur-sm border-[#404040]/50 text-[#E0E0E0] focus:border-[#A9C4FC] focus:ring-1 focus:ring-[#A9C4FC]"
                       />
                     </div>
                     <div>
@@ -302,7 +302,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                           setFolderForm({ name: '', description: '' });
                           setFolderError('');
                         }}
-                        className="px-6 py-2.5 bg-[#3C3C3C] hover:bg-[#4C4C4C] text-[#E0E0E0] font-medium rounded-lg transition-all duration-200 border border-[#404040]"
+                        className="px-6 py-2.5 bg-[#3C3C3C]/50 hover:bg-[#3C3C3C]/70 backdrop-blur-sm text-[#E0E0E0] font-medium rounded-lg transition-all duration-200 border border-[#404040]/50"
                       >
                         Cancel
                       </button>
@@ -318,7 +318,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                     setIsCreatingFolder(true);
                     setFolderForm({ name: '', description: '' });
                   }}
-                  className="w-full mb-6 p-4 rounded-xl bg-[#2C2C2C] hover:bg-[#323232] border-2 border-dashed border-[#404040] hover:border-[#A9C4FC]/50 transition-all duration-200 group"
+                  className="w-full mb-6 p-4 rounded-xl bg-[#2C2C2C]/40 hover:bg-[#2C2C2C]/60 border-2 border-dashed border-[#404040]/50 hover:border-[#A9C4FC]/50 transition-all duration-200 group backdrop-blur-sm"
                 >
                   <div className="flex items-center justify-center gap-3">
                     <Plus size={24} className="text-[#A9C4FC] group-hover:text-[#A9C4FC]/80" />
@@ -389,36 +389,30 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                     }}
                     className="relative group cursor-pointer transition-all duration-200 transform hover:scale-105"
                   >
-                    <div className="neumorphic-card-static hover:neumorphic-card-static hover:border-[#505050] hover:bg-[#323232] relative overflow-hidden h-full">
-                      <div className="aspect-[4/3] relative bg-gradient-to-br from-[#2C2C2C] to-[#1F1F1F] overflow-hidden">
-                        {/* Decorative pattern */}
-                        <div className="absolute inset-0 opacity-10">
-                          <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl bg-gray-400" />
-                          <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full blur-2xl bg-gray-500" />
-                        </div>
+                    <div className="relative overflow-hidden h-full bg-[#2C2C2C]/40 backdrop-blur-sm rounded-xl border border-[#404040]/30 hover:bg-[#2C2C2C]/60 hover:border-[#404040]/50 transition-all duration-200">
+                      <div className="aspect-[4/3] relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#2C2C2C]/20 to-[#1F1F1F]/40" />
                         
                         {/* Folder Icon */}
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="relative">
-                            <div className="absolute inset-0 blur-xl opacity-30 bg-gray-400" />
-                            <div className="relative p-5 rounded-2xl bg-[#2C2C2C]/90 backdrop-blur-sm border border-[#404040]/50 shadow-xl">
-                              <FolderOpen size={56} className="text-[#BDBDBD]" />
-                            </div>
+                            <div className="absolute inset-0 blur-2xl opacity-20 bg-gray-400" />
+                            <FolderOpen size={64} className="text-[#BDBDBD] drop-shadow-2xl" />
                           </div>
                         </div>
                         
                         {/* Set Count Badge */}
                         <div className="absolute top-3 left-3">
-                          <div className="px-4 py-1.5 rounded-full bg-[#1F1F1F]/95 backdrop-blur-sm border border-[#404040]/50 shadow-lg">
+                          <div className="px-3 py-1 rounded-full bg-[#1F1F1F]/60 backdrop-blur-md border border-[#404040]/30">
                             <span className="text-sm font-bold text-[#E0E0E0]">
                               {availableSets.filter(set => !set.folderId && !set.folderName && set.id !== 'default').length} sets
                             </span>
                           </div>
                         </div>
                       </div>
-                      <div className="p-4">
+                      <div className="p-4 bg-[#1F1F1F]/30 backdrop-blur-sm">
                         <h3 className="font-bold text-lg text-[#E0E0E0] leading-tight">Unfiled Sets</h3>
-                        <p className="text-sm text-[#BDBDBD] mt-1 leading-relaxed">Sets not in any folder</p>
+                        <p className="text-sm text-[#BDBDBD]/80 mt-1 leading-relaxed">Sets not in any folder</p>
                       </div>
                     </div>
                   </div>
@@ -445,7 +439,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                     }`}
                     onClick={() => handleSetClick(fullSet)}
                   >
-                    <div className={`neumorphic-card-static hover:border-[#505050] hover:bg-[#323232] relative overflow-hidden h-full ${
+                    <div className={`bg-[#2C2C2C]/40 backdrop-blur-sm rounded-xl border border-[#404040]/30 hover:bg-[#2C2C2C]/60 hover:border-[#404040]/50 transition-all duration-200 relative overflow-hidden h-full ${
                       isSelected ? 'ring-2 ring-[#A9C4FC] border-[#A9C4FC]' : ''
                     }`}>
                       <SetCompletionBadge setId={set.id} />
@@ -463,7 +457,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                         
                         {/* Card count overlay */}
                         <div className="absolute bottom-3 right-3">
-                          <div className="px-3 py-1.5 rounded-full bg-[#1F1F1F]/90 backdrop-blur-sm border border-[#404040]/50 shadow-lg">
+                          <div className="px-3 py-1 rounded-full bg-[#1F1F1F]/60 backdrop-blur-md border border-[#404040]/30">
                             <span className="text-sm font-bold text-[#E0E0E0]">
                               {set.phraseCount} cards
                             </span>
@@ -471,7 +465,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
                         </div>
                       </div>
 
-                      <div className="p-4">
+                      <div className="p-4 bg-[#1F1F1F]/30 backdrop-blur-sm">
                         <h3 className="text-lg font-bold text-[#E0E0E0] leading-tight">
                           {set.name}
                         </h3>

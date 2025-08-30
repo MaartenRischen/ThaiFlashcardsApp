@@ -349,7 +349,7 @@ export default function GalleryPage() {
         />
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h1 className="text-2xl font-semibold text-[#E0E0E0]">Gallery</h1>
+          <h1 className="text-2xl font-semibold text-[#E0E0E0]">Public Sets</h1>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             {isAdmin && filteredSets.length > 0 && (
               <button

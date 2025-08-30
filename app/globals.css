@@ -130,8 +130,8 @@ body {
   /* Remove all specific button shadow styles to prevent conflicts */
   .neumorphic-icon-button[title="Create!"],
   .neumorphic-icon-button[title="Create!"]:hover,
-  .neumorphic-icon-button[title="User Gallery"],
-  .neumorphic-icon-button[title="User Gallery"]:hover {
+  .neumorphic-icon-button[title="Browse community flashcard sets"],
+  .neumorphic-icon-button[title="Browse community flashcard sets"]:hover {
     box-shadow: none;
   }
 

@@ -191,7 +191,7 @@ export function CardsListModal({
         <div className="bg-[#1F1F1F] rounded-xl p-6 max-w-2xl w-full max-h-[85vh] overflow-hidden relative flex flex-col border border-[#404040]" onClick={e => e.stopPropagation()}>
         <div className="flex flex-col gap-3 mb-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-[#E0E0E0]">Cards in Current Set</h3>
+            <h3 className="text-xl font-semibold text-[#E0E0E0]">This Set</h3>
             <button 
               className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition-colors" 
               onClick={handleClose}

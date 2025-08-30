@@ -102,8 +102,55 @@ export function FlashcardHeader({
       {/* Navigation Buttons */}
       <div className="px-4 py-3 w-full bg-[#121212]">
         <div className="flex flex-row items-center w-full justify-between gap-x-3">
-          {/* === Set Management Category === */}
-          {/* Create! */}
+          {/* Cards (This Set) - First */}
+          <div className="flex flex-col items-center">
+            <button
+              onClick={onOpenCards}
+              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#f59e0b] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(245,158,11,0.15)] before:pointer-events-none"
+              style={{
+                boxShadow: '0 0 20px rgba(245, 158, 11, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
+              }}
+              title="View all cards in current set"
+              aria-label="View all cards in current set"
+            >
+              <Layers />
+            </button>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">This Set</span>
+          </div>
+          
+          {/* My Sets - Second */}
+          <div className="flex flex-col items-center">
+            <button
+              onClick={onOpenSetManager}
+              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#2563EB] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(37,99,235,0.15)] before:pointer-events-none"
+              style={{
+                boxShadow: '0 0 20px rgba(37, 99, 235, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
+              }}
+              title="Manage your flashcard sets"
+              aria-label="Manage your flashcard sets"
+            >
+              <Grid />
+            </button>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">My Sets</span>
+          </div>
+          
+          {/* Gallery (Public Sets) - Third */}
+          <div className="flex flex-col items-center">
+            <button
+              onClick={() => router.push('/gallery')}
+              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#BB86FC] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(187,134,252,0.15)] before:pointer-events-none"
+              style={{
+                boxShadow: '0 0 20px rgba(187, 134, 252, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
+              }}
+              title="Browse community flashcard sets"
+              aria-label="Browse community flashcard sets"
+            >
+              <GalleryHorizontal />
+            </button>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Public Sets</span>
+          </div>
+          
+          {/* Create! - Fourth */}
           <div className="flex flex-col items-center">
             <button
               onClick={onOpenSetWizard}
@@ -127,63 +174,11 @@ export function FlashcardHeader({
               </div>
             )}
           </div>
-          {/* Gallery */}
-          <div className="flex flex-col items-center">
-            <button
-              onClick={() => router.push('/gallery')}
-              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#BB86FC] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(187,134,252,0.15)] before:pointer-events-none"
-              style={{
-                boxShadow: '0 0 20px rgba(187, 134, 252, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
-              }}
-              title="Browse community flashcard sets"
-              aria-label="Browse community flashcard sets"
-            >
-              <GalleryHorizontal />
-            </button>
-            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Gallery</span>
-          </div>
-          {/* My Sets */}
-          <div className="flex flex-col items-center">
-            <button
-              onClick={onOpenSetManager}
-              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#2563EB] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(37,99,235,0.15)] before:pointer-events-none"
-              style={{
-                boxShadow: '0 0 20px rgba(37, 99, 235, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
-              }}
-              title="Manage your flashcard sets"
-              aria-label="Manage your flashcard sets"
-            >
-              <Grid />
-            </button>
-            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">My Sets</span>
-          </div>
           
-          {/* Divider between categories */}
+          {/* Divider */}
           <div className="h-12 w-px bg-[#404040]/50 mx-1" />
           
-          {/* === Current Set Actions Category === */}
-          {/* Cards in this set */}
-          <div className="flex flex-col items-center">
-            <button
-              onClick={onOpenCards}
-              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#f59e0b] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(245,158,11,0.15)] before:pointer-events-none"
-              style={{
-                boxShadow: '0 0 20px rgba(245, 158, 11, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
-              }}
-              title="View all cards in current set"
-              aria-label="View all cards in current set"
-            >
-              <Layers />
-            </button>
-            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Cards</span>
-          </div>
-
-          
-          {/* Divider between categories */}
-          <div className="h-12 w-px bg-[#404040]/50 mx-1" />
-          
-          {/* === App Controls Category === */}
-          {/* Settings */}
+          {/* Settings - Fifth */}
           <div className="flex flex-col items-center">
             <button
               onClick={onOpenSettings}
@@ -195,7 +190,8 @@ export function FlashcardHeader({
             </button>
             <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Settings</span>
           </div>
-          {/* Help */}
+          
+          {/* Help - Sixth */}
           <div className="flex flex-col items-center">
             <button
               onClick={() => setShowHowItWorks(true)}

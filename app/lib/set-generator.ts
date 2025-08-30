@@ -440,8 +440,11 @@ export async function generateOpenRouterBatch(
     const temperature = getTemperatureFromToneLevel(toneLevel);
   
   try {
-    console.log(`[Batch ${batchIndex}] Calling OpenRouter API with models:`, models);
+    console.log(`[Batch ${batchIndex}] Starting OpenRouter API call`);
+    console.log(`[Batch ${batchIndex}] Models:`, models);
     console.log(`[Batch ${batchIndex}] Temperature:`, temperature);
+    console.log(`[Batch ${batchIndex}] API Key present:`, !!process.env.OPENROUTER_API_KEY);
+    console.log(`[Batch ${batchIndex}] API Key preview:`, process.env.OPENROUTER_API_KEY?.substring(0, 20) + '...');
     
     const rawResponse = await callOpenRouterWithFallback(prompt, models, temperature);
     
@@ -492,14 +495,21 @@ export async function generateOpenRouterBatch(
     };
     
   } catch (error) {
+    console.error(`[Batch ${batchIndex}] CRITICAL ERROR:`, error);
+    console.error(`[Batch ${batchIndex}] Error details:`, {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      models: models,
+      apiKeyPresent: !!process.env.OPENROUTER_API_KEY
+    });
+    
     const batchError = createBatchError(
       'API_ERROR',
       error instanceof Error ? error.message : 'Unknown error',
-      { batchIndex, models }
+      { batchIndex, models, fullError: error }
     );
     
-        return {
-            phrases: [],
+    return {
+      phrases: [],
       error: batchError,
       temperature
     };

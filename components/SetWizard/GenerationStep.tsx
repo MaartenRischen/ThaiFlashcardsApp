@@ -222,7 +222,25 @@ export function GenerationStep({
         }
         
         failGeneration();
-        alert(`Failed to generate set: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        
+        // Provide more helpful error messages
+        let errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        
+        if (errorMessage.includes('No phrases were generated')) {
+          errorMessage = 'The AI service is temporarily unavailable. This could be due to:\n\n' +
+            '• OpenRouter API is down or experiencing issues\n' +
+            '• API key has insufficient credits\n' +
+            '• Rate limiting from too many requests\n\n' +
+            'Please try again in a moment or contact support if the issue persists.';
+        } else if (errorMessage.includes('Rate limit exceeded')) {
+          errorMessage = 'Too many requests. Please wait a minute and try again.';
+        } else if (errorMessage.includes('Insufficient credits')) {
+          errorMessage = 'The API has run out of credits. Please contact the app administrator.';
+        } else if (errorMessage.includes('Invalid API key')) {
+          errorMessage = 'API configuration error. Please contact support.';
+        }
+        
+        alert(errorMessage);
       }
     };
     

@@ -118,6 +118,9 @@ export function FlashcardHeader({
             <span className="block text-xs text-[#BDBDBD] mt-1 text-center">This Set</span>
           </div>
           
+          {/* Divider between This Set and My Sets */}
+          <div className="h-12 w-px bg-[#404040]/50 mx-1" />
+          
           {/* My Sets - Second */}
           <div className="flex flex-col items-center">
             <button
@@ -150,6 +153,9 @@ export function FlashcardHeader({
             <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Public Sets</span>
           </div>
           
+          {/* Divider between Public Sets and Create! */}
+          <div className="h-12 w-px bg-[#404040]/50 mx-1" />
+          
           {/* Create! - Fourth */}
           <div className="flex flex-col items-center">
             <button
@@ -175,7 +181,7 @@ export function FlashcardHeader({
             )}
           </div>
           
-          {/* Divider */}
+          {/* Divider between Create! and Settings */}
           <div className="h-12 w-px bg-[#404040]/50 mx-1" />
           
           {/* Settings - Fifth */}

@@ -371,14 +371,9 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
           const userSets: SetMetaData[] = userSetsResponse.sets; // Extract the array
           
-          // FIX: Combine default and user sets correctly
-          const allDefaultSets = getDefaultSetsForUnauthenticatedUsers();
-          const combinedSets = [
-            ...allDefaultSets,
-            ...userSets.filter(set => !set.id.startsWith('default'))
-          ];
-          setAvailableSets(combinedSets); 
-          console.log(`SetContext: Loaded ${userSets.length} user-specific sets via API. Total available: ${combinedSets.length}`);
+          // Just use the sets from the database (they now include all default sets)
+          setAvailableSets(userSets); 
+          console.log(`SetContext: Loaded ${userSets.length} sets via API.`);
 
         } catch (error) {
           console.error("SetContext: Error loading initial user data via API:", error);

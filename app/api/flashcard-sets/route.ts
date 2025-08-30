@@ -31,6 +31,11 @@ export async function GET() {
 
   try {
     console.log(`API Route /api/flashcard-sets GET: Fetching sets for user: ${userId}`);
+    
+    // First, ensure user has all default sets (for older accounts)
+    const { ensureUserHasAllDefaultSets } = await import('@/app/lib/ensure-default-sets');
+    await ensureUserHasAllDefaultSets(userId);
+    
     const sets = await storage.getAllSetMetaData(userId);
     console.log(`API Route /api/flashcard-sets GET: Found ${sets.length} sets.`);
     return NextResponse.json({ sets: sets || [] }, { status: 200 });

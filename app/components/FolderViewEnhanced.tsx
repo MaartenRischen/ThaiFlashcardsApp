@@ -29,6 +29,7 @@ import {
   Grid3X3,
   List
 } from 'lucide-react';
+import { ShareButton } from './ShareButton';
 
 interface FolderViewEnhancedProps {
   isOpen: boolean;
@@ -708,12 +709,20 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                   />
                                   <div className="absolute inset-0 bg-gradient-to-t from-[#1F1F1F] via-[#1F1F1F]/20 to-transparent" />
                                   
-                                  <div className="absolute bottom-3 right-3">
+                                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
                                     <div className="px-3 py-1 rounded-full bg-[#1F1F1F]/60 backdrop-blur-md border border-[#404040]/30">
                                       <span className="text-sm font-bold text-[#E0E0E0]">
                                         {set.phraseCount} cards
                                       </span>
                                     </div>
+                                    {!isSelectMode && (
+                                      <ShareButton
+                                        setId={set.id}
+                                        setName={set.name}
+                                        size="icon"
+                                        className="bg-[#1F1F1F]/60 backdrop-blur-md border border-[#404040]/30 hover:bg-[#2C2C2C]/80"
+                                      />
+                                    )}
                                   </div>
                                 </div>
 
@@ -755,6 +764,15 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                 <div className="flex items-center gap-4 text-sm text-[#BDBDBD]">
                                   <span>{set.phraseCount} cards</span>
                                   <SetCompletionBadge setId={set.id} />
+                                  {!isSelectMode && (
+                                    <ShareButton
+                                      setId={set.id}
+                                      setName={set.name}
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7"
+                                    />
+                                  )}
                                 </div>
                               </>
                             )}

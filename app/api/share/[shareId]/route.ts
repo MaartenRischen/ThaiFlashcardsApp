@@ -3,6 +3,7 @@ import { prisma } from '@/app/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
 import { randomUUID } from 'crypto';
 import { Prisma } from '@prisma/client';
+import { getTargetFolderForNewSet } from '@/app/lib/storage/folders';
 
 // GET /api/share/[shareId]
 // Returns the shared set (public, read‑only)
@@ -50,6 +51,11 @@ export async function POST(req: NextRequest, { params }: { params: { shareId: st
     }
 
     const newSetId = randomUUID();
+    
+    // Determine target folder based on original source
+    // Import sets should go to the appropriate folder based on the original source
+    const targetSource = original.source === 'manual' ? 'manual' : 'auto';
+    const folderId = await getTargetFolderForNewSet(userId, targetSource);
 
     await prisma.$transaction([
       prisma.flashcardSet.create({
@@ -64,6 +70,7 @@ export async function POST(req: NextRequest, { params }: { params: { shareId: st
           source: 'import',
           imageUrl: original.imageUrl,
           seriousnessLevel: original.seriousnessLevel,
+          folderId: folderId,
         },
       }),
       prisma.phrase.createMany({

@@ -195,8 +195,8 @@ export function CardsListModal({
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-[#E0E0E0]">This Set</h3>
             <div className="flex items-center gap-3">
-              {/* Go Live and Share Buttons - only show for non-default sets */}
-              {activeSet && activeSet.id !== 'default' && (
+              {/* Publish and Share Buttons - only show for user-created sets (not default sets) */}
+              {activeSet && activeSet.source !== 'default' && !activeSet.id.startsWith('default-') && (
                 <>
                   <GoLiveButton
                     setId={activeSet.id}

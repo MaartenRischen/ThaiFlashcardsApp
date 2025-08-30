@@ -123,7 +123,7 @@ export function GoLiveButton({ setId, setName, className, variant = 'ghost', siz
             </div>
             
             <Globe className="h-4 w-4 text-white" />
-            <span className="text-sm font-bold whitespace-nowrap">Go Live!</span>
+            <span className="text-sm font-bold whitespace-nowrap">Publish</span>
             
             {/* Hover overlay */}
             <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
@@ -146,7 +146,7 @@ export function GoLiveButton({ setId, setName, className, variant = 'ghost', siz
           title="Publish this set to the public gallery"
         >
           <Globe className={size === 'icon' ? "h-4 w-4" : "h-4 w-4 mr-1"} />
-          {size !== 'icon' && 'Go Live'}
+          {size !== 'icon' && 'Publish'}
         </Button>
       )}
 
@@ -220,7 +220,7 @@ export function GoLiveButton({ setId, setName, className, variant = 'ghost', siz
                   ) : (
                     <>
                       <Globe className="h-4 w-4 mr-2" />
-                      Go Live!
+                      Publish
                     </>
                   )}
                 </Button>

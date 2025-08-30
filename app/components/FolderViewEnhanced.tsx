@@ -712,11 +712,14 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                   
                                                                         {!isSelectMode && (
                                         <div className="absolute top-3 right-3 flex gap-2">
-                                          <GoLiveButton
-                                            setId={set.id}
-                                            setName={set.name}
-                                            variant="prominent"
-                                          />
+                                          {/* Only show Publish button for user-created sets (not default sets) */}
+                                          {set.source !== 'default' && !set.id.startsWith('default-') && (
+                                            <GoLiveButton
+                                              setId={set.id}
+                                              setName={set.name}
+                                              variant="prominent"
+                                            />
+                                          )}
                                           <ShareButton
                                             setId={set.id}
                                             setName={set.name}

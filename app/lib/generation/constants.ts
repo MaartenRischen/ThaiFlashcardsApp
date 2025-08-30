@@ -4,12 +4,11 @@ export const MAX_RETRIES = 3;
 // Prioritized list of text models for set generation
 export const TEXT_MODELS = [
   'openai/gpt-4o-mini',          // GPT-4o Mini - Most reliable, fast and cost-effective ($0.15/1M input)
-  'openrouter/auto',             // Let OpenRouter pick the best model automatically
   'anthropic/claude-3-haiku',    // Claude 3 Haiku - Reliable fallback ($0.25/1M input)
+  'openrouter/auto',             // Let OpenRouter pick the best model automatically
   'google/gemini-2.0-flash-exp', // Gemini 2.0 Flash - Latest Google model, very fast
   'deepseek/deepseek-chat',      // DeepSeek V3 - VERY fast & cheap ($0.14/1M input, $0.28/1M output)
   'anthropic/claude-3.5-sonnet', // Claude 3.5 Sonnet - Very capable but more expensive
-  'meta-llama/llama-3.1-8b-instruct:free', // Free tier fallback
 ];
 
 // Dynamic batch size based on model capabilities
@@ -21,8 +20,7 @@ export function getBatchSize(model: string): number {
     case 'openai/gpt-4o-mini': return 10;             // Optimized for speed
     case 'google/gemini-2.0-flash-exp': return 10;    // Flash models are very fast
     case 'anthropic/claude-3-haiku': return 10;
-    case 'meta-llama/llama-3.1-8b-instruct:free': return 8;
-    default: return 6;
+    default: return 8;
   }
 }
 

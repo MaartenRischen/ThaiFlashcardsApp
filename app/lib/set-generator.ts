@@ -292,7 +292,7 @@ export async function testOpenRouterConnection(): Promise<{success: boolean, mod
     const testPrompt = "Reply with a single word: 'working'";
     const testModels = ['openai/gpt-4o-mini', 'anthropic/claude-3-haiku'];
     
-    const response = await callOpenRouterWithFallback(testPrompt, testModels, 0.3);
+    const _response = await callOpenRouterWithFallback(testPrompt, testModels, 0.3);
     
     return {
       success: true,

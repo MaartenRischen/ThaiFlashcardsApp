@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { SignInButton } from '@clerk/nextjs';
 import { LogIn } from 'lucide-react';

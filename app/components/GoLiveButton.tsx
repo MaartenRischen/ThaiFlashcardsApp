@@ -68,7 +68,7 @@ export function GoLiveButton({ setId, setName, className, variant = 'ghost', siz
         throw new Error(errorData.error || 'Failed to publish set');
       }
 
-      const result = await response.json();
+      const _result = await response.json();
       
       setPublished(true);
       toast.success('🎉 Your set is now live in the public gallery!');

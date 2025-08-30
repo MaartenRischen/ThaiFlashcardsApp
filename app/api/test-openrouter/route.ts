@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { testOpenRouterConnection } from '@/app/lib/set-generator';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     console.log('[Test OpenRouter] Starting connectivity test...');
     console.log('[Test OpenRouter] API Key present:', !!process.env.OPENROUTER_API_KEY);

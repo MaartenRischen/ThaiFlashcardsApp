@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     const publishData: PublishedSetData = {
       title: title.trim(),
       description: description?.trim(),
-      imageUrl: set.imageUrl,
+      imageUrl: set.imageUrl || undefined,
       cardCount: phrases.length,
       author: author.trim() || 'Anonymous',
       llmBrand: set.llmBrand,

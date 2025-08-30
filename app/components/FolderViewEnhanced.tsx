@@ -79,6 +79,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
   // Fetch folders on mount
   useEffect(() => {
     if (isOpen) {
+      console.log('[FolderView] Modal opened, available sets:', availableSets.length);
       fetchFolders();
     }
   }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -93,16 +94,19 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
   const fetchFolders = async () => {
     const cachedFolders = getCachedFolders();
     if (cachedFolders) {
+      console.log('[FolderView] Using cached folders:', cachedFolders);
       setFolders(cachedFolders);
       return;
     }
 
     setLoading(true);
     try {
+      console.log('[FolderView] Loading folders...');
       const loadedFolders = await preloadFolders();
+      console.log('[FolderView] Loaded folders:', loadedFolders);
       setFolders(loadedFolders);
     } catch (error) {
-      console.error('Error fetching folders:', error);
+      console.error('[FolderView] Error fetching folders:', error);
       toast.error('Failed to load folders');
     } finally {
       setLoading(false);

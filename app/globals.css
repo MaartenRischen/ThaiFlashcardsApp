@@ -358,4 +358,20 @@ html.fake-dark-mode-active #dark-mode-toggle-container * {
 
 .animate-sparkle {
   animation: sparkle 2s ease-in-out infinite;
+}
+
+/* Go Live button pulse animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 } 

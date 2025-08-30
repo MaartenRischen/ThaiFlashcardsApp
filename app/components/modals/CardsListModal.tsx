@@ -6,6 +6,7 @@ import { saveSetContent } from '@/app/lib/storage/set-content';
 import { toast } from 'sonner';
 import { AudioLessonModalContent } from '../AudioLessonModalContent';
 import { ShareButton } from '../ShareButton';
+import { GoLiveButton } from '../GoLiveButton';
 
 interface CardsListModalProps {
   isOpen: boolean;
@@ -194,14 +195,22 @@ export function CardsListModal({
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-[#E0E0E0]">This Set</h3>
             <div className="flex items-center gap-3">
-              {/* Share Button - only show for non-default sets */}
+              {/* Go Live and Share Buttons - only show for non-default sets */}
               {activeSet && activeSet.id !== 'default' && (
-                <ShareButton
-                  setId={activeSet.id}
-                  setName={activeSet.name}
-                  variant="prominent"
-                  className="scale-90"
-                />
+                <>
+                  <GoLiveButton
+                    setId={activeSet.id}
+                    setName={activeSet.name}
+                    variant="prominent"
+                    className="scale-90"
+                  />
+                  <ShareButton
+                    setId={activeSet.id}
+                    setName={activeSet.name}
+                    variant="prominent"
+                    className="scale-90"
+                  />
+                </>
               )}
               <button 
                 className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition-colors" 

@@ -30,6 +30,7 @@ import {
   List
 } from 'lucide-react';
 import { ShareButton } from './ShareButton';
+import { GoLiveButton } from './GoLiveButton';
 
 interface FolderViewEnhancedProps {
   isOpen: boolean;
@@ -709,15 +710,20 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                   />
                                   <div className="absolute inset-0 bg-gradient-to-t from-[#1F1F1F] via-[#1F1F1F]/20 to-transparent" />
                                   
-                                  {!isSelectMode && (
-                                    <div className="absolute top-3 right-3">
-                                      <ShareButton
-                                        setId={set.id}
-                                        setName={set.name}
-                                        variant="prominent"
-                                      />
-                                    </div>
-                                  )}
+                                                                        {!isSelectMode && (
+                                        <div className="absolute top-3 right-3 flex gap-2">
+                                          <GoLiveButton
+                                            setId={set.id}
+                                            setName={set.name}
+                                            variant="prominent"
+                                          />
+                                          <ShareButton
+                                            setId={set.id}
+                                            setName={set.name}
+                                            variant="prominent"
+                                          />
+                                        </div>
+                                      )}
                                   
                                   <div className="absolute bottom-3 left-3">
                                     <div className="px-3 py-1 rounded-full bg-[#1F1F1F]/60 backdrop-blur-md border border-[#404040]/30">

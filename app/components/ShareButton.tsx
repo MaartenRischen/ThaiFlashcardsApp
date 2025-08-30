@@ -87,10 +87,10 @@ export function ShareButton({ setId, setName, className, variant = 'ghost', size
     <>
       {variant === 'prominent' ? (
         <div className="relative group">
-          {/* Glow effect behind button */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] rounded-full blur opacity-50 group-hover:opacity-75 transition-opacity" />
+          {/* Glow effect behind button - smaller and more subtle */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity" />
           
-          {/* Actual button */}
+          {/* Actual button - more transparent background */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -98,22 +98,22 @@ export function ShareButton({ setId, setName, className, variant = 'ghost', size
             }}
             disabled={loading}
             className={cn(
-              "relative px-4 py-2.5 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white font-bold rounded-full",
-              "shadow-lg hover:shadow-xl transform group-hover:scale-105 transition-all duration-200",
-              "border border-white/30",
-              "flex items-center gap-2",
+              "relative px-3 py-2 bg-gradient-to-r from-[#FF6B6B]/60 to-[#FF8E53]/60 text-white font-bold rounded-full",
+              "shadow-md hover:shadow-lg transform group-hover:scale-105 transition-all duration-200",
+              "border border-white/20 backdrop-blur-sm",
+              "flex items-center gap-1.5",
               className
             )}
             title="Share this set with friends!"
           >
-            {/* Sparkle icon */}
-            <div className="absolute -top-2 -right-2">
-              <Sparkles className="h-6 w-6 text-yellow-300 animate-sparkle drop-shadow-[0_0_6px_rgba(252,211,77,0.6)]" />
+            {/* Sparkle icon - smaller */}
+            <div className="absolute -top-1.5 -right-1.5">
+              <Sparkles className="h-4 w-4 text-yellow-300 animate-sparkle drop-shadow-[0_0_4px_rgba(252,211,77,0.6)]" />
             </div>
             
-            <Heart className="h-4 w-4 text-white" />
-            <span className="text-sm font-bold whitespace-nowrap">Send to a Friend!</span>
-            <Share2 className="h-4 w-4" />
+            <Heart className="h-3.5 w-3.5 text-white" />
+            <span className="text-xs font-bold whitespace-nowrap">Send to a Friend!</span>
+            <Share2 className="h-3.5 w-3.5" />
             
             {/* Hover overlay */}
             <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />

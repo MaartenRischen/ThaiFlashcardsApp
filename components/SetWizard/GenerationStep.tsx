@@ -33,7 +33,7 @@ export function GenerationStep({
   onClose: _onClose,
   onOpenSetManager: _onOpenSetManager
 }: GenerationStepProps) {
-  const { startGeneration, completeGeneration, failGeneration } = useGeneration();
+  const { startGeneration, updateProgress, completeGeneration, failGeneration } = useGeneration();
   const { addSet: _addSet, refreshSets } = useSet();
   const [hasStarted, setHasStarted] = useState(false);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -57,15 +57,12 @@ export function GenerationStep({
       try {
         
         // Start simulated progress updates
-        let simulatedProgress = 10;
+        let simulatedProgress = 0;
+        let currentPhrase = 0;
         progressIntervalRef.current = setInterval(() => {
-          simulatedProgress += Math.random() * 5; // Increment by 0-5%
-          if (simulatedProgress < 70) { // Don't go beyond 70% with simulation
-            if (state.mode === 'manual') {
-              // Progress messages removed since updateProgress was removed
-            } else {
-              // Progress messages removed since updateProgress was removed
-            }
+          currentPhrase += 1;
+          if (currentPhrase <= phraseCount) {
+            updateProgress(currentPhrase);
           }
         }, 1000);
         
@@ -120,12 +117,11 @@ export function GenerationStep({
             clearInterval(progressIntervalRef.current);
           }
           
-          // updateProgress(80, 'Saving your flashcards...'); // Removed updateProgress
+          // Update to show final progress
+          updateProgress(phraseCount);
           
           // The API already created the set, so we just need to refresh and switch to it
           await refreshSets();
-          
-          // updateProgress(100, 'Complete!'); // Removed updateProgress
           
           // Small delay to show completion
           await new Promise(resolve => setTimeout(resolve, 500));
@@ -197,12 +193,16 @@ export function GenerationStep({
           }
           console.log('GenerationStep: API result:', result);
           
-          // updateProgress(80, 'Saving your flashcards...'); // Removed updateProgress
+          // Clear simulated progress
+          if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current);
+          }
+          
+          // Update to show final progress
+          updateProgress(phraseCount);
           
           // The API already created the set, so we just need to refresh and switch to it
           await refreshSets();
-          
-          // updateProgress(100, 'Complete!'); // Removed updateProgress
           
           // Small delay to show completion
           await new Promise(resolve => setTimeout(resolve, 500));

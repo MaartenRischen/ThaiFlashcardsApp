@@ -8,13 +8,16 @@ interface GenerationStatus {
   isGenerating: boolean
   mode: GenerationMode
   phraseCount: number
+  currentPhrase?: number
 }
 
 interface GenerationContextType {
   generationStatus: GenerationStatus | null
   startGeneration: (mode: GenerationMode, phraseCount: number) => void
+  updateProgress: (currentPhrase: number) => void
   completeGeneration: () => void
   failGeneration: () => void
+  cancelGeneration: () => void
 }
 
 const GenerationContext = createContext<GenerationContextType | undefined>(undefined)
@@ -26,8 +29,13 @@ export function GenerationProvider({ children }: { children: React.ReactNode }) 
     setGenerationStatus({
       isGenerating: true,
       mode,
-      phraseCount
+      phraseCount,
+      currentPhrase: 0
     })
+  }, [])
+
+  const updateProgress = useCallback((currentPhrase: number) => {
+    setGenerationStatus(prev => prev ? { ...prev, currentPhrase } : null)
   }, [])
 
   const completeGeneration = useCallback(() => {
@@ -38,12 +46,19 @@ export function GenerationProvider({ children }: { children: React.ReactNode }) 
     setGenerationStatus(null)
   }, [])
 
+  const cancelGeneration = useCallback(() => {
+    // TODO: Implement actual cancellation logic if needed
+    setGenerationStatus(null)
+  }, [])
+
   return (
     <GenerationContext.Provider value={{
       generationStatus,
       startGeneration,
+      updateProgress,
       completeGeneration,
-      failGeneration
+      failGeneration,
+      cancelGeneration
     }}>
       {children}
     </GenerationContext.Provider>

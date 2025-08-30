@@ -46,7 +46,7 @@ type SortOption = 'name' | 'date' | 'size';
 
 export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlightSetId }: FolderViewEnhancedProps) {
   const { availableSets, switchSet, activeSetId, refreshSets } = useSet();
-  const { preloadFolders, getCachedFolders, clearFolderCache, preloadAllSets, preloadImages, getCachedProgress } = useSetCache();
+  const { preloadFolders, getCachedFolders, clearFolderCache, preloadAllSets, preloadImages, getCachedContent } = useSetCache();
   
   // State
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -826,8 +826,8 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                     {/* Card count and learned count */}
                                     <div className="mt-2">
                                       <span className="text-sm text-[#BDBDBD]">
-                                        {set.phraseCount} cards / {getCachedProgress(set.id) ? 
-                                          Object.values(getCachedProgress(set.id) || {}).filter(p => p.difficulty === 'easy').length 
+                                        {set.phraseCount} cards / {getCachedContent(set.id) ? 
+                                          Object.values(getCachedContent(set.id)?.progress || {}).filter(p => p.difficulty === 'easy').length 
                                           : 0} learned
                                       </span>
                                     </div>
@@ -919,8 +919,8 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                     )}
                                     <span className="text-[#606060]">•</span>
                                     <span className="text-sm text-[#BDBDBD]">
-                                      {set.phraseCount} cards / {getCachedProgress(set.id) ? 
-                                        Object.values(getCachedProgress(set.id) || {}).filter(p => p.difficulty === 'easy').length 
+                                      {set.phraseCount} cards / {getCachedContent(set.id) ? 
+                                        Object.values(getCachedContent(set.id)?.progress || {}).filter(p => p.difficulty === 'easy').length 
                                         : 0} learned
                                     </span>
                                   </div>

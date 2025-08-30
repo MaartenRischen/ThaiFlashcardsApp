@@ -167,6 +167,7 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
     }
     
     // Assign any unassigned user-generated sets to their appropriate folders
+    console.log(`[ENSURE-DEFAULT-SETS] Assigning user sets to folders for ${userId}`);
     await assignUserSetsToFolders(userId);
     
     console.log(`[ENSURE-DEFAULT-SETS] Completed for user ${userId}`);

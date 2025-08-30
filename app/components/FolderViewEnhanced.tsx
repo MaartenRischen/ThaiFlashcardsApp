@@ -141,6 +141,15 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
         }
       } else {
         // For authenticated users, use the existing logic
+        console.log(`[FolderView] Folder ${folder.name} (${folder.id}), looking for sets`);
+        console.log('[FolderView] Available sets:', availableSets.map(s => ({ 
+          id: s.id, 
+          name: s.name, 
+          folderId: s.folderId, 
+          folderName: s.folderName,
+          source: s.source 
+        })));
+        
         folderSets = availableSets.filter(set => 
           set.folderId === folder.id || set.folderName === folder.name
         );
@@ -153,6 +162,8 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
           const uniqueUnfiledSets = unfiledSets.filter(set => !setIds.has(set.id));
           folderSets = [...folderSets, ...uniqueUnfiledSets];
         }
+        
+        console.log(`[FolderView] Found ${folderSets.length} sets for folder ${folder.name}`);
       }
       
       const setIds = folderSets.map(set => set.id);

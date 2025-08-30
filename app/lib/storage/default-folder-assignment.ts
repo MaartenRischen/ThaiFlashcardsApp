@@ -149,7 +149,7 @@ export async function assignUserSetsToFolders(userId: string) {
       where: {
         userId,
         source: {
-          in: ['manual', 'generated', 'auto']
+          in: ['manual', 'generated', 'auto', 'import'] // Include imported sets too
         },
         folderId: null
       }
@@ -166,6 +166,7 @@ export async function assignUserSetsToFolders(userId: string) {
     const updates = [];
 
     for (const set of unassignedSets) {
+      // Manual sets go to manual folder, everything else goes to automatic folder
       const folderId = set.source === 'manual' ? manualFolderId : autoFolderId;
       
       updates.push(

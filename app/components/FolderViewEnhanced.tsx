@@ -27,10 +27,12 @@ import {
   Square,
   MoveRight,
   Grid3X3,
-  List
+  List,
+  Eye
 } from 'lucide-react';
 import { ShareButton } from './ShareButton';
 import { GoLiveButton } from './GoLiveButton';
+import { SetPreviewModal } from './SetPreviewModal';
 
 interface FolderViewEnhancedProps {
   isOpen: boolean;
@@ -65,6 +67,14 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [setsToMove, setSetsToMove] = useState<SetMetaData[]>([]);
   const [folderToDelete, setFolderToDelete] = useState<Folder | null>(null);
+  
+  // Preview modal state
+  const [previewSet, setPreviewSet] = useState<{
+    id: string;
+    name: string;
+    phraseCount: number;
+    imageUrl?: string | null;
+  } | null>(null);
 
   // Fetch folders on mount
   useEffect(() => {
@@ -246,11 +256,21 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     if (isSelectMode) {
       toggleSetSelection(set.id);
     } else {
-      if (set.id !== activeSetId) {
-        await switchSet(set.id);
-      }
-      onClose();
+      // Open preview instead of immediately loading
+      setPreviewSet({
+        id: set.id,
+        name: set.name,
+        phraseCount: set.phraseCount,
+        imageUrl: set.imageUrl
+      });
     }
+  };
+  
+  const handleLoadSet = async (setId: string) => {
+    if (setId !== activeSetId) {
+      await switchSet(setId);
+    }
+    onClose();
   };
 
   const toggleSetSelection = (setId: string) => {
@@ -738,14 +758,24 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                 </div>
 
                                 <div className="p-4 bg-[#1F1F1F]/30 backdrop-blur-sm">
-                                  <h3 className="text-lg font-bold text-[#E0E0E0] leading-tight">
-                                    {set.name}
-                                  </h3>
-                                  {fullSet.level && (
-                                    <p className="text-sm text-[#A9C4FC] mt-1">
-                                      Level: {fullSet.level}
-                                    </p>
-                                  )}
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1">
+                                      <h3 className="text-lg font-bold text-[#E0E0E0] leading-tight">
+                                        {set.name}
+                                      </h3>
+                                      {fullSet.level && (
+                                        <p className="text-sm text-[#A9C4FC] mt-1">
+                                          Level: {fullSet.level}
+                                        </p>
+                                      )}
+                                    </div>
+                                    {!isSelectMode && (
+                                      <div className="flex items-center gap-1 text-xs text-gray-400">
+                                        <Eye className="w-3 h-3" />
+                                        <span>Preview</span>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </>
                             ) : (
@@ -762,9 +792,17 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                 </div>
                                 
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="font-bold text-[#E0E0E0] truncate">
-                                    {set.name}
-                                  </h3>
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-bold text-[#E0E0E0] truncate">
+                                      {set.name}
+                                    </h3>
+                                    {!isSelectMode && (
+                                      <div className="flex items-center gap-1 text-xs text-gray-400">
+                                        <Eye className="w-3 h-3" />
+                                        <span>Preview</span>
+                                      </div>
+                                    )}
+                                  </div>
                                   {fullSet.level && (
                                     <p className="text-sm text-[#A9C4FC]">
                                       Level: {fullSet.level}
@@ -821,6 +859,17 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
           variant="danger"
           icon="folder-delete"
         />
+        
+        {previewSet && (
+          <SetPreviewModal
+            isOpen={!!previewSet}
+            onClose={() => setPreviewSet(null)}
+            setId={previewSet.id}
+            setName={previewSet.name}
+            phraseCount={previewSet.phraseCount}
+            imageUrl={previewSet.imageUrl}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

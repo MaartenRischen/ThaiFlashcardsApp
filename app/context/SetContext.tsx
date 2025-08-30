@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback, useMemo } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs'; // <-- Import useAuth from Clerk
 import { INITIAL_PHRASES, Phrase } from '@/app/data/phrases';
 import { getDefaultSetsForUnauthenticatedUsers, getDefaultSetContent } from '@/app/lib/seed-default-sets';
@@ -323,6 +323,12 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
         return; // Wait for Clerk to load
       }
 
+      // Don't reload if we already have sets loaded
+      if (setsHaveLoaded && availableSets.length > 0) {
+        console.log("SetContext: Sets already loaded, skipping reload");
+        return;
+      }
+
       setSetsHaveLoaded(false);
       setIsLoading(true); // Set loading true while fetching
 
@@ -390,7 +396,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     };
 
     loadInitialData();
-  }, [isLoaded, userId]); // Depend on Clerk's isLoaded and userId
+  }, [isLoaded, userId, setsHaveLoaded, availableSets.length]); // Depend on Clerk's isLoaded and userId
 
   // --- Restoration Effect (depends on setsHaveLoaded) ---
   useEffect(() => {
@@ -419,12 +425,19 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   }, [activeSetId, restored, setsHaveLoaded]);
 
   // Reset flags on auth change (now based on Clerk's userId)
+  const prevUserIdRef = useRef(userId);
   useEffect(() => {
-    setRestored(false);
-    setSetsHaveLoaded(false);
-    // Also reset activeSetId if user logs out, maybe?
-    if (isLoaded && !userId) {
-      setActiveSetId(DEFAULT_SET_ID);
+    // Only reset if userId actually changed (not just re-validated)
+    if (prevUserIdRef.current !== userId) {
+      console.log(`SetContext: User changed from ${prevUserIdRef.current} to ${userId}`);
+      prevUserIdRef.current = userId;
+      
+      setRestored(false);
+      setSetsHaveLoaded(false);
+      // Also reset activeSetId if user logs out
+      if (isLoaded && !userId) {
+        setActiveSetId(DEFAULT_SET_ID);
+      }
     }
   }, [isLoaded, userId]);
 

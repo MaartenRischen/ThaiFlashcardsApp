@@ -1,7 +1,7 @@
 import { prisma } from './prisma';
 import { ALL_DEFAULT_SETS } from '@/app/data/default-sets';
 import { INITIAL_PHRASES } from '@/app/data/phrases';
-import { DEFAULT_FOLDERS } from './storage/folders';
+import { DEFAULT_FOLDERS, createDefaultFolders } from './storage/folders';
 
 /**
  * Ensures a user has all default sets in their account
@@ -17,6 +17,10 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
       update: {},
       create: { id: userId },
     });
+    
+    // Ensure default folders exist
+    await createDefaultFolders(userId);
+    console.log(`[ENSURE-DEFAULT-SETS] Ensured default folders exist for user ${userId}`);
     
     // Get user's existing default sets
     const existingSets = await prisma.flashcardSet.findMany({
@@ -41,6 +45,24 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
     });
     
     const folderMap = new Map(folders.map(f => [f.name, f.id]));
+    
+    // Verify we have all expected folders
+    if (!folderMap.has(DEFAULT_FOLDERS.DEFAULT_SETS) || 
+        !folderMap.has(DEFAULT_FOLDERS.COMMON_WORDS) || 
+        !folderMap.has(DEFAULT_FOLDERS.COMMON_SENTENCES)) {
+      console.log(`[ENSURE-DEFAULT-SETS] Missing some folders, recreating...`);
+      await createDefaultFolders(userId);
+      
+      // Re-fetch folders after creation
+      const updatedFolders = await prisma.folder.findMany({
+        where: {
+          userId,
+          isDefault: true
+        }
+      });
+      folderMap.clear();
+      updatedFolders.forEach(f => folderMap.set(f.name, f.id));
+    }
     
     // Check for the original default set
     if (!existingSetIds.has('default')) {

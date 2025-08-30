@@ -13,8 +13,42 @@ const createFolderSchema = z.object({
 export async function GET() {
   try {
     const { userId } = await auth();
+    
+    // For unauthenticated users, return default folder structure
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      const defaultFolders = [
+        {
+          id: 'default-folder-default-sets',
+          userId: 'anonymous',
+          name: 'Default Sets',
+          description: 'Core flashcard sets for beginners',
+          isDefault: true,
+          orderIndex: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 'default-folder-common-words',
+          userId: 'anonymous',
+          name: '100 Most Used Thai Words',
+          description: '100 most frequently used Thai words',
+          isDefault: true,
+          orderIndex: 1,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 'default-folder-common-sentences',
+          userId: 'anonymous',
+          name: '100 Most Used Thai Sentences',
+          description: '100 most useful Thai sentences',
+          isDefault: true,
+          orderIndex: 2,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ];
+      return NextResponse.json({ folders: defaultFolders });
     }
 
     // Ensure default folders exist

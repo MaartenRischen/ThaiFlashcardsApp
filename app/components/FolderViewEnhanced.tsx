@@ -118,17 +118,41 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
 
     setLoading(true);
     try {
-      let folderSets = availableSets.filter(set => 
-        set.folderId === folder.id || set.folderName === folder.name
-      );
+      let folderSets: SetMetaData[] = [];
       
-      if (folder.name === 'Default Sets' && folder.isDefault) {
-        const unfiledSets = availableSets.filter(set => 
-          (!set.folderId && !set.folderName) || set.id === 'default'
+      // For unauthenticated users, match sets by their IDs
+      if (folderId.startsWith('default-folder-')) {
+        if (folder.name === 'Default Sets') {
+          // Include original default sets
+          folderSets = availableSets.filter(set => 
+            (set.id === 'default' || 
+             (set.id.startsWith('default-') && 
+              !set.id.includes('common-words') && 
+              !set.id.includes('common-sentences')))
+          );
+        } else if (folder.name === '100 Most Used Thai Words') {
+          folderSets = availableSets.filter(set => 
+            set.id.startsWith('default-common-words-')
+          );
+        } else if (folder.name === '100 Most Used Thai Sentences') {
+          folderSets = availableSets.filter(set => 
+            set.id.startsWith('default-common-sentences-')
+          );
+        }
+      } else {
+        // For authenticated users, use the existing logic
+        folderSets = availableSets.filter(set => 
+          set.folderId === folder.id || set.folderName === folder.name
         );
-        const setIds = new Set(folderSets.map(s => s.id));
-        const uniqueUnfiledSets = unfiledSets.filter(set => !setIds.has(set.id));
-        folderSets = [...folderSets, ...uniqueUnfiledSets];
+        
+        if (folder.name === 'Default Sets' && folder.isDefault) {
+          const unfiledSets = availableSets.filter(set => 
+            (!set.folderId && !set.folderName) || set.id === 'default'
+          );
+          const setIds = new Set(folderSets.map(s => s.id));
+          const uniqueUnfiledSets = unfiledSets.filter(set => !setIds.has(set.id));
+          folderSets = [...folderSets, ...uniqueUnfiledSets];
+        }
       }
       
       const setIds = folderSets.map(set => set.id);
@@ -602,17 +626,40 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 animate-in fade-in duration-300">
                   {folders.map((folder, index) => {
-                    let folderSets = availableSets.filter(set => 
-                      set.folderId === folder.id || set.folderName === folder.name
-                    );
+                    let folderSets: SetMetaData[] = [];
                     
-                    if (folder.name === 'Default Sets' && folder.isDefault) {
-                      const unfiledSets = availableSets.filter(set => 
-                        (!set.folderId && !set.folderName) || set.id === 'default'
+                    // For unauthenticated users, match sets by their IDs
+                    if (folder.id.startsWith('default-folder-')) {
+                      if (folder.name === 'Default Sets') {
+                        folderSets = availableSets.filter(set => 
+                          (set.id === 'default' || 
+                           (set.id.startsWith('default-') && 
+                            !set.id.includes('common-words') && 
+                            !set.id.includes('common-sentences')))
+                        );
+                      } else if (folder.name === '100 Most Used Thai Words') {
+                        folderSets = availableSets.filter(set => 
+                          set.id.startsWith('default-common-words-')
+                        );
+                      } else if (folder.name === '100 Most Used Thai Sentences') {
+                        folderSets = availableSets.filter(set => 
+                          set.id.startsWith('default-common-sentences-')
+                        );
+                      }
+                    } else {
+                      // For authenticated users, use the existing logic
+                      folderSets = availableSets.filter(set => 
+                        set.folderId === folder.id || set.folderName === folder.name
                       );
-                      const setIds = new Set(folderSets.map(s => s.id));
-                      const uniqueUnfiledSets = unfiledSets.filter(set => !setIds.has(set.id));
-                      folderSets = [...folderSets, ...uniqueUnfiledSets];
+                      
+                      if (folder.name === 'Default Sets' && folder.isDefault) {
+                        const unfiledSets = availableSets.filter(set => 
+                          (!set.folderId && !set.folderName) || set.id === 'default'
+                        );
+                        const setIds = new Set(folderSets.map(s => s.id));
+                        const uniqueUnfiledSets = unfiledSets.filter(set => !setIds.has(set.id));
+                        folderSets = [...folderSets, ...uniqueUnfiledSets];
+                      }
                     }
                     
                     const enhancedFolder = {

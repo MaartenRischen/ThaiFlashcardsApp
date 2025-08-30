@@ -3,12 +3,12 @@ export const MAX_RETRIES = 3;
 
 // Prioritized list of text models for set generation
 export const TEXT_MODELS = [
+  'openai/gpt-4o-mini',          // GPT-4o Mini - Most reliable, fast and cost-effective ($0.15/1M input)
   'openrouter/auto',             // Let OpenRouter pick the best model automatically
-  'deepseek/deepseek-chat',      // DeepSeek V3 - VERY fast & cheap ($0.14/1M input, $0.28/1M output)
-  'openai/gpt-4o-mini',          // GPT-4o Mini - Fast and cost-effective ($0.15/1M input)
+  'anthropic/claude-3-haiku',    // Claude 3 Haiku - Reliable fallback ($0.25/1M input)
   'google/gemini-2.0-flash-exp', // Gemini 2.0 Flash - Latest Google model, very fast
+  'deepseek/deepseek-chat',      // DeepSeek V3 - VERY fast & cheap ($0.14/1M input, $0.28/1M output)
   'anthropic/claude-3.5-sonnet', // Claude 3.5 Sonnet - Very capable but more expensive
-  'anthropic/claude-3-haiku',    // Claude 3 Haiku - Cheap fallback ($0.25/1M input)
   'meta-llama/llama-3.1-8b-instruct:free', // Free tier fallback
 ];
 

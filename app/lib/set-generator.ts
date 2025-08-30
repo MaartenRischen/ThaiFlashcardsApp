@@ -286,6 +286,28 @@ export function createCustomSet(
   return set;
 }
 
+// Test function to check OpenRouter connectivity
+export async function testOpenRouterConnection(): Promise<{success: boolean, model?: string, error?: string}> {
+  try {
+    const testPrompt = "Reply with a single word: 'working'";
+    const testModels = ['openai/gpt-4o-mini', 'anthropic/claude-3-haiku'];
+    
+    const response = await callOpenRouterWithFallback(testPrompt, testModels, 0.3);
+    
+    return {
+      success: true,
+      model: testModels[0],
+      error: undefined
+    };
+  } catch (error) {
+    return {
+      success: false,
+      model: undefined,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
 export async function generateSingleFlashcard(
   preferences: Omit<GeneratePromptOptions, 'count' | 'existingPhrases'>,
   targetEnglishMeaning?: string
@@ -341,7 +363,8 @@ function getTemperatureFromToneLevel(toneLevel: number | undefined): number {
 
 async function callOpenRouterWithFallback(prompt: string, models: string[], temperature: number): Promise<string> {
   const MAX_TOKENS = 8000; // Increased to prevent truncation
-  const TIMEOUT_MS = 25000; // 25 second timeout
+  const TIMEOUT_MS = 30000; // 30 second timeout (increased)
+  const RETRY_DELAY = 2000; // 2 second delay between retries
   
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
@@ -349,12 +372,14 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
     throw new Error('OpenRouter API key not configured');
   }
   
+  console.log('[OpenRouter] Starting API call with', models.length, 'models to try');
   console.log('[OpenRouter] API key length:', apiKey.length);
   
   const headers = {
     'Authorization': `Bearer ${apiKey}`,
     'Content-Type': 'application/json',
-    'X-Title': 'Thai Flashcards App'
+    'X-Title': 'Thai Flashcards App',
+    'HTTP-Referer': 'https://donkeybridge.world'  // Some models require this
   };
   
   for (const model of models) {
@@ -425,10 +450,14 @@ async function callOpenRouterWithFallback(prompt: string, models: string[], temp
       if (model === models[models.length - 1]) {
         throw error;
       }
+      
+      // Add delay before trying next model
+      console.log(`[OpenRouter] Waiting ${RETRY_DELAY}ms before trying next model...`);
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
     }
   }
   
-  throw new Error('All models failed');
+  throw new Error('All models failed - please try again in a moment');
 }
 
 export async function generateOpenRouterBatch(

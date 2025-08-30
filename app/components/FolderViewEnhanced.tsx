@@ -730,7 +730,15 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                   />
                                   <div className="absolute inset-0 bg-gradient-to-t from-[#1F1F1F] via-[#1F1F1F]/20 to-transparent" />
                                   
-                                                                        
+                                  {!isSelectMode && (
+                                    <div className="absolute top-3 right-3">
+                                      <ShareButton
+                                        setId={set.id}
+                                        setName={set.name}
+                                        variant="prominent"
+                                      />
+                                    </div>
+                                  )}
                                   
                                   <div className="absolute bottom-3 left-3">
                                     <div className="px-3 py-1 rounded-full bg-[#1F1F1F]/60 backdrop-blur-md border border-[#404040]/30">
@@ -765,17 +773,29 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                           )}
                                         </div>
                                       </div>
-                                      {!isSelectMode && (
-                                        <div className="flex items-center gap-1 text-xs text-gray-400">
-                                          <Eye className="w-3 h-3" />
-                                          <span>Preview</span>
-                                        </div>
-                                      )}
+
                                     </div>
                                     
                                     {/* Action Buttons */}
                                     {!isSelectMode && (
                                       <div className="flex gap-2">
+                                        {/* Preview Button */}
+                                        <div className="relative group">
+                                          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#3B82F6] to-[#2563EB] rounded-full blur opacity-50 group-hover:opacity-75 transition-opacity" />
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleSetClick(fullSet);
+                                            }}
+                                            className="relative px-4 py-2.5 bg-gradient-to-r from-[#3B82F6] to-[#2563EB] text-white font-bold rounded-full shadow-lg hover:shadow-xl transform group-hover:scale-105 transition-all duration-200 border border-white/30 flex items-center gap-2 scale-90"
+                                            title="Preview this set"
+                                          >
+                                            <Eye className="h-4 w-4 text-white" />
+                                            <span className="text-sm font-bold whitespace-nowrap">Preview</span>
+                                            <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
+                                          </button>
+                                        </div>
+                                        
                                         {/* Only show Publish button for user-created sets (not default sets) */}
                                         {fullSet && fullSet.source !== 'default' && !fullSet.id.startsWith('default-') && (
                                           <GoLiveButton
@@ -785,12 +805,6 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                             className="scale-90"
                                           />
                                         )}
-                                        <ShareButton
-                                          setId={set.id}
-                                          setName={set.name}
-                                          variant="prominent"
-                                          className="scale-90"
-                                        />
                                       </div>
                                     )}
                                   </div>
@@ -814,12 +828,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                     <h3 className="font-bold text-[#E0E0E0] truncate">
                                       {set.name}
                                     </h3>
-                                    {!isSelectMode && (
-                                      <div className="flex items-center gap-1 text-xs text-gray-400">
-                                        <Eye className="w-3 h-3" />
-                                        <span>Preview</span>
-                                      </div>
-                                    )}
+
                                   </div>
                                   <div className="flex flex-wrap items-center gap-2 mt-1">
                                     {fullSet.level && (
@@ -844,6 +853,23 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                 
                                 {!isSelectMode && (
                                   <div className="flex items-center gap-2 ml-auto">
+                                    {/* Preview Button */}
+                                    <div className="relative group">
+                                      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#3B82F6] to-[#2563EB] rounded-full blur opacity-50 group-hover:opacity-75 transition-opacity" />
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleSetClick(fullSet);
+                                        }}
+                                        className="relative px-4 py-2.5 bg-gradient-to-r from-[#3B82F6] to-[#2563EB] text-white font-bold rounded-full shadow-lg hover:shadow-xl transform group-hover:scale-105 transition-all duration-200 border border-white/30 flex items-center gap-2 scale-90"
+                                        title="Preview this set"
+                                      >
+                                        <Eye className="h-4 w-4 text-white" />
+                                        <span className="text-sm font-bold whitespace-nowrap">Preview</span>
+                                        <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
+                                      </button>
+                                    </div>
+                                    
                                     {/* Only show Publish button for user-created sets (not default sets) */}
                                     {fullSet && fullSet.source !== 'default' && !fullSet.id.startsWith('default-') && (
                                       <GoLiveButton
@@ -853,6 +879,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                         className="scale-90"
                                       />
                                     )}
+                                    
                                     <ShareButton
                                       setId={set.id}
                                       setName={set.name}

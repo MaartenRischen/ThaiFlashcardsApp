@@ -2,6 +2,7 @@ import { prisma } from './prisma';
 import { ALL_DEFAULT_SETS } from '@/app/data/default-sets';
 import { INITIAL_PHRASES } from '@/app/data/phrases';
 import { DEFAULT_FOLDERS, createDefaultFolders } from './storage/folders';
+import { assignUserSetsToFolders } from './storage/default-folder-assignment';
 
 /**
  * Ensures a user has all default sets in their account
@@ -164,6 +165,9 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
         }
       }
     }
+    
+    // Assign any unassigned user-generated sets to their appropriate folders
+    await assignUserSetsToFolders(userId);
     
     console.log(`[ENSURE-DEFAULT-SETS] Completed for user ${userId}`);
   } catch (error) {

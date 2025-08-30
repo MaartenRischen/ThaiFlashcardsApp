@@ -111,3 +111,77 @@ export function getDefaultSetFolderMapping(): Record<string, string> {
     'default-common-sentences-10': DEFAULT_FOLDERS.COMMON_SENTENCES,
   };
 }
+
+/**
+ * Assigns user-generated sets to their appropriate folders
+ * This is for older users who created sets before the folder system
+ */
+export async function assignUserSetsToFolders(userId: string) {
+  try {
+    // Get user's folders
+    const folders = await prisma.folder.findMany({
+      where: {
+        userId,
+        isDefault: true
+      }
+    });
+
+    if (folders.length === 0) {
+      console.log('No folders found for user, skipping user set assignment');
+      return;
+    }
+
+    // Create a map of folder names to IDs
+    const folderMap = new Map(folders.map(f => [f.name, f.id]));
+
+    // Get manual sets folder ID
+    const manualFolderId = folderMap.get(DEFAULT_FOLDERS.MY_MANUAL_SETS);
+    // Get automatic sets folder ID
+    const autoFolderId = folderMap.get(DEFAULT_FOLDERS.MY_AUTOMATIC_SETS);
+
+    if (!manualFolderId || !autoFolderId) {
+      console.log('Missing manual or automatic sets folders');
+      return;
+    }
+
+    // Get all user-generated sets without folder assignments
+    const unassignedSets = await prisma.flashcardSet.findMany({
+      where: {
+        userId,
+        source: {
+          in: ['manual', 'generated', 'auto']
+        },
+        folderId: null
+      }
+    });
+
+    if (unassignedSets.length === 0) {
+      console.log('No unassigned user sets found');
+      return;
+    }
+
+    console.log(`Found ${unassignedSets.length} unassigned user sets`);
+
+    // Batch update sets to their appropriate folders
+    const updates = [];
+
+    for (const set of unassignedSets) {
+      const folderId = set.source === 'manual' ? manualFolderId : autoFolderId;
+      
+      updates.push(
+        prisma.flashcardSet.update({
+          where: { id: set.id },
+          data: { folderId }
+        })
+      );
+    }
+
+    // Execute all updates
+    if (updates.length > 0) {
+      await prisma.$transaction(updates);
+      console.log(`Assigned ${updates.length} user sets to folders for user ${userId}`);
+    }
+  } catch (error) {
+    console.error('Error assigning user sets to folders:', error);
+  }
+}

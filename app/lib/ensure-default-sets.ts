@@ -2,7 +2,7 @@ import { prisma } from './prisma';
 import { ALL_DEFAULT_SETS } from '@/app/data/default-sets';
 import { INITIAL_PHRASES } from '@/app/data/phrases';
 import { DEFAULT_FOLDERS, createDefaultFolders } from './storage/folders';
-import { assignUserSetsToFolders } from './storage/default-folder-assignment';
+import { assignUserSetsToFolders, assignDefaultSetsToFolders } from './storage/default-folder-assignment';
 
 /**
  * Ensures a user has all default sets in their account
@@ -99,11 +99,11 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
       if (!existingSetIds.has(defaultSet.id)) {
         console.log(`[ENSURE-DEFAULT-SETS] User missing set: ${defaultSet.id}`);
         
-        // Determine folder
+        // Determine folder based on the original set ID (without 'default-' prefix)
         let folderId: string | undefined;
-        if (defaultSet.id.startsWith('default-common-words-')) {
+        if (defaultSet.id.startsWith('common-words-')) {
           folderId = folderMap.get(DEFAULT_FOLDERS.COMMON_WORDS);
-        } else if (defaultSet.id.startsWith('default-common-sentences-')) {
+        } else if (defaultSet.id.startsWith('common-sentences-')) {
           folderId = folderMap.get(DEFAULT_FOLDERS.COMMON_SENTENCES);
         } else {
           folderId = folderMap.get(DEFAULT_FOLDERS.DEFAULT_SETS);
@@ -165,6 +165,10 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
         }
       }
     }
+    
+    // Assign any unassigned default sets to their appropriate folders
+    console.log(`[ENSURE-DEFAULT-SETS] Assigning default sets to folders for ${userId}`);
+    await assignDefaultSetsToFolders(userId);
     
     // Assign any unassigned user-generated sets to their appropriate folders
     console.log(`[ENSURE-DEFAULT-SETS] Assigning user sets to folders for ${userId}`);

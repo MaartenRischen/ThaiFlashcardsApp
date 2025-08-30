@@ -43,12 +43,13 @@ export async function assignDefaultSetsToFolders(userId: string) {
       let folderId: string | undefined;
 
       // Determine which folder based on set ID
-      if (set.id.startsWith('default-common-words-')) {
+      // For authenticated users, the IDs don't have 'default-' prefix
+      if (set.id.startsWith('common-words-')) {
         folderId = folderMap.get(DEFAULT_FOLDERS.COMMON_WORDS);
-      } else if (set.id.startsWith('default-common-sentences-')) {
+      } else if (set.id.startsWith('common-sentences-')) {
         folderId = folderMap.get(DEFAULT_FOLDERS.COMMON_SENTENCES);
-      } else if (set.id.startsWith('default-') && !set.id.includes('common')) {
-        // Original default sets
+      } else {
+        // All other default sets go to the main default sets folder
         folderId = folderMap.get(DEFAULT_FOLDERS.DEFAULT_SETS);
       }
 

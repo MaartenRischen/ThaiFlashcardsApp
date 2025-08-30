@@ -26,15 +26,18 @@ export async function assignDefaultSetsToFolders(userId: string) {
     const sets = await prisma.flashcardSet.findMany({
       where: {
         userId,
-        source: 'default',
-        folderId: null // Only assign sets that aren't already in a folder
+        source: 'default'
+        // Remove folderId: null check to reassign ALL default sets
       }
     });
 
     if (sets.length === 0) {
-      console.log('No unassigned default sets found');
+      console.log('No default sets found');
       return;
     }
+
+    console.log(`[assignDefaultSetsToFolders] Found ${sets.length} default sets to assign`);
+    console.log(`[assignDefaultSetsToFolders] Sample set IDs:`, sets.slice(0, 5).map(s => s.id));
 
     // Batch update sets to their appropriate folders
     const updates = [];
@@ -46,8 +49,10 @@ export async function assignDefaultSetsToFolders(userId: string) {
       // For authenticated users, the IDs don't have 'default-' prefix
       if (set.id.startsWith('common-words-')) {
         folderId = folderMap.get(DEFAULT_FOLDERS.COMMON_WORDS);
+        console.log(`[assignDefaultSetsToFolders] Assigning ${set.id} to COMMON_WORDS folder`);
       } else if (set.id.startsWith('common-sentences-')) {
         folderId = folderMap.get(DEFAULT_FOLDERS.COMMON_SENTENCES);
+        console.log(`[assignDefaultSetsToFolders] Assigning ${set.id} to COMMON_SENTENCES folder`);
       } else {
         // All other default sets go to the main default sets folder
         folderId = folderMap.get(DEFAULT_FOLDERS.DEFAULT_SETS);
@@ -90,6 +95,17 @@ export function getDefaultSetFolderMapping(): Record<string, string> {
     'default-clothing': DEFAULT_FOLDERS.DEFAULT_SETS,
     'default-transportation': DEFAULT_FOLDERS.DEFAULT_SETS,
     'default-food': DEFAULT_FOLDERS.DEFAULT_SETS,
+    // Add mappings for authenticated users (without 'default-' prefix)
+    'numbers-1-10': DEFAULT_FOLDERS.DEFAULT_SETS,
+    'basic-colors': DEFAULT_FOLDERS.DEFAULT_SETS,
+    'family-members': DEFAULT_FOLDERS.DEFAULT_SETS,
+    'months-of-the-year': DEFAULT_FOLDERS.DEFAULT_SETS,
+    'body-parts': DEFAULT_FOLDERS.DEFAULT_SETS,
+    'clothing': DEFAULT_FOLDERS.DEFAULT_SETS,
+    'transportation': DEFAULT_FOLDERS.DEFAULT_SETS,
+    'food-and-drinks': DEFAULT_FOLDERS.DEFAULT_SETS,
+    'animals': DEFAULT_FOLDERS.DEFAULT_SETS,
+    'thai-proverbs': DEFAULT_FOLDERS.DEFAULT_SETS,
     'default-common-words-1': DEFAULT_FOLDERS.COMMON_WORDS,
     'default-common-words-2': DEFAULT_FOLDERS.COMMON_WORDS,
     'default-common-words-3': DEFAULT_FOLDERS.COMMON_WORDS,
@@ -110,6 +126,27 @@ export function getDefaultSetFolderMapping(): Record<string, string> {
     'default-common-sentences-8': DEFAULT_FOLDERS.COMMON_SENTENCES,
     'default-common-sentences-9': DEFAULT_FOLDERS.COMMON_SENTENCES,
     'default-common-sentences-10': DEFAULT_FOLDERS.COMMON_SENTENCES,
+    // Add mappings for authenticated users' common sets (without 'default-' prefix)
+    'common-words-1': DEFAULT_FOLDERS.COMMON_WORDS,
+    'common-words-2': DEFAULT_FOLDERS.COMMON_WORDS,
+    'common-words-3': DEFAULT_FOLDERS.COMMON_WORDS,
+    'common-words-4': DEFAULT_FOLDERS.COMMON_WORDS,
+    'common-words-5': DEFAULT_FOLDERS.COMMON_WORDS,
+    'common-words-6': DEFAULT_FOLDERS.COMMON_WORDS,
+    'common-words-7': DEFAULT_FOLDERS.COMMON_WORDS,
+    'common-words-8': DEFAULT_FOLDERS.COMMON_WORDS,
+    'common-words-9': DEFAULT_FOLDERS.COMMON_WORDS,
+    'common-words-10': DEFAULT_FOLDERS.COMMON_WORDS,
+    'common-sentences-1': DEFAULT_FOLDERS.COMMON_SENTENCES,
+    'common-sentences-2': DEFAULT_FOLDERS.COMMON_SENTENCES,
+    'common-sentences-3': DEFAULT_FOLDERS.COMMON_SENTENCES,
+    'common-sentences-4': DEFAULT_FOLDERS.COMMON_SENTENCES,
+    'common-sentences-5': DEFAULT_FOLDERS.COMMON_SENTENCES,
+    'common-sentences-6': DEFAULT_FOLDERS.COMMON_SENTENCES,
+    'common-sentences-7': DEFAULT_FOLDERS.COMMON_SENTENCES,
+    'common-sentences-8': DEFAULT_FOLDERS.COMMON_SENTENCES,
+    'common-sentences-9': DEFAULT_FOLDERS.COMMON_SENTENCES,
+    'common-sentences-10': DEFAULT_FOLDERS.COMMON_SENTENCES,
   };
 }
 

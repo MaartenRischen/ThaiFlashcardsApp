@@ -348,6 +348,23 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
             console.error('Failed to initialize folders:', folderInitResponse.status);
           }
           
+          // Fix folder assignments for existing sets
+          console.log(`SetContext: Fixing folder assignments...`);
+          const fixResponse = await fetch('/api/fix-folder-assignments', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+          });
+          
+          if (!fixResponse.ok) {
+            console.error('Failed to fix folder assignments:', fixResponse.status);
+          } else {
+            const fixResult = await fixResponse.json();
+            console.log('Folder assignments fixed:', fixResult);
+          }
+          
           console.log(`SetContext: Fetching initial sets via API for userId: ${userId}`);
           const response = await fetch('/api/flashcard-sets', { // <-- Fetch from API
             method: 'GET',

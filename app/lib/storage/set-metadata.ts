@@ -68,6 +68,7 @@ export async function addSetMetaData(
     llmBrand: newSetData.llmBrand || null,
     llmModel: newSetData.llmModel || null,
     shareId: null,
+    folderId: newSetData.folderId || null,
   } as const;
 
   console.log(`Inserting SetMetaData into DB via Prisma for userId: ${userId}`, dataToInsert);

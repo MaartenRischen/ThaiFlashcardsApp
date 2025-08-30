@@ -12,6 +12,7 @@ import { generateImage } from '@/app/lib/ideogram-service';
 import { uploadImageFromUrl } from '../../lib/imageStorage';
 import { getToneLabel, formatSetTitle } from '@/app/lib/utils';
 import { enhanceMnemonics } from '@/app/lib/enhance-mnemonics';
+import { getTargetFolderForNewSet } from '@/app/lib/storage/folders';
 import dotenv from 'dotenv';
 import { prisma } from "@/app/lib/prisma"; // Ensure prisma is imported
 
@@ -278,8 +279,14 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
       llmModel: generationResult.llmModel
     };
 
-    // Add the set metadata
-    const createdSet = await storage.addSetMetaData(userId, newSetMetaData);
+    // Get the target folder for manual sets
+    const folderId = await getTargetFolderForNewSet(userId, 'manual');
+    
+    // Add the set metadata with folder assignment
+    const createdSet = await storage.addSetMetaData(userId, {
+      ...newSetMetaData,
+      folderId
+    });
     if (!createdSet) {
       throw new Error('Failed to create set metadata');
     }
@@ -567,8 +574,14 @@ export async function POST(request: Request) {
       setData.imageUrl = null;
     }
 
-    // Add metadata to database
-    const insertedRecord = await storage.addSetMetaData(userId, setData);
+    // Get the target folder for automatic sets
+    const folderId = await getTargetFolderForNewSet(userId, 'auto');
+    
+    // Add metadata to database with folder assignment
+    const insertedRecord = await storage.addSetMetaData(userId, {
+      ...setData,
+      folderId
+    });
     if (!insertedRecord) throw new Error("Failed to save metadata");
     newMetaId = insertedRecord.id;
     console.log(`API Route: Metadata saved with ID: ${newMetaId}`);

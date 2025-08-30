@@ -730,23 +730,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                   />
                                   <div className="absolute inset-0 bg-gradient-to-t from-[#1F1F1F] via-[#1F1F1F]/20 to-transparent" />
                                   
-                                                                        {!isSelectMode && (
-                                        <div className="absolute top-3 right-3 flex gap-2">
-                                          {/* Only show Publish button for user-created sets (not default sets) */}
-                                          {fullSet && fullSet.source !== 'default' && !fullSet.id.startsWith('default-') && (
-                                            <GoLiveButton
-                                              setId={set.id}
-                                              setName={set.name}
-                                              variant="prominent"
-                                            />
-                                          )}
-                                          <ShareButton
-                                            setId={set.id}
-                                            setName={set.name}
-                                            variant="prominent"
-                                          />
-                                        </div>
-                                      )}
+                                                                        
                                   
                                   <div className="absolute bottom-3 left-3">
                                     <div className="px-3 py-1 rounded-full bg-[#1F1F1F]/60 backdrop-blur-md border border-[#404040]/30">
@@ -758,21 +742,55 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                 </div>
 
                                 <div className="p-4 bg-[#1F1F1F]/30 backdrop-blur-sm">
-                                  <div className="flex items-start justify-between gap-2">
-                                    <div className="flex-1">
-                                      <h3 className="text-lg font-bold text-[#E0E0E0] leading-tight">
-                                        {set.name}
-                                      </h3>
-                                      {fullSet.level && (
-                                        <p className="text-sm text-[#A9C4FC] mt-1">
-                                          Level: {fullSet.level}
-                                        </p>
+                                  <div className="space-y-3">
+                                    {/* Title and Info */}
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="flex-1">
+                                        <h3 className="text-lg font-bold text-[#E0E0E0] leading-tight">
+                                          {set.name}
+                                        </h3>
+                                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                                          {fullSet.level && (
+                                            <span className="text-sm text-[#A9C4FC]">
+                                              Level: {fullSet.level}
+                                            </span>
+                                          )}
+                                          {fullSet.toneLevel && (
+                                            <>
+                                              {fullSet.level && <span className="text-[#606060]">•</span>}
+                                              <span className="text-sm text-[#FFB84D]">
+                                                Tone: {fullSet.toneLevel}
+                                              </span>
+                                            </>
+                                          )}
+                                        </div>
+                                      </div>
+                                      {!isSelectMode && (
+                                        <div className="flex items-center gap-1 text-xs text-gray-400">
+                                          <Eye className="w-3 h-3" />
+                                          <span>Preview</span>
+                                        </div>
                                       )}
                                     </div>
+                                    
+                                    {/* Action Buttons */}
                                     {!isSelectMode && (
-                                      <div className="flex items-center gap-1 text-xs text-gray-400">
-                                        <Eye className="w-3 h-3" />
-                                        <span>Preview</span>
+                                      <div className="flex gap-2">
+                                        {/* Only show Publish button for user-created sets (not default sets) */}
+                                        {fullSet && fullSet.source !== 'default' && !fullSet.id.startsWith('default-') && (
+                                          <GoLiveButton
+                                            setId={set.id}
+                                            setName={set.name}
+                                            variant="prominent"
+                                            className="scale-90"
+                                          />
+                                        )}
+                                        <ShareButton
+                                          setId={set.id}
+                                          setName={set.name}
+                                          variant="prominent"
+                                          className="scale-90"
+                                        />
                                       </div>
                                     )}
                                   </div>
@@ -803,25 +821,45 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                       </div>
                                     )}
                                   </div>
-                                  {fullSet.level && (
-                                    <p className="text-sm text-[#A9C4FC]">
-                                      Level: {fullSet.level}
-                                    </p>
-                                  )}
+                                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                                    {fullSet.level && (
+                                      <span className="text-sm text-[#A9C4FC]">
+                                        Level: {fullSet.level}
+                                      </span>
+                                    )}
+                                    {fullSet.toneLevel && (
+                                      <>
+                                        {fullSet.level && <span className="text-[#606060]">•</span>}
+                                        <span className="text-sm text-[#FFB84D]">
+                                          Tone: {fullSet.toneLevel}
+                                        </span>
+                                      </>
+                                    )}
+                                    <span className="text-[#606060]">•</span>
+                                    <span className="text-sm text-[#BDBDBD]">{set.phraseCount} cards</span>
+                                  </div>
                                 </div>
                                 
-                                <div className="flex items-center gap-4 text-sm text-[#BDBDBD]">
-                                  <span>{set.phraseCount} cards</span>
-                                  <SetCompletionBadge setId={set.id} />
-                                </div>
+                                <SetCompletionBadge setId={set.id} />
                                 
                                 {!isSelectMode && (
-                                  <ShareButton
-                                    setId={set.id}
-                                    setName={set.name}
-                                    variant="prominent"
-                                    className="ml-auto"
-                                  />
+                                  <div className="flex items-center gap-2 ml-auto">
+                                    {/* Only show Publish button for user-created sets (not default sets) */}
+                                    {fullSet && fullSet.source !== 'default' && !fullSet.id.startsWith('default-') && (
+                                      <GoLiveButton
+                                        setId={set.id}
+                                        setName={set.name}
+                                        variant="prominent"
+                                        className="scale-90"
+                                      />
+                                    )}
+                                    <ShareButton
+                                      setId={set.id}
+                                      setName={set.name}
+                                      variant="prominent"
+                                      className="scale-90"
+                                    />
+                                  </div>
                                 )}
                               </>
                             )}

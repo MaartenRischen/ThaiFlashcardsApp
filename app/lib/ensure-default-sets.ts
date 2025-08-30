@@ -106,7 +106,7 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
           name: defaultSet.name,
           source: 'default' as const,
           imageUrl,
-          level: defaultSet.level as any,
+          level: defaultSet.level as 'complete beginner' | 'basic understanding' | 'intermediate' | 'advanced' | 'native/fluent' | 'god mode',
           goals: [],
           specificTopics: defaultSet.description,
           seriousnessLevel: null,

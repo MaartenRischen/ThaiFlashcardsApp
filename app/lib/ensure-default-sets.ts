@@ -86,17 +86,30 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
           folderId = folderMap.get(DEFAULT_FOLDERS.DEFAULT_SETS);
         }
         
+        // Determine which image to use based on set ID
+        let imageUrl: string;
+        if (defaultSet.id.startsWith('common-words-')) {
+          const setNumber = defaultSet.id.replace('common-words-', '');
+          imageUrl = `/images/defaults/default-common-words-${setNumber.padStart(2, '0')}.png`;
+        } else if (defaultSet.id.startsWith('common-sentences-')) {
+          const setNumber = defaultSet.id.replace('common-sentences-', '');
+          imageUrl = `/images/defaults/default-common-sentences-${setNumber}.png`;
+        } else {
+          // Use original thailand images for other sets
+          const index = ALL_DEFAULT_SETS.findIndex(s => s.id === defaultSet.id);
+          imageUrl = `/images/defaults/default-thailand-${(index + 1).toString().padStart(2, '0')}.png`;
+        }
+        
         setsToCreate.push({
           id: defaultSet.id,
           userId,
           name: defaultSet.name,
-          cleverTitle: defaultSet.cleverTitle,
           source: 'default' as const,
-          imageUrl: defaultSet.imageUrl || '/images/default-set-logo.png',
-          level: defaultSet.level,
-          goals: defaultSet.goals || [],
-          specificTopics: defaultSet.specificTopics,
-          seriousnessLevel: defaultSet.seriousnessLevel,
+          imageUrl,
+          level: defaultSet.level as any,
+          goals: [],
+          specificTopics: defaultSet.description,
+          seriousnessLevel: null,
           folderId
         });
       }

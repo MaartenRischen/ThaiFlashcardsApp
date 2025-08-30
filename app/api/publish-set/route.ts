@@ -65,10 +65,10 @@ export async function POST(req: NextRequest) {
       imageUrl: set.imageUrl || undefined,
       cardCount: phrases.length,
       author: author.trim() || 'Anonymous',
-      llmBrand: set.llmBrand,
-      llmModel: set.llmModel,
-      seriousnessLevel: set.seriousnessLevel,
-      specificTopics: set.specificTopics,
+      llmBrand: set.llmBrand || undefined,
+      llmModel: set.llmModel || undefined,
+      seriousnessLevel: set.seriousnessLevel || undefined,
+      specificTopics: set.specificTopics || undefined,
       phrases: phrases
     };
 

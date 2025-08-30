@@ -90,7 +90,7 @@ export function extractKeyWords(
   const importantWords: Array<{ thai: string, start: number, end: number }> = [];
   
   for (const pattern of PRIORITY_PATTERNS) {
-    const matches = thai.matchAll(new RegExp(pattern, 'g'));
+    const matches = Array.from(thai.matchAll(new RegExp(pattern, 'g')));
     for (const match of matches) {
       if (match.index !== undefined) {
         importantWords.push({

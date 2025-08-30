@@ -28,7 +28,8 @@ import {
   MoveRight,
   Grid3X3,
   List,
-  Eye
+  Eye,
+  Play
 } from 'lucide-react';
 import { ShareButton } from './ShareButton';
 import { GoLiveButton } from './GoLiveButton';
@@ -290,18 +291,11 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
   const handleSetClick = async (set: SetMetaData) => {
     if (isSelectMode) {
       toggleSetSelection(set.id);
-    } else {
-      // Open preview instead of immediately loading
-      setPreviewSet({
-        id: set.id,
-        name: set.name,
-        phraseCount: set.phraseCount,
-        imageUrl: set.imageUrl
-      });
     }
+    // Remove the preview opening - clicking the image should do nothing when not in select mode
   };
   
-  const _handleLoadSet = async (setId: string) => {
+  const handleLoadSet = async (setId: string) => {
     if (setId !== activeSetId) {
       await switchSet(setId);
     }
@@ -743,9 +737,10 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                       >
                         <div
                           className={cn(
-                            "group cursor-pointer transition-all duration-200",
+                            "group transition-all duration-200",
                             viewMode === 'grid' ? "transform hover:scale-105" : "",
-                            isActive ? 'scale-105' : ''
+                            isActive ? 'scale-105' : '',
+                            isSelectMode ? 'cursor-pointer' : ''
                           )}
                           onClick={() => handleSetClick(fullSet)}
                         >
@@ -843,13 +838,35 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              handleSetClick(fullSet);
+                                              setPreviewSet({
+                                                id: fullSet.id,
+                                                name: fullSet.name,
+                                                phraseCount: fullSet.phraseCount,
+                                                imageUrl: fullSet.imageUrl
+                                              });
                                             }}
                                             className="relative px-4 py-2.5 bg-gradient-to-r from-[#3B82F6] to-[#2563EB] text-white font-bold rounded-full shadow-lg hover:shadow-xl transform group-hover:scale-105 transition-all duration-200 border border-white/30 flex items-center gap-2 scale-90"
                                             title="Preview this set"
                                           >
                                             <Eye className="h-4 w-4 text-white" />
                                             <span className="text-sm font-bold whitespace-nowrap">Preview</span>
+                                            <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
+                                          </button>
+                                        </div>
+                                        
+                                        {/* Load Set Button */}
+                                        <div className="relative group">
+                                          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#22c55e] to-[#16a34a] rounded-full blur opacity-50 group-hover:opacity-75 transition-opacity" />
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleLoadSet(fullSet.id);
+                                            }}
+                                            className="relative px-4 py-2.5 bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-white font-bold rounded-full shadow-lg hover:shadow-xl transform group-hover:scale-105 transition-all duration-200 border border-white/30 flex items-center gap-2 scale-90"
+                                            title="Load this set"
+                                          >
+                                            <Play className="h-4 w-4 text-white" />
+                                            <span className="text-sm font-bold whitespace-nowrap">Load Set</span>
                                             <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
                                           </button>
                                         </div>
@@ -917,13 +934,35 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                       <button
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          handleSetClick(fullSet);
+                                          setPreviewSet({
+                                            id: fullSet.id,
+                                            name: fullSet.name,
+                                            phraseCount: fullSet.phraseCount,
+                                            imageUrl: fullSet.imageUrl
+                                          });
                                         }}
                                         className="relative px-4 py-2.5 bg-gradient-to-r from-[#3B82F6] to-[#2563EB] text-white font-bold rounded-full shadow-lg hover:shadow-xl transform group-hover:scale-105 transition-all duration-200 border border-white/30 flex items-center gap-2 scale-90"
                                         title="Preview this set"
                                       >
                                         <Eye className="h-4 w-4 text-white" />
                                         <span className="text-sm font-bold whitespace-nowrap">Preview</span>
+                                        <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
+                                      </button>
+                                    </div>
+                                    
+                                    {/* Load Set Button */}
+                                    <div className="relative group">
+                                      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#22c55e] to-[#16a34a] rounded-full blur opacity-50 group-hover:opacity-75 transition-opacity" />
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleLoadSet(fullSet.id);
+                                        }}
+                                        className="relative px-4 py-2.5 bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-white font-bold rounded-full shadow-lg hover:shadow-xl transform group-hover:scale-105 transition-all duration-200 border border-white/30 flex items-center gap-2 scale-90"
+                                        title="Load this set"
+                                      >
+                                        <Play className="h-4 w-4 text-white" />
+                                        <span className="text-sm font-bold whitespace-nowrap">Load Set</span>
                                         <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
                                       </button>
                                     </div>

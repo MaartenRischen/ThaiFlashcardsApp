@@ -342,4 +342,20 @@ html.fake-dark-mode-active #dark-mode-toggle-container {
 /* NEW Rule: Ensure visibility cascades within the toggle container (safer) */
 html.fake-dark-mode-active #dark-mode-toggle-container * {
   visibility: visible;
+}
+
+/* Share button sparkle animation */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2) rotate(180deg);
+  }
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
 } 

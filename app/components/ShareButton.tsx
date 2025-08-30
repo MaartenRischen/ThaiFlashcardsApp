@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Share2, Copy, Mail, Check } from 'lucide-react';
+import { Share2, Copy, Mail, Check, Heart, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -18,7 +18,7 @@ interface ShareButtonProps {
   setId: string;
   setName: string;
   className?: string;
-  variant?: 'default' | 'ghost' | 'outline';
+  variant?: 'default' | 'ghost' | 'outline' | 'prominent';
   size?: 'default' | 'sm' | 'lg' | 'icon';
 }
 
@@ -85,24 +85,60 @@ export function ShareButton({ setId, setName, className, variant = 'ghost', size
 
   return (
     <>
-      <Button
-        variant={variant}
-        size={size}
-        onClick={(e) => {
-          e.stopPropagation();
-          handleShare();
-        }}
-        disabled={loading}
-        className={cn(
-          "transition-all",
-          size === 'icon' && "h-8 w-8",
-          className
-        )}
-        title="Share this set"
-      >
-        <Share2 className={size === 'icon' ? "h-4 w-4" : "h-4 w-4 mr-1"} />
-        {size !== 'icon' && 'Share'}
-      </Button>
+      {variant === 'prominent' ? (
+        <div className="relative group">
+          {/* Glow effect behind button */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] rounded-full blur opacity-50 group-hover:opacity-75 transition-opacity" />
+          
+          {/* Actual button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleShare();
+            }}
+            disabled={loading}
+            className={cn(
+              "relative px-4 py-2.5 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white font-bold rounded-full",
+              "shadow-lg hover:shadow-xl transform group-hover:scale-105 transition-all duration-200",
+              "border border-white/30",
+              "flex items-center gap-2",
+              className
+            )}
+            title="Share this set with friends!"
+          >
+            {/* Sparkle icon */}
+            <div className="absolute -top-2 -right-2">
+              <Sparkles className="h-6 w-6 text-yellow-300 animate-sparkle drop-shadow-[0_0_6px_rgba(252,211,77,0.6)]" />
+            </div>
+            
+            <Heart className="h-4 w-4 text-white" />
+            <span className="text-sm font-bold whitespace-nowrap">Send to a Friend!</span>
+            <Share2 className="h-4 w-4" />
+            
+            {/* Hover overlay */}
+            <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
+          </button>
+        </div>
+      ) : (
+        <Button
+          variant={variant}
+          size={size}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleShare();
+          }}
+          disabled={loading}
+          className={cn(
+            "transition-all",
+            size === 'icon' && "h-8 w-8",
+            className
+          )}
+          title="Share this set"
+        >
+          <Share2 className={size === 'icon' ? "h-4 w-4" : "h-4 w-4 mr-1"} />
+          {size !== 'icon' && 'Share'}
+        </Button>
+      )}
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-md">

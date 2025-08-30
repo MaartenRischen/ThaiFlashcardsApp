@@ -206,18 +206,12 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
       console.log(`[refreshSets] Sets returned from API: ${userSets?.length ?? 0}`);
       
-      const combinedSets = [
-          DEFAULT_SET_METADATA,
-          ...userSets.filter(set => set.id !== DEFAULT_SET_ID)
-      ];
-      
-      // ADD LOGGING BEFORE/AFTER STATE UPDATE
-      console.log(`[refreshSets] Preparing to call setAvailableSets with ${combinedSets.length} sets:`, combinedSets);
-      setAvailableSets(combinedSets);
-      console.log(`[refreshSets] Called setAvailableSets. State *should* update.`);
+      // Don't manually add DEFAULT_SET_METADATA - it should come from the database
+      // The database now includes all default sets with proper folder assignments
+      setAvailableSets(userSets);
+      console.log(`[refreshSets] Updated available sets with ${userSets.length} sets from database`);
 
       setSetsHaveLoaded(true); // Mark as loaded after successful refresh
-      console.log(`[refreshSets] Combined sets updated. Total available: ${combinedSets.length}`);
 
     } catch (error: unknown) {
       console.error('[refreshSets] Error fetching sets:', error);

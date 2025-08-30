@@ -210,16 +210,11 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
         credentials: 'include'
       });
       
-      console.log('[SetCache] Folders API response status:', response.status);
-      
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error('[SetCache] Folders API error response:', errorData);
-        throw new Error(`Failed to fetch folders: ${response.status}`);
+        throw new Error('Failed to fetch folders');
       }
 
       const data = await response.json();
-      console.log('[SetCache] Folders API response data:', data);
       const folders = data.folders || [];
       
       // Update cache

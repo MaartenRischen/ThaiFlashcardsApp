@@ -11,6 +11,7 @@ import { SetMetaData } from '@/app/lib/storage';
 import { generateImage } from '@/app/lib/ideogram-service';
 import { uploadImageFromUrl } from '../../lib/imageStorage';
 import { getToneLabel, formatSetTitle } from '@/app/lib/utils';
+import { enhanceMnemonics } from '@/app/lib/enhance-mnemonics';
 import dotenv from 'dotenv';
 import { prisma } from "@/app/lib/prisma"; // Ensure prisma is imported
 
@@ -233,11 +234,12 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
       llmModel: TEXT_MODELS[0] // Will use the first available model
     };
 
-    // If we're adding to an existing set, just return the phrases
+    // If we're adding to an existing set, enhance and return the phrases
     if (isAddingToExistingSet) {
-      console.log("API Route: Adding to existing set - returning phrases only");
+      console.log("API Route: Adding to existing set - enhancing and returning phrases only");
+      const enhancedPhrases = await enhanceMnemonics(generationResult.phrases);
       return NextResponse.json({
-        phrases: generationResult.phrases
+        phrases: enhancedPhrases
       });
     }
 
@@ -284,8 +286,11 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
     
     newSetMetaData.id = createdSet.id;
     
+    // Enhance mnemonics before saving
+    const enhancedPhrases = await enhanceMnemonics(generationResult.phrases);
+    
     // Save the phrases
-    const contentSaved = await storage.saveSetContentDirect(createdSet.id, generationResult.phrases);
+    const contentSaved = await storage.saveSetContentDirect(createdSet.id, enhancedPhrases);
     if (!contentSaved) {
       // Cleanup on failure
       await storage.deleteSetMetaData(createdSet.id);
@@ -297,7 +302,7 @@ CRITICAL: You MUST generate EXACTLY ${cleanedPhrases.length} phrases in the same
     return NextResponse.json({
       success: true,
       newSetMetaData,
-      phrases: generationResult.phrases
+      phrases: enhancedPhrases
     });
   } catch (error) {
     console.error("API Route: Error in handleManualMode:", error);
@@ -568,8 +573,11 @@ export async function POST(request: Request) {
     newMetaId = insertedRecord.id;
     console.log(`API Route: Metadata saved with ID: ${newMetaId}`);
 
+    // Enhance mnemonics before saving
+    const enhancedPhrases = await enhanceMnemonics(generationResult.phrases);
+    
     // Save content
-    const contentSaved = await storage.saveSetContentDirect(newMetaId, generationResult.phrases);
+    const contentSaved = await storage.saveSetContentDirect(newMetaId, enhancedPhrases);
     if (!contentSaved) throw new Error("Failed to save content");
     console.log(`API Route: Content saved for set ID: ${newMetaId}`);
 
@@ -589,7 +597,7 @@ export async function POST(request: Request) {
       specificTopics: insertedRecord.specificTopics || undefined,
       source: insertedRecord.source as SetMetaData['source'] || 'generated',
       imageUrl: insertedRecord.imageUrl || undefined,
-      phraseCount: generationResult.phrases.length,
+      phraseCount: enhancedPhrases.length,
       isFullyLearned: false,
       llmBrand: insertedRecord.llmBrand || undefined,
       llmModel: insertedRecord.llmModel || undefined,
@@ -601,6 +609,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       newSetMetaData: completeNewMetaData,
       ...generationResult,
+      phrases: enhancedPhrases, // Override with enhanced phrases
       generationTime: Date.now() - startTime
     }, { status: 201 });
 

@@ -5,7 +5,8 @@
  * key words and generates individual mnemonics for each component.
  */
 
-import { cleanPronunciationForMnemonic, THAI_PRONOUNS } from './mnemonic-rules';
+// Import cleanPronunciationForMnemonic if needed in the future
+// import { cleanPronunciationForMnemonic, THAI_PRONOUNS } from './mnemonic-rules';
 
 export interface WordBreakdown {
   thai: string;
@@ -24,19 +25,8 @@ export interface BreakdownMnemonic {
   };
 }
 
-/**
- * Thai words to skip when creating mnemonics (common particles, pronouns)
- */
-const SKIP_WORDS = [
-  // Pronouns
-  'ผม', 'ฉัน', 'ดิฉัน', 'เขา', 'เธอ', 'มัน', 'พวกเขา', 'เรา',
-  // Common particles
-  'ครับ', 'ค่ะ', 'คะ', 'จ้ะ', 'จ๊ะ', 'นะ', 'สิ', 'หรอ', 'หรือ',
-  // Common function words that don't need mnemonics
-  'ที่', 'และ', 'แต่', 'หรือ', 'เพื่อ', 'กับ', 'ของ', 'ใน', 'บน', 'ใต้',
-  // Common verbs that appear in many phrases
-  'เป็น', 'มี', 'ได้', 'ไป', 'มา', 'อยู่'
-];
+// Words to skip are currently defined inline where needed
+// In the future, consider moving these to a shared constants file
 
 /**
  * Words to always include in breakdown (important content words)
@@ -97,7 +87,6 @@ export function extractKeyWords(
   // 4. Has clear English meaning
   
   // Parse Thai text looking for important words
-  let currentPos = 0;
   const importantWords: Array<{ thai: string, start: number, end: number }> = [];
   
   for (const pattern of PRIORITY_PATTERNS) {
@@ -170,7 +159,7 @@ export function extractKeyWords(
  * Simple helper to extract English meaning for a Thai word
  * In production, this would use a dictionary or translation API
  */
-function extractEnglishMeaning(thaiWord: string, fullEnglish: string): string {
+function extractEnglishMeaning(thaiWord: string, _fullEnglish: string): string {
   // Common word mappings
   const commonMappings: Record<string, string> = {
     'ไหน': 'where',

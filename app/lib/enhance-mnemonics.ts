@@ -4,7 +4,7 @@
 
 import { generateMnemonic } from './gemini';
 import { isInvalidMnemonic } from './mnemonic-breakdown';
-import type { Phrase } from './types';
+import type { Phrase } from './generation/types';
 
 /**
  * Enhance mnemonics for an array of phrases

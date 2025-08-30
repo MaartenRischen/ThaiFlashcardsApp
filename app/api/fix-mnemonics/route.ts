@@ -6,7 +6,7 @@ import { isInvalidMnemonic } from '@/app/lib/mnemonic-breakdown';
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId: _userId } = await auth();
     
     // This can be run by admin or system
     // For user-specific fixes, check userId

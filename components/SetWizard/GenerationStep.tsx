@@ -57,7 +57,6 @@ export function GenerationStep({
       try {
         
         // Start simulated progress updates
-        let simulatedProgress = 0;
         let currentPhrase = 0;
         progressIntervalRef.current = setInterval(() => {
           currentPhrase += 1;

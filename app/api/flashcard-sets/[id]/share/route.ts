@@ -20,10 +20,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       select: {
         shareId: true,
         userId: true,
+        source: true,
       },
     });
 
-    if (!set || set.userId !== userId) {
+    if (!set) {
+      return NextResponse.json({ error: 'Set not found' }, { status: 404 });
+    }
+    
+    // Allow sharing of default sets by any user who has them, or sets owned by the user
+    if (set.source !== 'default' && set.userId !== userId) {
       return NextResponse.json({ error: 'Set not found or not owned by user' }, { status: 404 });
     }
 

@@ -266,7 +266,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     }
   };
   
-  const handleLoadSet = async (setId: string) => {
+  const _handleLoadSet = async (setId: string) => {
     if (setId !== activeSetId) {
       await switchSet(setId);
     }

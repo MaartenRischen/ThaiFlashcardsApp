@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, Eye, Clock, CheckCircle2, AlertCircle, TrendingUp, Calendar, BarChart3, Play } from 'lucide-react';
+import { X, Eye, CheckCircle2, AlertCircle, TrendingUp, Calendar, BarChart3, Play } from 'lucide-react';
 import { useSet } from '@/app/context/SetContext';
 import { Phrase } from '@/app/lib/set-generator';
 import { SetProgress } from '@/app/lib/storage/types';
@@ -52,13 +53,7 @@ export function SetPreviewModal({
   const [progressStats, setProgressStats] = useState<ProgressStats | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'cards' | 'progress'>('overview');
 
-  useEffect(() => {
-    if (isOpen && setId) {
-      loadSetData();
-    }
-  }, [isOpen, setId]);
-
-  const loadSetData = async () => {
+  const loadSetData = React.useCallback(async () => {
     setLoading(true);
     try {
       // Load phrases from API
@@ -87,7 +82,13 @@ export function SetPreviewModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [setId, isSignedIn]);
+
+  useEffect(() => {
+    if (isOpen && setId) {
+      loadSetData();
+    }
+  }, [isOpen, setId, loadSetData]);
 
   const calculateProgressStats = (phrases: Phrase[], progress: SetProgress): ProgressStats => {
     const totalCards = phrases.length;
@@ -174,7 +175,7 @@ export function SetPreviewModal({
           </div>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'overview' | 'cards' | 'progress')} className="flex-1">
           <TabsList className="w-full border-b border-[#404040] bg-transparent rounded-none px-6">
             <TabsTrigger value="overview" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
               <Eye className="w-4 h-4 mr-2" />
@@ -203,10 +204,13 @@ export function SetPreviewModal({
                 {/* Set Image */}
                 {imageUrl && (
                   <div className="relative w-full h-48 rounded-lg overflow-hidden">
-                    <img
+                    <Image
                       src={imageUrl}
                       alt={setName}
-                      className="w-full h-full object-cover"
+                      className="object-cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 600px"
+                      unoptimized={true}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   </div>

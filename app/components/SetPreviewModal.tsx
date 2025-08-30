@@ -33,6 +33,7 @@ export function SetPreviewModal({
   const loadSetData = useCallback(async () => {
     setLoading(true);
     try {
+      console.log('Loading content for set:', setId);
       // Load set content
       const contentRes = await fetch(`/api/flashcard-sets/${setId}/content`, {
         credentials: 'include'
@@ -40,7 +41,13 @@ export function SetPreviewModal({
       
       if (contentRes.ok) {
         const contentData = await contentRes.json();
-        setPhrases(contentData.phrases || []);
+        console.log('Content data received:', contentData);
+        // The API returns the phrases array directly, not wrapped in an object
+        const phrasesArray = Array.isArray(contentData) ? contentData : contentData.phrases || [];
+        console.log('Phrases extracted:', phrasesArray.length, 'items');
+        setPhrases(phrasesArray);
+      } else {
+        console.error('Failed to load content:', contentRes.status, contentRes.statusText);
       }
 
       // Load progress if signed in

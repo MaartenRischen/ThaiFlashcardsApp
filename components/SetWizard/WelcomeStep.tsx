@@ -31,12 +31,13 @@ export function WelcomeStep({ onNext, isAuthenticated = true }: WelcomeStepProps
         className="relative w-full max-w-[280px] h-[160px] mx-auto rounded-xl overflow-hidden neumorphic"
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10" />
-        <Image
-          src="/images/gifs/setwizardgif2.gif"
-          alt="Set creation wizard animation"
-          fill
-          className="object-cover"
-          priority
+        <video
+          src="/images/gifs/setwizardgif2.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
         />
         <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/40 to-transparent z-10" />
       </motion.div>

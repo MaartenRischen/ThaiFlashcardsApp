@@ -39,8 +39,8 @@ export async function GET(req: NextRequest) {
       console.warn('[funny-videos/random] Supabase storage unavailable:', e);
     }
 
-    // No video available yet
-    return NextResponse.json({ url: null, source: 'none' });
+    // No video available yet: return a temporary local fallback while generation runs
+    return NextResponse.json({ url: '/images/gifs/setwizardgif2.mp4', source: 'fallback' });
   } catch (error) {
     console.error('[funny-videos/random] Error:', error);
     return NextResponse.json({ url: null }, { status: 500 });

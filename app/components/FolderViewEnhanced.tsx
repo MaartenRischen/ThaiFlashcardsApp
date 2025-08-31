@@ -35,6 +35,7 @@ import { ShareButton } from './ShareButton';
 import { GoLiveButton } from './GoLiveButton';
 import { SetPreviewModal } from './SetPreviewModal';
 import { usePreloadedFolders } from '@/app/hooks/usePreloadedData';
+import { usePreloader } from '@/app/context/PreloaderContext';
 
 interface FolderViewEnhancedProps {
   isOpen: boolean;
@@ -49,7 +50,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
   const { availableSets, switchSet, activeSetId, refreshSets } = useSet();
   const { preloadFolders, getCachedFolders, clearFolderCache, preloadAllSets, preloadImages, getCachedContent } = useSetCache();
   // Access preloaded data to avoid unnecessary spinners if cache hasn't been primed yet
-  const { preloadedData, isLoading: isPreloading } = require('@/app/context/PreloaderContext').usePreloader();
+  const { preloadedData, isLoading: isPreloading } = usePreloader();
   const { folders: preloadedFolders } = usePreloadedFolders();
   
   // State

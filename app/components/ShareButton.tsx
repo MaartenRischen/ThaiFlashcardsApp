@@ -102,7 +102,6 @@ export function ShareButton({ setId, setName, className, variant = 'ghost', size
               "shadow-lg hover:shadow-xl transform group-hover:scale-110 transition-all duration-200",
               "border border-white/30 backdrop-blur-md ring-1 ring-white/20",
               "flex items-center gap-2",
-              "animate-pulse group-hover:animate-none",
               className
             )}
             title="Share this set with friends!"

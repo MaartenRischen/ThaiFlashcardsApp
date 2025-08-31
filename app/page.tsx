@@ -1194,6 +1194,25 @@ export default function ThaiFlashcards() {
     
   }, [activeSetId]); // Re-run this effect only when activeSetId changes
 
+  // When new set content is available, check if a specific card was requested via Preview
+  useEffect(() => {
+    try {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('activeCardIndex') : null;
+      if (stored !== null) {
+        const raw = parseInt(stored, 10);
+        const maxIndex = Math.max(0, (phrases?.length || 1) - 1);
+        const target = Number.isFinite(raw) ? Math.min(Math.max(0, raw), maxIndex) : 0;
+        setIndex(target);
+        setShowAnswer(false);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('activeCardIndex');
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [phrases, activeSetId]);
+
   // Function to handle starting the rename edit
   const handleStartRename = (set: SetMetaData) => {
     setEditingSetId(set.id);

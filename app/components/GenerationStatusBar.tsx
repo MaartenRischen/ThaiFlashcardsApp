@@ -9,10 +9,6 @@ export function GenerationStatusBar() {
   const [displayProgress, setDisplayProgress] = React.useState(0)
   const tickRef = React.useRef<ReturnType<typeof setInterval> | null>(null)
 
-  if (!generationStatus?.isGenerating) {
-    return null
-  }
-
   const getTitle = () => {
     switch (generationStatus.mode) {
       case 'audio-pimsleur':
@@ -86,9 +82,11 @@ export function GenerationStatusBar() {
     if (rawProgress > displayProgress) {
       setDisplayProgress(rawProgress)
     }
-  }, [rawProgress])
+  }, [rawProgress, displayProgress])
 
   const progress = displayProgress
+
+  if (!generationStatus?.isGenerating) return null
 
   return (
     <div className="fixed top-20 left-2 right-2 sm:top-24 sm:left-auto sm:right-4 sm:w-96 z-40">

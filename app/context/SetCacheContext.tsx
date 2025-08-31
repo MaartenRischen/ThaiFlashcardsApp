@@ -244,7 +244,8 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const data = await response.json();
-      const folders = data.folders || [];
+      // API sometimes returns an array directly, or { folders: Folder[] }
+      const folders = Array.isArray(data) ? data : (data.folders || []);
       
       // Update cache
       setFolderCache({

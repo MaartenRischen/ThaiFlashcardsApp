@@ -48,6 +48,8 @@ type SortOption = 'name' | 'date' | 'size';
 export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlightSetId }: FolderViewEnhancedProps) {
   const { availableSets, switchSet, activeSetId, refreshSets } = useSet();
   const { preloadFolders, getCachedFolders, clearFolderCache, preloadAllSets, preloadImages, getCachedContent } = useSetCache();
+  // Access preloaded data to avoid unnecessary spinners if cache hasn't been primed yet
+  const { preloadedData, isLoading: isPreloading } = require('@/app/context/PreloaderContext').usePreloader();
   const { folders: preloadedFolders } = usePreloadedFolders();
   
   // State
@@ -189,14 +191,26 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
       const setIds = folderSets.map(set => set.id);
       if (setIds.length > 0) {
         // Check if we need to load anything
-        const needsLoading = setIds.some(id => !getCachedContent(id));
+        // Consider preloaded data as well, so we don't spinner while cache is being primed
+        const isInPreloadedData = (id: string) => {
+          try {
+            return !!(preloadedData && preloadedData.setContents && preloadedData.setContents[id] && preloadedData.setContents[id].length > 0);
+          } catch {
+            return false;
+          }
+        };
+        const needsLoading = setIds.some(id => !getCachedContent(id) && !isInPreloadedData(id));
         if (needsLoading) {
-          console.log(`[FolderViewEnhanced] Need to load content for ${setIds.filter(id => !getCachedContent(id)).length} sets`);
-          shouldShowLoading = true;
-          setLoading(true);
+          const missing = setIds.filter(id => !getCachedContent(id) && !isInPreloadedData(id));
+          console.log(`[FolderViewEnhanced] Need to load content for ${missing.length} sets`);
+          // Only show loading if preloader isn't still finishing up
+          if (!isPreloading) {
+            shouldShowLoading = true;
+            setLoading(true);
+          }
           
           // Only preload sets that aren't cached
-          const uncachedSetIds = setIds.filter(id => !getCachedContent(id));
+          const uncachedSetIds = missing;
           if (uncachedSetIds.length > 0) {
             await preloadAllSets(uncachedSetIds);
           }

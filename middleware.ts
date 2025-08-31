@@ -20,7 +20,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/verify-sets', // Verify sets endpoint
   '/api/generate-set(.*)', // Let route handle auth and return JSON 401
   '/api/generate-mnemonic', // Mnemonic generation (handles auth internally)
-  '/api/funny-videos/(.*)', // Comic generation endpoints
+  '/api/thai-facts/(.*)', // Thai facts endpoints
   '/public-sets(.*)', // Public sets page
   '/share/(.*)', // Share pages
   '/clerk-debug', // Debug page

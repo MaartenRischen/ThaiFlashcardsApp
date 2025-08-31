@@ -4,56 +4,51 @@ import React, { useEffect, useState } from 'react';
 import { PreloadProgress } from '@/app/lib/preloader';
 import Image from 'next/image';
 
-function ComicPanel() {
-  const [comic, setComic] = React.useState<{ panels: string[]; title: string } | null>(null);
-  const [currentPanel, setCurrentPanel] = React.useState(0);
+function ThaiFactPanel() {
+  const [fact, setFact] = React.useState<{ fact: string; category: string; difficulty: string } | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   
   React.useEffect(() => {
     let cancelled = false;
-    console.log('[ComicPanel] Fetching comic from /api/funny-videos/random');
-    fetch('/api/funny-videos/random')
-      .then(r => {
-        console.log('[ComicPanel] Response status:', r.status);
-        return r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`));
-      })
-      .then(data => {
-        console.log('[ComicPanel] Received data:', data);
-        if (!cancelled) {
-          if (data?.panels && data.panels.length > 0) {
-            console.log('[ComicPanel] Setting comic with', data.panels.length, 'panels');
-            setComic({ panels: data.panels, title: data.title });
-          } else {
-            console.log('[ComicPanel] No panels in response or empty panels array');
-            setError('No comics available yet');
+    
+    const fetchFact = () => {
+      fetch('/api/thai-facts/random')
+        .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
+        .then(data => {
+          if (!cancelled) {
+            setFact({
+              fact: data.fact,
+              category: data.category,
+              difficulty: data.difficulty
+            });
+            setLoading(false);
           }
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error('[ComicPanel] Error fetching comic:', err);
-        if (!cancelled) {
-          setError('Failed to load comic');
-          setLoading(false);
-        }
-      });
-    return () => { cancelled = true; };
-  }, []);
+        })
+        .catch((err) => {
+          console.error('[ThaiFactPanel] Error fetching fact:', err);
+          if (!cancelled) {
+            setError('Failed to load Thai fact');
+            setLoading(false);
+          }
+        });
+    };
 
-  // Auto-advance panels
-  React.useEffect(() => {
-    if (!comic || comic.panels.length === 0) return;
-    const interval = setInterval(() => {
-      setCurrentPanel(prev => (prev + 1) % comic.panels.length);
-    }, 3000); // 3 seconds per panel
-    return () => clearInterval(interval);
-  }, [comic]);
+    fetchFact();
+    
+    // Fetch a new fact every 8 seconds
+    const interval = setInterval(fetchFact, 8000);
+    
+    return () => { 
+      cancelled = true; 
+      clearInterval(interval);
+    };
+  }, []);
 
   if (loading) {
     return (
       <div className="mt-6 text-center">
-        <div className="text-sm text-gray-500">Loading entertainment...</div>
+        <div className="text-sm text-gray-500">Loading Thai facts...</div>
       </div>
     );
   }
@@ -66,28 +61,58 @@ function ComicPanel() {
     );
   }
 
-  if (!comic || comic.panels.length === 0) return null;
+  if (!fact) return null;
+  
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'grammar': return '📝';
+      case 'culture': return '🏛️';
+      case 'writing': return '✍️';
+      case 'pronunciation': return '🗣️';
+      case 'history': return '📚';
+      case 'fun': return '🎉';
+      default: return '🇹🇭';
+    }
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'beginner': return 'text-green-400';
+      case 'intermediate': return 'text-yellow-400';
+      case 'advanced': return 'text-red-400';
+      default: return 'text-gray-400';
+    }
+  };
   
   return (
     <div className="mt-6 space-y-2">
-      <div className="text-center text-sm text-gray-400">{comic.title}</div>
-      <div className="relative rounded-xl overflow-hidden border border-[#333] bg-black">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={comic.panels[currentPanel]}
-          alt={`Panel ${currentPanel + 1}`}
-          className="w-full h-48 object-contain"
-        />
-        <div className="absolute bottom-2 right-2 flex gap-1">
-          {comic.panels.map((_, idx) => (
-            <div
-              key={idx}
-              className={`w-2 h-2 rounded-full transition-all ${
-                idx === currentPanel ? 'bg-white' : 'bg-white/30'
-              }`}
-            />
-          ))}
+      <div className="text-center text-xs text-gray-500 uppercase tracking-wide">
+        Did you know?
+      </div>
+      <div className="bg-[#1A1A1A] rounded-xl p-4 border border-[#333] relative overflow-hidden">
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="text-6xl text-center pt-8">🇹🇭</div>
         </div>
+        
+        {/* Content */}
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">{getCategoryIcon(fact.category)}</span>
+            <span className="text-xs text-gray-400 capitalize">{fact.category}</span>
+            <span className="text-xs text-gray-600">•</span>
+            <span className={`text-xs capitalize font-medium ${getDifficultyColor(fact.difficulty)}`}>
+              {fact.difficulty}
+            </span>
+          </div>
+          
+          <p className="text-sm text-gray-200 leading-relaxed">
+            {fact.fact}
+          </p>
+        </div>
+        
+        {/* Subtle animation */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer" />
       </div>
     </div>
   );
@@ -218,8 +243,8 @@ export function AppLoadingScreen({ progress }: AppLoadingScreenProps) {
           </div>
         </div>
 
-        {/* Fun Comic Strip (donkey on a bridge) */}
-        <ComicPanel />
+        {/* Thai Language Facts */}
+        <ThaiFactPanel />
 
         {/* Fun Loading Tips */}
         <div className="mt-6 text-center">

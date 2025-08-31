@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { generateMnemonic } from '@/app/lib/gemini';
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,33 +25,30 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // Check if OpenRouter API key is available
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    console.log('[Generate Mnemonic] API Key available:', !!apiKey);
+    // Try OpenRouter first, then fallback to Gemini
+    const openRouterApiKey = process.env.OPENROUTER_API_KEY;
+    console.log('[Generate Mnemonic] OpenRouter API Key available:', !!openRouterApiKey);
     
-    if (!apiKey) {
-      console.error('[Generate Mnemonic] OPENROUTER_API_KEY not found in environment');
-      return NextResponse.json({ 
-        error: 'OpenRouter API key not configured' 
-      }, { status: 500 });
-    }
+    let mnemonic: string | null = null;
 
-    console.log('[Generate Mnemonic] Calling OpenRouter API...');
-    
-    // Use OpenRouter API to generate a new mnemonic
-    const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'X-Title': 'Thai Flashcards - Mnemonic Generator',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-pro',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a creative mnemonic generator for Thai language learning. Create memorable, clever, and often humorous mnemonics that help English speakers remember Thai words and phrases.
+    // Try OpenRouter first if API key is available
+    if (openRouterApiKey) {
+      try {
+        console.log('[Generate Mnemonic] Trying OpenRouter API...');
+        
+        const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openRouterApiKey}`,
+            'Content-Type': 'application/json',
+            'X-Title': 'Thai Flashcards - Mnemonic Generator',
+          },
+          body: JSON.stringify({
+            model: 'google/gemini-pro',
+            messages: [
+              {
+                role: 'system',
+                content: `You are a creative mnemonic generator for Thai language learning. Create memorable, clever, and often humorous mnemonics that help English speakers remember Thai words and phrases.
 
 Guidelines:
 - Make mnemonics vivid, silly, or absurd - they stick better
@@ -61,45 +59,58 @@ Guidelines:
 - Be creative and fun!
 
 Example format: "Think: '[sound association]' - [memorable scenario or wordplay]"`
-          },
-          {
-            role: 'user',
-            content: `Create a new mnemonic for:
+              },
+              {
+                role: 'user',
+                content: `Create a new mnemonic for:
 English: "${english}"
 Thai: "${thai}"
 Pronunciation: "${pronunciation}"
 
 Generate a creative, memorable mnemonic that helps remember this Thai word/phrase.`
-          }
-        ],
-        temperature: 0.8,
-        max_tokens: 150
-      })
-    });
+              }
+            ],
+            temperature: 0.8,
+            max_tokens: 150
+          })
+        });
 
-    if (!openRouterResponse.ok) {
-      const errorText = await openRouterResponse.text();
-      console.error('[Generate Mnemonic] OpenRouter API error:', openRouterResponse.status, openRouterResponse.statusText);
-      console.error('[Generate Mnemonic] Error response:', errorText);
-      return NextResponse.json({ 
-        error: 'Failed to generate mnemonic',
-        details: errorText
-      }, { status: 500 });
+        if (openRouterResponse.ok) {
+          const data = await openRouterResponse.json();
+          console.log('[Generate Mnemonic] OpenRouter response:', data);
+          mnemonic = data.choices?.[0]?.message?.content?.trim();
+          
+          if (mnemonic) {
+            console.log('[Generate Mnemonic] Generated mnemonic via OpenRouter:', mnemonic);
+          }
+        } else {
+          const errorText = await openRouterResponse.text();
+          console.error('[Generate Mnemonic] OpenRouter API error:', openRouterResponse.status, openRouterResponse.statusText);
+          console.error('[Generate Mnemonic] Error response:', errorText);
+        }
+      } catch (error) {
+        console.error('[Generate Mnemonic] OpenRouter error:', error);
+      }
     }
 
-    const data = await openRouterResponse.json();
-    console.log('[Generate Mnemonic] OpenRouter response:', data);
-    
-    const mnemonic = data.choices?.[0]?.message?.content?.trim();
+    // Fallback to Gemini if OpenRouter failed or is not available
+    if (!mnemonic) {
+      console.log('[Generate Mnemonic] Falling back to Gemini API...');
+      try {
+        mnemonic = await generateMnemonic(thai, english, pronunciation);
+        console.log('[Generate Mnemonic] Generated mnemonic via Gemini:', mnemonic);
+      } catch (error) {
+        console.error('[Generate Mnemonic] Gemini error:', error);
+      }
+    }
 
     if (!mnemonic) {
-      console.log('[Generate Mnemonic] No mnemonic in response');
+      console.log('[Generate Mnemonic] No mnemonic generated by any service');
       return NextResponse.json({ 
-        error: 'No mnemonic generated' 
+        error: 'Failed to generate mnemonic - both OpenRouter and Gemini unavailable' 
       }, { status: 500 });
     }
 
-    console.log('[Generate Mnemonic] Generated mnemonic:', mnemonic);
     return NextResponse.json({ mnemonic });
 
   } catch (error) {

@@ -21,6 +21,7 @@ export function GET() {
       // AI APIs
       OPENROUTER_API_KEY_EXISTS: !!process.env.OPENROUTER_API_KEY,
       IDEOGRAM_API_KEY_EXISTS: !!process.env.IDEOGRAM_API_KEY,
+      GEMINI_API_KEY_EXISTS: !!process.env.GEMINI_API_KEY,
       // Process info
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),

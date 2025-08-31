@@ -44,34 +44,44 @@ export async function POST(req: NextRequest) {
             'X-Title': 'Thai Flashcards - Mnemonic Generator',
           },
           body: JSON.stringify({
-            model: 'google/gemini-pro',
+            model: 'openai/gpt-4o-mini', // Use the same model as the main system
             messages: [
               {
                 role: 'system',
-                content: `You are a creative mnemonic generator for Thai language learning. Create memorable, clever, and often humorous mnemonics that help English speakers remember Thai words and phrases.
+                content: `You are an expert Thai language instructor specializing in creating practical, effective memory aids. Your goal is to create memorable mnemonics that help English speakers remember Thai words and phrases.
 
-Guidelines:
-- Make mnemonics vivid, silly, or absurd - they stick better
-- Use wordplay, rhymes, or sound associations when possible
-- Keep them concise but memorable
-- Make them appropriate for all audiences
-- Focus on the sound/pronunciation connection between English and Thai
-- Be creative and fun!
+### MNEMONIC CREATION RULES:
+1. Focus on sound similarities between Thai pronunciation and English words
+2. Are practical and easy to remember
+3. Help with memorization through logical connections
+4. Are clear and effective learning tools
+5. NEVER include gender-specific pronouns (chan/pom/dichan) in the mnemonic itself
+6. NEVER include politeness particles (ka/krap/krub) in the mnemonic
+7. For phrases with pronouns, focus on OTHER key words in the phrase
+8. Must relate to the meaning while sounding like the pronunciation
+9. Keep it under 80 characters
+10. Use format: "Think: '[sound association]' - [brief connection to meaning]"
 
-Example format: "Think: '[sound association]' - [memorable scenario or wordplay]"`
+Good examples:
+- "ขอบคุณ (khob khun)" → "Think: 'Cop coon' - cop saying thanks"
+- "อยากไป (yàak pai)" → "Think: 'Yak pie' - yak wants pie (go)"
+- "ที่ไหน (thîi nǎi)" → "Think: 'Tea nigh' - tea at night where?"
+
+Bad examples to AVOID:
+- "ผมอยากไป" → "Think: 'pom yàak...'" ❌ (contains pronoun)
+- "สวัสดีครับ" → "Think: '...krap'" ❌ (contains particle)
+- Just repeating the pronunciation ❌ (not creative)
+- Long, complex explanations ❌ (not memorable)`
               },
               {
                 role: 'user',
-                content: `Create a new mnemonic for:
-English: "${english}"
-Thai: "${thai}"
-Pronunciation: "${pronunciation}"
+                content: `Create a mnemonic for the Thai phrase "${thai}" which is pronounced "${pronunciation}" and means "${english}" in English.
 
-Generate a creative, memorable mnemonic that helps remember this Thai word/phrase.`
+Generate a single, concise mnemonic following the format: "Think: '[sound association]' - [brief connection to meaning]"`
               }
             ],
-            temperature: 0.8,
-            max_tokens: 150
+            temperature: 0.7,
+            max_tokens: 100
           })
         });
 
@@ -97,8 +107,19 @@ Generate a creative, memorable mnemonic that helps remember this Thai word/phras
     if (!mnemonic) {
       console.log('[Generate Mnemonic] Falling back to Gemini API...');
       try {
+        // Use the existing generateMnemonic function which has proven prompting
         mnemonic = await generateMnemonic(thai, english, pronunciation);
         console.log('[Generate Mnemonic] Generated mnemonic via Gemini:', mnemonic);
+        
+        // Clean up the mnemonic if it has the breakdown format - extract just the simple mnemonic
+        if (mnemonic && mnemonic.includes('Remember these key parts:')) {
+          // If it's a breakdown mnemonic, try to extract a simpler version
+          const lines = mnemonic.split('\n');
+          const simpleLine = lines.find(line => line.includes('Think:') && !line.includes('•'));
+          if (simpleLine) {
+            mnemonic = simpleLine.trim();
+          }
+        }
       } catch (error) {
         console.error('[Generate Mnemonic] Gemini error:', error);
       }

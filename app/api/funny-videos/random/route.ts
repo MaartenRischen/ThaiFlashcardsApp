@@ -1,10 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/app/lib/supabaseAdmin';
 import { funnyPromptVariants, generateDonkeyBridgeVideo } from '@/app/lib/openrouter-video';
 
 const BUCKET = process.env.FUNNY_VIDEOS_BUCKET || 'funny-videos';
+const CRON_KEY = process.env.CRON_SECRET_KEY || 'dbw-cron-2L9hJk7uYqN5sT3aX8wZ4mC1rV6pB2n';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     // Try Supabase bucket first
     try {
@@ -24,29 +25,15 @@ export async function GET() {
         }
       }
 
-      // If empty: auto-seed in background with 10 funny videos via OpenRouter
-      (async () => {
-        try {
-          const variants = funnyPromptVariants(10);
-          for (const v of variants) {
-            try {
-              const { url } = await generateDonkeyBridgeVideo(v);
-              const resp = await fetch(url);
-              if (!resp.ok) continue;
-              const buf = await resp.arrayBuffer();
-              const filename = `seed-${Date.now()}-${Math.random().toString(36).slice(2,8)}.mp4`;
-              await supabase.storage.from(BUCKET).upload(filename, new Uint8Array(buf), {
-                contentType: 'video/mp4', upsert: true,
-              });
-            } catch (e) {
-              console.error('[funny-videos/random] seed item failed:', e);
-            }
-          }
-          console.log('[funny-videos/random] seeding complete');
-        } catch (e) {
-          console.error('[funny-videos/random] seeding error:', e);
-        }
-      })();
+      // If empty: trigger cron generator in a separate request (fire-and-forget)
+      try {
+        const origin = req.nextUrl.origin;
+        // don't await; let it run separately
+        fetch(`${origin}/api/funny-videos/cron`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${CRON_KEY}` },
+        }).catch(() => {});
+      } catch (_) {}
     } catch (e) {
       // Ignore storage errors, fall back to static asset
       console.warn('[funny-videos/random] Supabase storage unavailable:', e);

@@ -7,6 +7,7 @@ import { Phrase } from '@/app/lib/set-generator';
 import { SetProgress } from '@/app/lib/storage/types';
 import { useAuth } from '@clerk/nextjs';
 import { usePreloadedSetContent } from '@/app/hooks/usePreloadedData';
+import { useSetCache } from '@/app/context/SetCacheContext';
 
 interface SetPreviewModalProps {
   isOpen: boolean;
@@ -28,23 +29,35 @@ export function SetPreviewModal({
   const { isSignedIn } = useAuth();
   const { switchSet } = useSet();
   const { content: preloadedContent, progress: preloadedProgress } = usePreloadedSetContent(setId);
+  const { getCachedContent } = useSetCache();
   const [phrases, setPhrases] = useState<Phrase[]>([]);
   const [progress, setProgress] = useState<SetProgress>({});
   const [loading, setLoading] = useState(false);
 
   const loadSetData = useCallback(async () => {
-    // Check if we have preloaded data first
+    console.log(`[SetPreviewModal] Loading data for set: ${setId}`);
+    
+    // First check cache
+    const cachedContent = getCachedContent(setId);
+    if (cachedContent && cachedContent.phrases.length > 0) {
+      console.log(`[SetPreviewModal] Using cached content for set ${setId}: ${cachedContent.phrases.length} phrases`);
+      setPhrases(cachedContent.phrases);
+      setProgress(cachedContent.progress || {});
+      return;
+    }
+    
+    // Then check preloaded data
     if (preloadedContent && preloadedContent.length > 0) {
-      console.log('Using preloaded content for set:', setId);
+      console.log(`[SetPreviewModal] Using preloaded content for set ${setId}: ${preloadedContent.length} phrases`);
       setPhrases(preloadedContent);
       setProgress(preloadedProgress || {});
       return;
     }
     
     // Only show loading if we need to fetch
+    console.log(`[SetPreviewModal] No cached/preloaded data found, fetching from API for set ${setId}`);
     setLoading(true);
     try {
-      console.log('Loading content for set:', setId);
       // Load set content
       const contentRes = await fetch(`/api/flashcard-sets/${setId}/content`, {
         credentials: 'include'
@@ -52,13 +65,14 @@ export function SetPreviewModal({
       
       if (contentRes.ok) {
         const contentData = await contentRes.json();
-        console.log('Content data received:', contentData);
+        console.log(`[SetPreviewModal] Content data received for ${setId}:`, contentData);
         // The API returns the phrases array directly, not wrapped in an object
         const phrasesArray = Array.isArray(contentData) ? contentData : contentData.phrases || [];
-        console.log('Phrases extracted:', phrasesArray.length, 'items');
+        console.log(`[SetPreviewModal] Phrases extracted for ${setId}:`, phrasesArray.length, 'items');
         setPhrases(phrasesArray);
       } else {
-        console.error('Failed to load content:', contentRes.status, contentRes.statusText);
+        console.error(`[SetPreviewModal] Failed to load content for ${setId}:`, contentRes.status, contentRes.statusText);
+        setPhrases([]);
       }
 
       // Load progress if signed in
@@ -73,11 +87,13 @@ export function SetPreviewModal({
         }
       }
     } catch (error) {
-      console.error('Error loading set data:', error);
+      console.error(`[SetPreviewModal] Error loading set data for ${setId}:`, error);
+      setPhrases([]);
+      setProgress({});
     } finally {
       setLoading(false);
     }
-  }, [setId, isSignedIn, preloadedContent, preloadedProgress]);
+  }, [setId, isSignedIn, preloadedContent, preloadedProgress, getCachedContent]);
 
   useEffect(() => {
     if (isOpen && setId) {

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/app/lib/supabaseAdmin';
-import { funnyPromptVariants, generateDonkeyBridgeVideo } from '@/app/lib/openrouter-video';
 
-const BUCKET = process.env.FUNNY_VIDEOS_BUCKET || 'funny-videos';
+const BUCKET = process.env.FUNNY_COMICS_BUCKET || 'funny-comics';
 const CRON_KEY = process.env.CRON_SECRET_KEY || 'dbw-cron-2L9hJk7uYqN5sT3aX8wZ4mC1rV6pB2n';
 
 export async function GET(req: NextRequest) {
@@ -16,12 +15,23 @@ export async function GET(req: NextRequest) {
       const { data: files, error } = await supabase.storage.from(BUCKET).list('', { limit: 100 });
       if (!error && files && files.length > 0) {
         const publicBase = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${BUCKET}`;
-        const mp4s = files
-          .filter(f => f.name.toLowerCase().endsWith('.mp4'))
-          .map(f => `${publicBase}/${encodeURIComponent(f.name)}`);
-        if (mp4s.length > 0) {
-          const choice = mp4s[Math.floor(Math.random() * mp4s.length)];
-          return NextResponse.json({ url: choice, source: 'supabase' });
+        const comicDirs = files.filter(f => f.name && !f.name.includes('.')); // directories only
+        if (comicDirs.length > 0) {
+          const choice = comicDirs[Math.floor(Math.random() * comicDirs.length)];
+          // Get panel images from the chosen comic directory
+          const { data: panels } = await supabase.storage.from(BUCKET).list(choice.name, { limit: 10 });
+          if (panels && panels.length > 0) {
+            const panelUrls = panels
+              .filter(p => p.name.match(/\.(jpg|jpeg|png|webp)$/i))
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map(p => `${publicBase}/${encodeURIComponent(choice.name)}/${encodeURIComponent(p.name)}`);
+            return NextResponse.json({ 
+              type: 'comic',
+              panels: panelUrls,
+              title: choice.name.replace(/-/g, ' '),
+              source: 'supabase' 
+            });
+          }
         }
       }
 
@@ -39,8 +49,8 @@ export async function GET(req: NextRequest) {
       console.warn('[funny-videos/random] Supabase storage unavailable:', e);
     }
 
-    // No video available yet: return a temporary local fallback while generation runs
-    return NextResponse.json({ url: '/images/gifs/setwizardgif2.mp4', source: 'fallback' });
+    // No comic available yet: return null while generation runs
+    return NextResponse.json({ type: 'comic', panels: [], title: 'Loading...', source: 'none' });
   } catch (error) {
     console.error('[funny-videos/random] Error:', error);
     return NextResponse.json({ url: null }, { status: 500 });

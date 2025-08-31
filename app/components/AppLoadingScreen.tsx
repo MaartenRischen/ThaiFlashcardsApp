@@ -4,30 +4,54 @@ import React, { useEffect, useState } from 'react';
 import { PreloadProgress } from '@/app/lib/preloader';
 import Image from 'next/image';
 
-function VideoPanel() {
-  const [videoUrl, setVideoUrl] = React.useState<string | null>(null);
+function ComicPanel() {
+  const [comic, setComic] = React.useState<{ panels: string[]; title: string } | null>(null);
+  const [currentPanel, setCurrentPanel] = React.useState(0);
+  
   React.useEffect(() => {
     let cancelled = false;
     fetch('/api/funny-videos/random')
       .then(r => r.ok ? r.json() : Promise.reject(new Error('failed')))
       .then(data => {
-        if (!cancelled && data?.url) setVideoUrl(data.url);
+        if (!cancelled && data?.panels && data.panels.length > 0) {
+          setComic({ panels: data.panels, title: data.title });
+        }
       })
       .catch(() => {});
     return () => { cancelled = true; };
   }, []);
 
-  if (!videoUrl) return null;
+  // Auto-advance panels
+  React.useEffect(() => {
+    if (!comic || comic.panels.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentPanel(prev => (prev + 1) % comic.panels.length);
+    }, 3000); // 3 seconds per panel
+    return () => clearInterval(interval);
+  }, [comic]);
+
+  if (!comic || comic.panels.length === 0) return null;
+  
   return (
-    <div className="mt-6 rounded-xl overflow-hidden border border-[#333] bg-black">
-      <video
-        src={videoUrl}
-        className="w-full h-40 object-cover"
-        autoPlay
-        muted
-        playsInline
-        loop
-      />
+    <div className="mt-6 space-y-2">
+      <div className="text-center text-sm text-gray-400">{comic.title}</div>
+      <div className="relative rounded-xl overflow-hidden border border-[#333] bg-black">
+        <img
+          src={comic.panels[currentPanel]}
+          alt={`Panel ${currentPanel + 1}`}
+          className="w-full h-48 object-contain"
+        />
+        <div className="absolute bottom-2 right-2 flex gap-1">
+          {comic.panels.map((_, idx) => (
+            <div
+              key={idx}
+              className={`w-2 h-2 rounded-full transition-all ${
+                idx === currentPanel ? 'bg-white' : 'bg-white/30'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -157,8 +181,8 @@ export function AppLoadingScreen({ progress }: AppLoadingScreenProps) {
           </div>
         </div>
 
-        {/* Fun Video (donkey on a bridge) */}
-        <VideoPanel />
+        {/* Fun Comic Strip (donkey on a bridge) */}
+        <ComicPanel />
 
         {/* Fun Loading Tips */}
         <div className="mt-6 text-center">

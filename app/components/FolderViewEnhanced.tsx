@@ -191,13 +191,20 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
         // Check if we need to load anything
         const needsLoading = setIds.some(id => !getCachedContent(id));
         if (needsLoading) {
+          console.log(`[FolderViewEnhanced] Need to load content for ${setIds.filter(id => !getCachedContent(id)).length} sets`);
           shouldShowLoading = true;
           setLoading(true);
+          
+          // Only preload sets that aren't cached
+          const uncachedSetIds = setIds.filter(id => !getCachedContent(id));
+          if (uncachedSetIds.length > 0) {
+            await preloadAllSets(uncachedSetIds);
+          }
         }
         
-        await preloadAllSets(setIds);
+        // Images can be loaded in background without showing spinner
         const imageUrls = folderSets.map(set => set.imageUrl || '/images/default-set-logo.png');
-        await preloadImages(imageUrls);
+        preloadImages(imageUrls); // Don't await, let it load in background
       }
       
       setCurrentFolder({

@@ -1,8 +1,7 @@
 import { SetMetaData, PhraseProgressData } from './storage/types';
 import { Phrase } from './generation/types';
-import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
+import { getDefaultSetContent, getDefaultSetsForUnauthenticatedUsers } from '@/app/lib/seed-default-sets';
 import { Folder } from './storage/folders';
-import { INITIAL_PHRASES } from '@/app/data/phrases';
 
 export interface PreloadedData {
   sets: SetMetaData[];
@@ -314,8 +313,14 @@ export class AppPreloader {
         });
         
         if (response.ok) {
-          const sets = await response.json();
-          return sets;
+          const data = await response.json();
+          // API returns { sets: [...] }
+          if (data && Array.isArray(data.sets)) {
+            return data.sets;
+          } else {
+            console.warn('Unexpected API response format:', data);
+            return [];
+          }
         }
       } catch (error) {
         console.error('Failed to load user sets:', error);
@@ -323,22 +328,8 @@ export class AppPreloader {
     }
     
     // Return default sets for non-authenticated users or as fallback
-    const now = new Date().toISOString();
-    const defaultSetMetadata: SetMetaData = {
-      id: 'default',
-      name: 'Default Thai Flashcards',
-      imageUrl: '/images/defaultnew.png',
-      level: 'complete beginner',
-      folderId: 'default-folder-default-sets',
-      createdAt: now,
-      source: 'default',
-      phraseCount: INITIAL_PHRASES.length,
-      isFullyLearned: false,
-      seriousnessLevel: null,
-      toneLevel: null
-    };
-    
-    return [defaultSetMetadata];
+    const defaultSets = getDefaultSetsForUnauthenticatedUsers();
+    return defaultSets;
   }
 
   private async loadSetContent(setId: string, _userId?: string | null): Promise<Phrase[]> {

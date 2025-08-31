@@ -1,4 +1,4 @@
-import { generateImageViaOpenRouter } from './ideogram-openrouter';
+import { generateImage } from './ideogram-service';
 
 export interface ComicPanel {
   prompt: string;
@@ -119,7 +119,7 @@ export async function generateComicStrip(storyIndex?: number): Promise<ComicStri
     const artPrompt = `Cartoon comic panel style, simple and colorful: ${panelPrompt}. Cute, expressive, family-friendly, no text or speech bubbles.`;
     
     try {
-      const imageUrl = await generateImageViaOpenRouter(artPrompt);
+      const imageUrl = await generateImage(artPrompt);
       panels.push({
         prompt: panelPrompt,
         imageUrl: imageUrl || undefined

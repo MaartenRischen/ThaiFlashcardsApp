@@ -21,6 +21,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/generate-set(.*)', // Let route handle auth and return JSON 401
   '/api/generate-mnemonic', // Mnemonic generation (handles auth internally)
   '/api/funny-videos/(.*)', // Comic generation endpoints
+  '/api/test-openrouter-models', // Test endpoint
   '/public-sets(.*)', // Public sets page
   '/share/(.*)', // Share pages
   '/clerk-debug', // Debug page

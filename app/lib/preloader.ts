@@ -251,10 +251,35 @@ export class AppPreloader {
     }
     
     // Return default folders as fallback
+    const now = new Date().toISOString();
     return [
-      { id: 'default-folder-default-sets', name: 'Default Sets', userId: 'default', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'default-folder-100-words', name: '100 Most Used Thai Words', userId: 'default', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'default-folder-100-sentences', name: '100 Most Used Thai Sentences', userId: 'default', createdAt: new Date(), updatedAt: new Date() }
+      { 
+        id: 'default-folder-default-sets', 
+        name: 'Default Sets', 
+        userId: 'default', 
+        isDefault: true,
+        orderIndex: 0,
+        createdAt: now, 
+        updatedAt: now 
+      },
+      { 
+        id: 'default-folder-100-words', 
+        name: '100 Most Used Thai Words', 
+        userId: 'default', 
+        isDefault: true,
+        orderIndex: 1,
+        createdAt: now, 
+        updatedAt: now 
+      },
+      { 
+        id: 'default-folder-100-sentences', 
+        name: '100 Most Used Thai Sentences', 
+        userId: 'default', 
+        isDefault: true,
+        orderIndex: 2,
+        createdAt: now, 
+        updatedAt: now 
+      }
     ];
   }
 

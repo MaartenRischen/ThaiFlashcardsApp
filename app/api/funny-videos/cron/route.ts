@@ -29,6 +29,28 @@ export async function POST(req: NextRequest) {
         // Create directory for this comic
         const comicDir = comic.id;
         
+        // Store comic metadata (title) as a JSON file
+        const metadata = {
+          title: comic.title,
+          id: comic.id,
+          created: new Date().toISOString(),
+          panels: comic.panels.length
+        };
+        
+        const metadataPath = `${comicDir}/metadata.json`;
+        const { error: metadataError } = await supabase.storage.from(BUCKET).upload(
+          metadataPath, 
+          new TextEncoder().encode(JSON.stringify(metadata)), 
+          {
+            contentType: 'application/json',
+            upsert: true,
+          }
+        );
+        
+        if (metadataError) {
+          console.error(`[funny-comics/cron] Failed to upload metadata:`, metadataError);
+        }
+        
         // Upload each panel
         for (let j = 0; j < comic.panels.length; j++) {
           const panel = comic.panels[j];

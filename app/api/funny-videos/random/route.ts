@@ -26,17 +26,41 @@ export async function GET(req: NextRequest) {
         
         if (comicDirs.length > 0) {
           const choice = comicDirs[Math.floor(Math.random() * comicDirs.length)];
+          console.log('[funny-videos/random] Selected comic directory:', choice.name);
+          
           // Get panel images from the chosen comic directory
           const { data: panels } = await supabase.storage.from(BUCKET).list(choice.name, { limit: 10 });
+          console.log('[funny-videos/random] Found panels:', panels?.map(p => p.name));
+          
           if (panels && panels.length > 0) {
             const panelUrls = panels
               .filter(p => p.name.match(/\.(jpg|jpeg|png|webp)$/i))
-              .sort((a, b) => a.name.localeCompare(b.name))
+              .sort((a, b) => a.name.localeCompare(b.name)) // This ensures panel-01.png, panel-02.png, etc. are in order
               .map(p => `${publicBase}/${encodeURIComponent(choice.name)}/${encodeURIComponent(p.name)}`);
+            
+            console.log('[funny-videos/random] Sorted panel URLs:', panelUrls);
+            
+            // Try to get the title from metadata.json
+            let comicTitle = 'Donkey Bridge Adventure'; // Default fallback
+            try {
+              const { data: metadataFile } = await supabase.storage
+                .from(BUCKET)
+                .download(`${choice.name}/metadata.json`);
+              
+              if (metadataFile) {
+                const metadataText = await metadataFile.text();
+                const metadata = JSON.parse(metadataText);
+                comicTitle = metadata.title || comicTitle;
+                console.log('[funny-videos/random] Found comic title:', comicTitle);
+              }
+            } catch (e) {
+              console.log('[funny-videos/random] No metadata found, using default title');
+            }
+            
             return NextResponse.json({ 
               type: 'comic',
               panels: panelUrls,
-              title: choice.name.replace(/-/g, ' '),
+              title: comicTitle,
               source: 'supabase' 
             });
           }

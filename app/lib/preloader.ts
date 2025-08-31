@@ -71,65 +71,92 @@ export class AppPreloader {
         await this.initializeUserData(userId);
       }
 
-      // Stage 3: Load folders
+      // Stage 3-4: Load folders and sets in parallel
       this.updateProgress({
         stage: 'folders',
         progress: 20,
-        message: 'Loading folders...'
+        message: 'Loading folders and sets...'
       });
-      data.folders = await this.loadFolders(userId);
-
-      // Stage 4: Load sets metadata
+      
+      const [folders, sets] = await Promise.all([
+        this.loadFolders(userId),
+        this.loadSets(userId)
+      ]);
+      
+      data.folders = folders;
+      data.sets = sets;
+      
       this.updateProgress({
         stage: 'sets',
         progress: 30,
-        message: 'Loading flashcard sets...'
+        message: `Loading ${sets.length} flashcard sets...`
       });
-      data.sets = await this.loadSets(userId);
 
-      // Stage 5: Load all set contents in parallel
+      // Stage 5-7: Load content, progress, and mnemonics in parallel
       this.updateProgress({
         stage: 'content',
         progress: 40,
-        message: 'Loading flashcards...',
+        message: 'Loading flashcards and progress...',
         subProgress: { current: 0, total: data.sets.length }
       });
       
-      const contentPromises = data.sets.map((set, index) => 
-        this.loadSetContent(set.id, userId).then(content => {
-          data.setContents[set.id] = content;
-          this.updateProgress({
-            stage: 'content',
-            progress: 40 + (20 * (index + 1) / data.sets.length),
-            message: 'Loading flashcards...',
-            subProgress: { 
-              current: index + 1, 
-              total: data.sets.length,
-              item: set.name
-            }
-          });
-          return content;
-        })
-      );
-      
-      await Promise.all(contentPromises);
-
-      // Stage 6: Load progress data
-      this.updateProgress({
-        stage: 'progress',
-        progress: 60,
-        message: 'Loading your progress...'
-      });
-      
       if (userId) {
-        const progressPromises = data.sets.map(set => 
-          this.loadSetProgress(userId, set.id).then(progress => {
-            data.setProgress[set.id] = progress;
+        // For authenticated users, load everything in parallel
+        const [allContents, allProgress, userMnemonics] = await Promise.all([
+          // Load all set contents
+          Promise.all(data.sets.map((set, index) => 
+            this.loadSetContent(set.id, userId).then(content => {
+              data.setContents[set.id] = content;
+              this.updateProgress({
+                stage: 'content',
+                progress: 40 + (30 * (index + 1) / data.sets.length),
+                message: 'Loading flashcards...',
+                subProgress: { 
+                  current: index + 1, 
+                  total: data.sets.length,
+                  item: set.name
+                }
+              });
+              return content;
+            })
+          )),
+          
+          // Load all progress data
+          Promise.all(data.sets.map(set => 
+            this.loadSetProgress(userId, set.id).then(progress => {
+              data.setProgress[set.id] = progress;
+              return progress;
+            })
+          )),
+          
+          // Load user mnemonics
+          this.loadUserMnemonics(userId)
+        ]);
+        
+        data.userMnemonics = userMnemonics;
+        
+      } else {
+        // For unauthenticated users, load from localStorage and default content
+        const contentPromises = data.sets.map((set, index) => 
+          this.loadSetContent(set.id, userId).then(content => {
+            data.setContents[set.id] = content;
+            this.updateProgress({
+              stage: 'content',
+              progress: 40 + (30 * (index + 1) / data.sets.length),
+              message: 'Loading flashcards...',
+              subProgress: { 
+                current: index + 1, 
+                total: data.sets.length,
+                item: set.name
+              }
+            });
+            return content;
           })
         );
-        await Promise.all(progressPromises);
-      } else {
-        // Load progress from localStorage for non-authenticated users
+        
+        await Promise.all(contentPromises);
+        
+        // Load progress from localStorage
         data.sets.forEach(set => {
           const storedProgress = localStorage.getItem(`progress_${set.id}`);
           if (storedProgress) {
@@ -140,19 +167,8 @@ export class AppPreloader {
             }
           }
         });
-      }
-
-      // Stage 7: Load user mnemonics
-      this.updateProgress({
-        stage: 'mnemonics',
-        progress: 70,
-        message: 'Loading custom mnemonics...'
-      });
-      
-      if (userId) {
-        data.userMnemonics = await this.loadUserMnemonics(userId);
-      } else {
-        // Load from localStorage for non-authenticated users
+        
+        // Load mnemonics from localStorage
         const storedMnemonics = localStorage.getItem('mnemonics-v2');
         if (storedMnemonics) {
           try {
@@ -162,6 +178,12 @@ export class AppPreloader {
           }
         }
       }
+      
+      this.updateProgress({
+        stage: 'mnemonics',
+        progress: 70,
+        message: 'Processing data...'
+      });
 
       // Stage 8: Preload images
       this.updateProgress({

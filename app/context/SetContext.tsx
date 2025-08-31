@@ -7,6 +7,7 @@ import { getDefaultSetsForUnauthenticatedUsers, getDefaultSetContent } from '@/a
 import { SetMetaData, SetProgress } from '@/app/lib/storage';
 import { useAudioGeneration } from '@/app/context/AudioGenerationContext';
 import { useSetCache } from '@/app/context/SetCacheContext';
+import { usePreloader } from '@/app/context/PreloaderContext';
 
 interface SetContextProps {
   availableSets: SetMetaData[];
@@ -57,6 +58,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   const { userId, isLoaded } = useAuth(); // <-- Use Clerk's useAuth hook
   const audioGeneration = useAudioGeneration();
   const { clearSetCache } = useSetCache(); // Get cache management functions
+  const { preloadedData, isLoading: isPreloading } = usePreloader(); // Get preloaded data
   const [availableSets, setAvailableSets] = useState<SetMetaData[]>([DEFAULT_SET_METADATA]);
   const [activeSetId, setActiveSetId] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
@@ -64,6 +66,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   const [activeSetProgress, setActiveSetProgress] = useState<SetProgress>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [setsHaveLoaded, setSetsHaveLoaded] = useState(false);
+  const [hasInitializedFromPreload, setHasInitializedFromPreload] = useState(false);
 
   // ADD LOGGING HERE TO SEE STATE ON RENDER
   console.log('[SetProvider Render] availableSets:', availableSets);
@@ -85,6 +88,16 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     }
     
     console.log(`SetContext: loadSetData called for id=${id}, userId=${userId}`);
+    
+    // Check if we have preloaded data for this set
+    if (id && preloadedData && preloadedData.setContents[id]) {
+      console.log(`SetContext: Using preloaded data for set ${id}`);
+      setActiveSetContent(preloadedData.setContents[id]);
+      setActiveSetProgress(preloadedData.setProgress[id] || {});
+      setIsLoading(false);
+      return;
+    }
+    
     setIsLoading(true);
     setActiveSetContent([]); // Clear content while loading
     setActiveSetProgress({}); // Clear progress while loading
@@ -178,7 +191,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [userId, isLoaded]); // Add isLoaded dependency
+  }, [userId, isLoaded, preloadedData]); // Add isLoaded and preloadedData dependency
 
   // Function to force refresh the list of available sets from the backend
   const refreshSets = useCallback(async () => {
@@ -313,6 +326,26 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [activeSetId, userId, isLoaded, activeSetContent, availableSets, clearSetCache]);
 
+  // Initialize from preloaded data when available
+  useEffect(() => {
+    if (!isPreloading && preloadedData && !hasInitializedFromPreload) {
+      console.log('[SetContext] Initializing from preloaded data');
+      setAvailableSets(preloadedData.sets);
+      setSetsHaveLoaded(true);
+      setHasInitializedFromPreload(true);
+      setIsLoading(false);
+      
+      // If there's a cached active set ID and we have its content, load it
+      const savedId = typeof window !== 'undefined' ? localStorage.getItem('activeSetId') : null;
+      if (savedId && preloadedData.setContents[savedId]) {
+        setActiveSetId(savedId);
+        setActiveSetContent(preloadedData.setContents[savedId]);
+        setActiveSetProgress(preloadedData.setProgress[savedId] || {});
+        setRestored(true); // Mark as restored to prevent re-loading
+      }
+    }
+  }, [isPreloading, preloadedData, hasInitializedFromPreload]);
+
   // --- Refactored Initial Data Loading --- (updated to use useAuth and fetch)
   useEffect(() => {
     const loadInitialData = async () => {
@@ -321,6 +354,12 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(true);
         setSetsHaveLoaded(false);
         return; // Wait for Clerk to load
+      }
+
+      // Skip if we've already initialized from preload
+      if (hasInitializedFromPreload) {
+        console.log("SetContext: Already initialized from preload, skipping fetch");
+        return;
       }
 
       // Don't reload if we already have sets loaded
@@ -413,7 +452,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     };
 
     loadInitialData();
-  }, [isLoaded, userId, setsHaveLoaded, availableSets.length]); // Depend on Clerk's isLoaded and userId
+  }, [isLoaded, userId, setsHaveLoaded, availableSets.length, hasInitializedFromPreload]); // Depend on Clerk's isLoaded and userId
 
   // --- Restoration Effect (depends on setsHaveLoaded) ---
   useEffect(() => {

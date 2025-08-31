@@ -7,17 +7,37 @@ import Image from 'next/image';
 function ComicPanel() {
   const [comic, setComic] = React.useState<{ panels: string[]; title: string } | null>(null);
   const [currentPanel, setCurrentPanel] = React.useState(0);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
   
   React.useEffect(() => {
     let cancelled = false;
+    console.log('[ComicPanel] Fetching comic from /api/funny-videos/random');
     fetch('/api/funny-videos/random')
-      .then(r => r.ok ? r.json() : Promise.reject(new Error('failed')))
+      .then(r => {
+        console.log('[ComicPanel] Response status:', r.status);
+        return r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`));
+      })
       .then(data => {
-        if (!cancelled && data?.panels && data.panels.length > 0) {
-          setComic({ panels: data.panels, title: data.title });
+        console.log('[ComicPanel] Received data:', data);
+        if (!cancelled) {
+          if (data?.panels && data.panels.length > 0) {
+            console.log('[ComicPanel] Setting comic with', data.panels.length, 'panels');
+            setComic({ panels: data.panels, title: data.title });
+          } else {
+            console.log('[ComicPanel] No panels in response or empty panels array');
+            setError('No comics available yet');
+          }
+          setLoading(false);
         }
       })
-      .catch(() => {});
+      .catch((err) => {
+        console.error('[ComicPanel] Error fetching comic:', err);
+        if (!cancelled) {
+          setError('Failed to load comic');
+          setLoading(false);
+        }
+      });
     return () => { cancelled = true; };
   }, []);
 
@@ -29,6 +49,22 @@ function ComicPanel() {
     }, 3000); // 3 seconds per panel
     return () => clearInterval(interval);
   }, [comic]);
+
+  if (loading) {
+    return (
+      <div className="mt-6 text-center">
+        <div className="text-sm text-gray-500">Loading entertainment...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mt-6 text-center">
+        <div className="text-sm text-gray-500">{error}</div>
+      </div>
+    );
+  }
 
   if (!comic || comic.panels.length === 0) return null;
   

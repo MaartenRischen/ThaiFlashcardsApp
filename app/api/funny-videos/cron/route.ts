@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
+import { getSupabaseAdmin } from '@/app/lib/supabaseAdmin';
 import { funnyPromptVariants, generateDonkeyBridgeVideo } from '@/app/lib/openrouter-video';
 
 const BUCKET = process.env.FUNNY_VIDEOS_BUCKET || 'funny-videos';
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = getSupabaseAdmin();
-    // @ts-ignore
+    // @ts-expect-error
     await supabase.storage.createBucket(BUCKET, { public: true }).catch(() => {});
 
     const variants = funnyPromptVariants(2); // generate a couple per run

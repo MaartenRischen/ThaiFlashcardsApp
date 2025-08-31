@@ -50,8 +50,10 @@ export async function generateDonkeyBridgeVideo(promptVariant: string): Promise<
   // Expected shapes differ by provider; attempt common patterns
   // 1) data.output may be an array of objects with { type: 'video', url }
   if (Array.isArray(data.output)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const vid = data.output.find((o: any) => (o.type === 'video' || o.mime?.startsWith?.('video')) && (o.url || o.content?.[0]?.url));
-    const url = vid?.url || vid?.content?.[0]?.url;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const url = (vid as any)?.url || (vid as any)?.content?.[0]?.url;
     if (url) return { url };
   }
   // 2) data.data[0].url or data.video.url

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
+import { getSupabaseAdmin } from '@/app/lib/supabaseAdmin';
 
 const BUCKET = process.env.FUNNY_VIDEOS_BUCKET || 'funny-videos';
 
@@ -9,7 +9,7 @@ export async function GET() {
     try {
       const supabase = getSupabaseAdmin();
       // Ensure bucket exists (best-effort)
-      // @ts-ignore - createBucket exists on admin client in supabase-js v2
+      // @ts-expect-error - createBucket exists on admin client in supabase-js v2
       await supabase.storage.createBucket(BUCKET, { public: true }).catch(() => {});
 
       const { data: files, error } = await supabase.storage.from(BUCKET).list('', { limit: 100 });

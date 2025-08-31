@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
+import { getSupabaseAdmin } from '@/app/lib/supabaseAdmin';
 
 // Placeholder endpoint to integrate with a video generation provider via OpenRouter or external API.
 // For now, it accepts a posted MP4 URL and stores it into the Supabase bucket so the app can pick it up.
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabaseAdmin();
     // Ensure bucket exists
-    // @ts-ignore
+    // @ts-expect-error
     await supabase.storage.createBucket(BUCKET, { public: true }).catch(() => {});
 
     // Fetch the remote file and upload into storage

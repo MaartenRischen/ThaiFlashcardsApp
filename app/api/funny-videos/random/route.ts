@@ -27,12 +27,8 @@ export async function GET() {
       console.warn('[funny-videos/random] Supabase storage unavailable:', e);
     }
 
-    // Fallback: local bundled video(s)
-    const fallbackVideos = [
-      '/images/gifs/setwizardgif2.mp4',
-    ];
-    const choice = fallbackVideos[Math.floor(Math.random() * fallbackVideos.length)];
-    return NextResponse.json({ url: choice, source: 'fallback' });
+    // No video available yet
+    return NextResponse.json({ url: null, source: 'none' });
   } catch (error) {
     console.error('[funny-videos/random] Error:', error);
     return NextResponse.json({ url: null }, { status: 500 });

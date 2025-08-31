@@ -1,4 +1,4 @@
-import { generateImageWithFallback } from './ideogram-service';
+import { generateImage } from './ideogram-service';
 
 export interface ComicPanel {
   prompt: string;
@@ -119,10 +119,10 @@ export async function generateComicStrip(storyIndex?: number): Promise<ComicStri
     const artPrompt = `Cartoon comic panel style, simple and colorful: ${panelPrompt}. Cute, expressive, family-friendly, no text or speech bubbles.`;
     
     try {
-      const result = await generateImageWithFallback(artPrompt, comicId);
+      const imageUrl = await generateImage(artPrompt);
       panels.push({
         prompt: panelPrompt,
-        imageUrl: result.url
+        imageUrl: imageUrl || undefined
       });
     } catch (error) {
       console.error('Failed to generate panel:', error);

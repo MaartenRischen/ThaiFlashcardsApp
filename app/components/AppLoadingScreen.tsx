@@ -36,6 +36,7 @@ function ComicPanel() {
     <div className="mt-6 space-y-2">
       <div className="text-center text-sm text-gray-400">{comic.title}</div>
       <div className="relative rounded-xl overflow-hidden border border-[#333] bg-black">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={comic.panels[currentPanel]}
           alt={`Panel ${currentPanel + 1}`}

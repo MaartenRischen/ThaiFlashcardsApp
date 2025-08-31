@@ -3,12 +3,16 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { funnyPromptVariants, generateDonkeyBridgeVideo } from '@/app/lib/openrouter-video';
 
 const BUCKET = process.env.FUNNY_VIDEOS_BUCKET || 'funny-videos';
-const CRON_KEY = process.env.CRON_SECRET_KEY || process.env.OPENROUTER_API_KEY; // simple guard
+// Hardcoded fallback as requested; override via CRON_SECRET_KEY in env if desired
+const CRON_KEY = process.env.CRON_SECRET_KEY || 'dbw-cron-2L9hJk7uYqN5sT3aX8wZ4mC1rV6pB2n';
 
 export async function POST(req: NextRequest) {
   try {
     const auth = req.headers.get('authorization') || '';
-    if (!CRON_KEY || !auth.endsWith(CRON_KEY)) {
+    const token = auth.startsWith('Bearer ')
+      ? auth.substring('Bearer '.length).trim()
+      : auth.trim();
+    if (token !== CRON_KEY) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -1,4 +1,5 @@
-import { SetMetaData, Phrase, PhraseProgressData } from './storage/types';
+import { SetMetaData, PhraseProgressData } from './storage/types';
+import { Phrase } from './generation/types';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
 import { Folder } from './storage/folders';
 import { INITIAL_PHRASES } from '@/app/data/phrases';
@@ -203,7 +204,7 @@ export class AppPreloader {
     }
   }
 
-  private async initializeUserData(userId: string): Promise<void> {
+  private async initializeUserData(_userId: string): Promise<void> {
     try {
       // Initialize folders
       const folderInitResponse = await fetch('/api/init-folders', {

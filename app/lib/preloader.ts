@@ -1,6 +1,7 @@
 import { SetMetaData, Phrase, PhraseProgressData } from './storage/types';
-import { DEFAULT_SET_METADATA, getDefaultSetContent } from '@/app/data/default-sets';
+import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
 import { Folder } from './storage/folders';
+import { INITIAL_PHRASES } from '@/app/data/phrases';
 
 export interface PreloadedData {
   sets: SetMetaData[];
@@ -8,7 +9,7 @@ export interface PreloadedData {
   setContents: Record<string, Phrase[]>;
   setProgress: Record<string, Record<number, PhraseProgressData>>;
   userMnemonics: Record<string, Record<string, string>>;
-  breakdowns?: Record<string, any>; // Optional word breakdowns
+  breakdowns?: Record<string, unknown>; // Optional word breakdowns
   images: Record<string, boolean>; // Track which images are preloaded
 }
 
@@ -232,7 +233,7 @@ export class AppPreloader {
     }
   }
 
-  private async loadFolders(userId?: string | null): Promise<Folder[]> {
+  private async loadFolders(_userId?: string | null): Promise<Folder[]> {
     try {
       const response = await fetch('/api/folders', {
         credentials: 'include',
@@ -273,10 +274,24 @@ export class AppPreloader {
     }
     
     // Return default sets for non-authenticated users or as fallback
-    return DEFAULT_SET_METADATA;
+    const defaultSetMetadata: SetMetaData = {
+      id: 'default',
+      name: 'Default Thai Flashcards',
+      imageUrl: '/images/defaultnew.png',
+      level: 'complete beginner',
+      folderId: 'default-folder-default-sets',
+      userId: 'default',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      source: 'default',
+      phraseCount: INITIAL_PHRASES.length,
+      isFullyLearned: false
+    };
+    
+    return [defaultSetMetadata];
   }
 
-  private async loadSetContent(setId: string, userId?: string | null): Promise<Phrase[]> {
+  private async loadSetContent(setId: string, _userId?: string | null): Promise<Phrase[]> {
     // Try API first
     try {
       const response = await fetch(`/api/flashcard-sets/${setId}/content`, {
@@ -297,7 +312,7 @@ export class AppPreloader {
     return defaultContent || [];
   }
 
-  private async loadSetProgress(userId: string, setId: string): Promise<Record<number, PhraseProgressData>> {
+  private async loadSetProgress(_userId: string, setId: string): Promise<Record<number, PhraseProgressData>> {
     try {
       const response = await fetch(`/api/flashcard-sets/${setId}/progress`, {
         credentials: 'include',
@@ -315,7 +330,7 @@ export class AppPreloader {
     return {};
   }
 
-  private async loadUserMnemonics(userId: string): Promise<Record<string, Record<string, string>>> {
+  private async loadUserMnemonics(_userId: string): Promise<Record<string, Record<string, string>>> {
     try {
       const response = await fetch('/api/user-mnemonics', {
         credentials: 'include',
@@ -327,7 +342,7 @@ export class AppPreloader {
         // Transform array format to nested object format
         const mnemonicMap: Record<string, Record<string, string>> = {};
         
-        mnemonics.forEach((item: any) => {
+        mnemonics.forEach((item: { setId: string; phraseIndex: number; mnemonic: string }) => {
           if (!mnemonicMap[item.setId]) {
             mnemonicMap[item.setId] = {};
           }

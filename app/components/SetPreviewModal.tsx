@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { useSet } from '@/app/context/SetContext';
 import { Phrase } from '@/app/lib/set-generator';
-import { SetProgress, PhraseProgressData } from '@/app/lib/storage/types';
+import { SetProgress } from '@/app/lib/storage/types';
 import { useAuth } from '@clerk/nextjs';
 
 interface SetPreviewModalProps {
@@ -21,8 +21,8 @@ export function SetPreviewModal({
   onClose, 
   setId, 
   setName, 
-  phraseCount,
-  imageUrl 
+  phraseCount: _phraseCount,
+  imageUrl: _imageUrl 
 }: SetPreviewModalProps) {
   const { isSignedIn } = useAuth();
   const { switchSet } = useSet();

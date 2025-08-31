@@ -9,7 +9,7 @@ export async function GET() {
     try {
       const supabase = getSupabaseAdmin();
       // Ensure bucket exists (best-effort)
-      // @ts-expect-error - createBucket exists on admin client in supabase-js v2
+      // @ts-expect-error createBucket exists on supabase-js admin client v2
       await supabase.storage.createBucket(BUCKET, { public: true }).catch(() => {});
 
       const { data: files, error } = await supabase.storage.from(BUCKET).list('', { limit: 100 });

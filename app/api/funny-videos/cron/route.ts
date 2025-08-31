@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = getSupabaseAdmin();
-    // @ts-expect-error
+    // @ts-expect-error createBucket exists on supabase-js admin client v2
     await supabase.storage.createBucket(BUCKET, { public: true }).catch(() => {});
 
     const variants = funnyPromptVariants(2); // generate a couple per run

@@ -31,4 +31,11 @@ if (!supabaseUrl || !supabaseServiceRoleKey) {
   }
 }
 
-export { supabaseAdmin }; 
+export { supabaseAdmin };
+
+export function getSupabaseAdmin() {
+  if (!supabaseAdmin) {
+    throw new Error('Supabase Admin Client not initialized. Check SUPABASE_SERVICE_ROLE_KEY environment variable.');
+  }
+  return supabaseAdmin;
+}

@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabaseAdmin();
     // Ensure bucket exists
-    // @ts-expect-error
+    // @ts-expect-error createBucket exists on supabase-js admin client v2
     await supabase.storage.createBucket(BUCKET, { public: true }).catch(() => {});
 
     // Fetch the remote file and upload into storage

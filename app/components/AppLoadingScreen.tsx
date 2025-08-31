@@ -4,6 +4,34 @@ import React, { useEffect, useState } from 'react';
 import { PreloadProgress } from '@/app/lib/preloader';
 import Image from 'next/image';
 
+function VideoPanel() {
+  const [videoUrl, setVideoUrl] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    let cancelled = false;
+    fetch('/api/funny-videos/random')
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('failed')))
+      .then(data => {
+        if (!cancelled && data?.url) setVideoUrl(data.url);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!videoUrl) return null;
+  return (
+    <div className="mt-6 rounded-xl overflow-hidden border border-[#333] bg-black">
+      <video
+        src={videoUrl}
+        className="w-full h-40 object-cover"
+        autoPlay
+        muted
+        playsInline
+        loop
+      />
+    </div>
+  );
+}
+
 interface AppLoadingScreenProps {
   progress: PreloadProgress;
 }
@@ -128,6 +156,9 @@ export function AppLoadingScreen({ progress }: AppLoadingScreenProps) {
             ))}
           </div>
         </div>
+
+        {/* Fun Video (donkey on a bridge) */}
+        <VideoPanel />
 
         {/* Fun Loading Tips */}
         <div className="mt-6 text-center">

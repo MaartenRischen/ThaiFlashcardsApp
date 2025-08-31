@@ -24,7 +24,7 @@ import { SetWizardState } from '../components/SetWizard/types';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Dialog } from '@/components/ui/dialog';
-import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle, Grid, Layers, Plus, Settings, HelpCircle, GalleryHorizontal, Lightbulb, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, CheckCircle, Info, Bookmark, PlayCircle, Grid, Layers, Plus, Settings, HelpCircle, GalleryHorizontal, Lightbulb, RotateCcw, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -233,6 +233,7 @@ export default function ThaiFlashcards() {
   const [wordBreakdowns, setWordBreakdowns] = useState<Record<string, PhraseBreakdown>>({});
   const [loadingBreakdown, setLoadingBreakdown] = useState(false);
   const [showBreakdownModal, setShowBreakdownModal] = useState(false);
+  const [loadingNewMnemonic, setLoadingNewMnemonic] = useState(false);
   const [autoplay, setAutoplay] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('autoplay');
@@ -975,6 +976,72 @@ export default function ThaiFlashcards() {
   //   }
   // }, []);
 
+  // Function to generate a new mnemonic for the current card
+  const generateNewMnemonic = async () => {
+    if (!phrases[index]) return;
+    
+    setLoadingNewMnemonic(true);
+    try {
+      const currentPhrase = phrases[index];
+      const response = await fetch('/api/generate-mnemonic', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          english: currentPhrase.english,
+          thai: currentPhrase.thai,
+          pronunciation: currentPhrase.pronunciation
+        }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate new mnemonic');
+      }
+
+      const data = await response.json();
+      const newMnemonic = data.mnemonic;
+
+      // Update the mnemonic in state
+      const newMnemonics = { ...mnemonics };
+      if (!newMnemonics[activeSetId || 'default']) {
+        newMnemonics[activeSetId || 'default'] = {};
+      }
+      newMnemonics[activeSetId || 'default'][`${index}`] = newMnemonic;
+      setMnemonics(newMnemonics);
+
+      // Save to database or localStorage
+      if (userId && activeSetId) {
+        try {
+          await fetch('/api/user-mnemonics', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              setId: activeSetId,
+              phraseIndex: index,
+              mnemonic: newMnemonic
+            }),
+            credentials: 'include'
+          });
+        } catch (error) {
+          console.error('Error saving mnemonic to API:', error);
+        }
+      } else {
+        localStorage.setItem('mnemonics-v2', JSON.stringify(newMnemonics));
+      }
+
+      toast.success('New mnemonic generated!');
+    } catch (error) {
+      console.error('Error generating new mnemonic:', error);
+      toast.error('Failed to generate new mnemonic');
+    } finally {
+      setLoadingNewMnemonic(false);
+    }
+  };
+
   // Function to reset current card
   const resetCard = async () => {
     // Remove card progress
@@ -1631,7 +1698,25 @@ export default function ThaiFlashcards() {
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm text-gray-200 font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4 text-yellow-400" /> Mnemonic (editable)</label>
-                    <button onClick={resetCurrentMnemonic} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"><RotateCcw className="w-3 h-3" /> Reset</button>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={generateNewMnemonic} 
+                        disabled={loadingNewMnemonic}
+                        className="text-xs text-green-400 hover:text-green-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center gap-1"
+                      >
+                        {loadingNewMnemonic ? (
+                          <>
+                            <div className="w-3 h-3 border border-green-400 border-t-transparent rounded-full animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-3 h-3" /> Get New
+                          </>
+                        )}
+                      </button>
+                      <button onClick={resetCurrentMnemonic} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"><RotateCcw className="w-3 h-3" /> Reset</button>
+                    </div>
                   </div>
                   
                   {/* Secondary pronunciation removed; rely on main line above */}

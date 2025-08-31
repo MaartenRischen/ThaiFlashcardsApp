@@ -10,7 +10,8 @@ export function GenerationStatusBar() {
   const tickRef = React.useRef<ReturnType<typeof setInterval> | null>(null)
 
   const getTitle = () => {
-    switch (generationStatus.mode) {
+    const mode = generationStatus?.mode || 'auto'
+    switch (mode) {
       case 'audio-pimsleur':
         return 'Audio Generation'
       case 'audio-simple':
@@ -24,23 +25,24 @@ export function GenerationStatusBar() {
   }
 
   const getIcon = () => {
-    if (generationStatus.mode.startsWith('audio-')) {
+    if (generationStatus?.mode?.startsWith('audio-')) {
       return <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
     }
     return <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
   }
 
   const getMessage = () => {
-    switch (generationStatus.mode) {
+    const mode = generationStatus?.mode || 'auto'
+    switch (mode) {
       case 'audio-pimsleur':
         return 'Creating guided audio lesson...'
       case 'audio-simple':
         return 'Creating repetition audio lesson...'
       case 'manual':
-        return `Creating ${generationStatus.phraseCount} flashcards...`
+        return `Creating ${generationStatus?.phraseCount ?? 0} flashcards...`
       case 'auto':
       default:
-        return `Generating ${generationStatus.phraseCount} flashcards...`
+        return `Generating ${generationStatus?.phraseCount ?? 0} flashcards...`
     }
   }
 
@@ -112,7 +114,7 @@ export function GenerationStatusBar() {
           />
         </div>
         <p className="text-[11px] sm:text-xs text-gray-300 mt-2">
-          {generationStatus.mode.startsWith('audio-') 
+          {generationStatus?.mode?.startsWith('audio-') 
             ? '✓ Continue learning • Navigate freely • Only switching sets cancels'
             : 'Please wait...'}
         </p>

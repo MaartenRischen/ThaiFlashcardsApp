@@ -1036,7 +1036,7 @@ export default function ThaiFlashcards() {
       toast.success('New mnemonic generated!');
     } catch (error) {
       console.error('Error generating new mnemonic:', error);
-      toast.error('Failed to generate new mnemonic');
+      toast.error('Failed to generate new mnemonic. The service may be temporarily unavailable - please try again in a moment.');
     } finally {
       setLoadingNewMnemonic(false);
     }

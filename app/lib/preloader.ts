@@ -102,7 +102,7 @@ export class AppPreloader {
       
       if (userId) {
         // For authenticated users, load everything in parallel
-        const [allContents, allProgress, userMnemonics] = await Promise.all([
+        const [_allContents, _allProgress, userMnemonics] = await Promise.all([
           // Load all set contents
           Promise.all(data.sets.map((set, index) => 
             this.loadSetContent(set.id, userId).then(content => {
@@ -330,9 +330,7 @@ export class AppPreloader {
       imageUrl: '/images/defaultnew.png',
       level: 'complete beginner',
       folderId: 'default-folder-default-sets',
-      userId: 'default',
       createdAt: now,
-      updatedAt: now,
       source: 'default',
       phraseCount: INITIAL_PHRASES.length,
       isFullyLearned: false,

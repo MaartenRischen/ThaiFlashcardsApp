@@ -18,6 +18,9 @@ export function GET() {
       // Clerk
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY_EXISTS: !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
       CLERK_SECRET_KEY_EXISTS: !!process.env.CLERK_SECRET_KEY,
+      // AI APIs
+      OPENROUTER_API_KEY_EXISTS: !!process.env.OPENROUTER_API_KEY,
+      IDEOGRAM_API_KEY_EXISTS: !!process.env.IDEOGRAM_API_KEY,
       // Process info
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),

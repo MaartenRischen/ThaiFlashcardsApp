@@ -3,25 +3,45 @@ import { auth } from '@clerk/nextjs/server';
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('[Generate Mnemonic] API called');
+    
     const { userId } = await auth();
     
     if (!userId) {
+      console.log('[Generate Mnemonic] Unauthorized - no userId');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    console.log('[Generate Mnemonic] User authenticated:', userId);
+
     const { english, thai, pronunciation } = await req.json();
+    console.log('[Generate Mnemonic] Request data:', { english, thai, pronunciation });
 
     if (!english || !thai || !pronunciation) {
+      console.log('[Generate Mnemonic] Missing required fields');
       return NextResponse.json({ 
         error: 'Missing required fields: english, thai, pronunciation' 
       }, { status: 400 });
     }
 
+    // Check if OpenRouter API key is available
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    console.log('[Generate Mnemonic] API Key available:', !!apiKey);
+    
+    if (!apiKey) {
+      console.error('[Generate Mnemonic] OPENROUTER_API_KEY not found in environment');
+      return NextResponse.json({ 
+        error: 'OpenRouter API key not configured' 
+      }, { status: 500 });
+    }
+
+    console.log('[Generate Mnemonic] Calling OpenRouter API...');
+    
     // Use OpenRouter API to generate a new mnemonic
     const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'X-Title': 'Thai Flashcards - Mnemonic Generator',
       },
@@ -58,27 +78,35 @@ Generate a creative, memorable mnemonic that helps remember this Thai word/phras
     });
 
     if (!openRouterResponse.ok) {
-      console.error('OpenRouter API error:', openRouterResponse.status, openRouterResponse.statusText);
+      const errorText = await openRouterResponse.text();
+      console.error('[Generate Mnemonic] OpenRouter API error:', openRouterResponse.status, openRouterResponse.statusText);
+      console.error('[Generate Mnemonic] Error response:', errorText);
       return NextResponse.json({ 
-        error: 'Failed to generate mnemonic' 
+        error: 'Failed to generate mnemonic',
+        details: errorText
       }, { status: 500 });
     }
 
     const data = await openRouterResponse.json();
+    console.log('[Generate Mnemonic] OpenRouter response:', data);
+    
     const mnemonic = data.choices?.[0]?.message?.content?.trim();
 
     if (!mnemonic) {
+      console.log('[Generate Mnemonic] No mnemonic in response');
       return NextResponse.json({ 
         error: 'No mnemonic generated' 
       }, { status: 500 });
     }
 
+    console.log('[Generate Mnemonic] Generated mnemonic:', mnemonic);
     return NextResponse.json({ mnemonic });
 
   } catch (error) {
-    console.error('Error generating mnemonic:', error);
+    console.error('[Generate Mnemonic] Error:', error);
     return NextResponse.json({ 
-      error: 'Internal server error' 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

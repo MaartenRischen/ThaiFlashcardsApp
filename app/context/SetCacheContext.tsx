@@ -1,10 +1,11 @@
 'use client';
 
-import React, { createContext, useState, useContext, useCallback, ReactNode } from 'react';
+import React, { createContext, useState, useContext, useCallback, ReactNode, useEffect } from 'react';
 import { Phrase } from '@/app/lib/set-generator';
 import type { PhraseProgressData } from '@/app/lib/storage';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
 import { Folder } from '@/app/lib/storage/folders';
+import { usePreloader } from './PreloaderContext';
 
 interface SetContentCache {
   phrases: Phrase[];
@@ -36,8 +37,36 @@ const SetCacheContext = createContext<SetCacheContextProps | undefined>(undefine
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache validity
 
 export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
+  const { preloadedData } = usePreloader();
   const [cache, setCache] = useState<Record<string, SetContentCache>>({});
   const [folderCache, setFolderCache] = useState<FolderCache | null>(null);
+  
+  // Initialize cache with preloaded data
+  useEffect(() => {
+    if (preloadedData && Object.keys(cache).length === 0) {
+      console.log('[SetCacheContext] Initializing cache with preloaded data');
+      const newCache: Record<string, SetContentCache> = {};
+      
+      // Add all preloaded set contents to cache
+      Object.entries(preloadedData.setContents).forEach(([setId, phrases]) => {
+        newCache[setId] = {
+          phrases,
+          progress: preloadedData.setProgress[setId] || {},
+          lastFetched: Date.now()
+        };
+      });
+      
+      setCache(newCache);
+      
+      // Also cache folders
+      if (preloadedData.folders.length > 0) {
+        setFolderCache({
+          folders: preloadedData.folders,
+          lastFetched: Date.now()
+        });
+      }
+    }
+  }, [preloadedData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getCachedContent = useCallback((setId: string): SetContentCache | null => {
     const cached = cache[setId];

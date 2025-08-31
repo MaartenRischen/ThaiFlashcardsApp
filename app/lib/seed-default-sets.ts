@@ -69,17 +69,24 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
  * Gets content for a default set by ID
  */
 export function getDefaultSetContent(setId: string): Phrase[] | null {
+  console.log(`[getDefaultSetContent] Looking for content for set: ${setId}`);
+  
   if (setId === 'default') {
+    console.log(`[getDefaultSetContent] Returning INITIAL_PHRASES for default set`);
     return INITIAL_PHRASES;
   }
   
   // Check if it's one of the new default sets
   const defaultSetId = setId.replace('default-', '');
+  console.log(`[getDefaultSetContent] Looking for set with ID: ${defaultSetId}`);
+  
   const defaultSet = ALL_DEFAULT_SETS.find(set => set.id === defaultSetId);
   
   if (defaultSet) {
+    console.log(`[getDefaultSetContent] Found set ${defaultSet.name} with ${defaultSet.phrases.length} phrases`);
     return defaultSet.phrases;
   }
   
+  console.warn(`[getDefaultSetContent] No content found for set ${setId}`);
   return null;
 } 

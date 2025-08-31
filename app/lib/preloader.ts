@@ -351,7 +351,18 @@ export class AppPreloader {
   }
 
   private async loadSetContent(setId: string, _userId?: string | null): Promise<Phrase[]> {
-    // Try API first
+    console.log(`[Preloader] Loading content for set: ${setId}`);
+    
+    // For default sets, get content directly without API call
+    if (setId.startsWith('default-') || setId === 'default') {
+      const defaultContent = getDefaultSetContent(setId);
+      if (defaultContent && defaultContent.length > 0) {
+        console.log(`[Preloader] Found default content for ${setId}: ${defaultContent.length} phrases`);
+        return defaultContent;
+      }
+    }
+    
+    // Try API for user sets
     try {
       const response = await fetch(`/api/flashcard-sets/${setId}/content`, {
         credentials: 'include',
@@ -360,15 +371,19 @@ export class AppPreloader {
       
       if (response.ok) {
         const content = await response.json();
-        return Array.isArray(content) ? content : content.phrases || [];
+        const phrases = Array.isArray(content) ? content : content.phrases || [];
+        console.log(`[Preloader] Loaded ${phrases.length} phrases from API for ${setId}`);
+        return phrases;
+      } else {
+        console.warn(`[Preloader] API returned ${response.status} for set ${setId}`);
       }
     } catch (error) {
-      console.error(`Failed to load content for set ${setId}:`, error);
+      console.error(`[Preloader] Failed to load content for set ${setId}:`, error);
     }
     
-    // Fallback to default content
-    const defaultContent = getDefaultSetContent(setId);
-    return defaultContent || [];
+    // Final fallback
+    console.warn(`[Preloader] No content found for set ${setId}`);
+    return [];
   }
 
   private async loadSetProgress(_userId: string, setId: string): Promise<Record<number, PhraseProgressData>> {

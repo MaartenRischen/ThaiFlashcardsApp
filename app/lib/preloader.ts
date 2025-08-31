@@ -171,9 +171,10 @@ export class AppPreloader {
         subProgress: { current: 0, total: data.sets.length }
       });
       
-      const imagePromises = data.sets.map((set, index) => 
-        this.preloadImage(set.imageUrl).then(loaded => {
-          data.images[set.imageUrl] = loaded;
+      const imagePromises = data.sets.map((set, index) => {
+        const imageUrl = set.imageUrl || '/images/default-set-logo.png';
+        return this.preloadImage(imageUrl).then(loaded => {
+          data.images[imageUrl] = loaded;
           this.updateProgress({
             stage: 'images',
             progress: 80 + (15 * (index + 1) / data.sets.length),
@@ -184,8 +185,8 @@ export class AppPreloader {
               item: set.name
             }
           });
-        })
-      );
+        });
+      });
       
       await Promise.all(imagePromises);
 

@@ -839,7 +839,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                         setId={set.id}
                                         setName={set.name}
                                         variant="prominent"
-                                        className="scale-75"
+                                        className=""
                                       />
                                     </div>
                                   )}

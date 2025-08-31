@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react';
 import { useSet } from '@/app/context/SetContext';
 import { useSetCache } from '@/app/context/SetCacheContext';
 import { useAuth } from '@clerk/nextjs';
+import { usePreloader } from '@/app/context/PreloaderContext';
+import { AppLoadingScreen } from './AppLoadingScreen';
 
 export function AppInitializer() {
   const { isLoaded, userId } = useAuth();
   const { availableSets, refreshSets } = useSet();
   const { preloadAllSets, preloadImages, preloadFolders } = useSetCache();
+  const { isLoading, progress } = usePreloader();
   const [initialized, setInitialized] = useState(false);
   const [setsPreloaded, setSetsPreloaded] = useState(false);
   const [defaultSetFixed, setDefaultSetFixed] = useState(false);
@@ -122,6 +125,11 @@ export function AppInitializer() {
 
     fixDefaultSetImage();
   }, [isLoaded, userId, defaultSetFixed, refreshSets]);
+
+  // Show loading screen when preloader is active
+  if (isLoading) {
+    return <AppLoadingScreen progress={progress} />;
+  }
 
   // This component doesn't render anything visible
   return null;

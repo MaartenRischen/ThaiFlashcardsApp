@@ -5,6 +5,7 @@ import { SetProvider } from './context/SetContext'
 import { SetCacheProvider } from './context/SetCacheContext'
 import { GenerationProvider } from './context/GenerationContext'
 import { AudioGenerationProvider } from './context/AudioGenerationContext'
+import { PreloaderProvider } from './context/PreloaderContext'
 import Navbar from './components/Navbar'
 import { GenerationStatusBar } from './components/GenerationStatusBar'
 import { AudioGenerationStatusBar } from './components/AudioGenerationStatusBar'
@@ -74,25 +75,27 @@ export default function RootLayout({
         <body className={inter.className}>
           <Toaster richColors position="top-left" duration={5000} />
           <Tooltip.Provider>
-            <AudioGenerationProvider>
-              <SetCacheProvider>
-                <SetProvider>
-                  <GenerationProvider>
-                    <AppInitializer />
-                    <GenerationStatusBar />
-                    <AudioGenerationStatusBar />
-                    <Navbar />
-                    <main className="main-content min-h-screen relative pb-32 md:pb-0">
-                      {children}
-                    </main>
-                    {/* Copyright Notice */}
-                    <div className="w-full text-center text-xs text-gray-600 py-3 bg-[#181818]">
-                      Copyright (c) 2025 Maarten Rischen. All rights reserved.
-                    </div>
-                  </GenerationProvider>
-                </SetProvider>
-              </SetCacheProvider>
-            </AudioGenerationProvider>
+            <PreloaderProvider>
+              <AudioGenerationProvider>
+                <SetCacheProvider>
+                  <SetProvider>
+                    <GenerationProvider>
+                      <AppInitializer />
+                      <GenerationStatusBar />
+                      <AudioGenerationStatusBar />
+                      <Navbar />
+                      <main className="main-content min-h-screen relative pb-32 md:pb-0">
+                        {children}
+                      </main>
+                      {/* Copyright Notice */}
+                      <div className="w-full text-center text-xs text-gray-600 py-3 bg-[#181818]">
+                        Copyright (c) 2025 Maarten Rischen. All rights reserved.
+                      </div>
+                    </GenerationProvider>
+                  </SetProvider>
+                </SetCacheProvider>
+              </AudioGenerationProvider>
+            </PreloaderProvider>
           </Tooltip.Provider>
         </body>
       </html>

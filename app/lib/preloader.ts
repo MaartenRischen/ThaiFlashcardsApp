@@ -301,6 +301,7 @@ export class AppPreloader {
     }
     
     // Return default sets for non-authenticated users or as fallback
+    const now = new Date().toISOString();
     const defaultSetMetadata: SetMetaData = {
       id: 'default',
       name: 'Default Thai Flashcards',
@@ -308,11 +309,13 @@ export class AppPreloader {
       level: 'complete beginner',
       folderId: 'default-folder-default-sets',
       userId: 'default',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
       source: 'default',
       phraseCount: INITIAL_PHRASES.length,
-      isFullyLearned: false
+      isFullyLearned: false,
+      seriousnessLevel: null,
+      toneLevel: null
     };
     
     return [defaultSetMetadata];

@@ -65,14 +65,15 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
       updatedFolders.forEach(f => folderMap.set(f.name, f.id));
     }
     
-    // Check for the original default set
-    if (!existingSetIds.has('default')) {
+    // Check for the original default set (namespaced ID per user to avoid global collisions)
+    const defaultSetId = `default__${userId}`;
+    if (!existingSetIds.has(defaultSetId) && !existingSetIds.has('default')) {
       console.log(`[ENSURE-DEFAULT-SETS] Creating original default set for user`);
       const folderId = folderMap.get(DEFAULT_FOLDERS.DEFAULT_SETS);
       
       await prisma.flashcardSet.create({
         data: {
-          id: 'default',
+          id: defaultSetId,
           userId,
           name: 'Default Set',
           source: 'default',
@@ -96,7 +97,8 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
     // Check for all other default sets
     const setsToCreate = [];
     for (const defaultSet of ALL_DEFAULT_SETS) {
-      if (!existingSetIds.has(defaultSet.id)) {
+      const namespacedId = `${defaultSet.id}__${userId}`;
+      if (!existingSetIds.has(namespacedId) && !existingSetIds.has(defaultSet.id)) {
         console.log(`[ENSURE-DEFAULT-SETS] User missing set: ${defaultSet.id}`);
         
         // Determine folder based on the original set ID (without 'default-' prefix)
@@ -124,7 +126,7 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
         }
         
         setsToCreate.push({
-          id: defaultSet.id,
+          id: namespacedId,
           userId,
           name: defaultSet.name,
           source: 'default' as const,
@@ -148,7 +150,8 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
       
       // Now create phrases for each set
       for (const setData of setsToCreate) {
-        const defaultSet = ALL_DEFAULT_SETS.find(s => s.id === setData.id);
+        const baseId = setData.id.split('__')[0];
+        const defaultSet = ALL_DEFAULT_SETS.find(s => s.id === baseId);
         if (defaultSet && defaultSet.phrases) {
           await prisma.phrase.createMany({
             data: defaultSet.phrases.map(phrase => ({

@@ -56,14 +56,15 @@ export function GenerationStep({
       
       try {
         
-        // Start simulated progress updates
+        // Start simulated progress updates (cap at ~75% until server responds)
         let currentPhrase = 0;
+        const maxSimulated = Math.max(1, Math.floor(phraseCount * 0.75));
         progressIntervalRef.current = setInterval(() => {
-          currentPhrase += 1;
-          if (currentPhrase <= phraseCount) {
+          if (currentPhrase < maxSimulated) {
+            currentPhrase += 1;
             updateProgress(currentPhrase);
           }
-        }, 1000);
+        }, 1200);
         
         if (state.mode === 'manual' && state.manualPhrases) {
           // Manual mode - call the API with manual phrases
@@ -116,7 +117,7 @@ export function GenerationStep({
             clearInterval(progressIntervalRef.current);
           }
           
-          // Update to show final progress
+          // Update to show final progress (100%)
           updateProgress(phraseCount);
           
           // The API already created the set, so we just need to refresh and switch to it
@@ -197,7 +198,7 @@ export function GenerationStep({
             clearInterval(progressIntervalRef.current);
           }
           
-          // Update to show final progress
+          // Update to show final progress (100%)
           updateProgress(phraseCount);
           
           // The API already created the set, so we just need to refresh and switch to it

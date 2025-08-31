@@ -81,10 +81,17 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
 
   // Use preloaded folders when available
   useEffect(() => {
-    if (isOpen && preloadedFolders.length > 0) {
-      setFolders(preloadedFolders);
+    if (isOpen) {
+      console.log('[FolderViewEnhanced] isOpen:', isOpen, 'preloadedFolders:', preloadedFolders);
+      if (preloadedFolders.length > 0) {
+        console.log('[FolderViewEnhanced] Using preloaded folders:', preloadedFolders);
+        setFolders(preloadedFolders);
+      } else {
+        console.log('[FolderViewEnhanced] No preloaded folders, fetching...');
+        fetchFolders();
+      }
     }
-  }, [isOpen, preloadedFolders]);
+  }, [isOpen, preloadedFolders]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset selection when leaving select mode
   useEffect(() => {

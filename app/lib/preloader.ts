@@ -300,6 +300,24 @@ export class AppPreloader {
         orderIndex: 2,
         createdAt: now, 
         updatedAt: now 
+      },
+      { 
+        id: 'default-folder-automatic-sets', 
+        name: 'My Automatic Sets', 
+        userId: 'default', 
+        isDefault: true,
+        orderIndex: 3,
+        createdAt: now, 
+        updatedAt: now 
+      },
+      { 
+        id: 'default-folder-manual-sets', 
+        name: 'My Manual Sets', 
+        userId: 'default', 
+        isDefault: true,
+        orderIndex: 4,
+        createdAt: now, 
+        updatedAt: now 
       }
     ];
   }

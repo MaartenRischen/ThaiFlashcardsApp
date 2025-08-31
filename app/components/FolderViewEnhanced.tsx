@@ -34,6 +34,7 @@ import {
 import { ShareButton } from './ShareButton';
 import { GoLiveButton } from './GoLiveButton';
 import { SetPreviewModal } from './SetPreviewModal';
+import { usePreloadedFolders } from '@/app/hooks/usePreloadedData';
 
 interface FolderViewEnhancedProps {
   isOpen: boolean;
@@ -47,6 +48,7 @@ type SortOption = 'name' | 'date' | 'size';
 export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlightSetId }: FolderViewEnhancedProps) {
   const { availableSets, switchSet, activeSetId, refreshSets } = useSet();
   const { preloadFolders, getCachedFolders, clearFolderCache, preloadAllSets, preloadImages, getCachedContent } = useSetCache();
+  const { folders: preloadedFolders } = usePreloadedFolders();
   
   // State
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -77,12 +79,12 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     imageUrl?: string | null;
   } | null>(null);
 
-  // Fetch folders on mount
+  // Use preloaded folders when available
   useEffect(() => {
-    if (isOpen) {
-      fetchFolders();
+    if (isOpen && preloadedFolders.length > 0) {
+      setFolders(preloadedFolders);
     }
-  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen, preloadedFolders]);
 
   // Reset selection when leaving select mode
   useEffect(() => {
@@ -92,12 +94,20 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
   }, [isSelectMode]);
 
   const fetchFolders = async () => {
+    // First try preloaded data
+    if (preloadedFolders.length > 0) {
+      setFolders(preloadedFolders);
+      return;
+    }
+    
+    // Then try cache
     const cachedFolders = getCachedFolders();
     if (cachedFolders) {
       setFolders(cachedFolders);
       return;
     }
 
+    // Only load if we really need to
     setLoading(true);
     try {
       const loadedFolders = await preloadFolders();
@@ -117,7 +127,9 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
       return;
     }
 
-    setLoading(true);
+    // Don't show loading if we already have the data
+    let shouldShowLoading = false;
+    
     try {
       let folderSets: SetMetaData[] = [];
       
@@ -169,6 +181,13 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
       
       const setIds = folderSets.map(set => set.id);
       if (setIds.length > 0) {
+        // Check if we need to load anything
+        const needsLoading = setIds.some(id => !getCachedContent(id));
+        if (needsLoading) {
+          shouldShowLoading = true;
+          setLoading(true);
+        }
+        
         await preloadAllSets(setIds);
         const imageUrls = folderSets.map(set => set.imageUrl || '/images/default-set-logo.png');
         await preloadImages(imageUrls);
@@ -193,7 +212,9 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
       console.error('Error loading folder details:', error);
       toast.error('Failed to load folder contents');
     } finally {
-      setLoading(false);
+      if (shouldShowLoading) {
+        setLoading(false);
+      }
     }
   };
 

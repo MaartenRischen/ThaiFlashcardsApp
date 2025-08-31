@@ -6,6 +6,7 @@ import { useSet } from '@/app/context/SetContext';
 import { Phrase } from '@/app/lib/set-generator';
 import { SetProgress } from '@/app/lib/storage/types';
 import { useAuth } from '@clerk/nextjs';
+import { usePreloadedSetContent } from '@/app/hooks/usePreloadedData';
 
 interface SetPreviewModalProps {
   isOpen: boolean;
@@ -26,11 +27,21 @@ export function SetPreviewModal({
 }: SetPreviewModalProps) {
   const { isSignedIn } = useAuth();
   const { switchSet } = useSet();
+  const { content: preloadedContent, progress: preloadedProgress } = usePreloadedSetContent(setId);
   const [phrases, setPhrases] = useState<Phrase[]>([]);
   const [progress, setProgress] = useState<SetProgress>({});
   const [loading, setLoading] = useState(false);
 
   const loadSetData = useCallback(async () => {
+    // Check if we have preloaded data first
+    if (preloadedContent && preloadedContent.length > 0) {
+      console.log('Using preloaded content for set:', setId);
+      setPhrases(preloadedContent);
+      setProgress(preloadedProgress || {});
+      return;
+    }
+    
+    // Only show loading if we need to fetch
     setLoading(true);
     try {
       console.log('Loading content for set:', setId);
@@ -66,7 +77,7 @@ export function SetPreviewModal({
     } finally {
       setLoading(false);
     }
-  }, [setId, isSignedIn]);
+  }, [setId, isSignedIn, preloadedContent, preloadedProgress]);
 
   useEffect(() => {
     if (isOpen && setId) {

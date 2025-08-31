@@ -1,5 +1,5 @@
 import { SetMetaData, Phrase, PhraseProgressData } from './storage/types';
-import { DEFAULT_SET_METADATA, getDefaultSetContent } from './default-sets';
+import { DEFAULT_SET_METADATA, getDefaultSetContent } from '@/app/data/default-sets';
 import { Folder } from './storage/folders';
 
 export interface PreloadedData {

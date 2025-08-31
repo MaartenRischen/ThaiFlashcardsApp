@@ -885,7 +885,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                     {/* Action Buttons */}
                                     {!isSelectMode && (
                                       <div className="flex gap-2">
-                                        {/* Preview Button - smaller, no glow */}
+                                        {/* Preview Button - simpler */}
                                         <button
                                           onClick={(e) => {
                                             e.stopPropagation();
@@ -896,36 +896,33 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                               imageUrl: fullSet.imageUrl
                                             });
                                           }}
-                                          className="px-3 py-1.5 bg-[#3B82F6] text-white text-xs font-medium rounded-full hover:bg-[#2563EB] transition-colors flex items-center gap-1.5"
+                                          className="px-3 py-1.5 bg-[#2F2F2F] text-[#E0E0E0] text-xs font-medium rounded-md hover:bg-[#3A3A3A] border border-[#444] transition-colors flex items-center gap-1.5"
                                           title="Preview this set"
                                         >
-                                          <Eye className="h-3.5 w-3.5 text-white" />
+                                          <Eye className="h-3.5 w-3.5 text-[#E0E0E0]" />
                                           <span>Preview</span>
                                         </button>
                                         
-                                        {/* Load Set Button - smaller with glow */}
-                                        <div className="relative group">
-                                          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#22c55e] to-[#16a34a] rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity" />
-                                          <button
+                                        {/* Load Set Button - solid */}
+                                        <button
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               handleLoadSet(fullSet.id);
                                             }}
-                                            className="relative px-3 py-1.5 bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-white text-xs font-medium rounded-full shadow-lg hover:shadow-xl transform group-hover:scale-105 transition-all duration-200 border border-white/20 flex items-center gap-1.5"
+                                            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
                                             title="Load this set"
-                                          >
+                                        >
                                             <Play className="h-3.5 w-3.5 text-white" />
                                             <span>Load Set</span>
-                                          </button>
-                                        </div>
+                                        </button>
                                         
                                         {/* Only show Publish button for user-created sets (not default sets) */}
                                         {fullSet && fullSet.source !== 'default' && !fullSet.id.startsWith('default-') && (
                                           <GoLiveButton
                                             setId={set.id}
                                             setName={set.name}
-                                            variant="prominent"
-                                            className="scale-75"
+                                            variant="default"
+                                            className=""
                                           />
                                         )}
                                       </div>
@@ -980,7 +977,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                 
                                 {!isSelectMode && (
                                   <div className="flex items-center gap-2 ml-auto">
-                                    {/* Preview Button - smaller, no glow */}
+                                    {/* Preview Button - simpler */}
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
@@ -991,36 +988,33 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                           imageUrl: fullSet.imageUrl
                                         });
                                       }}
-                                      className="px-3 py-1.5 bg-[#3B82F6] text-white text-xs font-medium rounded-full hover:bg-[#2563EB] transition-colors flex items-center gap-1.5"
+                                      className="px-3 py-1.5 bg-[#2F2F2F] text-[#E0E0E0] text-xs font-medium rounded-md hover:bg-[#3A3A3A] border border-[#444] transition-colors flex items-center gap-1.5"
                                       title="Preview this set"
                                     >
-                                      <Eye className="h-3.5 w-3.5 text-white" />
+                                      <Eye className="h-3.5 w-3.5 text-[#E0E0E0]" />
                                       <span>Preview</span>
                                     </button>
                                     
-                                    {/* Load Set Button - smaller with glow */}
-                                    <div className="relative group">
-                                      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#22c55e] to-[#16a34a] rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity" />
-                                      <button
+                                    {/* Load Set Button - solid */}
+                                    <button
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           handleLoadSet(fullSet.id);
                                         }}
-                                        className="relative px-3 py-1.5 bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-white text-xs font-medium rounded-full shadow-lg hover:shadow-xl transform group-hover:scale-105 transition-all duration-200 border border-white/20 flex items-center gap-1.5"
+                                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
                                         title="Load this set"
-                                      >
+                                    >
                                         <Play className="h-3.5 w-3.5 text-white" />
                                         <span>Load Set</span>
-                                      </button>
-                                    </div>
+                                    </button>
                                     
                                     {/* Only show Publish button for user-created sets (not default sets) */}
                                     {fullSet && fullSet.source !== 'default' && !fullSet.id.startsWith('default-') && (
                                       <GoLiveButton
                                         setId={set.id}
                                         setName={set.name}
-                                        variant="prominent"
-                                        className="scale-90"
+                                        variant="default"
+                                        className=""
                                       />
                                     )}
                                     

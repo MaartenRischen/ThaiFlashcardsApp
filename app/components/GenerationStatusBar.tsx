@@ -6,6 +6,8 @@ import { useGeneration } from '@/app/context/GenerationContext'
 
 export function GenerationStatusBar() {
   const { generationStatus, cancelGeneration } = useGeneration()
+  const [displayProgress, setDisplayProgress] = React.useState(0)
+  const tickRef = React.useRef<ReturnType<typeof setInterval> | null>(null)
 
   if (!generationStatus?.isGenerating) {
     return null
@@ -46,19 +48,51 @@ export function GenerationStatusBar() {
     }
   }
 
-  const getProgress = () => {
-    // Estimate progress based on the generation process
-    if (generationStatus.currentPhrase && generationStatus.phraseCount) {
+  const rawProgress = React.useMemo(() => {
+    if (generationStatus?.currentPhrase && generationStatus?.phraseCount) {
       return Math.round((generationStatus.currentPhrase / generationStatus.phraseCount) * 100)
     }
     return 0
-  }
+  }, [generationStatus])
 
-  const progress = getProgress()
+  // Smooth, time-based progress: gently advance to 85% while generating
+  React.useEffect(() => {
+    if (!generationStatus?.isGenerating) {
+      if (tickRef.current) clearInterval(tickRef.current)
+      setDisplayProgress(0)
+      return
+    }
+
+    // Start at 8% to show movement
+    setDisplayProgress(prev => (prev === 0 ? 8 : prev))
+
+    const CAP = 85
+    tickRef.current = setInterval(() => {
+      setDisplayProgress(prev => {
+        const target = Math.max(prev, rawProgress)
+        if (target >= CAP) return target
+        const next = Math.min(CAP, target + 2) // slow, steady increment
+        return next
+      })
+    }, 800)
+
+    return () => {
+      if (tickRef.current) clearInterval(tickRef.current)
+    }
+  }, [generationStatus?.isGenerating, rawProgress])
+
+  // If server reports higher progress, snap up to it
+  React.useEffect(() => {
+    if (rawProgress > displayProgress) {
+      setDisplayProgress(rawProgress)
+    }
+  }, [rawProgress])
+
+  const progress = displayProgress
 
   return (
     <div className="fixed top-20 left-2 right-2 sm:top-24 sm:left-auto sm:right-4 sm:w-96 z-40">
-      <div className="p-3 sm:p-4 border border-blue-500/50 bg-black/50 backdrop-blur-md rounded-xl">
+      <div className="p-3 sm:p-4 border border-blue-500/30 bg-black/50 backdrop-blur-md rounded-xl">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             {getIcon()}
@@ -75,7 +109,7 @@ export function GenerationStatusBar() {
         <p className="text-sm text-gray-400 mb-2">{getMessage()}</p>
         <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden">
           <div 
-            className="bg-blue-500 h-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+            className="bg-blue-500 h-full transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>

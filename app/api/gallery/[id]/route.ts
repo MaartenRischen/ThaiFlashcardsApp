@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getPublishedSetById, deletePublishedSet } from '@/app/lib/storage';
-import { currentUser } from '@clerk/nextjs/server';
+import { currentUser, auth } from '@clerk/nextjs/server';
 // import { publishedSets } from '../route'; // REMOVED: Cannot import from other routes
 
 function getErrorMessage(error: unknown): string {
@@ -30,13 +30,26 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Explicitly enforce authentication for deletions
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const user = await currentUser();
-    console.log('API user email:', user?.emailAddresses?.[0]?.emailAddress);
-    const userEmail = user?.emailAddresses?.[0]?.emailAddress;
-    const isAdmin = userEmail === 'maartenrischen@protonmail.com';
-    if (!isAdmin) {
+    const userEmail = user?.emailAddresses?.[0]?.emailAddress?.toLowerCase();
+
+    // Admin whitelist (extendable via env)
+    const envAdmin = (process.env.ADMIN_EMAIL || '').toLowerCase();
+    const adminEmails = new Set([
+      'maartenrischen@protonmail.com',
+      envAdmin,
+    ].filter(Boolean));
+
+    if (!userEmail || !adminEmails.has(userEmail)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
+
     const success = await deletePublishedSet(params.id);
     if (!success) {
       return NextResponse.json({ error: 'Failed to delete set' }, { status: 500 });

@@ -124,17 +124,8 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
           {set.title}
         </h3>
         
-        {/* Description - only show if different from title and specific topics */}
-        {set.description &&
-         set.description.toLowerCase() !== set.title.toLowerCase() &&
-         set.description !== set.specificTopics && (
-          <p className="text-sm text-[#BDBDBD] leading-relaxed">
-            {set.description}
-          </p>
-        )}
-        
         {/* Metadata badges */}
-        <div className="flex flex-wrap gap-3 text-xs text-[#BDBDBD]">
+        <div className="flex flex-wrap gap-3 text-xs text-[#BDBDBD] pt-2">
           <div className="flex items-center gap-1">
             <span className="text-[#8B8B8B]">Tone level:</span>
             {getToneLabel(set.seriousnessLevel)}

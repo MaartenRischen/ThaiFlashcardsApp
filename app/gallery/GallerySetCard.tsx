@@ -133,14 +133,20 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
         )}
         
         {/* Metadata badges */}
-        <div className="flex flex-wrap gap-2">
+        <div className="space-y-2">
           {/* Tone level */}
-          <div className="flex items-center gap-1 bg-[#2A2A2A] px-2 py-1 rounded-lg border border-[#444]">
+          <div className="flex items-center gap-2 bg-[#2A2A2A] px-3 py-2 rounded-lg border border-[#444]">
+            <span className="text-xs text-[#8B8B8B] font-medium">Tone level:</span>
             {getToneLabel(set.seriousnessLevel)}
           </div>
           
           {/* Proficiency level */}
-          {getProficiencyDisplay(set.proficiencyLevel)}
+          {getProficiencyDisplay(set.proficiencyLevel) && (
+            <div className="flex items-center gap-2 bg-[#2A2A2A] px-3 py-2 rounded-lg border border-[#444]">
+              <span className="text-xs text-[#8B8B8B] font-medium">Proficiency level:</span>
+              {getProficiencyDisplay(set.proficiencyLevel)}
+            </div>
+          )}
         </div>
         
         {/* Action buttons */}
@@ -166,10 +172,13 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
           </button>
         </div>
         
-        {/* Author info */}
-        <div className="flex items-center gap-2 text-xs text-[#8B8B8B] pt-1 border-t border-[#333]">
-          <User className="h-3 w-3" />
-          <span>by {username}</span>
+        {/* Author info - more prominent */}
+        <div className="bg-[#2A2A2A] border border-[#444] rounded-lg p-3 mt-3">
+          <div className="flex items-center gap-2 text-sm text-[#E0E0E0]">
+            <User className="h-4 w-4 text-[#BB86FC]" />
+            <span className="font-medium">Created by:</span>
+            <span className="text-[#BB86FC] font-semibold">{username}</span>
+          </div>
         </div>
       </div>
     </div>

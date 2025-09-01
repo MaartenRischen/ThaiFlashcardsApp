@@ -3,7 +3,15 @@ import { Prisma } from '@prisma/client';
 import { PublishedSetData } from './types';
 
 // Heuristic estimators for gallery metadata when missing
-function estimateProficiencyLevel(phrases: any[]): string {
+interface PhraseLike {
+  english?: string;
+  en?: string;
+  translation?: string;
+  mnemonic?: string;
+  note?: string;
+}
+
+function estimateProficiencyLevel(phrases: PhraseLike[]): string {
   if (!Array.isArray(phrases) || phrases.length === 0) return 'Complete Beginner';
   const lengths = phrases
     .map(p => ((p?.english || p?.en || p?.translation || '') + '').trim().split(/\s+/).filter(Boolean).length)
@@ -16,7 +24,7 @@ function estimateProficiencyLevel(phrases: any[]): string {
   return 'Native/Fluent';
 }
 
-function estimateSeriousnessLevel(phrases: any[]): number {
+function estimateSeriousnessLevel(phrases: PhraseLike[]): number {
   if (!Array.isArray(phrases) || phrases.length === 0) return 2;
   const text = phrases.map(p => `${p?.mnemonic || ''} ${p?.note || ''} ${p?.english || p?.en || ''}`).join(' ').toLowerCase();
   let score = 2;
@@ -50,14 +58,15 @@ export async function publishSetToGallery(publishedSet: PublishedSetData) {
   console.log("--- DEBUG: Data being passed to prisma.publishedSet.create ---", JSON.stringify(dataToSave, null, 2));
 
   // Fill missing fields from phrases heuristically
-  const phrasesArray: any[] = Array.isArray(publishedSet.phrases) ? (publishedSet.phrases as any[]) : [];
-  if (dataToSave.seriousnessLevel == null) {
-    (dataToSave as any).seriousnessLevel = estimateSeriousnessLevel(phrasesArray);
-  }
-  (dataToSave as any).proficiencyLevel = (publishedSet as any).proficiencyLevel || estimateProficiencyLevel(phrasesArray);
+  const phrasesArray: PhraseLike[] = Array.isArray(publishedSet.phrases) ? (publishedSet.phrases as PhraseLike[]) : [];
+  const enhancedData = {
+    ...dataToSave,
+    seriousnessLevel: dataToSave.seriousnessLevel ?? estimateSeriousnessLevel(phrasesArray),
+    proficiencyLevel: ((publishedSet as unknown) as Record<string, unknown>).proficiencyLevel || estimateProficiencyLevel(phrasesArray)
+  };
 
   const createdPublishedSet = await prisma.publishedSet.create({
-    data: dataToSave as any
+    data: enhancedData as unknown as Prisma.PublishedSetCreateInput
   });
   
   return createdPublishedSet;
@@ -84,10 +93,10 @@ export async function getAllPublishedSets() {
     orderBy: { publishedAt: 'desc' }
   });
 
-  return rows.map((row: any) => {
-    const phrases = Array.isArray(row.phrases) ? row.phrases : [];
-    const proficiency = row.proficiencyLevel || estimateProficiencyLevel(phrases);
-    const tone = row.seriousnessLevel ?? estimateSeriousnessLevel(phrases);
+  return rows.map((row: Record<string, unknown>) => {
+    const phrases = Array.isArray(row.phrases) ? (row.phrases as PhraseLike[]) : [];
+    const proficiency = (row.proficiencyLevel as string) || estimateProficiencyLevel(phrases);
+    const tone = (row.seriousnessLevel as number) ?? estimateSeriousnessLevel(phrases);
     const { phrases: _omit, ...rest } = row;
     return { ...rest, proficiencyLevel: proficiency, seriousnessLevel: tone };
   });
@@ -95,7 +104,7 @@ export async function getAllPublishedSets() {
 
 // Fetch a single published set by ID (full data)
 export async function getPublishedSetById(id: string) {
-  const row: any = await prisma.publishedSet.findUnique({
+  const row: Record<string, unknown> | null = await prisma.publishedSet.findUnique({
     where: { id },
     select: {
       id: true,
@@ -114,9 +123,9 @@ export async function getPublishedSetById(id: string) {
     },
   });
   if (!row) return null;
-  const phrases = Array.isArray(row.phrases) ? row.phrases : [];
-  const proficiency = row.proficiencyLevel || estimateProficiencyLevel(phrases);
-  const tone = row.seriousnessLevel ?? estimateSeriousnessLevel(phrases);
+  const phrases = Array.isArray(row.phrases) ? (row.phrases as PhraseLike[]) : [];
+  const proficiency = (row.proficiencyLevel as string) || estimateProficiencyLevel(phrases);
+  const tone = (row.seriousnessLevel as number) ?? estimateSeriousnessLevel(phrases);
   const { phrases: _omit, ...rest } = row;
   return { ...rest, proficiencyLevel: proficiency, seriousnessLevel: tone };
 }

@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
-import { Trash2, BookOpen, Download, Layers, Star, User } from 'lucide-react';
+import { Trash2, BookOpen, Download, Layers, User } from 'lucide-react';
 import { getToneLabel } from '@/app/lib/utils';
 
 // Define a more specific type for the set prop

@@ -110,8 +110,8 @@ export default function GalleryPage() {
           set.proficiencyLevel,
           String(set.seriousnessLevel ?? ''),
           set.specificTopics,
-          (set as any).llmBrand,
-          (set as any).llmModel,
+          (set as unknown as Record<string, unknown>).llmBrand,
+          (set as unknown as Record<string, unknown>).llmModel,
           set.publishedAt,
           String(set.cardCount ?? ''),
           String(set.phraseCount ?? ''),
@@ -501,11 +501,11 @@ export default function GalleryPage() {
 
             <select
               value={filterOp}
-              onChange={(e) => setFilterOp(e.target.value as any)}
+              onChange={(e) => setFilterOp(e.target.value as 'contains' | 'eq' | 'gte' | 'lte')}
               className="px-4 py-2 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
             >
               {(() => {
-                const field = filterableFields.find(f => f.key === (filterKey as any));
+                const field = filterableFields.find(f => f.key === (filterKey as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt'));
                 if (!field || field.type === 'string') {
                   return (
                     <>
@@ -528,7 +528,7 @@ export default function GalleryPage() {
             </select>
 
             {(() => {
-              const field = filterableFields.find(f => f.key === (filterKey as any));
+              const field = filterableFields.find(f => f.key === (filterKey as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt'));
               const inputType = field?.type === 'number' ? 'number' : (field?.type === 'date' ? 'date' : 'text');
               return (
                 <input

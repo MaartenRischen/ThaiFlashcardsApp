@@ -65,6 +65,24 @@ export default function GalleryPage() {
   const [sortOrder, setSortOrder] = useState<'Newest' | 'Oldest' | 'Most Cards' | 'Highest Rated'>('Newest');
   const [authorFilter, setAuthorFilter] = useState<string>('All');
 
+  // Dynamic filter (field + operator + value)
+  type FieldType = 'string' | 'number' | 'date';
+  const filterableFields: { key: keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt'; label: string; type: FieldType }[] = [
+    { key: 'title', label: 'Title', type: 'string' },
+    { key: 'description', label: 'Description', type: 'string' },
+    { key: 'author', label: 'Author', type: 'string' },
+    { key: 'proficiencyLevel', label: 'Proficiency Level', type: 'string' },
+    { key: 'seriousnessLevel', label: 'Tone Level (number)', type: 'number' },
+    { key: 'cardCount', label: 'Card Count', type: 'number' },
+    { key: 'phraseCount', label: 'Phrase Count', type: 'number' },
+    { key: 'llmBrand' as any, label: 'LLM Brand', type: 'string' },
+    { key: 'llmModel' as any, label: 'LLM Model', type: 'string' },
+    { key: 'publishedAt', label: 'Published At', type: 'date' },
+  ];
+  const [filterKey, setFilterKey] = useState<string>('');
+  const [filterOp, setFilterOp] = useState<'contains' | 'eq' | 'gte' | 'lte'>('contains');
+  const [filterValue, setFilterValue] = useState<string>('');
+
   // --- Filtering Logic ---
   const sortOptions = ['Newest', 'Oldest', 'Most Cards', 'Highest Rated'];
   
@@ -81,21 +99,82 @@ export default function GalleryPage() {
   const filteredSets = useMemo(() => {
     let filtered = sets;
 
-    // Text search
+    // Text search across many fields
     if (search.trim()) {
       const s = search.trim().toLowerCase();
-      filtered = filtered.filter(set =>
-        set.title?.toLowerCase().includes(s) ||
-        set.description?.toLowerCase().includes(s) ||
-        set.specificTopics?.toLowerCase().includes(s)
-      );
+      filtered = filtered.filter(set => {
+        const haystack = [
+          set.title,
+          set.description,
+          set.author,
+          set.proficiencyLevel,
+          String(set.seriousnessLevel ?? ''),
+          set.specificTopics,
+          (set as any).llmBrand,
+          (set as any).llmModel,
+          set.publishedAt,
+          String(set.cardCount ?? ''),
+          String(set.phraseCount ?? ''),
+          set.id,
+        ]
+          .filter(Boolean)
+          .join(' | ')
+          .toLowerCase();
+        return haystack.includes(s);
+      });
     }
 
     // Author filter
     if (authorFilter !== 'All') {
-      filtered = filtered.filter(set => 
-        (set.author || 'Anonymous') === authorFilter
-      );
+      filtered = filtered.filter(set => (set.author || 'Anonymous') === authorFilter);
+    }
+
+    // Dynamic filter
+    if (filterKey && filterValue.trim()) {
+      const field = filterableFields.find(f => f.key === (filterKey as any));
+      const v = filterValue.trim();
+      if (field) {
+        filtered = filtered.filter(set => {
+          let value: any;
+          if (field.key === 'publishedAt') {
+            value = set.publishedAt ? new Date(set.publishedAt) : null;
+          } else if (field.key === 'proficiencyLevel') {
+            value = (set as any).proficiencyLevel ?? '';
+          } else if (field.key === 'seriousnessLevel') {
+            value = (set as any).seriousnessLevel ?? null;
+          } else {
+            value = (set as any)[field.key as keyof DisplaySet];
+          }
+
+          if (field.type === 'string') {
+            const text = String(value ?? '').toLowerCase();
+            if (filterOp === 'eq') return text === v.toLowerCase();
+            return text.includes(v.toLowerCase());
+          }
+
+          if (field.type === 'number') {
+            const num = Number(value);
+            const target = Number(v);
+            if (Number.isNaN(target)) return true; // ignore invalid input
+            if (filterOp === 'eq') return num === target;
+            if (filterOp === 'gte') return num >= target;
+            if (filterOp === 'lte') return num <= target;
+            return true;
+          }
+
+          if (field.type === 'date') {
+            const dateVal = value instanceof Date ? value : (value ? new Date(value) : null);
+            const target = new Date(v);
+            if (!dateVal || isNaN(target.getTime())) return true;
+            if (filterOp === 'eq') return dateVal.toDateString() === target.toDateString();
+            if (filterOp === 'gte') return dateVal.getTime() >= target.getTime();
+            if (filterOp === 'lte') return dateVal.getTime() <= target.getTime();
+            return true;
+          }
+
+          return true;
+        });
+      }
     }
 
     // Sorting
@@ -115,7 +194,7 @@ export default function GalleryPage() {
     });
 
     return filtered;
-  }, [sets, search, sortOrder, authorFilter]);
+  }, [sets, search, sortOrder, authorFilter, filterKey, filterOp, filterValue]);
 
   // Function to fetch gallery sets
   const fetchSets = () => {
@@ -399,6 +478,78 @@ export default function GalleryPage() {
               ))}
             </select>
           </div>
+
+          {/* Dynamic filter row */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <select
+              value={filterKey}
+              onChange={(e) => {
+                const key = e.target.value;
+                setFilterKey(key);
+                // Adjust default operator by field type
+                const field = filterableFields.find(f => f.key === (key as any));
+                if (field?.type === 'string') setFilterOp('contains');
+                else setFilterOp('eq');
+              }}
+              className="px-4 py-2 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
+            >
+              <option value="">Filter by (any field)</option>
+              {filterableFields.map(f => (
+                <option key={String(f.key)} value={String(f.key)}>{f.label}</option>
+              ))}
+            </select>
+
+            <select
+              value={filterOp}
+              onChange={(e) => setFilterOp(e.target.value as any)}
+              className="px-4 py-2 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
+            >
+              {(() => {
+                const field = filterableFields.find(f => f.key === (filterKey as any));
+                if (!field || field.type === 'string') {
+                  return (
+                    <>
+                      <option value="contains">contains</option>
+                      <option value="eq">equals</option>
+                    </>
+                  );
+                }
+                if (field.type === 'number' || field.type === 'date') {
+                  return (
+                    <>
+                      <option value="eq">equals</option>
+                      <option value="gte">≥</option>
+                      <option value="lte">≤</option>
+                    </>
+                  );
+                }
+                return null;
+              })()}
+            </select>
+
+            {(() => {
+              const field = filterableFields.find(f => f.key === (filterKey as any));
+              const inputType = field?.type === 'number' ? 'number' : (field?.type === 'date' ? 'date' : 'text');
+              return (
+                <input
+                  type={inputType}
+                  placeholder="Value"
+                  value={filterValue}
+                  onChange={(e) => setFilterValue(e.target.value)}
+                  className="w-full sm:w-64 px-4 py-2 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg placeholder-[#8B8B8B] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
+                />
+              );
+            })()}
+
+            {(filterKey || filterValue) && (
+              <button
+                onClick={() => { setFilterKey(''); setFilterOp('contains'); setFilterValue(''); }}
+                className="px-4 py-2 bg-[#3C3C3C] border border-[#555] text-[#E0E0E0] rounded-lg hover:bg-[#4C4C4C] transition-colors text-sm"
+              >
+                Clear filter
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -423,7 +574,7 @@ export default function GalleryPage() {
             </div>
             <h3 className="text-xl font-semibold mb-3 text-[#E0E0E0]">No gallery sets found</h3>
             <p className="text-[#BDBDBD] mb-6">
-              No sets have been published to the gallery yet. You can publish your own sets from the My Sets page!
+              Try adjusting your search or filters.
             </p>
             <div className="text-sm text-[#8B8B8B]">
               Sets published to the gallery become available to the entire community for learning and inspiration.

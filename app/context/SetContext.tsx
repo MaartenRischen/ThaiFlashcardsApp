@@ -657,6 +657,11 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     
     console.log(`SetContext: Switching to set ${id}`);
     setActiveSetId(id); // Triggers useEffect to load new set data
+    
+    // Save the last active set ID for faster loading next time
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lastActiveSetId', id);
+    }
   }, [activeSetId, audioGeneration]);
 
   // --- reloadActiveSet (Force reload current set content) --- 

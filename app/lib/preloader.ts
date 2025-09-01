@@ -91,76 +91,68 @@ export class AppPreloader {
         message: `Loading ${sets.length} flashcard sets...`
       });
 
-      // Stage 5-7: Load content, progress, and mnemonics in parallel
+      // Stage 5-7: Load ONLY essential data - not all content!
       this.updateProgress({
         stage: 'content',
         progress: 40,
-        message: 'Loading flashcards and progress...',
-        subProgress: { current: 0, total: data.sets.length }
+        message: 'Loading your progress...',
+        subProgress: { current: 0, total: 3 }
       });
       
       if (userId) {
-        // For authenticated users, load everything in parallel
-        const [_allContents, _allProgress, userMnemonics] = await Promise.all([
-          // Load all set contents
-          Promise.all(data.sets.map((set, index) => 
-            this.loadSetContent(set.id, userId).then(content => {
-              data.setContents[set.id] = content;
-              this.updateProgress({
-                stage: 'content',
-                progress: 40 + (30 * (index + 1) / data.sets.length),
-                message: 'Loading flashcards...',
-                subProgress: { 
-                  current: index + 1, 
-                  total: data.sets.length,
-                  item: set.name
-                }
-              });
-              return content;
-            })
-          )),
-          
-          // Load all progress data
-          Promise.all(data.sets.map(set => 
-            this.loadSetProgress(userId, set.id).then(progress => {
-              data.setProgress[set.id] = progress;
-              return progress;
-            })
-          )),
-          
-          // Load user mnemonics
+        // For authenticated users, load only essential data
+        const [userMnemonics] = await Promise.all([
+          // Load user mnemonics (small data)
           this.loadUserMnemonics(userId)
         ]);
         
         data.userMnemonics = userMnemonics;
         
-      } else {
-        // For unauthenticated users, load from localStorage and default content
-        const contentPromises = data.sets.map((set, index) => 
-          this.loadSetContent(set.id, userId).then(content => {
-            data.setContents[set.id] = content;
-            this.updateProgress({
-              stage: 'content',
-              progress: 40 + (30 * (index + 1) / data.sets.length),
-              message: 'Loading flashcards...',
-              subProgress: { 
-                current: index + 1, 
-                total: data.sets.length,
-                item: set.name
+        // Load progress for sets the user has actually used (not all sets!)
+        const progressResponse = await fetch('/api/user-progress', {
+          credentials: 'include',
+          signal: this.abortController?.signal
+        });
+        
+        if (progressResponse.ok) {
+          const progressData = await progressResponse.json();
+          // Only store progress for sets that have actual progress
+          if (progressData.progress) {
+            progressData.progress.forEach((p: any) => {
+              if (p.flashcardSetId && p.learnedPhrases && p.learnedPhrases.length > 0) {
+                data.setProgress[p.flashcardSetId] = {
+                  learnedPhrases: p.learnedPhrases,
+                  lastReviewedAt: p.lastReviewedAt
+                };
               }
             });
-            return content;
-          })
-        );
+          }
+        }
         
-        await Promise.all(contentPromises);
+        // Only preload content for the user's most recent set
+        const lastSetId = localStorage.getItem('lastActiveSetId');
+        if (lastSetId && data.sets.find(s => s.id === lastSetId)) {
+          const content = await this.loadSetContent(lastSetId, userId);
+          data.setContents[lastSetId] = content;
+        }
         
-        // Load progress from localStorage
+      } else {
+        // For unauthenticated users, only load content for the default set
+        const defaultSetId = 'default';
+        if (data.sets.find(s => s.id === defaultSetId)) {
+          const content = await this.loadSetContent(defaultSetId, userId);
+          data.setContents[defaultSetId] = content;
+        }
+        
+        // Load progress from localStorage (only for sets with progress)
         data.sets.forEach(set => {
           const storedProgress = localStorage.getItem(`progress_${set.id}`);
           if (storedProgress) {
             try {
-              data.setProgress[set.id] = JSON.parse(storedProgress);
+              const progress = JSON.parse(storedProgress);
+              if (progress.learnedPhrases && progress.learnedPhrases.length > 0) {
+                data.setProgress[set.id] = progress;
+              }
             } catch (e) {
               console.error('Failed to parse progress:', e);
             }
@@ -184,26 +176,40 @@ export class AppPreloader {
         message: 'Processing data...'
       });
 
-      // Stage 8: Preload images
+      // Stage 8: Preload only essential images
       this.updateProgress({
         stage: 'images',
         progress: 80,
         message: 'Loading images...',
-        subProgress: { current: 0, total: data.sets.length }
+        subProgress: { current: 0, total: 5 }
       });
       
-      const imagePromises = data.sets.map((set, index) => {
-        const imageUrl = set.imageUrl || '/images/default-set-logo.png';
-        return this.preloadImage(imageUrl).then(loaded => {
-          data.images[imageUrl] = loaded;
+      // Only preload images for sets we've loaded content for
+      const imageUrls = new Set<string>();
+      
+      // Add images for sets with content
+      Object.keys(data.setContents).forEach(setId => {
+        const set = data.sets.find(s => s.id === setId);
+        if (set?.imageUrl) {
+          imageUrls.add(set.imageUrl);
+        }
+      });
+      
+      // Add default images
+      imageUrls.add('/images/default-set-logo.png');
+      imageUrls.add('/images/defaultnew.png');
+      
+      // Preload only these essential images
+      const imagePromises = Array.from(imageUrls).map((url, index) => {
+        return this.preloadImage(url).then(loaded => {
+          data.images[url] = loaded;
           this.updateProgress({
             stage: 'images',
-            progress: 80 + (15 * (index + 1) / data.sets.length),
+            progress: 80 + (15 * (index + 1) / imageUrls.size),
             message: 'Loading images...',
             subProgress: { 
               current: index + 1, 
-              total: data.sets.length,
-              item: set.name
+              total: imageUrls.size
             }
           });
         });

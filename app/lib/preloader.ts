@@ -126,34 +126,20 @@ export class AppPreloader {
           }
         }
         
-        // Preload content for all sets to avoid loading spinners
-        console.log(`[Preloader] Loading content for ${data.sets.length} sets`);
-        const contentPromises = data.sets.map(async (set) => {
-          const content = await this.loadSetContent(set.id, userId);
-          return { setId: set.id, content };
-        });
-        
-        const contentResults = await Promise.all(contentPromises);
-        contentResults.forEach(({ setId, content }) => {
-          if (content.length > 0) {
-            data.setContents[setId] = content;
-          }
-        });
+        // As a compromise, only preload content for the user's most recent set
+        const lastSetId = typeof window !== 'undefined' ? localStorage.getItem('lastActiveSetId') : null;
+        if (lastSetId && data.sets.find(s => s.id === lastSetId)) {
+          const content = await this.loadSetContent(lastSetId, userId);
+          data.setContents[lastSetId] = content;
+        }
         
       } else {
-        // For unauthenticated users, load content for all default sets
-        console.log(`[Preloader] Loading content for ${data.sets.length} default sets`);
-        const contentPromises = data.sets.map(async (set) => {
-          const content = await this.loadSetContent(set.id, userId);
-          return { setId: set.id, content };
-        });
-        
-        const contentResults = await Promise.all(contentPromises);
-        contentResults.forEach(({ setId, content }) => {
-          if (content.length > 0) {
-            data.setContents[setId] = content;
-          }
-        });
+        // For unauthenticated users, only load content for the main default set
+        const defaultSetId = 'default';
+        if (data.sets.find(s => s.id === defaultSetId)) {
+          const content = await this.loadSetContent(defaultSetId, userId);
+          data.setContents[defaultSetId] = content;
+        }
         
         // Load progress from localStorage (only for sets with progress)
         data.sets.forEach(set => {

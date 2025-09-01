@@ -124,9 +124,11 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
           {set.title}
         </h3>
         
-        {/* Description - only show if different from title */}
-        {set.description && set.description !== set.title && (
-          <p className="text-sm text-[#BDBDBD] line-clamp-2 leading-relaxed">
+        {/* Description - only show if different from title and specific topics */}
+        {set.description &&
+         set.description.toLowerCase() !== set.title.toLowerCase() &&
+         set.description !== set.specificTopics && (
+          <p className="text-sm text-[#BDBDBD] leading-relaxed">
             {set.description}
           </p>
         )}

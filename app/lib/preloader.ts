@@ -66,8 +66,22 @@ export class AppPreloader {
       });
 
       if (userId) {
-        // Initialize user data structures
-        await this.initializeUserData(userId);
+        // Initialize user data structures in the background (non-blocking)
+        try {
+          const initKey = `preloader-init-done-${userId}`;
+          const alreadyInitialized = typeof window !== 'undefined' && localStorage.getItem(initKey) === '1';
+          if (!alreadyInitialized) {
+            this.initializeUserData(userId)
+              .then(() => {
+                try { if (typeof window !== 'undefined') localStorage.setItem(initKey, '1'); } catch {}
+              })
+              .catch((err) => console.error('initializeUserData error (non-blocking):', err));
+          } else {
+            console.log('[Preloader] Skipping user data initialization - already done this session');
+          }
+        } catch (e) {
+          console.error('Failed scheduling initializeUserData:', e);
+        }
       }
 
       // Stage 3-4: Load folders and sets in parallel
@@ -267,8 +281,9 @@ export class AppPreloader {
       });
       
       if (response.ok) {
-        const folders = await response.json();
-        return folders;
+        const data = await response.json();
+        const folders = Array.isArray(data) ? data : (data?.folders ?? []);
+        return folders as Folder[];
       }
     } catch (error) {
       console.error('Failed to load folders:', error);
@@ -418,17 +433,25 @@ export class AppPreloader {
       });
       
       if (response.ok) {
-        const mnemonics = await response.json();
+        const body = await response.json();
+        // API may return an array or wrap in { mnemonics } | { items }
+        const list = Array.isArray(body)
+          ? body
+          : Array.isArray(body?.mnemonics)
+            ? body.mnemonics
+            : Array.isArray(body?.items)
+              ? body.items
+              : [];
+
         // Transform array format to nested object format
         const mnemonicMap: Record<string, Record<string, string>> = {};
-        
-        mnemonics.forEach((item: { setId: string; phraseIndex: number; mnemonic: string }) => {
+        list.forEach((item: { setId: string; phraseIndex: number; mnemonic: string }) => {
+          if (!item || !item.setId) return;
           if (!mnemonicMap[item.setId]) {
             mnemonicMap[item.setId] = {};
           }
-          mnemonicMap[item.setId][item.phraseIndex.toString()] = item.mnemonic;
+          mnemonicMap[item.setId][String(item.phraseIndex)] = item.mnemonic;
         });
-        
         return mnemonicMap;
       }
     } catch (error) {

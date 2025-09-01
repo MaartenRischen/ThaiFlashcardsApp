@@ -60,6 +60,11 @@ export default function GalleryPage() {
   const userEmail = user?.emailAddresses?.[0]?.emailAddress;
   const isAdmin = userEmail === 'maartenrischen@protonmail.com';
 
+  // Debug logging for admin check
+  console.log('Gallery Page - User:', user);
+  console.log('Gallery Page - User Email:', userEmail);
+  console.log('Gallery Page - Is Admin:', isAdmin);
+
   // --- Search/Filter State ---
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'Newest' | 'Oldest' | 'Most Cards' | 'Highest Rated'>('Newest');

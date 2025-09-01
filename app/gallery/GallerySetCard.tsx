@@ -70,15 +70,15 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
   };
 
   return (
-    <div className={`bg-[#1A1A1A] border border-[#333] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${isSelected ? 'ring-2 ring-[#BB86FC] ring-offset-2 ring-offset-[#1A1A1A]' : 'hover:border-[#444]'}`}>
+    <div className={`relative bg-[#1A1A1A] border border-[#333] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${isSelected ? 'ring-2 ring-[#BB86FC] ring-offset-2 ring-offset-[#1A1A1A]' : 'hover:border-[#444]'}`}>
       {/* Selection checkbox for admin */}
       {showCheckbox && (
-        <div className="absolute top-3 left-3 z-10">
+        <div className="absolute top-3 left-3 z-20">
           <input
             type="checkbox"
             checked={isSelected}
             onChange={onToggleSelect}
-            className="w-4 h-4 text-[#BB86FC] bg-[#2A2A2A] border-[#444] rounded focus:ring-[#BB86FC] focus:ring-2"
+            className="w-5 h-5 text-[#BB86FC] bg-[#2A2A2A] border-[#444] rounded focus:ring-[#BB86FC] focus:ring-2 cursor-pointer"
           />
         </div>
       )}
@@ -91,7 +91,7 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
               onDelete(set.id);
             }
           }}
-          className="absolute top-3 right-3 p-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-md transition-colors z-10"
+          className="absolute top-3 right-3 p-2 text-red-400 hover:text-red-300 hover:bg-red-900/30 rounded-lg transition-colors z-20 bg-[#1A1A1A]/80 backdrop-blur-sm border border-red-800/40"
           title="Delete set"
         >
           <Trash2 className="h-4 w-4" />

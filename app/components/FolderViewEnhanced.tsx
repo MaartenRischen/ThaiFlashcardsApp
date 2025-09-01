@@ -36,6 +36,7 @@ import { GoLiveButton } from './GoLiveButton';
 import { SetPreviewModal } from './SetPreviewModal';
 import { usePreloadedFolders } from '@/app/hooks/usePreloadedData';
 import { usePreloader } from '@/app/context/PreloaderContext';
+import MySetCard from './MySetCard';
 
 interface FolderViewEnhancedProps {
   isOpen: boolean;
@@ -788,30 +789,18 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                         className="animate-in fade-in slide-in-from-bottom-2 duration-300"
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
-                        <div
-                          className={cn(
-                            "group transition-all duration-200",
-                            viewMode === 'grid' ? "transform hover:scale-105" : "",
-                            isActive ? 'scale-105' : '',
-                            isSelectMode ? 'cursor-pointer' : ''
-                          )}
-                          onClick={() => handleSetClick(fullSet)}
-                        >
-                          <div className={cn(
-                            "bg-[#2C2C2C]/40 backdrop-blur-sm rounded-xl border transition-all duration-200 relative overflow-hidden",
-                            viewMode === 'list' ? "flex items-center gap-4 p-4" : "h-full",
-                            isSelected 
-                              ? "border-[#A9C4FC] ring-2 ring-[#A9C4FC] bg-[#A9C4FC]/10" 
-                              : "border-[#404040]/30 hover:bg-[#2C2C2C]/60 hover:border-[#404040]/50",
-                            isActive ? "ring-2 ring-[#22c55e] border-[#22c55e]" : ""
-                          )}>
-                            {/* Selection Checkbox */}
+                        {viewMode === 'grid' ? (
+                          <div className="relative">
+                            {/* Selection Checkbox overlay */}
                             {isSelectMode && (
-                              <div className={cn(
-                                "absolute z-10",
-                                viewMode === 'grid' ? "top-3 left-3" : "relative order-first"
-                              )}>
-                                <div className="p-2 rounded-lg bg-[#1F1F1F]/80 backdrop-blur-sm">
+                              <div className="absolute top-3 left-3 z-30">
+                                <div 
+                                  className="p-2 rounded-lg bg-[#1F1F1F]/80 backdrop-blur-sm cursor-pointer"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSetClick(fullSet);
+                                  }}
+                                >
                                   {isSelected ? (
                                     <CheckSquare size={20} className="text-[#A9C4FC]" />
                                   ) : (
@@ -820,219 +809,148 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                 </div>
                               </div>
                             )}
-
-                            {viewMode === 'grid' ? (
-                              <>
-                                <SetCompletionBadge setId={set.id} />
-                                
-                                <div className="relative w-full aspect-[16/9] bg-gradient-to-br from-[#2C2C2C] to-[#1F1F1F] overflow-hidden">
-                                  <Image
-                                    src={imgUrl}
-                                    alt={set.name}
-                                    className="object-cover transition-transform duration-300 group-hover:scale-110"
-                                    fill
-                                    sizes="(max-width: 768px) 100vw, 33vw"
-                                    unoptimized={true}
-                                  />
-                                  <div className="absolute inset-0 bg-gradient-to-t from-[#1F1F1F] via-[#1F1F1F]/20 to-transparent" />
-                                  
-                                  {!isSelectMode && (
-                                    <div className="absolute top-3 right-3">
-                                      <ShareButton
-                                        setId={set.id}
-                                        setName={set.name}
-                                        variant="prominent"
-                                        className=""
-                                      />
-                                    </div>
-                                  )}
-                                  
-                                  {/* Remove card count from image overlay */}
-                                </div>
-
-                                <div className="p-4 bg-[#1F1F1F]/30 backdrop-blur-sm">
-                                  <div className="space-y-3">
-                                    {/* Title and Info */}
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div className="flex-1">
-                                        <h3 className="text-lg font-bold text-[#E0E0E0] leading-tight">
-                                          {set.name}
-                                        </h3>
-                                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                                          {fullSet.level && (
-                                            <span className="text-sm text-[#A9C4FC]">
-                                              Level: {fullSet.level}
-                                            </span>
-                                          )}
-                                          {fullSet.toneLevel && (
-                                            <>
-                                              {fullSet.level && <span className="text-[#606060]">•</span>}
-                                              <span className="text-sm text-[#FFB84D]">
-                                                Tone: {fullSet.toneLevel}
-                                              </span>
-                                            </>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-                                    
-                                    {/* Card count and learned count */}
-                                    <div className="mt-2">
-                                      <span className="text-sm text-[#BDBDBD]">
-                                        {set.phraseCount} cards / {getCachedContent(set.id) ? 
-                                          Object.values(getCachedContent(set.id)?.progress || {}).filter(p => p.difficulty === 'easy').length 
-                                          : 0} learned
-                                      </span>
-                                    </div>
-                                    
-                                    {/* Action Buttons */}
-                                    {!isSelectMode && (
-                                      <div className="flex gap-2">
-                                        {/* Preview Button - simpler */}
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setPreviewSet({
-                                              id: fullSet.id,
-                                              name: fullSet.name,
-                                              phraseCount: fullSet.phraseCount,
-                                              imageUrl: fullSet.imageUrl
-                                            });
-                                          }}
-                                          className="px-3 py-1.5 bg-[#2F2F2F] text-[#E0E0E0] text-xs font-medium rounded-md hover:bg-[#3A3A3A] border border-[#444] transition-colors flex items-center gap-1.5"
-                                          title="Preview this set"
-                                        >
-                                          <Eye className="h-3.5 w-3.5 text-[#E0E0E0]" />
-                                          <span>Preview</span>
-                                        </button>
-                                        
-                                        {/* Load Set Button - solid */}
-                                        <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              handleLoadSet(fullSet.id);
-                                            }}
-                                            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
-                                            title="Load this set"
-                                        >
-                                            <Play className="h-3.5 w-3.5 text-white" />
-                                            <span>Load Set</span>
-                                        </button>
-                                        
-                                        {/* Only show Publish button for user-created sets (not default sets) */}
-                                        {fullSet && fullSet.source !== 'default' && !fullSet.id.startsWith('default-') && (
-                                          <GoLiveButton
-                                            setId={set.id}
-                                            setName={set.name}
-                                            variant="default"
-                                            className=""
-                                          />
-                                        )}
-                                      </div>
+                            <MySetCard
+                              set={fullSet}
+                              onLoadSet={handleLoadSet}
+                              onPreview={(id) => {
+                                setPreviewSet({
+                                  id: fullSet.id,
+                                  name: fullSet.name,
+                                  phraseCount: fullSet.phraseCount,
+                                  imageUrl: fullSet.imageUrl
+                                });
+                              }}
+                              isLoading={loading}
+                              currentSetId={activeSetId}
+                            />
+                          </div>
+                        ) : (
+                          // List view
+                          <div
+                            className={cn(
+                              "group transition-all duration-200",
+                              isSelectMode ? 'cursor-pointer' : ''
+                            )}
+                            onClick={() => handleSetClick(fullSet)}
+                          >
+                            <div className={cn(
+                              "bg-[#2C2C2C]/40 backdrop-blur-sm rounded-xl border transition-all duration-200 relative overflow-hidden",
+                              "flex items-center gap-4 p-4",
+                              isSelected 
+                                ? "border-[#A9C4FC] ring-2 ring-[#A9C4FC] bg-[#A9C4FC]/10" 
+                                : "border-[#404040]/30 hover:bg-[#2C2C2C]/60 hover:border-[#404040]/50",
+                              isActive ? "ring-2 ring-[#22c55e] border-[#22c55e]" : ""
+                            )}>
+                              {/* Selection Checkbox */}
+                              {isSelectMode && (
+                                <div className="relative order-first">
+                                  <div className="p-2 rounded-lg bg-[#1F1F1F]/80 backdrop-blur-sm">
+                                    {isSelected ? (
+                                      <CheckSquare size={20} className="text-[#A9C4FC]" />
+                                    ) : (
+                                      <Square size={20} className="text-[#BDBDBD]" />
                                     )}
                                   </div>
                                 </div>
-                              </>
-                            ) : (
-                              <>
-                                <div className="relative w-24 h-16 flex-shrink-0 rounded-lg overflow-hidden">
-                                  <Image
-                                    src={imgUrl}
-                                    alt={set.name}
-                                    className="object-cover"
-                                    fill
-                                    sizes="96px"
-                                    unoptimized={true}
-                                  />
-                                </div>
-                                
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <h3 className="font-bold text-[#E0E0E0] truncate">
-                                      {set.name}
-                                    </h3>
+                              )}
 
-                                  </div>
-                                  <div className="flex flex-wrap items-center gap-2 mt-1">
-                                    {fullSet.level && (
-                                      <span className="text-sm text-[#A9C4FC]">
-                                        Level: {fullSet.level}
-                                      </span>
-                                    )}
-                                    {fullSet.toneLevel && (
-                                      <>
-                                        {fullSet.level && <span className="text-[#606060]">•</span>}
-                                        <span className="text-sm text-[#FFB84D]">
-                                          Tone: {fullSet.toneLevel}
-                                        </span>
-                                      </>
-                                    )}
-                                    <span className="text-[#606060]">•</span>
-                                    <span className="text-sm text-[#BDBDBD]">
-                                      {set.phraseCount} cards / {getCachedContent(set.id) ? 
-                                        Object.values(getCachedContent(set.id)?.progress || {}).filter(p => p.difficulty === 'easy').length 
-                                        : 0} learned
+                              <div className="relative w-24 h-16 flex-shrink-0 rounded-lg overflow-hidden">
+                                <Image
+                                  src={imgUrl}
+                                  alt={set.name}
+                                  className="object-cover"
+                                  fill
+                                  sizes="96px"
+                                  unoptimized={true}
+                                />
+                              </div>
+                              
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-bold text-[#E0E0E0] truncate">
+                                    {set.name}
+                                  </h3>
+
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                  {fullSet.level && (
+                                    <span className="text-sm text-[#A9C4FC]">
+                                      Level: {fullSet.level}
                                     </span>
-                                  </div>
+                                  )}
+                                  {fullSet.toneLevel && (
+                                    <>
+                                      {fullSet.level && <span className="text-[#606060]">•</span>}
+                                      <span className="text-sm text-[#FFB84D]">
+                                        Tone: {fullSet.toneLevel}
+                                      </span>
+                                    </>
+                                  )}
+                                  <span className="text-[#606060]">•</span>
+                                  <span className="text-sm text-[#BDBDBD]">
+                                    {set.phraseCount} cards / {getCachedContent(set.id) ? 
+                                      Object.values(getCachedContent(set.id)?.progress || {}).filter(p => p.difficulty === 'easy').length 
+                                      : 0} learned
+                                  </span>
                                 </div>
-                                
-                                <SetCompletionBadge setId={set.id} />
-                                
-                                {!isSelectMode && (
-                                  <div className="flex items-center gap-2 ml-auto">
-                                    {/* Preview Button - simpler */}
-                                    <button
+                              </div>
+                              
+                              <SetCompletionBadge setId={set.id} />
+                              
+                              {!isSelectMode && (
+                                <div className="flex items-center gap-2 ml-auto">
+                                  {/* Preview Button - simpler */}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPreviewSet({
+                                        id: fullSet.id,
+                                        name: fullSet.name,
+                                        phraseCount: fullSet.phraseCount,
+                                        imageUrl: fullSet.imageUrl
+                                      });
+                                    }}
+                                    className="px-3 py-1.5 bg-[#2F2F2F] text-[#E0E0E0] text-xs font-medium rounded-md hover:bg-[#3A3A3A] border border-[#444] transition-colors flex items-center gap-1.5"
+                                    title="Preview this set"
+                                  >
+                                    <Eye className="h-3.5 w-3.5 text-[#E0E0E0]" />
+                                    <span>Preview</span>
+                                  </button>
+                                  
+                                  {/* Load Set Button - solid */}
+                                  <button
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        setPreviewSet({
-                                          id: fullSet.id,
-                                          name: fullSet.name,
-                                          phraseCount: fullSet.phraseCount,
-                                          imageUrl: fullSet.imageUrl
-                                        });
+                                        handleLoadSet(fullSet.id);
                                       }}
-                                      className="px-3 py-1.5 bg-[#2F2F2F] text-[#E0E0E0] text-xs font-medium rounded-md hover:bg-[#3A3A3A] border border-[#444] transition-colors flex items-center gap-1.5"
-                                      title="Preview this set"
-                                    >
-                                      <Eye className="h-3.5 w-3.5 text-[#E0E0E0]" />
-                                      <span>Preview</span>
-                                    </button>
-                                    
-                                    {/* Load Set Button - solid */}
-                                    <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleLoadSet(fullSet.id);
-                                        }}
-                                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
-                                        title="Load this set"
-                                    >
-                                        <Play className="h-3.5 w-3.5 text-white" />
-                                        <span>Load Set</span>
-                                    </button>
-                                    
-                                    {/* Only show Publish button for user-created sets (not default sets) */}
-                                    {fullSet && fullSet.source !== 'default' && !fullSet.id.startsWith('default-') && (
-                                      <GoLiveButton
-                                        setId={set.id}
-                                        setName={set.name}
-                                        variant="default"
-                                        className=""
-                                      />
-                                    )}
-                                    
-                                    <ShareButton
+                                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
+                                      title="Load this set"
+                                  >
+                                      <Play className="h-3.5 w-3.5 text-white" />
+                                      <span>Load Set</span>
+                                  </button>
+                                  
+                                  {/* Only show Publish button for user-created sets (not default sets) */}
+                                  {fullSet && fullSet.source !== 'default' && !fullSet.id.startsWith('default-') && (
+                                    <GoLiveButton
                                       setId={set.id}
                                       setName={set.name}
-                                      variant="prominent"
-                                      className="scale-90"
+                                      variant="default"
+                                      className=""
                                     />
-                                  </div>
-                                )}
-                              </>
-                            )}
+                                  )}
+                                  
+                                  <ShareButton
+                                    setId={set.id}
+                                    setName={set.name}
+                                    variant="prominent"
+                                    className="scale-90"
+                                  />
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     );
                   })}

@@ -75,8 +75,8 @@ export default function GalleryPage() {
     { key: 'seriousnessLevel', label: 'Tone Level (number)', type: 'number' },
     { key: 'cardCount', label: 'Card Count', type: 'number' },
     { key: 'phraseCount', label: 'Phrase Count', type: 'number' },
-    { key: 'llmBrand' as any, label: 'LLM Brand', type: 'string' },
-    { key: 'llmModel' as any, label: 'LLM Model', type: 'string' },
+    { key: 'llmBrand' as keyof DisplaySet, label: 'LLM Brand', type: 'string' },
+    { key: 'llmModel' as keyof DisplaySet, label: 'LLM Model', type: 'string' },
     { key: 'publishedAt', label: 'Published At', type: 'date' },
   ];
   const [filterKey, setFilterKey] = useState<string>('');
@@ -131,19 +131,19 @@ export default function GalleryPage() {
 
     // Dynamic filter
     if (filterKey && filterValue.trim()) {
-      const field = filterableFields.find(f => f.key === (filterKey as any));
+      const field = filterableFields.find(f => f.key === (filterKey as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt'));
       const v = filterValue.trim();
       if (field) {
         filtered = filtered.filter(set => {
-          let value: any;
+          let value: unknown;
           if (field.key === 'publishedAt') {
             value = set.publishedAt ? new Date(set.publishedAt) : null;
           } else if (field.key === 'proficiencyLevel') {
-            value = (set as any).proficiencyLevel ?? '';
+            value = (set as unknown as Record<string, unknown>).proficiencyLevel ?? '';
           } else if (field.key === 'seriousnessLevel') {
-            value = (set as any).seriousnessLevel ?? null;
+            value = (set as unknown as Record<string, unknown>).seriousnessLevel ?? null;
           } else {
-            value = (set as any)[field.key as keyof DisplaySet];
+            value = (set as unknown as Record<string, unknown>)[field.key as keyof DisplaySet];
           }
 
           if (field.type === 'string') {
@@ -163,7 +163,7 @@ export default function GalleryPage() {
           }
 
           if (field.type === 'date') {
-            const dateVal = value instanceof Date ? value : (value ? new Date(value) : null);
+            const dateVal = value instanceof Date ? value : (value ? new Date(String(value)) : null);
             const target = new Date(v);
             if (!dateVal || isNaN(target.getTime())) return true;
             if (filterOp === 'eq') return dateVal.toDateString() === target.toDateString();
@@ -487,7 +487,7 @@ export default function GalleryPage() {
                 const key = e.target.value;
                 setFilterKey(key);
                 // Adjust default operator by field type
-                const field = filterableFields.find(f => f.key === (key as any));
+                const field = filterableFields.find(f => f.key === (key as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt'));
                 if (field?.type === 'string') setFilterOp('contains');
                 else setFilterOp('eq');
               }}

@@ -72,18 +72,18 @@ export default function GalleryPage() {
 
   // Dynamic filter (field + operator + value)
   type FieldType = 'string' | 'number' | 'date';
-  const filterableFields: { key: keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt'; label: string; type: FieldType }[] = [
-    { key: 'title', label: 'Title', type: 'string' },
-    { key: 'description', label: 'Description', type: 'string' },
-    { key: 'author', label: 'Author', type: 'string' },
-    { key: 'proficiencyLevel', label: 'Proficiency Level', type: 'string' },
-    { key: 'seriousnessLevel', label: 'Tone Level (number)', type: 'number' },
-    { key: 'cardCount', label: 'Card Count', type: 'number' },
-    { key: 'phraseCount', label: 'Phrase Count', type: 'number' },
-    { key: 'llmBrand' as keyof DisplaySet, label: 'LLM Brand', type: 'string' },
-    { key: 'llmModel' as keyof DisplaySet, label: 'LLM Model', type: 'string' },
-    { key: 'publishedAt', label: 'Published At', type: 'date' },
-  ];
+  const filterableFields = useMemo(() => [
+    { key: 'title' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Title', type: 'string' as FieldType },
+    { key: 'description' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Description', type: 'string' as FieldType },
+    { key: 'author' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Author', type: 'string' as FieldType },
+    { key: 'proficiencyLevel' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Proficiency Level', type: 'string' as FieldType },
+    { key: 'seriousnessLevel' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Tone Level (number)', type: 'number' as FieldType },
+    { key: 'cardCount' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Card Count', type: 'number' as FieldType },
+    { key: 'phraseCount' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Phrase Count', type: 'number' as FieldType },
+    { key: 'llmBrand' as keyof DisplaySet, label: 'LLM Brand', type: 'string' as FieldType },
+    { key: 'llmModel' as keyof DisplaySet, label: 'LLM Model', type: 'string' as FieldType },
+    { key: 'publishedAt' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Published At', type: 'date' as FieldType },
+  ], []);
   const [filterKey, setFilterKey] = useState<string>('');
   const [filterOp, setFilterOp] = useState<'contains' | 'eq' | 'gte' | 'lte'>('contains');
   const [filterValue, setFilterValue] = useState<string>('');
@@ -199,7 +199,7 @@ export default function GalleryPage() {
     });
 
     return filtered;
-  }, [sets, search, sortOrder, authorFilter, filterKey, filterOp, filterValue, filterableFields]);
+  }, [sets, search, sortOrder, authorFilter, filterKey, filterOp, filterValue]);
 
   // Function to fetch gallery sets
   const fetchSets = () => {

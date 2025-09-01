@@ -6,7 +6,7 @@ import { ShareButton } from './ShareButton';
 import { GoLiveButton } from './GoLiveButton';
 import { BookOpen, Layers, Sparkles } from 'lucide-react';
 import { getToneLabel } from '@/app/lib/utils';
-import { SetMetaData } from '@/app/lib/set-generator';
+import { SetMetaData } from '@/app/lib/storage/types';
 
 interface MySetCardProps {
   set: SetMetaData;

@@ -106,10 +106,10 @@ const MySetCard: React.FC<MySetCardProps> = ({
             {getToneLabel(typeof set.seriousnessLevel === "number" ? set.seriousnessLevel : null)}
           </div>
           
-          {getProficiencyDisplay(set.proficiencyLevel) && (
+          {getProficiencyDisplay(set.level) && (
             <div className="flex items-center gap-1">
               <span className="text-[#8B8B8B]">Proficiency level:</span>
-              {getProficiencyDisplay(set.proficiencyLevel)}
+              {getProficiencyDisplay(set.level)}
             </div>
           )}
         </div>

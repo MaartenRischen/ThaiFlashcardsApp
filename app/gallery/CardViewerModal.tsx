@@ -69,24 +69,33 @@ const CardViewerModal: React.FC<CardViewerModalProps> = ({ set, isLoading, error
           )}
           {!isLoading && !error && set && (
             <div className="space-y-3">
-              {set.phrases.map((phrase, index) => (
-                <div 
-                  key={index} 
-                  className="neumorphic rounded-lg p-3 flex flex-col space-y-1"
-                >
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="text-2xl font-bold text-[#E0E0E0]">{phrase.thai}</span>
-                    <span className="text-xs text-[#8B8B8B] ml-2">#{index + 1}</span>
-                  </div>
-                  <div className="text-sm text-[#BDBDBD] italic">{phrase.pronunciation}</div>
-                  <div className="text-base text-[#A9C4FC]">{phrase.english}</div>
-                  {phrase.mnemonic && (
-                    <div className="text-xs text-[#8B8B8B] mt-1 p-2 bg-[#1F1F1F] rounded border border-[#333333]">
-                      Hint: {phrase.mnemonic}
+              {set.phrases && Array.isArray(set.phrases) && set.phrases.length > 0 ? (
+                set.phrases.map((phrase, index) => (
+                  <div 
+                    key={index} 
+                    className="neumorphic rounded-lg p-3 flex flex-col space-y-1"
+                  >
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="text-2xl font-bold text-[#E0E0E0]">{phrase.thai}</span>
+                      <span className="text-xs text-[#8B8B8B] ml-2">#{index + 1}</span>
                     </div>
-                  )}
+                    <div className="text-sm text-[#BDBDBD] italic">{phrase.pronunciation}</div>
+                    <div className="text-base text-[#A9C4FC]">{phrase.english}</div>
+                    {phrase.mnemonic && (
+                      <div className="text-xs text-[#8B8B8B] mt-1 p-2 bg-[#1F1F1F] rounded border border-[#333333]">
+                        Hint: {phrase.mnemonic}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-[#BDBDBD] py-8">
+                  <p>No phrases available for this set.</p>
+                  <p className="text-sm text-[#8B8B8B] mt-2">
+                    The set content could not be loaded or is empty.
+                  </p>
                 </div>
-              ))}
+              )}
             </div>
           )}
         </div>

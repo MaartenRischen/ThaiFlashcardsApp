@@ -127,17 +127,28 @@ export default function GalleryPage() {
         return res.json();
       })
       .then(data => {
+        // Ensure data is an array
+        if (!Array.isArray(data)) {
+          console.error('Gallery API returned non-array data:', data);
+          setError('Invalid data format received from server');
+          setLoading(false);
+          return;
+        }
+        
         // Map publishedAt to createdAt and fix cardCount for all sets
         const mapped = data.map((set: GallerySet & { publishedAt?: string | Date; phraseCount?: number }) => ({
           ...set,
-          createdAt: set.publishedAt || set.createdAt,
+          createdAt: new Date(set.publishedAt || set.createdAt || new Date()),
           publishedAt: String(set.publishedAt || set.createdAt || new Date().toISOString()), // Ensure publishedAt is always a string
           cardCount: set.cardCount ?? set.phraseCount ?? 0,
+          phraseCount: set.phraseCount ?? set.cardCount ?? 0, // Ensure phraseCount is always a number
+          userId: set.author || 'anonymous', // Use author as userId or fallback to 'anonymous'
         }));
         setSets(mapped);
         setLoading(false);
       })
       .catch(err => {
+        console.error('Gallery fetch error:', err);
         setError(err.message || 'Unknown error');
         setLoading(false);
       });

@@ -11,6 +11,7 @@ const isPublicRoute = createRouteMatcher([
   '/reset-password(.*)',
   '/api/share/(.*)', // Public share endpoints
   '/api/public-sets(.*)', // Public sets API
+  '/api/gallery(.*)', // Gallery API (public access for browsing sets)
   '/api/folders', // Folders API (returns default folders for unauthenticated users)
   '/api/flashcard-sets/(.*)/content', // Set content API (allows fetching default sets)
   '/api/health', // Health check endpoint

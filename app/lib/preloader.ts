@@ -118,12 +118,9 @@ export class AppPreloader {
           const progressData = await progressResponse.json();
           // Only store progress for sets that have actual progress
           if (progressData.progress) {
-            progressData.progress.forEach((p: { flashcardSetId?: string; learnedPhrases?: string[]; lastReviewedAt?: string }) => {
-              if (p.flashcardSetId && p.learnedPhrases && p.learnedPhrases.length > 0) {
-                data.setProgress[p.flashcardSetId] = {
-                  learnedPhrases: p.learnedPhrases,
-                  lastReviewedAt: p.lastReviewedAt
-                };
+            progressData.progress.forEach((p: { flashcardSetId?: string; progress?: Record<number, PhraseProgressData> }) => {
+              if (p.flashcardSetId && p.progress) {
+                data.setProgress[p.flashcardSetId] = p.progress;
               }
             });
           }

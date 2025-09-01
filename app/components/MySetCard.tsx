@@ -25,7 +25,7 @@ const MySetCard: React.FC<MySetCardProps> = ({
 }) => {
   const imgUrl = set.imageUrl || '/images/default-set-logo.png';
   const isCurrentSet = currentSetId === set.id;
-  const canPublish = !set.isDefault && set.source !== 'default' && !set.id.startsWith('default-');
+  const canPublish = set.source !== 'default' && !set.id.startsWith('default-');
 
   // Get proficiency level display
   const getProficiencyDisplay = (level?: string) => {

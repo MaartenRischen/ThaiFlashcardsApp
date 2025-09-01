@@ -126,8 +126,8 @@ export async function getPublishedSetById(id: string) {
   const phrases = Array.isArray(row.phrases) ? (row.phrases as PhraseLike[]) : [];
   const proficiency = (row.proficiencyLevel as string) || estimateProficiencyLevel(phrases);
   const tone = (row.seriousnessLevel as number) ?? estimateSeriousnessLevel(phrases);
-  const { phrases: _omit, ...rest } = row;
-  return { ...rest, proficiencyLevel: proficiency, seriousnessLevel: tone };
+  // Include phrases in the returned payload (do not omit)
+  return { ...row, phrases, proficiencyLevel: proficiency, seriousnessLevel: tone };
 }
 
 // Delete a published set from the gallery

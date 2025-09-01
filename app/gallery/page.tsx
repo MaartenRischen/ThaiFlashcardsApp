@@ -199,7 +199,7 @@ export default function GalleryPage() {
     });
 
     return filtered;
-  }, [sets, search, sortOrder, authorFilter, filterKey, filterOp, filterValue]);
+  }, [sets, search, sortOrder, authorFilter, filterKey, filterOp, filterValue, filterableFields]);
 
   // Function to fetch gallery sets
   const fetchSets = () => {

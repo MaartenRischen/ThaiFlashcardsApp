@@ -812,7 +812,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                             <MySetCard
                               set={fullSet}
                               onLoadSet={handleLoadSet}
-                              onPreview={(id) => {
+                              onPreview={(_id) => {
                                 setPreviewSet({
                                   id: fullSet.id,
                                   name: fullSet.name,

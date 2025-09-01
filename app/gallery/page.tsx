@@ -305,23 +305,23 @@ export default function GalleryPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6">
       {isAdmin && selectedSets.size > 0 && (
-        <div className="mb-4 p-3 neumorphic rounded-lg flex items-center justify-between bg-red-900/10 border-red-800/30">
-          <span className="text-sm text-red-400">
+        <div className="mb-6 p-4 bg-red-900/20 border border-red-800/40 rounded-xl flex items-center justify-between">
+          <span className="text-sm text-red-400 font-medium">
             {selectedSets.size} set{selectedSets.size > 1 ? 's' : ''} selected
           </span>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button
               onClick={() => setSelectedSets(new Set())}
-              className="px-3 py-1.5 text-sm text-red-400/70 hover:text-red-400 transition"
+              className="px-4 py-2 text-sm text-red-400/70 hover:text-red-400 transition-colors rounded-lg hover:bg-red-900/20"
             >
               Cancel
             </button>
             <button
               onClick={handleBulkDelete}
               disabled={isDeletingBulk}
-              className="neumorphic-button px-4 py-1.5 text-sm text-red-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 text-sm text-red-400 bg-red-900/30 hover:bg-red-900/50 border border-red-800/50 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
             >
               {isDeletingBulk ? (
                 <>
@@ -339,22 +339,32 @@ export default function GalleryPage() {
         </div>
       )}
       
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Search sets..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="neumorphic-input w-full mb-4"
-        />
+      {/* Header Section */}
+      <div className="mb-8">
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-bold text-[#E0E0E0] mb-3">Public Sets</h1>
+          <p className="text-lg text-[#BDBDBD] max-w-2xl mx-auto">
+            Browse and import sets created by the Donkey Bridge community
+          </p>
+        </div>
         
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h1 className="text-2xl font-semibold text-[#E0E0E0]">Public Sets</h1>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        {/* Search and Filters */}
+        <div className="max-w-4xl mx-auto space-y-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search sets by title, description, or topics..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full px-4 py-3 bg-[#2A2A2A] border border-[#444] rounded-xl text-[#E0E0E0] placeholder-[#8B8B8B] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all"
+            />
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {isAdmin && filteredSets.length > 0 && (
               <button
                 onClick={handleSelectAll}
-                className="neumorphic-button rounded-xl px-4 py-2 text-sm bg-[#3C3C3C] border border-[#404040] text-[#E0E0E0] hover:bg-[#4C4C4C] transition"
+                className="px-4 py-2 bg-[#3C3C3C] border border-[#555] text-[#E0E0E0] rounded-lg hover:bg-[#4C4C4C] transition-colors text-sm font-medium"
               >
                 {selectedSets.size === filteredSets.length ? 'Deselect All' : 'Select All'}
               </button>
@@ -362,7 +372,7 @@ export default function GalleryPage() {
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
-              className="neumorphic-input rounded-xl px-4 py-2 text-sm bg-[#3C3C3C] border border-[#404040] text-[#E0E0E0] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition"
+              className="px-4 py-2 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
             >
               {sortOptions.map(option => (
                 <option key={option} value={option}>{option}</option>
@@ -371,7 +381,7 @@ export default function GalleryPage() {
             <select
               value={authorFilter}
               onChange={(e) => setAuthorFilter(e.target.value)}
-              className="neumorphic-input rounded-xl px-4 py-2 text-sm bg-[#3C3C3C] border border-[#404040] text-[#E0E0E0] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition"
+              className="px-4 py-2 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
             >
               {authors.map(author => (
                 <option key={author} value={author}>{author}</option>
@@ -380,31 +390,37 @@ export default function GalleryPage() {
           </div>
         </div>
       </div>
-      <p className="text-sm text-[#BDBDBD] mb-6 -mt-6">
-        Browse and import sets created by the Donkey Bridge community
-      </p>
 
       {error && (
-        <div className="p-3 bg-red-900/20 border border-red-700/30 rounded-md text-red-400 text-sm mb-4">
+        <div className="max-w-4xl mx-auto p-4 bg-red-900/20 border border-red-700/40 rounded-xl text-red-400 text-sm mb-6">
           {error}
         </div>
       )}
+      
       {loading ? (
-        <div className="flex justify-center py-10">
-          <Loader2 className="h-6 w-6 animate-spin text-[#BB86FC]" />
+        <div className="flex justify-center py-16">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin text-[#BB86FC] mx-auto mb-4" />
+            <p className="text-[#BDBDBD]">Loading public sets...</p>
+          </div>
         </div>
       ) : filteredSets.length === 0 ? (
-        <div className="neumorphic rounded-lg p-6 text-center">
-          <div className="flex justify-center mb-4">
-            <GalleryHorizontal className="h-12 w-12 text-[#BDBDBD]" />
+        <div className="max-w-2xl mx-auto text-center py-16">
+          <div className="bg-[#2A2A2A] border border-[#444] rounded-xl p-8">
+            <div className="flex justify-center mb-6">
+              <GalleryHorizontal className="h-16 w-16 text-[#8B8B8B]" />
+            </div>
+            <h3 className="text-xl font-semibold mb-3 text-[#E0E0E0]">No gallery sets found</h3>
+            <p className="text-[#BDBDBD] mb-6">
+              No sets have been published to the gallery yet. You can publish your own sets from the My Sets page!
+            </p>
+            <div className="text-sm text-[#8B8B8B]">
+              Sets published to the gallery become available to the entire community for learning and inspiration.
+            </div>
           </div>
-          <h3 className="text-base font-medium mb-2 text-[#E0E0E0]">No gallery sets found</h3>
-          <p className="text-sm text-[#BDBDBD] mb-5">
-            No sets have been published to the gallery yet. You can publish your own sets from the My Sets page!
-          </p>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredSets.map((set) => (
             <GallerySetCard
               key={set.id}

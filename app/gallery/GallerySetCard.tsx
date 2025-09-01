@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
-import { Trash2, BookOpen, Download, Layers } from 'lucide-react';
+import { Trash2, BookOpen, Download, Layers, Star, User } from 'lucide-react';
 import { getToneLabel } from '@/app/lib/utils';
 
 // Define a more specific type for the set prop
@@ -51,16 +51,35 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
   const userEmail = user?.emailAddresses?.[0]?.emailAddress;
   const isAdmin = userEmail === 'maartenrischen@protonmail.com';
 
+  // Get proficiency level display
+  const getProficiencyDisplay = (level?: string) => {
+    if (!level) return null;
+    const levelMap: Record<string, { label: string; color: string }> = {
+      'Complete Beginner': { label: 'Beginner', color: 'text-green-400' },
+      'Basic Understanding': { label: 'Basic', color: 'text-blue-400' },
+      'Intermediate': { label: 'Intermediate', color: 'text-yellow-400' },
+      'Advanced': { label: 'Advanced', color: 'text-orange-400' },
+      'Native/Fluent': { label: 'Expert', color: 'text-purple-400' }
+    };
+    const display = levelMap[level] || { label: level, color: 'text-gray-400' };
+    return (
+      <div className={`flex items-center gap-1 text-xs ${display.color}`}>
+        <Star className="h-3 w-3" />
+        <span>{display.label}</span>
+      </div>
+    );
+  };
+
   return (
-    <div className={`neumorphic rounded-lg ${isSelected ? 'ring-2 ring-[#BB86FC]' : ''} p-3 flex flex-col relative transition-all`}>
+    <div className={`bg-[#1A1A1A] border border-[#333] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${isSelected ? 'ring-2 ring-[#BB86FC] ring-offset-2 ring-offset-[#1A1A1A]' : 'hover:border-[#444]'}`}>
       {/* Selection checkbox for admin */}
       {showCheckbox && (
-        <div className="absolute top-2 left-2 z-10">
+        <div className="absolute top-3 left-3 z-10">
           <input
             type="checkbox"
             checked={isSelected}
             onChange={onToggleSelect}
-            className="w-4 h-4 text-[#BB86FC] bg-[#3C3C3C] border-[#404040] rounded focus:ring-[#BB86FC] focus:ring-2"
+            className="w-4 h-4 text-[#BB86FC] bg-[#2A2A2A] border-[#444] rounded focus:ring-[#BB86FC] focus:ring-2"
           />
         </div>
       )}
@@ -73,59 +92,84 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
               onDelete(set.id);
             }
           }}
-          className="absolute top-2 right-2 p-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-md transition-colors"
+          className="absolute top-3 right-3 p-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-md transition-colors z-10"
           title="Delete set"
         >
           <Trash2 className="h-4 w-4" />
         </button>
       )}
       
-      <div className="relative w-full h-32 rounded-lg overflow-hidden mb-3 neumorphic-inset">
+      {/* Image with overlay gradient */}
+      <div className="relative w-full h-40 overflow-hidden">
         <Image
           src={imgUrl}
           alt={`${set.title} logo`}
           fill
           className="object-cover"
         />
-      </div>
-      
-      <h3 className="font-medium text-sm mb-1 text-[#E0E0E0]">{set.title}</h3>
-      {set.description && (
-        <p className="text-xs text-[#BDBDBD] mb-2 line-clamp-2">{set.description}</p>
-      )}
-      <div className="mt-auto">
-        <div className="text-xs text-[#BDBDBD] space-y-1 mb-3">
-          <div className="flex items-center gap-1">
-            {getToneLabel(set.seriousnessLevel)}
-          </div>
-          <div className="flex items-center gap-1">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent opacity-80" />
+        
+        {/* Card count badge */}
+        <div className="absolute bottom-3 left-3 bg-[#1A1A1A]/90 backdrop-blur-sm px-2 py-1 rounded-lg border border-[#333]">
+          <div className="flex items-center gap-1 text-xs text-[#E0E0E0]">
             <Layers className="h-3 w-3" />
             <span>{set.cardCount} cards</span>
           </div>
         </div>
-        <div className="flex gap-2">
+      </div>
+      
+      {/* Content area */}
+      <div className="p-4 space-y-3">
+        {/* Title */}
+        <h3 className="font-bold text-lg text-[#E0E0E0] leading-tight line-clamp-2">
+          {set.title}
+        </h3>
+        
+        {/* Description - only show if different from title */}
+        {set.description && set.description !== set.title && (
+          <p className="text-sm text-[#BDBDBD] line-clamp-2 leading-relaxed">
+            {set.description}
+          </p>
+        )}
+        
+        {/* Metadata badges */}
+        <div className="flex flex-wrap gap-2">
+          {/* Tone level */}
+          <div className="flex items-center gap-1 bg-[#2A2A2A] px-2 py-1 rounded-lg border border-[#444]">
+            {getToneLabel(set.seriousnessLevel)}
+          </div>
+          
+          {/* Proficiency level */}
+          {getProficiencyDisplay(set.proficiencyLevel)}
+        </div>
+        
+        {/* Action buttons */}
+        <div className="flex gap-2 pt-2">
           <button
             onClick={() => handleViewCards(set.id)}
-            className="flex-1 neumorphic-button px-3 py-1.5 text-xs font-medium flex items-center justify-center gap-1"
+            className="flex-1 bg-[#2A2A2A] hover:bg-[#3A3A3A] text-[#E0E0E0] px-3 py-2 text-sm font-medium rounded-lg border border-[#444] hover:border-[#555] transition-all flex items-center justify-center gap-2"
           >
-            <BookOpen className="h-3 w-3" />
+            <BookOpen className="h-4 w-4" />
             View
           </button>
           <button
             onClick={() => handleImport(set.id)}
             disabled={importingSetId === set.id || contextIsLoading}
-            className="flex-1 neumorphic-button px-3 py-1.5 text-xs font-medium flex items-center justify-center gap-1 text-[#BB86FC] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-[#BB86FC] hover:bg-[#A66EFC] text-[#1A1A1A] px-3 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {importingSetId === set.id ? (
-              <span className="inline-block h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              <span className="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Download className="h-3 w-3" />
+              <Download className="h-4 w-4" />
             )}
             {importingSetId === set.id ? 'Importing...' : 'Import'}
           </button>
         </div>
-        <div className="text-xs text-[#8B8B8B] mt-2">
-          by {username}
+        
+        {/* Author info */}
+        <div className="flex items-center gap-2 text-xs text-[#8B8B8B] pt-1 border-t border-[#333]">
+          <User className="h-3 w-3" />
+          <span>by {username}</span>
         </div>
       </div>
     </div>

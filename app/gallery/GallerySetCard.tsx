@@ -120,7 +120,7 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
       {/* Content area */}
       <div className="p-4 space-y-3">
         {/* Title */}
-        <h3 className="font-bold text-lg text-[#E0E0E0] leading-tight line-clamp-2">
+        <h3 className="font-bold text-lg text-[#E0E0E0] leading-tight line-clamp-3 h-[84px]">
           {set.title}
         </h3>
         

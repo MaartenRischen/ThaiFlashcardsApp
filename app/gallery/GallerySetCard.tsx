@@ -63,10 +63,9 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
     };
     const display = levelMap[level] || { label: level, color: 'text-gray-400' };
     return (
-      <div className={`flex items-center gap-1 text-xs ${display.color}`}>
-        <Star className="h-3 w-3" />
-        <span>{display.label}</span>
-      </div>
+      <span className={`${display.color} font-medium`}>
+        {display.label}
+      </span>
     );
   };
 
@@ -133,17 +132,15 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
         )}
         
         {/* Metadata badges */}
-        <div className="space-y-2">
-          {/* Tone level */}
-          <div className="flex items-center gap-2 bg-[#2A2A2A] px-3 py-2 rounded-lg border border-[#444]">
-            <span className="text-xs text-[#8B8B8B] font-medium">Tone level:</span>
+        <div className="flex flex-wrap gap-3 text-xs text-[#BDBDBD]">
+          <div className="flex items-center gap-1">
+            <span className="text-[#8B8B8B]">Tone level:</span>
             {getToneLabel(set.seriousnessLevel)}
           </div>
           
-          {/* Proficiency level */}
           {getProficiencyDisplay(set.proficiencyLevel) && (
-            <div className="flex items-center gap-2 bg-[#2A2A2A] px-3 py-2 rounded-lg border border-[#444]">
-              <span className="text-xs text-[#8B8B8B] font-medium">Proficiency level:</span>
+            <div className="flex items-center gap-1">
+              <span className="text-[#8B8B8B]">Proficiency level:</span>
               {getProficiencyDisplay(set.proficiencyLevel)}
             </div>
           )}

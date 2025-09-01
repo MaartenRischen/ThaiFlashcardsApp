@@ -129,20 +129,34 @@ export class AppPreloader {
           }
         }
         
-        // Only preload content for the user's most recent set
-        const lastSetId = localStorage.getItem('lastActiveSetId');
-        if (lastSetId && data.sets.find(s => s.id === lastSetId)) {
-          const content = await this.loadSetContent(lastSetId, userId);
-          data.setContents[lastSetId] = content;
-        }
+        // Preload content for all sets to avoid loading spinners
+        console.log(`[Preloader] Loading content for ${data.sets.length} sets`);
+        const contentPromises = data.sets.map(async (set) => {
+          const content = await this.loadSetContent(set.id, userId);
+          return { setId: set.id, content };
+        });
+        
+        const contentResults = await Promise.all(contentPromises);
+        contentResults.forEach(({ setId, content }) => {
+          if (content.length > 0) {
+            data.setContents[setId] = content;
+          }
+        });
         
       } else {
-        // For unauthenticated users, only load content for the default set
-        const defaultSetId = 'default';
-        if (data.sets.find(s => s.id === defaultSetId)) {
-          const content = await this.loadSetContent(defaultSetId, userId);
-          data.setContents[defaultSetId] = content;
-        }
+        // For unauthenticated users, load content for all default sets
+        console.log(`[Preloader] Loading content for ${data.sets.length} default sets`);
+        const contentPromises = data.sets.map(async (set) => {
+          const content = await this.loadSetContent(set.id, userId);
+          return { setId: set.id, content };
+        });
+        
+        const contentResults = await Promise.all(contentPromises);
+        contentResults.forEach(({ setId, content }) => {
+          if (content.length > 0) {
+            data.setContents[setId] = content;
+          }
+        });
         
         // Load progress from localStorage (only for sets with progress)
         data.sets.forEach(set => {
@@ -366,6 +380,9 @@ export class AppPreloader {
         console.log(`[Preloader] Found default content for ${setId}: ${defaultContent.length} phrases`);
         return defaultContent;
       }
+      // If no default content found, don't try API - just return empty
+      console.warn(`[Preloader] No default content found for set ${setId}, skipping API call`);
+      return [];
     }
     
     // Try API for user sets

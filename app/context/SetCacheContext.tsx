@@ -43,8 +43,8 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
   
   // Initialize cache with preloaded data
   useEffect(() => {
-    if (preloadedData && Object.keys(cache).length === 0) {
-      console.log('[SetCacheContext] Initializing cache with preloaded data');
+    if (preloadedData) {
+      console.log('[SetCacheContext] Updating cache with preloaded data');
       const newCache: Record<string, SetContentCache> = {};
       
       // Add all preloaded set contents to cache
@@ -56,7 +56,11 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
         };
       });
       
-      setCache(newCache);
+      // Merge with existing cache instead of replacing
+      setCache(prevCache => ({
+        ...prevCache,
+        ...newCache
+      }));
       
       // Also cache folders
       if (preloadedData.folders.length > 0) {

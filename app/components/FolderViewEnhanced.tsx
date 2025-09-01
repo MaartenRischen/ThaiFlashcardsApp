@@ -106,6 +106,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
   const fetchFolders = async () => {
     // First try preloaded data
     if (preloadedFolders.length > 0) {
+      console.log('[FolderViewEnhanced] Using preloaded folders');
       setFolders(preloadedFolders);
       return;
     }
@@ -113,11 +114,13 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     // Then try cache
     const cachedFolders = getCachedFolders();
     if (cachedFolders) {
+      console.log('[FolderViewEnhanced] Using cached folders');
       setFolders(cachedFolders);
       return;
     }
 
     // Only load if we really need to
+    console.log('[FolderViewEnhanced] No cached/preloaded folders, fetching...');
     setLoading(true);
     try {
       const loadedFolders = await preloadFolders();

@@ -43,6 +43,7 @@ export function SetPreviewModal({
       console.log(`[SetPreviewModal] Using cached content for set ${setId}: ${cachedContent.phrases.length} phrases`);
       setPhrases(cachedContent.phrases);
       setProgress(cachedContent.progress || {});
+      setLoading(false); // Ensure loading is false
       return;
     }
     
@@ -51,6 +52,7 @@ export function SetPreviewModal({
       console.log(`[SetPreviewModal] Using preloaded content for set ${setId}: ${preloadedContent.length} phrases`);
       setPhrases(preloadedContent);
       setProgress(preloadedProgress || {});
+      setLoading(false); // Ensure loading is false
       return;
     }
     

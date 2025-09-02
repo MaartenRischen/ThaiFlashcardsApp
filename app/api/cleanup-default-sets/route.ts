@@ -119,17 +119,48 @@ export async function POST() {
     const commonWordsFolderId = folderMap.get('100 Most Used Thai Words');
     const commonSentencesFolderId = folderMap.get('100 Most Used Thai Sentences');
 
-    // Assign unfiled sets to proper folders
-    const unfiledSets = remainingSets.filter(set => !set.folderId);
+    // Find sets that are in the wrong folder or unfiled
+    const setsToReassign = remainingSets.filter(set => {
+      // Unfiled sets
+      if (!set.folderId) return true;
+      
+      // Check if sets with common words/sentences names are in the default folder
+      if (set.folderId === defaultSetsFolderId && set.name) {
+        if (set.name.includes('100 Most Used Thai Words') ||
+            set.name.includes('Most Used Thai Words & Phrases')) {
+          return true;
+        }
+        if (set.name.includes('100 Most Used Thai Sentences') ||
+            (set.name.includes('Most Used Thai') && set.name.includes('Sentences'))) {
+          return true;
+        }
+      }
+      
+      return false;
+    });
     const folderAssignments = [];
 
-    for (const set of unfiledSets) {
+    for (const set of setsToReassign) {
       const originalSetId = set.id.includes('__') ? set.id.split('__')[0] : set.id;
       
       let folderId: string | undefined;
+      
+      // Check by ID first
       if (originalSetId.startsWith('common-words-') && commonWordsFolderId) {
         folderId = commonWordsFolderId;
       } else if (originalSetId.startsWith('common-sentences-') && commonSentencesFolderId) {
+        folderId = commonSentencesFolderId;
+      } 
+      // Also check by name for misnamed/imported sets
+      else if (set.name && commonWordsFolderId && (
+        set.name.includes('100 Most Used Thai Words') ||
+        set.name.includes('Most Used Thai Words & Phrases')
+      )) {
+        folderId = commonWordsFolderId;
+      } else if (set.name && commonSentencesFolderId && (
+        set.name.includes('100 Most Used Thai Sentences') ||
+        (set.name.includes('Most Used Thai') && set.name.includes('Sentences'))
+      )) {
         folderId = commonSentencesFolderId;
       } else if (defaultSetsFolderId) {
         folderId = defaultSetsFolderId;

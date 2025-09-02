@@ -44,11 +44,26 @@ export async function GET() {
     // Extract easy cards from progress data
     const easyCardsBySet = new Map<string, Array<{ phraseIndex: number; lastReviewed: Date }>>();
     
+    const isRecordObject = (val: unknown): val is Record<string, unknown> => {
+      return !!val && typeof val === 'object' && !Array.isArray(val);
+    };
+
+    const isPhraseProgressData = (val: unknown): val is PhraseProgressData => {
+      if (!isRecordObject(val)) return false;
+      const difficulty = val['difficulty'];
+      const lastReviewedDate = val['lastReviewedDate'];
+      return (
+        (difficulty === 'easy' || difficulty === 'good' || difficulty === 'hard') &&
+        typeof lastReviewedDate === 'string'
+      );
+    };
+
     allProgressEntries.forEach(entry => {
-      const progressData = entry.progressData as Record<string, PhraseProgressData>;
-      
-      Object.entries(progressData).forEach(([phraseIndexStr, progress]) => {
-        if (progress?.difficulty === 'easy') {
+      const raw = entry.progressData as unknown;
+      if (!isRecordObject(raw)) return;
+
+      Object.entries(raw).forEach(([phraseIndexStr, progress]) => {
+        if (isPhraseProgressData(progress) && progress.difficulty === 'easy') {
           const phraseIndex = parseInt(phraseIndexStr, 10);
           if (!easyCardsBySet.has(entry.setId)) {
             easyCardsBySet.set(entry.setId, []);

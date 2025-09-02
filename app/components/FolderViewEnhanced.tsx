@@ -606,7 +606,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                 <button
                   onClick={() => {
                     onClose();
-                    window.location.href = '/easy-cards-exam';
+                    window.location.href = '/the-everything-exam';
                   }}
                   className="w-full p-6 bg-gradient-to-r from-green-500/20 to-blue-500/20 hover:from-green-500/30 hover:to-blue-500/30 backdrop-blur-sm rounded-xl border border-[#404040]/50 transition-all duration-300 group"
                 >
@@ -617,7 +617,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                       </div>
                       <div className="text-left">
                         <h3 className="text-lg font-semibold text-[#E0E0E0] group-hover:text-white transition-colors">
-                          Easy Cards Exam
+                          The Everything Exam
                         </h3>
                         <p className="text-sm text-[#A0A0A0] mt-1">
                           Review all cards you've marked as "Easy" across all sets

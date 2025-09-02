@@ -333,7 +333,7 @@ export default function EasyCardsExam() {
       {/* Progress Header */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-2xl font-bold">Exam</h2>
+          <h2 className="text-2xl font-bold">The Everything Exam</h2>
           <span className="text-sm text-muted-foreground">
             {currentIndex + 1} / {cards.length}
           </span>

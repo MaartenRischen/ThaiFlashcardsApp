@@ -24,6 +24,7 @@ interface EasyCard {
     mnemonic?: string;
     hint?: string;
     audioUrl?: string;
+    examples?: { thai: string; pronunciation: string; translation: string }[];
   };
   lastReviewed: string;
 }

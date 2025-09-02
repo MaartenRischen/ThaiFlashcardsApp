@@ -44,11 +44,6 @@ export default function EasyCardsExam() {
   const [error, setError] = useState<string | null>(null);
   const [examComplete, setExamComplete] = useState(false);
 
-  // Fetch easy cards
-  useEffect(() => {
-    fetchEasyCards();
-  }, [fetchEasyCards]);
-
   type UiPhrase = {
     thai: string;
     romanization: string;
@@ -178,6 +173,11 @@ export default function EasyCardsExam() {
       setLoading(false);
     }
   }, []);
+
+  // Fetch easy cards
+  useEffect(() => {
+    fetchEasyCards();
+  }, [fetchEasyCards]);
 
   const handleAnswer = (correct: boolean) => {
     const timeSpent = Date.now() - cardStartTime;

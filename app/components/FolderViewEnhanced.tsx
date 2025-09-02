@@ -435,7 +435,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
   const filteredAndSortedSets = useMemo(() => {
     if (!currentFolder) return [];
     
-    let filtered = currentFolder.sets;
+    const filtered = currentFolder.sets;
     
     // Apply sorting
     const sorted = [...filtered].sort((a, b) => {
@@ -452,7 +452,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     });
     
     return sorted;
-  }, [currentFolder, searchQuery, sortOption]);
+  }, [currentFolder, sortOption]);
 
   const handleBackToFolders = () => {
     setCurrentFolder(null);
@@ -790,7 +790,8 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                     }
                     
                     // Consider a folder loading if global flags say so OR we have fewer than expected sets for defaults
-                    let isFolderLoading = (loading || setsLoading || isPreloading);
+                    const baseLoading = (loading || setsLoading || isPreloading);
+                    let isFolderLoading = baseLoading;
                     if (!isFolderLoading && folder.isDefault) {
                       // If it's a default folder and shows < 3 sets, assume hydration still in progress
                       if (folder.name === 'Default Sets' && folderSets.length < 6) isFolderLoading = true;

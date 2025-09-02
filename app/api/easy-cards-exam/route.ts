@@ -106,7 +106,25 @@ export async function GET() {
         });
         
         if (dbSet?.phrases) {
-          content = dbSet.phrases as Phrase[];
+          type DbPhrase = {
+            english: string;
+            thai: string;
+            thaiMasculine: string;
+            thaiFeminine: string;
+            pronunciation: string;
+            mnemonic: string | null;
+            examplesJson: unknown;
+          };
+
+          content = (dbSet.phrases as DbPhrase[]).map((p) => ({
+            english: p.english,
+            thai: p.thai,
+            thaiMasculine: p.thaiMasculine,
+            thaiFeminine: p.thaiFeminine,
+            pronunciation: p.pronunciation,
+            mnemonic: p.mnemonic ?? undefined,
+            examples: Array.isArray(p.examplesJson) ? (p.examplesJson as unknown as any[]) : []
+          })) as Phrase[];
         }
       }
 

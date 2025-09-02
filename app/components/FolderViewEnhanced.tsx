@@ -467,38 +467,38 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl bg-[#1F1F1F]/95 backdrop-blur-md border-[#404040]/50 text-white p-0 overflow-hidden h-[90vh] flex flex-col [&>button]:hidden">
         {/* Header */}
-        <div className="bg-[#2C2C2C]/80 backdrop-blur-sm border-b border-[#404040]/50 px-8 py-6 flex-shrink-0">
-          <div className="flex items-center justify-between">
+        <div className="bg-[#2C2C2C]/80 backdrop-blur-sm border-b border-[#404040]/50 px-4 sm:px-8 py-6 flex-shrink-0">
+          <div className="flex items-center justify-between gap-4">
             <DialogHeader className="flex-1">
               <DialogTitle asChild>
                 {currentFolder ? (
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                     <button
                       onClick={handleBackToFolders}
-                      className="p-4 rounded-xl bg-[#3C3C3C]/50 hover:bg-[#3C3C3C]/70 backdrop-blur-sm transition-all duration-200 border border-[#404040]/50 group"
+                      className="p-3 sm:p-4 rounded-xl bg-[#3C3C3C]/50 hover:bg-[#3C3C3C]/70 backdrop-blur-sm transition-all duration-200 border border-[#404040]/50 group flex-shrink-0"
                     >
-                      <ArrowLeft size={24} className="text-[#A9C4FC] group-hover:text-[#A9C4FC]/80" />
+                      <ArrowLeft size={20} className="text-[#A9C4FC] group-hover:text-[#A9C4FC]/80 sm:w-6 sm:h-6" />
                     </button>
-                    <div className="flex-1">
-                      <h2 className="text-2xl font-bold text-[#E0E0E0]">{currentFolder.name}</h2>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-lg sm:text-2xl font-bold text-[#E0E0E0] truncate">{currentFolder.name}</h2>
                       {currentFolder.description && (
-                        <p className="text-sm text-[#BDBDBD] mt-1">{currentFolder.description}</p>
+                        <p className="text-xs sm:text-sm text-[#BDBDBD] mt-1 truncate">{currentFolder.description}</p>
                       )}
                     </div>
                     
                     {/* Set Actions */}
                     {currentFolder.sets.length > 0 && (
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {isSelectMode ? (
                           <>
-                            <span className="text-sm text-[#BDBDBD]">
+                            <span className="text-sm text-[#BDBDBD] whitespace-nowrap">
                               {selectedSets.size} selected
                             </span>
                             <Button
                               onClick={handleSelectAll}
                               variant="outline"
                               size="sm"
-                              className="bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50"
+                              className="bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50 text-xs px-2"
                             >
                               {selectedSets.size === currentFolder.sets.length ? 'Deselect All' : 'Select All'}
                             </Button>
@@ -506,9 +506,9 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                               <Button
                                 onClick={handleMoveSelected}
                                 size="sm"
-                                className="bg-[#A9C4FC] hover:bg-[#A9C4FC]/90 text-[#121212]"
+                                className="bg-[#A9C4FC] hover:bg-[#A9C4FC]/90 text-[#121212] text-xs px-2"
                               >
-                                <MoveRight size={16} className="mr-2" />
+                                <MoveRight size={14} className="mr-1" />
                                 Move
                               </Button>
                             )}
@@ -516,7 +516,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                               onClick={() => setIsSelectMode(false)}
                               variant="outline"
                               size="sm"
-                              className="bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50"
+                              className="bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50 text-xs px-2"
                             >
                               Cancel
                             </Button>
@@ -526,9 +526,9 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                             onClick={() => setIsSelectMode(true)}
                             variant="outline"
                             size="sm"
-                            className="bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50"
+                            className="bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50 text-xs px-2"
                           >
-                            <CheckSquare size={16} className="mr-2" />
+                            <CheckSquare size={14} className="mr-1" />
                             Select
                           </Button>
                         )}
@@ -546,9 +546,9 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
             
             <button
               onClick={onClose}
-              className="p-4 rounded-xl bg-[#3C3C3C]/50 hover:bg-[#3C3C3C]/70 backdrop-blur-sm transition-all duration-200 border border-[#404040]/50 group ml-4"
+              className="p-3 sm:p-4 rounded-xl bg-[#3C3C3C]/50 hover:bg-[#3C3C3C]/70 backdrop-blur-sm transition-all duration-200 border border-[#404040]/50 group flex-shrink-0"
             >
-              <X size={24} className="text-[#BDBDBD] group-hover:text-[#E0E0E0]" />
+              <X size={20} className="text-[#BDBDBD] group-hover:text-[#E0E0E0] sm:w-6 sm:h-6" />
             </button>
           </div>
 

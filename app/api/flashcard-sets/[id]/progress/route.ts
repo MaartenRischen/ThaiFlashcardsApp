@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import * as storage from '@/app/lib/storage';
+import type { SetProgress } from '@/app/lib/storage/types';
 
 interface RouteParams {
   params: {
@@ -37,7 +38,34 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 }
 
-// Placeholder for PUT handler (to save progress)
-// export async function PUT(request: Request, { params }: RouteParams) {
-//   // ... logic to save progress ...
-// } 
+// POST handler for saving progress for a specific set and user
+export async function POST(request: Request, { params }: RouteParams) {
+  const { id: setId } = params;
+  const { userId } = await auth();
+
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (!setId) {
+    return NextResponse.json({ error: 'Missing set ID' }, { status: 400 });
+  }
+
+  try {
+    const body = await request.json().catch(() => ({}));
+    const progress: SetProgress | undefined = body?.progress;
+
+    if (!progress || typeof progress !== 'object') {
+      return NextResponse.json({ error: 'Invalid progress payload' }, { status: 400 });
+    }
+
+    const ok = await storage.saveSetProgress(userId, setId, progress);
+    if (!ok) {
+      return NextResponse.json({ error: 'Failed to save progress' }, { status: 500 });
+    }
+
+    return NextResponse.json({ message: 'Progress saved successfully' }, { status: 200 });
+  } catch (error: unknown) {
+    console.error(`API Route /api/flashcard-sets/${setId}/progress POST:`, error);
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
+  }
+}

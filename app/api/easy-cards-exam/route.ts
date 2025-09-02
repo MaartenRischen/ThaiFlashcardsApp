@@ -28,29 +28,40 @@ export async function GET() {
 
     console.log(`[EASY-CARDS-EXAM] Found ${sets.length} sets`);
 
-    // Get all user progress entries where mastery is "easy"
-    const easyProgressEntries = await prisma.userProgress.findMany({
-      where: {
-        userId,
-        mastery: 'easy'
-      },
+    // Get all user progress entries and filter for "easy" cards
+    const allProgressEntries = await prisma.userSetProgress.findMany({
+      where: { userId },
       select: {
-        flashcardSetId: true,
-        phraseIndex: true,
-        updatedAt: true
+        setId: true,
+        progressData: true,
+        lastAccessedAt: true
       }
     });
 
-    console.log(`[EASY-CARDS-EXAM] Found ${easyProgressEntries.length} easy cards`);
+    console.log(`[EASY-CARDS-EXAM] Found ${allProgressEntries.length} progress entries`);
 
-    // Group easy cards by set
-    const easyCardsBySet = new Map<string, number[]>();
-    easyProgressEntries.forEach(entry => {
-      if (!easyCardsBySet.has(entry.flashcardSetId)) {
-        easyCardsBySet.set(entry.flashcardSetId, []);
-      }
-      easyCardsBySet.get(entry.flashcardSetId)!.push(entry.phraseIndex);
+    // Extract easy cards from progress data
+    const easyCardsBySet = new Map<string, Array<{ phraseIndex: number; lastReviewed: Date }>>();
+    
+    allProgressEntries.forEach(entry => {
+      const progressData = entry.progressData as Record<string, any>;
+      
+      Object.entries(progressData).forEach(([phraseIndexStr, progress]) => {
+        if (progress?.difficulty === 'easy') {
+          const phraseIndex = parseInt(phraseIndexStr, 10);
+          if (!easyCardsBySet.has(entry.setId)) {
+            easyCardsBySet.set(entry.setId, []);
+          }
+          easyCardsBySet.get(entry.setId)!.push({
+            phraseIndex,
+            lastReviewed: new Date(progress.lastReviewedDate || entry.lastAccessedAt)
+          });
+        }
+      });
     });
+
+    const totalEasyCards = Array.from(easyCardsBySet.values()).reduce((sum, cards) => sum + cards.length, 0);
+    console.log(`[EASY-CARDS-EXAM] Found ${totalEasyCards} easy cards across ${easyCardsBySet.size} sets`);
 
     // Collect all easy cards with their content
     const easyCards: Array<{
@@ -63,8 +74,8 @@ export async function GET() {
     }> = [];
 
     for (const set of sets) {
-      const easyIndices = easyCardsBySet.get(set.id);
-      if (!easyIndices || easyIndices.length === 0) continue;
+      const easyCardsData = easyCardsBySet.get(set.id);
+      if (!easyCardsData || easyCardsData.length === 0) continue;
 
       let content: Phrase[] = [];
 
@@ -84,19 +95,15 @@ export async function GET() {
       }
 
       // Add easy cards from this set
-      for (const phraseIndex of easyIndices) {
-        if (phraseIndex < content.length) {
-          const progressEntry = easyProgressEntries.find(
-            e => e.flashcardSetId === set.id && e.phraseIndex === phraseIndex
-          );
-          
+      for (const cardData of easyCardsData) {
+        if (cardData.phraseIndex < content.length) {
           easyCards.push({
             setId: set.id,
             setName: set.name,
             setImageUrl: set.imageUrl || undefined,
-            phraseIndex,
-            phrase: content[phraseIndex],
-            lastReviewed: progressEntry?.updatedAt || new Date()
+            phraseIndex: cardData.phraseIndex,
+            phrase: content[cardData.phraseIndex],
+            lastReviewed: cardData.lastReviewed
           });
         }
       }

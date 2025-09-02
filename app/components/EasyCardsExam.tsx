@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Check, X, RotateCcw, Trophy, Clock, BookOpen } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { RotateCcw, Trophy, Clock, BookOpen } from 'lucide-react';
 import { ttsService } from '@/app/lib/tts-service';
 import { getDefaultSetContent, getDefaultSetsForUnauthenticatedUsers } from '@/app/lib/seed-default-sets';
 import type { Phrase as SeedPhrase } from '@/app/data/phrases';
@@ -349,9 +348,7 @@ export default function EasyCardsExam() {
           isMale={true}
           isPoliteMode={false}
           onToggleAnswer={() => setShowAnswer((s) => !s)}
-          onPlayAudio={(e?: any) => {
-            // prevent bubbling if invoked via button
-            try { if (e && e.stopPropagation) e.stopPropagation(); } catch {}
+          onPlayAudio={() => {
             playCardAudio();
           }}
           onNextCard={() => {

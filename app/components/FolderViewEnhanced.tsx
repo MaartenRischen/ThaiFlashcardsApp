@@ -29,7 +29,8 @@ import {
   Grid3X3,
   List,
   Eye,
-  Play
+  Play,
+  FolderX
 } from 'lucide-react';
 import { ShareButton } from './ShareButton';
 import { GoLiveButton } from './GoLiveButton';
@@ -142,6 +143,9 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
       return;
     }
 
+    // Clear search when entering a folder
+    setSearchQuery('');
+    
     // Don't show loading if we already have the data
     let shouldShowLoading = false;
     
@@ -427,18 +431,11 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     }
   };
 
-  // Filter and sort logic
+  // Sort logic (no search filter in folder view)
   const filteredAndSortedSets = useMemo(() => {
     if (!currentFolder) return [];
     
     let filtered = currentFolder.sets;
-    
-    // Apply search filter
-    if (searchQuery) {
-      filtered = filtered.filter(set => 
-        set.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
     
     // Apply sorting
     const sorted = [...filtered].sort((a, b) => {
@@ -461,7 +458,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     setCurrentFolder(null);
     setIsSelectMode(false);
     setSelectedSets(new Set());
-    setSearchQuery('');
+    // Don't clear search when going back - keep the search context
   };
 
   if (!isOpen) return null;
@@ -555,39 +552,40 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
             </button>
           </div>
 
-          {/* Search and Filter Bar for Sets View */}
+          {/* Filter Bar for Sets View (no search in individual folders) */}
           {currentFolder && currentFolder.sets.length > 0 && (
-            <div className="mt-4 flex items-center gap-4">
-              <div className="flex-1 relative">
-                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#BDBDBD]/60" />
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search sets..."
-                  className="pl-10 bg-[#3C3C3C]/50 backdrop-blur-sm border-[#404040]/50 text-[#E0E0E0] placeholder-[#BDBDBD]/60"
-                />
-              </div>
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <Button
+                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                variant="outline"
+                size="sm"
+                className="bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50"
+              >
+                {viewMode === 'grid' ? <List size={16} /> : <Grid3X3 size={16} />}
+              </Button>
               
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                  variant="outline"
-                  size="sm"
-                  className="bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50"
-                >
-                  {viewMode === 'grid' ? <List size={16} /> : <Grid3X3 size={16} />}
-                </Button>
-                
-                <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value as SortOption)}
-                  className="px-3 py-1.5 rounded-lg bg-[#3C3C3C]/50 backdrop-blur-sm border border-[#404040]/50 text-[#E0E0E0] text-sm"
-                >
-                  <option value="name">Name</option>
-                  <option value="date">Date</option>
-                  <option value="size">Size</option>
-                </select>
-              </div>
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value as SortOption)}
+                className="px-3 py-1.5 rounded-lg bg-[#3C3C3C]/50 backdrop-blur-sm border border-[#404040]/50 text-[#E0E0E0] text-sm"
+              >
+                <option value="name">Name</option>
+                <option value="date">Date</option>
+                <option value="size">Size</option>
+              </select>
+            </div>
+          )}
+          
+          {/* Global Search Bar for Main Folder View */}
+          {!currentFolder && (
+            <div className="mt-4 relative">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#BDBDBD]/60" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search all sets..."
+                className="pl-10 bg-[#3C3C3C]/50 backdrop-blur-sm border-[#404040]/50 text-[#E0E0E0] placeholder-[#BDBDBD]/60 w-full"
+              />
             </div>
           )}
         </div>
@@ -717,9 +715,53 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                     setFolderForm({ name: '', description: '' });
                   }}
                 />
+              ) : folders.filter(folder => {
+                    // If no search query, show all folders
+                    if (!searchQuery) return true;
+                    
+                    // Check if folder name matches
+                    if (folder.name.toLowerCase().includes(searchQuery.toLowerCase())) return true;
+                    
+                    // Check if any sets in the folder match the search
+                    const folderSets = availableSets.filter(set => 
+                      set.folderId === folder.id || set.folderName === folder.name
+                    );
+                    
+                    return folderSets.some(set => 
+                      set.name.toLowerCase().includes(searchQuery.toLowerCase())
+                    );
+                  }).length === 0 && searchQuery ? (
+                <div className="flex flex-col items-center justify-center py-24 animate-in fade-in duration-300">
+                  <FolderX size={64} className="text-[#404040] mb-4" />
+                  <h3 className="text-lg font-semibold text-[#E0E0E0] mb-2">No results found</h3>
+                  <p className="text-[#BDBDBD]">No folders or sets match "{searchQuery}"</p>
+                  <Button
+                    onClick={() => setSearchQuery('')}
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50"
+                  >
+                    Clear search
+                  </Button>
+                </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 animate-in fade-in duration-300">
-                  {folders.map((folder, index) => {
+                  {folders.filter(folder => {
+                    // If no search query, show all folders
+                    if (!searchQuery) return true;
+                    
+                    // Check if folder name matches
+                    if (folder.name.toLowerCase().includes(searchQuery.toLowerCase())) return true;
+                    
+                    // Check if any sets in the folder match the search
+                    const folderSets = availableSets.filter(set => 
+                      set.folderId === folder.id || set.folderName === folder.name
+                    );
+                    
+                    return folderSets.some(set => 
+                      set.name.toLowerCase().includes(searchQuery.toLowerCase())
+                    );
+                  }).map((folder, index) => {
                     let folderSets: SetMetaData[] = [];
                     
                     // For unauthenticated users, match sets by their IDs

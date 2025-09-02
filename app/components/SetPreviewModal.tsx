@@ -29,7 +29,7 @@ export function SetPreviewModal({
   const { content: preloadedContent, progress: preloadedProgress } = usePreloadedSetContent(setId);
   const { getCachedContent } = useSetCache();
   const [phrases, setPhrases] = useState<Phrase[]>([]);
-  const [progress, setProgress] = useState<SetProgress>({});
+  const [_progress, setProgress] = useState<SetProgress>({});
   const [loading, setLoading] = useState(false);
 
   const loadSetData = useCallback(async () => {

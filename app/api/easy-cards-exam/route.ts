@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/app/lib/prisma';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
+import { Phrase } from '@/app/lib/generation/types';
 
 export async function GET() {
   try {
@@ -57,7 +58,7 @@ export async function GET() {
       setName: string;
       setImageUrl?: string;
       phraseIndex: number;
-      phrase: any;
+      phrase: Phrase;
       lastReviewed: Date;
     }> = [];
 
@@ -65,7 +66,7 @@ export async function GET() {
       const easyIndices = easyCardsBySet.get(set.id);
       if (!easyIndices || easyIndices.length === 0) continue;
 
-      let content: any[] = [];
+      let content: Phrase[] = [];
 
       // For default sets, get content from seed data
       if (set.source === 'default') {
@@ -78,7 +79,7 @@ export async function GET() {
         });
         
         if (dbSet?.phrases) {
-          content = dbSet.phrases as any[];
+          content = dbSet.phrases as Phrase[];
         }
       }
 

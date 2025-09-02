@@ -66,22 +66,25 @@ export class AppPreloader {
       });
 
       if (userId) {
-        // Initialize user data structures in the background (non-blocking)
-        try {
+        // Skip heavy initialization during preload - do it lazily later
+        console.log('[Preloader] Skipping heavy initialization during preload for faster startup');
+        
+        // Schedule initialization to happen after the app loads (truly non-blocking)
+        setTimeout(() => {
           const initKey = `preloader-init-done-${userId}`;
           const alreadyInitialized = typeof window !== 'undefined' && localStorage.getItem(initKey) === '1';
           if (!alreadyInitialized) {
+            console.log('[Preloader] Starting background initialization after app load');
             this.initializeUserData(userId)
               .then(() => {
-                try { if (typeof window !== 'undefined') localStorage.setItem(initKey, '1'); } catch {}
+                try { 
+                  if (typeof window !== 'undefined') localStorage.setItem(initKey, '1'); 
+                  console.log('[Preloader] Background initialization completed');
+                } catch {}
               })
-              .catch((err) => console.error('initializeUserData error (non-blocking):', err));
-          } else {
-            console.log('[Preloader] Skipping user data initialization - already done this session');
+              .catch((err) => console.error('Background initializeUserData error:', err));
           }
-        } catch (e) {
-          console.error('Failed scheduling initializeUserData:', e);
-        }
+        }, 2000); // Wait 2 seconds after app loads
       }
 
       // Stage 3-4: Load folders and sets in parallel
@@ -123,21 +126,33 @@ export class AppPreloader {
         data.userMnemonics = userMnemonics;
         
         // Load progress for sets the user has actually used (not all sets!)
-        const progressResponse = await fetch('/api/user-progress', {
-          credentials: 'include',
-          signal: this.abortController?.signal
-        });
-        
-        if (progressResponse.ok) {
-          const progressData = await progressResponse.json();
-          // Only store progress for sets that have actual progress
-          if (progressData.progress) {
-            progressData.progress.forEach((p: { flashcardSetId?: string; progress?: Record<number, PhraseProgressData> }) => {
-              if (p.flashcardSetId && p.progress) {
-                data.setProgress[p.flashcardSetId] = p.progress;
-              }
-            });
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+          
+          const progressResponse = await fetch('/api/user-progress', {
+            credentials: 'include',
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (progressResponse.ok) {
+            const progressData = await progressResponse.json();
+            // Only store progress for sets that have actual progress
+            if (progressData.progress) {
+              progressData.progress.forEach((p: { flashcardSetId?: string; progress?: Record<number, PhraseProgressData> }) => {
+                if (p.flashcardSetId && p.progress) {
+                  data.setProgress[p.flashcardSetId] = p.progress;
+                }
+              });
+              console.log(`[Preloader] Loaded progress for ${Object.keys(data.setProgress).length} sets`);
+            }
+          } else {
+            console.warn(`[Preloader] Progress API returned ${progressResponse.status}`);
           }
+        } catch (error) {
+          console.warn('[Preloader] Failed to load progress:', error);
         }
         
         // As a compromise, only preload content for the user's most recent set
@@ -273,29 +288,14 @@ export class AppPreloader {
     }
   }
 
-  private async loadFolders(_userId?: string | null): Promise<Folder[]> {
-    try {
-      const response = await fetch('/api/folders', {
-        credentials: 'include',
-        signal: this.abortController?.signal
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const folders = Array.isArray(data) ? data : (data?.folders ?? []);
-        return folders as Folder[];
-      }
-    } catch (error) {
-      console.error('Failed to load folders:', error);
-    }
-    
-    // Return default folders as fallback
+  private async loadFolders(userId?: string | null): Promise<Folder[]> {
+    // For faster loading, return default folders immediately and load real ones in background
     const now = new Date().toISOString();
-    return [
+    const defaultFolders = [
       { 
         id: 'default-folder-default-sets', 
         name: 'Default Sets', 
-        userId: 'default', 
+        userId: userId || 'default', 
         isDefault: true,
         orderIndex: 0,
         createdAt: now, 
@@ -304,7 +304,7 @@ export class AppPreloader {
       { 
         id: 'default-folder-100-words', 
         name: '100 Most Used Thai Words', 
-        userId: 'default', 
+        userId: userId || 'default', 
         isDefault: true,
         orderIndex: 1,
         createdAt: now, 
@@ -313,7 +313,7 @@ export class AppPreloader {
       { 
         id: 'default-folder-100-sentences', 
         name: '100 Most Used Thai Sentences', 
-        userId: 'default', 
+        userId: userId || 'default', 
         isDefault: true,
         orderIndex: 2,
         createdAt: now, 
@@ -322,7 +322,7 @@ export class AppPreloader {
       { 
         id: 'default-folder-automatic-sets', 
         name: 'My Automatic Sets', 
-        userId: 'default', 
+        userId: userId || 'default', 
         isDefault: true,
         orderIndex: 3,
         createdAt: now, 
@@ -331,40 +331,79 @@ export class AppPreloader {
       { 
         id: 'default-folder-manual-sets', 
         name: 'My Manual Sets', 
-        userId: 'default', 
+        userId: userId || 'default', 
         isDefault: true,
         orderIndex: 4,
         createdAt: now, 
         updatedAt: now 
       }
     ];
+
+    if (!userId) {
+      return defaultFolders;
+    }
+
+    try {
+      // Add a timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      const response = await fetch('/api/folders', {
+        credentials: 'include',
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const data = await response.json();
+        const folders = Array.isArray(data) ? data : (data?.folders ?? []);
+        console.log(`[Preloader] Loaded ${folders.length} folders from API`);
+        return folders as Folder[];
+      } else {
+        console.warn(`[Preloader] Folders API returned ${response.status}, using defaults`);
+      }
+    } catch (error) {
+      console.warn('[Preloader] Failed to load folders, using defaults:', error);
+    }
+    
+    return defaultFolders;
   }
 
   private async loadSets(userId?: string | null): Promise<SetMetaData[]> {
     if (userId) {
       try {
+        // Add a timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+        
         const response = await fetch('/api/flashcard-sets', {
           credentials: 'include',
-          signal: this.abortController?.signal
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         
         if (response.ok) {
           const data = await response.json();
           // API returns { sets: [...] }
           if (data && Array.isArray(data.sets)) {
+            console.log(`[Preloader] Loaded ${data.sets.length} sets from API`);
             return data.sets;
           } else {
-            console.warn('Unexpected API response format:', data);
-            return [];
+            console.warn('[Preloader] Unexpected API response format:', data);
           }
+        } else {
+          console.warn(`[Preloader] Sets API returned ${response.status}, using defaults`);
         }
       } catch (error) {
-        console.error('Failed to load user sets:', error);
+        console.warn('[Preloader] Failed to load user sets, using defaults:', error);
       }
     }
     
     // Return default sets for non-authenticated users or as fallback
     const defaultSets = getDefaultSetsForUnauthenticatedUsers();
+    console.log(`[Preloader] Using ${defaultSets.length} default sets`);
     return defaultSets;
   }
 

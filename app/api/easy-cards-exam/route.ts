@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/app/lib/prisma';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
+import { ALL_DEFAULT_SETS } from '@/app/data/default-sets';
 import { Phrase, ExampleSentence } from '@/app/lib/generation/types';
 import { PhraseProgressData } from '@/app/lib/storage/types';
 
@@ -89,22 +90,35 @@ export async function GET() {
       lastReviewed: Date;
     }> = [];
 
-    for (const set of sets) {
-      const easyCardsData = easyCardsBySet.get(set.id);
+    // Iterate over every setId that has progress, not only sets existing in DB
+    for (const [setId, easyCardsData] of easyCardsBySet.entries()) {
       if (!easyCardsData || easyCardsData.length === 0) continue;
 
-      let content: Phrase[] = [];
+      // Try to find DB metadata for name/image/source
+      const dbMeta = sets.find((s) => s.id === setId);
+      const isDefault = dbMeta?.source === 'default' || setId === 'default' || setId.startsWith('default-');
 
-      // For default sets, get content from seed data
-      if (set.source === 'default') {
-        content = getDefaultSetContent(set.id) || [];
+      let setName = dbMeta?.name ?? 'Unknown Set';
+      let setImageUrl = dbMeta?.imageUrl ?? undefined;
+
+      if (!dbMeta && (setId === 'default' || setId.startsWith('default-'))) {
+        // Derive default set name from templates
+        const baseId = setId.replace('default-', '');
+        const template = ALL_DEFAULT_SETS.find((s) => s.id === baseId);
+        if (template) {
+          setName = template.name;
+        }
+      }
+
+      // Load content for this setId
+      let content: Phrase[] = [];
+      if (isDefault) {
+        content = getDefaultSetContent(setId) || [];
       } else {
-        // For user sets, fetch from database
         const dbSet = await prisma.flashcardSet.findUnique({
-          where: { id: set.id },
+          where: { id: setId },
           select: { phrases: true }
         });
-        
         if (dbSet?.phrases) {
           type DbPhrase = {
             english: string;
@@ -115,7 +129,6 @@ export async function GET() {
             mnemonic: string | null;
             examplesJson: unknown;
           };
-
           const toExamples = (val: unknown): ExampleSentence[] => {
             if (!Array.isArray(val)) return [];
             return val
@@ -128,7 +141,6 @@ export async function GET() {
                 translation: String(e['translation'] ?? ''),
               }));
           };
-
           content = (dbSet.phrases as DbPhrase[]).map((p): Phrase => ({
             english: p.english,
             thai: p.thai,
@@ -141,16 +153,15 @@ export async function GET() {
         }
       }
 
-      // Add easy cards from this set
       for (const cardData of easyCardsData) {
         if (cardData.phraseIndex < content.length) {
           easyCards.push({
-            setId: set.id,
-            setName: set.name,
-            setImageUrl: set.imageUrl || undefined,
+            setId,
+            setName,
+            setImageUrl,
             phraseIndex: cardData.phraseIndex,
             phrase: content[cardData.phraseIndex],
-            lastReviewed: cardData.lastReviewed
+            lastReviewed: cardData.lastReviewed,
           });
         }
       }

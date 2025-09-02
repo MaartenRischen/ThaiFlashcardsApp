@@ -48,6 +48,30 @@ export default function EasyCardsExam() {
     fetchEasyCards();
   }, []);
 
+  type UiPhrase = {
+    thai: string;
+    romanization: string;
+    english: string;
+    mnemonic?: string;
+    hint?: string;
+    audioUrl?: string;
+  };
+
+  type ApiCard = {
+    setId: string;
+    setName: string;
+    setImageUrl?: string;
+    phraseIndex: number;
+    phrase: {
+      thai: string;
+      english: string;
+      pronunciation?: string; // server may provide
+      romanization?: string;  // or this
+      mnemonic?: string;
+    };
+    lastReviewed: string | Date;
+  };
+
   const fetchEasyCards = async () => {
     try {
       setLoading(true);
@@ -72,10 +96,16 @@ export default function EasyCardsExam() {
           const parsed = JSON.parse(raw) as unknown;
           const isRecord = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 
+          const isLegacyProgress = (v: unknown): v is { learnedPhrases: number[] } => {
+            if (!isRecord(v)) return false;
+            const lp = v['learnedPhrases'];
+            return Array.isArray(lp) && lp.every((n) => typeof n === 'number');
+          };
+
           let easyIndices: number[] = [];
-          if (isRecord(parsed) && Array.isArray((parsed as any).learnedPhrases)) {
+          if (isLegacyProgress(parsed)) {
             // Legacy format
-            easyIndices = (parsed as any).learnedPhrases as number[];
+            easyIndices = parsed.learnedPhrases;
           } else if (isRecord(parsed)) {
             // Current format: Record<string, PhraseProgressData>
             const rec = parsed as Record<string, PhraseProgressData>;
@@ -89,12 +119,20 @@ export default function EasyCardsExam() {
             const content = getDefaultSetContent(set.id) || [];
             for (const idx of easyIndices) {
               if (idx >= 0 && idx < content.length) {
+                const p = content[idx];
+                const uiPhrase: UiPhrase = {
+                  thai: p.thai,
+                  romanization: (p as any).pronunciation ?? '',
+                  english: p.english,
+                  mnemonic: p.mnemonic,
+                };
+
                 localEasyCards.push({
                   setId: set.id,
                   setName: set.name,
                   setImageUrl: set.imageUrl || undefined,
                   phraseIndex: idx,
-                  phrase: content[idx] as any, // content conforms to Phrase shape
+                  phrase: uiPhrase,
                   lastReviewed: new Date().toISOString(),
                 } as EasyCard);
               }
@@ -105,7 +143,24 @@ export default function EasyCardsExam() {
         console.warn('Failed to read local default set progress:', e);
       }
 
-      const merged = [...(data.cards || []), ...localEasyCards];
+      // Normalize server cards to UI shape
+      const serverCards: EasyCard[] = Array.isArray(data.cards)
+        ? (data.cards as ApiCard[]).map((c) => ({
+            setId: c.setId,
+            setName: c.setName,
+            setImageUrl: c.setImageUrl,
+            phraseIndex: c.phraseIndex,
+            phrase: {
+              thai: c.phrase?.thai ?? '',
+              romanization: c.phrase?.pronunciation ?? c.phrase?.romanization ?? '',
+              english: c.phrase?.english ?? '',
+              mnemonic: c.phrase?.mnemonic ?? undefined,
+            },
+            lastReviewed: typeof c.lastReviewed === 'string' ? c.lastReviewed : new Date(c.lastReviewed).toISOString(),
+          }))
+        : [];
+
+      const merged = [...serverCards, ...localEasyCards];
 
       if (merged.length === 0) {
         setError('No easy cards found. Mark some cards as "Easy" in your sets to use this feature!');

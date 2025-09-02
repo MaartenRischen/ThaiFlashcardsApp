@@ -11,6 +11,7 @@ import { getDefaultSetContent, getDefaultSetsForUnauthenticatedUsers } from '@/a
 import type { Phrase as SeedPhrase } from '@/app/data/phrases';
 import type { PhraseProgressData } from '@/app/lib/storage/types';
 import Image from 'next/image';
+import { FlashcardDisplay, type Phrase as DisplayPhrase } from './FlashcardDisplay';
 
 interface EasyCard {
   setId: string;
@@ -209,10 +210,10 @@ export default function EasyCardsExam() {
       try {
         await ttsService.speak({
           text: currentCard.phrase.thai,
-          genderValue: true, // Default to male voice
+          genderValue: true,
           onStart: () => {},
           onEnd: () => {},
-          onError: (error) => console.error('TTS error:', error)
+          onError: (error) => console.error('TTS error:', error),
         });
       } catch (error) {
         console.error('Error playing audio:', error);
@@ -301,12 +302,21 @@ export default function EasyCardsExam() {
   const currentCard = cards[currentIndex];
   const progress = ((currentIndex + 1) / cards.length) * 100;
 
+  const toDisplayPhrase = (c: EasyCard): DisplayPhrase => ({
+    thai: c.phrase.thai,
+    pronunciation: c.phrase.romanization ?? '',
+    translation: c.phrase.english,
+    english: c.phrase.english,
+    examples: [],
+    mnemonic: c.phrase.mnemonic,
+  });
+
   return (
     <div className="max-w-4xl mx-auto">
       {/* Progress Header */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-2xl font-bold">Easy Cards Exam</h2>
+          <h2 className="text-2xl font-bold">Exam</h2>
           <span className="text-sm text-muted-foreground">
             {currentIndex + 1} / {cards.length}
           </span>
@@ -314,111 +324,75 @@ export default function EasyCardsExam() {
         <Progress value={progress} className="h-2" />
       </div>
 
-      {/* Card Display */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card className="p-8">
-            {/* Set Info */}
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b">
-              {currentCard.setImageUrl && (
-                <Image
-                  src={currentCard.setImageUrl}
-                  alt={currentCard.setName}
-                  width={40}
-                  height={40}
-                  className="rounded-lg"
-                />
-              )}
-              <div>
-                <p className="text-sm text-muted-foreground">From set:</p>
-                <p className="font-semibold">{currentCard.setName}</p>
-              </div>
-              <div className="ml-auto text-right">
-                <p className="text-sm text-muted-foreground">Last reviewed:</p>
-                <p className="text-sm">
-                  {new Date(currentCard.lastReviewed).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
+      <Card className="p-6">
+        {/* Set Info */}
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b">
+          {currentCard.setImageUrl && (
+            <Image src={currentCard.setImageUrl} alt={currentCard.setName} width={40} height={40} className="rounded-lg" />
+          )}
+          <div>
+            <p className="text-sm text-muted-foreground">From set:</p>
+            <p className="font-semibold">{currentCard.setName}</p>
+          </div>
+          <div className="ml-auto text-right">
+            <p className="text-sm text-muted-foreground">Last reviewed:</p>
+            <p className="text-sm">{new Date(currentCard.lastReviewed).toLocaleDateString()}</p>
+          </div>
+        </div>
 
-            {/* Question */}
-            <div className="text-center mb-8">
-              <h3 className="text-4xl font-thai mb-4">{currentCard.phrase.thai}</h3>
-              <p className="text-xl text-muted-foreground mb-2">
-                {currentCard.phrase.romanization}
-              </p>
-              
-              <Button
-                onClick={playCardAudio}
-                variant="outline"
-                size="sm"
-                className="mt-2"
-              >
-                🔊 Play Audio
-              </Button>
-            </div>
+        {/* Flashcard - matches normal card UI */}
+        <FlashcardDisplay
+          phrase={toDisplayPhrase(currentCard)}
+          showAnswer={showAnswer}
+          mnemonic={currentCard.phrase.mnemonic}
+          autoplay={false}
+          isMale={true}
+          isPoliteMode={false}
+          onToggleAnswer={() => setShowAnswer((s) => !s)}
+          onPlayAudio={(e?: any) => {
+            // prevent bubbling if invoked via button
+            try { if (e && e.stopPropagation) e.stopPropagation(); } catch {}
+            playCardAudio();
+          }}
+          onNextCard={() => {
+            if (currentIndex < cards.length - 1) setCurrentIndex((i) => i + 1);
+          }}
+          onPrevCard={() => {
+            if (currentIndex > 0) setCurrentIndex((i) => i - 1);
+          }}
+          hideControls
+        />
 
-            {/* Answer (hidden initially) */}
-            {showAnswer && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="border-t pt-6"
-              >
-                <p className="text-xl font-semibold text-center mb-4">
-                  {currentCard.phrase.english}
-                </p>
-                {currentCard.phrase.mnemonic && (
-                  <p className="text-sm text-muted-foreground text-center italic">
-                    💡 {currentCard.phrase.mnemonic}
-                  </p>
-                )}
-              </motion.div>
-            )}
+        {/* Answer buttons - mirror normal card view */}
+        {showAnswer && (
+          <div className="mt-4 flex justify-center gap-2">
+            <button
+              className="neumorphic-button px-3 py-1 text-red-400"
+              aria-label="Mark as wrong (hard)"
+              onClick={(e) => { e.stopPropagation(); handleAnswer(false); }}
+            >
+              Wrong
+            </button>
+            <button
+              className="neumorphic-button px-3 py-1 text-yellow-400"
+              aria-label="Mark as correct (good)"
+              onClick={(e) => { e.stopPropagation(); handleAnswer(true); }}
+            >
+              Correct
+            </button>
+            {/* Keep Easy for visual parity but route to Correct path */}
+            <button
+              className="neumorphic-button px-3 py-1 text-green-400"
+              aria-label="Mark as easy"
+              onClick={(e) => { e.stopPropagation(); handleAnswer(true); }}
+            >
+              Easy
+            </button>
+          </div>
+        )}
+      </Card>
 
-            {/* Actions */}
-            <div className="mt-8">
-              {!showAnswer ? (
-                <Button
-                  onClick={() => setShowAnswer(true)}
-                  size="lg"
-                  className="w-full"
-                >
-                  Show Answer
-                </Button>
-              ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    onClick={() => handleAnswer(false)}
-                    variant="outline"
-                    size="lg"
-                    className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Incorrect
-                  </Button>
-                  <Button
-                    onClick={() => handleAnswer(true)}
-                    size="lg"
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <Check className="w-4 h-4 mr-2" />
-                    Correct
-                  </Button>
-                </div>
-              )}
-            </div>
-          </Card>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Stats Footer */}
+      {/* Footer */}
       <div className="mt-6 flex justify-between text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4" />
@@ -426,13 +400,7 @@ export default function EasyCardsExam() {
             {results.filter(r => r.correct).length} correct, {results.filter(r => !r.correct).length} incorrect
           </span>
         </div>
-        <Button
-          onClick={() => window.history.back()}
-          variant="ghost"
-          size="sm"
-        >
-          Exit Exam
-        </Button>
+        <Button onClick={() => window.history.back()} variant="ghost" size="sm">Exit Exam</Button>
       </div>
     </div>
   );

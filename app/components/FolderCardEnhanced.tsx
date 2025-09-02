@@ -87,7 +87,7 @@ export default function FolderCardEnhanced({
             />
           )}
           
-          {/* Animated Folder Icon */}
+          {/* Animated Folder Icon (show spinner if setCount not yet known) */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="relative">
               {/* Animated rings */}
@@ -113,11 +113,15 @@ export default function FolderCardEnhanced({
                   boxShadow: `0 8px 32px ${theme.glow}`
                 }}
               >
-                <FolderIcon 
-                  size={48} 
-                  style={{ color: theme.primary }} 
-                  className="drop-shadow-2xl transition-all duration-300 group-hover:rotate-3"
-                />
+                {typeof folder.setCount === 'number' && folder.setCount > 0 ? (
+                  <FolderIcon 
+                    size={48} 
+                    style={{ color: theme.primary }} 
+                    className="drop-shadow-2xl transition-all duration-300 group-hover:rotate-3"
+                  />
+                ) : (
+                  <div className="h-12 w-12 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: `${theme.primary}` }} />
+                )}
               </div>
             </div>
           </div>
@@ -132,7 +136,7 @@ export default function FolderCardEnhanced({
               }}
             >
               <span className="text-sm font-bold" style={{ color: theme.primary }}>
-                {folder.setCount || 0} {folder.setCount === 1 ? 'set' : 'sets'}
+                {typeof folder.setCount === 'number' ? folder.setCount : 0} {folder.setCount === 1 ? 'set' : 'sets'}
               </span>
             </div>
           </div>

@@ -48,7 +48,7 @@ type ViewMode = 'grid' | 'list';
 type SortOption = 'name' | 'date' | 'size';
 
 export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlightSetId }: FolderViewEnhancedProps) {
-  const { availableSets, switchSet, activeSetId, refreshSets } = useSet();
+  const { availableSets, switchSet, activeSetId, refreshSets, isLoading: setsLoading } = useSet();
   const { preloadFolders, getCachedFolders, clearFolderCache, preloadAllSets, preloadImages, getCachedContent } = useSetCache();
   // Access preloaded data to avoid unnecessary spinners if cache hasn't been primed yet
   const { preloadedData, isLoading: isPreloading } = usePreloader();
@@ -593,13 +593,16 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
 
         {/* Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto px-8 py-6">
-          {loading && (
+          {(loading || setsLoading || isPreloading) && (
             <div className="flex justify-center items-center py-24">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#A9C4FC]"></div>
+              <div className="flex flex-col items-center gap-3">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#A9C4FC]"></div>
+                <div className="text-sm text-[#A9C4FC]">Loading folders and sets…</div>
+              </div>
             </div>
           )}
 
-          {!loading && !currentFolder && (
+          {!(loading || setsLoading || isPreloading) && !currentFolder && (
             <>
               {/* Easy Cards Exam Button */}
               <div className="mb-6">
@@ -790,7 +793,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
           )}
 
           {/* Folder Contents View */}
-          {!loading && currentFolder && (
+          {!(loading || setsLoading || isPreloading) && currentFolder && (
             <>
               {filteredAndSortedSets.length === 0 ? (
                 searchQuery ? (

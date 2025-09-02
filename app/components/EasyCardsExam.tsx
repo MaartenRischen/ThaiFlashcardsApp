@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { RotateCcw, Trophy, Clock, BookOpen } from 'lucide-react';
+import { RotateCcw, Trophy, Clock, BookOpen, Volume2, Lightbulb } from 'lucide-react';
 import { ttsService } from '@/app/lib/tts-service';
 import { getDefaultSetContent, getDefaultSetsForUnauthenticatedUsers } from '@/app/lib/seed-default-sets';
 import type { Phrase as SeedPhrase } from '@/app/data/phrases';
@@ -330,7 +330,7 @@ export default function EasyCardsExam() {
         <Progress value={progress} className="h-2" />
       </div>
 
-      <Card className="p-6 w-full max-w-lg mx-auto">
+      <div className="neumorphic rounded-xl flex flex-col p-6 w-full max-w-md mx-auto">
         {/* Set Info */}
         <div className="flex items-center gap-3 mb-6 pb-4 border-b">
           {currentCard.setImageUrl && (
@@ -353,7 +353,7 @@ export default function EasyCardsExam() {
             {currentCard.phrase.mnemonic && (
               <button className="text-sm text-blue-400 hover:text-blue-300 underline mb-6" onClick={() => setShowAnswer(true)}>Show Hint</button>
             )}
-            <Button onClick={() => setShowAnswer(true)} className="px-6 py-2">Show Answer</Button>
+            <button onClick={() => setShowAnswer(true)} className="neumorphic-button text-blue-400 px-6 py-2">Show Answer</button>
           </div>
         ) : (
           <div className="border-t border-[#333] p-6 flex flex-col min-h-[20rem] overflow-y-auto card-back-container">
@@ -377,14 +377,16 @@ export default function EasyCardsExam() {
                     className="neumorphic-button text-blue-400 flex items-center gap-2 px-3 py-2"
                     title="Play at normal speed"
                   >
-                    Normal
+                    <Volume2 className="w-4 h-4" />
+                    <span className="text-sm">Normal</span>
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); ttsService.speak({ text: getThaiWithGender(toPronPhrase(currentCard), isMale, isPoliteMode), genderValue: isMale, rate: -30 }); }}
                     className="neumorphic-button text-green-400 flex items-center gap-2 px-3 py-2"
                     title="Play at slow speed"
                   >
-                    Slow
+                    <Volume2 className="w-4 h-4" />
+                    <span className="text-sm">Slow</span>
                   </button>
                 </div>
                 {/* English translation */}
@@ -432,6 +434,10 @@ export default function EasyCardsExam() {
             {/* Mnemonic read-only */}
             {currentCard.phrase.mnemonic && (
               <div className="mt-2 w-full">
+                <div className="flex items-center gap-2 text-yellow-400 mb-2 text-sm">
+                  <Lightbulb className="w-4 h-4" />
+                  <span>Mnemonic</span>
+                </div>
                 <div className="neumorphic-input w-full min-h-24 rounded-lg p-4 text-gray-200 bg-[#1f1f1f] border border-[#333] text-base">
                   {currentCard.phrase.mnemonic}
                 </div>
@@ -459,7 +465,7 @@ export default function EasyCardsExam() {
             )}
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Footer */}
       <div className="mt-6 flex justify-between text-sm text-muted-foreground">

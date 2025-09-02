@@ -202,6 +202,16 @@ export class AppPreloader {
         message: 'Processing data...'
       });
 
+      // Stage 7.5: Preload lightweight folder view assets so My Sets shows immediately
+      try {
+        const minimalImageUrls = data.sets.map(s => s.imageUrl).filter((u): u is string => !!u);
+        minimalImageUrls.push('/images/default-set-logo.png');
+        minimalImageUrls.push('/images/defaultnew.png');
+        await Promise.all(minimalImageUrls.map((url) => this.preloadImage(url).then(loaded => { data.images[url] = loaded; })));
+      } catch (e) {
+        console.warn('[Preloader] Minimal image warmup failed', e);
+      }
+
       // Stage 8: Preload only essential images
       this.updateProgress({
         stage: 'images',

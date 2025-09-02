@@ -6,6 +6,7 @@ export interface ThaiFact {
   difficulty: 'beginner' | 'intermediate' | 'advanced';
 }
 
+// TIP: Keep this list growing. We intentionally include many entries to avoid repetition.
 export const thaiFactsDatabase: ThaiFact[] = [
   // Grammar Facts
   {
@@ -227,7 +228,17 @@ export const thaiFactsDatabase: ThaiFact[] = [
     fact: 'Thai has a special particle "นะ" (ná) that makes any sentence sound friendlier and more polite.',
     category: 'fun',
     difficulty: 'beginner'
-  }
+  },
+  { id: 'pron-006', fact: 'Thai tone changes can flip meanings: maa (come) vs máa (dog).', category: 'pronunciation', difficulty: 'beginner' },
+  { id: 'pron-007', fact: 'Syllable-final consonants in Thai are unreleased; บ (b) ends as a p-like stop.', category: 'pronunciation', difficulty: 'intermediate' },
+  { id: 'writing-006', fact: 'There are no capital letters in Thai; proper nouns rely on context and spacing cues.', category: 'writing', difficulty: 'beginner' },
+  { id: 'grammar-006', fact: 'Questions often end with particles like ไหม (mǎi) or เหรอ (rǒe).', category: 'grammar', difficulty: 'beginner' },
+  { id: 'grammar-007', fact: 'Aspect is often expressed with แล้ว (already), อยู่ (currently), กำลัง (in the middle of).', category: 'grammar', difficulty: 'intermediate' },
+  { id: 'culture-006', fact: 'Wai greetings vary by target: higher hands for monks/elders show respect.', category: 'culture', difficulty: 'beginner' },
+  { id: 'history-006', fact: 'Central Thai coexists with strong regional dialects (Isan, Northern, Southern).', category: 'history', difficulty: 'intermediate' },
+  { id: 'fun-006', fact: 'Thai onomatopoeia is rich: จุ๊บๆ (joop-joop) for kisses, ก๊อกๆ (gok-gok) for knocking.', category: 'fun', difficulty: 'beginner' },
+  { id: 'fun-007', fact: 'Many Thai nicknames are food or objects: “Ice”, “Milk”, “Oil”, “Bank”.', category: 'fun', difficulty: 'beginner' },
+  { id: 'fun-008', fact: 'Street stall Thai uses clipped forms; listening there is great for colloquial Thai.', category: 'fun', difficulty: 'intermediate' }
 ];
 
 export function getRandomThaiFact(): ThaiFact {

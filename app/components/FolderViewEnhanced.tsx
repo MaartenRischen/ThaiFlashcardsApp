@@ -601,6 +601,36 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
 
           {!loading && !currentFolder && (
             <>
+              {/* Easy Cards Exam Button */}
+              <div className="mb-6">
+                <button
+                  onClick={() => {
+                    onClose();
+                    window.location.href = '/easy-cards-exam';
+                  }}
+                  className="w-full p-6 bg-gradient-to-r from-green-500/20 to-blue-500/20 hover:from-green-500/30 hover:to-blue-500/30 backdrop-blur-sm rounded-xl border border-[#404040]/50 transition-all duration-300 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-lg bg-gradient-to-br from-green-500 to-blue-500 text-white">
+                        <CheckSquare className="w-6 h-6" />
+                      </div>
+                      <div className="text-left">
+                        <h3 className="text-lg font-semibold text-[#E0E0E0] group-hover:text-white transition-colors">
+                          Easy Cards Exam
+                        </h3>
+                        <p className="text-sm text-[#A0A0A0] mt-1">
+                          Review all cards you've marked as "Easy" across all sets
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Play className="w-5 h-5 text-[#A0A0A0] group-hover:text-white transition-colors" />
+                    </div>
+                  </div>
+                </button>
+              </div>
+
               {/* Create/Edit Folder Form */}
               {(isCreatingFolder || isEditingFolder) && (
                 <div className="mb-6 p-6 bg-[#2C2C2C]/40 backdrop-blur-sm rounded-xl border border-[#404040]/50 animate-in fade-in slide-in-from-top-2 duration-300">

@@ -791,12 +791,17 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                     
                     // Consider a folder loading if global flags say so OR we have fewer than expected sets for defaults
                     const baseLoading = (loading || setsLoading || isPreloading);
-                    let isFolderLoading = baseLoading;
+                    let isFolderLoading: boolean = baseLoading;
+                    
+                    // If it's a default folder and shows fewer than expected sets, assume hydration still in progress
                     if (!isFolderLoading && folder.isDefault) {
-                      // If it's a default folder and shows < 3 sets, assume hydration still in progress
-                      if (folder.name === 'Default Sets' && folderSets.length < 6) isFolderLoading = true;
-                      if (folder.name === '100 Most Used Thai Words' && folderSets.length < 10) isFolderLoading = true;
-                      if (folder.name === '100 Most Used Thai Sentences' && folderSets.length < 10) isFolderLoading = true;
+                      if (folder.name === 'Default Sets' && folderSets.length < 6) {
+                        isFolderLoading = true;
+                      } else if (folder.name === '100 Most Used Thai Words' && folderSets.length < 10) {
+                        isFolderLoading = true;
+                      } else if (folder.name === '100 Most Used Thai Sentences' && folderSets.length < 10) {
+                        isFolderLoading = true;
+                      }
                     }
                     const enhancedFolder = {
                       ...folder,

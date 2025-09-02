@@ -6,7 +6,8 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { RotateCcw, Trophy, Clock, BookOpen, Volume2, Lightbulb } from 'lucide-react';
 import { ttsService } from '@/app/lib/tts-service';
-import { getDefaultSetContent, getDefaultSetsForUnauthenticatedUsers } from '@/app/lib/seed-default-sets';
+import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
+import { ALL_DEFAULT_SETS } from '@/app/data/default-sets';
 import type { Phrase as SeedPhrase } from '@/app/data/phrases';
 import type { PhraseProgressData } from '@/app/lib/storage/types';
 import Image from 'next/image';
@@ -87,11 +88,12 @@ export default function EasyCardsExam() {
       // Also gather localStorage progress for default sets (these are saved locally even for signed-in users)
       const localEasyCards: EasyCard[] = [];
       try {
-        const defaultSets = getDefaultSetsForUnauthenticatedUsers();
-        for (const set of defaultSets) {
-          const key = `progress_${set.id}`;
+        const keys = typeof window !== 'undefined' ? Object.keys(localStorage).filter(k => k.startsWith('progress_default')) : [];
+        for (const key of keys) {
           const raw = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
           if (!raw) continue;
+
+          const setId = key.replace('progress_', '');
 
           // Support both legacy and current formats
           const parsed = JSON.parse(raw) as unknown;
@@ -117,7 +119,7 @@ export default function EasyCardsExam() {
           }
 
           if (easyIndices.length > 0) {
-            const content = (getDefaultSetContent(set.id) || []) as SeedPhrase[];
+            const content = (getDefaultSetContent(setId) || []) as SeedPhrase[];
             for (const idx of easyIndices) {
               if (idx >= 0 && idx < content.length) {
                 const p = content[idx];
@@ -129,10 +131,19 @@ export default function EasyCardsExam() {
                   examples: p.examples as { thai: string; pronunciation: string; translation: string }[],
                 };
 
+                // Derive display name and image for default sets
+                let setName = 'Default Set';
+                let setImageUrl: string | undefined = '/images/default-set-logo.png';
+                if (setId !== 'default') {
+                  const baseId = setId.replace('default-', '');
+                  const meta = ALL_DEFAULT_SETS.find(s => s.id === baseId);
+                  if (meta) setName = meta.name;
+                }
+
                 localEasyCards.push({
-                  setId: set.id,
-                  setName: set.name,
-                  setImageUrl: set.imageUrl || undefined,
+                  setId,
+                  setName,
+                  setImageUrl,
                   phraseIndex: idx,
                   phrase: uiPhrase,
                   lastReviewed: new Date().toISOString(),

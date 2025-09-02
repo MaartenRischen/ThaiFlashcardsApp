@@ -91,7 +91,8 @@ export async function GET() {
     }> = [];
 
     // Iterate over every setId that has progress, not only sets existing in DB
-    for (const [setId, easyCardsData] of easyCardsBySet.entries()) {
+    for (const entry of Array.from(easyCardsBySet.entries())) {
+      const [setId, easyCardsData] = entry;
       if (!easyCardsData || easyCardsData.length === 0) continue;
 
       // Try to find DB metadata for name/image/source

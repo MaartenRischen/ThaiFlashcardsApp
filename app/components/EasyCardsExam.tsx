@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
+import ThaiFactInline from './ThaiFactInline';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { RotateCcw, Trophy, Clock, BookOpen, Volume2, Lightbulb } from 'lucide-react';
@@ -251,6 +252,7 @@ export default function EasyCardsExam() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p>Loading your easy cards...</p>
+          <ThaiFactInline />
         </div>
       </div>
     );

@@ -261,7 +261,10 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
         <div className="flex-1 overflow-y-auto px-8 py-6">
           {loading && (
             <div className="flex justify-center items-center py-24">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#A9C4FC]"></div>
+              <div className="flex flex-col items-center gap-3">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#A9C4FC]"></div>
+                <div className="text-sm text-[#A9C4FC]">Loading folders and sets…</div>
+              </div>
             </div>
           )}
 

@@ -7,6 +7,7 @@ import { SetProgress } from '@/app/lib/storage/types';
 import { useAuth } from '@clerk/nextjs';
 import { usePreloadedSetContent } from '@/app/hooks/usePreloadedData';
 import { useSetCache } from '@/app/context/SetCacheContext';
+import ThaiFactInline from './ThaiFactInline';
 
 interface SetPreviewModalProps {
   isOpen: boolean;
@@ -123,6 +124,7 @@ export function SetPreviewModal({
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
               <p className="text-gray-400">Loading cards...</p>
+              <ThaiFactInline />
             </div>
           </div>
         ) : (

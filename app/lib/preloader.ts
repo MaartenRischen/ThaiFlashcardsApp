@@ -94,10 +94,18 @@ export class AppPreloader {
         message: 'Loading folders and sets...'
       });
       
-      const [folders, sets] = await Promise.all([
-        this.loadFolders(userId),
-        this.loadSets(userId)
-      ]);
+      // Load folders first, then sets, so we can immediately start preloading
+      const folders = await this.loadFolders(userId);
+      // Kick off sets fetch but don't block on it to start warming previews quickly
+      const setsPromise = this.loadSets(userId);
+      
+      // Preload a small number of images immediately to avoid empty cards while sets resolve
+      try {
+        const minimalImageUrlsEarly = ['/images/default-set-logo.png', '/images/defaultnew.png'];
+        await Promise.all(minimalImageUrlsEarly.map((url) => this.preloadImage(url).then(loaded => { data.images[url] = loaded; })));
+      } catch {}
+
+      const sets = await setsPromise;
       
       data.folders = folders;
       data.sets = sets;
@@ -220,7 +228,7 @@ export class AppPreloader {
         subProgress: { current: 0, total: 5 }
       });
       
-      // Only preload images for sets we've loaded content for
+      // Only preload images for sets we've loaded content for and also a first screen of folder previews
       const imageUrls = new Set<string>();
       
       // Add images for sets with content
@@ -235,6 +243,9 @@ export class AppPreloader {
       imageUrls.add('/images/default-set-logo.png');
       imageUrls.add('/images/defaultnew.png');
       
+      // Add first N set thumbnails as a guard to prevent empty previews
+      sets.slice(0, 12).forEach(s => { if (s?.imageUrl) imageUrls.add(s.imageUrl); });
+
       // Preload only these essential images
       const imagePromises = Array.from(imageUrls).map((url, index) => {
         return this.preloadImage(url).then(loaded => {

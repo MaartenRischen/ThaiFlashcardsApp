@@ -195,7 +195,8 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
     console.log(`[SetCache] Pre-loading ${setIds.length} sets...`);
     
     // Load sets in batches to avoid overwhelming the server
-    const BATCH_SIZE = 8;
+    // Slightly larger batches to speed up first-load counts without overloading the server
+    const BATCH_SIZE = 12;
     for (let i = 0; i < setIds.length; i += BATCH_SIZE) {
       const batch = setIds.slice(i, i + BATCH_SIZE);
       await Promise.all(

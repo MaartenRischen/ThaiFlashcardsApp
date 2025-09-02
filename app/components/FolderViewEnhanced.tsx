@@ -789,7 +789,14 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                       );
                     }
                     
-                    const isFolderLoading = (loading || setsLoading || isPreloading);
+                    // Consider a folder loading if global flags say so OR we have fewer than expected sets for defaults
+                    let isFolderLoading = (loading || setsLoading || isPreloading);
+                    if (!isFolderLoading && folder.isDefault) {
+                      // If it's a default folder and shows < 3 sets, assume hydration still in progress
+                      if (folder.name === 'Default Sets' && folderSets.length < 6) isFolderLoading = true;
+                      if (folder.name === '100 Most Used Thai Words' && folderSets.length < 10) isFolderLoading = true;
+                      if (folder.name === '100 Most Used Thai Sentences' && folderSets.length < 10) isFolderLoading = true;
+                    }
                     const enhancedFolder = {
                       ...folder,
                       setCount: folderSets.length,
@@ -808,7 +815,16 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                         <FolderCardEnhanced
                           folder={enhancedFolder}
                           isLoading={isFolderLoading && folderSets.length === 0}
-                          onClick={() => fetchFolderDetails(folder.id)}
+                          onClick={async () => {
+                            try {
+                              const folderContents = availableSets.filter(set => set.folderId === folder.id || set.folderName === folder.name);
+                              const firstFew = folderContents.slice(0, 6).map(s => s.id);
+                              if (firstFew.length > 0) {
+                                await preloadAllSets(firstFew);
+                              }
+                            } catch {}
+                            fetchFolderDetails(folder.id);
+                          }}
                           onEdit={() => {
                             setIsEditingFolder(folder);
                             setFolderForm({

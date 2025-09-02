@@ -37,6 +37,7 @@ import { SetPreviewModal } from './SetPreviewModal';
 import { usePreloadedFolders } from '@/app/hooks/usePreloadedData';
 import { usePreloader } from '@/app/context/PreloaderContext';
 import MySetCard from './MySetCard';
+import ThaiFactInline from './ThaiFactInline';
 
 interface FolderViewEnhancedProps {
   isOpen: boolean;
@@ -598,6 +599,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
               <div className="flex flex-col items-center gap-3">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#A9C4FC]"></div>
                 <div className="text-sm text-[#A9C4FC]">Loading folders and sets…</div>
+                <ThaiFactInline />
               </div>
             </div>
           )}

@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/app/lib/prisma';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
 import { Phrase } from '@/app/lib/generation/types';
+import { PhraseProgressData } from '@/app/lib/storage/types';
 
 export async function GET() {
   try {
@@ -44,7 +45,7 @@ export async function GET() {
     const easyCardsBySet = new Map<string, Array<{ phraseIndex: number; lastReviewed: Date }>>();
     
     allProgressEntries.forEach(entry => {
-      const progressData = entry.progressData as Record<string, any>;
+      const progressData = entry.progressData as Record<string, PhraseProgressData>;
       
       Object.entries(progressData).forEach(([phraseIndexStr, progress]) => {
         if (progress?.difficulty === 'easy') {

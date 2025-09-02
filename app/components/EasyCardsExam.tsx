@@ -8,6 +8,7 @@ import { Check, X, RotateCcw, Trophy, Clock, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ttsService } from '@/app/lib/tts-service';
 import { getDefaultSetContent, getDefaultSetsForUnauthenticatedUsers } from '@/app/lib/seed-default-sets';
+import type { Phrase as SeedPhrase } from '@/app/data/phrases';
 import type { PhraseProgressData } from '@/app/lib/storage/types';
 import Image from 'next/image';
 
@@ -46,7 +47,7 @@ export default function EasyCardsExam() {
   // Fetch easy cards
   useEffect(() => {
     fetchEasyCards();
-  }, []);
+  }, [fetchEasyCards]);
 
   type UiPhrase = {
     thai: string;
@@ -72,7 +73,7 @@ export default function EasyCardsExam() {
     lastReviewed: string | Date;
   };
 
-  const fetchEasyCards = async () => {
+  const fetchEasyCards = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/easy-cards-exam');
@@ -116,13 +117,13 @@ export default function EasyCardsExam() {
           }
 
           if (easyIndices.length > 0) {
-            const content = getDefaultSetContent(set.id) || [];
+            const content = (getDefaultSetContent(set.id) || []) as SeedPhrase[];
             for (const idx of easyIndices) {
               if (idx >= 0 && idx < content.length) {
                 const p = content[idx];
                 const uiPhrase: UiPhrase = {
                   thai: p.thai,
-                  romanization: (p as any).pronunciation ?? '',
+                  romanization: p.pronunciation ?? '',
                   english: p.english,
                   mnemonic: p.mnemonic,
                 };
@@ -176,7 +177,7 @@ export default function EasyCardsExam() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const handleAnswer = (correct: boolean) => {
     const timeSpent = Date.now() - cardStartTime;

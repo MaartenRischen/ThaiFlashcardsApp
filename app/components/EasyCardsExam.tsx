@@ -10,7 +10,7 @@ import { getDefaultSetContent, getDefaultSetsForUnauthenticatedUsers } from '@/a
 import type { Phrase as SeedPhrase } from '@/app/data/phrases';
 import type { PhraseProgressData } from '@/app/lib/storage/types';
 import Image from 'next/image';
-import { FlashcardDisplay, type Phrase as DisplayPhrase } from './FlashcardDisplay';
+import { getThaiWithGender, getGenderedPronunciation, type Phrase as PronPhrase } from '@/app/lib/pronunciation';
 
 interface EasyCard {
   setId: string;
@@ -38,6 +38,8 @@ export default function EasyCardsExam() {
   const [cards, setCards] = useState<EasyCard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [isMale, setIsMale] = useState(true);
+  const [isPoliteMode, setIsPoliteMode] = useState(false);
   const [results, setResults] = useState<ExamResult[]>([]);
   const [cardStartTime, setCardStartTime] = useState(Date.now());
   const [loading, setLoading] = useState(true);
@@ -301,7 +303,7 @@ export default function EasyCardsExam() {
   const currentCard = cards[currentIndex];
   const progress = ((currentIndex + 1) / cards.length) * 100;
 
-  const toDisplayPhrase = (c: EasyCard): DisplayPhrase => ({
+  const toPronPhrase = (c: EasyCard): PronPhrase => ({
     thai: c.phrase.thai,
     pronunciation: c.phrase.romanization ?? '',
     translation: c.phrase.english,
@@ -339,52 +341,97 @@ export default function EasyCardsExam() {
           </div>
         </div>
 
-        {/* Flashcard - matches normal card UI */}
-        <FlashcardDisplay
-          phrase={toDisplayPhrase(currentCard)}
-          showAnswer={showAnswer}
-          mnemonic={currentCard.phrase.mnemonic}
-          autoplay={false}
-          isMale={true}
-          isPoliteMode={false}
-          onToggleAnswer={() => setShowAnswer((s) => !s)}
-          onPlayAudio={() => {
-            playCardAudio();
-          }}
-          onNextCard={() => {
-            if (currentIndex < cards.length - 1) setCurrentIndex((i) => i + 1);
-          }}
-          onPrevCard={() => {
-            if (currentIndex > 0) setCurrentIndex((i) => i - 1);
-          }}
-          hideControls
-        />
+        {/* Front/Back like normal card */}
+        {!showAnswer ? (
+          <div className="flex flex-col items-center justify-center py-10">
+            <h2 className="text-3xl font-bold mb-3">{currentCard.phrase.english}</h2>
+            {currentCard.phrase.mnemonic && (
+              <button className="text-sm text-blue-400 hover:text-blue-300 underline mb-6" onClick={() => setShowAnswer(true)}>Show Hint</button>
+            )}
+            <Button onClick={() => setShowAnswer(true)} className="px-6 py-2">Show Answer</Button>
+          </div>
+        ) : (
+          <div className="border-t border-[#333] p-6 flex flex-col min-h-[20rem] overflow-y-auto card-back-container">
+            {/* Main Phrase Section */}
+            <div className="flex flex-col items-center justify-center mb-4">
+              <div className="text-center">
+                {/* Thai */}
+                <div className="text-3xl md:text-4xl font-extrabold mb-2 text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
+                  {getThaiWithGender(toPronPhrase(currentCard), isMale, isPoliteMode)}
+                </div>
+                {/* Pronunciation label */}
+                <div className="text-center mb-3">
+                  <div className="text-xl md:text-2xl font-semibold text-gray-100 px-4 py-2 bg-[#0f172a] rounded-lg inline-block">
+                    {getGenderedPronunciation(toPronPhrase(currentCard), isMale, isPoliteMode) || ''}
+                  </div>
+                </div>
+                {/* Normal / Slow buttons */}
+                <div className="flex justify-center gap-3 mb-4">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); ttsService.speak({ text: getThaiWithGender(toPronPhrase(currentCard), isMale, isPoliteMode), genderValue: isMale }); }}
+                    className="neumorphic-button text-blue-400 flex items-center gap-2 px-3 py-2"
+                    title="Play at normal speed"
+                  >
+                    Normal
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); ttsService.speak({ text: getThaiWithGender(toPronPhrase(currentCard), isMale, isPoliteMode), genderValue: isMale, rate: -30 }); }}
+                    className="neumorphic-button text-green-400 flex items-center gap-2 px-3 py-2"
+                    title="Play at slow speed"
+                  >
+                    Slow
+                  </button>
+                </div>
+                {/* English translation */}
+                <div className="text-base md:text-lg font-medium mb-2 text-blue-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
+                  ({currentCard.phrase.english})
+                </div>
+                {/* Literal/Breakdown placeholder */}
+                <button className="text-xs text-gray-400 hover:text-gray-300 underline mb-3" onClick={(e) => e.stopPropagation()}>
+                  Literal / breakdown
+                </button>
+                {/* Difficulty buttons */}
+                <div className="flex flex-col items-center mb-6">
+                  <div className="flex justify-center space-x-3">
+                    <button onClick={() => handleAnswer(true)} className="neumorphic-button text-green-400 px-4 py-2 text-sm">Easy</button>
+                    <button onClick={() => handleAnswer(true)} className="neumorphic-button text-yellow-400 px-4 py-2 text-sm">Correct</button>
+                    <button onClick={() => handleAnswer(false)} className="neumorphic-button text-red-400 px-4 py-2 text-sm">Wrong</button>
+                  </div>
+                  <div className="text-xs text-gray-400 mt-2">Hit one of the buttons to proceed.</div>
+                </div>
+              </div>
+            </div>
 
-        {/* Answer buttons - mirror normal card view */}
-        {showAnswer && (
-          <div className="mt-4 flex justify-center gap-2">
-            <button
-              className="neumorphic-button px-3 py-1 text-red-400"
-              aria-label="Mark as wrong (hard)"
-              onClick={(e) => { e.stopPropagation(); handleAnswer(false); }}
-            >
-              Wrong
-            </button>
-            <button
-              className="neumorphic-button px-3 py-1 text-yellow-400"
-              aria-label="Mark as correct (good)"
-              onClick={(e) => { e.stopPropagation(); handleAnswer(true); }}
-            >
-              Correct
-            </button>
-            {/* Keep Easy for visual parity but route to Correct path */}
-            <button
-              className="neumorphic-button px-3 py-1 text-green-400"
-              aria-label="Mark as easy"
-              onClick={(e) => { e.stopPropagation(); handleAnswer(true); }}
-            >
-              Easy
-            </button>
+            {/* Gender & Polite toggles */}
+            <div className="flex items-center justify-center space-x-4 mb-6">
+              <label htmlFor="gender-toggle-exam" className="flex items-center cursor-pointer">
+                <span className="mr-2 text-sm font-medium text-gray-400">Female (Ka)</span>
+                <div className="relative">
+                  <input type="checkbox" id="gender-toggle-exam" className="sr-only" checked={isMale} onChange={() => setIsMale(!isMale)} />
+                  <div className="block bg-gray-600 w-10 h-6 rounded-full"></div>
+                  <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isMale ? 'translate-x-full bg-blue-400' : 'bg-pink-400'}`}></div>
+                </div>
+                <span className="ml-2 text-sm font-medium text-gray-400">Male (Krap)</span>
+              </label>
+              <label htmlFor="polite-toggle-exam" className="flex items-center cursor-pointer">
+                <span className="mr-2 text-sm font-medium text-gray-400">Casual</span>
+                <div className="relative">
+                  <input type="checkbox" id="polite-toggle-exam" className="sr-only" checked={isPoliteMode} onChange={() => setIsPoliteMode(!isPoliteMode)} />
+                  <div className="block bg-gray-600 w-10 h-6 rounded-full"></div>
+                  <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isPoliteMode ? 'translate-x-full bg-green-400' : 'bg-gray-400'}`}></div>
+                </div>
+                <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
+              </label>
+            </div>
+
+            {/* Mnemonic read-only */}
+            {currentCard.phrase.mnemonic && (
+              <div className="mt-2 w-full max-w-[720px] mx-auto">
+                <div className="neumorphic-input w-full min-h-24 rounded-lg p-4 text-gray-200 bg-[#1f1f1f] border border-[#333] text-base">
+                  {currentCard.phrase.mnemonic}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Card>

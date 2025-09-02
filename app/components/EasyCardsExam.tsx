@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { RotateCcw, Trophy, Clock, BookOpen } from 'lucide-react';
+import { RotateCcw, Trophy, Clock, BookOpen, Volume2 } from 'lucide-react';
 import { ttsService } from '@/app/lib/tts-service';
 import { getDefaultSetContent, getDefaultSetsForUnauthenticatedUsers } from '@/app/lib/seed-default-sets';
 import type { Phrase as SeedPhrase } from '@/app/data/phrases';
@@ -45,6 +45,7 @@ export default function EasyCardsExam() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [examComplete, setExamComplete] = useState(false);
+  const [exampleIndex, setExampleIndex] = useState(0);
 
   type UiPhrase = {
     thai: string;
@@ -53,6 +54,7 @@ export default function EasyCardsExam() {
     mnemonic?: string;
     hint?: string;
     audioUrl?: string;
+    examples?: { thai: string; pronunciation: string; translation: string }[];
   };
 
   type ApiCard = {
@@ -123,6 +125,7 @@ export default function EasyCardsExam() {
                   romanization: p.pronunciation ?? '',
                   english: p.english,
                   mnemonic: p.mnemonic,
+                  examples: p.examples as any,
                 };
 
                 localEasyCards.push({
@@ -153,6 +156,7 @@ export default function EasyCardsExam() {
               romanization: c.phrase?.pronunciation ?? c.phrase?.romanization ?? '',
               english: c.phrase?.english ?? '',
               mnemonic: c.phrase?.mnemonic ?? undefined,
+              examples: (c as any).phrase?.examples ?? [],
             },
             lastReviewed: typeof c.lastReviewed === 'string' ? c.lastReviewed : new Date(c.lastReviewed).toISOString(),
           }))
@@ -325,7 +329,7 @@ export default function EasyCardsExam() {
         <Progress value={progress} className="h-2" />
       </div>
 
-      <Card className="p-6">
+      <Card className="p-6 w-full max-w-lg mx-auto">
         {/* Set Info */}
         <div className="flex items-center gap-3 mb-6 pb-4 border-b">
           {currentCard.setImageUrl && (
@@ -426,9 +430,29 @@ export default function EasyCardsExam() {
 
             {/* Mnemonic read-only */}
             {currentCard.phrase.mnemonic && (
-              <div className="mt-2 w-full max-w-[720px] mx-auto">
+              <div className="mt-2 w-full">
                 <div className="neumorphic-input w-full min-h-24 rounded-lg p-4 text-gray-200 bg-[#1f1f1f] border border-[#333] text-base">
                   {currentCard.phrase.mnemonic}
+                </div>
+              </div>
+            )}
+
+            {/* In Context (matches style) */}
+            {Array.isArray(currentCard.phrase.examples) && currentCard.phrase.examples.length > 0 && (
+              <div className="mt-6 bg-[#161616] border border-[#333] rounded-xl p-5 text-center">
+                <div className="text-blue-300 tracking-wide text-sm mb-2">IN CONTEXT</div>
+                <div className="text-xl text-white font-semibold mb-1">{currentCard.phrase.examples[exampleIndex]?.thai || ''}</div>
+                <div className="italic text-gray-300 mb-2">{currentCard.phrase.examples[exampleIndex]?.pronunciation || ''}</div>
+                <div className="text-gray-400">{currentCard.phrase.examples[exampleIndex]?.translation || ''}</div>
+                <div className="flex justify-between mt-4">
+                  <button className="neumorphic-button px-4 py-2" onClick={() => setExampleIndex((i) => (i - 1 + currentCard.phrase.examples!.length) % currentCard.phrase.examples!.length)}>Prev</button>
+                  <button
+                    className="neumorphic-button px-4 py-2"
+                    onClick={() => ttsService.speak({ text: currentCard.phrase.examples?.[exampleIndex]?.thai ?? '', genderValue: isMale })}
+                  >
+                    Play Context
+                  </button>
+                  <button className="neumorphic-button px-4 py-2" onClick={() => setExampleIndex((i) => (i + 1) % currentCard.phrase.examples!.length)}>Next</button>
                 </div>
               </div>
             )}

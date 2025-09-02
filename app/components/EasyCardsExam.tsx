@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Check, X, RotateCcw, Trophy, Clock, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { playAudio } from '@/app/lib/audio';
+import { ttsService } from '@/app/lib/tts-service';
 import Image from 'next/image';
 
 interface EasyCard {
@@ -99,8 +99,18 @@ export default function EasyCardsExam() {
 
   const playCardAudio = useCallback(async () => {
     const currentCard = cards[currentIndex];
-    if (currentCard?.phrase.audioUrl) {
-      await playAudio(currentCard.phrase.audioUrl);
+    if (currentCard?.phrase.thai) {
+      try {
+        await ttsService.speak({
+          text: currentCard.phrase.thai,
+          genderValue: true, // Default to male voice
+          onStart: () => {},
+          onEnd: () => {},
+          onError: (error) => console.error('TTS error:', error)
+        });
+      } catch (error) {
+        console.error('Error playing audio:', error);
+      }
     }
   }, [cards, currentIndex]);
 

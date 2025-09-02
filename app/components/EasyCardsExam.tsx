@@ -227,12 +227,12 @@ export default function EasyCardsExam() {
     }
   }, [cards, currentIndex]);
 
-  // Auto-play audio when card changes
+  // Auto-play audio when answer is shown
   useEffect(() => {
-    if (!loading && cards.length > 0 && !showAnswer) {
+    if (!loading && cards.length > 0 && showAnswer) {
       playCardAudio();
     }
-  }, [currentIndex, loading, cards.length, showAnswer, playCardAudio]);
+  }, [showAnswer, loading, cards.length, playCardAudio]);
 
   if (loading) {
     return (

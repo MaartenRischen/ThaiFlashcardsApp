@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { RotateCcw, Trophy, Clock, BookOpen, Volume2 } from 'lucide-react';
+import { RotateCcw, Trophy, Clock, BookOpen } from 'lucide-react';
 import { ttsService } from '@/app/lib/tts-service';
 import { getDefaultSetContent, getDefaultSetsForUnauthenticatedUsers } from '@/app/lib/seed-default-sets';
 import type { Phrase as SeedPhrase } from '@/app/data/phrases';
@@ -125,7 +125,7 @@ export default function EasyCardsExam() {
                   romanization: p.pronunciation ?? '',
                   english: p.english,
                   mnemonic: p.mnemonic,
-                  examples: p.examples as any,
+                  examples: p.examples as { thai: string; pronunciation: string; translation: string }[],
                 };
 
                 localEasyCards.push({
@@ -156,7 +156,7 @@ export default function EasyCardsExam() {
               romanization: c.phrase?.pronunciation ?? c.phrase?.romanization ?? '',
               english: c.phrase?.english ?? '',
               mnemonic: c.phrase?.mnemonic ?? undefined,
-              examples: (c as any).phrase?.examples ?? [],
+              examples: (c.phrase as any)?.examples ?? [],
             },
             lastReviewed: typeof c.lastReviewed === 'string' ? c.lastReviewed : new Date(c.lastReviewed).toISOString(),
           }))

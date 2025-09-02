@@ -756,6 +756,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                       }
                     }
                     
+                    const isFolderLoading = (loading || setsLoading || isPreloading);
                     const enhancedFolder = {
                       ...folder,
                       setCount: folderSets.length,
@@ -773,6 +774,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                       >
                         <FolderCardEnhanced
                           folder={enhancedFolder}
+                          isLoading={isFolderLoading && folderSets.length === 0}
                           onClick={() => fetchFolderDetails(folder.id)}
                           onEdit={() => {
                             setIsEditingFolder(folder);

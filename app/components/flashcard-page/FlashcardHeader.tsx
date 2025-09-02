@@ -81,17 +81,18 @@ export function FlashcardHeader({
           {/* Set Title Overlay at Bottom */}
           <div
             className="absolute bottom-0 left-0 right-0 z-30 flex flex-col items-center pointer-events-none"
-            style={{ paddingBottom: '4px' }}
+            style={{ paddingBottom: '8px' }}
           >
             <div
-              className="bg-[#1F1F1F]/90 backdrop-blur-sm px-2 py-0.5 text-[#E0E0E0] text-xs font-semibold shadow-none border-t border-[#404040] w-full max-w-2xl mx-auto text-center"
+              className="px-3 py-1 text-white text-lg font-bold text-center"
               style={{
-                letterSpacing: '0.02em',
+                letterSpacing: '0.05em',
                 maxWidth: '100%',
                 textAlign: 'center',
-                fontWeight: 600,
-                lineHeight: 1.1,
-                paddingTop: 0,
+                fontWeight: 700,
+                lineHeight: 1.2,
+                textShadow: '0 2px 8px rgba(0, 0, 0, 0.8), 0 1px 4px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 1)',
+                filter: 'drop-shadow(0 0 1px rgba(255, 255, 255, 0.1))',
               }}
             >
               {activeSet?.cleverTitle || activeSet?.name || ''}

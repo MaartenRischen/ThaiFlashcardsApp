@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
+import ThaiFactInline from '@/app/components/ThaiFactInline';
 import { useGeneration } from '@/app/context/GenerationContext';
 import { SetWizardState } from './types';
 import { useSet } from '@/app/context/SetContext';
@@ -273,6 +274,9 @@ export function GenerationStep({
         <p>Generating {state.mode === 'manual' ? 'translations and' : ''} flashcards...</p>
         <p className="mt-2">You can close this window - we'll notify you when it's ready!</p>
       </div>
+
+      {/* Thai facts while progress runs */}
+      <ThaiFactInline />
     </div>
   );
 } 

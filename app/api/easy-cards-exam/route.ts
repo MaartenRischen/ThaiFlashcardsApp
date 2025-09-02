@@ -97,7 +97,7 @@ export async function GET() {
 
       // For default sets, get content from seed data
       if (set.source === 'default') {
-        content = getDefaultSetContent(set.id);
+        content = getDefaultSetContent(set.id) || [];
       } else {
         // For user sets, fetch from database
         const dbSet = await prisma.flashcardSet.findUnique({

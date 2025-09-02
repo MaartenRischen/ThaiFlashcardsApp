@@ -7,6 +7,8 @@ import { Progress } from '@/components/ui/progress';
 import { Check, X, RotateCcw, Trophy, Clock, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ttsService } from '@/app/lib/tts-service';
+import { getDefaultSetContent, getDefaultSetsForUnauthenticatedUsers } from '@/app/lib/seed-default-sets';
+import type { PhraseProgressData } from '@/app/lib/storage/types';
 import Image from 'next/image';
 
 interface EasyCard {
@@ -56,12 +58,60 @@ export default function EasyCardsExam() {
       }
 
       const data = await response.json();
-      
-      if (data.cards.length === 0) {
+
+      // Also gather localStorage progress for default sets (these are saved locally even for signed-in users)
+      const localEasyCards: EasyCard[] = [];
+      try {
+        const defaultSets = getDefaultSetsForUnauthenticatedUsers();
+        for (const set of defaultSets) {
+          const key = `progress_${set.id}`;
+          const raw = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+          if (!raw) continue;
+
+          // Support both legacy and current formats
+          const parsed = JSON.parse(raw) as unknown;
+          const isRecord = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
+
+          let easyIndices: number[] = [];
+          if (isRecord(parsed) && Array.isArray((parsed as any).learnedPhrases)) {
+            // Legacy format
+            easyIndices = (parsed as any).learnedPhrases as number[];
+          } else if (isRecord(parsed)) {
+            // Current format: Record<string, PhraseProgressData>
+            const rec = parsed as Record<string, PhraseProgressData>;
+            easyIndices = Object.entries(rec)
+              .filter(([, prog]) => prog && prog.difficulty === 'easy')
+              .map(([idx]) => parseInt(idx, 10))
+              .filter((n) => !Number.isNaN(n));
+          }
+
+          if (easyIndices.length > 0) {
+            const content = getDefaultSetContent(set.id) || [];
+            for (const idx of easyIndices) {
+              if (idx >= 0 && idx < content.length) {
+                localEasyCards.push({
+                  setId: set.id,
+                  setName: set.name,
+                  setImageUrl: set.imageUrl || undefined,
+                  phraseIndex: idx,
+                  phrase: content[idx] as any, // content conforms to Phrase shape
+                  lastReviewed: new Date().toISOString(),
+                } as EasyCard);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to read local default set progress:', e);
+      }
+
+      const merged = [...(data.cards || []), ...localEasyCards];
+
+      if (merged.length === 0) {
         setError('No easy cards found. Mark some cards as "Easy" in your sets to use this feature!');
       } else {
         // Shuffle cards for variety
-        const shuffled = [...data.cards].sort(() => Math.random() - 0.5);
+        const shuffled = [...merged].sort(() => Math.random() - 0.5);
         setCards(shuffled);
         setCardStartTime(Date.now());
       }

@@ -29,7 +29,7 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
   
   // PERFORMANCE OPTIMIZATION: Don't load ALL sets for unauthenticated users
   // Only load a small subset to make the initial load MUCH faster
-  const PREVIEW_SET_IDS = ['numbers-1-10', 'colors', 'greetings'];
+  const PREVIEW_SET_IDS = ['numbers-1-10', 'basic-colors', 'days-of-week'];
   const previewSets = ALL_DEFAULT_SETS.filter(set => PREVIEW_SET_IDS.includes(set.id));
   
   // Add only the preview sets

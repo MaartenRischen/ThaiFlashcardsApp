@@ -74,17 +74,6 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
         set.folderId === folder.id || set.folderName === folder.name
       );
       
-      // If this is the Default Sets folder, also include unfiled sets and the default set
-      if (folder.name === 'Default Sets' && folder.isDefault) {
-        const unfiledSets = availableSets.filter(set => 
-          (!set.folderId && !set.folderName) || set.id === 'default'
-        );
-        // Remove duplicates in case the default set is already included
-        const setIds = new Set(folderSets.map(s => s.id));
-        const uniqueUnfiledSets = unfiledSets.filter(set => !setIds.has(set.id));
-        folderSets = [...folderSets, ...uniqueUnfiledSets];
-      }
-      
       // Preload content for sets in this folder
       const setIds = folderSets.map(set => set.id);
       if (setIds.length > 0) {

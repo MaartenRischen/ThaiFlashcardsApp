@@ -745,15 +745,6 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                       folderSets = availableSets.filter(set => 
                         set.folderId === folder.id || set.folderName === folder.name
                       );
-                      
-                      if (folder.name === 'Default Sets' && folder.isDefault) {
-                        const unfiledSets = availableSets.filter(set => 
-                          (!set.folderId && !set.folderName) || set.id === 'default'
-                        );
-                        const setIds = new Set(folderSets.map(s => s.id));
-                        const uniqueUnfiledSets = unfiledSets.filter(set => !setIds.has(set.id));
-                        folderSets = [...folderSets, ...uniqueUnfiledSets];
-                      }
                     }
                     
                     const isFolderLoading = (loading || setsLoading || isPreloading);

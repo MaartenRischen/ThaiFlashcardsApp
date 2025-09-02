@@ -70,7 +70,7 @@ export function FolderView({ isOpen, onClose, highlightSetId: _highlightSetId }:
     setLoading(true);
     try {
       // Get all sets that belong to this folder
-      let folderSets = availableSets.filter(set => 
+      const folderSets = availableSets.filter(set => 
         set.folderId === folder.id || set.folderName === folder.name
       );
       

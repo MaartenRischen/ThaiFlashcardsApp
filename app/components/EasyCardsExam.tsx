@@ -134,7 +134,7 @@ export default function EasyCardsExam() {
 
                 // Derive display name and image for default sets
                 let setName = 'Default Set';
-                let setImageUrl: string | undefined = '/images/default-set-logo.png';
+                const setImageUrl: string | undefined = '/images/default-set-logo.png';
                 if (setId !== 'default') {
                   const baseId = setId.replace('default-', '');
                   const meta = ALL_DEFAULT_SETS.find(s => s.id === baseId);

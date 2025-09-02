@@ -100,7 +100,7 @@ export async function GET() {
       const isDefault = dbMeta?.source === 'default' || setId === 'default' || setId.startsWith('default-');
 
       let setName = dbMeta?.name ?? 'Unknown Set';
-      let setImageUrl = dbMeta?.imageUrl ?? undefined;
+      const setImageUrl = dbMeta?.imageUrl ?? undefined;
 
       if (!dbMeta && (setId === 'default' || setId.startsWith('default-'))) {
         // Derive default set name from templates

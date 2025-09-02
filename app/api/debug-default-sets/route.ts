@@ -63,7 +63,7 @@ export async function GET() {
       totalSets: userSets.length,
       expectedSets: ALL_DEFAULT_SETS.length + 1, // +1 for the original default set
       folders,
-      duplicateNames: [...new Set(duplicateNames)],
+      duplicateNames: Array.from(new Set(duplicateNames)),
       setsWithPlaceholderImages,
       unfiledSets,
       allSets: userSets

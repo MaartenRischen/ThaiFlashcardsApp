@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/app/lib/prisma';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
-import { Phrase } from '@/app/lib/generation/types';
+import { Phrase, ExampleSentence } from '@/app/lib/generation/types';
 import { PhraseProgressData } from '@/app/lib/storage/types';
 
 export async function GET() {
@@ -116,15 +116,28 @@ export async function GET() {
             examplesJson: unknown;
           };
 
-          content = (dbSet.phrases as DbPhrase[]).map((p) => ({
+          const toExamples = (val: unknown): ExampleSentence[] => {
+            if (!Array.isArray(val)) return [];
+            return val
+              .filter((e): e is Record<string, unknown> => !!e && typeof e === 'object' && !Array.isArray(e))
+              .map((e) => ({
+                thai: String(e['thai'] ?? ''),
+                thaiMasculine: String(e['thaiMasculine'] ?? ''),
+                thaiFeminine: String(e['thaiFeminine'] ?? ''),
+                pronunciation: String(e['pronunciation'] ?? ''),
+                translation: String(e['translation'] ?? ''),
+              }));
+          };
+
+          content = (dbSet.phrases as DbPhrase[]).map((p): Phrase => ({
             english: p.english,
             thai: p.thai,
             thaiMasculine: p.thaiMasculine,
             thaiFeminine: p.thaiFeminine,
             pronunciation: p.pronunciation,
             mnemonic: p.mnemonic ?? undefined,
-            examples: Array.isArray(p.examplesJson) ? (p.examplesJson as unknown as any[]) : []
-          })) as Phrase[];
+            examples: toExamples(p.examplesJson),
+          }));
         }
       }
 

@@ -156,7 +156,7 @@ export default function EasyCardsExam() {
               romanization: c.phrase?.pronunciation ?? c.phrase?.romanization ?? '',
               english: c.phrase?.english ?? '',
               mnemonic: c.phrase?.mnemonic ?? undefined,
-              examples: (c.phrase as any)?.examples ?? [],
+              examples: (c.phrase as { examples?: { thai: string; pronunciation: string; translation: string }[] })?.examples ?? [],
             },
             lastReviewed: typeof c.lastReviewed === 'string' ? c.lastReviewed : new Date(c.lastReviewed).toISOString(),
           }))

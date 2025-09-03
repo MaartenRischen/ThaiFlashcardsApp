@@ -70,11 +70,11 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
           // Remove highlight from previous element
           if (highlightEl && highlightEl !== el) {
             highlightEl.classList.remove('db-tour-highlight');
-            (highlightEl as any).style.zIndex = '';
+            (highlightEl as unknown as HTMLElement).style.zIndex = '';
           }
           // Apply highlight to current
           el.classList.add('db-tour-highlight');
-          (el as any).style.zIndex = '100001';
+          (el as unknown as HTMLElement).style.zIndex = '100001';
           setHighlightEl(el);
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
           return;
@@ -83,7 +83,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
       // No anchor found: cleanup previous
       if (highlightEl) {
         highlightEl.classList.remove('db-tour-highlight');
-        (highlightEl as any).style.zIndex = '';
+        (highlightEl as unknown as HTMLElement).style.zIndex = '';
         setHighlightEl(null);
       }
     };
@@ -96,7 +96,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
       window.removeEventListener('scroll', onWinChange, true);
     };
     return cleanup;
-  }, [isOpen, stepIndex]);
+  }, [isOpen, stepIndex, highlightEl]);
 
   if (!isOpen) return null;
 

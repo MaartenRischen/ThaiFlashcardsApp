@@ -38,6 +38,7 @@ import { SetPreviewModal } from './SetPreviewModal';
 import { usePreloadedFolders } from '@/app/hooks/usePreloadedData';
 import { usePreloader } from '@/app/context/PreloaderContext';
 import MySetCard from './MySetCard';
+import { useUser } from '@clerk/nextjs';
 import ThaiFactInline from './ThaiFactInline';
 
 interface FolderViewEnhancedProps {
@@ -50,11 +51,14 @@ type ViewMode = 'grid' | 'list';
 type SortOption = 'name' | 'date' | 'size';
 
 export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlightSetId }: FolderViewEnhancedProps) {
-  const { availableSets, switchSet, activeSetId, refreshSets, isLoading: setsLoading } = useSet();
+  const { availableSets, switchSet, activeSetId, refreshSets, isLoading: setsLoading, deleteSet } = useSet();
   const { preloadFolders, getCachedFolders, clearFolderCache, preloadAllSets, preloadImages, getCachedContent } = useSetCache();
   // Access preloaded data to avoid unnecessary spinners if cache hasn't been primed yet
   const { preloadedData, isLoading: isPreloading } = usePreloader();
   const { folders: preloadedFolders } = usePreloadedFolders();
+  const { user } = useUser();
+  const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+  const isAdmin = userEmail === 'maartenrischen@protonmail.com';
   
   // State
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -428,6 +432,19 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
       toast.error('Failed to move sets');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // --- Admin-only action: delete this default set for my account only ---
+  const adminDeleteDefaultSetForMe = async (setId: string) => {
+    if (!isAdmin) return;
+    if (!window.confirm('Delete this default set from your account?')) return;
+    try {
+      await deleteSet(setId);
+      toast.success('Default set deleted from your account');
+      if (currentFolder) await fetchFolderDetails(currentFolder.id);
+    } catch (e) {
+      toast.error('Delete failed');
     }
   };
 
@@ -915,6 +932,16 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                               isLoading={loading}
                               currentSetId={activeSetId}
                             />
+                            {isAdmin && fullSet.source === 'default' && (
+                              <div className="mt-2">
+                                <button
+                                  className="px-2 py-1 text-xs rounded bg-red-900/30 text-red-300 border border-red-800/50 hover:bg-red-900/50"
+                                  onClick={() => adminDeleteDefaultSetForMe(fullSet.id)}
+                                >
+                                  Delete from my account
+                                </button>
+                              </div>
+                            )}
                           </div>
                         ) : (
                           // List view
@@ -1038,6 +1065,18 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                     variant="prominent"
                                     className="scale-90"
                                   />
+                                  {isAdmin && fullSet.source === 'default' && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        adminDeleteDefaultSetForMe(fullSet.id);
+                                      }}
+                                      className="px-2 py-1 text-xs rounded bg-red-900/30 text-red-300 border border-red-800/50 hover:bg-red-900/50"
+                                      title="Delete this default set from my account"
+                                    >
+                                      Delete
+                                    </button>
+                                  )}
                                 </div>
                               )}
                             </div>

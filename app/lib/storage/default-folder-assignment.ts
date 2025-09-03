@@ -6,6 +6,7 @@ import { DEFAULT_FOLDERS } from './folders';
  */
 export async function assignDefaultSetsToFolders(userId: string) {
   try {
+    // No admin overrides in no-migration mode
     // Get or create default folders
     const folders = await prisma.folder.findMany({
       where: {
@@ -47,10 +48,11 @@ export async function assignDefaultSetsToFolders(userId: string) {
 
       // Determine which folder based on set ID
       // For authenticated users, the IDs don't have 'default-' prefix
-      if (set.id.startsWith('common-words-')) {
+      const baseId = set.id.split('__')[0];
+      if (baseId.startsWith('common-words-')) {
         folderId = folderMap.get(DEFAULT_FOLDERS.COMMON_WORDS);
         console.log(`[assignDefaultSetsToFolders] Assigning ${set.id} to COMMON_WORDS folder`);
-      } else if (set.id.startsWith('common-sentences-')) {
+      } else if (baseId.startsWith('common-sentences-')) {
         folderId = folderMap.get(DEFAULT_FOLDERS.COMMON_SENTENCES);
         console.log(`[assignDefaultSetsToFolders] Assigning ${set.id} to COMMON_SENTENCES folder`);
       } else {

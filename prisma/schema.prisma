@@ -137,3 +137,5 @@ model Folder {
   @@unique([userId, name]) // Prevent duplicate folder names per user
   @@index([userId])
 }
+
+

@@ -24,23 +24,39 @@ const steps: Array<{ id: StepId; title: string; body: string; anchor?: string }>
   { id: 'create', title: 'Create', body: 'Open the Set Wizard to generate a new personalized set.', anchor: '[data-tour="nav-create"]' },
   { id: 'gallery', title: 'Gallery', body: 'Browse the public gallery and import sets you like.', anchor: '[data-tour="nav-gallery"]' },
   { id: 'settings', title: 'Settings', body: 'Dark mode, gender, polite mode, autoplay, and more.', anchor: '[data-tour="nav-settings"]' },
-  { id: 'card', title: 'Flashcards', body: 'Each card has Thai, pronunciation, AI mnemonic, audio, and examples.' },
+  { id: 'card', title: 'Flashcards', body: 'Each card has Thai, pronunciation, AI mnemonic, audio, and examples.', anchor: '[data-tour="card"]' },
   { id: 'share', title: 'Send to a Friend!', body: 'Share a set with a link so friends can try instantly.' },
 ];
 
 export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
   const [stepIndex, setStepIndex] = useState(0);
+  const [spot, setSpot] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
-    // Auto-focus anchor elements if present
     const s = steps[stepIndex];
-    if (s?.anchor) {
-      const el = document.querySelector<HTMLElement>(s.anchor);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    let cleanup: (() => void) | undefined;
+    const measure = () => {
+      if (s?.anchor) {
+        const el = document.querySelector<HTMLElement>(s.anchor);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          setSpot({ top: rect.top + window.scrollY - 8, left: rect.left + window.scrollX - 8, width: rect.width + 16, height: rect.height + 16 });
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
       }
-    }
+      setSpot(null);
+    };
+    measure();
+    const onWinChange = () => measure();
+    window.addEventListener('resize', onWinChange);
+    window.addEventListener('scroll', onWinChange, true);
+    cleanup = () => {
+      window.removeEventListener('resize', onWinChange);
+      window.removeEventListener('scroll', onWinChange, true);
+    };
+    return cleanup;
   }, [isOpen, stepIndex]);
 
   if (!isOpen) return null;
@@ -51,6 +67,13 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
   return (
     <div className="fixed inset-0 z-[1000] pointer-events-none">
       <div className="absolute inset-0 bg-black/60" />
+
+      {spot && (
+        <div
+          className="absolute border-2 border-[#A9C4FC] rounded-xl shadow-[0_0_0_6px_rgba(169,196,252,0.25)] transition-all duration-200"
+          style={{ top: spot.top, left: spot.left, width: spot.width, height: spot.height }}
+        />
+      )}
 
       <div className="absolute inset-0 p-4 flex items-end justify-center sm:items-center pointer-events-none">
         <div className="max-w-md w-full bg-[#1F1F1F] border border-[#333] rounded-2xl shadow-2xl p-4 sm:p-6 pointer-events-auto">

@@ -1535,7 +1535,7 @@ export default function ThaiFlashcards() {
             {/* Card Front: Displayed when showAnswer is false */} 
             {!showAnswer && (
               <div className="p-6 flex flex-col items-center justify-center min-h-[20rem]"> {/* Ensure min height */} 
-                <div className="text-2xl font-bold mb-4 text-center">{phrases[index]?.english ?? ''}</div>
+                <div data-tour="card" className="text-2xl font-bold mb-4 text-center">{phrases[index]?.english ?? ''}</div>
                 
                 {/* NEW: Mnemonic Hint Section */}
                 <div className="text-center mb-4 w-full px-4">

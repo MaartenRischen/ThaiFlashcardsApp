@@ -46,6 +46,7 @@ import Confetti from './components/Confetti';
 import { useSetCompletion } from './hooks/useSetCompletion';
 import { useAudioGeneration } from './context/AudioGenerationContext';
 import { AudioReadyModal } from './components/AudioReadyModal';
+import { GuidedTour, shouldAutoStartTour, markTourSeen } from './components/GuidedTour';
 
 // Type for phrases with literal translation
 interface PhraseWithLiteral extends Phrase {
@@ -277,6 +278,7 @@ export default function ThaiFlashcards() {
   const [showMnemonicsModal, setShowMnemonicsModal] = useState(false);
   const [showMnemonicHint, setShowMnemonicHint] = useState(false); // NEW: State for front hint
   const [showCardsModal, setShowCardsModal] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
 
   // === Reintroduced state variables to fix missing identifier errors ===
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
@@ -306,6 +308,16 @@ export default function ThaiFlashcards() {
   console.log("ThaiFlashcards: Component rendering/re-rendering. randomSentence:", randomSentence); // DEBUG
 
   // Load voices when component mounts
+  useEffect(() => {
+    // Auto-start tour for new/non-logged users
+    try {
+      if (shouldAutoStartTour()) {
+        setIsTourOpen(true);
+        markTourSeen();
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     function loadVoices() {
       const voices = window.speechSynthesis.getVoices();
@@ -1457,6 +1469,8 @@ export default function ThaiFlashcards() {
 
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col">
+      {/* Guided Tour */}
+      <GuidedTour isOpen={isTourOpen} onClose={() => setIsTourOpen(false)} />
       {/* Render the new FlashcardHeader component - Removed setShowProgress & showAnswer */}
       <FlashcardHeader
         setShowHowItWorks={setShowHowItWorks}

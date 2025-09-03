@@ -108,6 +108,7 @@ export function FlashcardHeader({
             <button
               onClick={onOpenCards}
               className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#f59e0b] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(245,158,11,0.15)] before:pointer-events-none"
+              data-tour="nav-current"
               style={{
                 boxShadow: '0 0 20px rgba(245, 158, 11, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
               }}
@@ -127,6 +128,7 @@ export function FlashcardHeader({
             <button
               onClick={onOpenSetManager}
               className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#2563EB] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(37,99,235,0.15)] before:pointer-events-none"
+              data-tour="nav-mysets"
               style={{
                 boxShadow: '0 0 20px rgba(37, 99, 235, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
               }}
@@ -143,6 +145,7 @@ export function FlashcardHeader({
             <button
               onClick={() => router.push('/gallery')}
               className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#BB86FC] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(187,134,252,0.15)] before:pointer-events-none"
+              data-tour="nav-gallery"
               style={{
                 boxShadow: '0 0 20px rgba(187, 134, 252, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
               }}
@@ -162,6 +165,7 @@ export function FlashcardHeader({
             <button
               onClick={onOpenSetWizard}
               className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d4a3d] text-[#22c55e] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(34,197,94,0.15)] before:pointer-events-none"
+              data-tour="nav-create"
               style={{
                 boxShadow: '0 0 20px rgba(34, 197, 94, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
               }}
@@ -190,6 +194,7 @@ export function FlashcardHeader({
             <button
               onClick={onOpenSettings}
               className="neumorphic-icon-button text-xl rounded-xl"
+              data-tour="nav-settings"
               title="App settings"
               aria-label="App settings"
             >

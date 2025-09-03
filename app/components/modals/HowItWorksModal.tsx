@@ -23,6 +23,20 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
           </button>
         </div>
 
+        {/* Quick access to interactive tour */}
+        <div className="mb-4 p-3 rounded-md border border-[#333] bg-[#222] flex items-center justify-between">
+          <div className="text-sm text-gray-300">Prefer a quick, interactive walkthrough?</div>
+          <button
+            onClick={() => {
+              try { localStorage.removeItem('tour_seen_v1'); } catch {}
+              window.location.reload();
+            }}
+            className="px-3 py-1 text-xs rounded bg-[#A9C4FC] text-[#121212]"
+          >
+            Start Tour
+          </button>
+        </div>
+
         <Accordion type="single" collapsible className="w-full space-y-2 text-gray-300 text-sm max-h-[70vh] overflow-y-auto pr-2">
           {/* Set Wizard - Updated for 7 steps */}
           <AccordionItem value="item-0" className="border-[#333]">

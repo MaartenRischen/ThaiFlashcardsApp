@@ -123,11 +123,12 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
           box-shadow: 0 0 0 3px #A9C4FC, 0 0 0 8px rgba(169,196,252,0.25) !important;
           border-radius: 12px !important;
           transition: box-shadow .2s ease, transform .2s ease;
+          pointer-events: none !important;
         }
       `}</style>
 
-      <div className="absolute inset-0 p-4 flex items-start justify-center sm:items-start pt-8 pointer-events-none">
-        <div className="max-w-md w-full bg-[#1F1F1F] border border-[#333] rounded-2xl shadow-2xl p-4 sm:p-6 pointer-events-auto">
+      <div className="absolute inset-0 p-2 sm:p-4 flex items-end justify-center sm:items-start pt-8 pointer-events-none">
+        <div className="max-w-md w-full bg-[#1F1F1F] border border-[#333] rounded-2xl shadow-2xl p-3 sm:p-6 pointer-events-auto z-[100002] mb-3 sm:mb-0">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold text-[#A9C4FC]">{s.title}</h3>

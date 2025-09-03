@@ -20,13 +20,12 @@ interface GuidedTourProps {
 
 const steps: Array<{ id: StepId; title: string; body: string; anchor?: string }> = [
   { id: 'welcome', title: 'Welcome to Donkey Bridge', body: 'Quick 60‑second tour of key features. You can exit anytime.' },
+  { id: 'card', title: 'Flashcards', body: 'Each card has Thai, pronunciation, AI mnemonic, audio, and examples.', anchor: '[data-tour="card"]' },
   { id: 'current', title: 'Current', body: 'Track progress and due cards for the active set.', anchor: '[data-tour="nav-current"]' },
   { id: 'mysets', title: 'My Sets', body: 'Manage sets, preview cards, and switch sets.', anchor: '[data-tour="nav-mysets"]' },
-  { id: 'create', title: 'Create', body: 'Open the Set Wizard to generate a new personalized set.', anchor: '[data-tour="nav-create"]' },
-  { id: 'gallery', title: 'Gallery', body: 'Browse the public gallery and import sets you like.', anchor: '[data-tour="nav-gallery"]' },
+  { id: 'gallery', title: 'Public Sets', body: 'Browse the public gallery and import sets you like.', anchor: '[data-tour="nav-gallery"]' },
+  { id: 'create', title: 'Create!', body: 'Open the Set Wizard to generate a new personalized set.', anchor: '[data-tour="nav-create"]' },
   { id: 'settings', title: 'Settings', body: 'Dark mode, gender, polite mode, autoplay, and more.', anchor: '[data-tour="nav-settings"]' },
-  { id: 'card', title: 'Flashcards', body: 'Each card has Thai, pronunciation, AI mnemonic, audio, and examples.', anchor: '[data-tour="card"]' },
-  { id: 'share', title: 'Send to a Friend!', body: 'Share a set with a link so friends can try instantly.' },
 ];
 
 export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {

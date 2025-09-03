@@ -5,13 +5,13 @@ import { createPortal } from 'react-dom';
 
 type StepId =
   | 'welcome'
+  | 'cardFront'
+  | 'cardBack'
   | 'current'
   | 'mysets'
   | 'create'
   | 'gallery'
-  | 'settings'
-  | 'card'
-  | 'share';
+  | 'settings';
 
 interface GuidedTourProps {
   isOpen: boolean;
@@ -20,7 +20,8 @@ interface GuidedTourProps {
 
 const steps: Array<{ id: StepId; title: string; body: string; anchor?: string }> = [
   { id: 'welcome', title: 'Welcome to Donkey Bridge', body: 'Quick 60‑second tour of key features. You can exit anytime.' },
-  { id: 'card', title: 'Flashcards', body: 'Each card has Thai, pronunciation, AI mnemonic, audio, and examples.', anchor: '[data-tour="card"]' },
+  { id: 'cardFront', title: 'Flashcard Front', body: 'Front shows the English prompt and optional mnemonic hint.', anchor: '[data-tour="card-front"]' },
+  { id: 'cardBack', title: 'Flashcard Back', body: 'Back shows Thai, pronunciation, audio, examples, and rating.', anchor: '[data-tour="card-back"]' },
   { id: 'current', title: 'Current', body: 'Track progress and due cards for the active set.', anchor: '[data-tour="nav-current"]' },
   { id: 'mysets', title: 'My Sets', body: 'Manage sets, preview cards, and switch sets.', anchor: '[data-tour="nav-mysets"]' },
   { id: 'gallery', title: 'Public Sets', body: 'Browse the public gallery and import sets you like.', anchor: '[data-tour="nav-gallery"]' },
@@ -37,6 +38,12 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
     const s = steps[stepIndex];
     let cleanup: (() => void) | undefined;
     const measure = () => {
+      // Fire demo actions when entering specific steps
+      if (s?.id === 'cardBack') {
+        window.dispatchEvent(new Event('db_tour_show_back'));
+      } else if (s?.id === 'cardFront') {
+        window.dispatchEvent(new Event('db_tour_show_front'));
+      }
       if (s?.anchor) {
         const el = document.querySelector<HTMLElement>(s.anchor);
         if (el) {

@@ -392,6 +392,18 @@ export default function ThaiFlashcards() {
     prevShowAnswerRef.current = showAnswer;
   }, [showAnswer, autoplay, phrases, index, isPlayingWord, isPlayingContext, voicesLoaded, isMale, isPoliteMode]);
 
+  // Respond to tour step events to flip demo card
+  useEffect(() => {
+    const toBack = () => setShowAnswer(true);
+    const toFront = () => setShowAnswer(false);
+    window.addEventListener('db_tour_show_back', toBack);
+    window.addEventListener('db_tour_show_front', toFront);
+    return () => {
+      window.removeEventListener('db_tour_show_back', toBack);
+      window.removeEventListener('db_tour_show_front', toFront);
+    };
+  }, []);
+
   // Mobile optimization: Add resize event listener to handle proper card positioning
   useEffect(() => {
     const handleResize = () => {
@@ -1537,8 +1549,8 @@ export default function ThaiFlashcards() {
           <div className="neumorphic rounded-xl flex flex-col"> 
             {/* Card Front: Displayed when showAnswer is false */} 
             {!showAnswer && (
-              <div className="p-6 flex flex-col items-center justify-center min-h-[20rem]"> {/* Ensure min height */} 
-                <div data-tour="card" className="text-2xl font-bold mb-4 text-center">{phrases[index]?.english ?? ''}</div>
+              <div className="p-6 flex flex-col items-center justify-center min-h-[20rem]" data-tour="card-front"> {/* Ensure min height */} 
+                <div className="text-2xl font-bold mb-4 text-center">{phrases[index]?.english ?? ''}</div>
                 
                 {/* NEW: Mnemonic Hint Section */}
                 <div className="text-center mb-4 w-full px-4">
@@ -1600,6 +1612,7 @@ export default function ThaiFlashcards() {
               <div 
                 ref={cardBackRef} 
                 className="border-t border-[#333] p-6 flex flex-col min-h-[20rem] overflow-y-auto card-back-container"
+                data-tour="card-back"
               > 
                 {/* Main Phrase Section - Centered */}
                 <div className="flex flex-col items-center justify-center mb-4">

@@ -121,6 +121,8 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
 export function shouldAutoStartTour(): boolean {
   try {
     if (typeof window === 'undefined') return false;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('tour') === '1') return true;
     const seen = localStorage.getItem('tour_seen_v1');
     return !seen;
   } catch {

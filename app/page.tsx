@@ -1708,7 +1708,7 @@ export default function ThaiFlashcards() {
                 </div> 
                 
                 {/* === Gender Slider and Polite Mode Toggle Section - MOVED HERE === */}
-                <div className="flex items-center justify-center space-x-4 mb-6">
+                <div className="flex items-center justify-center space-x-4 mb-6" data-tour="back-gender">
                   {/* Gender Toggle */} 
                   <label htmlFor="gender-toggle" className="flex items-center cursor-pointer">
                     <span className="mr-2 text-sm font-medium text-gray-400">Female (Ka)</span>
@@ -1727,7 +1727,7 @@ export default function ThaiFlashcards() {
                   </label>
 
                   {/* Polite Mode Toggle */} 
-                  <label htmlFor="polite-toggle" className="flex items-center cursor-pointer">
+                  <label htmlFor="polite-toggle" className="flex items-center cursor-pointer" data-tour="back-polite">
                     <span className="mr-2 text-sm font-medium text-gray-400">Casual</span>
                     <div className="relative">
                       <input
@@ -1745,7 +1745,7 @@ export default function ThaiFlashcards() {
                 </div> 
 
                 {/* Mnemonic Section */} 
-                <div className="mt-4">
+                <div className="mt-4" data-tour="back-mnemonic">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm text-gray-200 font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4 text-yellow-400" /> Mnemonic (editable)</label>
                     <div className="flex items-center gap-2">
@@ -1808,7 +1808,7 @@ export default function ThaiFlashcards() {
                 </div>
 
                 {/* === Context section (Speech bubble) === */}
-                <div className="relative p-4 space-y-2 rounded-2xl bg-[#222] border border-[#333] neumorphic mb-6 text-center">
+                <div className="relative p-4 space-y-2 rounded-2xl bg-[#222] border border-[#333] neumorphic mb-6 text-center" data-tour="back-context">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm text-blue-400 uppercase tracking-wider w-full text-center">In Context</h3>
                   </div>
@@ -1823,7 +1823,7 @@ export default function ThaiFlashcards() {
                   </ClientOnly>
                   {/* Speech bubble tail */}
                   <div className="absolute left-8 -bottom-3 w-0 h-0" style={{ borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderTop: '10px solid #222' }} />
-                  <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center justify-between mt-2" data-tour="back-context-controls">
                     <button 
                           onClick={() => generateRandomPhrase('prev')}
                           className="neumorphic-button text-blue-400 px-4"

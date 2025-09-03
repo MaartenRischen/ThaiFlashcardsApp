@@ -13,6 +13,11 @@ type StepId =
   | 'cardBackTranslation'
   | 'cardBackLiteral'
   | 'cardBackSRS'
+  | 'cardBackGender'
+  | 'cardBackPolite'
+  | 'cardBackMnemonic'
+  | 'cardBackContext'
+  | 'cardBackContextControls'
   | 'current'
   | 'mysets'
   | 'create'
@@ -34,6 +39,11 @@ const steps: Array<{ id: StepId; title: string; body: string; anchor?: string }>
   { id: 'cardBackTranslation', title: 'English Translation', body: 'Quick English gloss to confirm meaning.', anchor: '[data-tour="back-translation"]' },
   { id: 'cardBackLiteral', title: 'Literal / Breakdown', body: 'Open a detailed breakdown with literal parts and notes.', anchor: '[data-tour="back-literal"]' },
   { id: 'cardBackSRS', title: 'Rate Your Recall', body: 'Easy / Correct / Wrong feeds the SRS to schedule reviews.', anchor: '[data-tour="back-srs"]' },
+  { id: 'cardBackGender', title: 'Gender Toggle', body: 'Switch between female (Ka) and male (Krap) phrasing.', anchor: '[data-tour="back-gender"]' },
+  { id: 'cardBackPolite', title: 'Politeness', body: 'Toggle polite particles on/off.', anchor: '[data-tour="back-polite"]' },
+  { id: 'cardBackMnemonic', title: 'Mnemonic', body: 'Edit, reset, or generate a new memory aid.', anchor: '[data-tour="back-mnemonic"]' },
+  { id: 'cardBackContext', title: 'In Context', body: 'See the phrase used in a sentence with pronunciation and translation.', anchor: '[data-tour="back-context"]' },
+  { id: 'cardBackContextControls', title: 'Context Controls', body: 'Navigate examples and play the context audio.', anchor: '[data-tour="back-context-controls"]' },
   { id: 'current', title: 'Current', body: 'Track progress and due cards for the active set.', anchor: '[data-tour="nav-current"]' },
   { id: 'mysets', title: 'My Sets', body: 'Manage sets, preview cards, and switch sets.', anchor: '[data-tour="nav-mysets"]' },
   { id: 'gallery', title: 'Public Sets', body: 'Browse the public gallery and import sets you like.', anchor: '[data-tour="nav-gallery"]' },

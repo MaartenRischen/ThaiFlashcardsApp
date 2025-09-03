@@ -43,7 +43,7 @@ const steps: Array<{ id: StepId; title: string; body: string; anchor?: string }>
 
 export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
   const [stepIndex, setStepIndex] = useState(0);
-  const [spot, setSpot] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const [highlightEl, setHighlightEl] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -67,13 +67,25 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
       if (s?.anchor) {
         const el = document.querySelector<HTMLElement>(s.anchor);
         if (el) {
-          const rect = el.getBoundingClientRect();
-          setSpot({ top: rect.top + window.scrollY - 8, left: rect.left + window.scrollX - 8, width: rect.width + 16, height: rect.height + 16 });
+          // Remove highlight from previous element
+          if (highlightEl && highlightEl !== el) {
+            highlightEl.classList.remove('db-tour-highlight');
+            (highlightEl as any).style.zIndex = '';
+          }
+          // Apply highlight to current
+          el.classList.add('db-tour-highlight');
+          (el as any).style.zIndex = '100001';
+          setHighlightEl(el);
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
           return;
         }
       }
-      setSpot(null);
+      // No anchor found: cleanup previous
+      if (highlightEl) {
+        highlightEl.classList.remove('db-tour-highlight');
+        (highlightEl as any).style.zIndex = '';
+        setHighlightEl(null);
+      }
     };
     measure();
     const onWinChange = () => measure();
@@ -94,13 +106,15 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
   const overlay = (
     <div className="fixed inset-0 z-[100000] pointer-events-none">
       <div className="absolute inset-0 bg-black/60" />
-
-      {spot && (
-        <div
-          className="absolute border-2 border-[#A9C4FC] rounded-xl shadow-[0_0_0_6px_rgba(169,196,252,0.25)] transition-all duration-200"
-          style={{ top: spot.top, left: spot.left, width: spot.width, height: spot.height }}
-        />
-      )}
+      {/* Highlight style */}
+      <style>{`
+        .db-tour-highlight {
+          position: relative !important;
+          box-shadow: 0 0 0 3px #A9C4FC, 0 0 0 8px rgba(169,196,252,0.25) !important;
+          border-radius: 12px !important;
+          transition: box-shadow .2s ease, transform .2s ease;
+        }
+      `}</style>
 
       <div className="absolute inset-0 p-4 flex items-start justify-center sm:items-start pt-8 pointer-events-none">
         <div className="max-w-md w-full bg-[#1F1F1F] border border-[#333] rounded-2xl shadow-2xl p-4 sm:p-6 pointer-events-auto">

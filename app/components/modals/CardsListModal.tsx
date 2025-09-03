@@ -190,7 +190,7 @@ export function CardsListModal({
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={handleClose}>
-        <div className="bg-[#1F1F1F] rounded-xl p-6 max-w-2xl w-full max-h-[85vh] overflow-hidden relative flex flex-col border border-[#404040]" onClick={e => e.stopPropagation()}>
+        <div className="bg-[#1F1F1F] rounded-2xl p-6 max-w-2xl w-full max-h-[85vh] overflow-hidden relative flex flex-col border border-[#404040] shadow-xl" onClick={e => e.stopPropagation()}>
         <div className="flex flex-col gap-3 mb-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-[#E0E0E0]">This Set</h3>
@@ -235,7 +235,7 @@ export function CardsListModal({
             {!isEditMode ? (
               <button
                 onClick={() => setIsEditMode(true)}
-                className="neumorphic-button px-4 py-2 text-sm flex items-center gap-2"
+                className="neumorphic-button px-4 py-2 text-sm flex items-center gap-2 rounded-full"
               >
                 <Edit3 className="w-4 h-4" />
                 <span>Edit / Add / Delete</span>
@@ -310,7 +310,7 @@ export function CardsListModal({
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {!isEditMode && (
                       <div
-                        className={`px-3 py-1.5 text-xs font-medium rounded-lg ${statusStyle}`}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-full ${statusStyle}`}
                       >
                         {statusText}
                       </div>

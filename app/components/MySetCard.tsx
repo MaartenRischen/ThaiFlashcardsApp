@@ -23,7 +23,46 @@ const MySetCard: React.FC<MySetCardProps> = ({
   isLoading = false,
   currentSetId
 }) => {
-  const imgUrl = set.imageUrl || '/images/default-set-logo.png';
+  const computeDefaultImageUrl = (): string => {
+    const originalId = set.id.includes('__') ? set.id.split('__')[0] : set.id;
+    if (originalId === 'default') {
+      return '/images/defaultnew.png';
+    }
+    // Common words: 01..10
+    if (originalId.startsWith('common-words-')) {
+      const n = originalId.replace('common-words-', '');
+      const padded = String(parseInt(n, 10)).padStart(2, '0');
+      return `/images/defaults/default-common-words-${padded}.png`;
+    }
+    // Common sentences: 1..10 (no pad)
+    if (originalId.startsWith('common-sentences-')) {
+      const n = originalId.replace('common-sentences-', '');
+      return `/images/defaults/default-common-sentences-${n}.png`;
+    }
+    // Map other canonical default sets to thailand images
+    const thailandMap: Record<string, string> = {
+      'numbers-1-10': '01',
+      'basic-colors': '02',
+      'days-of-week': '03',
+      'family-members': '04',
+      'months-of-year': '05',
+      'body-parts': '06',
+      'animals': '07',
+      'thai-proverbs': '08',
+      'clothing': '09',
+      'transportation': '10',
+      'food-and-drinks': '11',
+    };
+    const baseId = originalId.replace('default-', '');
+    const idx = thailandMap[baseId];
+    if (idx) {
+      return `/images/defaults/default-thailand-${idx}.png`;
+    }
+    // Fallback
+    return '/images/default-set-logo.png';
+  };
+
+  const imgUrl = (set.source === 'default' ? computeDefaultImageUrl() : (set.imageUrl || '/images/default-set-logo.png'));
   const isCurrentSet = currentSetId === set.id;
   const canPublish = set.source !== 'default' && !set.id.startsWith('default-');
 

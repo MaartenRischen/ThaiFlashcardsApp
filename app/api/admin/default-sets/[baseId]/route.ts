@@ -6,7 +6,7 @@ function isAdminEmail(email: string | undefined | null): boolean {
   const adminEnv = (process.env.ADMIN_EMAIL || '').toLowerCase();
   const fixed = 'maartenrischen@protonmail.com';
   const candidate = (email || '').toLowerCase();
-  return candidate === fixed || (adminEnv && candidate === adminEnv);
+  return candidate === fixed || (!!adminEnv && candidate === adminEnv);
 }
 
 // DELETE: Remove a default set across ALL accounts (admin-only)

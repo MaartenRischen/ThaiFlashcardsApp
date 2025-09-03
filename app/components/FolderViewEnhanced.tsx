@@ -51,7 +51,7 @@ type ViewMode = 'grid' | 'list';
 type SortOption = 'name' | 'date' | 'size';
 
 export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlightSetId }: FolderViewEnhancedProps) {
-  const { availableSets, switchSet, activeSetId, refreshSets, isLoading: setsLoading, deleteSet } = useSet();
+  const { availableSets, switchSet, activeSetId, refreshSets, isLoading: setsLoading } = useSet();
   const { preloadFolders, getCachedFolders, clearFolderCache, preloadAllSets, preloadImages, getCachedContent } = useSetCache();
   // Access preloaded data to avoid unnecessary spinners if cache hasn't been primed yet
   const { preloadedData, isLoading: isPreloading } = usePreloader();

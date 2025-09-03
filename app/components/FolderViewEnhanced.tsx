@@ -435,16 +435,22 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     }
   };
 
-  // --- Admin-only action: delete this default set for my account only ---
-  const adminDeleteDefaultSetForMe = async (setId: string) => {
+  // --- Admin-only action: delete default set across ALL accounts ---
+  const adminDeleteDefaultSetGlobally = async (setId: string) => {
     if (!isAdmin) return;
-    if (!window.confirm('Delete this default set from your account?')) return;
+    const baseId = setId.split('__')[0];
+    if (!window.confirm('Delete this default set for ALL accounts? This cannot be undone.')) return;
     try {
-      await deleteSet(setId);
-      toast.success('Default set deleted from your account');
+      const res = await fetch(`/api/admin/default-sets/${encodeURIComponent(baseId)}`, { method: 'DELETE', credentials: 'include' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to delete globally');
+      }
+      toast.success('Default set deleted globally');
+      await refreshSets();
       if (currentFolder) await fetchFolderDetails(currentFolder.id);
     } catch (e) {
-      toast.error('Delete failed');
+      toast.error(e instanceof Error ? e.message : 'Delete failed');
     }
   };
 
@@ -936,9 +942,9 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                               <div className="mt-2">
                                 <button
                                   className="px-2 py-1 text-xs rounded bg-red-900/30 text-red-300 border border-red-800/50 hover:bg-red-900/50"
-                                  onClick={() => adminDeleteDefaultSetForMe(fullSet.id)}
+                                  onClick={() => adminDeleteDefaultSetGlobally(fullSet.id)}
                                 >
-                                  Delete from my account
+                                  Delete globally
                                 </button>
                               </div>
                             )}
@@ -1069,12 +1075,12 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        adminDeleteDefaultSetForMe(fullSet.id);
+                                        adminDeleteDefaultSetGlobally(fullSet.id);
                                       }}
                                       className="px-2 py-1 text-xs rounded bg-red-900/30 text-red-300 border border-red-800/50 hover:bg-red-900/50"
-                                      title="Delete this default set from my account"
+                                      title="Delete this default set for ALL accounts"
                                     >
-                                      Delete
+                                      Delete globally
                                     </button>
                                   )}
                                 </div>

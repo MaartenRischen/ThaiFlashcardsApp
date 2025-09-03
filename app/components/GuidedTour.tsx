@@ -7,6 +7,12 @@ type StepId =
   | 'welcome'
   | 'cardFront'
   | 'cardBack'
+  | 'cardBackThai'
+  | 'cardBackPronunciation'
+  | 'cardBackAudio'
+  | 'cardBackTranslation'
+  | 'cardBackLiteral'
+  | 'cardBackSRS'
   | 'current'
   | 'mysets'
   | 'create'
@@ -22,6 +28,12 @@ const steps: Array<{ id: StepId; title: string; body: string; anchor?: string }>
   { id: 'welcome', title: 'Welcome to Donkey Bridge', body: 'Quick 60‑second tour of key features. You can exit anytime.' },
   { id: 'cardFront', title: 'Flashcard Front', body: 'Front shows the English prompt and optional mnemonic hint.', anchor: '[data-tour="card-front"]' },
   { id: 'cardBack', title: 'Flashcard Back', body: 'Back shows Thai, pronunciation, audio, examples, and rating.', anchor: '[data-tour="card-back"]' },
+  { id: 'cardBackThai', title: 'Thai Text', body: 'The main Thai phrase, gendered and polite based on your settings.', anchor: '[data-tour="back-thai"]' },
+  { id: 'cardBackPronunciation', title: 'Pronunciation', body: 'Phonetic line matching your gender/politeness settings.', anchor: '[data-tour="back-pronunciation"]' },
+  { id: 'cardBackAudio', title: 'Audio Buttons', body: 'Tap Normal or Slow to hear native-like pronunciation.', anchor: '[data-tour="back-audio"]' },
+  { id: 'cardBackTranslation', title: 'English Translation', body: 'Quick English gloss to confirm meaning.', anchor: '[data-tour="back-translation"]' },
+  { id: 'cardBackLiteral', title: 'Literal / Breakdown', body: 'Open a detailed breakdown with literal parts and notes.', anchor: '[data-tour="back-literal"]' },
+  { id: 'cardBackSRS', title: 'Rate Your Recall', body: 'Easy / Correct / Wrong feeds the SRS to schedule reviews.', anchor: '[data-tour="back-srs"]' },
   { id: 'current', title: 'Current', body: 'Track progress and due cards for the active set.', anchor: '[data-tour="nav-current"]' },
   { id: 'mysets', title: 'My Sets', body: 'Manage sets, preview cards, and switch sets.', anchor: '[data-tour="nav-mysets"]' },
   { id: 'gallery', title: 'Public Sets', body: 'Browse the public gallery and import sets you like.', anchor: '[data-tour="nav-gallery"]' },
@@ -39,7 +51,15 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
     let cleanup: (() => void) | undefined;
     const measure = () => {
       // Fire demo actions when entering specific steps
-      if (s?.id === 'cardBack') {
+      if (
+        s?.id === 'cardBack' ||
+        s?.id === 'cardBackThai' ||
+        s?.id === 'cardBackPronunciation' ||
+        s?.id === 'cardBackAudio' ||
+        s?.id === 'cardBackTranslation' ||
+        s?.id === 'cardBackLiteral' ||
+        s?.id === 'cardBackSRS'
+      ) {
         window.dispatchEvent(new Event('db_tour_show_back'));
       } else if (s?.id === 'cardFront') {
         window.dispatchEvent(new Event('db_tour_show_front'));
@@ -82,7 +102,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
         />
       )}
 
-      <div className="absolute inset-0 p-4 flex items-end justify-center sm:items-center pointer-events-none">
+      <div className="absolute inset-0 p-4 flex items-start justify-center sm:items-start pt-8 pointer-events-none">
         <div className="max-w-md w-full bg-[#1F1F1F] border border-[#333] rounded-2xl shadow-2xl p-4 sm:p-6 pointer-events-auto">
           <div className="flex items-start justify-between gap-4">
             <div>

@@ -1618,17 +1618,17 @@ export default function ThaiFlashcards() {
                 <div className="flex flex-col items-center justify-center mb-4">
                   <div className="text-center">
                     {/* Thai word */}
-                    <div className="text-3xl md:text-4xl font-extrabold mb-2 text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
+                    <div data-tour="back-thai" className="text-3xl md:text-4xl font-extrabold mb-2 text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
                       {getThaiWithGender(phrases[index], isMale, isPoliteMode)}
                     </div>
                     {/* Pronunciation text display (framed and prominent) */}
-                    <div className="text-center mb-3">
+                    <div data-tour="back-pronunciation" className="text-center mb-3">
                       <div className="text-xl md:text-2xl font-semibold text-gray-100 px-4 py-2 bg-[#0f172a] rounded-lg inline-block">
                         {getGenderedPronunciation(phrases[index], isMale, isPoliteMode) || ''}
                       </div>
                     </div>
                     {/* Pronunciation buttons - Normal and Slow speed UNDER pronunciation */}
-                    <div className="flex justify-center gap-3 mb-4">
+                    <div data-tour="back-audio" className="flex justify-center gap-3 mb-4">
                       {/* Normal speed button */}
                       <button
                         onClick={(event) => {
@@ -1663,7 +1663,7 @@ export default function ThaiFlashcards() {
                     
                     {/* English translation in blue, in parentheses */}
                     {phrases[index] && (
-                      <div className="text-base md:text-lg font-medium mb-2 text-blue-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
+                      <div data-tour="back-translation" className="text-base md:text-lg font-medium mb-2 text-blue-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
                         ({phrases[index]?.english ?? ''})
                       </div>
                     )}
@@ -1672,6 +1672,7 @@ export default function ThaiFlashcards() {
                     <button
                       onClick={() => setShowBreakdownModal(true)}
                       className="text-xs text-gray-400 hover:text-gray-300 underline mb-3"
+                      data-tour="back-literal"
                     >
                       Literal / breakdown
                     </button>
@@ -1679,7 +1680,7 @@ export default function ThaiFlashcards() {
                     {/* Difficulty Buttons - Wrapped in Popover (Step 3) */}
                     <Popover open={tutorialStep === 3}>
                       <PopoverTrigger asChild>
-                        <div className="flex flex-col items-center mb-6">
+                        <div data-tour="back-srs" className="flex flex-col items-center mb-6">
                           <div className="flex justify-center space-x-3">
                             <button onClick={() => handleCardAction('easy')} className="neumorphic-button text-green-400 px-4 py-2 text-sm">Easy</button>
                             <button onClick={() => handleCardAction('good')} className="neumorphic-button text-yellow-400 px-4 py-2 text-sm">Correct</button>

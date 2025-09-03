@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 type StepId =
   | 'welcome'
@@ -64,8 +65,8 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
   const s = steps[stepIndex];
   const isLast = stepIndex === steps.length - 1;
 
-  return (
-    <div className="fixed inset-0 z-[1000] pointer-events-none">
+  const overlay = (
+    <div className="fixed inset-0 z-[100000] pointer-events-none">
       <div className="absolute inset-0 bg-black/60" />
 
       {spot && (
@@ -109,6 +110,12 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
       </div>
     </div>
   );
+
+  // Render at document.body to avoid stacking context issues
+  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    return createPortal(overlay, document.body);
+  }
+  return overlay;
 }
 
 export function shouldAutoStartTour(): boolean {

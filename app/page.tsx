@@ -309,13 +309,16 @@ export default function ThaiFlashcards() {
 
   // Load voices when component mounts
   useEffect(() => {
-    // Auto-start tour for new/non-logged users
-    try {
-      if (shouldAutoStartTour()) {
-        setIsTourOpen(true);
-        markTourSeen();
-      }
-    } catch {}
+    // Auto-start tour for new/non-logged users, after first paint
+    const id = setTimeout(() => {
+      try {
+        if (shouldAutoStartTour()) {
+          setIsTourOpen(true);
+          markTourSeen();
+        }
+      } catch {}
+    }, 300); // slight delay to ensure DOM is ready
+    return () => clearTimeout(id);
   }, []);
 
   useEffect(() => {

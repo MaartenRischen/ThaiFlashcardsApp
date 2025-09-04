@@ -187,8 +187,8 @@ export function TopicStep({
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[60]" onClick={onClose}>
-        <div className="bg-[#1F1F1F] rounded-2xl p-6 max-w-2xl w-full max-h-[85vh] overflow-hidden relative flex flex-col border border-[#404040] shadow-xl" onClick={e => e.stopPropagation()}>
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-[#1F1F1F] rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-[#404040] shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="flex items-center justify-between p-6 pb-4 border-b border-[#404040]">
             <h3 className="text-lg font-semibold text-[#E0E0E0]">{title}</h3>
             <button
               onClick={onClose}
@@ -197,19 +197,25 @@ export function TopicStep({
               <X size={24} />
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 overflow-y-auto flex-1">
-            {topics.map((topicItem, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  onNext(topicItem);
-                  onClose();
-                }}
-                className="neumorphic-card-static text-left p-3 text-sm text-[#E0E0E0] rounded-xl hover:border-[#BB86FC]/30 transition-colors"
-              >
-                {topicItem}
-              </button>
-            ))}
+          <div className="flex-1 overflow-y-auto p-6 pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {topics.map((topicItem, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setTopic(topicItem);
+                    onClose();
+                  }}
+                  className={`neumorphic-card-static text-left p-3 text-sm rounded-xl transition-colors ${
+                    topic === topicItem 
+                      ? 'text-[#BB86FC] border-[#BB86FC]/50' 
+                      : 'text-[#E0E0E0] hover:border-[#BB86FC]/30'
+                  }`}
+                >
+                  {topicItem}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

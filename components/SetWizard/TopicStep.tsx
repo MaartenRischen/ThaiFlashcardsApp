@@ -228,14 +228,14 @@ export function TopicStep({
       <div className="flex justify-between items-center">
         <button
           onClick={onBack}
-          className="neumorphic-button px-4 py-2 text-[#BDBDBD] rounded-lg text-sm"
+          className="neumorphic-button px-6 py-3 text-[#BDBDBD] rounded-xl"
         >
           ← Back
         </button>
         <button
           onClick={() => onNext(topic || "General conversation")}
-          className="px-4 py-2 rounded-lg bg-[#BB86FC] hover:bg-[#A374E8] 
-                   transition-colors text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-3 rounded-xl bg-[#BB86FC] hover:bg-[#A374E8] 
+                   transition-colors text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!topic.trim()}
         >
           Next →
@@ -256,7 +256,9 @@ export function TopicStep({
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           placeholder="Enter topic or situation..."
-          className="neumorphic-input w-full placeholder-[#BDBDBD]"
+          className={`neumorphic-input w-full placeholder-[#BDBDBD] ${
+            topic ? 'border-[#BB86FC] focus:border-[#BB86FC]' : ''
+          }`}
         />
       </div>
 
@@ -282,7 +284,7 @@ export function TopicStep({
             {randomCommonTopics.map((commonTopic, index) => (
               <button
                 key={index}
-                onClick={() => onNext(commonTopic)}
+                onClick={() => setTopic(commonTopic)}
                 className="neumorphic-card-static text-left p-3 text-sm text-[#E0E0E0] rounded-xl"
               >
                 {commonTopic}
@@ -306,7 +308,7 @@ export function TopicStep({
             {randomPracticalTopics.map((practicalTopic, index) => (
               <button
                 key={index}
-                onClick={() => onNext(practicalTopic)}
+                onClick={() => setTopic(practicalTopic)}
                 className="neumorphic-card-static w-full text-left p-3 text-sm text-[#E0E0E0] rounded-xl"
               >
                 {practicalTopic}
@@ -330,7 +332,7 @@ export function TopicStep({
             {randomWeirdTopics.map((weirdTopic, index) => (
               <button
                 key={index}
-                onClick={() => onNext(weirdTopic)}
+                onClick={() => setTopic(weirdTopic)}
                 className="neumorphic-card-static w-full text-left p-3 text-sm text-[#BB86FC] rounded-xl border-[#BB86FC]/20"
               >
                 {weirdTopic}

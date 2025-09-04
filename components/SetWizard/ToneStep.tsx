@@ -49,14 +49,14 @@ export function ToneStep({ toneLevel, onNext, onBack }: {
       <div className="flex justify-between items-center">
         <button
           onClick={onBack}
-          className="neumorphic-button px-4 py-2 text-[#BDBDBD] rounded-lg text-sm"
+          className="neumorphic-button px-6 py-3 text-[#BDBDBD] rounded-xl"
         >
           ← Back
         </button>
         <button
           onClick={() => onNext(safeToneLevel)}
-          className="px-4 py-2 rounded-lg bg-[#BB86FC] hover:bg-[#A374E8] 
-                   transition-colors text-white text-sm font-medium"
+          className="px-6 py-3 rounded-xl bg-[#BB86FC] hover:bg-[#A374E8] 
+                   transition-colors text-white font-medium"
         >
           Next →
         </button>

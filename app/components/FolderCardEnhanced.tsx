@@ -115,7 +115,7 @@ export default function FolderCardEnhanced({
                   boxShadow: `0 8px 32px ${theme.glow}`
                 }}
               >
-                {!isLoading && folder.setCount !== 0 ? (
+                {!isLoading ? (
                   <FolderIcon 
                     size={48} 
                     style={{ color: theme.primary }} 
@@ -146,7 +146,7 @@ export default function FolderCardEnhanced({
               }}
             >
               <span className="text-sm font-bold" style={{ color: theme.primary }}>
-                {isLoading || folder.setCount === 0 ? 'Loading...' : `${folder.setCount} ${folder.setCount === 1 ? 'set' : 'sets'}`}
+                {isLoading ? 'Loading...' : `${folder.setCount} ${folder.setCount === 1 ? 'set' : 'sets'}`}
               </span>
             </div>
           </div>

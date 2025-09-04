@@ -94,6 +94,23 @@ export function ProficiencyStep({
 
   return (
     <div className="space-y-6">
+      {/* Top Navigation */}
+      <div className="flex justify-between items-center">
+        <button
+          onClick={onBack}
+          className="neumorphic-button px-4 py-2 text-[#BDBDBD] rounded-lg text-sm"
+        >
+          ← Back
+        </button>
+        <button
+          onClick={handleNext}
+          className="px-4 py-2 rounded-lg bg-[#BB86FC] hover:bg-[#A374E8] 
+                   transition-colors text-white text-sm font-medium"
+        >
+          Next →
+        </button>
+      </div>
+
       <ImagePreloader />
       <div className="text-center space-y-2">
         <h3 className="text-xl font-semibold text-[#E0E0E0]">
@@ -178,19 +195,20 @@ export function ProficiencyStep({
         </div>
       </div>
 
-      {/* Navigation */}
+      {/* Bottom Navigation */}
       <div className="flex justify-between pt-4">
         <button
           onClick={onBack}
-          className="neumorphic-button text-gray-400"
+          className="neumorphic-button px-6 py-3 text-[#BDBDBD] rounded-xl"
         >
-          Back
+          ← Back
         </button>
         <button
           onClick={handleNext}
-          className="neumorphic-button text-blue-400"
+          className="px-6 py-3 rounded-xl bg-[#BB86FC] hover:bg-[#A374E8] 
+                   transition-colors text-white font-medium"
         >
-          Next
+          Next →
         </button>
       </div>
     </div>

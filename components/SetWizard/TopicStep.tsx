@@ -1,5 +1,41 @@
 import React, { useState, useEffect } from 'react';
 
+// Pool of common topics
+const commonTopicsPool = [
+  "Shopping", "Restaurant", "Travel", "Daily conversation",
+  "At the hotel", "Asking for directions", "At the market", "Transportation",
+  "Meeting new people", "Ordering food", "Emergency situations", "Banking",
+  "At the doctor", "Job interview", "Making appointments", "Weather talk",
+  "Family gatherings", "School/University", "Sports activities", "Entertainment",
+  "Buying groceries", "Renting accommodation", "Airport check-in", "Taxi conversations",
+  "Coffee shop orders", "Pharmacy visits", "Post office", "Hair salon",
+  "Gym membership", "Library visits", "Museum tours", "Concert tickets"
+];
+
+// Pool of practical topics
+const practicalTopicsPool = [
+  "Simple commands & requests (polite)",
+  "Asking for help in emergencies",
+  "Ordering food at street vendors",
+  "Negotiating prices at markets",
+  "Getting directions when lost",
+  "Making hotel reservations",
+  "Asking about public transportation",
+  "Requesting medical assistance",
+  "Introducing yourself professionally",
+  "Asking for the bill at restaurants",
+  "Booking taxi or ride services",
+  "Asking about WiFi passwords",
+  "Requesting help with language barriers",
+  "Making small talk with locals",
+  "Asking about local customs",
+  "Requesting recommendations for places to visit",
+  "Reporting lost items to police",
+  "Asking for vegetarian food options",
+  "Requesting room service at hotels",
+  "Asking about visa requirements"
+];
+
 // Pool of extremely weird topics
 const weirdTopicsPool = [
   "Hosting a silent auction for thoughts that never existed",
@@ -90,10 +126,25 @@ const weirdTopicsPool = [
   "Filing for bankruptcy of emotional availability"
 ];
 
+// Function to get random topics from any pool
+function getRandomTopics(pool: string[], count: number): string[] {
+  const shuffled = [...pool].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
 // Function to get random weird topics
 function getRandomWeirdTopics(count: number): string[] {
-  const shuffled = [...weirdTopicsPool].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
+  return getRandomTopics(weirdTopicsPool, count);
+}
+
+// Function to get random common topics
+function getRandomCommonTopics(count: number): string[] {
+  return getRandomTopics(commonTopicsPool, count);
+}
+
+// Function to get random practical topics
+function getRandomPracticalTopics(count: number): string[] {
+  return getRandomTopics(practicalTopicsPool, count);
 }
 
 export function TopicStep({ 
@@ -107,14 +158,36 @@ export function TopicStep({
 }) {
   const [topic, setTopic] = useState(value);
   const [randomWeirdTopics, setRandomWeirdTopics] = useState<string[]>([]);
+  const [randomCommonTopics, setRandomCommonTopics] = useState<string[]>([]);
+  const [randomPracticalTopics, setRandomPracticalTopics] = useState<string[]>([]);
 
-  // Get 2 random weird topics on component mount
+  // Get random topics on component mount
   useEffect(() => {
     setRandomWeirdTopics(getRandomWeirdTopics(2));
+    setRandomCommonTopics(getRandomCommonTopics(4));
+    setRandomPracticalTopics(getRandomPracticalTopics(2));
   }, []);
 
   return (
     <div className="space-y-6">
+      {/* Top Navigation */}
+      <div className="flex justify-between items-center">
+        <button
+          onClick={onBack}
+          className="neumorphic-button px-4 py-2 text-[#BDBDBD] rounded-lg text-sm"
+        >
+          ← Back
+        </button>
+        <button
+          onClick={() => onNext(topic || "General conversation")}
+          className="px-4 py-2 rounded-lg bg-[#BB86FC] hover:bg-[#A374E8] 
+                   transition-colors text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!topic.trim()}
+        >
+          Next →
+        </button>
+      </div>
+
       {/* Title */}
       <div className="text-center space-y-2">
         <h3 className="text-xl font-semibold text-[#E0E0E0]">
@@ -128,54 +201,63 @@ export function TopicStep({
           type="text"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
-          placeholder="Enter your topic..."
+          placeholder="Enter topic or situation..."
           className="neumorphic-input w-full placeholder-[#BDBDBD]"
         />
+      </div>
+
+      {/* Or Choose Label */}
+      <div className="text-center">
+        <span className="text-sm text-[#BDBDBD] font-medium">Or choose:</span>
       </div>
 
       {/* Suggested Topics */}
       <div className="space-y-4">
         {/* Common Section */}
         <div className="space-y-3">
-          <span className="text-sm text-[#BDBDBD] font-medium">Common Topics</span>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-[#BDBDBD] font-medium">Common Topics</span>
+            <button
+              onClick={() => setRandomCommonTopics(getRandomCommonTopics(4))}
+              className="text-xs text-[#BDBDBD]/70 hover:text-[#BDBDBD] transition-colors"
+            >
+              🎲 Shuffle
+            </button>
+          </div>
           <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => onNext("Shopping")}
-              className="neumorphic-card-static text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
-            >
-              Shopping
-            </button>
-            <button
-              onClick={() => onNext("Restaurant")}
-              className="neumorphic-card-static text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
-            >
-              Restaurant
-            </button>
-            <button
-              onClick={() => onNext("Travel")}
-              className="neumorphic-card-static text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
-            >
-              Travel
-            </button>
-            <button
-              onClick={() => onNext("Daily conversation")}
-              className="neumorphic-card-static text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
-            >
-              Daily conversation
-            </button>
+            {randomCommonTopics.map((commonTopic, index) => (
+              <button
+                key={index}
+                onClick={() => onNext(commonTopic)}
+                className="neumorphic-card-static text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
+              >
+                {commonTopic}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Practical Section */}
         <div className="space-y-3">
-          <span className="text-sm text-[#BDBDBD] font-medium">Practical</span>
-          <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-[#BDBDBD] font-medium">Practical</span>
             <button
-              onClick={() => onNext("Simple commands & requests (polite)")}
-              className="neumorphic-card-static w-full text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
+              onClick={() => setRandomPracticalTopics(getRandomPracticalTopics(2))}
+              className="text-xs text-[#BDBDBD]/70 hover:text-[#BDBDBD] transition-colors"
             >
-              Simple commands & requests (polite)
+              🎲 Shuffle
             </button>
+          </div>
+          <div className="space-y-2">
+            {randomPracticalTopics.map((practicalTopic, index) => (
+              <button
+                key={index}
+                onClick={() => onNext(practicalTopic)}
+                className="neumorphic-card-static w-full text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
+              >
+                {practicalTopic}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -204,13 +286,13 @@ export function TopicStep({
         </div>
       </div>
 
-      {/* Navigation */}
+      {/* Bottom Navigation */}
       <div className="flex justify-between pt-6">
         <button
           onClick={onBack}
           className="neumorphic-button px-6 py-3 text-[#BDBDBD] rounded-xl"
         >
-          Back
+          ← Back
         </button>
         <button
           onClick={() => onNext(topic || "General conversation")}
@@ -218,7 +300,7 @@ export function TopicStep({
                    transition-colors text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!topic.trim()}
         >
-          Next
+          Next →
         </button>
       </div>
     </div>

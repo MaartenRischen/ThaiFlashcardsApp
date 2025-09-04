@@ -47,6 +47,7 @@ import { useSetCompletion } from './hooks/useSetCompletion';
 import { useAudioGeneration } from './context/AudioGenerationContext';
 import { AudioReadyModal } from './components/AudioReadyModal';
 import { GuidedTour, shouldAutoStartTour, markTourSeen } from './components/GuidedTour';
+import { usePreloader } from './context/PreloaderContext';
 
 // Type for phrases with literal translation
 interface PhraseWithLiteral extends Phrase {
@@ -214,6 +215,7 @@ export default function ThaiFlashcards() {
   } = useSet();
   
   const audioGeneration = useAudioGeneration();
+  const { isLoading } = usePreloader();
   
   // Log activeSetProgress whenever the component renders
   console.log("ThaiFlashcards Rendering - ActiveSetProgress:", JSON.stringify(activeSetProgress));
@@ -309,7 +311,9 @@ export default function ThaiFlashcards() {
 
   // Load voices when component mounts
   useEffect(() => {
-    // Auto-start tour for new/non-logged users, after first paint
+    // Auto-start tour for new/non-logged users, but only after loading is complete
+    if (isLoading) return; // Don't start tour while loading
+    
     const id = setTimeout(() => {
       try {
         if (shouldAutoStartTour()) {
@@ -319,7 +323,7 @@ export default function ThaiFlashcards() {
       } catch {}
     }, 300); // slight delay to ensure DOM is ready
     return () => clearTimeout(id);
-  }, []);
+  }, [isLoading]); // Add isLoading as dependency
 
   useEffect(() => {
     function loadVoices() {

@@ -444,6 +444,30 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     const sorted = [...filtered].sort((a, b) => {
       switch (sortOption) {
         case 'name':
+          // Special handling for numbered sets (common words/sentences)
+          const aIsNumbered = /\d+$/.test(a.name);
+          const bIsNumbered = /\d+$/.test(b.name);
+          
+          if (aIsNumbered && bIsNumbered) {
+            // Both have numbers at the end, extract and compare numerically
+            const aMatch = a.name.match(/(\d+)$/);
+            const bMatch = b.name.match(/(\d+)$/);
+            
+            if (aMatch && bMatch) {
+              const aNum = parseInt(aMatch[1], 10);
+              const bNum = parseInt(bMatch[1], 10);
+              
+              // If the base names are the same (e.g., "100 Most Used Thai Words"), sort by number
+              const aBase = a.name.replace(/\s+\d+$/, '');
+              const bBase = b.name.replace(/\s+\d+$/, '');
+              
+              if (aBase === bBase) {
+                return aNum - bNum;
+              }
+            }
+          }
+          
+          // Default to alphabetical sorting
           return a.name.localeCompare(b.name);
         case 'date':
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();

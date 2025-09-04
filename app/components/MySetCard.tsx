@@ -31,14 +31,14 @@ const MySetCard: React.FC<MySetCardProps> = ({
       return getThumbnailUrl('/images/defaultnew.png');
     }
     // Common words: 01..10
-    if (originalId.startsWith('common-words-')) {
-      const n = originalId.replace('common-words-', '');
+    if (originalId.startsWith('default-common-words-') || originalId.startsWith('common-words-')) {
+      const n = originalId.replace('default-common-words-', '').replace('common-words-', '');
       const padded = String(parseInt(n, 10)).padStart(2, '0');
       return getThumbnailUrl(`/images/defaults/default-common-words-${padded}.png`);
     }
     // Common sentences: 1..10 (no pad)
-    if (originalId.startsWith('common-sentences-')) {
-      const n = originalId.replace('common-sentences-', '');
+    if (originalId.startsWith('default-common-sentences-') || originalId.startsWith('common-sentences-')) {
+      const n = originalId.replace('default-common-sentences-', '').replace('common-sentences-', '');
       return getThumbnailUrl(`/images/defaults/default-common-sentences-${n}.png`);
     }
     // Map other canonical default sets to thailand images
@@ -64,7 +64,9 @@ const MySetCard: React.FC<MySetCardProps> = ({
     return getThumbnailUrl('/images/default-set-logo.png');
   };
 
-  const imgUrl = (set.source === 'default' ? computeDefaultImageUrl() : getThumbnailUrl(set.imageUrl || '/images/default-set-logo.png'));
+  // Use imageUrl if provided, otherwise compute based on ID
+  const imgUrl = set.imageUrl ? set.imageUrl : computeDefaultImageUrl();
+  console.log(`[MySetCard] Set ${set.id} - imageUrl: ${set.imageUrl}, computed: ${imgUrl}`);
   const isCurrentSet = currentSetId === set.id;
   const canPublish = set.source !== 'default' && !set.id.startsWith('default-');
 

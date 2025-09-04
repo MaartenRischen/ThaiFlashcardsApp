@@ -56,6 +56,13 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
   const [highlightEl, setHighlightEl] = useState<HTMLElement | null>(null);
   const [showTourAtStartup, setShowTourAtStartupState] = useState(getShowTourAtStartup());
 
+  // Sync state when tour opens
+  useEffect(() => {
+    if (isOpen) {
+      setShowTourAtStartupState(getShowTourAtStartup());
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return;
     const s = steps[stepIndex];

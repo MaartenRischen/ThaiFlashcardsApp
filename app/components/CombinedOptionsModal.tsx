@@ -265,6 +265,13 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
 }) {
   const [showTourAtStartup, setShowTourAtStartupState] = useState(getShowTourAtStartup());
   const { refreshSets } = useSet();
+  
+  // Sync state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setShowTourAtStartupState(getShowTourAtStartup());
+    }
+  }, [isOpen]);
 
   const handleResetDefaultSets = async () => {
     if (!window.confirm('Are you sure you want to reset all default sets to their original state? This will overwrite any customizations you made to default sets.')) {

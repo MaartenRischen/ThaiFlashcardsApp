@@ -65,11 +65,15 @@ export function GenerationStep({
             currentPhrase += 1;
             updateProgress(currentPhrase);
           }
-        }, 1200);
+        }, 300); // Update every 300ms instead of 1200ms for smoother progress
         
         if (state.mode === 'manual' && state.manualPhrases) {
           // Manual mode - call the API with manual phrases
           console.log('GenerationStep: Calling API for manual mode with phrases:', state.manualPhrases);
+          
+          // Add a timeout using AbortController
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
           
           const response = await fetch('/api/generate-set', {
             method: 'POST',
@@ -81,8 +85,9 @@ export function GenerationStep({
               englishPhrases: state.manualPhrases,
               totalCount: state.manualPhrases.length
             }),
-            credentials: 'include'
-          });
+            credentials: 'include',
+            signal: controller.signal
+          }).finally(() => clearTimeout(timeoutId));
           
           console.log('GenerationStep: API response status:', response.status);
           
@@ -124,8 +129,8 @@ export function GenerationStep({
           // The API already created the set, so we just need to refresh and switch to it
           await refreshSets();
           
-          // Small delay to show completion
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Wait a bit longer to ensure the sets are fully loaded
+          await new Promise(resolve => setTimeout(resolve, 1500));
           
           completeGeneration();
           
@@ -145,6 +150,10 @@ export function GenerationStep({
           
           console.log('GenerationStep: Calling API for auto mode with preferences:', preferences);
           
+          // Add a timeout using AbortController
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+          
           const response = await fetch('/api/generate-set', {
             method: 'POST',
             headers: {
@@ -155,8 +164,9 @@ export function GenerationStep({
               totalCount: state.cardCount || 10,
               mode: 'auto'
             }),
-            credentials: 'include'
-          });
+            credentials: 'include',
+            signal: controller.signal
+          }).finally(() => clearTimeout(timeoutId));
           
           console.log('GenerationStep: API response status:', response.status);
           
@@ -205,8 +215,8 @@ export function GenerationStep({
           // The API already created the set, so we just need to refresh and switch to it
           await refreshSets();
           
-          // Small delay to show completion
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Wait a bit longer to ensure the sets are fully loaded
+          await new Promise(resolve => setTimeout(resolve, 1500));
           
           completeGeneration();
           
@@ -228,7 +238,9 @@ export function GenerationStep({
         // Provide more helpful error messages
         let errorMessage = error instanceof Error ? error.message : 'Unknown error';
         
-        if (errorMessage.includes('No phrases were generated')) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          errorMessage = 'Generation is taking too long. The server might be overloaded. Please try again later.';
+        } else if (errorMessage.includes('No phrases were generated')) {
           errorMessage = 'The AI service is temporarily unavailable. This could be due to:\n\n' +
             '• OpenRouter API is down or experiencing issues\n' +
             '• API key has insufficient credits\n' +

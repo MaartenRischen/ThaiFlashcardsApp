@@ -71,10 +71,6 @@ export function GenerationStep({
           // Manual mode - call the API with manual phrases
           console.log('GenerationStep: Calling API for manual mode with phrases:', state.manualPhrases);
           
-          // Add a timeout using AbortController
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
-          
           const response = await fetch('/api/generate-set', {
             method: 'POST',
             headers: {
@@ -85,9 +81,8 @@ export function GenerationStep({
               englishPhrases: state.manualPhrases,
               totalCount: state.manualPhrases.length
             }),
-            credentials: 'include',
-            signal: controller.signal
-          }).finally(() => clearTimeout(timeoutId));
+            credentials: 'include'
+          });
           
           console.log('GenerationStep: API response status:', response.status);
           
@@ -150,10 +145,6 @@ export function GenerationStep({
           
           console.log('GenerationStep: Calling API for auto mode with preferences:', preferences);
           
-          // Add a timeout using AbortController
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
-          
           const response = await fetch('/api/generate-set', {
             method: 'POST',
             headers: {
@@ -164,9 +155,8 @@ export function GenerationStep({
               totalCount: state.cardCount || 10,
               mode: 'auto'
             }),
-            credentials: 'include',
-            signal: controller.signal
-          }).finally(() => clearTimeout(timeoutId));
+            credentials: 'include'
+          });
           
           console.log('GenerationStep: API response status:', response.status);
           

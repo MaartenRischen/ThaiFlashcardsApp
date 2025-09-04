@@ -1913,14 +1913,10 @@ export default function ThaiFlashcards() {
         <SetWizardModal
           isOpen={showSetWizardModal}
           onClose={() => setShowSetWizardModal(false)}
-          onComplete={async (newSetId: string) => {
+          onComplete={(newSetId: string) => {
             console.log('SetWizardModal onComplete fired, new set:', newSetId);
             if (newSetId) {
               setHighlightSetId(newSetId);
-              // Close wizard modal first
-              setShowSetWizardModal(false);
-              // Wait a bit before opening My Sets modal to ensure state updates
-              await new Promise(resolve => setTimeout(resolve, 500));
               // Open My Sets modal to show the new set
               setIsManagementModalOpen(true);
             }

@@ -21,6 +21,7 @@ interface FolderCache {
 interface SetCacheContextProps {
   cache: Record<string, SetContentCache>;
   folderCache: FolderCache | null;
+  hasInitiallyLoadedFolders: boolean;
   getCachedContent: (setId: string) => SetContentCache | null;
   getCachedFolders: () => Folder[] | null;
   preloadSetContent: (setId: string, forceRefresh?: boolean) => Promise<SetContentCache>;
@@ -40,6 +41,7 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
   const { preloadedData } = usePreloader();
   const [cache, setCache] = useState<Record<string, SetContentCache>>({});
   const [folderCache, setFolderCache] = useState<FolderCache | null>(null);
+  const [hasInitiallyLoadedFolders, setHasInitiallyLoadedFolders] = useState(false);
   
   // Initialize cache with preloaded data
   useEffect(() => {
@@ -68,6 +70,7 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
           folders: preloadedData.folders,
           lastFetched: Date.now()
         });
+        setHasInitiallyLoadedFolders(true);
       }
     }
   }, [preloadedData]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -257,6 +260,7 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
         folders,
         lastFetched: Date.now()
       });
+      setHasInitiallyLoadedFolders(true);
 
       console.log(`[SetCache] Cached ${folders.length} folders`);
       return folders;
@@ -295,6 +299,7 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
     <SetCacheContext.Provider value={{
       cache,
       folderCache,
+      hasInitiallyLoadedFolders,
       getCachedContent,
       getCachedFolders,
       preloadSetContent,

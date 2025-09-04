@@ -81,9 +81,13 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
           if (highlightEl && highlightEl !== el) {
             highlightEl.classList.remove('db-tour-highlight');
             (highlightEl as unknown as HTMLElement).style.zIndex = '';
+            highlightEl.classList.remove('db-tour-highlight-create');
           }
           // Apply highlight to current
           el.classList.add('db-tour-highlight');
+          if (s?.id === 'create') {
+            el.classList.add('db-tour-highlight-create');
+          }
           (el as unknown as HTMLElement).style.zIndex = '100001';
           setHighlightEl(el);
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -93,6 +97,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
       // No anchor found: cleanup previous
       if (highlightEl) {
         highlightEl.classList.remove('db-tour-highlight');
+        highlightEl.classList.remove('db-tour-highlight-create');
         (highlightEl as unknown as HTMLElement).style.zIndex = '';
         setHighlightEl(null);
       }
@@ -124,6 +129,22 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
           border-radius: 12px !important;
           transition: box-shadow .2s ease, transform .2s ease;
           pointer-events: none !important;
+        }
+
+        @keyframes tour-sparkle {
+          0%, 100% {
+            opacity: 0.5;
+            transform: scale(0.95);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.05);
+          }
+        }
+
+        .db-tour-highlight-create {
+          box-shadow: 0 0 0 3px #22c55e, 0 0 0 8px rgba(34, 197, 94, 0.3), 0 0 25px 15px rgba(34, 197, 94, 0.4) !important;
+          animation: tour-sparkle 1.5s ease-in-out infinite;
         }
       `}</style>
 

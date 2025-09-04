@@ -164,7 +164,7 @@ export function FlashcardHeader({
           <div className="flex flex-col items-center">
             <button
               onClick={onOpenSetWizard}
-              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d4a3d] text-[#22c55e] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(34,197,94,0.15)] before:pointer-events-none"
+              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d4a3d] text-[#22c55e] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(34,197,94,0.15)] before:pointer-events-none create-button-emphasis"
               data-tour="nav-create"
               style={{
                 boxShadow: '0 0 20px rgba(34, 197, 94, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 
 // Pool of common topics
 const commonTopicsPool = [
@@ -160,6 +161,8 @@ export function TopicStep({
   const [randomWeirdTopics, setRandomWeirdTopics] = useState<string[]>([]);
   const [randomCommonTopics, setRandomCommonTopics] = useState<string[]>([]);
   const [randomPracticalTopics, setRandomPracticalTopics] = useState<string[]>([]);
+  const [showCommonModal, setShowCommonModal] = useState(false);
+  const [showPracticalModal, setShowPracticalModal] = useState(false);
 
   // Get random topics on component mount
   useEffect(() => {
@@ -167,6 +170,51 @@ export function TopicStep({
     setRandomCommonTopics(getRandomCommonTopics(4));
     setRandomPracticalTopics(getRandomPracticalTopics(2));
   }, []);
+
+  // Modal component for full list
+  const TopicListModal = ({ 
+    isOpen, 
+    onClose, 
+    title, 
+    topics 
+  }: { 
+    isOpen: boolean, 
+    onClose: () => void, 
+    title: string, 
+    topics: string[] 
+  }) => {
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[60]" onClick={onClose}>
+        <div className="bg-[#1F1F1F] rounded-2xl p-6 max-w-2xl w-full max-h-[85vh] overflow-hidden relative flex flex-col border border-[#404040] shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-[#E0E0E0]">{title}</h3>
+            <button
+              onClick={onClose}
+              className="text-[#BDBDBD] hover:text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 overflow-y-auto flex-1">
+            {topics.map((topicItem, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  onNext(topicItem);
+                  onClose();
+                }}
+                className="neumorphic-card-static text-left p-3 text-sm text-[#E0E0E0] rounded-xl hover:border-[#BB86FC]/30 transition-colors"
+              >
+                {topicItem}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -218,10 +266,10 @@ export function TopicStep({
           <div className="flex items-center justify-between">
             <span className="text-sm text-[#BDBDBD] font-medium">Common Topics</span>
             <button
-              onClick={() => setRandomCommonTopics(getRandomCommonTopics(4))}
+              onClick={() => setShowCommonModal(true)}
               className="text-xs text-[#BDBDBD]/70 hover:text-[#BDBDBD] transition-colors"
             >
-              🎲 Shuffle
+              📋 Full List
             </button>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -229,7 +277,7 @@ export function TopicStep({
               <button
                 key={index}
                 onClick={() => onNext(commonTopic)}
-                className="neumorphic-card-static text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
+                className="neumorphic-card-static text-left p-3 text-sm text-[#E0E0E0] rounded-xl"
               >
                 {commonTopic}
               </button>
@@ -242,10 +290,10 @@ export function TopicStep({
           <div className="flex items-center justify-between">
             <span className="text-sm text-[#BDBDBD] font-medium">Practical</span>
             <button
-              onClick={() => setRandomPracticalTopics(getRandomPracticalTopics(2))}
+              onClick={() => setShowPracticalModal(true)}
               className="text-xs text-[#BDBDBD]/70 hover:text-[#BDBDBD] transition-colors"
             >
-              🎲 Shuffle
+              📋 Full List
             </button>
           </div>
           <div className="space-y-2">
@@ -253,7 +301,7 @@ export function TopicStep({
               <button
                 key={index}
                 onClick={() => onNext(practicalTopic)}
-                className="neumorphic-card-static w-full text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
+                className="neumorphic-card-static w-full text-left p-3 text-sm text-[#E0E0E0] rounded-xl"
               >
                 {practicalTopic}
               </button>
@@ -277,7 +325,7 @@ export function TopicStep({
               <button
                 key={index}
                 onClick={() => onNext(weirdTopic)}
-                className="neumorphic-card-static w-full text-left p-4 text-sm text-[#BB86FC] rounded-xl border-[#BB86FC]/20"
+                className="neumorphic-card-static w-full text-left p-3 text-sm text-[#BB86FC] rounded-xl border-[#BB86FC]/20"
               >
                 {weirdTopic}
               </button>
@@ -303,6 +351,20 @@ export function TopicStep({
           Next →
         </button>
       </div>
+
+      {/* Modals */}
+      <TopicListModal
+        isOpen={showCommonModal}
+        onClose={() => setShowCommonModal(false)}
+        title="All Common Topics"
+        topics={commonTopicsPool}
+      />
+      <TopicListModal
+        isOpen={showPracticalModal}
+        onClose={() => setShowPracticalModal(false)}
+        title="All Practical Topics"
+        topics={practicalTopicsPool}
+      />
     </div>
   );
 } 

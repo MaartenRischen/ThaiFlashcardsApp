@@ -103,11 +103,11 @@ export function FlashcardHeader({
       {/* Navigation Buttons */}
       <div className="px-4 py-3 w-full bg-[#121212]">
         <div className="flex flex-row items-center w-full justify-between gap-x-3">
-          {/* Cards (This Set) - First */}
+          {/* Cards (Current) - First */}
           <div className="flex flex-col items-center">
             <button
               onClick={onOpenCards}
-              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#f59e0b] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(245,158,11,0.15)] before:pointer-events-none"
+              className="relative neumorphic-icon-button text-xl rounded-xl bg-[#3C3C3C] hover:bg-[#3d3c44] text-[#f59e0b] before:absolute before:inset-0 before:rounded-xl before:shadow-[0_0_20px_10px_rgba(245,158,11,0.15)] before:pointer-events-none current-button-frame"
               data-tour="nav-current"
               style={{
                 boxShadow: '0 0 20px rgba(245, 158, 11, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
@@ -117,10 +117,10 @@ export function FlashcardHeader({
             >
               <Layers />
             </button>
-            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">This Set</span>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Current</span>
           </div>
           
-          {/* Divider between This Set and My Sets */}
+          {/* Divider between Current and My Sets */}
           <div className="h-12 w-px bg-[#404040]/50 mx-1" />
           
           {/* My Sets - Second */}
@@ -140,7 +140,7 @@ export function FlashcardHeader({
             <span className="block text-xs text-[#BDBDBD] mt-1 text-center">My Sets</span>
           </div>
           
-          {/* Gallery (Public Sets) - Third */}
+          {/* Gallery - Third */}
           <div className="flex flex-col items-center">
             <button
               onClick={() => router.push('/gallery')}
@@ -154,10 +154,10 @@ export function FlashcardHeader({
             >
               <GalleryHorizontal />
             </button>
-            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Public Sets</span>
+            <span className="block text-xs text-[#BDBDBD] mt-1 text-center">Gallery</span>
           </div>
           
-          {/* Divider between Public Sets and Create! */}
+          {/* Divider between Gallery and Create! */}
           <div className="h-12 w-px bg-[#404040]/50 mx-1" />
           
           {/* Create! - Fourth */}

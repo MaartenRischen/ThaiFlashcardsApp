@@ -27,13 +27,8 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
     }
   ];
   
-  // PERFORMANCE OPTIMIZATION: Don't load ALL sets for unauthenticated users
-  // Only load a small subset to make the initial load MUCH faster
-  const PREVIEW_SET_IDS = ['numbers-1-10', 'basic-colors', 'days-of-week'];
-  const previewSets = ALL_DEFAULT_SETS.filter(set => PREVIEW_SET_IDS.includes(set.id));
-  
-  // Add only the preview sets
-  previewSets.forEach((set, index) => {
+  // Load ALL default sets - we need metadata for the folders to work
+  ALL_DEFAULT_SETS.forEach((set, index) => {
     // Determine which image to use based on set ID
     let imageUrl: string;
     if (set.id.startsWith('common-words-')) {

@@ -177,21 +177,11 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
           );
         } else if (folder.name === '100 Most Used Thai Words') {
           folderSets = availableSets.filter(set => 
-            set.id.startsWith('common-words-') || set.id === 'common-words-1' || 
-            set.id === 'common-words-2' || set.id === 'common-words-3' || 
-            set.id === 'common-words-4' || set.id === 'common-words-5' || 
-            set.id === 'common-words-6' || set.id === 'common-words-7' || 
-            set.id === 'common-words-8' || set.id === 'common-words-9' || 
-            set.id === 'common-words-10'
+            set.id.startsWith('default-common-words-') || set.id.startsWith('common-words-')
           );
         } else if (folder.name === '100 Most Used Thai Sentences') {
           folderSets = availableSets.filter(set => 
-            set.id.startsWith('common-sentences-') || set.id === 'common-sentences-1' || 
-            set.id === 'common-sentences-2' || set.id === 'common-sentences-3' || 
-            set.id === 'common-sentences-4' || set.id === 'common-sentences-5' || 
-            set.id === 'common-sentences-6' || set.id === 'common-sentences-7' || 
-            set.id === 'common-sentences-8' || set.id === 'common-sentences-9' || 
-            set.id === 'common-sentences-10'
+            set.id.startsWith('default-common-sentences-') || set.id.startsWith('common-sentences-')
           );
         }
       } else {
@@ -792,21 +782,11 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                         );
                       } else if (folder.name === '100 Most Used Thai Words') {
                         folderSets = availableSets.filter(set => 
-                          set.id.startsWith('common-words-') || set.id === 'common-words-1' || 
-                          set.id === 'common-words-2' || set.id === 'common-words-3' || 
-                          set.id === 'common-words-4' || set.id === 'common-words-5' || 
-                          set.id === 'common-words-6' || set.id === 'common-words-7' || 
-                          set.id === 'common-words-8' || set.id === 'common-words-9' || 
-                          set.id === 'common-words-10'
+                          set.id.startsWith('default-common-words-') || set.id.startsWith('common-words-')
                         );
                       } else if (folder.name === '100 Most Used Thai Sentences') {
                         folderSets = availableSets.filter(set => 
-                          set.id.startsWith('common-sentences-') || set.id === 'common-sentences-1' || 
-                          set.id === 'common-sentences-2' || set.id === 'common-sentences-3' || 
-                          set.id === 'common-sentences-4' || set.id === 'common-sentences-5' || 
-                          set.id === 'common-sentences-6' || set.id === 'common-sentences-7' || 
-                          set.id === 'common-sentences-8' || set.id === 'common-sentences-9' || 
-                          set.id === 'common-sentences-10'
+                          set.id.startsWith('default-common-sentences-') || set.id.startsWith('common-sentences-')
                         );
                       }
                     } else {

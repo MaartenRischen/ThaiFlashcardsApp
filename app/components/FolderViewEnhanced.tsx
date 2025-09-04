@@ -639,7 +639,13 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="p-3 rounded-lg bg-gradient-to-br from-green-500 to-blue-500 text-white">
-                        <CheckSquare className="w-6 h-6" />
+                        <Image 
+                          src="/images/exam.png" 
+                          alt="Exam icon" 
+                          width={24} 
+                          height={24} 
+                          className="w-6 h-6"
+                        />
                       </div>
                       <div className="text-left">
                         <h3 className="text-lg font-semibold text-[#E0E0E0] group-hover:text-white transition-colors">

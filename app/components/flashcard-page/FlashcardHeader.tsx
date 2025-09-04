@@ -41,13 +41,13 @@ export function FlashcardHeader({
   const hasClerkSession = typeof window !== 'undefined' && !!document.cookie.match(/__session=/);
 
   return (
-    <div className="bg-[#1F1F1F] border-b border-[#404040] flex flex-col">
+    <div className="bg-[#1F1F1F] border-b border-[#404040] flex flex-col relative z-0">
       {/* Full-width Ideogram set image (16:9 aspect ratio) */}
       <div className="w-full flex items-center justify-center py-2 relative mt-2 bg-[#121212]">
         <div className="w-full max-w-lg aspect-[16/9] rounded-xl overflow-hidden relative border border-[#404040] bg-[#2C2C2C]">
           {/* Overlay (Top) */}
           <div
-            className="absolute top-0 left-0 right-0 z-20 flex flex-col items-center pointer-events-none"
+            className="absolute top-0 left-0 right-0 z-10 flex flex-col items-center pointer-events-none"
             style={{ paddingTop: '4px' }}
           >
             <div
@@ -80,7 +80,7 @@ export function FlashcardHeader({
           />
           {/* Set Title Overlay at Bottom */}
           <div
-            className="absolute bottom-0 left-0 right-0 z-30 flex flex-col items-center pointer-events-none"
+            className="absolute bottom-0 left-0 right-0 z-10 flex flex-col items-center pointer-events-none"
             style={{ paddingBottom: '8px' }}
           >
             <div

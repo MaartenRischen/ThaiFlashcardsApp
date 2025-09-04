@@ -6,6 +6,7 @@ import type { PhraseProgressData } from '@/app/lib/storage';
 import { getDefaultSetContent } from '@/app/lib/seed-default-sets';
 import { Folder } from '@/app/lib/storage/folders';
 import { usePreloader } from './PreloaderContext';
+import { getThumbnailUrl, preloadImage } from '@/app/lib/image-utils';
 
 interface SetContentCache {
   phrases: Phrase[];
@@ -274,25 +275,15 @@ export const SetCacheProvider = ({ children }: { children: ReactNode }) => {
     const validUrls = imageUrls.filter((url): url is string => !!url);
     const uniqueUrls = Array.from(new Set(validUrls));
     
-    console.log(`[SetCache] Pre-loading ${uniqueUrls.length} images...`);
+    console.log(`[SetCache] Pre-loading ${uniqueUrls.length} images as thumbnails...`);
     
-    const imagePromises = uniqueUrls.map(url => {
-      return new Promise<void>((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          console.log(`[SetCache] Successfully preloaded image: ${url}`);
-          resolve();
-        };
-        img.onerror = () => {
-          console.error(`[SetCache] Failed to preload image: ${url}`);
-          resolve(); // Still resolve to not block other images
-        };
-        img.src = url;
-      });
-    });
+    // Convert to thumbnail URLs for faster loading
+    const thumbnailUrls = uniqueUrls.map(url => getThumbnailUrl(url));
+    
+    const imagePromises = thumbnailUrls.map(url => preloadImage(url));
     
     await Promise.all(imagePromises);
-    console.log(`[SetCache] Image pre-loading complete`);
+    console.log(`[SetCache] Thumbnail pre-loading complete`);
   }, []);
 
   return (

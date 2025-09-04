@@ -18,6 +18,7 @@ import SetCompletionBadge from './SetCompletionBadge';
 import type { SetMetaData } from '@/app/lib/storage';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { LazyImage } from '@/app/components/LazyImage';
 import { 
   Plus, 
   ArrowLeft, 
@@ -945,13 +946,11 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                               )}
 
                               <div className="relative w-24 h-16 flex-shrink-0 rounded-lg overflow-hidden">
-                                <Image
+                                <LazyImage
                                   src={imgUrl}
                                   alt={set.name}
-                                  className="object-cover"
-                                  fill
-                                  sizes="96px"
-                                  unoptimized={true}
+                                  className="w-full h-full object-cover"
+                                  loadFullImage={false}
                                 />
                               </div>
                               

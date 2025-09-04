@@ -19,7 +19,7 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
       createdAt: new Date().toISOString(),
       phraseCount: INITIAL_PHRASES.length,
       source: 'default',
-      imageUrl: '/images/defaultnew.png',
+      imageUrl: '/images/thumbnails/defaultnew.png',
       isFullyLearned: false,
       seriousnessLevel: null,
       toneLevel: null,
@@ -29,17 +29,17 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
   
   // Load ALL default sets - we need metadata for the folders to work
   ALL_DEFAULT_SETS.forEach((set, index) => {
-    // Determine which image to use based on set ID
+    // Determine which image to use based on set ID - use thumbnails for faster loading
     let imageUrl: string;
     if (set.id.startsWith('common-words-')) {
       const setNumber = set.id.replace('common-words-', '');
-      imageUrl = `/images/defaults/default-common-words-${setNumber.padStart(2, '0')}.png`;
+      imageUrl = `/images/thumbnails/defaults/default-common-words-${setNumber.padStart(2, '0')}.png`;
     } else if (set.id.startsWith('common-sentences-')) {
       const setNumber = set.id.replace('common-sentences-', '');
-      imageUrl = `/images/defaults/default-common-sentences-${setNumber}.png`;
+      imageUrl = `/images/thumbnails/defaults/default-common-sentences-${setNumber}.png`;
     } else {
       // Use original thailand images for the first 6 sets
-      imageUrl = `/images/defaults/default-thailand-${(index + 1).toString().padStart(2, '0')}.png`;
+      imageUrl = `/images/thumbnails/defaults/default-thailand-${(index + 1).toString().padStart(2, '0')}.png`;
     }
     
     const setId = `default-${set.id}`;

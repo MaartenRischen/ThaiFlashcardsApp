@@ -68,6 +68,9 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortOption, setSortOption] = useState<SortOption>('name');
   
+  // Track if we've completed initial load
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
+  
   // Multi-select state
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedSets, setSelectedSets] = useState<Set<string>>(new Set());
@@ -92,16 +95,20 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
   // Use preloaded folders when available
   useEffect(() => {
     if (isOpen) {
-      console.log('[FolderViewEnhanced] isOpen:', isOpen, 'preloadedFolders:', preloadedFolders);
-      if (preloadedFolders.length > 0) {
-        console.log('[FolderViewEnhanced] Using preloaded folders:', preloadedFolders);
-        setFolders(preloadedFolders);
-      } else {
-        console.log('[FolderViewEnhanced] No preloaded folders, fetching...');
-        fetchFolders();
+      console.log('[FolderViewEnhanced] isOpen:', isOpen, 'hasInitiallyLoaded:', hasInitiallyLoaded, 'preloadedFolders:', preloadedFolders);
+      // Only fetch if we haven't already loaded
+      if (!hasInitiallyLoaded) {
+        if (preloadedFolders.length > 0) {
+          console.log('[FolderViewEnhanced] Using preloaded folders:', preloadedFolders);
+          setFolders(preloadedFolders);
+          setHasInitiallyLoaded(true);
+        } else {
+          console.log('[FolderViewEnhanced] No preloaded folders, fetching...');
+          fetchFolders();
+        }
       }
     }
-  }, [isOpen, preloadedFolders]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen, preloadedFolders, hasInitiallyLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset selection when leaving select mode
   useEffect(() => {
@@ -115,6 +122,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     if (preloadedFolders.length > 0) {
       console.log('[FolderViewEnhanced] Using preloaded folders');
       setFolders(preloadedFolders);
+      setHasInitiallyLoaded(true);
       return;
     }
     
@@ -123,6 +131,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     if (cachedFolders) {
       console.log('[FolderViewEnhanced] Using cached folders');
       setFolders(cachedFolders);
+      setHasInitiallyLoaded(true);
       return;
     }
 
@@ -132,6 +141,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     try {
       const loadedFolders = await preloadFolders();
       setFolders(loadedFolders);
+      setHasInitiallyLoaded(true);
     } catch (error) {
       console.error('Error fetching folders:', error);
       toast.error('Failed to load folders');
@@ -615,7 +625,8 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
 
         {/* Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto px-8 py-6">
-          {(loading || setsLoading || isPreloading) && (
+          {/* Show loading only when actually loading, not based on preloading state if we have data */}
+          {(loading || (setsLoading && !hasInitiallyLoaded) || (!hasInitiallyLoaded && isPreloading)) && (
             <div className="flex justify-center items-center py-24">
               <div className="flex flex-col items-center gap-3">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#A9C4FC]"></div>
@@ -625,7 +636,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
             </div>
           )}
 
-          {!(loading || setsLoading || isPreloading) && !currentFolder && (
+          {(hasInitiallyLoaded || folders.length > 0) && !currentFolder && (
             <>
               {/* Easy Cards Exam Button */}
               <div className="mb-6">
@@ -817,7 +828,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                     }
                     
                     // Consider a folder loading if global flags say so OR we have fewer than expected sets for defaults
-                    const baseLoading = (loading || setsLoading || isPreloading);
+                    const baseLoading = (loading || (setsLoading && !hasInitiallyLoaded) || (!hasInitiallyLoaded && isPreloading));
                     let isFolderLoading: boolean = baseLoading;
                     
                     // If it's a default folder and shows fewer than expected sets, assume hydration still in progress
@@ -879,7 +890,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
           )}
 
           {/* Folder Contents View */}
-          {!(loading || setsLoading || isPreloading) && currentFolder && (
+          {(hasInitiallyLoaded || folders.length > 0) && currentFolder && (
             <>
               {filteredAndSortedSets.length === 0 ? (
                 searchQuery ? (

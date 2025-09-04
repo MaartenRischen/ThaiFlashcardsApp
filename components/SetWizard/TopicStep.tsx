@@ -116,59 +116,50 @@ export function TopicStep({
   return (
     <div className="space-y-6">
       {/* Title */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-100 mb-2">
-          What do you want to learn about?
+      <div className="text-center space-y-2">
+        <h3 className="text-xl font-semibold text-[#E0E0E0]">
+          In what situation do you want to speak Thai?
         </h3>
-        <p className="text-sm text-gray-400">
-          Choose a topic or enter your own
-        </p>
       </div>
 
       {/* Custom Topic Input */}
-      <div>
+      <div className="neumorphic p-4 rounded-xl space-y-3">
         <input
           type="text"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           placeholder="Enter your topic..."
-          className="w-full p-4 rounded-xl bg-gray-800/50 border border-gray-700 
-                   text-gray-100 placeholder-gray-500 focus:border-blue-500 
-                   focus:outline-none transition-colors"
+          className="neumorphic-input w-full placeholder-[#BDBDBD]"
         />
       </div>
 
       {/* Suggested Topics */}
       <div className="space-y-4">
         {/* Common Section */}
-        <div className="space-y-2">
-          <span className="text-sm text-gray-400">Common Topics</span>
-          <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-3">
+          <span className="text-sm text-[#BDBDBD] font-medium">Common Topics</span>
+          <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => onNext("Shopping")}
-              className="text-left p-3 rounded-lg bg-gray-800/30 hover:bg-gray-700/30 
-                       transition-colors text-sm"
+              className="neumorphic-card-static text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
             >
               Shopping
             </button>
             <button
               onClick={() => onNext("Restaurant")}
-              className="text-left p-3 rounded-lg bg-gray-800/30 hover:bg-gray-700/30 
-                       transition-colors text-sm"
+              className="neumorphic-card-static text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
             >
               Restaurant
             </button>
             <button
               onClick={() => onNext("Travel")}
-              className="text-left p-3 rounded-lg bg-gray-800/30 hover:bg-gray-700/30 
-                       transition-colors text-sm"
+              className="neumorphic-card-static text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
             >
               Travel
             </button>
             <button
               onClick={() => onNext("Daily conversation")}
-              className="text-left p-3 rounded-lg bg-gray-800/30 hover:bg-gray-700/30 
-                       transition-colors text-sm"
+              className="neumorphic-card-static text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
             >
               Daily conversation
             </button>
@@ -176,13 +167,12 @@ export function TopicStep({
         </div>
 
         {/* Practical Section */}
-        <div className="space-y-2">
-          <span className="text-sm text-gray-400">Practical</span>
+        <div className="space-y-3">
+          <span className="text-sm text-[#BDBDBD] font-medium">Practical</span>
           <div className="space-y-2">
             <button
               onClick={() => onNext("Simple commands & requests (polite)")}
-              className="w-full text-left p-3 rounded-lg bg-gray-800/30 hover:bg-gray-700/30 
-                       transition-colors text-sm"
+              className="neumorphic-card-static w-full text-left p-4 text-sm text-[#E0E0E0] rounded-xl"
             >
               Simple commands & requests (polite)
             </button>
@@ -190,12 +180,12 @@ export function TopicStep({
         </div>
 
         {/* Weird Section */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-purple-400">Or Be Weird</span>
+            <span className="text-sm text-[#BB86FC] font-medium">Or Be Weird</span>
             <button
               onClick={() => setRandomWeirdTopics(getRandomWeirdTopics(2))}
-              className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
+              className="text-xs text-[#BB86FC]/70 hover:text-[#BB86FC] transition-colors"
             >
               🎲 Shuffle
             </button>
@@ -205,8 +195,7 @@ export function TopicStep({
               <button
                 key={index}
                 onClick={() => onNext(weirdTopic)}
-                className="w-full text-left p-3 rounded-lg bg-purple-900/20 hover:bg-purple-800/30 
-                         transition-colors text-sm text-purple-100 border border-purple-800/30"
+                className="neumorphic-card-static w-full text-left p-4 text-sm text-[#BB86FC] rounded-xl border-[#BB86FC]/20"
               >
                 {weirdTopic}
               </button>
@@ -216,18 +205,17 @@ export function TopicStep({
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between pt-4">
+      <div className="flex justify-between pt-6">
         <button
           onClick={onBack}
-          className="px-6 py-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 
-                   transition-colors text-gray-300"
+          className="neumorphic-button px-6 py-3 text-[#BDBDBD] rounded-xl"
         >
           Back
         </button>
         <button
           onClick={() => onNext(topic || "General conversation")}
-          className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 
-                   transition-colors text-white"
+          className="px-6 py-3 rounded-xl bg-[#BB86FC] hover:bg-[#A374E8] 
+                   transition-colors text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!topic.trim()}
         >
           Next

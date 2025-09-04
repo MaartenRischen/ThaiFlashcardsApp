@@ -238,7 +238,7 @@ export function SetWizardModal({
         {
           type: 'topic',
           title: 'What would you like to learn?',
-          subtitle: 'Choose a topic that interests you',
+          subtitle: '',
           component: TopicStep,
           props: {
             value: topic,

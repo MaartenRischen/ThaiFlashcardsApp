@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import SetCompletionBadge from './SetCompletionBadge';
 
 import { toast } from 'sonner';
+import { getShowTourAtStartup, setShowTourAtStartup } from './GuidedTour';
 
 interface CombinedOptionsModalProps {
   isOpen: boolean;
@@ -263,6 +264,7 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
   setAutoplay: (checked: boolean) => void;
 }) {
   const [useTurboRendering, setUseTurboRendering] = useState(true); // Default to TURBO
+  const [showTourAtStartup, setShowTourAtStartupState] = useState(getShowTourAtStartup());
   const { refreshSets } = useSet();
 
   useEffect(() => {
@@ -362,6 +364,11 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
                 <Switch id="renderingSpeedToggle" checked={useTurboRendering} onCheckedChange={handleRenderingSpeedChange} />
                 <span className="text-sm font-medium text-[#BDBDBD]">Turbo</span>
               </div>
+              <label htmlFor="showTourToggle" className="text-[#E0E0E0]">Show Tour at Startup</label>
+              <Switch id="showTourToggle" checked={showTourAtStartup} onCheckedChange={(checked) => {
+                setShowTourAtStartupState(checked);
+                setShowTourAtStartup(checked);
+              }} />
             </div>
           </section>
           <div className="mt-10 flex flex-col gap-2">

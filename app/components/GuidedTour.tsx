@@ -54,6 +54,7 @@ const steps: Array<{ id: StepId; title: string; body: string; anchor?: string; c
 export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const [highlightEl, setHighlightEl] = useState<HTMLElement | null>(null);
+  const [showTourAtStartup, setShowTourAtStartupState] = useState(getShowTourAtStartup());
 
   useEffect(() => {
     if (!isOpen) return;
@@ -148,6 +149,26 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
                     Our coolest feature!!
                   </span>
                 </p>
+              ) : s.id === 'welcome' ? (
+                <div className="mt-2">
+                  <p className="text-sm text-[#E0E0E0] mb-3">{s.body}</p>
+                  <div className="flex items-center gap-2 p-3 bg-[#2C2C2C] rounded-lg border border-[#404040]">
+                    <input
+                      type="checkbox"
+                      id="show-tour-checkbox"
+                      checked={showTourAtStartup}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setShowTourAtStartupState(checked);
+                        setShowTourAtStartup(checked);
+                      }}
+                      className="w-4 h-4 text-[#A9C4FC] bg-[#3C3C3C] border-[#555] rounded focus:ring-[#A9C4FC] focus:ring-2"
+                    />
+                    <label htmlFor="show-tour-checkbox" className="text-sm text-[#E0E0E0] cursor-pointer">
+                      Show tour at startup
+                    </label>
+                  </div>
+                </div>
               ) : (
                 <p className="mt-2 text-sm text-[#E0E0E0]">{s.body}</p>
               )}
@@ -192,11 +213,28 @@ export function shouldAutoStartTour(): boolean {
     if (typeof window === 'undefined') return false;
     const url = new URL(window.location.href);
     if (url.searchParams.get('tour') === '1') return true;
-    const seen = localStorage.getItem('tour_seen_v1');
-    return !seen;
+    const showTourAtStartup = localStorage.getItem('show_tour_at_startup');
+    // Default to true (show tour) if preference hasn't been set
+    return showTourAtStartup !== 'false';
   } catch {
-    return false;
+    return true; // Default to showing tour if there's an error
   }
+}
+
+export function getShowTourAtStartup(): boolean {
+  try {
+    if (typeof window === 'undefined') return true;
+    const showTourAtStartup = localStorage.getItem('show_tour_at_startup');
+    return showTourAtStartup !== 'false';
+  } catch {
+    return true;
+  }
+}
+
+export function setShowTourAtStartup(show: boolean) {
+  try {
+    localStorage.setItem('show_tour_at_startup', show ? 'true' : 'false');
+  } catch {}
 }
 
 export function markTourSeen() {

@@ -396,4 +396,8 @@ html.fake-dark-mode-active #dark-mode-toggle-container * {
 
 .current-button-frame {
   box-shadow: 0 0 0 3px #f59e0b, 0 0 0 8px rgba(245, 158, 11, 0.25), 0 0 30px rgba(245, 158, 11, 0.4), 0 0 60px rgba(245, 158, 11, 0.2) !important;
+}
+
+.edit-button-glow {
+  box-shadow: 0 0 20px rgba(187, 134, 252, 0.5), 0 0 40px rgba(187, 134, 252, 0.3) !important;
 } 

@@ -193,7 +193,7 @@ export function CardsListModal({
         <div className="bg-[#1F1F1F] rounded-2xl p-6 max-w-2xl w-full max-h-[85vh] overflow-hidden relative flex flex-col border border-[#404040] shadow-xl" onClick={e => e.stopPropagation()}>
         <div className="flex flex-col gap-3 mb-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-[#E0E0E0]">This Set</h3>
+            <h3 className="text-xl font-semibold text-[#E0E0E0]">Current Set</h3>
             <div className="flex items-center gap-3">
               {/* Publish and Share Buttons - only show for user-created sets (not default sets) */}
               {activeSet && activeSet.source !== 'default' && !activeSet.id.startsWith('default-') && (
@@ -235,10 +235,14 @@ export function CardsListModal({
             {!isEditMode ? (
               <button
                 onClick={() => setIsEditMode(true)}
-                className="neumorphic-button px-4 py-2 text-sm flex items-center gap-2 rounded-full"
+                className="relative neumorphic-button px-5 py-2.5 text-sm flex items-center gap-2.5 rounded-full bg-gradient-to-r from-[#BB86FC] to-[#9B6DD0] hover:from-[#C896FC] hover:to-[#AB7DE0] text-white font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl edit-button-glow"
               >
                 <Edit3 className="w-4 h-4" />
                 <span>Edit / Add / Delete</span>
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                </span>
               </button>
             ) : (
               <div className="flex gap-2">
@@ -306,6 +310,11 @@ export function CardsListModal({
                     <p className="text-[13px] text-gray-400">
                       {phrase.thai} • {phrase.pronunciation}
                     </p>
+                    {phrase.mnemonic && (
+                      <p className="text-[12px] text-purple-400 mt-1.5 italic">
+                        💡 {phrase.mnemonic}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {!isEditMode && (

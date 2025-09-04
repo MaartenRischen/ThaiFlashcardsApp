@@ -29,7 +29,7 @@ interface GuidedTourProps {
   onClose: () => void;
 }
 
-const steps: Array<{ id: StepId; title: string; body: string; anchor?: string }> = [
+const steps: Array<{ id: StepId; title: string; body: string; anchor?: string; customBody?: boolean }> = [
   { id: 'welcome', title: 'Welcome to Donkey Bridge', body: 'Quick 60‑second tour of key features. You can exit anytime.' },
   { id: 'cardFront', title: 'Flashcard Front', body: 'Front shows the English prompt and optional mnemonic hint.', anchor: '[data-tour="card-front"]' },
   { id: 'cardBack', title: 'Flashcard Back', body: 'Back shows Thai, pronunciation, audio, examples, and rating.', anchor: '[data-tour="card-back"]' },
@@ -47,7 +47,7 @@ const steps: Array<{ id: StepId; title: string; body: string; anchor?: string }>
   { id: 'current', title: 'Current', body: 'Track progress and due cards for the active set.', anchor: '[data-tour="nav-current"]' },
   { id: 'mysets', title: 'My Sets', body: 'Manage sets, preview cards, and switch sets.', anchor: '[data-tour="nav-mysets"]' },
   { id: 'gallery', title: 'Public Sets', body: 'Browse the public gallery and import sets you like.', anchor: '[data-tour="nav-gallery"]' },
-  { id: 'create', title: 'Create!', body: 'Open the Set Wizard to generate a new personalized set.', anchor: '[data-tour="nav-create"]' },
+  { id: 'create', title: 'Create!', body: 'Open the Set Wizard to generate a new personalized set.', anchor: '[data-tour="nav-create"]', customBody: true },
   { id: 'settings', title: 'Settings', body: 'Dark mode, gender, polite mode, autoplay, and more.', anchor: '[data-tour="nav-settings"]' },
 ];
 
@@ -141,7 +141,16 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold text-[#A9C4FC]">{s.title}</h3>
-              <p className="mt-2 text-sm text-[#E0E0E0]">{s.body}</p>
+              {s.customBody && s.id === 'create' ? (
+                <p className="mt-2 text-sm text-[#E0E0E0]">
+                  Open the Set Wizard to generate a new personalized set.{' '}
+                  <span className="text-[#22c55e] font-bold animate-pulse-slow" style={{ textShadow: '0 0 20px rgba(34, 197, 94, 0.8)' }}>
+                    Our coolest feature!!
+                  </span>
+                </p>
+              ) : (
+                <p className="mt-2 text-sm text-[#E0E0E0]">{s.body}</p>
+              )}
             </div>
             <button onClick={onClose} className="text-[#BDBDBD] hover:text-white">✕</button>
           </div>

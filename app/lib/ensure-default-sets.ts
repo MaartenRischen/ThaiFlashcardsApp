@@ -77,7 +77,7 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
           userId,
           name: 'Default Set',
           source: 'default',
-          imageUrl: '/images/defaultnew.png',
+          imageUrl: '/images/thumbnails/defaultnew.png',
           folderId,
           phrases: {
             create: INITIAL_PHRASES.map(phrase => ({
@@ -111,18 +111,18 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
           folderId = folderMap.get(DEFAULT_FOLDERS.DEFAULT_SETS);
         }
         
-        // Determine which image to use based on set ID
+        // Determine which image to use based on set ID - use thumbnails for faster loading
         let imageUrl: string;
         if (defaultSet.id.startsWith('common-words-')) {
           const setNumber = defaultSet.id.replace('common-words-', '');
-          imageUrl = `/images/defaults/default-common-words-${setNumber.padStart(2, '0')}.png`;
+          imageUrl = `/images/thumbnails/defaults/default-common-words-${setNumber.padStart(2, '0')}.png`;
         } else if (defaultSet.id.startsWith('common-sentences-')) {
           const setNumber = defaultSet.id.replace('common-sentences-', '');
-          imageUrl = `/images/defaults/default-common-sentences-${setNumber}.png`;
+          imageUrl = `/images/thumbnails/defaults/default-common-sentences-${setNumber}.png`;
         } else {
           // Use original thailand images for other sets
           const index = ALL_DEFAULT_SETS.findIndex(s => s.id === defaultSet.id);
-          imageUrl = `/images/defaults/default-thailand-${(index + 1).toString().padStart(2, '0')}.png`;
+          imageUrl = `/images/thumbnails/defaults/default-thailand-${(index + 1).toString().padStart(2, '0')}.png`;
         }
         
         setsToCreate.push({

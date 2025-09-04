@@ -64,9 +64,8 @@ const MySetCard: React.FC<MySetCardProps> = ({
     return getThumbnailUrl('/images/default-set-logo.png');
   };
 
-  // Use imageUrl if provided, otherwise compute based on ID
-  const imgUrl = set.imageUrl ? set.imageUrl : computeDefaultImageUrl();
-  console.log(`[MySetCard] Set ${set.id} - imageUrl: ${set.imageUrl}, computed: ${imgUrl}`);
+  // Always use imageUrl if provided
+  const imgUrl = set.imageUrl || computeDefaultImageUrl();
   const isCurrentSet = currentSetId === set.id;
   const canPublish = set.source !== 'default' && !set.id.startsWith('default-');
 

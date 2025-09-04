@@ -24,7 +24,6 @@ export function LazyImage({ src, alt, className, loadFullImage = false }: LazyIm
 
     // If already a thumbnail, use as-is, otherwise get thumbnail
     const thumbnailUrl = src.includes('/thumbnails/') ? src : getThumbnailUrl(src);
-    console.log(`[LazyImage] Loading image: ${src} -> ${thumbnailUrl}`);
     setImageSrc(thumbnailUrl);
     setIsLoading(false);
 

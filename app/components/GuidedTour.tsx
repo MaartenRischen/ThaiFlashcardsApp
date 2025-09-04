@@ -80,8 +80,8 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
           // Remove highlight from previous element
           if (highlightEl && highlightEl !== el) {
             highlightEl.classList.remove('db-tour-highlight');
-            (highlightEl as unknown as HTMLElement).style.zIndex = '';
             highlightEl.classList.remove('db-tour-highlight-create');
+            (highlightEl as unknown as HTMLElement).style.zIndex = '';
           }
           // Apply highlight to current
           el.classList.add('db-tour-highlight');
@@ -131,20 +131,8 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
           pointer-events: none !important;
         }
 
-        @keyframes tour-sparkle {
-          0%, 100% {
-            opacity: 0.5;
-            transform: scale(0.95);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.05);
-          }
-        }
-
         .db-tour-highlight-create {
-          box-shadow: 0 0 0 3px #22c55e, 0 0 0 8px rgba(34, 197, 94, 0.3), 0 0 25px 15px rgba(34, 197, 94, 0.4) !important;
-          animation: tour-sparkle 1.5s ease-in-out infinite;
+          box-shadow: 0 0 0 4px #22c55e, 0 0 0 12px rgba(34, 197, 94, 0.3), 0 0 40px 20px rgba(34, 197, 94, 0.5) !important;
         }
       `}</style>
 

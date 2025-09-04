@@ -1952,7 +1952,12 @@ export default function ThaiFlashcards() {
         isOpen={showCardsModal}
         onClose={() => setShowCardsModal(false)}
         phrases={phrases}
-        onSelectCard={(idx) => setIndex(idx)}
+        onSelectCard={(idx) => {
+          setIndex(idx);
+          setShowAnswer(false); // Ensure the selected card shows the front
+          setRandomSentence(null); // Clear any back-side context state
+          setShowCardsModal(false); // Close the modal immediately
+        }}
         getCardStatus={getCardStatus}
         isMale={isMale}
       />

@@ -119,6 +119,18 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
   const s = steps[stepIndex];
   const isLast = stepIndex === steps.length - 1;
 
+  const handleClose = () => {
+    // Ensure any previously highlighted element is fully reset
+    try {
+      if (highlightEl) {
+        highlightEl.classList.remove('db-tour-highlight');
+        highlightEl.classList.remove('db-tour-highlight-create');
+        (highlightEl as unknown as HTMLElement).style.zIndex = '';
+      }
+    } catch {}
+    onClose();
+  };
+
   const overlay = (
     <div className="fixed inset-0 z-[100000] pointer-events-none">
       <div className="absolute inset-0 bg-black/60" />
@@ -173,7 +185,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
                 <p className="mt-2 text-sm text-[#E0E0E0]">{s.body}</p>
               )}
             </div>
-            <button onClick={onClose} className="text-[#BDBDBD] hover:text-white">✕</button>
+            <button onClick={handleClose} className="text-[#BDBDBD] hover:text-white">✕</button>
           </div>
 
           <div className="mt-4 flex items-center justify-between">
@@ -190,7 +202,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
               </button>
               <button
                 className="px-3 py-1 text-xs rounded bg-[#A9C4FC] text-[#121212]"
-                onClick={() => (isLast ? onClose() : setStepIndex(i => Math.min(steps.length - 1, i + 1)))}
+                onClick={() => (isLast ? handleClose() : setStepIndex(i => Math.min(steps.length - 1, i + 1)))}
               >
                 {isLast ? 'Finish' : 'Next'}
               </button>

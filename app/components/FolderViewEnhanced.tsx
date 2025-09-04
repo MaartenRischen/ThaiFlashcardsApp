@@ -52,7 +52,7 @@ type SortOption = 'name' | 'date' | 'size';
 
 export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlightSetId }: FolderViewEnhancedProps) {
   const { availableSets, switchSet, activeSetId, refreshSets, isLoading: setsLoading } = useSet();
-  const { preloadFolders, getCachedFolders, clearFolderCache, preloadAllSets, preloadImages, getCachedContent, hasInitiallyLoadedFolders } = useSetCache();
+  const { preloadFolders, getCachedFolders, clearFolderCache, preloadImages, getCachedContent, hasInitiallyLoadedFolders } = useSetCache();
   // Access preloaded data to avoid unnecessary spinners if cache hasn't been primed yet
   const { preloadedData, isLoading: isPreloading } = usePreloader();
   const { folders: preloadedFolders } = usePreloadedFolders();
@@ -159,7 +159,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     // Clear search when entering a folder
     setSearchQuery('');
     
-    // Don't show loading if we already have the data
+    // Never show loading for entering folders - we have all metadata already
     let shouldShowLoading = false;
     
     try {
@@ -211,34 +211,8 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
         console.log(`[FolderView] Found ${folderSets.length} sets for folder ${folder.name}`);
       }
       
-      const setIds = folderSets.map(set => set.id);
-      if (setIds.length > 0) {
-        // Check if we need to load anything
-        // Consider preloaded data as well, so we don't spinner while cache is being primed
-        const isInPreloadedData = (id: string) => {
-          try {
-            return !!(preloadedData && preloadedData.setContents && preloadedData.setContents[id] && preloadedData.setContents[id].length > 0);
-          } catch {
-            return false;
-          }
-        };
-        const needsLoading = setIds.some(id => !getCachedContent(id) && !isInPreloadedData(id));
-        if (needsLoading) {
-          const missing = setIds.filter(id => !getCachedContent(id) && !isInPreloadedData(id));
-          console.log(`[FolderViewEnhanced] Need to load content for ${missing.length} sets`);
-          // Only show loading if preloader isn't still finishing up
-          if (!isPreloading) {
-            shouldShowLoading = true;
-            setLoading(true);
-          }
-          
-          // Only preload sets that aren't cached
-          const uncachedSetIds = missing;
-          if (uncachedSetIds.length > 0) {
-            await preloadAllSets(uncachedSetIds);
-          }
-        }
-        
+      // Don't preload content anymore - just load images in background
+      if (folderSets.length > 0) {
         // Images can be loaded in background without showing spinner
         const imageUrls = folderSets.map(set => set.imageUrl || '/images/default-set-logo.png');
         preloadImages(imageUrls); // Don't await, let it load in background
@@ -262,10 +236,6 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     } catch (error) {
       console.error('Error loading folder details:', error);
       toast.error('Failed to load folder contents');
-    } finally {
-      if (shouldShowLoading) {
-        setLoading(false);
-      }
     }
   };
 
@@ -624,12 +594,12 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
 
         {/* Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto px-8 py-6">
-          {/* Show loading only when actually loading, not based on preloading state if we have data */}
-          {(loading || (setsLoading && !hasInitiallyLoadedFolders) || (!hasInitiallyLoadedFolders && isPreloading)) && (
+          {/* Show loading only when folders haven't been loaded yet */}
+          {!hasInitiallyLoadedFolders && folders.length === 0 && (
             <div className="flex justify-center items-center py-24">
               <div className="flex flex-col items-center gap-3">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#A9C4FC]"></div>
-                <div className="text-sm text-[#A9C4FC]">Loading folders and sets…</div>
+                <div className="text-sm text-[#A9C4FC]">Loading folders…</div>
                 <ThaiFactInline />
               </div>
             </div>
@@ -826,20 +796,8 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                       );
                     }
                     
-                    // Consider a folder loading if global flags say so OR we have fewer than expected sets for defaults
-                    const baseLoading = (loading || (setsLoading && !hasInitiallyLoadedFolders) || (!hasInitiallyLoadedFolders && isPreloading));
-                    let isFolderLoading: boolean = baseLoading;
-                    
-                    // If it's a default folder and shows fewer than expected sets, assume hydration still in progress
-                    if (!isFolderLoading && folder.isDefault) {
-                      if (folder.name === 'Default Sets' && folderSets.length < 6) {
-                        isFolderLoading = true;
-                      } else if (folder.name === '100 Most Used Thai Words' && folderSets.length < 10) {
-                        isFolderLoading = true;
-                      } else if (folder.name === '100 Most Used Thai Sentences' && folderSets.length < 10) {
-                        isFolderLoading = true;
-                      }
-                    }
+                    // Only show loading if we haven't loaded folders metadata yet
+                    const isFolderLoading = !hasInitiallyLoadedFolders && folders.length === 0;
                     const enhancedFolder = {
                       ...folder,
                       setCount: folderSets.length,
@@ -858,14 +816,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                         <FolderCardEnhanced
                           folder={enhancedFolder}
                           isLoading={isFolderLoading && folderSets.length === 0}
-                          onClick={async () => {
-                            try {
-                              const folderContents = availableSets.filter(set => set.folderId === folder.id || set.folderName === folder.name);
-                              const firstFew = folderContents.slice(0, 6).map(s => s.id);
-                              if (firstFew.length > 0) {
-                                await preloadAllSets(firstFew);
-                              }
-                            } catch {}
+                          onClick={() => {
                             fetchFolderDetails(folder.id);
                           }}
                           onEdit={() => {

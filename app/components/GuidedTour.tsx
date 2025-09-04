@@ -139,7 +139,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
   };
 
   const overlay = (
-    <div className="fixed inset-0 z-[100000] pointer-events-none">
+    <div className="fixed inset-0 z-[999999] pointer-events-none">
       <div className="absolute inset-0 bg-black/60" />
       {/* Highlight style */}
       <style>{`
@@ -149,15 +149,17 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
           border-radius: 12px !important;
           transition: box-shadow .2s ease, transform .2s ease;
           pointer-events: none !important;
+          z-index: 999998 !important;
         }
 
         .db-tour-highlight-create {
           box-shadow: 0 0 0 4px #22c55e, 0 0 0 12px rgba(34, 197, 94, 0.3), 0 0 40px 20px rgba(34, 197, 94, 0.5) !important;
+          z-index: 999998 !important;
         }
       `}</style>
 
       <div className="absolute inset-0 p-2 sm:p-4 flex items-end justify-center sm:items-start pt-8 pointer-events-none">
-        <div className="max-w-md w-full bg-[#1F1F1F] border border-[#333] rounded-2xl shadow-2xl p-3 sm:p-6 pointer-events-auto z-[100002] mb-3 sm:mb-0">
+        <div className="max-w-md w-full bg-[#1F1F1F] border border-[#333] rounded-2xl shadow-2xl p-3 sm:p-6 pointer-events-auto z-[999999] mb-3 sm:mb-0">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold text-[#A9C4FC]">{s.title}</h3>

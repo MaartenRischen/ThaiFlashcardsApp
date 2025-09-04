@@ -641,9 +641,9 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                       <Image 
                         src="/images/exam.png" 
                         alt="Exam icon" 
-                        width={48} 
-                        height={48} 
-                        className="w-12 h-12"
+                        width={80} 
+                        height={80} 
+                        className="w-20 h-20"
                       />
                       <div className="text-left">
                         <h3 className="text-lg font-semibold text-[#E0E0E0] group-hover:text-white transition-colors">

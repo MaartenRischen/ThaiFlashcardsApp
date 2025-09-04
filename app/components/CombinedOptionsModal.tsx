@@ -263,20 +263,8 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
   autoplay: boolean;
   setAutoplay: (checked: boolean) => void;
 }) {
-  const [useTurboRendering, setUseTurboRendering] = useState(true); // Default to TURBO
   const [showTourAtStartup, setShowTourAtStartupState] = useState(getShowTourAtStartup());
   const { refreshSets } = useSet();
-
-  useEffect(() => {
-    // Load the rendering speed preference from localStorage
-    const savedSpeed = localStorage.getItem('renderingSpeed');
-    setUseTurboRendering(savedSpeed !== 'NORMAL');
-  }, []);
-
-  const handleRenderingSpeedChange = (checked: boolean) => {
-    setUseTurboRendering(checked);
-    localStorage.setItem('renderingSpeed', checked ? 'TURBO' : 'NORMAL');
-  };
 
   const handleResetDefaultSets = async () => {
     if (!window.confirm('Are you sure you want to reset all default sets to their original state? This will overwrite any customizations you made to default sets.')) {
@@ -355,15 +343,6 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
               <Switch id="autoplayToggleApp" checked={autoplay} onCheckedChange={setAutoplay} />
               <label htmlFor="darkModeToggleApp" className="text-[#E0E0E0]">Dark Mode</label>
               <Switch id="darkModeToggleApp" checked={isDarkMode} onCheckedChange={toggleDarkMode} />
-              <label htmlFor="renderingSpeedToggle" className="text-[#E0E0E0] flex items-center gap-2">
-                Image Generation Speed
-                <span className="text-xs text-[#BDBDBD] italic">(TURBO = faster but may be less accurate)</span>
-              </label>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-[#BDBDBD]">Normal</span>
-                <Switch id="renderingSpeedToggle" checked={useTurboRendering} onCheckedChange={handleRenderingSpeedChange} />
-                <span className="text-sm font-medium text-[#BDBDBD]">Turbo</span>
-              </div>
               <label htmlFor="showTourToggle" className="text-[#E0E0E0]">Show Tour at Startup</label>
               <Switch id="showTourToggle" checked={showTourAtStartup} onCheckedChange={(checked) => {
                 setShowTourAtStartupState(checked);

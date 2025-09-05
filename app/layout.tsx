@@ -26,13 +26,13 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Thai Flashcards - Learn Thai with Mnemonics',
+  title: 'Donkey Bridge - Learn Thai with Mnemonics',
   description: 'Learn Thai vocabulary effectively with mnemonics and spaced repetition',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Thai Flashcards'
+    title: 'Donkey Bridge'
   },
   formatDetection: {
     telephone: false

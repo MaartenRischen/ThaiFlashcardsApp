@@ -5,7 +5,7 @@ import { X, Sparkles, Volume2 } from 'lucide-react'
 import { useGeneration } from '@/app/context/GenerationContext'
 
 export function GenerationStatusBar() {
-  const { generationStatus, cancelGeneration } = useGeneration()
+  const { generationStatus, cancelGeneration, showGenerationModal } = useGeneration()
   const [displayProgress, setDisplayProgress] = React.useState(0)
   const tickRef = React.useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -92,14 +92,20 @@ export function GenerationStatusBar() {
 
   return (
     <div className="fixed top-20 left-2 right-2 sm:top-24 sm:left-auto sm:right-4 sm:w-96 z-40">
-      <div className="p-3 sm:p-4 border border-blue-500/30 bg-black/50 backdrop-blur-md rounded-xl">
+      <div 
+        className="p-3 sm:p-4 border border-blue-500/30 bg-black/50 backdrop-blur-md rounded-xl cursor-pointer hover:bg-black/60 transition-colors"
+        onClick={showGenerationModal}
+      >
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             {getIcon()}
             <span className="font-medium text-sm sm:text-base text-[#E0E0E0]">{getTitle()}</span>
           </div>
           <button
-            onClick={cancelGeneration}
+            onClick={(e) => {
+              e.stopPropagation()
+              cancelGeneration()
+            }}
             className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition-colors"
           >
             <X className="w-4 h-4" />

@@ -117,7 +117,7 @@ export function ConfirmationStep({ phrases, corrections, onConfirm, onBack }: Co
 
           <Button
             onClick={onConfirm}
-            className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
+            className="neumorphic-button bg-[#BB86FC] hover:bg-[#A66EFC] text-[#1A1A1A] font-bold rounded-xl"
           >
             <Sparkles className="w-4 h-4 mr-2" />
             Generate Flashcards

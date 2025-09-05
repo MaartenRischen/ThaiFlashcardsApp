@@ -52,6 +52,7 @@ model FlashcardSet {
   phrases Phrase[] 
   progress UserSetProgress[]
   folder   Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  ratings  SetRating[]
 
   @@index([userId])
   @@index([folderId])
@@ -144,16 +145,20 @@ model Folder {
 model SetRating {
   id            String   @id @default(cuid())
   userId        String   // Foreign key referencing User.id (Clerk User ID)
-  publishedSetId String  // Foreign key to PublishedSet
+  publishedSetId String?  // Foreign key to PublishedSet (optional)
+  flashcardSetId String? // Foreign key to FlashcardSet (optional)
   rating        Int      // Rating value (1-5 stars)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  publishedSet PublishedSet @relation(fields: [publishedSetId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  publishedSet PublishedSet? @relation(fields: [publishedSetId], references: [id], onDelete: Cascade)
+  flashcardSet FlashcardSet? @relation(fields: [flashcardSetId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, publishedSetId]) // User can only rate a set once
+  @@unique([userId, publishedSetId]) // User can only rate a published set once
+  @@unique([userId, flashcardSetId]) // User can only rate a flashcard set once
   @@index([publishedSetId])
+  @@index([flashcardSetId])
   @@index([userId])
 }
 

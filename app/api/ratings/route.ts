@@ -12,20 +12,44 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const publishedSetId = url.searchParams.get('publishedSetId');
+  const flashcardSetId = url.searchParams.get('flashcardSetId');
   
-  if (!publishedSetId) {
-    return NextResponse.json({ error: 'publishedSetId is required' }, { status: 400 });
+  if (!publishedSetId && !flashcardSetId) {
+    return NextResponse.json({ error: 'Either publishedSetId or flashcardSetId is required' }, { status: 400 });
   }
 
   try {
-    const rating = await prisma.setRating.findUnique({
-      where: {
-        userId_publishedSetId: {
-          userId,
-          publishedSetId
+    let rating;
+    
+    if (publishedSetId) {
+      rating = await prisma.setRating.findUnique({
+        where: {
+          userId_publishedSetId: {
+            userId,
+            publishedSetId
+          }
         }
+      });
+    } else if (flashcardSetId) {
+      // Check if this is a default set (should not be rateable)
+      const flashcardSet = await prisma.flashcardSet.findUnique({
+        where: { id: flashcardSetId },
+        include: { folder: true }
+      });
+      
+      if (flashcardSet?.folder?.name === 'Default Sets' || flashcardSet?.source === 'default') {
+        return NextResponse.json({ error: 'Default sets cannot be rated' }, { status: 403 });
       }
-    });
+      
+      rating = await prisma.setRating.findUnique({
+        where: {
+          userId_flashcardSetId: {
+            userId,
+            flashcardSetId
+          }
+        }
+      });
+    }
 
     return NextResponse.json({ rating: rating?.rating || null });
   } catch (error) {
@@ -43,34 +67,67 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { publishedSetId, rating } = await request.json();
+    const { publishedSetId, flashcardSetId, rating } = await request.json();
     
-    if (!publishedSetId || rating === undefined) {
-      return NextResponse.json({ error: 'publishedSetId and rating are required' }, { status: 400 });
+    if ((!publishedSetId && !flashcardSetId) || rating === undefined) {
+      return NextResponse.json({ error: 'Either publishedSetId or flashcardSetId and rating are required' }, { status: 400 });
     }
     
     if (rating < 1 || rating > 5) {
       return NextResponse.json({ error: 'Rating must be between 1 and 5' }, { status: 400 });
     }
 
-    // Upsert the rating
-    const newRating = await prisma.setRating.upsert({
-      where: {
-        userId_publishedSetId: {
+    let newRating;
+    
+    if (publishedSetId) {
+      // Upsert rating for published set
+      newRating = await prisma.setRating.upsert({
+        where: {
+          userId_publishedSetId: {
+            userId,
+            publishedSetId
+          }
+        },
+        update: {
+          rating,
+          updatedAt: new Date()
+        },
+        create: {
           userId,
-          publishedSetId
+          publishedSetId,
+          rating
         }
-      },
-      update: {
-        rating,
-        updatedAt: new Date()
-      },
-      create: {
-        userId,
-        publishedSetId,
-        rating
+      });
+    } else if (flashcardSetId) {
+      // Check if this is a default set (should not be rateable)
+      const flashcardSet = await prisma.flashcardSet.findUnique({
+        where: { id: flashcardSetId },
+        include: { folder: true }
+      });
+      
+      if (flashcardSet?.folder?.name === 'Default Sets' || flashcardSet?.source === 'default') {
+        return NextResponse.json({ error: 'Default sets cannot be rated' }, { status: 403 });
       }
-    });
+      
+      // Upsert rating for flashcard set
+      newRating = await prisma.setRating.upsert({
+        where: {
+          userId_flashcardSetId: {
+            userId,
+            flashcardSetId
+          }
+        },
+        update: {
+          rating,
+          updatedAt: new Date()
+        },
+        create: {
+          userId,
+          flashcardSetId,
+          rating
+        }
+      });
+    }
 
     return NextResponse.json({ rating: newRating });
   } catch (error) {
@@ -89,20 +146,32 @@ export async function DELETE(request: Request) {
 
   const url = new URL(request.url);
   const publishedSetId = url.searchParams.get('publishedSetId');
+  const flashcardSetId = url.searchParams.get('flashcardSetId');
   
-  if (!publishedSetId) {
-    return NextResponse.json({ error: 'publishedSetId is required' }, { status: 400 });
+  if (!publishedSetId && !flashcardSetId) {
+    return NextResponse.json({ error: 'Either publishedSetId or flashcardSetId is required' }, { status: 400 });
   }
 
   try {
-    await prisma.setRating.delete({
-      where: {
-        userId_publishedSetId: {
-          userId,
-          publishedSetId
+    if (publishedSetId) {
+      await prisma.setRating.delete({
+        where: {
+          userId_publishedSetId: {
+            userId,
+            publishedSetId
+          }
         }
-      }
-    });
+      });
+    } else if (flashcardSetId) {
+      await prisma.setRating.delete({
+        where: {
+          userId_flashcardSetId: {
+            userId,
+            flashcardSetId
+          }
+        }
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

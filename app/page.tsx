@@ -1940,6 +1940,7 @@ export default function ThaiFlashcards() {
               setHighlightSetId(newSetId);
               // Open My Sets modal to show the new set
               setIsManagementModalOpen(true);
+              // TODO: Navigate to specific folder based on set type
             }
           }}
         />

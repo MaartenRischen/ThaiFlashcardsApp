@@ -4,21 +4,25 @@ import { Star } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 
 interface StarRatingProps {
-  publishedSetId: string;
+  publishedSetId?: string;
+  flashcardSetId?: string;
   averageRating?: number;
   ratingCount?: number;
   size?: 'small' | 'medium' | 'large';
   interactive?: boolean;
   onRatingChange?: (rating: number) => void;
+  isDefaultSet?: boolean;
 }
 
 export function StarRating({ 
-  publishedSetId, 
+  publishedSetId,
+  flashcardSetId, 
   averageRating = 0, 
   ratingCount = 0, 
   size = 'medium',
   interactive = true,
-  onRatingChange 
+  onRatingChange,
+  isDefaultSet = false
 }: StarRatingProps) {
   const { user } = useUser();
   const [userRating, setUserRating] = useState<number | null>(null);
@@ -35,8 +39,9 @@ export function StarRating({
   
   // Fetch user's rating
   useEffect(() => {
-    if (user && interactive) {
-      fetch(`/api/ratings?publishedSetId=${publishedSetId}`)
+    if (user && interactive && !isDefaultSet) {
+      const params = publishedSetId ? `publishedSetId=${publishedSetId}` : `flashcardSetId=${flashcardSetId}`;
+      fetch(`/api/ratings?${params}`)
         .then(res => res.json())
         .then(data => {
           if (data.rating) {
@@ -45,17 +50,21 @@ export function StarRating({
         })
         .catch(err => console.error('Error fetching rating:', err));
     }
-  }, [publishedSetId, user, interactive]);
+  }, [publishedSetId, flashcardSetId, user, interactive, isDefaultSet]);
   
   const handleRating = async (rating: number) => {
-    if (!user || !interactive || isLoading) return;
+    if (!user || !interactive || isLoading || isDefaultSet) return;
     
     setIsLoading(true);
     try {
+      const body = publishedSetId 
+        ? { publishedSetId, rating }
+        : { flashcardSetId, rating };
+        
       const res = await fetch('/api/ratings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ publishedSetId, rating })
+        body: JSON.stringify(body)
       });
       
       if (res.ok) {

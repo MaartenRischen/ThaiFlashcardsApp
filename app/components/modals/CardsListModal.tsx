@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { AudioLessonModalContent } from '../AudioLessonModalContent';
 import { ShareButton } from '../ShareButton';
 import { GoLiveButton } from '../GoLiveButton';
+import { StarRating } from '../StarRating';
 
 interface CardsListModalProps {
   isOpen: boolean;
@@ -193,7 +194,19 @@ export function CardsListModal({
         <div className="bg-[#1F1F1F] rounded-2xl p-6 max-w-2xl w-full max-h-[85vh] overflow-hidden relative flex flex-col border border-[#404040] shadow-xl" onClick={e => e.stopPropagation()}>
         <div className="flex flex-col gap-3 mb-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-[#E0E0E0]">Current Set</h3>
+            <div className="flex-1">
+              <h3 className="text-xl font-semibold text-[#E0E0E0]">Current Set</h3>
+              {activeSet && activeSet.source !== 'default' && !activeSet.id.startsWith('default-') && (
+                <div className="mt-2">
+                  <StarRating
+                    flashcardSetId={activeSet.id}
+                    size="medium"
+                    interactive={true}
+                    isDefaultSet={activeSet.source === 'default' || activeSet.id.startsWith('default-')}
+                  />
+                </div>
+              )}
+            </div>
             <button 
               className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition-colors" 
               onClick={handleClose}

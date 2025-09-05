@@ -9,6 +9,7 @@ import { PreloaderProvider } from './context/PreloaderContext'
 import Navbar from './components/Navbar'
 import { GenerationStatusBar } from './components/GenerationStatusBar'
 import { AudioGenerationStatusBar } from './components/AudioGenerationStatusBar'
+import { GenerationModal } from './components/GenerationModal'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from "sonner"
@@ -83,6 +84,7 @@ export default function RootLayout({
                       <AppInitializer />
                       <GenerationStatusBar />
                       <AudioGenerationStatusBar />
+                      <GenerationModal />
                       <Navbar />
                       <main className="main-content min-h-screen relative pb-32 md:pb-0">
                         {children}

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from 'next/image';
+import { ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface PublicSet {
   id: string;
@@ -21,6 +23,7 @@ interface PublicSet {
 }
 
 export default function PublicSetsPage() {
+  const router = useRouter();
   const [sets, setSets] = useState<PublicSet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +53,15 @@ export default function PublicSetsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      {/* Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="mb-6 neumorphic-button px-4 py-2 rounded-xl flex items-center gap-2 text-[#E0E0E0] hover:text-[#BB86FC] transition-colors"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span>Back</span>
+      </button>
+      
       <h1 className="text-3xl font-bold mb-6 text-center">🌏 Public Flashcard Sets</h1>
       {loading && <div className="text-center py-8">Loading public sets…</div>}
       {error && <div className="text-center text-red-500 py-8">{error}</div>}
@@ -76,7 +88,7 @@ export default function PublicSetsPage() {
             {set.cleverTitle && <div className="text-sm text-gray-400 mb-2 text-center">{set.cleverTitle}</div>}
             <div className="text-xs text-gray-500 mb-2">{set.level ? `Level: ${set.level}` : ""}</div>
             <div className="text-xs text-gray-500 mb-2">{set.phraseCount} cards</div>
-            <Link href={`/share/${set.shareId}`} className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">View / Import</Link>
+            <Link href={`/share/${set.shareId}`} className="mt-2 px-4 py-2 bg-gradient-to-r from-[#BB86FC] to-[#A374E8] hover:from-[#A374E8] hover:to-[#9B6DD0] text-white rounded-xl font-medium transition-all duration-200">View / Import</Link>
           </div>
         ))}
       </div>

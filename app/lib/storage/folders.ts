@@ -30,7 +30,8 @@ export const DEFAULT_FOLDERS = {
   COMMON_SENTENCES: '100 Most Used Thai Sentences',
   MY_SETS: 'My Sets', // Kept for backward compatibility
   MY_AUTOMATIC_SETS: 'My Automatic Sets',
-  MY_MANUAL_SETS: 'My Manual Sets'
+  MY_MANUAL_SETS: 'My Manual Sets',
+  IMPORTED_SETS: 'Imported Sets'
 } as const;
 
 /**
@@ -123,6 +124,13 @@ export async function createDefaultFolders(userId: string) {
       description: 'Flashcard sets created from your custom phrases',
       isDefault: true,
       orderIndex: 4
+    },
+    {
+      userId,
+      name: DEFAULT_FOLDERS.IMPORTED_SETS,
+      description: 'Flashcard sets imported from friends or the public gallery',
+      isDefault: true,
+      orderIndex: 5
     }
   ];
 
@@ -323,12 +331,17 @@ export { assignDefaultSetsToFolders } from './default-folder-assignment';
  */
 export async function getTargetFolderForNewSet(
   userId: string, 
-  source: 'manual' | 'generated' | 'auto'
+  source: 'manual' | 'generated' | 'auto' | 'import'
 ): Promise<string | null> {
   try {
-    const folderName = source === 'manual' 
-      ? DEFAULT_FOLDERS.MY_MANUAL_SETS 
-      : DEFAULT_FOLDERS.MY_AUTOMATIC_SETS;
+    let folderName: string;
+    if (source === 'manual') {
+      folderName = DEFAULT_FOLDERS.MY_MANUAL_SETS;
+    } else if (source === 'import') {
+      folderName = DEFAULT_FOLDERS.IMPORTED_SETS;
+    } else {
+      folderName = DEFAULT_FOLDERS.MY_AUTOMATIC_SETS;
+    }
     
     const folder = await prisma.folder.findFirst({
       where: {

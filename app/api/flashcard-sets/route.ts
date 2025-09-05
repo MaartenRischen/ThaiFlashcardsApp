@@ -5,6 +5,7 @@ import { SetMetaData } from '@/app/lib/storage'; // Keep if needed by SetMetaDat
 import { Phrase } from '@/app/lib/set-generator';
 import { prisma } from "@/app/lib/prisma";
 import { getToneLabel } from '@/app/lib/utils'; // Import getToneLabel
+import { getTargetFolderForNewSet } from '@/app/lib/storage/folders';
 
 function getErrorMessage(error: unknown): string {
   if (typeof error === 'object' && error && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
@@ -98,9 +99,21 @@ export async function POST(_request: Request) {
      if (!finalImageUrl && setData.source === 'default') {
         finalImageUrl = '/images/defaultnew.png'; // Define your default image path
      }
+     
+     // Determine the target folder based on source
+     let folderId: string | null = null;
+     if (setData.source === 'import' || setData.source === 'gallery_import') {
+       folderId = await getTargetFolderForNewSet(userId, 'import');
+     } else if (setData.source === 'manual') {
+       folderId = await getTargetFolderForNewSet(userId, 'manual');
+     } else if (setData.source === 'generated' || setData.source === 'auto') {
+       folderId = await getTargetFolderForNewSet(userId, 'auto');
+     }
+     
      const metaDataForStorage = {
        ...setData,
-       imageUrl: finalImageUrl || undefined
+       imageUrl: finalImageUrl || undefined,
+       folderId: folderId || undefined
      };
 
     // 1. Add metadata

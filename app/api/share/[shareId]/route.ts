@@ -52,10 +52,8 @@ export async function POST(req: NextRequest, { params }: { params: { shareId: st
 
     const newSetId = randomUUID();
     
-    // Determine target folder based on original source
-    // Import sets should go to the appropriate folder based on the original source
-    const targetSource = original.source === 'manual' ? 'manual' : 'auto';
-    const folderId = await getTargetFolderForNewSet(userId, targetSource);
+    // Import sets always go to the "Imported Sets" folder
+    const folderId = await getTargetFolderForNewSet(userId, 'import');
 
     await prisma.$transaction([
       prisma.flashcardSet.create({

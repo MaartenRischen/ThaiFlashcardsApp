@@ -3,8 +3,9 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useSet } from '@/app/context/SetContext';
 import { Phrase } from '@/app/lib/set-generator';
 import GallerySetCard from './GallerySetCard';
-import { GalleryHorizontal, Loader2, Trash2 } from 'lucide-react';
+import { GalleryHorizontal, Loader2, Trash2, ArrowLeft } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 // Import a modal component (we'll create this next)
 import CardViewerModal from './CardViewerModal';
 
@@ -41,6 +42,7 @@ interface DisplaySet extends Omit<GallerySet, 'phrases' | 'createdAt'> {
 }
 
 export default function GalleryPage() {
+  const router = useRouter();
   const { availableSets, addSet, isLoading: contextIsLoading } = useSet();
   const [sets, setSets] = useState<DisplaySet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -436,6 +438,15 @@ export default function GalleryPage() {
       
       {/* Header Section */}
       <div className="mb-8">
+        {/* Back Button */}
+        <button
+          onClick={() => router.back()}
+          className="mb-6 neumorphic-button px-4 py-2 rounded-xl flex items-center gap-2 text-[#E0E0E0] hover:text-[#BB86FC] transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Back</span>
+        </button>
+        
         <div className="text-center mb-6">
           <h1 className="text-4xl font-bold text-[#E0E0E0] mb-3">Public Sets</h1>
           <p className="text-lg text-[#BDBDBD] max-w-2xl mx-auto">

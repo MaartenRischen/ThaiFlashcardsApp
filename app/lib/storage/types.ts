@@ -11,7 +11,7 @@ export interface SetMetaData {
   level?: 'complete beginner' | 'basic understanding' | 'intermediate' | 'advanced' | 'native/fluent' | 'god mode';
   goals?: string[];
   specificTopics?: string;
-  source: 'default' | 'import' | 'generated' | 'manual';
+  source: 'default' | 'import' | 'generated' | 'manual' | 'gallery_import' | 'auto';
   imageUrl?: string | null;
   isFullyLearned?: boolean;
   seriousnessLevel: number | null;

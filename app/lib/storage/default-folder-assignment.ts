@@ -178,6 +178,8 @@ export async function assignUserSetsToFolders(userId: string) {
     const manualFolderId = folderMap.get(DEFAULT_FOLDERS.MY_MANUAL_SETS);
     // Get automatic sets folder ID
     const autoFolderId = folderMap.get(DEFAULT_FOLDERS.MY_AUTOMATIC_SETS);
+    // Get imported sets folder ID
+    const importedFolderId = folderMap.get(DEFAULT_FOLDERS.IMPORTED_SETS);
 
     if (!manualFolderId || !autoFolderId) {
       console.log('Missing manual or automatic sets folders');
@@ -189,7 +191,7 @@ export async function assignUserSetsToFolders(userId: string) {
       where: {
         userId,
         source: {
-          in: ['manual', 'generated', 'auto', 'import'] // Include imported sets too
+          in: ['manual', 'generated', 'auto', 'import', 'gallery_import'] // Include imported sets too
         },
         folderId: null
       }
@@ -206,17 +208,24 @@ export async function assignUserSetsToFolders(userId: string) {
     const updates = [];
 
     for (const set of unassignedSets) {
-      // Manual sets go to manual folder, generated/automatic sets go to automatic folder
-      const folderId = set.source === 'manual' ? manualFolderId : 
-                       (set.source === 'generated' || set.source === 'automatic' || set.source === 'import') ? autoFolderId : 
-                       null;
+      // Determine correct folder based on source
+      let folderId: string | null = null;
+      if (set.source === 'manual') {
+        folderId = manualFolderId;
+      } else if (set.source === 'import' || set.source === 'gallery_import') {
+        folderId = importedFolderId || autoFolderId; // Fallback to auto folder if imported folder doesn't exist
+      } else if (set.source === 'generated' || set.source === 'automatic' || set.source === 'auto') {
+        folderId = autoFolderId;
+      }
       
-      updates.push(
-        prisma.flashcardSet.update({
-          where: { id: set.id },
-          data: { folderId }
-        })
-      );
+      if (folderId) {
+        updates.push(
+          prisma.flashcardSet.update({
+            where: { id: set.id },
+            data: { folderId }
+          })
+        );
+      }
     }
 
     // Execute all updates

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { AlertTriangle } from 'lucide-react';
 
 const getToneLevelLabel = (value: number): string => {
   switch (value) {
@@ -167,6 +168,20 @@ export function ToneStep({ toneLevel, onNext, onBack }: {
         </div>
       </div>
 
+      {/* Pre-generation warning */}
+      <div className="neumorphic rounded-xl p-4 border border-blue-500/30 bg-blue-50/10">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+          <div className="text-sm">
+            <p className="font-semibold text-blue-400 mb-1">Before we generate your set</p>
+            <p className="text-gray-300 leading-relaxed">
+              The next step will generate your flashcards, which takes 2-5 minutes. 
+              Please keep this app open and visible during the entire process.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Bottom Navigation */}
       <div className="flex justify-between pt-4">
         <button
@@ -180,7 +195,7 @@ export function ToneStep({ toneLevel, onNext, onBack }: {
           className="px-6 py-3 rounded-xl bg-[#BB86FC] hover:bg-[#A374E8] 
                    transition-colors text-white font-medium"
         >
-          Next →
+          Generate Set →
         </button>
       </div>
     </div>

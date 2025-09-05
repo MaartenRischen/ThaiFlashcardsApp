@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
-import { ChevronLeft, Sparkles, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Sparkles, AlertCircle, AlertTriangle } from 'lucide-react';
 
 interface ConfirmationStepProps {
   phrases: string[];
@@ -84,6 +84,20 @@ export function ConfirmationStep({ phrases, corrections, onConfirm, onBack }: Co
             <li>• Create example sentences for context</li>
             <li>• Generate a smart title based on your content</li>
           </ul>
+        </div>
+
+        {/* Pre-generation warning */}
+        <div className="neumorphic rounded-xl p-4 border border-blue-500/30 bg-blue-50/10">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+            <div className="text-sm">
+              <p className="font-semibold text-blue-400 mb-1">Before we generate your set</p>
+              <p className="text-gray-300 leading-relaxed">
+                The next step will generate your flashcards, which takes 2-5 minutes. 
+                Please keep this app open and visible during the entire process.
+              </p>
+            </div>
+          </div>
         </div>
       </motion.div>
 

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import ThaiFactInline from '@/app/components/ThaiFactInline';
 import { useGeneration } from '@/app/context/GenerationContext';
 import { SetWizardState } from './types';
@@ -37,7 +37,28 @@ export function GenerationStep({
   const { startGeneration, updateProgress, completeGeneration, failGeneration } = useGeneration();
   const { addSet: _addSet, refreshSets } = useSet();
   const [hasStarted, setHasStarted] = useState(false);
+  const [isPageVisible, setIsPageVisible] = useState(true);
+  const [showVisibilityWarning, setShowVisibilityWarning] = useState(false);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Page visibility detection
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const isVisible = !document.hidden;
+      setIsPageVisible(isVisible);
+      
+      if (!isVisible && hasStarted) {
+        // User switched away during generation
+        setShowVisibilityWarning(true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [hasStarted]);
 
   useEffect(() => {
     // Prevent double execution
@@ -267,6 +288,46 @@ export function GenerationStep({
           Your flashcard set is being generated. This will take a moment...
         </p>
       </div>
+
+      {/* Important warning about staying in the app */}
+      <div className="neumorphic rounded-xl p-4 border border-yellow-500/30 bg-yellow-50/10">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+          <div className="text-sm">
+            <p className="font-semibold text-yellow-500 mb-1">Important: Stay in this app</p>
+            <p className="text-gray-300 leading-relaxed">
+              Please keep this app open and visible during generation. 
+              Switching apps or minimizing the browser may cause the generation to fail.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Visibility warning if user switched away */}
+      {showVisibilityWarning && (
+        <div className="neumorphic rounded-xl p-4 border border-red-500/30 bg-red-50/10">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+            <div className="text-sm">
+              <p className="font-semibold text-red-500 mb-1">Warning: App was minimized</p>
+              <p className="text-gray-300 leading-relaxed">
+                You switched away from the app during generation. This may cause the process to fail. 
+                Please return to this app and keep it visible until generation completes.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Page visibility indicator */}
+      {!isPageVisible && hasStarted && (
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-red-500/20 text-red-400 text-sm">
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+            App is in background - generation may be affected
+          </div>
+        </div>
+      )}
       
       <div className="flex justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
@@ -274,7 +335,9 @@ export function GenerationStep({
       
       <div className="text-center text-sm text-gray-500">
         <p>Generating {state.mode === 'manual' ? 'translations and' : ''} flashcards...</p>
-        <p className="mt-2">You can close this window - we'll notify you when it's ready!</p>
+        <p className="mt-2 text-xs text-gray-400">
+          Generation typically takes 2-5 minutes. Please be patient and keep this app open.
+        </p>
       </div>
 
       {/* Thai facts while progress runs */}

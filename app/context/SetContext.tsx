@@ -384,6 +384,12 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
         console.log("SetContext: Sets already loaded, skipping reload");
         return;
       }
+      
+      // Also skip if we already have preloaded data (even if not yet marked as initialized)
+      if (preloadedData && preloadedData.sets && preloadedData.sets.length > 0) {
+        console.log("SetContext: Have preloaded data, skipping API calls");
+        return;
+      }
 
       setSetsHaveLoaded(false);
       setIsLoading(true); // Set loading true while fetching

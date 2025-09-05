@@ -65,16 +65,8 @@ export class AppPreloader {
         message: userId ? 'Loading your personalized content...' : 'Loading default content...'
       });
 
-      if (userId) {
-        // Initialize user data immediately for better UX
-        console.log('[Preloader] Initializing user data immediately');
-        try {
-          await this.initializeUserData(userId);
-        } catch (err) {
-          console.error('[Preloader] Error initializing user data:', err);
-          // Continue anyway - we'll still load what we can
-        }
-      }
+      // Skip initializeUserData - it's redundant and slows down loading
+      // The backend already handles folder initialization when needed
 
       // Stage 3-4: Load folders and sets in parallel
       this.updateProgress({

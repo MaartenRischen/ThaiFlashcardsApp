@@ -408,6 +408,48 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     setShowMoveModal(true);
   };
 
+  const handleDeleteSelected = async () => {
+    const selectedSetsList = availableSets.filter(s => selectedSets.has(s.id));
+    const setNames = selectedSetsList.map(s => s.name).join(', ');
+    
+    if (window.confirm(`Are you sure you want to delete ${selectedSets.size} set(s)? This action cannot be undone.\n\nSets to delete: ${setNames}`)) {
+      setLoading(true);
+      try {
+        const promises = Array.from(selectedSets).map(setId => 
+          fetch(`/api/flashcard-sets/${setId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+          })
+        );
+        
+        const responses = await Promise.all(promises);
+        const failedCount = responses.filter(r => !r.ok).length;
+        
+        if (failedCount > 0) {
+          toast.error(`Failed to delete ${failedCount} set(s)`);
+        } else {
+          toast.success(`Deleted ${selectedSets.size} set(s) successfully`);
+        }
+
+        // Clear selection and refresh data
+        setSelectedSets(new Set());
+        setIsSelectMode(false);
+        clearFolderCache();
+        await refreshSets();
+        await fetchFolders();
+        
+        if (currentFolder) {
+          await loadFolder(currentFolder.id);
+        }
+      } catch (error) {
+        console.error('Error deleting sets:', error);
+        toast.error('Failed to delete sets');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   const handleMove = async (setIds: string[], targetFolderId: string | null) => {
     setLoading(true);
     try {
@@ -536,66 +578,90 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
             <DialogHeader className="flex-1">
               <DialogTitle asChild>
                 {currentFolder ? (
-                  <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-                    <button
-                      onClick={handleBackToFolders}
-                      className="p-3 sm:p-4 rounded-xl bg-[#3C3C3C]/50 hover:bg-[#3C3C3C]/70 backdrop-blur-sm transition-all duration-200 border border-[#404040]/50 group flex-shrink-0"
-                    >
-                      <ArrowLeft size={20} className="text-[#A9C4FC] group-hover:text-[#A9C4FC]/80 sm:w-6 sm:h-6" />
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <h2 className="text-lg sm:text-2xl font-bold text-[#E0E0E0] truncate">{currentFolder.name}</h2>
-                      {currentFolder.description && (
-                        <p className="text-xs sm:text-sm text-[#BDBDBD] mt-1 truncate">{currentFolder.description}</p>
-                      )}
+                  <div className="flex flex-col gap-4 w-full">
+                    {/* Header Row */}
+                    <div className="flex items-center gap-2 sm:gap-4">
+                      <button
+                        onClick={handleBackToFolders}
+                        className="p-3 sm:p-4 rounded-xl bg-[#3C3C3C]/50 hover:bg-[#3C3C3C]/70 backdrop-blur-sm transition-all duration-200 border border-[#404040]/50 group flex-shrink-0"
+                      >
+                        <ArrowLeft size={20} className="text-[#A9C4FC] group-hover:text-[#A9C4FC]/80 sm:w-6 sm:h-6" />
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <h2 className="text-lg sm:text-2xl font-bold text-[#E0E0E0] truncate">{currentFolder.name}</h2>
+                        {currentFolder.description && (
+                          <p className="text-xs sm:text-sm text-[#BDBDBD] mt-1 truncate">{currentFolder.description}</p>
+                        )}
+                      </div>
                     </div>
                     
-                    {/* Set Actions */}
+                    {/* Actions Row */}
                     {currentFolder.sets.length > 0 && (
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {isSelectMode ? (
-                          <>
-                            <span className="text-sm text-[#BDBDBD] whitespace-nowrap">
+                      <div className="flex items-center justify-between gap-4 px-4 py-3 bg-[#2A2A2A]/30 backdrop-blur-sm rounded-xl border border-[#404040]/20">
+                        <div className="flex items-center gap-2">
+                          {isSelectMode ? (
+                            <span className="text-sm text-[#BDBDBD] font-medium">
                               {selectedSets.size} selected
                             </span>
-                            <Button
-                              onClick={handleSelectAll}
-                              variant="outline"
-                              size="sm"
-                              className="bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50 text-xs px-2"
-                            >
-                              {selectedSets.size === currentFolder.sets.length ? 'Deselect All' : 'Select All'}
-                            </Button>
-                            {selectedSets.size > 0 && (
+                          ) : (
+                            <span className="text-sm text-[#BDBDBD]">
+                              {currentFolder.sets.length} set{currentFolder.sets.length !== 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          {isSelectMode ? (
+                            <>
                               <Button
-                                onClick={handleMoveSelected}
+                                onClick={handleSelectAll}
+                                variant="outline"
                                 size="sm"
-                                className="bg-[#A9C4FC] hover:bg-[#A9C4FC]/90 text-[#121212] text-xs px-2"
+                                className="neumorphic-button text-[#E0E0E0] hover:bg-[#2C2C2C]/50 text-xs px-3 py-2 rounded-xl"
                               >
-                                <MoveRight size={14} className="mr-1" />
-                                Move
+                                {selectedSets.size === currentFolder.sets.length ? 'Deselect All' : 'Select All'}
                               </Button>
-                            )}
+                              {selectedSets.size > 0 && (
+                                <>
+                                  <Button
+                                    onClick={handleMoveSelected}
+                                    size="sm"
+                                    className="bg-gradient-to-r from-[#A9C4FC] to-[#BB86FC] hover:from-[#9B8DF0] hover:to-[#A374E8] text-[#121212] text-xs px-3 py-2 rounded-xl font-medium"
+                                  >
+                                    <MoveRight size={14} className="mr-1" />
+                                    Move
+                                  </Button>
+                                  <Button
+                                    onClick={handleDeleteSelected}
+                                    size="sm"
+                                    className="bg-gradient-to-r from-[#ef4444] to-[#dc2626] hover:from-[#f87171] hover:to-[#ef4444] text-white text-xs px-3 py-2 rounded-xl font-medium"
+                                  >
+                                    <FolderX size={14} className="mr-1" />
+                                    Delete
+                                  </Button>
+                                </>
+                              )}
+                              <Button
+                                onClick={() => setIsSelectMode(false)}
+                                variant="outline"
+                                size="sm"
+                                className="neumorphic-button text-[#E0E0E0] hover:bg-[#2C2C2C]/50 text-xs px-3 py-2 rounded-xl"
+                              >
+                                Cancel
+                              </Button>
+                            </>
+                          ) : (
                             <Button
-                              onClick={() => setIsSelectMode(false)}
+                              onClick={() => setIsSelectMode(true)}
                               variant="outline"
                               size="sm"
-                              className="bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50 text-xs px-2"
+                              className="neumorphic-button text-[#E0E0E0] hover:bg-[#2C2C2C]/50 text-xs px-3 py-2 rounded-xl"
                             >
-                              Cancel
+                              <CheckSquare size={14} className="mr-1" />
+                              Select
                             </Button>
-                          </>
-                        ) : (
-                          <Button
-                            onClick={() => setIsSelectMode(true)}
-                            variant="outline"
-                            size="sm"
-                            className="bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50 text-xs px-2"
-                          >
-                            <CheckSquare size={14} className="mr-1" />
-                            Select
-                          </Button>
-                        )}
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1060,7 +1126,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                         imageUrl: fullSet.imageUrl
                                       });
                                     }}
-                                    className="px-3 py-1.5 bg-[#2F2F2F] text-[#E0E0E0] text-xs font-medium rounded-md hover:bg-[#3A3A3A] border border-[#444] transition-colors flex items-center gap-1.5"
+                                    className="px-3 py-1.5 bg-[#2F2F2F] text-[#E0E0E0] text-xs font-medium rounded-xl hover:bg-[#3A3A3A] border border-[#444] transition-colors flex items-center gap-1.5"
                                     title="Preview this set"
                                   >
                                     <Eye className="h-3.5 w-3.5 text-[#E0E0E0]" />
@@ -1073,7 +1139,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                         e.stopPropagation();
                                         handleLoadSet(fullSet.id);
                                       }}
-                                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
+                                      className="px-3 py-1.5 bg-gradient-to-r from-[#BB86FC] to-[#A374E8] hover:from-[#A374E8] hover:to-[#9B6DD0] text-white text-xs font-medium rounded-xl transition-all duration-200 flex items-center gap-1.5"
                                       title="Load this set"
                                   >
                                       <Play className="h-3.5 w-3.5 text-white" />
@@ -1086,7 +1152,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                       setId={set.id}
                                       setName={set.name}
                                       variant="default"
-                                      className=""
+                                      className="px-3 py-1.5 bg-gradient-to-r from-[#10b981] to-[#059669] hover:from-[#34d399] hover:to-[#10b981] text-white text-xs font-medium rounded-xl transition-all duration-200"
                                     />
                                   )}
                                   

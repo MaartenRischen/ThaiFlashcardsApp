@@ -1156,11 +1156,12 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                     />
                                   )}
                                   
+                                  {/* Send to a Friend Button - consistent styling */}
                                   <ShareButton
                                     setId={set.id}
                                     setName={set.name}
-                                    variant="prominent"
-                                    className="scale-90"
+                                    variant="default"
+                                    className="px-3 py-1.5 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] hover:from-[#FF8E53] hover:to-[#FFB84D] text-white text-xs font-medium rounded-xl transition-all duration-200"
                                   />
                                   {isAdmin && fullSet.source === 'default' && (
                                     <button
@@ -1168,7 +1169,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                                         e.stopPropagation();
                                         adminDeleteDefaultSetGlobally(fullSet.id);
                                       }}
-                                      className="px-2 py-1 text-xs rounded bg-red-900/30 text-red-300 border border-red-800/50 hover:bg-red-900/50"
+                                      className="px-3 py-1.5 bg-gradient-to-r from-[#ef4444] to-[#dc2626] hover:from-[#f87171] hover:to-[#ef4444] text-white text-xs font-medium rounded-xl transition-all duration-200"
                                       title="Delete this default set for ALL accounts"
                                     >
                                       Delete globally

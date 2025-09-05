@@ -3,7 +3,7 @@ import { useSet } from '@/app/context/SetContext'; // Import useSet hook
 import { Layers, Grid, Plus, Settings, HelpCircle, GalleryHorizontal, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-
+import { ShareButton } from '@/app/components/ShareButton';
 
 import { SignInButton } from '@clerk/nextjs';
 
@@ -78,6 +78,18 @@ export function FlashcardHeader({
               target.src = '/images/defaultnew.png';
             }}
           />
+          {/* Send to a Friend Button - Top Right */}
+          {activeSet && (
+            <div className="absolute top-3 right-3 z-20 pointer-events-auto">
+              <ShareButton
+                setId={activeSet.id}
+                setName={activeSet.cleverTitle || activeSet.name || 'Set'}
+                variant="prominent"
+                className="scale-75 origin-top-right"
+              />
+            </div>
+          )}
+          
           {/* Set Title Overlay at Bottom */}
           <div
             className="absolute bottom-0 left-0 right-0 z-10 flex flex-col items-center pointer-events-none"

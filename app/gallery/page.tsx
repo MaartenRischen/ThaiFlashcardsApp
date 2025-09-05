@@ -3,7 +3,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useSet } from '@/app/context/SetContext';
 import { Phrase } from '@/app/lib/set-generator';
 import GallerySetCard from './GallerySetCard';
-import { GalleryHorizontal, Loader2, Trash2, ArrowLeft } from 'lucide-react';
+import { GalleryHorizontal, Loader2, Trash2, X, Filter } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 // Import a modal component (we'll create this next)
@@ -72,24 +72,6 @@ export default function GalleryPage() {
   const [sortOrder, setSortOrder] = useState<'Newest' | 'Oldest' | 'Most Cards' | 'Highest Rated'>('Newest');
   const [authorFilter, setAuthorFilter] = useState<string>('All');
 
-  // Dynamic filter (field + operator + value)
-  type FieldType = 'string' | 'number' | 'date';
-  const filterableFields = useMemo(() => [
-    { key: 'title' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Title', type: 'string' as FieldType },
-    { key: 'description' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Description', type: 'string' as FieldType },
-    { key: 'author' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Author', type: 'string' as FieldType },
-    { key: 'proficiencyLevel' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Proficiency Level', type: 'string' as FieldType },
-    { key: 'seriousnessLevel' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Tone Level (number)', type: 'number' as FieldType },
-    { key: 'cardCount' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Card Count', type: 'number' as FieldType },
-    { key: 'phraseCount' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Phrase Count', type: 'number' as FieldType },
-    { key: 'llmBrand' as keyof DisplaySet, label: 'LLM Brand', type: 'string' as FieldType },
-    { key: 'llmModel' as keyof DisplaySet, label: 'LLM Model', type: 'string' as FieldType },
-    { key: 'publishedAt' as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt', label: 'Published At', type: 'date' as FieldType },
-  ], []);
-  const [filterKey, setFilterKey] = useState<string>('');
-  const [filterOp, setFilterOp] = useState<'contains' | 'eq' | 'gte' | 'lte'>('contains');
-  const [filterValue, setFilterValue] = useState<string>('');
-
   // --- Filtering Logic ---
   const sortOptions = ['Newest', 'Oldest', 'Most Cards', 'Highest Rated'];
   
@@ -136,53 +118,6 @@ export default function GalleryPage() {
       filtered = filtered.filter(set => (set.author || 'Anonymous') === authorFilter);
     }
 
-    // Dynamic filter
-    if (filterKey && filterValue.trim()) {
-      const field = filterableFields.find(f => f.key === (filterKey as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt'));
-      const v = filterValue.trim();
-      if (field) {
-        filtered = filtered.filter(set => {
-          let value: unknown;
-          if (field.key === 'publishedAt') {
-            value = set.publishedAt ? new Date(set.publishedAt) : null;
-          } else if (field.key === 'proficiencyLevel') {
-            value = (set as unknown as Record<string, unknown>).proficiencyLevel ?? '';
-          } else if (field.key === 'seriousnessLevel') {
-            value = (set as unknown as Record<string, unknown>).seriousnessLevel ?? null;
-          } else {
-            value = (set as unknown as Record<string, unknown>)[field.key as keyof DisplaySet];
-          }
-
-          if (field.type === 'string') {
-            const text = String(value ?? '').toLowerCase();
-            if (filterOp === 'eq') return text === v.toLowerCase();
-            return text.includes(v.toLowerCase());
-          }
-
-          if (field.type === 'number') {
-            const num = Number(value);
-            const target = Number(v);
-            if (Number.isNaN(target)) return true; // ignore invalid input
-            if (filterOp === 'eq') return num === target;
-            if (filterOp === 'gte') return num >= target;
-            if (filterOp === 'lte') return num <= target;
-            return true;
-          }
-
-          if (field.type === 'date') {
-            const dateVal = value instanceof Date ? value : (value ? new Date(String(value)) : null);
-            const target = new Date(v);
-            if (!dateVal || isNaN(target.getTime())) return true;
-            if (filterOp === 'eq') return dateVal.toDateString() === target.toDateString();
-            if (filterOp === 'gte') return dateVal.getTime() >= target.getTime();
-            if (filterOp === 'lte') return dateVal.getTime() <= target.getTime();
-            return true;
-          }
-
-          return true;
-        });
-      }
-    }
 
     // Sorting
     filtered = filtered.slice().sort((a, b) => {
@@ -201,7 +136,7 @@ export default function GalleryPage() {
     });
 
     return filtered;
-  }, [sets, search, sortOrder, authorFilter, filterKey, filterOp, filterValue, filterableFields]);
+  }, [sets, search, sortOrder, authorFilter]);
 
   // Function to fetch gallery sets
   const fetchSets = () => {
@@ -438,13 +373,13 @@ export default function GalleryPage() {
       
       {/* Header Section */}
       <div className="mb-8">
-        {/* Back Button */}
+        {/* Close Button */}
         <button
-          onClick={() => router.back()}
-          className="mb-6 neumorphic-button px-4 py-2 rounded-xl flex items-center gap-2 text-[#E0E0E0] hover:text-[#BB86FC] transition-colors"
+          onClick={() => router.push('/')}
+          className="absolute top-4 right-4 neumorphic-button p-2 rounded-xl text-[#E0E0E0] hover:text-[#BB86FC] transition-colors"
+          aria-label="Close"
         >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back</span>
+          <X className="w-6 h-6" />
         </button>
         
         <div className="text-center mb-6">
@@ -455,117 +390,68 @@ export default function GalleryPage() {
         </div>
         
         {/* Search and Filters */}
-        <div className="max-w-4xl mx-auto space-y-4">
+        <div className="max-w-4xl mx-auto space-y-3">
           <div className="relative">
             <input
               type="text"
               placeholder="Search sets by title, description, or topics..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-4 py-3 bg-[#2A2A2A] border border-[#444] rounded-xl text-[#E0E0E0] placeholder-[#8B8B8B] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all"
+              className="w-full px-4 py-2.5 bg-[#2A2A2A] border border-[#444] rounded-xl text-[#E0E0E0] placeholder-[#8B8B8B] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all"
             />
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          {/* Compact filter row */}
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-[#BDBDBD]">Sort by:</label>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
+                className="px-3 py-1.5 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
+              >
+                {sortOptions.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-[#BDBDBD]">Created by:</label>
+              <select
+                value={authorFilter}
+                onChange={(e) => setAuthorFilter(e.target.value)}
+                className="px-3 py-1.5 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
+              >
+                {authors.map(author => (
+                  <option key={author} value={author}>{author}</option>
+                ))}
+              </select>
+            </div>
+            
+            {(search || authorFilter !== 'All') && (
+              <button
+                onClick={() => {
+                  setSearch('');
+                  setAuthorFilter('All');
+                }}
+                className="px-3 py-1.5 bg-[#3C3C3C] text-[#E0E0E0] rounded-lg hover:bg-[#4C4C4C] transition-colors text-sm font-medium flex items-center gap-1"
+              >
+                <X className="w-3.5 h-3.5" />
+                Clear filters
+              </button>
+            )}
+            
             {isAdmin && filteredSets.length > 0 && (
               <button
                 onClick={handleSelectAll}
-                className="px-4 py-2 bg-[#3C3C3C] border border-[#555] text-[#E0E0E0] rounded-lg hover:bg-[#4C4C4C] transition-colors text-sm font-medium"
+                className="px-3 py-1.5 bg-[#3C3C3C] text-[#E0E0E0] rounded-lg hover:bg-[#4C4C4C] transition-colors text-sm font-medium"
               >
                 {selectedSets.size === filteredSets.length ? 'Deselect All' : 'Select All'}
               </button>
             )}
-            <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
-              className="px-4 py-2 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
-            >
-              {sortOptions.map(option => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-            <select
-              value={authorFilter}
-              onChange={(e) => setAuthorFilter(e.target.value)}
-              className="px-4 py-2 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
-            >
-              {authors.map(author => (
-                <option key={author} value={author}>{author}</option>
-              ))}
-            </select>
           </div>
 
-          {/* Dynamic filter row */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <select
-              value={filterKey}
-              onChange={(e) => {
-                const key = e.target.value;
-                setFilterKey(key);
-                // Adjust default operator by field type
-                const field = filterableFields.find(f => f.key === (key as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt'));
-                if (field?.type === 'string') setFilterOp('contains');
-                else setFilterOp('eq');
-              }}
-              className="px-4 py-2 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
-            >
-              <option value="">Filter by (any field)</option>
-              {filterableFields.map(f => (
-                <option key={String(f.key)} value={String(f.key)}>{f.label}</option>
-              ))}
-            </select>
-
-            <select
-              value={filterOp}
-              onChange={(e) => setFilterOp(e.target.value as 'contains' | 'eq' | 'gte' | 'lte')}
-              className="px-4 py-2 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
-            >
-              {(() => {
-                const field = filterableFields.find(f => f.key === (filterKey as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt'));
-                if (!field || field.type === 'string') {
-                  return (
-                    <>
-                      <option value="contains">contains</option>
-                      <option value="eq">equals</option>
-                    </>
-                  );
-                }
-                if (field.type === 'number' || field.type === 'date') {
-                  return (
-                    <>
-                      <option value="eq">equals</option>
-                      <option value="gte">≥</option>
-                      <option value="lte">≤</option>
-                    </>
-                  );
-                }
-                return null;
-              })()}
-            </select>
-
-            {(() => {
-              const field = filterableFields.find(f => f.key === (filterKey as keyof DisplaySet | 'proficiencyLevel' | 'seriousnessLevel' | 'publishedAt'));
-              const inputType = field?.type === 'number' ? 'number' : (field?.type === 'date' ? 'date' : 'text');
-              return (
-                <input
-                  type={inputType}
-                  placeholder="Value"
-                  value={filterValue}
-                  onChange={(e) => setFilterValue(e.target.value)}
-                  className="w-full sm:w-64 px-4 py-2 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg placeholder-[#8B8B8B] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
-                />
-              );
-            })()}
-
-            {(filterKey || filterValue) && (
-              <button
-                onClick={() => { setFilterKey(''); setFilterOp('contains'); setFilterValue(''); }}
-                className="px-4 py-2 bg-[#3C3C3C] border border-[#555] text-[#E0E0E0] rounded-lg hover:bg-[#4C4C4C] transition-colors text-sm"
-              >
-                Clear filter
-              </button>
-            )}
-          </div>
         </div>
       </div>
 

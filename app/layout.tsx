@@ -21,18 +21,18 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#ffffff',
+  themeColor: '#BB86FC',
   viewportFit: 'cover',
 }
 
 export const metadata: Metadata = {
-  title: 'Donkey Bridge - Thai Language Mnemonics',
+  title: 'Thai Flashcards - Learn Thai with Mnemonics',
   description: 'Learn Thai vocabulary effectively with mnemonics and spaced repetition',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Donkey Bridge'
+    title: 'Thai Flashcards'
   },
   formatDetection: {
     telephone: false

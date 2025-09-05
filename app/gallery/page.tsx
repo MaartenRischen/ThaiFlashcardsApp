@@ -21,6 +21,8 @@ interface GallerySet {
   author?: string;
   cardCount?: number;
   specificTopics?: string;
+  averageRating?: number;
+  ratingCount?: number;
 }
 
 // Define a type for the full set data including phrases
@@ -39,6 +41,8 @@ interface DisplaySet extends Omit<GallerySet, 'phrases' | 'createdAt'> {
   cardCount: number; // Make cardCount required
   generationMeta?: { imageUrl?: string | null } | null; 
   userId: string;
+  averageRating?: number;
+  ratingCount?: number;
 }
 
 export default function GalleryPage() {
@@ -129,7 +133,14 @@ export default function GalleryPage() {
         case 'Most Cards':
           return (b.cardCount || 0) - (a.cardCount || 0);
         case 'Highest Rated':
-          return 0;
+          // Sort by average rating, then by number of ratings as tiebreaker
+          const aRating = a.averageRating || 0;
+          const bRating = b.averageRating || 0;
+          if (aRating !== bRating) {
+            return bRating - aRating;
+          }
+          // If ratings are equal, prioritize sets with more ratings
+          return (b.ratingCount || 0) - (a.ratingCount || 0);
         default:
           return 0;
       }

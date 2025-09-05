@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
 import { Trash2, BookOpen, Download, Layers, User } from 'lucide-react';
+import { StarRating } from '@/app/components/StarRating';
 import { getToneLabel } from '@/app/lib/utils';
 
 // Define a more specific type for the set prop
@@ -20,6 +21,8 @@ interface GallerySet {
   proficiencyLevel?: string;
   specificTopics?: string;
   publishedAt: string;
+  averageRating?: number;
+  ratingCount?: number;
 }
 
 interface GallerySetCardProps {
@@ -123,6 +126,15 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
         <h3 className="font-bold text-lg text-[#E0E0E0] leading-tight">
           {set.title}
         </h3>
+        
+        {/* Rating */}
+        <StarRating
+          publishedSetId={set.id}
+          averageRating={set.averageRating}
+          ratingCount={set.ratingCount}
+          size="small"
+          interactive={false}
+        />
         
         {/* Metadata badges */}
         <div className="flex flex-wrap gap-3 text-xs text-[#BDBDBD] pt-2">

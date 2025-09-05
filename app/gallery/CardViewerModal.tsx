@@ -2,6 +2,7 @@
 import React from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { Phrase } from '@/app/lib/set-generator';
+import { StarRating } from '@/app/components/StarRating';
 
 // Re-use or redefine the FullGallerySet interface if needed, or import it
 interface FullGallerySet {
@@ -42,17 +43,30 @@ const CardViewerModal: React.FC<CardViewerModalProps> = ({ set, isLoading, error
     >
       <div className="neumorphic bg-[#2C2C2C] rounded-lg max-w-2xl w-full max-h-[80vh] flex flex-col">
         {/* Modal Header */}
-        <div className="flex justify-between items-center p-4 border-b border-[#404040]">
-          <h2 className="text-lg font-medium text-[#E0E0E0] truncate pr-4">
-            {isLoading ? 'Loading Set...' : set?.title || 'View Cards'}
-          </h2>
-          <button 
-            onClick={onClose} 
-            className="text-[#BDBDBD] hover:text-[#E0E0E0] transition"
-            aria-label="Close"
-          >
-            <X className="h-5 w-5" />
-          </button>
+        <div className="p-4 border-b border-[#404040]">
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <h2 className="text-lg font-medium text-[#E0E0E0] truncate pr-4">
+                {isLoading ? 'Loading Set...' : set?.title || 'View Cards'}
+              </h2>
+              {set && !isLoading && (
+                <div className="mt-2">
+                  <StarRating
+                    publishedSetId={set.id}
+                    size="medium"
+                    interactive={true}
+                  />
+                </div>
+              )}
+            </div>
+            <button 
+              onClick={onClose} 
+              className="text-[#BDBDBD] hover:text-[#E0E0E0] transition"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Body */}

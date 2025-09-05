@@ -26,6 +26,7 @@ model User {
   userSetProgress UserSetProgress[]
   userMnemonics   UserMnemonic[]
   folders         Folder[]
+  ratings         SetRating[]
 }
 
 model FlashcardSet {
@@ -102,6 +103,8 @@ model PublishedSet {
   phrases        Json     @db.JsonB // Store the Phrase[] array directly as JSONB
   publishedAt    DateTime @default(now())
 
+  ratings        SetRating[]
+
   @@index([publishedAt])
 }
 
@@ -135,6 +138,22 @@ model Folder {
   sets FlashcardSet[]
 
   @@unique([userId, name]) // Prevent duplicate folder names per user
+  @@index([userId])
+}
+
+model SetRating {
+  id            String   @id @default(cuid())
+  userId        String   // Foreign key referencing User.id (Clerk User ID)
+  publishedSetId String  // Foreign key to PublishedSet
+  rating        Int      // Rating value (1-5 stars)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  publishedSet PublishedSet @relation(fields: [publishedSetId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, publishedSetId]) // User can only rate a set once
+  @@index([publishedSetId])
   @@index([userId])
 }
 

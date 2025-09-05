@@ -75,20 +75,12 @@ export async function publishSetToGallery(publishedSet: PublishedSetData) {
 // Fetch all published sets (metadata only)
 export async function getAllPublishedSets() {
   const rows = await prisma.publishedSet.findMany({
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      imageUrl: true,
-      cardCount: true,
-      author: true,
-      llmBrand: true,
-      llmModel: true,
-      specificTopics: true,
-      publishedAt: true,
-      proficiencyLevel: true,
-      seriousnessLevel: true,
-      phrases: true,
+    include: {
+      ratings: {
+        select: {
+          rating: true
+        }
+      }
     },
     orderBy: { publishedAt: 'desc' }
   });
@@ -97,8 +89,22 @@ export async function getAllPublishedSets() {
     const phrases = Array.isArray(row.phrases) ? (row.phrases as PhraseLike[]) : [];
     const proficiency = (row.proficiencyLevel as string) || estimateProficiencyLevel(phrases);
     const tone = (row.seriousnessLevel as number) ?? estimateSeriousnessLevel(phrases);
-    const { phrases: _omit, ...rest } = row;
-    return { ...rest, proficiencyLevel: proficiency, seriousnessLevel: tone };
+    
+    // Calculate average rating
+    const ratings = Array.isArray(row.ratings) ? row.ratings as { rating: number }[] : [];
+    const averageRating = ratings.length > 0 
+      ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length 
+      : 0;
+    const ratingCount = ratings.length;
+    
+    const { phrases: _omit, ratings: _omitRatings, ...rest } = row;
+    return { 
+      ...rest, 
+      proficiencyLevel: proficiency, 
+      seriousnessLevel: tone,
+      averageRating,
+      ratingCount
+    };
   });
 }
 

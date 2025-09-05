@@ -194,34 +194,34 @@ export function CardsListModal({
         <div className="flex flex-col gap-3 mb-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-[#E0E0E0]">Current Set</h3>
-            <div className="flex items-center gap-3">
-              {/* Publish and Share Buttons - only show for user-created sets (not default sets) */}
-              {activeSet && activeSet.source !== 'default' && !activeSet.id.startsWith('default-') && (
-                <>
-                  <GoLiveButton
-                    setId={activeSet.id}
-                    setName={activeSet.name}
-                    variant="prominent"
-                    className="scale-90"
-                  />
-                  <ShareButton
-                    setId={activeSet.id}
-                    setName={activeSet.name}
-                    variant="prominent"
-                    className="scale-90"
-                  />
-                </>
-              )}
-              <button 
-                className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition-colors" 
-                onClick={handleClose}
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            <button 
+              className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition-colors" 
+              onClick={handleClose}
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
           
-          <div className="flex flex-wrap items-center gap-3">
+          {/* All action buttons aligned to the right */}
+          <div className="flex items-center justify-end gap-3 flex-wrap">
+            {/* Publish and Share Buttons - only show for user-created sets (not default sets) */}
+            {activeSet && activeSet.source !== 'default' && !activeSet.id.startsWith('default-') && (
+              <>
+                <GoLiveButton
+                  setId={activeSet.id}
+                  setName={activeSet.name}
+                  variant="prominent"
+                  className="scale-90"
+                />
+                <ShareButton
+                  setId={activeSet.id}
+                  setName={activeSet.name}
+                  variant="prominent"
+                  className="scale-90"
+                />
+              </>
+            )}
+            
             {/* Audio Lesson Button - only show for non-default sets */}
             {activeSet && activeSet.id !== 'default' && (
               <button
@@ -235,6 +235,7 @@ export function CardsListModal({
                 <span>Audio Lesson</span>
               </button>
             )}
+            
             {!isEditMode ? (
               <button
                 onClick={() => setIsEditMode(true)}

@@ -76,14 +76,21 @@ export class AppPreloader {
       });
       
       // Load folders first, then sets, so we can immediately start preloading
+      this.updateProgress({
+        stage: 'folders',
+        progress: 20,
+        message: 'Loading folders...',
+        subProgress: { current: 0, total: 5 }
+      });
+      
       const folders = await this.loadFolders(userId);
       
-      // Show folder names being loaded - no delays
+      // Show folders as loaded
       if (folders.length > 0) {
         this.updateProgress({
           stage: 'folders',
           progress: 25,
-          message: `Loading ${folders.length} folders...`,
+          message: `Loaded ${folders.length} folders`,
           subProgress: { 
             current: folders.length, 
             total: folders.length
@@ -311,7 +318,7 @@ export class AppPreloader {
   }
 
   private async loadFolders(userId?: string | null): Promise<Folder[]> {
-    // For faster loading, return default folders immediately and load real ones in background
+    // For faster loading, always use default folders immediately
     const now = new Date().toISOString();
     const defaultFolders = [
       { 
@@ -361,34 +368,24 @@ export class AppPreloader {
       }
     ];
 
-    if (!userId) {
-      return defaultFolders;
+    // Show progressive loading for visual feedback
+    for (let i = 0; i < defaultFolders.length; i++) {
+      this.updateProgress({
+        stage: 'folders',
+        progress: 20 + (5 * (i + 1) / defaultFolders.length),
+        message: 'Loading folders...',
+        subProgress: { 
+          current: i + 1, 
+          total: defaultFolders.length,
+          item: defaultFolders[i].name
+        }
+      });
+      // Very small delay to make progress visible
+      await new Promise(resolve => setTimeout(resolve, 20));
     }
 
-    try {
-      // Add a timeout to prevent hanging
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-      
-      const response = await fetch('/api/folders', {
-        credentials: 'include',
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (response.ok) {
-        const data = await response.json();
-        const folders = Array.isArray(data) ? data : (data?.folders ?? []);
-        console.log(`[Preloader] Loaded ${folders.length} folders from API`);
-        return folders as Folder[];
-      } else {
-        console.warn(`[Preloader] Folders API returned ${response.status}, using defaults`);
-      }
-    } catch (error) {
-      console.warn('[Preloader] Failed to load folders, using defaults:', error);
-    }
-    
+    // For authenticated users, we'll load custom folders later in SetContext if needed
+    // This prevents the long delay during initial loading
     return defaultFolders;
   }
 

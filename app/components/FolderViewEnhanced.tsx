@@ -52,10 +52,10 @@ type ViewMode = 'grid' | 'list';
 type SortOption = 'name' | 'date' | 'size';
 
 export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlightSetId }: FolderViewEnhancedProps) {
-  const { availableSets, switchSet, activeSetId, refreshSets, isLoading: setsLoading } = useSet();
+  const { availableSets, switchSet, activeSetId, refreshSets } = useSet();
   const { preloadFolders, getCachedFolders, clearFolderCache, preloadImages, getCachedContent, hasInitiallyLoadedFolders } = useSetCache();
   // Access preloaded data to avoid unnecessary spinners if cache hasn't been primed yet
-  const { preloadedData, isLoading: isPreloading } = usePreloader();
+  const { preloadedData: _preloadedData } = usePreloader();
   const { folders: preloadedFolders } = usePreloadedFolders();
   const { user } = useUser();
   const userEmail = user?.emailAddresses?.[0]?.emailAddress;
@@ -165,7 +165,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     setSearchQuery('');
     
     // Never show loading for entering folders - we have all metadata already
-    let shouldShowLoading = false;
+    const _shouldShowLoading = false;
     
     try {
       let folderSets: SetMetaData[] = [];

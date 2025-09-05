@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { ShareButton } from './ShareButton';
 import { GoLiveButton } from './GoLiveButton';
 import { BookOpen, Layers, Sparkles } from 'lucide-react';

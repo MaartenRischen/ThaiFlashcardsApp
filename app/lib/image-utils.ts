@@ -21,7 +21,7 @@ export function getThumbnailUrl(originalUrl: string | null | undefined): string 
  * Returns a promise that resolves when the image is loaded
  */
 export function preloadImage(url: string): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     const img = new Image();
     img.onload = () => resolve();
     img.onerror = () => {

@@ -98,20 +98,20 @@ export function FlashcardHeader({
               {activeSet?.cleverTitle || activeSet?.name || ''}
             </div>
           </div>
+          
+          {/* Send to a Friend Button - Bottom Right with Half Overlap */}
+          {activeSet && (
+            <div className="absolute bottom-0 right-0 z-20 pointer-events-auto transform translate-x-1/2 translate-y-1/2">
+              <ShareButton
+                setId={activeSet.id}
+                setName={activeSet.cleverTitle || activeSet.name || 'Set'}
+                variant="prominent"
+                className="scale-75"
+              />
+            </div>
+          )}
         </div>
       </div>
-      
-      {/* Send to a Friend Button - Below Image */}
-      {activeSet && (
-        <div className="w-full flex justify-center py-2 bg-[#121212]">
-          <ShareButton
-            setId={activeSet.id}
-            setName={activeSet.cleverTitle || activeSet.name || 'Set'}
-            variant="prominent"
-            className="scale-90"
-          />
-        </div>
-      )}
       
       {/* Navigation Buttons */}
       <div className="px-4 py-3 w-full bg-[#121212]">

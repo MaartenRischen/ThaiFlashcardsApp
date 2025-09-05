@@ -55,6 +55,9 @@ const CardViewerModal: React.FC<CardViewerModalProps> = ({ set, isLoading, error
                     publishedSetId={set.id}
                     size="medium"
                     interactive={true}
+                    onRatingChange={() => {
+                      // Rating changed, parent will refresh on close
+                    }}
                   />
                 </div>
               )}

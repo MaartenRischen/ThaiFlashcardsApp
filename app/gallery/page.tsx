@@ -345,6 +345,8 @@ export default function GalleryPage() {
     setIsCardViewerOpen(false);
     setViewingSet(null); // Clear set data when closing
     setCardViewError(null);
+    // Refresh gallery data to update ratings
+    fetchGallerySets();
   };
 
   return (

@@ -158,7 +158,7 @@ const GallerySetCard: React.FC<GallerySetCardProps> = ({
             className="flex-1 bg-[#2A2A2A] hover:bg-[#3A3A3A] text-[#E0E0E0] px-3 py-2 text-sm font-medium rounded-lg border border-[#444] hover:border-[#555] transition-all flex items-center justify-center gap-2"
           >
             <BookOpen className="h-4 w-4" />
-            Preview
+            Preview / Rate
           </button>
           <button
             onClick={() => handleImport(set.id)}

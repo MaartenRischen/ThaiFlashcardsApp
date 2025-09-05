@@ -299,6 +299,9 @@ export function GenerationStep({
               Please keep this app open and visible during generation. 
               Switching apps or minimizing the browser may cause the generation to fail.
             </p>
+            <p className="text-gray-300 leading-relaxed mt-2">
+              You can close this window and keep learning in the meantime!
+            </p>
           </div>
         </div>
       </div>

@@ -178,6 +178,9 @@ export function ToneStep({ toneLevel, onNext, onBack }: {
               The next step will generate your flashcards, which takes 2-5 minutes. 
               Please keep this app open and visible during the entire process.
             </p>
+            <p className="text-gray-300 leading-relaxed mt-2">
+              You can close this window and keep learning in the meantime!
+            </p>
           </div>
         </div>
       </div>

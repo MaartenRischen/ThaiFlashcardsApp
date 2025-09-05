@@ -300,6 +300,9 @@ export default function ThaiFlashcards() {
 
   // Add ref to track previous showAnswer state - RESTORED
   const prevShowAnswerRef = React.useRef(false);
+  // Add refs to track previous gender and politeness values
+  const prevIsMaleRef = React.useRef(isMale);
+  const prevIsPoliteRef = React.useRef(isPoliteMode);
   // Add a ref for the card back
   const cardBackRef = useRef<HTMLDivElement>(null);
   
@@ -392,15 +395,23 @@ export default function ThaiFlashcards() {
   useEffect(() => {
     // Only play if card is showing and audio is not already playing
     if (showAnswer && voicesLoaded && !isPlayingWord && !isPlayingContext && phrases[index]) {
-      // Check if this is initial card flip (autoplay enabled) or gender/politeness change
+      // Check if this is initial card flip (autoplay enabled)
       const isInitialFlip = autoplay && !prevShowAnswerRef.current;
-      const isGenderOrPolitenessChange = prevShowAnswerRef.current; // Card was already showing
+      
+      // Check if this is a gender or politeness change (card was already showing AND values changed)
+      const isGenderChange = prevShowAnswerRef.current && prevIsMaleRef.current !== isMale;
+      const isPolitenessChange = prevShowAnswerRef.current && prevIsPoliteRef.current !== isPoliteMode;
+      const isGenderOrPolitenessChange = isGenderChange || isPolitenessChange;
       
       if (isInitialFlip || isGenderOrPolitenessChange) {
         speak(getThaiWithGender(phrases[index], isMale, isPoliteMode), true, isMale);
       }
     }
+    
+    // Update refs
     prevShowAnswerRef.current = showAnswer;
+    prevIsMaleRef.current = isMale;
+    prevIsPoliteRef.current = isPoliteMode;
   }, [showAnswer, autoplay, phrases, index, isPlayingWord, isPlayingContext, voicesLoaded, isMale, isPoliteMode]);
 
   // Respond to tour step events to flip demo card

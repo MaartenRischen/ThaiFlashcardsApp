@@ -200,8 +200,11 @@ export function AppLoadingScreen({ progress }: AppLoadingScreenProps) {
               </p>
               {progress.subProgress && (
                 <p className="text-gray-400 text-sm mt-1">
-                  {progress.subProgress.item || 
-                   `${progress.subProgress.current} of ${progress.subProgress.total}`}
+                  {progress.subProgress.item ? (
+                    <span className="text-white font-medium">{progress.subProgress.item}</span>
+                  ) : (
+                    `${progress.subProgress.current} of ${progress.subProgress.total}`
+                  )}
                 </p>
               )}
             </div>

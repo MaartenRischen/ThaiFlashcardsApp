@@ -85,6 +85,25 @@ export class AppPreloader {
       
       // Load folders first, then sets, so we can immediately start preloading
       const folders = await this.loadFolders(userId);
+      
+      // Show folder names being loaded
+      if (folders.length > 0) {
+        for (let i = 0; i < Math.min(3, folders.length); i++) {
+          this.updateProgress({
+            stage: 'folders',
+            progress: 20 + (5 * (i + 1) / Math.min(3, folders.length)),
+            message: 'Loading folders...',
+            subProgress: { 
+              current: i + 1, 
+              total: folders.length,
+              item: folders[i].name
+            }
+          });
+          // Small delay to show the name
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+      }
+      
       // Kick off sets fetch but don't block on it to start warming previews quickly
       const setsPromise = this.loadSets(userId);
       
@@ -102,8 +121,27 @@ export class AppPreloader {
       this.updateProgress({
         stage: 'sets',
         progress: 30,
-        message: `Loading ${sets.length} flashcard sets...`
+        message: `Loading ${sets.length} flashcard sets...`,
+        subProgress: { current: 0, total: sets.length }
       });
+
+      // Show individual set names while processing them
+      if (sets.length > 0) {
+        for (let i = 0; i < Math.min(3, sets.length); i++) {
+          this.updateProgress({
+            stage: 'sets',
+            progress: 30 + (10 * (i + 1) / Math.min(3, sets.length)),
+            message: `Loading sets...`,
+            subProgress: { 
+              current: i + 1, 
+              total: sets.length,
+              item: sets[i].name
+            }
+          });
+          // Small delay to show the name
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
 
       // Stage 5-7: Load ONLY essential data - not all content!
       this.updateProgress({
@@ -155,6 +193,17 @@ export class AppPreloader {
         // As a compromise, only preload content for the user's most recent set
         const lastSetId = typeof window !== 'undefined' ? localStorage.getItem('lastActiveSetId') : null;
         if (lastSetId && data.sets.find(s => s.id === lastSetId)) {
+          const lastSet = data.sets.find(s => s.id === lastSetId);
+          this.updateProgress({
+            stage: 'content',
+            progress: 45,
+            message: 'Loading your last active set...',
+            subProgress: { 
+              current: 1, 
+              total: 1,
+              item: lastSet ? lastSet.name : 'Last set'
+            }
+          });
           const content = await this.loadSetContent(lastSetId, userId);
           data.setContents[lastSetId] = content;
         }
@@ -239,15 +288,23 @@ export class AppPreloader {
       const imagePromises = Array.from(imageUrls).map((url, index) => {
         return this.preloadImage(url).then(loaded => {
           data.images[url] = loaded;
-          this.updateProgress({
-            stage: 'images',
-            progress: 80 + (15 * (index + 1) / imageUrls.size),
-            message: 'Loading images...',
-            subProgress: { 
-              current: index + 1, 
-              total: imageUrls.size
-            }
-          });
+                  // Extract set name from image URL if possible
+        let imageName = 'set image';
+        const setForImage = sets.find(s => s.imageUrl === url);
+        if (setForImage) {
+          imageName = `${setForImage.name} image`;
+        }
+        
+        this.updateProgress({
+          stage: 'images',
+          progress: 80 + (15 * (index + 1) / imageUrls.size),
+          message: 'Loading images...',
+          subProgress: { 
+            current: index + 1, 
+            total: imageUrls.size,
+            item: imageName
+          }
+        });
         });
       });
       

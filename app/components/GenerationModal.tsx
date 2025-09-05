@@ -31,7 +31,7 @@ export function GenerationModal() {
 
   return (
     <Dialog open={true} onOpenChange={() => hideGenerationModal()}>
-      <DialogContent className="neumorphic max-w-2xl" showCloseButton={false}>
+      <DialogContent className="neumorphic max-w-2xl">
         <DialogHeader className="space-y-3">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl font-bold">

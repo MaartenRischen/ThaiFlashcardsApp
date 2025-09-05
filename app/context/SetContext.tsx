@@ -58,7 +58,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
   const { userId, isLoaded } = useAuth(); // <-- Use Clerk's useAuth hook
   const audioGeneration = useAudioGeneration();
   const { clearSetCache } = useSetCache(); // Get cache management functions
-  const { preloadedData, isLoading: isPreloading } = usePreloader(); // Get preloaded data
+  const { preloadedData, isLoading: _isPreloading } = usePreloader(); // Get preloaded data
   const [availableSets, setAvailableSets] = useState<SetMetaData[]>([DEFAULT_SET_METADATA]);
   const [activeSetId, setActiveSetId] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);

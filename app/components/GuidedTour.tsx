@@ -66,7 +66,6 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
   useEffect(() => {
     if (!isOpen) return;
     const s = steps[stepIndex];
-    let cleanup: (() => void) | undefined;
     const measure = () => {
       // Fire demo actions when entering specific steps
       if (
@@ -114,7 +113,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
     const onWinChange = () => measure();
     window.addEventListener('resize', onWinChange);
     window.addEventListener('scroll', onWinChange, true);
-    cleanup = () => {
+    const cleanup = () => {
       window.removeEventListener('resize', onWinChange);
       window.removeEventListener('scroll', onWinChange, true);
     };

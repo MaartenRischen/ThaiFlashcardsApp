@@ -95,8 +95,7 @@ module.exports = {
   },
   plugins: [
     require("tailwindcss-animate"),
-    require("@tailwindcss/line-clamp"),
     require('tailwind-scrollbar-hide')
-    // Custom plugin REMOVED
+    // @tailwindcss/line-clamp is now included by default in Tailwind CSS v3.3+
   ],
 }

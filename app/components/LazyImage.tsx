@@ -56,6 +56,7 @@ export function LazyImage({ src, alt, className, loadFullImage = false }: LazyIm
   }
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={imageSrc}
       alt={alt}

@@ -20,7 +20,7 @@ interface AddSetRequestBody {
 }
 
 // GET handler for fetching all set metadata for the logged-in user
-export async function GET() {
+export async function GET(request: Request) {
   console.log("API Route: /api/flashcard-sets GET request received");
   const { userId } = await auth();
 
@@ -32,9 +32,15 @@ export async function GET() {
   try {
     console.log(`API Route /api/flashcard-sets GET: Fetching sets for user: ${userId}`);
     
-    // First, ensure user has all default sets (for older accounts)
-    const { ensureUserHasAllDefaultSets } = await import('@/app/lib/ensure-default-sets');
-    await ensureUserHasAllDefaultSets(userId);
+    // Check if this is a preload request (skip slow operations)
+    const url = new URL(request.url);
+    const skipEnsureDefaults = url.searchParams.get('skipEnsureDefaults') === 'true';
+    
+    if (!skipEnsureDefaults) {
+      // Only ensure default sets for regular requests, not preload
+      const { ensureUserHasAllDefaultSets } = await import('@/app/lib/ensure-default-sets');
+      await ensureUserHasAllDefaultSets(userId);
+    }
     
     const sets = await storage.getAllSetMetaData(userId);
     console.log(`API Route /api/flashcard-sets GET: Found ${sets.length} sets.`);

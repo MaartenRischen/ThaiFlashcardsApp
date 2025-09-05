@@ -390,15 +390,9 @@ export class AppPreloader {
     
     // For authenticated users, load ALL their sets (metadata only, not content)
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout - enough for metadata
-      
-      const response = await fetch('/api/flashcard-sets', {
-        credentials: 'include',
-        signal: controller.signal
+      const response = await fetch('/api/flashcard-sets?skipEnsureDefaults=true', {
+        credentials: 'include'
       });
-      
-      clearTimeout(timeoutId);
       
       if (response.ok) {
         const data = await response.json();
@@ -433,17 +427,12 @@ export class AppPreloader {
         console.warn(`[Preloader] Sets API returned ${response.status}`);
       }
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        console.warn('[Preloader] Sets API timed out after 10s');
-      } else {
-        console.warn('[Preloader] Failed to load user sets:', error);
-      }
+      console.warn('[Preloader] Failed to load user sets:', error);
     }
     
-    // Only fall back to default sets if API completely fails
-    const defaultSets = getDefaultSetsForUnauthenticatedUsers();
-    console.log(`[Preloader] API failed, using ${defaultSets.length} default sets as fallback`);
-    return defaultSets;
+    // Don't throw away everything! Just return empty array and let SetContext handle it
+    console.log(`[Preloader] API failed or timed out, returning empty array. SetContext will load sets later.`);
+    return [];
   }
 
   private async loadSetContent(setId: string, _userId?: string | null): Promise<Phrase[]> {

@@ -195,8 +195,16 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
   // Function to force refresh the list of available sets from the backend
   const refreshSets = useCallback(async () => {
-    if (!userId || !isLoaded) {
-      console.warn('[refreshSets] User not loaded yet, cannot refresh.');
+    if (!isLoaded) {
+      console.warn('[refreshSets] Clerk not loaded yet, cannot refresh.');
+      return;
+    }
+    if (!userId) {
+      console.warn('[refreshSets] No user ID, using default sets.');
+      // For unauthenticated users, load default sets
+      const defaultSets = getDefaultSetsForUnauthenticatedUsers();
+      setAvailableSets(defaultSets);
+      setSetsHaveLoaded(true);
       return;
     }
     setIsLoading(true);
@@ -204,6 +212,13 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await fetch('/api/flashcard-sets', { credentials: 'include' });
       if (!response.ok) {
+        if (response.status === 401) {
+          console.warn('[refreshSets] Unauthorized - user may not be fully authenticated yet');
+          // Don't throw error, just return empty for now
+          setAvailableSets([]);
+          setSetsHaveLoaded(true);
+          return;
+        }
         throw new Error(`API request failed with status ${response.status}`);
       }
       
@@ -228,6 +243,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
     } catch (error: unknown) {
       console.error('[refreshSets] Error fetching sets:', error);
+      // On error, don't leave sets empty - keep existing sets if any
       setSetsHaveLoaded(true); 
     } finally {
       setIsLoading(false);

@@ -1632,7 +1632,7 @@ export default function ThaiFlashcards() {
                       </div>
                     </div>
                     {/* Pronunciation buttons - Normal and Slow speed UNDER pronunciation */}
-                    <div data-tour="back-audio" className="flex justify-center gap-3 mb-4">
+                    <div data-tour="back-audio" className="flex justify-center gap-4 mb-6">
                       {/* Normal speed button */}
                       <button
                         onClick={(event) => {
@@ -1641,11 +1641,11 @@ export default function ThaiFlashcards() {
                           speak(textToSpeak, true, isMale);
                         }}
                         disabled={isPlayingWord || isPlayingContext}
-                        className="neumorphic-button text-blue-400 flex items-center gap-2 px-3 py-2"
+                        className="neumorphic-button text-blue-400 flex items-center gap-2 px-4 py-2 min-w-[100px]"
                         title="Play at normal speed"
                       >
                         <Volume2 className="w-4 h-4" />
-                        <span className="text-sm">Normal</span>
+                        <span className="text-sm font-medium">Normal</span>
                       </button>
                       
                       {/* Slow speed button */}
@@ -1656,11 +1656,11 @@ export default function ThaiFlashcards() {
                           speak(textToSpeak, true, isMale, -30); // 30% slower
                         }}
                         disabled={isPlayingWord || isPlayingContext}
-                        className="neumorphic-button text-green-400 flex items-center gap-2 px-3 py-2"
+                        className="neumorphic-button text-green-400 flex items-center gap-2 px-4 py-2 min-w-[100px]"
                         title="Play at slow speed"
                       >
                         <Volume2 className="w-4 h-4" />
-                        <span className="text-sm">Slow</span>
+                        <span className="text-sm font-medium">Slow</span>
                       </button>
                     </div>
                     
@@ -1673,24 +1673,26 @@ export default function ThaiFlashcards() {
                     )}
                     
                     {/* Literal/Breakdown Button */}
-                    <button
-                      onClick={() => setShowBreakdownModal(true)}
-                      className="text-xs text-gray-400 hover:text-gray-300 underline mb-3"
-                      data-tour="back-literal"
-                    >
-                      Literal / breakdown
-                    </button>
+                    <div className="mb-4">
+                      <button
+                        onClick={() => setShowBreakdownModal(true)}
+                        className="text-xs text-gray-400 hover:text-gray-300 underline"
+                        data-tour="back-literal"
+                      >
+                        Literal / breakdown
+                      </button>
+                    </div>
                     
                     {/* Difficulty Buttons - Wrapped in Popover (Step 3) */}
                     <Popover open={tutorialStep === 3}>
                       <PopoverTrigger asChild>
-                        <div data-tour="back-srs" className="flex flex-col items-center mb-6">
-                          <div className="flex justify-center space-x-3">
-                            <button onClick={() => handleCardAction('easy')} className="neumorphic-button text-green-400 px-4 py-2 text-sm">Easy</button>
-                            <button onClick={() => handleCardAction('good')} className="neumorphic-button text-yellow-400 px-4 py-2 text-sm">Correct</button>
-                            <button onClick={() => handleCardAction('hard')} className="neumorphic-button text-red-400 px-4 py-2 text-sm">Wrong</button>
+                        <div data-tour="back-srs" className="flex flex-col items-center mb-8">
+                          <div className="flex justify-center gap-4">
+                            <button onClick={() => handleCardAction('easy')} className="neumorphic-button text-green-400 px-6 py-3 text-sm font-medium min-w-[80px]">Easy</button>
+                            <button onClick={() => handleCardAction('good')} className="neumorphic-button text-yellow-400 px-6 py-3 text-sm font-medium min-w-[80px]">Correct</button>
+                            <button onClick={() => handleCardAction('hard')} className="neumorphic-button text-red-400 px-6 py-3 text-sm font-medium min-w-[80px]">Wrong</button>
                           </div>
-                          <div className="text-xs text-gray-400 mt-2">Hit one of the buttons to proceed.</div>
+                          <div className="text-xs text-gray-400 mt-3">Hit one of the buttons to proceed.</div>
                         </div>
                       </PopoverTrigger>
                       <PopoverContent className="w-80 bg-gray-800 text-white border-gray-700" side="top" align="center">
@@ -1712,10 +1714,10 @@ export default function ThaiFlashcards() {
                 </div> 
                 
                 {/* === Gender Slider and Polite Mode Toggle Section - MOVED HERE === */}
-                <div className="flex items-center justify-center space-x-4 mb-6" data-tour="back-gender">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-8 px-4" data-tour="back-gender">
                   {/* Gender Toggle */} 
                   <label htmlFor="gender-toggle" className="flex items-center cursor-pointer">
-                    <span className="mr-2 text-sm font-medium text-gray-400">Female (Ka)</span>
+                    <span className="mr-3 text-sm font-medium text-gray-400">Female (Ka)</span>
                     <div className="relative">
                       <input
                         type="checkbox"
@@ -1724,15 +1726,15 @@ export default function ThaiFlashcards() {
                         checked={isMale}
                         onChange={() => setIsMale(!isMale)}
                       />
-                      <div className="block bg-gray-600 w-10 h-6 rounded-full"></div>
-                      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isMale ? 'translate-x-full bg-blue-400' : 'bg-pink-400'}`}></div>
+                      <div className="block bg-gray-600 w-12 h-6 rounded-full"></div>
+                      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isMale ? 'translate-x-6 bg-blue-400' : 'bg-pink-400'}`}></div>
                     </div>
-                    <span className="ml-2 text-sm font-medium text-gray-400">Male (Krap)</span>
+                    <span className="ml-3 text-sm font-medium text-gray-400">Male (Krap)</span>
                   </label>
 
                   {/* Polite Mode Toggle */} 
                   <label htmlFor="polite-toggle" className="flex items-center cursor-pointer" data-tour="back-polite">
-                    <span className="mr-2 text-sm font-medium text-gray-400">Casual</span>
+                    <span className="mr-3 text-sm font-medium text-gray-400">Casual</span>
                     <div className="relative">
                       <input
                         type="checkbox"
@@ -1741,22 +1743,25 @@ export default function ThaiFlashcards() {
                         checked={isPoliteMode}
                         onChange={() => setIsPoliteMode(!isPoliteMode)}
                       />
-                      <div className="block bg-gray-600 w-10 h-6 rounded-full"></div>
-                      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isPoliteMode ? 'translate-x-full bg-green-400' : 'bg-gray-400'}`}></div>
+                      <div className="block bg-gray-600 w-12 h-6 rounded-full"></div>
+                      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isPoliteMode ? 'translate-x-6 bg-green-400' : 'bg-gray-400'}`}></div>
                     </div>
-                    <span className="ml-2 text-sm font-medium text-gray-400">Polite</span>
+                    <span className="ml-3 text-sm font-medium text-gray-400">Polite</span>
                   </label>
                 </div> 
 
                 {/* Mnemonic Section */} 
-                <div className="mt-4" data-tour="back-mnemonic">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm text-gray-200 font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4 text-yellow-400" /> Mnemonic (editable)</label>
-                    <div className="flex items-center gap-2">
+                <div className="mt-6" data-tour="back-mnemonic">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+                    <label className="text-sm text-gray-200 font-medium flex items-center gap-2">
+                      <Lightbulb className="w-4 h-4 text-yellow-400" /> 
+                      Mnemonic (editable)
+                    </label>
+                    <div className="flex items-center gap-3">
                       <button 
                         onClick={generateNewMnemonic} 
                         disabled={loadingNewMnemonic}
-                        className="text-xs text-green-400 hover:text-green-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center gap-1"
+                        className="text-xs text-green-400 hover:text-green-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center gap-1 px-2 py-1 rounded"
                       >
                         {loadingNewMnemonic ? (
                           <>
@@ -1769,7 +1774,12 @@ export default function ThaiFlashcards() {
                           </>
                         )}
                       </button>
-                      <button onClick={resetCurrentMnemonic} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"><RotateCcw className="w-3 h-3" /> Reset</button>
+                      <button 
+                        onClick={resetCurrentMnemonic} 
+                        className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 px-2 py-1 rounded"
+                      >
+                        <RotateCcw className="w-3 h-3" /> Reset
+                      </button>
                     </div>
                   </div>
                   
@@ -1827,10 +1837,10 @@ export default function ThaiFlashcards() {
                   </ClientOnly>
                   {/* Speech bubble tail */}
                   <div className="absolute left-8 -bottom-3 w-0 h-0" style={{ borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderTop: '10px solid #222' }} />
-                  <div className="flex items-center justify-between mt-2" data-tour="back-context-controls">
+                  <div className="flex items-center justify-center gap-3 mt-4" data-tour="back-context-controls">
                     <button 
                           onClick={() => generateRandomPhrase('prev')}
-                          className="neumorphic-button text-blue-400 px-4"
+                          className="neumorphic-button text-blue-400 px-4 py-2 min-w-[70px]"
                           aria-label="Previous example"
                     >
                           Prev
@@ -1845,13 +1855,13 @@ export default function ThaiFlashcards() {
                             }
                           }}
                           disabled={isPlayingWord || isPlayingContext || !randomSentence}
-                          className="neumorphic-button text-blue-400"
+                          className="neumorphic-button text-blue-400 px-4 py-2 min-w-[120px]"
                     >
                           {isPlayingContext ? 'Playing...' : 'Play Context'}
                     </button>
                     <button 
                           onClick={() => generateRandomPhrase('next')}
-                          className="neumorphic-button text-blue-400 px-4"
+                          className="neumorphic-button text-blue-400 px-4 py-2 min-w-[70px]"
                           aria-label="Next example"
                     >
                           Next

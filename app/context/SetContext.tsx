@@ -475,7 +475,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     };
 
     loadInitialData();
-  }, [isLoaded, userId, setsHaveLoaded, availableSets.length, hasInitializedFromPreload]); // Depend on Clerk's isLoaded and userId
+  }, [isLoaded, userId, setsHaveLoaded, availableSets.length, hasInitializedFromPreload, preloadedData]); // Depend on Clerk's isLoaded and userId
 
   // --- Restoration Effect (depends on setsHaveLoaded) ---
   useEffect(() => {

@@ -277,7 +277,7 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      (window as any).deferredPrompt = e;
+      (window as unknown as { deferredPrompt?: Event }).deferredPrompt = e;
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -325,17 +325,17 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
     }
 
     // Check if the browser supports PWA installation
-    const deferredPrompt = (window as any).deferredPrompt;
+    const deferredPrompt = (window as unknown as { deferredPrompt?: { prompt: () => void; userChoice: Promise<{ outcome: string }> } }).deferredPrompt;
     if (deferredPrompt) {
       // Show the install prompt
       deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult: any) => {
+      deferredPrompt.userChoice.then((choiceResult: { outcome: string }) => {
         if (choiceResult.outcome === 'accepted') {
           toast.success('App installed successfully!');
         }
-        (window as any).deferredPrompt = null;
+        (window as unknown as { deferredPrompt?: null }).deferredPrompt = null;
       });
-    } else if ('standalone' in navigator && !(navigator as any).standalone) {
+    } else if ('standalone' in navigator && !(navigator as unknown as { standalone?: boolean }).standalone) {
       // iOS Safari
       toast('To install this app on iOS:\n1. Tap the Share button\n2. Tap "Add to Home Screen"', {
         duration: 8000,

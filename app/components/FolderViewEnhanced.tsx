@@ -439,7 +439,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
         await fetchFolders();
         
         if (currentFolder) {
-          await loadFolder(currentFolder.id);
+          await fetchFolderDetails(currentFolder.id);
         }
       } catch (error) {
         console.error('Error deleting sets:', error);

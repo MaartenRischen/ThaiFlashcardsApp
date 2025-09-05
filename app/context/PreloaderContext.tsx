@@ -64,10 +64,8 @@ export function PreloaderProvider({ children }: { children: React.ReactNode }) {
         images: Object.keys(data.images).length
       });
 
-      // Keep loading screen visible for a moment to show completion
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
+      // Immediately hide loading screen - data is ready
+      setIsLoading(false);
 
     } catch (error) {
       console.error('[Preloader] Error during preload:', error);

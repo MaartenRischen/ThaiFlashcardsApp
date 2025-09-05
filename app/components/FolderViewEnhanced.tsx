@@ -95,9 +95,9 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     if (isOpen) {
       console.log('[FolderViewEnhanced] isOpen:', isOpen, 'hasInitiallyLoadedFolders:', hasInitiallyLoadedFolders, 'preloadedFolders:', preloadedFolders);
       
-      // Always refresh sets when modal opens to ensure we have latest data
-      refreshSets().then(() => {
-        // Only fetch if we haven't already loaded
+      // Skip refresh if we already have sets loaded
+      if (availableSets.length > 0) {
+        // Just load folders immediately
         if (!hasInitiallyLoadedFolders) {
           if (preloadedFolders.length > 0) {
             console.log('[FolderViewEnhanced] Using preloaded folders:', preloadedFolders);
@@ -113,7 +113,27 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
             setFolders(cachedFolders);
           }
         }
-      });
+      } else {
+        // Only refresh if we don't have sets yet
+        refreshSets().then(() => {
+          // Only fetch if we haven't already loaded
+          if (!hasInitiallyLoadedFolders) {
+            if (preloadedFolders.length > 0) {
+              console.log('[FolderViewEnhanced] Using preloaded folders:', preloadedFolders);
+              setFolders(preloadedFolders);
+            } else {
+              console.log('[FolderViewEnhanced] No preloaded folders, fetching...');
+              fetchFolders();
+            }
+          } else {
+            // If already loaded, use cached folders
+            const cachedFolders = getCachedFolders();
+            if (cachedFolders) {
+              setFolders(cachedFolders);
+            }
+          }
+        });
+      }
     }
   }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 

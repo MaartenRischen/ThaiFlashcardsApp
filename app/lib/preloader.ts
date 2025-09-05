@@ -86,22 +86,17 @@ export class AppPreloader {
       // Load folders first, then sets, so we can immediately start preloading
       const folders = await this.loadFolders(userId);
       
-      // Show folder names being loaded
+      // Show folder names being loaded - no delays
       if (folders.length > 0) {
-        for (let i = 0; i < Math.min(3, folders.length); i++) {
-          this.updateProgress({
-            stage: 'folders',
-            progress: 20 + (5 * (i + 1) / Math.min(3, folders.length)),
-            message: 'Loading folders...',
-            subProgress: { 
-              current: i + 1, 
-              total: folders.length,
-              item: folders[i].name
-            }
-          });
-          // Small delay to show the name
-          await new Promise(resolve => setTimeout(resolve, 50));
-        }
+        this.updateProgress({
+          stage: 'folders',
+          progress: 25,
+          message: `Loading ${folders.length} folders...`,
+          subProgress: { 
+            current: folders.length, 
+            total: folders.length
+          }
+        });
       }
       
       // Kick off sets fetch but don't block on it to start warming previews quickly
@@ -125,22 +120,17 @@ export class AppPreloader {
         subProgress: { current: 0, total: sets.length }
       });
 
-      // Show individual set names while processing them
+      // Show sets loaded - no delays
       if (sets.length > 0) {
-        for (let i = 0; i < Math.min(3, sets.length); i++) {
-          this.updateProgress({
-            stage: 'sets',
-            progress: 30 + (10 * (i + 1) / Math.min(3, sets.length)),
-            message: `Loading sets...`,
-            subProgress: { 
-              current: i + 1, 
-              total: sets.length,
-              item: sets[i].name
-            }
-          });
-          // Small delay to show the name
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
+        this.updateProgress({
+          stage: 'sets',
+          progress: 35,
+          message: `Loading ${sets.length} sets...`,
+          subProgress: { 
+            current: sets.length, 
+            total: sets.length
+          }
+        });
       }
 
       // Stage 5-7: Load ONLY essential data - not all content!
@@ -160,35 +150,8 @@ export class AppPreloader {
         
         data.userMnemonics = userMnemonics;
         
-        // Load progress for sets the user has actually used (not all sets!)
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-          
-          const progressResponse = await fetch('/api/user-progress', {
-            credentials: 'include',
-            signal: controller.signal
-          });
-          
-          clearTimeout(timeoutId);
-          
-          if (progressResponse.ok) {
-            const progressData = await progressResponse.json();
-            // Only store progress for sets that have actual progress
-            if (progressData.progress) {
-              progressData.progress.forEach((p: { flashcardSetId?: string; progress?: Record<number, PhraseProgressData> }) => {
-                if (p.flashcardSetId && p.progress) {
-                  data.setProgress[p.flashcardSetId] = p.progress;
-                }
-              });
-              console.log(`[Preloader] Loaded progress for ${Object.keys(data.setProgress).length} sets`);
-            }
-          } else {
-            console.warn(`[Preloader] Progress API returned ${progressResponse.status}`);
-          }
-        } catch (error) {
-          console.warn('[Preloader] Failed to load progress:', error);
-        }
+        // Skip loading all progress during preload - it's loaded on-demand per set
+        // This significantly speeds up initial load
         
         // As a compromise, only preload content for the user's most recent set
         const lastSetId = typeof window !== 'undefined' ? localStorage.getItem('lastActiveSetId') : null;

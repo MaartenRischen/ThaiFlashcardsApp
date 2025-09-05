@@ -367,7 +367,7 @@ export default function ThaiFlashcards() {
   }, [activeCards]);
 
   // Update the speak helper function definition in page.tsx
-  const speak = async (text: string, isWord: boolean = true, isMale: boolean, rate?: number) => {
+  const speak = useCallback(async (text: string, isWord: boolean = true, isMale: boolean, rate?: number) => {
     if (isWord) setIsPlayingWord(true); else setIsPlayingContext(true);
     try {
       await ttsService.speak({
@@ -386,7 +386,7 @@ export default function ThaiFlashcards() {
         setIsPlayingContext(false);
       }
     }
-  };
+  }, [setIsPlayingWord, setIsPlayingContext]); // Dependencies for useCallback
 
   // Auto-play useEffect - handles both initial card flip and gender/politeness changes
   useEffect(() => {
@@ -401,7 +401,7 @@ export default function ThaiFlashcards() {
       }
     }
     prevShowAnswerRef.current = showAnswer;
-  }, [showAnswer, autoplay, phrases, index, isPlayingWord, isPlayingContext, voicesLoaded, isMale, isPoliteMode, speak]);
+  }, [showAnswer, autoplay, phrases, index, isPlayingWord, isPlayingContext, voicesLoaded, isMale, isPoliteMode]);
 
   // Respond to tour step events to flip demo card
   useEffect(() => {

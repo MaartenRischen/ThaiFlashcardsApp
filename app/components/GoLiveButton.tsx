@@ -117,11 +117,6 @@ export function GoLiveButton({ setId, setName, className, variant = 'ghost', siz
             )}
             title="Publish this set to the public gallery!"
           >
-            {/* Sparkle icon */}
-            <div className="absolute -top-2 -right-2">
-              <Sparkles className="h-5 w-5 text-yellow-300 animate-pulse drop-shadow-[0_0_6px_rgba(252,211,77,0.6)]" />
-            </div>
-            
             <Globe className="h-4 w-4 text-white" />
             <span className="text-sm font-bold whitespace-nowrap">Publish</span>
             

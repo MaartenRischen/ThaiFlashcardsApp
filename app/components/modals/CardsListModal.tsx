@@ -221,12 +221,15 @@ export function CardsListModal({
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-3">
             {/* Audio Lesson Button - only show for non-default sets */}
             {activeSet && activeSet.id !== 'default' && (
               <button
                 onClick={() => setShowAudioSettings(true)}
-                className="neumorphic-button px-4 py-2 text-sm flex items-center gap-2"
+                className="relative neumorphic-button px-4 py-2.5 text-sm flex items-center gap-2.5 bg-gradient-to-r from-[#f59e0b] to-[#d97706] hover:from-[#fbbf24] hover:to-[#f59e0b] text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl rounded-full"
+                style={{
+                  boxShadow: '0 0 20px rgba(245, 158, 11, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)',
+                }}
               >
                 <Volume2 className="w-4 h-4" />
                 <span>Audio Lesson</span>

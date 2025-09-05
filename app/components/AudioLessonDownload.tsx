@@ -44,7 +44,7 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple' | 'shuffle'>('simple');
+  const [lessonMode, setLessonMode] = useState<'pimsleur' | 'simple' | 'shuffle'>('pimsleur');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
@@ -251,8 +251,8 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
           <Volume2 />
         </button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[525px] max-h-[90vh] bg-[#1f1f1f] border-[#404040] text-[#E0E0E0] overflow-y-auto">
-        <DialogHeader className="sticky top-0 bg-[#1f1f1f] pb-4 z-10">
+      <DialogContent className="w-[95vw] max-w-[525px] max-h-[90vh] bg-[#1F1F1F] border-[#404040] text-[#E0E0E0] overflow-y-auto rounded-2xl shadow-xl">
+        <DialogHeader className="sticky top-0 bg-[#1F1F1F] pb-4 z-10 border-b border-[#333]">
           <DialogTitle className="text-[#E0E0E0] text-xl font-semibold">Generate Audio Lesson</DialogTitle>
           <DialogDescription className="text-[#BDBDBD]">
             Create an audio lesson for "{setName}" with {phraseCount} phrases.
@@ -267,10 +267,10 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 onClick={() => setLessonMode('pimsleur')}
-                className={`flex items-center justify-start gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                className={`flex items-center justify-start gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   lessonMode === 'pimsleur' 
-                    ? 'bg-[#A9C4FC] text-[#121212] border border-[#A9C4FC]' 
-                    : 'bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] hover:bg-[#4C4C4C]'
+                    ? 'bg-gradient-to-r from-[#BB86FC] to-[#9B6DD0] text-white shadow-lg' 
+                    : 'neumorphic text-[#E0E0E0] hover:shadow-md'
                 }`}
               >
                 <Brain className="w-5 h-5 flex-shrink-0" />
@@ -281,24 +281,24 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
               </button>
               <button
                 onClick={() => setLessonMode('simple')}
-                className={`flex items-center justify-start gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                className={`flex items-center justify-start gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   lessonMode === 'simple' 
-                    ? 'bg-[#A9C4FC] text-[#121212] border border-[#A9C4FC]' 
-                    : 'bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] hover:bg-[#4C4C4C]'
+                    ? 'bg-gradient-to-r from-[#BB86FC] to-[#9B6DD0] text-white shadow-lg' 
+                    : 'neumorphic text-[#E0E0E0] hover:shadow-md'
                 }`}
               >
                 <Repeat className="w-5 h-5 flex-shrink-0" />
                 <div className="text-left">
                   <div className="font-medium">Repetition Mode</div>
-                  <div className="text-xs opacity-80">For sleep learning</div>
+                  <div className="text-xs opacity-80">For passive practice</div>
                 </div>
               </button>
               <button
                 onClick={() => setLessonMode('shuffle')}
-                className={`flex items-center justify-start gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                className={`flex items-center justify-start gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   lessonMode === 'shuffle' 
-                    ? 'bg-[#A9C4FC] text-[#121212] border border-[#A9C4FC]' 
-                    : 'bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] hover:bg-[#4C4C4C]'
+                    ? 'bg-gradient-to-r from-[#BB86FC] to-[#9B6DD0] text-white shadow-lg' 
+                    : 'neumorphic text-[#E0E0E0] hover:shadow-md'
                 }`}
               >
                 <Repeat className="w-5 h-5 flex-shrink-0" />
@@ -323,18 +323,18 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
                 }
               }}
             >
-              <SelectTrigger id="voice" className="bg-[#3C3C3C] border-[#404040] text-[#E0E0E0] rounded-lg">
+              <SelectTrigger id="voice" className="neumorphic-input rounded-xl">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#3C3C3C] border-[#404040] text-[#E0E0E0]">
-                <SelectItem value="female" className="text-[#E0E0E0] hover:bg-[#4C4C4C]">Female (Premwadee)</SelectItem>
-                <SelectItem value="male" className="text-[#E0E0E0] hover:bg-[#4C4C4C]">Male (Niwat)</SelectItem>
+              <SelectContent className="bg-[#2A2A2A] border-[#404040] text-[#E0E0E0] rounded-xl">
+                <SelectItem value="female" className="text-[#E0E0E0] hover:bg-[#3A3A3A]">Female (Premwadee)</SelectItem>
+                <SelectItem value="male" className="text-[#E0E0E0] hover:bg-[#3A3A3A]">Male (Niwat)</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Basic Settings Info */}
-          <div className="text-sm text-[#BDBDBD] space-y-2 bg-[#2C2C2C] p-4 rounded-lg border border-[#404040]">
+          <div className="text-sm text-[#BDBDBD] space-y-2 neumorphic p-4 rounded-xl">
             {lessonMode === 'pimsleur' ? (
               <>
                 <p>• Practice time: {(config.pauseDurationMs?.forPractice || 3000) / 1000} seconds to repeat each word</p>
@@ -597,15 +597,15 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
             </div>
             
             {/* Download Warning */}
-            <div className="bg-[#2A2A2A] border border-[#555555] rounded-lg p-3">
-              <div className="flex items-start gap-2">
-                <div className="text-yellow-400 text-lg">⚠️</div>
+            <div className="neumorphic rounded-xl p-4 border border-[#f59e0b]/30 bg-[#2A2A2A]/50">
+              <div className="flex items-start gap-3">
+                <div className="text-yellow-400 text-xl">⚠️</div>
                 <div className="text-sm text-[#E0E0E0]">
-                  <p className="font-medium mb-1">Important: Download your audio lesson</p>
-                  <p className="text-[#BDBDBD]">
-                    Please download the audio file before switching to another set. 
-                    Audio lessons are not saved in the app and will be lost when you navigate away.
-                    We recommend using your preferred audio player for the best listening experience.
+                  <p className="font-semibold mb-1 text-[#f59e0b]">Important: Download your audio lesson</p>
+                  <p className="text-[#BDBDBD] leading-relaxed">
+                    Audio lessons are generated on-demand and not saved in the app. 
+                    Please download the file to keep it before switching sets or closing this dialog.
+                    You can then play it in your favorite audio player anytime.
                   </p>
                 </div>
               </div>
@@ -645,22 +645,22 @@ export function AudioLessonDownload({ setId, setName, phraseCount, isMale = fals
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 px-6 pb-6 bg-[#1f1f1f] sticky bottom-0">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 px-6 pb-6 bg-[#1F1F1F] sticky bottom-0 border-t border-[#333]">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 px-3 py-2 bg-[#3C3C3C] text-[#E0E0E0] border border-[#404040] rounded-lg hover:bg-[#4C4C4C] transition-colors order-2 sm:order-1"
+            className="flex items-center gap-2 px-4 py-2.5 neumorphic-button rounded-xl transition-all order-2 sm:order-1"
           >
             <Settings2 className="w-4 h-4" />
-            {showAdvanced ? 'Hide' : 'Show'} Advanced
+            {showAdvanced ? 'Hide' : 'Show'} Advanced Settings
           </button>
 
           <button 
             onClick={handleGenerate} 
             disabled={isGenerating}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all order-1 sm:order-2 w-full sm:w-auto ${
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all order-1 sm:order-2 w-full sm:w-auto ${
               isGenerating 
                 ? 'bg-[#666666] text-[#999999] cursor-not-allowed' 
-                : 'bg-[#A9C4FC] text-[#121212] hover:bg-[#BB86FC]'
+                : 'bg-gradient-to-r from-[#BB86FC] to-[#9B6DD0] text-white hover:from-[#C896FC] hover:to-[#AB7DE0] shadow-lg hover:shadow-xl'
             }`}
           >
             {isGenerating ? (

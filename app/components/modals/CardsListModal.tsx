@@ -196,13 +196,13 @@ export function CardsListModal({
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <h3 className="text-xl font-semibold text-[#E0E0E0]">Current Set</h3>
-              {activeSet && activeSet.source !== 'default' && !activeSet.id.startsWith('default-') && (
+              {activeSet && (activeSet.source as string) !== 'default' && !activeSet.id.startsWith('default-') && (
                 <div className="mt-2">
                   <StarRating
                     flashcardSetId={activeSet.id}
                     size="medium"
                     interactive={true}
-                    isDefaultSet={activeSet.source === 'default' || activeSet.id.startsWith('default-')}
+                    isDefaultSet={(activeSet.source as string) === 'default' || activeSet.id.startsWith('default-')}
                   />
                 </div>
               )}
@@ -218,7 +218,7 @@ export function CardsListModal({
           {/* All action buttons aligned to the right */}
           <div className="flex items-center justify-end gap-3 flex-wrap">
             {/* Publish and Share Buttons - only show for user-created sets (not default sets) */}
-            {activeSet && activeSet.source !== 'default' && !activeSet.id.startsWith('default-') && (
+            {activeSet && (activeSet.source as string) !== 'default' && !activeSet.id.startsWith('default-') && (
               <>
                 <GoLiveButton
                   setId={activeSet.id}

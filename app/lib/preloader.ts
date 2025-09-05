@@ -66,25 +66,14 @@ export class AppPreloader {
       });
 
       if (userId) {
-        // Skip heavy initialization during preload - do it lazily later
-        console.log('[Preloader] Skipping heavy initialization during preload for faster startup');
-        
-        // Schedule initialization to happen after the app loads (truly non-blocking)
-        setTimeout(() => {
-          const initKey = `preloader-init-done-${userId}`;
-          const alreadyInitialized = typeof window !== 'undefined' && localStorage.getItem(initKey) === '1';
-          if (!alreadyInitialized) {
-            console.log('[Preloader] Starting background initialization after app load');
-            this.initializeUserData(userId)
-              .then(() => {
-                try { 
-                  if (typeof window !== 'undefined') localStorage.setItem(initKey, '1'); 
-                  console.log('[Preloader] Background initialization completed');
-                } catch {}
-              })
-              .catch((err) => console.error('Background initializeUserData error:', err));
-          }
-        }, 2000); // Wait 2 seconds after app loads
+        // Initialize user data immediately for better UX
+        console.log('[Preloader] Initializing user data immediately');
+        try {
+          await this.initializeUserData(userId);
+        } catch (err) {
+          console.error('[Preloader] Error initializing user data:', err);
+          // Continue anyway - we'll still load what we can
+        }
       }
 
       // Stage 3-4: Load folders and sets in parallel
@@ -394,16 +383,9 @@ export class AppPreloader {
   private async loadSets(userId?: string | null): Promise<SetMetaData[]> {
     if (userId) {
       try {
-        // Add a timeout to prevent hanging
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
-        
         const response = await fetch('/api/flashcard-sets', {
-          credentials: 'include',
-          signal: controller.signal
+          credentials: 'include'
         });
-        
-        clearTimeout(timeoutId);
         
         if (response.ok) {
           const data = await response.json();
@@ -415,16 +397,16 @@ export class AppPreloader {
             console.warn('[Preloader] Unexpected API response format:', data);
           }
         } else {
-          console.warn(`[Preloader] Sets API returned ${response.status}, using defaults`);
+          console.warn(`[Preloader] Sets API returned ${response.status}, will retry later`);
         }
       } catch (error) {
-        console.warn('[Preloader] Failed to load user sets, using defaults:', error);
+        console.warn('[Preloader] Failed to load user sets, will retry later:', error);
       }
     }
     
-    // Return default sets for non-authenticated users or as fallback
+    // Return default sets for non-authenticated users or as temporary fallback
     const defaultSets = getDefaultSetsForUnauthenticatedUsers();
-    console.log(`[Preloader] Using ${defaultSets.length} default sets`);
+    console.log(`[Preloader] Using ${defaultSets.length} default sets as fallback`);
     return defaultSets;
   }
 

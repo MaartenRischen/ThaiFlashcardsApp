@@ -344,8 +344,9 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
 
   // Initialize from preloaded data when available
   useEffect(() => {
-    if (!isPreloading && preloadedData && !hasInitializedFromPreload) {
-      console.log('[SetContext] Initializing from preloaded data');
+    // Use preloaded data immediately if available, don't wait for isPreloading to be false
+    if (preloadedData && preloadedData.sets && preloadedData.sets.length > 0 && !hasInitializedFromPreload) {
+      console.log('[SetContext] Initializing from preloaded data immediately');
       setAvailableSets(preloadedData.sets);
       setSetsHaveLoaded(true);
       setHasInitializedFromPreload(true);
@@ -360,7 +361,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
         setRestored(true); // Mark as restored to prevent re-loading
       }
     }
-  }, [isPreloading, preloadedData, hasInitializedFromPreload]);
+  }, [preloadedData, hasInitializedFromPreload]); // Remove isPreloading dependency
 
   // --- Refactored Initial Data Loading --- (updated to use useAuth and fetch)
   useEffect(() => {

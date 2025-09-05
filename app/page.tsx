@@ -388,13 +388,20 @@ export default function ThaiFlashcards() {
     }
   };
 
-  // Auto-play useEffect - Restore call to getThaiWithGender with isPoliteMode
+  // Auto-play useEffect - handles both initial card flip and gender/politeness changes
   useEffect(() => {
-    if (autoplay && showAnswer && !prevShowAnswerRef.current && !isPlayingWord && !isPlayingContext && voicesLoaded) {
-      speak(getThaiWithGender(phrases[index], isMale, isPoliteMode), true, isMale); // Normal speed for autoplay
+    // Only play if card is showing and audio is not already playing
+    if (showAnswer && voicesLoaded && !isPlayingWord && !isPlayingContext && phrases[index]) {
+      // Check if this is initial card flip (autoplay enabled) or gender/politeness change
+      const isInitialFlip = autoplay && !prevShowAnswerRef.current;
+      const isGenderOrPolitenessChange = prevShowAnswerRef.current; // Card was already showing
+      
+      if (isInitialFlip || isGenderOrPolitenessChange) {
+        speak(getThaiWithGender(phrases[index], isMale, isPoliteMode), true, isMale);
+      }
     }
     prevShowAnswerRef.current = showAnswer;
-  }, [showAnswer, autoplay, phrases, index, isPlayingWord, isPlayingContext, voicesLoaded, isMale, isPoliteMode]);
+  }, [showAnswer, autoplay, phrases, index, isPlayingWord, isPlayingContext, voicesLoaded, isMale, isPoliteMode, speak]);
 
   // Respond to tour step events to flip demo card
   useEffect(() => {
@@ -432,13 +439,6 @@ export default function ThaiFlashcards() {
       window.removeEventListener('resize', handleResize);
     };
   }, [showAnswer]);
-
-  // Trigger autoplay when gender or politeness is toggled (if card back is showing)
-  useEffect(() => {
-    if (showAnswer && voicesLoaded && !isPlayingWord && !isPlayingContext && phrases[index]) {
-      speak(getThaiWithGender(phrases[index], isMale, isPoliteMode), true, isMale); // Normal speed
-    }
-  }, [isMale, isPoliteMode, showAnswer, voicesLoaded, isPlayingWord, isPlayingContext, phrases, index]);
   
   // Auto-load breakdown when card is shown
   useEffect(() => {

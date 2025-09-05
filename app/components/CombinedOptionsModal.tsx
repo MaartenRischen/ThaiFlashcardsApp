@@ -273,6 +273,20 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
     }
   }, [isOpen]);
 
+  // Capture the PWA install prompt
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      (window as any).deferredPrompt = e;
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
   const handleResetDefaultSets = async () => {
     if (!window.confirm('Are you sure you want to reset all default sets to their original state? This will overwrite any customizations you made to default sets.')) {
       return;
@@ -303,6 +317,37 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
       window.location.reload();
     }
   };
+  const handleAddToHomeScreen = () => {
+    // Check if the app is already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      toast.info('This app is already installed on your device!');
+      return;
+    }
+
+    // Check if the browser supports PWA installation
+    const deferredPrompt = (window as any).deferredPrompt;
+    if (deferredPrompt) {
+      // Show the install prompt
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === 'accepted') {
+          toast.success('App installed successfully!');
+        }
+        (window as any).deferredPrompt = null;
+      });
+    } else if ('standalone' in navigator && !(navigator as any).standalone) {
+      // iOS Safari
+      toast('To install this app on iOS:\n1. Tap the Share button\n2. Tap "Add to Home Screen"', {
+        duration: 8000,
+      });
+    } else {
+      // Desktop or unsupported browser
+      toast('To install this app:\n• Chrome/Edge: Click the install icon in the address bar\n• Safari: Add to Home Screen from Share menu', {
+        duration: 8000,
+      });
+    }
+  };
+
   const handleFactoryResetFull = async () => {
     if (window.confirm('Are you sure you want to reset the entire app, including all sets and progress? This cannot be undone.')) {
       try {
@@ -357,6 +402,23 @@ export function SettingsModal({ isOpen, onClose, isDarkMode, toggleDarkMode, isM
               }} />
             </div>
           </section>
+          
+          <section>
+            <h3 className="text-lg font-semibold text-[#A9C4FC] mb-4">App Installation</h3>
+            <button
+              onClick={handleAddToHomeScreen}
+              className="w-full neumorphic-button text-green-400 px-4 py-3 text-sm rounded-xl flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8l-8 8-8-8" />
+              </svg>
+              Add to Home Screen
+            </button>
+            <p className="text-xs text-[#BDBDBD] mt-2 text-center">
+              Install this app on your device for a native app experience
+            </p>
+          </section>
+          
           <div className="mt-10 flex flex-col gap-2">
             <button onClick={handleFactoryResetPreferences} className="w-full border border-[#A9C4FC] text-[#A9C4FC] rounded py-2 text-sm font-semibold hover:bg-[#A9C4FC] hover:text-[#121212] transition flex items-center justify-center gap-2 bg-transparent">
               Factory Reset (Preferences)

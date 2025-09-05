@@ -75,28 +75,8 @@ export class AppPreloader {
         message: 'Loading folders and sets...'
       });
       
-      // Load folders first, then sets, so we can immediately start preloading
-      this.updateProgress({
-        stage: 'folders',
-        progress: 20,
-        message: 'Loading folders...',
-        subProgress: { current: 0, total: 5 }
-      });
-      
-      const folders = await this.loadFolders(userId);
-      
-      // Show folders as loaded
-      if (folders.length > 0) {
-        this.updateProgress({
-          stage: 'folders',
-          progress: 25,
-          message: `Loaded ${folders.length} folders`,
-          subProgress: { 
-            current: folders.length, 
-            total: folders.length
-          }
-        });
-      }
+      // Load folders with progressive updates
+      const folders = await this.loadFoldersWithProgress(userId);
       
       // Kick off sets fetch but don't block on it to start warming previews quickly
       const setsPromise = this.loadSets(userId);
@@ -317,6 +297,46 @@ export class AppPreloader {
     }
   }
 
+  private async loadFoldersWithProgress(userId?: string | null): Promise<Folder[]> {
+    const defaultFolderNames = [
+      'Default Sets',
+      '100 Most Used Thai Words', 
+      '100 Most Used Thai Sentences',
+      'My Automatic Sets',
+      'My Manual Sets'
+    ];
+    
+    // Show initial progress
+    this.updateProgress({
+      stage: 'folders',
+      progress: 20,
+      message: 'Loading folders...',
+      subProgress: { current: 0, total: 5 }
+    });
+    
+    // Small delay to ensure UI updates
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    // Simulate progressive loading for better UX
+    for (let i = 0; i < defaultFolderNames.length; i++) {
+      this.updateProgress({
+        stage: 'folders',
+        progress: 20 + (5 * (i + 1) / defaultFolderNames.length),
+        message: 'Loading folders...',
+        subProgress: { 
+          current: i + 1, 
+          total: defaultFolderNames.length,
+          item: defaultFolderNames[i]
+        }
+      });
+      // Small delay between updates to make them visible
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    // Now actually load the folders
+    return this.loadFolders(userId);
+  }
+
   private async loadFolders(userId?: string | null): Promise<Folder[]> {
     // For faster loading, always use default folders immediately
     const now = new Date().toISOString();
@@ -368,24 +388,8 @@ export class AppPreloader {
       }
     ];
 
-    // Show progressive loading for visual feedback
-    for (let i = 0; i < defaultFolders.length; i++) {
-      this.updateProgress({
-        stage: 'folders',
-        progress: 20 + (5 * (i + 1) / defaultFolders.length),
-        message: 'Loading folders...',
-        subProgress: { 
-          current: i + 1, 
-          total: defaultFolders.length,
-          item: defaultFolders[i].name
-        }
-      });
-      // Very small delay to make progress visible
-      await new Promise(resolve => setTimeout(resolve, 20));
-    }
-
-    // For authenticated users, we'll load custom folders later in SetContext if needed
-    // This prevents the long delay during initial loading
+    // Return default folders immediately without delays
+    // Progress updates are handled in loadFoldersWithProgress
     return defaultFolders;
   }
 

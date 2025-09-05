@@ -91,26 +91,6 @@ export class AppPreloader {
       
       data.folders = folders;
       data.sets = sets;
-      
-      this.updateProgress({
-        stage: 'sets',
-        progress: 30,
-        message: `Loading ${sets.length} flashcard sets...`,
-        subProgress: { current: 0, total: sets.length }
-      });
-
-      // Show sets loaded - no delays
-      if (sets.length > 0) {
-        this.updateProgress({
-          stage: 'sets',
-          progress: 35,
-          message: `Loading ${sets.length} sets...`,
-          subProgress: { 
-            current: sets.length, 
-            total: sets.length
-          }
-        });
-      }
 
       // Stage 5-7: Load ONLY essential data - not all content!
       this.updateProgress({
@@ -204,8 +184,8 @@ export class AppPreloader {
       this.updateProgress({
         stage: 'images',
         progress: 80,
-        message: 'Loading images...',
-        subProgress: { current: 0, total: 5 }
+        message: 'Loading set images...',
+        subProgress: { current: 0, total: sets.length + 2 } // +2 for default images
       });
       
       // Import getThumbnailUrl to convert to thumbnails
@@ -226,8 +206,8 @@ export class AppPreloader {
       imageUrls.add('/images/thumbnails/default-set-logo.png');
       imageUrls.add('/images/thumbnails/defaultnew.png');
       
-      // Add first N set thumbnails as a guard to prevent empty previews
-      sets.slice(0, 12).forEach(s => { 
+      // Add ALL set thumbnails to ensure every set has its image ready
+      sets.forEach(s => { 
         if (s?.imageUrl) {
           imageUrls.add(getThumbnailUrl(s.imageUrl));
         }
@@ -401,18 +381,17 @@ export class AppPreloader {
   }
 
   private async loadSets(userId?: string | null): Promise<SetMetaData[]> {
-    // Always start with default sets for immediate display
-    const defaultSets = getDefaultSetsForUnauthenticatedUsers();
-    
     if (!userId) {
+      // For unauthenticated users, return default sets
+      const defaultSets = getDefaultSetsForUnauthenticatedUsers();
       console.log(`[Preloader] Using ${defaultSets.length} default sets for unauthenticated user`);
       return defaultSets;
     }
     
-    // For authenticated users, try to load their sets with a short timeout
+    // For authenticated users, load ALL their sets (metadata only, not content)
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout - enough for metadata
       
       const response = await fetch('/api/flashcard-sets', {
         credentials: 'include',
@@ -426,23 +405,44 @@ export class AppPreloader {
         // API returns { sets: [...] }
         if (data && Array.isArray(data.sets)) {
           console.log(`[Preloader] Loaded ${data.sets.length} sets from API`);
+          
+          // Show progress for each set being processed
+          for (let i = 0; i < data.sets.length; i++) {
+            const set = data.sets[i];
+            this.updateProgress({
+              stage: 'sets',
+              progress: 30 + (5 * (i + 1) / data.sets.length),
+              message: `Loading sets...`,
+              subProgress: { 
+                current: i + 1, 
+                total: data.sets.length,
+                item: set.name
+              }
+            });
+            // Very small delay to show progress
+            if (i % 5 === 0) { // Only delay every 5th set
+              await new Promise(resolve => setTimeout(resolve, 10));
+            }
+          }
+          
           return data.sets;
         } else {
           console.warn('[Preloader] Unexpected API response format:', data);
         }
       } else {
-        console.warn(`[Preloader] Sets API returned ${response.status}, using defaults`);
+        console.warn(`[Preloader] Sets API returned ${response.status}`);
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        console.warn('[Preloader] Sets API timed out after 3s, using defaults');
+        console.warn('[Preloader] Sets API timed out after 10s');
       } else {
-        console.warn('[Preloader] Failed to load user sets, using defaults:', error);
+        console.warn('[Preloader] Failed to load user sets:', error);
       }
     }
     
-    // Fall back to default sets if API fails or times out
-    console.log(`[Preloader] Using ${defaultSets.length} default sets as fallback`);
+    // Only fall back to default sets if API completely fails
+    const defaultSets = getDefaultSetsForUnauthenticatedUsers();
+    console.log(`[Preloader] API failed, using ${defaultSets.length} default sets as fallback`);
     return defaultSets;
   }
 

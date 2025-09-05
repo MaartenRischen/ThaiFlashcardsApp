@@ -3,7 +3,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useSet } from '@/app/context/SetContext';
 import { Phrase } from '@/app/lib/set-generator';
 import GallerySetCard from './GallerySetCard';
-import { GalleryHorizontal, Loader2, Trash2, X, Filter } from 'lucide-react';
+import { GalleryHorizontal, Loader2, Trash2, X } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 // Import a modal component (we'll create this next)
@@ -346,7 +346,7 @@ export default function GalleryPage() {
     setViewingSet(null); // Clear set data when closing
     setCardViewError(null);
     // Refresh gallery data to update ratings
-    fetchGallerySets();
+    fetchSets();
   };
 
   return (

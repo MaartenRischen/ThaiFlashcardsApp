@@ -38,8 +38,16 @@ export function getDefaultSetsForUnauthenticatedUsers(): SetMetaData[] {
       const setNumber = set.id.replace('common-sentences-', '');
       imageUrl = `/images/thumbnails/defaults/default-common-sentences-${setNumber}.png`;
     } else {
-      // Use original thailand images for the first 6 sets
-      imageUrl = `/images/thumbnails/defaults/default-thailand-${(index + 1).toString().padStart(2, '0')}.png`;
+      // Map specific sets to their correct images
+      const imageMapping: Record<string, string> = {
+        'numbers-1-10': 'default-thailand-01.png',
+        'basic-colors': 'default-thailand-02.png',
+        'days-of-week': 'default-thailand-03.png',
+        'family-members': 'default-thailand-04.png',
+        'months-of-year': 'default-thailand-05.png',
+        'body-parts': 'default-thailand-06.png'
+      };
+      imageUrl = `/images/thumbnails/defaults/${imageMapping[set.id] || `default-thailand-${(index + 1).toString().padStart(2, '0')}.png`}`;
     }
     
     const setId = `default-${set.id}`;

@@ -120,9 +120,17 @@ export async function ensureUserHasAllDefaultSets(userId: string) {
           const setNumber = defaultSet.id.replace('common-sentences-', '');
           imageUrl = `/images/thumbnails/defaults/default-common-sentences-${setNumber}.png`;
         } else {
-          // Use original thailand images for other sets
+          // Map specific sets to their correct images
+          const imageMapping: Record<string, string> = {
+            'numbers-1-10': 'default-thailand-01.png',
+            'basic-colors': 'default-thailand-02.png',
+            'days-of-week': 'default-thailand-03.png',
+            'family-members': 'default-thailand-04.png',
+            'months-of-year': 'default-thailand-05.png',
+            'body-parts': 'default-thailand-06.png'
+          };
           const index = ALL_DEFAULT_SETS.findIndex(s => s.id === defaultSet.id);
-          imageUrl = `/images/thumbnails/defaults/default-thailand-${(index + 1).toString().padStart(2, '0')}.png`;
+          imageUrl = `/images/thumbnails/defaults/${imageMapping[defaultSet.id] || `default-thailand-${(index + 1).toString().padStart(2, '0')}.png`}`;
         }
         
         setsToCreate.push({

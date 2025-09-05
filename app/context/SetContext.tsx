@@ -45,6 +45,21 @@ const DEFAULT_SET_METADATA: SetMetaData = {
   toneLevel: null // Add default null value
 };
 
+// Helper function to sort sets with "Default Set" first
+const sortSetsWithDefaultFirst = (sets: SetMetaData[]): SetMetaData[] => {
+  return sets.sort((a, b) => {
+    // Check if either set is the default set
+    const aIsDefault = a.id === 'default' || a.id.startsWith('default__') || a.name === 'Default Set';
+    const bIsDefault = b.id === 'default' || b.id.startsWith('default__') || b.name === 'Default Set';
+    
+    if (aIsDefault && !bIsDefault) return -1;
+    if (!aIsDefault && bIsDefault) return 1;
+    
+    // For other sets, maintain their current order
+    return 0;
+  });
+};
+
 // Helper to get initial active set ID from localStorage (client-side only)
 // const getInitialActiveSetId = (): string => {
 //   if (typeof window !== 'undefined') {
@@ -203,7 +218,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       console.warn('[refreshSets] No user ID, using default sets.');
       // For unauthenticated users, load default sets
       const defaultSets = getDefaultSetsForUnauthenticatedUsers();
-      setAvailableSets(defaultSets);
+      setAvailableSets(sortSetsWithDefaultFirst(defaultSets));
       setSetsHaveLoaded(true);
       return;
     }
@@ -236,7 +251,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       
       // Don't manually add DEFAULT_SET_METADATA - it should come from the database
       // The database now includes all default sets with proper folder assignments
-      setAvailableSets(userSets);
+      setAvailableSets(sortSetsWithDefaultFirst(userSets));
       console.log(`[refreshSets] Updated available sets with ${userSets.length} sets from database`);
 
       setSetsHaveLoaded(true); // Mark as loaded after successful refresh
@@ -347,7 +362,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
     // Use preloaded data immediately if available, don't wait for isPreloading to be false
     if (preloadedData && preloadedData.sets && preloadedData.sets.length > 0 && !hasInitializedFromPreload) {
       console.log('[SetContext] Initializing from preloaded data immediately');
-      setAvailableSets(preloadedData.sets);
+      setAvailableSets(sortSetsWithDefaultFirst(preloadedData.sets));
       setSetsHaveLoaded(true);
       setHasInitializedFromPreload(true);
       setIsLoading(false);
@@ -451,12 +466,12 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
           const userSets: SetMetaData[] = userSetsResponse.sets; // Extract the array
           
           // Just use the sets from the database (they now include all default sets)
-          setAvailableSets(userSets); 
+          setAvailableSets(sortSetsWithDefaultFirst(userSets)); 
           console.log(`SetContext: Loaded ${userSets.length} sets via API.`);
 
         } catch (error) {
           console.error("SetContext: Error loading initial user data via API:", error);
-          setAvailableSets(getDefaultSetsForUnauthenticatedUsers()); // Fallback to all default sets
+          setAvailableSets(sortSetsWithDefaultFirst(getDefaultSetsForUnauthenticatedUsers())); // Fallback to all default sets
         } finally {
           setIsLoading(false);
           setSetsHaveLoaded(true);
@@ -465,7 +480,7 @@ export const SetProvider = ({ children }: { children: ReactNode }) => {
       } else { // User is unauthenticated (userId is null)
         console.log("SetContext: User unauthenticated (Clerk userId is null). Clearing user data and showing default set.");
         const defaultSets = getDefaultSetsForUnauthenticatedUsers();
-        setAvailableSets(defaultSets);
+        setAvailableSets(sortSetsWithDefaultFirst(defaultSets));
         setActiveSetId(DEFAULT_SET_ID);
         setActiveSetContent(INITIAL_PHRASES as unknown as Phrase[]);
         setActiveSetProgress({});

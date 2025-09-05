@@ -36,7 +36,21 @@ export async function getAllSetMetaData(userId: string): Promise<SetMetaData[]> 
     console.log('Successfully fetched SetMetaData:', prismaSets);
     const sets = prismaSets || [];
 
-    return sets.map(dbSet => mapDatabaseToStorage(dbSet));
+    // Map to storage format
+    const mappedSets = sets.map(dbSet => mapDatabaseToStorage(dbSet));
+    
+    // Sort to ensure "Default Set" is always first
+    return mappedSets.sort((a, b) => {
+      // Check if either set is the default set (could be 'default' or 'default__userId')
+      const aIsDefault = a.id === 'default' || a.id.startsWith('default__') || a.name === 'Default Set';
+      const bIsDefault = b.id === 'default' || b.id.startsWith('default__') || b.name === 'Default Set';
+      
+      if (aIsDefault && !bIsDefault) return -1;
+      if (!aIsDefault && bIsDefault) return 1;
+      
+      // For other sets, maintain their current order
+      return 0;
+    });
 
   } catch (error) {
     console.error('Unexpected error in getAllSetMetaData:', error);

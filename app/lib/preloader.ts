@@ -325,7 +325,26 @@ export class AppPreloader {
   }
 
   private async loadFolders(userId?: string | null): Promise<Folder[]> {
-    // For faster loading, always use default folders immediately
+    // For authenticated users, load actual folders from API
+    if (userId) {
+      try {
+        const response = await fetch('/api/folders', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data && Array.isArray(data.folders)) {
+            console.log(`[Preloader] Loaded ${data.folders.length} real folders from API`);
+            return data.folders;
+          }
+        }
+      } catch (error) {
+        console.warn('[Preloader] Failed to load folders from API:', error);
+      }
+    }
+    
+    // For unauthenticated users or if API fails, use default folders
     const now = new Date().toISOString();
     const defaultFolders = [
       { 
@@ -375,8 +394,7 @@ export class AppPreloader {
       }
     ];
 
-    // Return default folders immediately without delays
-    // Progress updates are handled in loadFoldersWithProgress
+    // Return default folders
     return defaultFolders;
   }
 

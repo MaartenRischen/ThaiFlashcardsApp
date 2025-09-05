@@ -224,6 +224,19 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
           set.folderId === folder.id || set.folderName === folder.name
         );
         
+        // Debug logging
+        if (folder.name === 'My Automatic Sets' || folder.name === 'My Manual Sets') {
+          console.log(`[FolderView] Filtering for folder ${folder.name} (ID: ${folder.id})`);
+          console.log(`[FolderView] Available sets:`, availableSets.slice(0, 5).map(s => ({
+            id: s.id,
+            name: s.name,
+            folderId: s.folderId,
+            folderName: s.folderName,
+            source: s.source
+          })));
+          console.log(`[FolderView] Filtered sets:`, folderSets.map(s => s.name));
+        }
+        
         if (folder.name === 'Default Sets' && folder.isDefault) {
           const unfiledSets = availableSets.filter(set => 
             (!set.folderId && !set.folderName) || set.id === 'default'

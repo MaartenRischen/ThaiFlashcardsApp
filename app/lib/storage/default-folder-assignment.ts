@@ -206,8 +206,10 @@ export async function assignUserSetsToFolders(userId: string) {
     const updates = [];
 
     for (const set of unassignedSets) {
-      // Manual sets go to manual folder, everything else goes to automatic folder
-      const folderId = set.source === 'manual' ? manualFolderId : autoFolderId;
+      // Manual sets go to manual folder, generated/automatic sets go to automatic folder
+      const folderId = set.source === 'manual' ? manualFolderId : 
+                       (set.source === 'generated' || set.source === 'automatic' || set.source === 'import') ? autoFolderId : 
+                       null;
       
       updates.push(
         prisma.flashcardSet.update({

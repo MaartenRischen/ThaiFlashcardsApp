@@ -435,10 +435,10 @@ export default function ThaiFlashcards() {
 
   // Trigger autoplay when gender or politeness is toggled (if card back is showing)
   useEffect(() => {
-    if (showAnswer && voicesLoaded && !isPlayingWord && !isPlayingContext) {
+    if (showAnswer && voicesLoaded && !isPlayingWord && !isPlayingContext && phrases[index]) {
       speak(getThaiWithGender(phrases[index], isMale, isPoliteMode), true, isMale); // Normal speed
     }
-  }, [isMale, isPoliteMode]);
+  }, [isMale, isPoliteMode, showAnswer, voicesLoaded, isPlayingWord, isPlayingContext, phrases, index]);
   
   // Auto-load breakdown when card is shown
   useEffect(() => {

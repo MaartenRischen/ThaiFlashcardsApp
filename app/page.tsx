@@ -1959,6 +1959,12 @@ export default function ThaiFlashcards() {
             if (newSetId) {
               setHighlightSetId(newSetId);
               
+              // Refresh sets first before doing anything else
+              await refreshSets();
+              
+              // Small delay to ensure the sets are fully loaded
+              await new Promise(resolve => setTimeout(resolve, 500));
+              
               // Determine the folder based on the set
               const set = availableSets.find(s => s.id === newSetId);
               if (set) {
@@ -1969,8 +1975,15 @@ export default function ThaiFlashcards() {
                 }
               }
               
-              // Open My Sets modal to show the new set
-              setIsManagementModalOpen(true);
+              // Don't automatically open My Sets modal - let user do it manually
+              // This prevents the duplicate confirmation screen experience
+              // setIsManagementModalOpen(true);
+              
+              // Show success message with guidance
+              toast.success('🎉 Your flashcard set has been created!', {
+                description: 'Click "My Sets" to view and start learning',
+                duration: 5000
+              });
             }
           }}
         />

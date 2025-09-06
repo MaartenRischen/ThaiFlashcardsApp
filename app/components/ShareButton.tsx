@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Share2, Copy, Mail, Check, Heart, Sparkles } from 'lucide-react';
+import { Share2, Copy, Mail, Check, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

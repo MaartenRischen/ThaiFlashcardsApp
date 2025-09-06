@@ -4,8 +4,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useSet } from '@/app/context/SetContext';
 import { useSetCache } from '@/app/context/SetCacheContext';
 import { Folder, FolderWithSets } from '@/app/lib/storage/folders';
@@ -155,7 +153,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
       if (initialFolderName && !currentFolder) {
         const targetFolder = preloadedFolders.find(f => f.name === initialFolderName);
         if (targetFolder) {
-          handleOpenFolder(targetFolder);
+          fetchFolderDetails(targetFolder.id);
         }
       }
       return;
@@ -171,7 +169,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
       if (initialFolderName && !currentFolder) {
         const targetFolder = cachedFolders.find(f => f.name === initialFolderName);
         if (targetFolder) {
-          handleOpenFolder(targetFolder);
+          fetchFolderDetails(targetFolder.id);
         }
       }
       return;
@@ -188,7 +186,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
       if (initialFolderName && !currentFolder) {
         const targetFolder = loadedFolders.find(f => f.name === initialFolderName);
         if (targetFolder) {
-          handleOpenFolder(targetFolder);
+          fetchFolderDetails(targetFolder.id);
         }
       }
     } catch (error) {

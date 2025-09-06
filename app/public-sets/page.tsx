@@ -62,16 +62,16 @@ export default function PublicSetsPage() {
         <span>Back</span>
       </button>
       
-      <h1 className="text-3xl font-bold mb-6 text-center">🌏 Public Flashcard Sets</h1>
-      {loading && <div className="text-center py-8">Loading public sets…</div>}
-      {error && <div className="text-center text-red-500 py-8">{error}</div>}
+      <h1 className="text-4xl font-bold mb-6 text-center text-[#E0E0E0]">🌏 Public Flashcard Sets</h1>
+      {loading && <div className="text-center py-8 text-[#E0E0E0]">Loading public sets…</div>}
+      {error && <div className="text-center text-red-400 py-8">{error}</div>}
       {!loading && !error && sets.length === 0 && (
-        <div className="text-center text-gray-400 py-8">No public sets found yet.</div>
+        <div className="text-center text-[#BDBDBD] py-8">No public sets found yet.</div>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {sets.map(set => (
-          <div key={set.id} className="bg-gray-900 rounded-xl shadow-lg p-5 flex flex-col items-center border border-gray-800">
-            <div className="w-full h-40 mb-4 relative flex items-center justify-center bg-gray-800 rounded-lg overflow-hidden">
+          <div key={set.id} className="bg-[#2C2C2C] rounded-xl shadow-lg p-6 flex flex-col items-center border border-[#404040] transition-all duration-200 hover:border-[#BB86FC]/30">
+            <div className="w-full h-40 mb-4 relative flex items-center justify-center bg-[#3C3C3C] rounded-xl overflow-hidden">
               <Image
                 src={set.imageUrl || '/images/default-set-logo.png'}
                 alt={set.cleverTitle || set.name}
@@ -84,10 +84,10 @@ export default function PublicSetsPage() {
                 }}
               />
             </div>
-            <h2 className="text-xl font-semibold mb-1 text-center">{set.name}</h2>
-            {set.cleverTitle && <div className="text-sm text-gray-400 mb-2 text-center">{set.cleverTitle}</div>}
-            <div className="text-xs text-gray-500 mb-2">{set.level ? `Level: ${set.level}` : ""}</div>
-            <div className="text-xs text-gray-500 mb-2">{set.phraseCount} cards</div>
+            <h2 className="text-xl font-semibold mb-1 text-center text-[#E0E0E0]">{set.name}</h2>
+            {set.cleverTitle && <div className="text-sm text-[#BDBDBD] mb-2 text-center">{set.cleverTitle}</div>}
+            <div className="text-xs text-[#BDBDBD] mb-2">{set.level ? `Level: ${set.level}` : ""}</div>
+            <div className="text-xs text-[#BDBDBD] mb-2">{set.phraseCount} cards</div>
             <Link href={`/share/${set.shareId}`} className="mt-2 px-4 py-2 bg-gradient-to-r from-[#BB86FC] to-[#A374E8] hover:from-[#A374E8] hover:to-[#9B6DD0] text-white rounded-xl font-medium transition-all duration-200">View / Import</Link>
           </div>
         ))}

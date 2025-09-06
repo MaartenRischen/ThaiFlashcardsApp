@@ -368,14 +368,14 @@ export default function GalleryPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setSelectedSets(new Set())}
-              className="px-4 py-2 text-sm text-red-400/70 hover:text-red-400 transition-colors rounded-lg hover:bg-red-900/20"
+              className="px-4 py-2 text-sm text-red-400/70 hover:text-red-400 transition-colors rounded-xl hover:bg-red-900/20 neumorphic-button"
             >
               Cancel
             </button>
             <button
               onClick={handleBulkDelete}
               disabled={isDeletingBulk}
-              className="px-4 py-2 text-sm text-red-400 bg-red-900/30 hover:bg-red-900/50 border border-red-800/50 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+              className="px-4 py-2 text-sm text-red-400 bg-red-900/30 hover:bg-red-900/50 border border-red-800/50 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all neumorphic-button"
             >
               {isDeletingBulk ? (
                 <>
@@ -419,7 +419,7 @@ export default function GalleryPage() {
               placeholder="Search sets by title, description, or topics..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-4 py-2.5 bg-[#2A2A2A] border border-[#444] rounded-xl text-[#E0E0E0] placeholder-[#8B8B8B] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all"
+              className="w-full px-4 py-2.5 bg-[#3C3C3C] border border-[#404040] rounded-xl text-[#E0E0E0] placeholder-[#BDBDBD] focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-transparent transition-all"
             />
           </div>
           
@@ -430,7 +430,7 @@ export default function GalleryPage() {
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
-                className="px-3 py-1.5 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
+                className="px-3 py-1.5 bg-[#3C3C3C] border border-[#404040] text-[#E0E0E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-transparent transition-all text-sm"
               >
                 {sortOptions.map(option => (
                   <option key={option} value={option}>{option}</option>
@@ -443,7 +443,7 @@ export default function GalleryPage() {
               <select
                 value={authorFilter}
                 onChange={(e) => setAuthorFilter(e.target.value)}
-                className="px-3 py-1.5 bg-[#2A2A2A] border border-[#444] text-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-[#BB86FC] transition-all text-sm"
+                className="px-3 py-1.5 bg-[#3C3C3C] border border-[#404040] text-[#E0E0E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#BB86FC] focus:border-transparent transition-all text-sm"
               >
                 {authors.map(author => (
                   <option key={author} value={author}>{author}</option>
@@ -457,7 +457,7 @@ export default function GalleryPage() {
                   setSearch('');
                   setAuthorFilter('All');
                 }}
-                className="px-3 py-1.5 bg-[#3C3C3C] text-[#E0E0E0] rounded-lg hover:bg-[#4C4C4C] transition-colors text-sm font-medium flex items-center gap-1"
+                className="px-3 py-1.5 bg-[#3C3C3C] text-[#E0E0E0] rounded-xl hover:bg-[#4C4C4C] transition-colors text-sm font-medium flex items-center gap-1 neumorphic-button"
               >
                 <X className="w-3.5 h-3.5" />
                 Clear filters
@@ -467,7 +467,7 @@ export default function GalleryPage() {
             {isAdmin && filteredSets.length > 0 && (
               <button
                 onClick={handleSelectAll}
-                className="px-3 py-1.5 bg-[#3C3C3C] text-[#E0E0E0] rounded-lg hover:bg-[#4C4C4C] transition-colors text-sm font-medium"
+                className="px-3 py-1.5 bg-[#3C3C3C] text-[#E0E0E0] rounded-xl hover:bg-[#4C4C4C] transition-colors text-sm font-medium neumorphic-button"
               >
                 {selectedSets.size === filteredSets.length ? 'Deselect All' : 'Select All'}
               </button>

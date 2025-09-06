@@ -38,7 +38,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="mx-auto space-y-6 w-full max-w-md">
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold text-[#E0E0E0]">Reset Password</h1>
+        <h1 className="text-4xl font-bold text-[#E0E0E0]">Reset Password</h1>
         <p className="text-[#BDBDBD]">
           Enter your new password below.
         </p>
@@ -66,7 +66,7 @@ export default function ResetPasswordPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={isLoading}
-            className="bg-[#3C3C3C] text-[#E0E0E0] border-[#404040] focus:border-[#BB86FC] focus:ring-[#BB86FC]"
+            className="neumorphic-input rounded-xl"
           />
         </div>
 
@@ -80,7 +80,7 @@ export default function ResetPasswordPage() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             disabled={isLoading}
-            className="bg-[#3C3C3C] text-[#E0E0E0] border-[#404040] focus:border-[#BB86FC] focus:ring-[#BB86FC]"
+            className="neumorphic-input rounded-xl"
           />
         </div>
 

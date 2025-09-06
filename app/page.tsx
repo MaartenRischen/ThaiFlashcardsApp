@@ -166,16 +166,16 @@ const MnemonicsListModal: React.FC<MnemonicsListModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="neumorphic max-w-xl w-full p-6" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-200">Create Your Custom Set</h2>
+          <h2 className="text-2xl font-bold text-[#E0E0E0]">Create Your Custom Set</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white text-2xl leading-none"
+            className="text-[#BDBDBD] hover:text-[#E0E0E0] text-2xl leading-none"
             aria-label="Close modal"
           >
             &times;
           </button>
         </div>
-        <div className="text-gray-300">
+        <div className="text-[#E0E0E0]">
           <p>Welcome to the Set Wizard!</p>
           <p className="mt-4">This feature will guide you through creating a personalized vocabulary and mnemonic set based on your goals.</p>
           <p className="mt-2">(Wizard steps and logic will be implemented here.)</p>
@@ -893,7 +893,7 @@ export default function ThaiFlashcards() {
     console.log(`getStatusInfo called with status: ${status}`); // Log input status
     switch(status) {
       case 'unseen':
-        return { color: 'bg-gray-700 text-gray-300', label: 'Unseen' };
+        return { color: 'bg-[#3C3C3C] text-[#BDBDBD]', label: 'Unseen' };
       case 'wrong': // Changed from 'hard' to match getCardStatus output
         return { color: 'bg-red-600 text-white', label: 'Wrong' };
       case 'due': // Added case for 'due'
@@ -902,7 +902,7 @@ export default function ThaiFlashcards() {
         return { color: 'bg-green-500 text-white', label: 'Learned' }; // Label it 'Learned' for simplicity
       default:
         console.warn(`getStatusInfo: Unknown status '${status}'`);
-        return { color: 'bg-gray-700 text-gray-300', label: 'Unknown' }; // Default fallback
+        return { color: 'bg-[#3C3C3C] text-[#BDBDBD]', label: 'Unknown' }; // Default fallback
     }
   };
 

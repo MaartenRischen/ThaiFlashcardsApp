@@ -87,7 +87,7 @@ const MySetCard: React.FC<MySetCardProps> = ({
       'expert': { label: 'Expert', color: 'text-purple-400' },
       'god mode': { label: 'God Mode', color: 'text-red-400' }
     };
-    const display = levelMap[level] || { label: level, color: 'text-gray-400' };
+    const display = levelMap[level] || { label: level, color: 'text-[#BDBDBD]' };
     return (
       <span className={`${display.color} font-medium`}>
         {display.label}

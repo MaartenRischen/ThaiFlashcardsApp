@@ -40,7 +40,7 @@ export async function generateImage(prompt: string): Promise<string | null> {
     console.log(`[IDEOGRAM DEBUG] Using rendering speed: ${renderingSpeed}`);
     
     // Strengthen the main prompt to be explicit about no text and focus on visual elements
-    const enhancedPrompt = `VISUAL ONLY - NO TEXT ALLOWED: ${prompt}\n\nCRITICAL REQUIREMENTS FOR IMAGE GENERATION:\n1. Create a purely visual representation with absolutely NO text, letters, or writing of any kind.\n2. Focus on visual storytelling through images, colors, and scenes only.\n3. Use symbolic and pictorial elements to convey meaning.\n4. Avoid anything that could be interpreted as text or writing.\n5. Create clean, text-free compositions that tell the story through imagery alone.`;
+    const enhancedPrompt = `VISUAL ONLY - ABSOLUTELY NO TEXT, LETTERS, WORDS, OR WRITING: ${prompt}\n\nMANDATORY REQUIREMENTS - VIOLATION WILL RESULT IN REJECTION:\n1. This is a TEXT-FREE ZONE. The image must contain ZERO text, letters, numbers as text, words, writing, or anything resembling written language.\n2. If you see ANY text appearing in the image, you have FAILED. This includes:\n   - Text on signs, banners, labels, logos, watermarks\n   - Hidden text in patterns or backgrounds\n   - Letters or words formed by objects\n   - Any form of written communication\n3. Numbers may ONLY appear as visual quantities (e.g., 3 apples) not as written digits or text.\n4. Focus ENTIRELY on visual storytelling through imagery, not text.\n5. Use ONLY visual elements: colors, shapes, objects, scenes, symbols (non-text), and compositions.\n6. The word "text" or "writing" should NEVER appear in any form in the final image.\n7. This is an art piece, not a document - treat it as such.`;
     formData.append('prompt', enhancedPrompt);
     
     // Core configuration with optimized settings to prevent text
@@ -49,17 +49,18 @@ export async function generateImage(prompt: string): Promise<string | null> {
     formData.append('resolution', '1344x768');
     formData.append('magic_prompt', 'OFF'); // Prevent automatic prompt enhancement that might add text
     formData.append('seed', Math.floor(Math.random() * 1000000).toString()); // Use random seed for variety
-    formData.append('cfg_scale', '20'); // Higher CFG scale for stronger adherence to prompt requirements
+    formData.append('cfg_scale', '25'); // Maximum CFG scale for absolute adherence to no-text requirement
     formData.append('steps', '30'); // More steps for better control
     formData.append('sampler', 'DDIM');
     
-    // Updated negative prompts to allow numbers while maintaining strict text prevention
+    // Extremely comprehensive negative prompts to prevent ANY text
     const negativePrompt = [
-      // ABSOLUTE PROHIBITIONS (core text elements)
-      "(text:1.5), (writing:1.5), (letters:1.5), (words:1.5), (captions:1.5), (labels:1.5)",
+      // MAXIMUM PROHIBITION STRENGTH
+      "(text:2.0), (writing:2.0), (letters:2.0), (words:2.0), (captions:2.0), (labels:2.0)",
+      "(any text whatsoever:2.0), (anything that looks like text:2.0)",
       
       // Typography elements
-      "(typography:1.4), (fonts:1.4), (alphabets:1.4), (characters:1.4), (scripts:1.4)",
+      "(typography:1.8), (fonts:1.8), (alphabets:1.8), (characters:1.8), (scripts:1.8), (typeface:1.8)",
       
       // Communication elements
       "speech bubbles, thought bubbles, dialogue boxes, subtitles, watermarks, signatures",
@@ -92,7 +93,8 @@ export async function generateImage(prompt: string): Promise<string | null> {
       "hieroglyphics, written symbols, pictographs, ideographs, ancient writing",
       
       // Comprehensive text exclusions
-      "(any form of visible language or writing:1.6), (anything that could be interpreted as text:1.6)"
+      "(any form of visible language or writing:2.0), (anything that could be interpreted as text:2.0)",
+      "(text elements:2.0), (written content:2.0), (readable text:2.0), (text anywhere:2.0)"
     ].join(", ");
     
     formData.append('negative_prompt', negativePrompt);

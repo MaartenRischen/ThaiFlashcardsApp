@@ -32,7 +32,7 @@ export function GoLiveButton({ setId, setName, className, variant = 'ghost', siz
   
   const { user } = useUser();
 
-  const displayName = user?.fullName || user?.firstName || 'Anonymous';
+  const displayName = user?.username || user?.firstName || user?.fullName || user?.primaryEmailAddress?.emailAddress?.split('@')[0] || 'Anonymous';
 
   const handleGoLive = async () => {
     setLoading(true);

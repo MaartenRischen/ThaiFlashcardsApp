@@ -46,12 +46,13 @@ interface FolderViewEnhancedProps {
   isOpen: boolean;
   onClose: () => void;
   highlightSetId: string | null;
+  initialFolderName?: string;
 }
 
 type ViewMode = 'grid' | 'list';
 type SortOption = 'name' | 'date' | 'size';
 
-export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlightSetId }: FolderViewEnhancedProps) {
+export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlightSetId, initialFolderName }: FolderViewEnhancedProps) {
   const { availableSets, switchSet, activeSetId, refreshSets } = useSet();
   const { preloadFolders, getCachedFolders, clearFolderCache, preloadImages, getCachedContent, hasInitiallyLoadedFolders } = useSetCache();
   // Access preloaded data to avoid unnecessary spinners if cache hasn't been primed yet
@@ -76,7 +77,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
   // Modal states
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [isEditingFolder, setIsEditingFolder] = useState<Folder | null>(null);
-  const [folderForm, setFolderForm] = useState({ name: '', description: '' });
+  const [folderForm, setFolderForm] = useState({ name: '' });
   const [folderError, setFolderError] = useState('');
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [setsToMove, setSetsToMove] = useState<SetMetaData[]>([]);
@@ -149,6 +150,14 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     if (preloadedFolders.length > 0) {
       console.log('[FolderViewEnhanced] Using preloaded folders');
       setFolders(preloadedFolders);
+      
+      // Open initial folder if specified
+      if (initialFolderName && !currentFolder) {
+        const targetFolder = preloadedFolders.find(f => f.name === initialFolderName);
+        if (targetFolder) {
+          handleOpenFolder(targetFolder);
+        }
+      }
       return;
     }
     
@@ -157,6 +166,14 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     if (cachedFolders) {
       console.log('[FolderViewEnhanced] Using cached folders');
       setFolders(cachedFolders);
+      
+      // Open initial folder if specified
+      if (initialFolderName && !currentFolder) {
+        const targetFolder = cachedFolders.find(f => f.name === initialFolderName);
+        if (targetFolder) {
+          handleOpenFolder(targetFolder);
+        }
+      }
       return;
     }
 
@@ -166,6 +183,14 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     try {
       const loadedFolders = await preloadFolders();
       setFolders(loadedFolders);
+      
+      // Open initial folder if specified
+      if (initialFolderName && !currentFolder) {
+        const targetFolder = loadedFolders.find(f => f.name === initialFolderName);
+        if (targetFolder) {
+          handleOpenFolder(targetFolder);
+        }
+      }
     } catch (error) {
       console.error('Error fetching folders:', error);
       toast.error('Failed to load folders');
@@ -286,11 +311,17 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     setLoading(true);
     setFolderError('');
 
+    // Auto-capitalize folder name
+    const capitalizedName = folderForm.name
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+
     try {
       const response = await fetch('/api/folders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(folderForm),
+        body: JSON.stringify({ name: capitalizedName }),
         credentials: 'include'
       });
 
@@ -302,7 +333,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
       clearFolderCache();
       await fetchFolders();
       setIsCreatingFolder(false);
-      setFolderForm({ name: '', description: '' });
+      setFolderForm({ name: '' });
       toast.success('Folder created successfully');
     } catch (error) {
       setFolderError(error instanceof Error ? error.message : 'Failed to create folder');
@@ -333,7 +364,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
       clearFolderCache();
       await fetchFolders();
       setIsEditingFolder(null);
-      setFolderForm({ name: '', description: '' });
+      setFolderForm({ name: '' });
       toast.success('Folder updated successfully');
     } catch (error) {
       setFolderError('Failed to update folder');
@@ -567,6 +598,15 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
     // Don't clear search when going back - keep the search context
   };
 
+  // Reset current folder when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setCurrentFolder(null);
+      setIsSelectMode(false);
+      setSelectedSets(new Set());
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -583,9 +623,10 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                     <div className="flex items-center gap-2 sm:gap-4">
                       <button
                         onClick={handleBackToFolders}
-                        className="p-3 sm:p-4 rounded-xl bg-[#3C3C3C]/50 hover:bg-[#3C3C3C]/70 backdrop-blur-sm transition-all duration-200 border border-[#404040]/50 group flex-shrink-0"
+                        className="flex items-center gap-2 px-4 py-3 sm:px-6 sm:py-4 rounded-xl bg-gradient-to-r from-[#BB86FC]/20 to-[#9B6DD0]/20 hover:from-[#BB86FC]/30 hover:to-[#9B6DD0]/30 backdrop-blur-sm transition-all duration-200 border border-[#BB86FC]/30 group"
                       >
-                        <ArrowLeft size={20} className="text-[#A9C4FC] group-hover:text-[#A9C4FC]/80 sm:w-6 sm:h-6" />
+                        <ArrowLeft size={24} className="text-[#BB86FC] group-hover:text-[#BB86FC]/80" />
+                        <span className="text-[#BB86FC] font-medium text-base">Back</span>
                       </button>
                       <div className="flex-1 min-w-0">
                         <h2 className="text-lg sm:text-2xl font-bold text-[#E0E0E0] truncate">{currentFolder.name}</h2>
@@ -777,24 +818,13 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                   </h3>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="folder-name" className="text-[#E0E0E0]">Name</Label>
                       <Input
                         id="folder-name"
                         value={folderForm.name}
-                        onChange={(e) => setFolderForm({ ...folderForm, name: e.target.value })}
+                        onChange={(e) => setFolderForm({ name: e.target.value })}
                         placeholder="Enter folder name"
-                        className="mt-1 bg-[#3C3C3C]/50 backdrop-blur-sm border-[#404040]/50 text-[#E0E0E0] focus:border-[#A9C4FC] focus:ring-1 focus:ring-[#A9C4FC]"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="folder-description" className="text-[#E0E0E0]">Description (optional)</Label>
-                      <Textarea
-                        id="folder-description"
-                        value={folderForm.description}
-                        onChange={(e) => setFolderForm({ ...folderForm, description: e.target.value })}
-                        placeholder="Enter folder description"
-                        className="mt-1 bg-[#3C3C3C]/50 backdrop-blur-sm border-[#404040]/50 text-[#E0E0E0] focus:border-[#A9C4FC] focus:ring-1 focus:ring-[#A9C4FC] min-h-[80px]"
-                        rows={3}
+                        className="mt-1 neumorphic-input rounded-xl text-[#E0E0E0]"
+                        autoFocus
                       />
                     </div>
                     {folderError && (
@@ -804,7 +834,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                       <Button
                         onClick={isCreatingFolder ? handleCreateFolder : handleUpdateFolder}
                         disabled={loading}
-                        className="bg-[#A9C4FC] hover:bg-[#A9C4FC]/90 text-[#121212]"
+                        className="neumorphic-button bg-gradient-to-r from-[#BB86FC] to-[#9B6DD0] hover:from-[#A66EFC] hover:to-[#8B5DC0] text-white font-semibold rounded-xl"
                       >
                         {isCreatingFolder ? 'Create' : 'Update'}
                       </Button>
@@ -812,11 +842,10 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                         onClick={() => {
                           setIsCreatingFolder(false);
                           setIsEditingFolder(null);
-                          setFolderForm({ name: '', description: '' });
+                          setFolderForm({ name: '' });
                           setFolderError('');
                         }}
-                        variant="outline"
-                        className="bg-transparent border-[#404040] text-[#E0E0E0] hover:bg-[#2C2C2C]/50"
+                        className="neumorphic-button rounded-xl text-[#E0E0E0]"
                       >
                         Cancel
                       </Button>
@@ -830,7 +859,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                 <button
                   onClick={() => {
                     setIsCreatingFolder(true);
-                    setFolderForm({ name: '', description: '' });
+                    setFolderForm({ name: '' });
                   }}
                   className="w-full mb-6 p-4 rounded-xl bg-[#2C2C2C]/40 hover:bg-[#2C2C2C]/60 border-2 border-dashed border-[#404040]/50 hover:border-[#A9C4FC]/50 transition-all duration-200 group backdrop-blur-sm animate-in fade-in duration-300"
                 >
@@ -847,7 +876,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                   type="folders"
                   onAction={() => {
                     setIsCreatingFolder(true);
-                    setFolderForm({ name: '', description: '' });
+                    setFolderForm({ name: '' });
                   }}
                 />
               ) : folders.filter(folder => {
@@ -950,8 +979,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
                           onEdit={() => {
                             setIsEditingFolder(folder);
                             setFolderForm({
-                              name: folder.name,
-                              description: folder.description || ''
+                              name: folder.name
                             });
                           }}
                           onDelete={() => setFolderToDelete(folder)}

@@ -227,6 +227,15 @@ export default function GalleryPage() {
 
       if (newSetId) {
         alert(`Set '${title}' imported successfully!`);
+        
+        // Store the imported set info to open the correct folder
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('openFolder', 'Imported Sets');
+          localStorage.setItem('highlightSetId', newSetId);
+        }
+        
+        // Navigate to main app to show the imported set
+        router.push('/');
       } else {
         throw new Error('Failed to import set via context');
       }

@@ -86,39 +86,24 @@ export function ShareButton({ setId, setName, className, variant = 'ghost', size
   return (
     <>
       {variant === 'prominent' ? (
-        <div className="relative group">
-          {/* Glow effect behind button - stronger and larger */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity" />
-          
-          {/* Actual button - larger and crisper */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleShare();
-            }}
-            disabled={loading}
-            className={cn(
-              "relative px-3.5 py-2.5 bg-gradient-to-r from-[#FF6B6B]/80 to-[#FF8E53]/80 text-white font-bold rounded-full",
-              "shadow-lg hover:shadow-xl transform group-hover:scale-110 transition-all duration-200",
-              "border border-white/30 backdrop-blur-md ring-1 ring-white/20",
-              "flex items-center gap-2",
-              className
-            )}
-            title="Share this set with friends!"
-          >
-            {/* Sparkle icon - bigger */}
-            <div className="absolute -top-2 -right-2">
-              <Sparkles className="h-5 w-5 text-yellow-300 animate-sparkle drop-shadow-[0_0_6px_rgba(252,211,77,0.7)]" />
-            </div>
-            
-            <Heart className="h-4 w-4 text-white" />
-            <span className="text-sm font-extrabold whitespace-nowrap">Send to a Friend!</span>
-            <Share2 className="h-4 w-4" />
-            
-            {/* Hover overlay */}
-            <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
-          </button>
-        </div>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleShare();
+          }}
+          disabled={loading}
+          className={cn(
+            "px-3 py-1.5 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white font-semibold rounded-full",
+            "shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200",
+            "flex items-center gap-2",
+            className
+          )}
+          title="Share this set with friends!"
+        >
+          <Heart className="h-3.5 w-3.5 text-white" />
+          <span className="text-xs font-semibold whitespace-nowrap">Send to a Friend!</span>
+          <Share2 className="h-3.5 w-3.5" />
+        </button>
       ) : (
         <Button
           variant={variant}

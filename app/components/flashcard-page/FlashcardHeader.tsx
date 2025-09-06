@@ -103,12 +103,11 @@ export function FlashcardHeader({
       
       {/* Send to a Friend Button - Below Image */}
       {activeSet && (
-        <div className="w-full flex justify-center py-2 bg-[#121212]">
+        <div className="w-full flex justify-center py-1 bg-[#121212]">
           <ShareButton
             setId={activeSet.id}
             setName={activeSet.cleverTitle || activeSet.name || 'Set'}
             variant="prominent"
-            className="scale-90"
           />
         </div>
       )}

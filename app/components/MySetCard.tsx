@@ -8,6 +8,7 @@ import { getToneLabel } from '@/app/lib/utils';
 import { SetMetaData } from '@/app/lib/storage/types';
 import { LazyImage } from './LazyImage';
 import { getThumbnailUrl } from '@/app/lib/image-utils';
+import { StarRating } from './StarRating';
 
 interface MySetCardProps {
   set: SetMetaData;
@@ -139,6 +140,16 @@ const MySetCard: React.FC<MySetCardProps> = ({
         <h3 className="font-bold text-lg text-[#E0E0E0] leading-tight">
           {set.name}
         </h3>
+        
+        {/* Rating - only show for non-default sets */}
+        {canPublish && (
+          <StarRating
+            flashcardSetId={set.id}
+            size="small"
+            interactive={true}
+            isDefaultSet={set.source === 'default' || set.id.startsWith('default-')}
+          />
+        )}
         
         {/* Metadata badges */}
         <div className="flex flex-wrap gap-3 text-xs text-[#BDBDBD] pt-2">

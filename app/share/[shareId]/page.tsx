@@ -70,6 +70,12 @@ export default function ShareSetPage({ params }: { params: { shareId: string } }
         throw new Error(d.error || 'Import failed');
       }
       setImported(true);
+      
+      // Store the imported set info to open the correct folder
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('openFolder', 'Imported Sets');
+      }
+      
       // Redirect to home page after successful import
       setTimeout(() => {
         router.push('/');

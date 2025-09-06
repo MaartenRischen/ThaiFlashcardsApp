@@ -287,6 +287,7 @@ export default function ThaiFlashcards() {
   const [showSetWizardModal, setShowSetWizardModal] = useState<boolean>(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
   const [isManagementModalOpen, setIsManagementModalOpen] = useState<boolean>(false);
+  const [targetFolderName, setTargetFolderName] = useState<string | undefined>(undefined);
   const [tutorialStep, setTutorialStep] = useState<number>(0);
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
@@ -294,6 +295,25 @@ export default function ThaiFlashcards() {
   const [reviewsCompletedToday, setReviewsCompletedToday] = useState<number>(0);
   const [highlightSetId, setHighlightSetId] = useState<string | null>(null);
   // === End reintroduced state variables ===
+
+  // Check for folder to open from localStorage (for imports)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const openFolder = localStorage.getItem('openFolder');
+      const highlightSetIdFromStorage = localStorage.getItem('highlightSetId');
+      
+      if (openFolder) {
+        setTargetFolderName(openFolder);
+        setIsManagementModalOpen(true);
+        localStorage.removeItem('openFolder');
+      }
+      
+      if (highlightSetIdFromStorage) {
+        setHighlightSetId(highlightSetIdFromStorage);
+        localStorage.removeItem('highlightSetId');
+      }
+    }
+  }, []);
 
   // --- NEW: Ref for dark mode timeout ---
   const darkModeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -1934,13 +1954,23 @@ export default function ThaiFlashcards() {
         <SetWizardModal
           isOpen={showSetWizardModal}
           onClose={() => setShowSetWizardModal(false)}
-          onComplete={(newSetId: string) => {
+          onComplete={async (newSetId: string) => {
             console.log('SetWizardModal onComplete fired, new set:', newSetId);
             if (newSetId) {
               setHighlightSetId(newSetId);
+              
+              // Determine the folder based on the set
+              const set = availableSets.find(s => s.id === newSetId);
+              if (set) {
+                if (set.source === 'manual') {
+                  setTargetFolderName('My Manual Sets');
+                } else if (set.source === 'generated' || set.source === 'auto') {
+                  setTargetFolderName('My Automatic Sets');
+                }
+              }
+              
               // Open My Sets modal to show the new set
               setIsManagementModalOpen(true);
-              // TODO: Navigate to specific folder based on set type
             }
           }}
         />
@@ -1964,8 +1994,10 @@ export default function ThaiFlashcards() {
         onClose={() => {
           setIsManagementModalOpen(false);
           setHighlightSetId(null); // Clear highlight when closing
+          setTargetFolderName(undefined);
         }}
         highlightSetId={highlightSetId}
+        initialFolderName={targetFolderName}
       />
       {/* --- End of Combined Settings Modal --- */}
 

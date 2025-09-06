@@ -10,9 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
@@ -29,24 +28,13 @@ export function GoLiveButton({ setId, setName, className, variant = 'ghost', siz
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [published, setPublished] = useState(false);
-  const [title, setTitle] = useState(setName);
-  const [description, setDescription] = useState('');
-  const [author, setAuthor] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
   
   const { user } = useUser();
 
-  React.useEffect(() => {
-    if (user) {
-      setAuthor(user.fullName || user.firstName || 'Anonymous');
-    }
-  }, [user]);
+  const displayName = user?.fullName || user?.firstName || 'Anonymous';
 
   const handleGoLive = async () => {
-    if (!title.trim()) {
-      toast.error('Please enter a title for your set');
-      return;
-    }
-
     setLoading(true);
     try {
       const response = await fetch('/api/publish-set', {
@@ -56,9 +44,9 @@ export function GoLiveButton({ setId, setName, className, variant = 'ghost', siz
         },
         body: JSON.stringify({
           setId,
-          title: title.trim(),
-          description: description.trim() || undefined,
-          author: author.trim() || 'Anonymous'
+          title: setName.trim(),
+          description: undefined,
+          author: isAnonymous ? 'Anonymous' : displayName
         }),
         credentials: 'include'
       });
@@ -160,37 +148,28 @@ export function GoLiveButton({ setId, setName, className, variant = 'ghost', siz
           {!published ? (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter a catchy title for your set"
-                  disabled={loading}
-                />
+                <Label>Title</Label>
+                <div className="p-3 bg-gray-50 border rounded-md text-sm text-gray-700">
+                  {setName}
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description (optional)</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe what makes this set special..."
-                  rows={3}
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="author">Author</Label>
-                <Input
-                  id="author"
-                  value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
-                  placeholder="Your name or 'Anonymous'"
-                  disabled={loading}
-                />
+                <Label>Author</Label>
+                <div className="p-3 bg-gray-50 border rounded-md text-sm text-gray-700">
+                  {isAnonymous ? 'Anonymous' : displayName}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="anonymous"
+                    checked={isAnonymous}
+                    onCheckedChange={(checked) => setIsAnonymous(checked as boolean)}
+                    disabled={loading}
+                  />
+                  <Label htmlFor="anonymous" className="text-sm font-normal cursor-pointer">
+                    Publish anonymously
+                  </Label>
+                </div>
               </div>
 
               <div className="flex gap-3 pt-4">
@@ -204,7 +183,7 @@ export function GoLiveButton({ setId, setName, className, variant = 'ghost', siz
                 </Button>
                 <Button
                   onClick={handleGoLive}
-                  disabled={loading || !title.trim()}
+                  disabled={loading}
                   className="flex-1 bg-green-600 hover:bg-green-700"
                 >
                   {loading ? (

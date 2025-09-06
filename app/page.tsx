@@ -1543,7 +1543,7 @@ export default function ThaiFlashcards() {
 
       {/* Show testGenResult for debugging - Refined conditional and type guards */}
       {typeof testGenResult === 'object' && testGenResult !== null && (
-        <div className="max-w-2xl mx-auto bg-gray-900 text-gray-200 p-4 mt-4 rounded shadow overflow-x-auto text-xs">
+        <div className="max-w-2xl mx-auto bg-[#2C2C2C] text-[#E0E0E0] p-4 mt-4 rounded shadow overflow-x-auto text-xs">
           <pre>{JSON.stringify(testGenResult, null, 2)}</pre>
           {/* Safely access phrases with type guards */}
           {'phrases' in testGenResult && Array.isArray(testGenResult.phrases) &&
@@ -1599,7 +1599,7 @@ export default function ThaiFlashcards() {
                     {showMnemonicHint ? 'Hide Hint' : 'Show Hint'}
                   </button>
                   {showMnemonicHint && (
-                    <div className="text-sm text-gray-400 p-2 border border-gray-600 rounded bg-gray-800 max-h-24 overflow-y-auto">
+                    <div className="text-sm text-[#BDBDBD] p-2 border border-[#404040] rounded bg-[#2C2C2C] max-h-24 overflow-y-auto">
                       {((): React.ReactNode => { // Immediately invoked function expression (IIFE) to allow logging
                         const userMnemonic = activeSetId ? mnemonics[activeSetId]?.[`${index}`] : undefined;
                         const defaultMnemonic = phrases[index]?.mnemonic;
@@ -1624,11 +1624,11 @@ export default function ThaiFlashcards() {
                       </button>
                     </div>
                   </PopoverTrigger>
-                  <PopoverContent className="w-80 bg-gray-800 text-white border-gray-700" side="bottom">
+                  <PopoverContent className="w-80 bg-[#2C2C2C] text-white border-[#404040]" side="bottom">
                     <div className="grid gap-4 p-4">
                       <div className="space-y-2">
                         <h4 className="font-medium leading-none text-blue-400">2. Reveal the Answer</h4>
-                        <p className="text-sm text-gray-300">
+                        <p className="text-sm text-[#BDBDBD]">
                           Click here to flip the card and see the Thai translation, pronunciation, and examples.
                         </p>
                       </div>
@@ -1658,7 +1658,7 @@ export default function ThaiFlashcards() {
                     </div>
                     {/* Pronunciation text display (framed and prominent) */}
                     <div data-tour="back-pronunciation" className="text-center mb-3">
-                      <div className="text-xl md:text-2xl font-semibold text-gray-100 px-4 py-2 bg-[#0f172a] rounded-lg inline-block">
+                      <div className="text-xl md:text-2xl font-semibold text-[#E0E0E0] px-4 py-2 bg-[#0f172a] rounded-lg inline-block">
                         {getGenderedPronunciation(phrases[index], isMale, isPoliteMode) || ''}
                       </div>
                     </div>
@@ -1707,7 +1707,7 @@ export default function ThaiFlashcards() {
                     <div className="mb-4">
                       <button
                         onClick={() => setShowBreakdownModal(true)}
-                        className="text-xs text-gray-400 hover:text-gray-300 underline"
+                        className="text-xs text-[#BDBDBD] hover:text-[#E0E0E0] underline"
                         data-tour="back-literal"
                       >
                         Literal / breakdown
@@ -1723,14 +1723,14 @@ export default function ThaiFlashcards() {
                             <button onClick={() => handleCardAction('good')} className="neumorphic-button text-yellow-400 px-6 py-3 text-sm font-medium min-w-[80px]">Correct</button>
                             <button onClick={() => handleCardAction('hard')} className="neumorphic-button text-red-400 px-6 py-3 text-sm font-medium min-w-[80px]">Wrong</button>
                           </div>
-                          <div className="text-xs text-gray-400 mt-3">Hit one of the buttons to proceed.</div>
+                          <div className="text-xs text-[#BDBDBD] mt-3">Hit one of the buttons to proceed.</div>
                         </div>
                       </PopoverTrigger>
-                      <PopoverContent className="w-80 bg-gray-800 text-white border-gray-700" side="top" align="center">
+                      <PopoverContent className="w-80 bg-[#2C2C2C] text-white border-[#404040]" side="top" align="center">
                         <div className="grid gap-4 p-4">
                           <div className="space-y-2">
                             <h4 className="font-medium leading-none text-blue-400">3. Rate Your Recall (SRS)</h4>
-                            <p className="text-sm text-gray-300">
+                            <p className="text-sm text-[#BDBDBD]">
                               Use these buttons to tell the Spaced Repetition System how well you knew the answer. This schedules the card for future review.
                             </p>
                           </div>
@@ -1748,7 +1748,7 @@ export default function ThaiFlashcards() {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-8 px-4" data-tour="back-gender">
                   {/* Gender Toggle */} 
                   <label htmlFor="gender-toggle" className="flex items-center cursor-pointer">
-                    <span className="mr-3 text-sm font-medium text-gray-400">Female (Ka)</span>
+                    <span className="mr-3 text-sm font-medium text-[#BDBDBD]">Female (Ka)</span>
                     <div className="relative">
                       <input
                         type="checkbox"
@@ -1757,15 +1757,15 @@ export default function ThaiFlashcards() {
                         checked={isMale}
                         onChange={() => setIsMale(!isMale)}
                       />
-                      <div className="block bg-gray-600 w-12 h-6 rounded-full"></div>
+                      <div className="block bg-[#3C3C3C] w-12 h-6 rounded-full"></div>
                       <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isMale ? 'translate-x-6 bg-blue-400' : 'bg-pink-400'}`}></div>
                     </div>
-                    <span className="ml-3 text-sm font-medium text-gray-400">Male (Krap)</span>
+                    <span className="ml-3 text-sm font-medium text-[#BDBDBD]">Male (Krap)</span>
                   </label>
 
                   {/* Polite Mode Toggle */} 
                   <label htmlFor="polite-toggle" className="flex items-center cursor-pointer" data-tour="back-polite">
-                    <span className="mr-3 text-sm font-medium text-gray-400">Casual</span>
+                    <span className="mr-3 text-sm font-medium text-[#BDBDBD]">Casual</span>
                     <div className="relative">
                       <input
                         type="checkbox"
@@ -1774,17 +1774,17 @@ export default function ThaiFlashcards() {
                         checked={isPoliteMode}
                         onChange={() => setIsPoliteMode(!isPoliteMode)}
                       />
-                      <div className="block bg-gray-600 w-12 h-6 rounded-full"></div>
-                      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isPoliteMode ? 'translate-x-6 bg-green-400' : 'bg-gray-400'}`}></div>
+                      <div className="block bg-[#3C3C3C] w-12 h-6 rounded-full"></div>
+                      <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ease-in-out ${isPoliteMode ? 'translate-x-6 bg-green-400' : 'bg-[#BDBDBD]'}`}></div>
                     </div>
-                    <span className="ml-3 text-sm font-medium text-gray-400">Polite</span>
+                    <span className="ml-3 text-sm font-medium text-[#BDBDBD]">Polite</span>
                   </label>
                 </div> 
 
                 {/* Mnemonic Section */} 
                 <div className="mt-6" data-tour="back-mnemonic">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
-                    <label className="text-sm text-gray-200 font-medium flex items-center gap-2">
+                    <label className="text-sm text-[#E0E0E0] font-medium flex items-center gap-2">
                       <Lightbulb className="w-4 h-4 text-yellow-400" /> 
                       Mnemonic (editable)
                     </label>
@@ -1792,7 +1792,7 @@ export default function ThaiFlashcards() {
                       <button 
                         onClick={generateNewMnemonic} 
                         disabled={loadingNewMnemonic}
-                        className="text-xs text-green-400 hover:text-green-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center gap-1 px-2 py-1 rounded"
+                        className="text-xs text-green-400 hover:text-green-300 disabled:text-[#BDBDBD] disabled:cursor-not-allowed flex items-center gap-1 px-2 py-1 rounded"
                       >
                         {loadingNewMnemonic ? (
                           <>
@@ -1861,10 +1861,10 @@ export default function ThaiFlashcards() {
                     <p className="text-base text-white font-medium">
                       {randomSentence ? replaceName(getThaiWithGender(randomSentence, isMale, isPoliteMode), contextName) : "(No example available)"}
                     </p>
-                    <p className="text-base text-gray-300 italic">
+                    <p className="text-base text-[#BDBDBD] italic">
                       {randomSentence ? replaceName(getGenderedPronunciation(randomSentence, isMale, isPoliteMode), contextName) : ""}
                     </p>
-                    <p className="text-sm text-gray-400 italic">{randomSentence?.translation ? replaceName(randomSentence.translation, contextName) : ""}</p>
+                    <p className="text-sm text-[#BDBDBD] italic">{randomSentence?.translation ? replaceName(randomSentence.translation, contextName) : ""}</p>
                   </ClientOnly>
                   {/* Speech bubble tail */}
                   <div className="absolute left-8 -bottom-3 w-0 h-0" style={{ borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderTop: '10px solid #222' }} />

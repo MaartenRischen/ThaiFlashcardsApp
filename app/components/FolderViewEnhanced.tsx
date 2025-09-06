@@ -66,7 +66,7 @@ export function FolderViewEnhanced({ isOpen, onClose, highlightSetId: _highlight
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [sortOption, setSortOption] = useState<SortOption>('name');
+  const [sortOption, setSortOption] = useState<SortOption>('date');
   
   // Multi-select state
   const [isSelectMode, setIsSelectMode] = useState(false);

@@ -280,71 +280,14 @@ export function GenerationStep({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Intentionally empty - we only want to run once on mount
 
+  // Since GenerationModal handles the UI, we just return a minimal loading state
+  // This prevents duplicate popups
   return (
-    <div className="space-y-6">
+    <div className="flex items-center justify-center py-8">
       <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Creating Your Set</h2>
-        <p className="text-gray-600 mb-8">
-          Your flashcard set is being generated. This will take a moment...
-        </p>
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
+        <p className="text-sm text-gray-400">Processing...</p>
       </div>
-
-      {/* Important warning about staying in the app */}
-      <div className="neumorphic rounded-xl p-4 border border-yellow-500/30 bg-yellow-50/10">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
-          <div className="text-sm">
-            <p className="font-semibold text-yellow-500 mb-1">Important: Stay in this app</p>
-            <p className="text-gray-300 leading-relaxed">
-              Please keep this app open and visible during generation. 
-              Switching apps or minimizing the browser may cause the generation to fail.
-            </p>
-            <p className="text-gray-300 leading-relaxed mt-2">
-              You can close this window and keep learning in the meantime!
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Visibility warning if user switched away */}
-      {showVisibilityWarning && (
-        <div className="neumorphic rounded-xl p-4 border border-red-500/30 bg-red-50/10">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
-            <div className="text-sm">
-              <p className="font-semibold text-red-500 mb-1">Warning: App was minimized</p>
-              <p className="text-gray-300 leading-relaxed">
-                You switched away from the app during generation. This may cause the process to fail. 
-                Please return to this app and keep it visible until generation completes.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Page visibility indicator */}
-      {!isPageVisible && hasStarted && (
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-red-500/20 text-red-400 text-sm">
-            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-            App is in background - generation may be affected
-          </div>
-        </div>
-      )}
-      
-      <div className="flex justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
-      </div>
-      
-      <div className="text-center text-sm text-gray-500">
-        <p>Generating {state.mode === 'manual' ? 'translations and' : ''} flashcards...</p>
-        <p className="mt-2 text-xs text-gray-400">
-          Generation typically takes 2-5 minutes. Please be patient and keep this app open.
-        </p>
-      </div>
-
-      {/* Thai facts while progress runs */}
-      <ThaiFactInline />
     </div>
   );
 } 

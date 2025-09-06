@@ -565,9 +565,9 @@ export async function POST(request: Request) {
           setData.imageUrl = generatedImageUrl;
         }
       } else {
-        // Fallback logic removed - we'll use a default image in the frontend instead
-        console.warn("API Route: Initial image generation failed (Ideogram API returned null). Setting imageUrl to null.");
-        setData.imageUrl = null;
+        // Use a censorship-safe fallback image when Ideogram fails (likely due to content moderation)
+        console.warn("API Route: Initial image generation failed (Ideogram API returned null - likely censored). Using fallback image.");
+        setData.imageUrl = '/images/generated-fallback.png'; // You'll need to provide this image
       }
     } catch (imageError) {
       console.error('API Route: Error during image generation/upload process:', imageError);
